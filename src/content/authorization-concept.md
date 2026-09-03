@@ -1,5 +1,9 @@
 # Permission, scope, and authority
 
+This document is about **authorization**, not authentication. Authentication already happened by the time any of this runs: a principal has been identified, in a tenant, and that identity is this document's starting input—not something it resolves. What's still open is authorization: given that identified principal, what are they actually allowed to do, and to which data?
+
+HRMS serves many tenants at once, and every tenant has its own employees, managers, and payroll administrators. A payroll ledger is sensitive: an employee should see their own, a payroll administrator should see every employee's—but only inside their own tenant, never another company's. The same shape of problem repeats for code repositories, documents, and every other resource this platform will host. Getting it wrong in either direction is a real failure: too loose leaks another employee's salary or another tenant's data; too strict blocks a payroll administrator from doing their job. A permission string alone can't express that difference—"can read payroll ledgers" says nothing about *whose*—so the rest of this document builds up what has to sit alongside it.
+
 The Authorization Explanation Bench exists to answer a deceptively simple question:
 
 > When we give a user a permission string, what exactly have we authorized them to do—and to which data?
