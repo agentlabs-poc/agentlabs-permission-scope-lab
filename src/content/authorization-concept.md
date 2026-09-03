@@ -139,6 +139,146 @@ hrms:payroll:ledger:entry:attachment::read
 
 This avoids a shallow wildcard silently gaining authority over deeper resource types introduced later. Parent inheritance and wildcard depth remain design decisions until deliberately agreed.
 
+### The same model for Space, Project, and Repository
+
+Payroll is only the first example. The same authorization model applies to a hierarchy such as:
+
+```text
+Space SPACE-01
+├── Project PROJECT-A
+│   ├── Repository REPO-API
+│   └── Repository REPO-UI
+└── Project PROJECT-B
+    └── Repository REPO-DOCS
+```
+
+It is important to distinguish the domain noun from authorization scope:
+
+```text
+Space = a domain resource
+Scope = the reach of an authorization assignment
+```
+
+Capabilities describe operations on resource types:
+
+```text
+agentforge:space::read
+agentforge:project::read
+agentforge:repository::read
+agentforge:repository::write
+agentforge:repository::admin
+```
+
+Access to exactly one repository can be represented as:
+
+```json
+{
+  "principal": "user:vinay",
+  "permission": "agentforge:repository::read",
+  "scope": {
+    "type": "resource_exact",
+    "resource_type": "agentforge:repository",
+    "resource_id": "REPO-API"
+  }
+}
+```
+
+This allows `REPO-API`, but not `REPO-UI` or `REPO-DOCS`.
+
+Access to every repository inside one project uses a subtree scope:
+
+```json
+{
+  "principal": "user:vinay",
+  "permission": "agentforge:repository::read",
+  "scope": {
+    "type": "resource_subtree",
+    "resource_type": "agentforge:project",
+    "resource_id": "PROJECT-A"
+  }
+}
+```
+
+The result is:
+
+| Target | Contained by `PROJECT-A` | Decision |
+|---|---:|---:|
+| `REPO-API` | Yes | Allow |
+| `REPO-UI` | Yes | Allow |
+| `REPO-DOCS` | No | Deny |
+
+An assignment covering the complete Space follows the same pattern:
+
+```json
+{
+  "principal": "user:maya",
+  "permission": "agentforge:repository::read",
+  "scope": {
+    "type": "resource_subtree",
+    "resource_type": "agentforge:space",
+    "resource_id": "SPACE-01"
+  }
+}
+```
+
+When `REPO-API` is requested, AgentForge supplies trusted target context:
+
+```json
+{
+  "resource_type": "agentforge:repository",
+  "resource_id": "REPO-API",
+  "tenant_id": "TENANT-001",
+  "space_id": "SPACE-01",
+  "project_id": "PROJECT-A"
+}
+```
+
+Authorization then checks:
+
+```text
+Capability: agentforge:repository::read             ✓
+Containment: PROJECT-A contains REPO-API             ✓
+Tenant: target and principal are in TENANT-001       ✓
+Decision                                              ALLOW
+```
+
+The owning application—not generic Auth—resolves whether a repository belongs to a project or Space.
+
+Granting this capability:
+
+```text
+agentforge:project::read
+```
+
+does not create this different capability:
+
+```text
+agentforge:repository::read
+```
+
+A reusable role can explicitly contain both:
+
+```text
+Project Viewer
+├── agentforge:project::read
+└── agentforge:repository::read
+```
+
+Assigning that role at `resource_subtree:PROJECT-A` gives both declared capabilities reach inside Project A. The scope broadens where those capabilities apply; it does not invent undeclared capabilities.
+
+The general rule is:
+
+> A parent scope can extend the reach of an explicitly granted capability, but a parent capability does not implicitly create child capabilities.
+
+The same separation works across domains:
+
+```text
+HRMS        Tenant → Legal entity → Department → Employee → Payroll ledger
+AgentForge  Tenant → Space → Project → Repository → Job
+Documents   Tenant → Folder → Subfolder → Document
+Commerce    Tenant → Store → Catalogue → Product
+```
+
 ## 3. A grant is more than a permission
 
 Assigning only this string is incomplete for scoped business data:
