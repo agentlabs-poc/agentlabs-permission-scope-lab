@@ -164,6 +164,8 @@ function render() {
   const principalGrants = grants.filter(g => g.principalId === selectedPrincipal && g.valid)
   const target = resources.find(resource => resource.id === selectedResource)!
   const activeScenario = challenges.find(scenario => scenario.id === activeChallenge) ?? challenges[0]
+  const comparisonScenarioId = ({ 1: 2, 2: 1, 3: 4, 4: 3, 5: 1, 6: 3 } as Record<number, number>)[activeScenario.id]
+  const comparisonScenario = challenges.find(scenario => scenario.id === comparisonScenarioId)
   const matchingGrant = principalGrants.find(grant => grant.permission === selectedPermission)
   const permissionParts = selectedPermission.split('::')
   const resourceParts = permissionParts[0].split(':')
@@ -193,7 +195,7 @@ function render() {
     {
       eyebrow: 'DECISION, ENFORCEMENT & AUDIT',
       title: lastDecision ? lastDecision.title : 'Evaluate the complete authority',
-      body: lastDecision ? `<div class="guided-result ${lastDecision.allowed ? 'allowed' : 'denied'}"><strong>${lastDecision.allowed ? 'ALLOW' : 'DENY'}</strong><p>${lastDecision.reason}</p></div><div class="guided-output"><div><small>ENFORCED PREDICATE</small><pre>${lastDecision.predicate}</pre></div><div><small>AUDIT RECEIPT</small><code>principal=user:${selectedPrincipal}\npermission=${selectedPermission}\ntarget=${selectedResource}\ndecision=${lastDecision.allowed ? 'allow' : 'deny'}</code></div></div><aside><b>Concept:</b> The API must enforce the decision as a data restriction. The audit receipt records which principal, assignment context, target, and policy produced it.</aside>` : `<p>The system now has the complete story: principal, capability, assignment scope, and trusted target. Evaluate their intersection.</p><button class="guide-evaluate" data-guide-evaluate>Evaluate and explain →</button><aside><b>Expected:</b> This worked scenario should produce <strong>${activeScenario.expected ? 'ALLOW' : 'DENY'}</strong>. The explanation matters more than the label.</aside>`,
+      body: lastDecision ? `<div class="guided-result ${lastDecision.allowed ? 'allowed' : 'denied'}"><strong>${lastDecision.allowed ? 'ALLOW' : 'DENY'}</strong><p>${lastDecision.reason}</p></div><div class="guided-output"><div><small>ENFORCED PREDICATE</small><pre>${lastDecision.predicate}</pre></div><div><small>AUDIT RECEIPT</small><code>principal=user:${selectedPrincipal}\npermission=${selectedPermission}\ntarget=${selectedResource}\ndecision=${lastDecision.allowed ? 'allow' : 'deny'}</code></div></div><aside><b>Concept:</b> The API must enforce the decision as a data restriction. The audit receipt records which principal, assignment context, target, and policy produced it.</aside>${comparisonScenario ? `<button class="compare-request" data-compare-scenario="${comparisonScenario.id}"><span><small>CHANGE ONE THING</small><b>${comparisonScenario.brief}</b></span><em>Compare explanation →</em></button>` : ''}` : `<p>The system now has the complete story: principal, capability, assignment scope, and trusted target. Evaluate their intersection.</p><button class="guide-evaluate" data-guide-evaluate>Evaluate and explain →</button><aside><b>Expected:</b> This worked scenario should produce <strong>${activeScenario.expected ? 'ALLOW' : 'DENY'}</strong>. The explanation matters more than the label.</aside>`,
     },
   ]
   const currentGuide = guideSteps[guideStep]
@@ -217,8 +219,18 @@ function render() {
         </div>
       </section>
 
+      <section class="learning-path">
+        <div class="section-heading"><div><small>WHAT DO YOU WANT TO UNDERSTAND?</small><h2>Choose a guided explanation</h2></div><span>Each path starts with a familiar story</span></div>
+        <div class="learning-path-grid">
+          <a href="/concept.html?doc=hrms"><span>01</span><div><small>I WANT TO CONFIGURE ACCESS</small><b>How does a tenant create Payroll Admin?</b><p>Walk through permissions, role creation, scope selection, assignment records, and tenant protection.</p></div><em>Start explanation →</em></a>
+          <button data-path-scenario="1"><span>02</span><div><small>I AM AN EMPLOYEE</small><b>Why can I see my salary but not another employee’s?</b><p>Follow identity, employee-self scope, target ownership, and the enforced row restriction.</p></div><em>Start explanation ↓</em></button>
+          <button data-path-scenario="3"><span>03</span><div><small>I AM A PAYROLL ADMIN</small><b>Why can I read payroll only inside my tenant?</b><p>See how a tenant-wide assignment reaches employees without crossing the tenant boundary.</p></div><em>Start explanation ↓</em></button>
+          <a href="/concept.html?doc=projects"><span>04</span><div><small>I WORK WITH TEAMS & REPOS</small><b>How do team membership and project scope combine?</b><p>Separate group principals from exact-resource and subtree assignment scopes.</p></div><em>Start explanation →</em></a>
+        </div>
+      </section>
+
       <section class="challenge-strip">
-        <div class="section-heading"><div><small>WORKED REQUESTS</small><h2>Choose a scenario to explain</h2></div><span>${completedChallenges.size} / ${challenges.length} explored</span></div>
+        <div class="section-heading"><div><small>MORE WORKED REQUESTS</small><h2>Choose the story you want explained</h2></div><span>${completedChallenges.size} / ${challenges.length} viewed</span></div>
         <div class="challenge-list">
           ${challenges.map(challenge => `<button class="challenge ${activeChallenge === challenge.id ? 'active' : ''} ${completedChallenges.has(challenge.id) ? 'complete' : ''}" data-challenge="${challenge.id}"><span>${completedChallenges.has(challenge.id) ? '✓' : String(challenge.id).padStart(2, '0')}</span><div><b>${challenge.title}</b><small>${challenge.brief}</small></div><em>EXPECTED · ${challenge.expected ? 'ALLOW' : 'DENY'}</em></button>`).join('')}
         </div>
@@ -320,7 +332,7 @@ function render() {
         <div class="question-board">
           ${designQuestions.map(item => `<article><span class="question-number">Q${String(item.id).padStart(2, '0')}</span><p>${escapeHtml(item.question)}</p><button class="status-${item.status}" data-question="${item.id}">${item.status.toUpperCase()} <b>→</b></button></article>`).join('')}
         </div>
-        <form id="question-form"><label for="new-question">A question discovered while playing</label><div><input id="new-question" required maxlength="180" placeholder="What authority rule is still ambiguous?"/><button type="submit">Add to board ＋</button></div></form>
+        <form id="question-form"><label for="new-question">A question discovered while exploring</label><div><input id="new-question" required maxlength="180" placeholder="What authority rule is still ambiguous?"/><button type="submit">Add to board ＋</button></div></form>
         <div class="legend"><span><i class="open-dot"></i>OPEN · unanswered</span><span><i class="proposed-dot"></i>PROPOSED · candidate shape</span><span><i class="agreed-dot"></i>AGREED · accepted for the model</span></div>
       </section>
     </main>
@@ -329,10 +341,12 @@ function render() {
 
   document.querySelectorAll<HTMLElement>('[data-principal]').forEach(el => el.onclick = () => { selectedPrincipal = el.dataset.principal as PrincipalId; selectedScopeTarget = principals.find(p => p.id === selectedPrincipal)?.employeeId ?? 'EMP-005'; lastDecision = null; render() })
   document.querySelectorAll<HTMLButtonElement>('[data-challenge]').forEach(el => el.onclick = () => loadChallenge(Number(el.dataset.challenge)))
+  document.querySelectorAll<HTMLButtonElement>('[data-path-scenario]').forEach(el => el.onclick = () => loadChallenge(Number(el.dataset.pathScenario)))
   document.querySelectorAll<HTMLButtonElement>('[data-guide-step]').forEach(el => el.onclick = () => { guideStep = Number(el.dataset.guideStep); render() })
   document.querySelector<HTMLButtonElement>('[data-guide-previous]')?.addEventListener('click', () => moveGuide(-1))
   document.querySelector<HTMLButtonElement>('[data-guide-next]')?.addEventListener('click', () => moveGuide(1))
   document.querySelector<HTMLButtonElement>('[data-guide-evaluate]')?.addEventListener('click', () => evaluate(true))
+  document.querySelector<HTMLButtonElement>('[data-compare-scenario]')?.addEventListener('click', element => loadChallenge(Number((element.currentTarget as HTMLButtonElement).dataset.compareScenario)))
   document.querySelector<HTMLSelectElement>('#permission')!.onchange = e => { selectedPermission = (e.target as HTMLSelectElement).value as Permission; lastDecision = null; render() }
   document.querySelector<HTMLSelectElement>('#request-permission')!.onchange = e => { selectedPermission = (e.target as HTMLSelectElement).value as Permission; lastDecision = null; render() }
   document.querySelector<HTMLSelectElement>('#scope')!.onchange = e => { selectedScope = (e.target as HTMLSelectElement).value as ScopeType; lastDecision = null; render() }
