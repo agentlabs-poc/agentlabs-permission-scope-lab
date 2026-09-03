@@ -557,7 +557,33 @@ The bench is not merely a static document and is not a production authorization 
 
 Payroll is the first interactive scenario pack. Later packs can cover employee documents, leave, expenses, recruiting, AgentForge jobs, or other products while keeping the same authorization equation.
 
-## 13. Questions still open
+## 13. Canonical terms across the industry
+
+Nothing in this vocabulary is invented in isolation. Every term maps onto an established access-control concept, most formally onto NIST/ANSI **RBAC** (Role-Based Access Control, INCITS 359-2004):
+
+| Term used here | NIST RBAC | What it means |
+|---|---|---|
+| Principal | User | Anything that authenticates and can hold a grant—a person, a group, or a service/agent |
+| Permission | Permission (operation + object) | A stable capability name; the `<namespaced-noun>::<verb>` string |
+| Role | Role | A named bundle of permissions. Carries no scope, no target, no principal |
+| Grant / assignment | User assignment (UA) | The binding `principal + role/permission + scope + validity` that gives a role reach |
+| Resource | Protected object class | The *type* named inside the permission string, e.g. `ledger`, `repository` |
+| Target | Protected object instance | The specific *instance* being requested, plus its trusted attributes (tenant, owner, project) |
+| Scope | Not in base RBAC; closest is ABAC's attribute constraints | The reach a grant covers over target instances |
+| Group / team | Group | A named set of principals; an assignment made to a group is inherited by every member |
+
+A role is only ever the second row plus the third: a name plus a set of permissions. Nothing about scope, target, or principal belongs on it—that is what the assignment supplies. This is why the same role can be assigned twice with two different reaches, to an individual principal or to a group principal, without being redefined either time.
+
+### Where real platforms diverge
+
+"Role" and "scope" do not mean the same thing everywhere, and it is worth knowing the differences before this model meets an external system:
+
+- **Kubernetes RBAC** matches this bench closely: a `Role` / `ClusterRole` is a pure permission bundle with no principal or target attached. A separate `RoleBinding` / `ClusterRoleBinding` supplies `{subject, role, namespace}`—structurally identical to this bench's `Grant`.
+- **Azure RBAC** matches even more closely: a Role Definition is the permission bundle; a Role Assignment is `{principal, role, scope}`, and Azure's `scope` is literally a resource-hierarchy path (`/subscriptions/.../resourceGroups/...`)—the same "reach over a resource tree" idea as this bench's `department:<id>`, `tenant:<id>`, and `resource_subtree` scopes.
+- **AWS IAM diverges.** An AWS "Role" is not a permission bundle—it is an *assumable identity* (a special kind of principal). The actual permission bundle in AWS is called a **Policy**, attached to a Role, User, or Group. Anyone arriving from an AWS background will not mean the same thing by "role" that this bench does.
+- **OAuth 2.0 already owns the word "scope"**, and means something different by it: an OAuth scope such as `read:contacts` is closer to this bench's *permission* than to its *reach*. If this system ever issues or accepts OAuth tokens, "scope" becomes ambiguous between the two meanings in the same sentence—worth a disambiguating term (this bench's equation already says `reach`) before that becomes a real integration surface rather than bench vocabulary.
+
+## 14. Questions still open
 
 The initial question board contains:
 
