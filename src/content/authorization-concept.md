@@ -17,9 +17,109 @@ All four parts must intersect: the *assigned* scope, not any scope; the *trusted
 - **Scope** — how far the principal's grant reaches: a typed descriptor (`employee_self`, `department:<id>`, `tenant:<id>`, `resource_exact`, `resource_subtree`, …) attached at assignment time, not inside the permission string.
 - **Target** — the specific resource instance being requested, plus its trusted attributes (tenant, owner, department/project)—resolved server-side from the id, never asserted by the caller.
 
-The rest of this document works through each of the four in turn, then closes with how the whole vocabulary maps onto industry terms (§13).
+The rest of this document follows one request through its eight resolution stages (§1), states who owns each stage (§2), then gives each of stages 2–6 its own detailed section (§3–§7), before closing with reference material and how the vocabulary maps onto industry terms (§13).
 
-## 1. The permission string
+## 1. The shape of a request
+
+Suppose Vinay calls:
+
+```http
+GET /api/payroll/ledger/me
+```
+
+Nothing about this request is self-authorizing. It becomes a decision by passing through eight stages:
+
+```text
+1. Authenticate principal and tenant
+             ↓
+2. Map API operation to required permission
+             ↓
+3. Load active, versioned assignments
+             ↓
+4. Resolve assignment scope using trusted HRMS context
+             ↓
+5. Resolve the requested resource's owner and tenant
+             ↓
+6. Intersect permission, scope, and target
+             ↓
+7. Apply the resulting row predicate or deny
+             ↓
+8. Record the authorization and business audit events
+```
+
+Stages 2–6 are where the equation's four terms actually get established:
+
+| Stage | Resolves | Detail |
+|---|---|---|
+| 2. Map operation to permission | Permission | §3 |
+| 3. Load assignments | The grant (permission + scope, as one record) | §4 |
+| 4. Resolve scope | Scope | §5 |
+| 5. Resolve the resource | Target | §6 |
+| 6. Intersect | Authority itself—the containment check | §7 |
+
+Stage 1 (Principal) happens once at authentication and isn't specific to this bench. Stages 7–8 (enforcement, audit) are covered by §2 (who owns them) and §10 (the audit receipt shape).
+
+For Vinay's self grant, stage 7 produces this enforced predicate:
+
+```sql
+WHERE tenant_id = :authenticated_tenant_id
+  AND ledger_owner_id = :authenticated_employee_id
+```
+
+The request cannot broaden this predicate. Supplying another `employee_id` in a URL, body, header, CLI flag, or UI state does not change Vinay's reach—none of stages 1–6 read anything from the caller except which operation and which target id they're naming.
+
+## 2. Who owns which stage
+
+No single system runs all eight stages:
+
+| Stage | Owner |
+|---|---|
+| 1. Authenticate principal and tenant | Auth |
+| 2. Map operation to permission | HRMS Authorization Agent |
+| 3. Load active, versioned assignments | Auth |
+| 4. Resolve assignment scope | HRMS Authorization Agent |
+| 5. Resolve target owner and tenant | HRMS Authorization Agent |
+| 6. Intersect permission, scope, target | HRMS Authorization Agent |
+| 7. Apply the row predicate | Payroll API |
+| 8. Record the audit events | Payroll API |
+
+### Auth
+
+Auth is generic. It knows:
+
+- the authenticated principal;
+- roles and direct assignments;
+- opaque permission strings;
+- the assignment's scope descriptor;
+- validity windows and status;
+- assignment versions and invalidation.
+
+Auth does not need to understand payroll ledgers or employee ownership.
+
+### HRMS Authorization Agent
+
+The HRMS Authorization Agent knows:
+
+- which permission an HRMS operation requires;
+- what `employee_self`, department, and legal-entity scopes mean;
+- how a user maps to an employee;
+- the trusted attributes of the requested payroll resource;
+- whether scope contains the target;
+- which mandatory data predicate follows from the decision.
+
+### Payroll API
+
+The API is an enforcement point. It:
+
+- asks for an authorization decision;
+- applies the returned tenant and ownership restrictions;
+- never trusts caller-provided authority context;
+- records the business access event;
+- returns no data when the decision or scope cannot be resolved.
+
+The UI and CLI do not create authority. They call the same protected APIs.
+
+## 3. Naming the operation
 
 The canonical grammar is:
 
@@ -46,17 +146,15 @@ ledger     → resource
 read       → operation
 ```
 
-The permission string should stay stable across users. It does **not** say which employee, department, company, or tenant the caller can reach.
+The permission string should stay stable across users. It does **not** say which employee, department, company, or tenant the caller can reach—stage 2 only names *what kind* of operation this is, nothing about *who* or *which one*.
 
-## 2. Resource depth
+### Resource-type depth
 
-Resources can have semantic depth. The canonical grammar therefore permits zero or more subresource segments:
+The grammar permits zero or more subresource segments, to express real resource relationships:
 
 ```text
 <application>:<domain>:<resource>[:<subresource>...]::<verb>
 ```
-
-For example:
 
 ```text
 hrms:payroll::read
@@ -65,53 +163,7 @@ hrms:payroll:ledger:entry::read
 hrms:payroll:ledger:entry:attachment::read
 ```
 
-Depth should express a real resource relationship. A name such as `salary_earning` is one resource segment, while `ledger:entry` describes an entry below a ledger.
-
-Three kinds of depth must remain separate:
-
-### Permission resource-type depth
-
-This names the class of operation:
-
-```text
-hrms:payroll:ledger:entry::read
-```
-
-### Target resource-instance depth
-
-This identifies the particular object being accessed:
-
-```text
-tenant/TENANT-001/payroll-ledger/PAY-000005/entry/ENTRY-017
-```
-
-Resource instance IDs never belong inside the permission string.
-
-### Assignment-scope depth
-
-This describes the reach of the grant:
-
-```text
-tenant:TENANT-001
-└── legal_entity:INDIA-PVT-LTD
-    └── department:ENG
-        └── employee:EMP-005
-```
-
-Scope is not necessarily one rigid tree. A payroll target can simultaneously carry tenant, legal-entity, department, employee-owner, and other trusted attributes. Authorization checks those dimensions against the assigned scope.
-
-A target presented to authorization might therefore be:
-
-```json
-{
-  "resource_type": "payroll:ledger:entry",
-  "resource_id": "ENTRY-017",
-  "tenant_id": "TENANT-001",
-  "legal_entity_id": "INDIA-PVT-LTD",
-  "department_id": "ENG",
-  "ledger_owner_id": "EMP-005"
-}
-```
+A name such as `salary_earning` is one resource segment, while `ledger:entry` describes an entry below a ledger. This is depth in the *permission string*—separate from depth in the target instance (§6) or the assignment scope (§5), and the three must not be collapsed into one.
 
 The working safety proposal is that parent capabilities do **not** automatically grant child capabilities:
 
@@ -146,27 +198,7 @@ hrms:payroll:ledger:entry:attachment::read
 
 This avoids a shallow wildcard silently gaining authority over deeper resource types introduced later. Parent inheritance and wildcard depth remain design decisions until deliberately agreed.
 
-### The same model for Space, Project, and Repository
-
-Payroll is only the first example. The same authorization model applies to a hierarchy such as:
-
-```text
-Space SPACE-01
-├── Project PROJECT-A
-│   ├── Repository REPO-API
-│   └── Repository REPO-UI
-└── Project PROJECT-B
-    └── Repository REPO-DOCS
-```
-
-It is important to distinguish the domain noun from authorization scope:
-
-```text
-Space = a domain resource
-Scope = the reach of an authorization assignment
-```
-
-Capabilities describe operations on resource types:
+The same shape names operations in a completely different domain:
 
 ```text
 agentforge:space::read
@@ -176,108 +208,7 @@ agentforge:repository::write
 agentforge:repository::admin
 ```
 
-Access to exactly one repository can be represented as:
-
-```json
-{
-  "principal": "user:vinay",
-  "permission": "agentforge:repository::read",
-  "scope": {
-    "type": "resource_exact",
-    "resource_type": "agentforge:repository",
-    "resource_id": "REPO-API"
-  }
-}
-```
-
-This allows `REPO-API`, but not `REPO-UI` or `REPO-DOCS`.
-
-Access to every repository inside one project uses a subtree scope:
-
-```json
-{
-  "principal": "user:vinay",
-  "permission": "agentforge:repository::read",
-  "scope": {
-    "type": "resource_subtree",
-    "resource_type": "agentforge:project",
-    "resource_id": "PROJECT-A"
-  }
-}
-```
-
-The result is:
-
-| Target | Contained by `PROJECT-A` | Decision |
-|---|---:|---:|
-| `REPO-API` | Yes | Allow |
-| `REPO-UI` | Yes | Allow |
-| `REPO-DOCS` | No | Deny |
-
-An assignment covering the complete Space follows the same pattern:
-
-```json
-{
-  "principal": "user:maya",
-  "permission": "agentforge:repository::read",
-  "scope": {
-    "type": "resource_subtree",
-    "resource_type": "agentforge:space",
-    "resource_id": "SPACE-01"
-  }
-}
-```
-
-When `REPO-API` is requested, AgentForge supplies trusted target context:
-
-```json
-{
-  "resource_type": "agentforge:repository",
-  "resource_id": "REPO-API",
-  "tenant_id": "TENANT-001",
-  "space_id": "SPACE-01",
-  "project_id": "PROJECT-A"
-}
-```
-
-Authorization then checks:
-
-```text
-Permission: agentforge:repository::read              ✓
-Containment: PROJECT-A contains REPO-API             ✓
-Tenant: target and principal are in TENANT-001       ✓
-Decision                                              ALLOW
-```
-
-The owning application—not generic Auth—resolves whether a repository belongs to a project or Space.
-
-Granting this capability:
-
-```text
-agentforge:project::read
-```
-
-does not create this different capability:
-
-```text
-agentforge:repository::read
-```
-
-A reusable role can explicitly contain both:
-
-```text
-Project Viewer
-├── agentforge:project::read
-└── agentforge:repository::read
-```
-
-Assigning that role at `resource_subtree:PROJECT-A` gives both declared capabilities reach inside Project A. The scope broadens where those capabilities apply; it does not invent undeclared capabilities.
-
-The general rule is:
-
-> A parent scope can extend the reach of an explicitly granted capability, but a parent capability does not implicitly create child capabilities.
-
-The same separation works across domains:
+and the same hierarchy pattern repeats across products:
 
 ```text
 HRMS        Tenant → Legal entity → Department → Employee → Payroll ledger
@@ -286,7 +217,7 @@ Documents   Tenant → Folder → Subfolder → Document
 Commerce    Tenant → Store → Catalogue → Product
 ```
 
-## 3. A grant is more than a permission
+## 4. Loading the grant
 
 Assigning only this string is incomplete for scoped business data:
 
@@ -327,7 +258,31 @@ A payroll administrator can receive the same capability at a wider scope:
 
 The capability is identical; the reach is different.
 
-## 4. Scope vocabulary
+### Roles group capabilities; assignments carry reach
+
+```text
+Employee
+├── hrms:payroll:ledger::read
+└── hrms:payroll:payslip::read
+
+Payroll administrator
+├── hrms:payroll:ledger::read
+├── hrms:payroll:salary_earning::create
+└── hrms:payroll:ledger::post
+```
+
+The user-to-role assignment carries the reach:
+
+```text
+Vinay ── Employee role ── employee_self
+Maya  ── Payroll administrator role ── tenant:TENANT-001
+```
+
+This separation lets the role remain reusable. It also makes privilege review clearer: the role says **what**, while the assignment says **where**.
+
+A direct permission grant should use the same scoped-assignment shape. It must not bypass scope simply because it was assigned directly.
+
+## 5. Resolving scope
 
 The first payroll scenario uses these scope types:
 
@@ -341,7 +296,7 @@ The first payroll scenario uses these scope types:
 
 Scopes are typed descriptors—not arbitrary SQL expressions. HRMS owns the meaning of HRMS-specific scope types.
 
-`employee_self` is dynamic. It does not mean “use the employee ID supplied in the request.” HRMS resolves it from a trusted identity relationship:
+`employee_self` is dynamic. It does not mean "use the employee ID supplied in the request." HRMS resolves it from a trusted identity relationship:
 
 ```text
 authenticated user:vinay
@@ -376,108 +331,170 @@ The owning application validates that the target exists and belongs to the authe
 
 A role's `tenant_self` or `employee_self` value can be a suggested assignment template. It becomes an effective scope only when the role is assigned. `tenant_self` is resolved to the concrete active tenant; `employee_self` remains a dynamic HRMS relationship resolved from trusted identity context.
 
-## 5. Roles and assignments
+### Scope depth
 
-A role groups capabilities:
-
-```text
-Employee
-├── hrms:payroll:ledger::read
-└── hrms:payroll:payslip::read
-
-Payroll administrator
-├── hrms:payroll:ledger::read
-├── hrms:payroll:salary_earning::create
-└── hrms:payroll:ledger::post
-```
-
-The user-to-role assignment carries the reach:
+This is depth in the *assignment scope*—separate from depth in the permission string (§3) or the target instance (§6). Scope is not necessarily one rigid tree:
 
 ```text
-Vinay ── Employee role ── employee_self
-Maya  ── Payroll administrator role ── tenant:TENANT-001
+tenant:TENANT-001
+└── legal_entity:INDIA-PVT-LTD
+    └── department:ENG
+        └── employee:EMP-005
 ```
 
-This separation lets the role remain reusable. It also makes privilege review clearer: the role says **what**, while the assignment says **where**.
+A payroll target can simultaneously carry tenant, legal-entity, department, employee-owner, and other trusted attributes. Authorization checks those dimensions against the assigned scope—which is exactly what §7 does, once the target itself is resolved (§6).
 
-A direct permission grant should use the same scoped-assignment shape. It must not bypass scope simply because it was assigned directly.
+## 6. Resolving the target
 
-## 6. Request consumption
+This is depth in the *target instance*—separate from depth in the permission string (§3) or the assignment scope (§5). Stage 5 identifies the particular object being accessed:
 
-Suppose Vinay calls:
+```text
+tenant/TENANT-001/payroll-ledger/PAY-000005/entry/ENTRY-017
+```
+
+Resource instance IDs never belong inside the permission string (§3).
+
+The client only ever supplies the id. It does not, and cannot, assert what that id means:
 
 ```http
-GET /api/payroll/ledger/me
+GET /api/payroll/ledger/PAY-000005
 ```
 
-The authorization flow is:
+HRMS looks the id up in its own payroll store and reads back its actual attributes:
+
+```json
+{
+  "resource_type": "payroll:ledger:entry",
+  "resource_id": "ENTRY-017",
+  "tenant_id": "TENANT-001",
+  "legal_entity_id": "INDIA-PVT-LTD",
+  "department_id": "ENG",
+  "ledger_owner_id": "EMP-005"
+}
+```
+
+Nothing in that object came from the request. The client named which record to look up; HRMS supplied what it contains. An id is therefore never secret—knowing `PAY-000023` is not what stops Vinay from reading Arjun's ledger. Stage 6 is what stops it, by checking this resolved target against the assigned scope from §5.
+
+An unknown or unresolvable target id fails closed, the same as an unknown permission or scope (§11).
+
+## 7. Checking containment
+
+Stage 6 asks one question: does the assigned scope, resolved in §5, contain the target, resolved in §6? The rule is specific to each scope type:
+
+| Scope type | Contains the target when |
+|---|---|
+| `employee_self` | target's owner equals the principal's resolved employee |
+| `employee:<id>` | target's owner equals `<id>` |
+| `department:<id>` | target's department equals `<id>` |
+| `tenant:<id>` | target's tenant equals `<id>` |
+| `resource_exact:<type>:<id>` | target's type and id equal `<type>` and `<id>` exactly |
+| `resource_subtree:<type>:<id>` | target descends from `<type>:<id>` in the owning application's containment graph |
+
+Only the owning application knows what a given resource descends from—Space = a domain resource, Scope = the reach of an authorization assignment, and the two are not the same thing. Take the AgentForge hierarchy:
 
 ```text
-1. Authenticate principal and tenant
-             ↓
-2. Map API operation to required permission
-             ↓
-3. Load active, versioned assignments
-             ↓
-4. Resolve assignment scope using trusted HRMS context
-             ↓
-5. Resolve the requested resource's owner and tenant
-             ↓
-6. Intersect capability, scope, and target
-             ↓
-7. Apply the resulting row predicate or deny
-             ↓
-8. Record the authorization and business audit events
+Space SPACE-01
+├── Project PROJECT-A
+│   ├── Repository REPO-API
+│   └── Repository REPO-UI
+└── Project PROJECT-B
+    └── Repository REPO-DOCS
 ```
 
-For Vinay's self grant, the enforced predicate is effectively:
+Access to exactly one repository uses an exact scope:
 
-```sql
-WHERE tenant_id = :authenticated_tenant_id
-  AND ledger_owner_id = :authenticated_employee_id
+```json
+{
+  "principal": "user:vinay",
+  "permission": "agentforge:repository::read",
+  "scope": {
+    "type": "resource_exact",
+    "resource_type": "agentforge:repository",
+    "resource_id": "REPO-API"
+  }
+}
 ```
 
-The request cannot broaden this predicate. Supplying another `employee_id` in a URL, body, header, CLI flag, or UI state does not change Vinay's reach.
+This allows `REPO-API`, but not `REPO-UI` or `REPO-DOCS`. Access to every repository inside one project uses a subtree scope instead:
 
-## 7. Auth and authorization-agent boundary
+```json
+{
+  "principal": "user:vinay",
+  "permission": "agentforge:repository::read",
+  "scope": {
+    "type": "resource_subtree",
+    "resource_type": "agentforge:project",
+    "resource_id": "PROJECT-A"
+  }
+}
+```
 
-The working boundary is:
+| Target | Contained by `PROJECT-A` | Decision |
+|---|---:|---:|
+| `REPO-API` | Yes | Allow |
+| `REPO-UI` | Yes | Allow |
+| `REPO-DOCS` | No | Deny |
 
-### Auth
+An assignment covering the complete Space follows the same pattern, one level higher:
 
-Auth is generic. It knows:
+```json
+{
+  "principal": "user:maya",
+  "permission": "agentforge:repository::read",
+  "scope": {
+    "type": "resource_subtree",
+    "resource_type": "agentforge:space",
+    "resource_id": "SPACE-01"
+  }
+}
+```
 
-- the authenticated principal;
-- roles and direct assignments;
-- opaque permission strings;
-- the assignment's scope descriptor;
-- validity windows and status;
-- assignment versions and invalidation.
+When `REPO-API` is requested, AgentForge resolves its trusted target context the same way §6 describes:
 
-Auth does not need to understand payroll ledgers or employee ownership.
+```json
+{
+  "resource_type": "agentforge:repository",
+  "resource_id": "REPO-API",
+  "tenant_id": "TENANT-001",
+  "space_id": "SPACE-01",
+  "project_id": "PROJECT-A"
+}
+```
 
-### HRMS Authorization Agent
+and containment—the table above—is checked against it:
 
-The HRMS Authorization Agent knows:
+```text
+Permission: agentforge:repository::read              ✓
+Containment: PROJECT-A contains REPO-API             ✓
+Tenant: target and principal are in TENANT-001       ✓
+Decision                                              ALLOW
+```
 
-- which permission an HRMS operation requires;
-- what `employee_self`, department, and legal-entity scopes mean;
-- how a user maps to an employee;
-- the trusted attributes of the requested payroll resource;
-- whether scope contains the target;
-- which mandatory data predicate follows from the decision.
+The owning application—not generic Auth—resolves whether a repository belongs to a project or Space.
 
-### Payroll API
+Containment only ever broadens *where* a granted capability applies; it never invents a capability that was not explicitly granted. Granting:
 
-The API is an enforcement point. It:
+```text
+agentforge:project::read
+```
 
-- asks for an authorization decision;
-- applies the returned tenant and ownership restrictions;
-- never trusts caller-provided authority context;
-- records the business access event;
-- returns no data when the decision or scope cannot be resolved.
+does not create this different capability:
 
-The UI and CLI do not create authority. They call the same protected APIs.
+```text
+agentforge:repository::read
+```
+
+A reusable role can explicitly contain both:
+
+```text
+Project Viewer
+├── agentforge:project::read
+└── agentforge:repository::read
+```
+
+Assigning that role at `resource_subtree:PROJECT-A` gives both declared capabilities reach inside Project A—the scope broadens where they apply, exactly as §3's wildcard rule says a parent permission never implicitly creates a child one:
+
+> A parent scope can extend the reach of an explicitly granted capability, but a parent capability does not implicitly create child capabilities.
 
 ## 8. Example decisions
 
@@ -516,7 +533,7 @@ This is deliberately still a question in the bench. The worked examples must hel
 
 ## 10. Audit receipt
 
-A useful decision record contains the whole explanation:
+A useful decision record—stage 8's output—contains the whole explanation:
 
 ```json
 {
@@ -579,7 +596,7 @@ Nothing in this vocabulary is invented in isolation. Every term maps onto an est
 | Scope | Not in base RBAC; closest is ABAC's attribute constraints | The reach a grant covers over target instances |
 | Group / team | Group | A named set of principals; an assignment made to a group is inherited by every member |
 
-A role is only ever the second row plus the third—the same split §5 already draws between what a role says and what its assignment says. The detail worth adding here: the assignment's principal can be an individual or a group, and the role is redefined for neither. "Project Viewer" assigned to Maya's team at one scope is the same role as one assigned to a single user at another.
+A role is only ever the second row plus the third—the same split §4 already draws between what a role says and what its assignment says. The detail worth adding here: the assignment's principal can be an individual or a group, and the role is redefined for neither. "Project Viewer" assigned to Maya's team at one scope is the same role as one assigned to a single user at another.
 
 ### Where real platforms diverge
 
