@@ -160,7 +160,7 @@ function render() {
   app.innerHTML = `
     <header class="topbar">
       <a class="brand" href="#">${icon('shield')}<span>Permission Quest</span><small>Payroll scope lab</small></a>
-      <nav><a href="#play">Play</a><a href="#boundary">System boundary</a><a href="#questions">Decision board</a></nav>
+      <nav class="page-tabs"><a class="active" href="/">Playground</a><a href="/concept.html">Concept guide</a><a href="#boundary">System boundary</a><a href="#questions">Decision board</a></nav>
       <div class="canonical"><span>Canonical grammar</span><code>&lt;namespaced-noun&gt;::<b>verb</b></code></div>
       <div class="score"><small>SCORE</small><b>${score}</b></div>
     </header>
