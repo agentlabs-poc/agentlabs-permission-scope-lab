@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08111f" />
+    <title>Enforcement Trace · Authorization Handbook</title>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #08111f;
+  --surface: #0e1c2c;
+  --surface-2: #0a1622;
+  --line: #24384c;
+  --ink: #e8f4fb;
+  --muted: #8aa0b8;
+  --teal: #51d6c3;
+  --amber: #ffbe5c;
+  --violet: #a78bfa;
+  --good: #5fd88f;
+  --bad: #ff6f7d;
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh;
+  background: radial-gradient(circle at 15% 0%, #12334a55 0, transparent 32%), radial-gradient(circle at 90% 15%, #241b4655 0, transparent 28%), var(--bg);
+  color: var(--ink); font-family: Manrope, system-ui, sans-serif;
+}
+code, pre, .mono { font-family: 'DM Mono', ui-monospace, monospace; }
+.page { max-width: 1180px; margin: 0 auto; padding: 44px 26px 72px; display: flex; flex-direction: column; gap: 24px; }
+
+header { max-width: 780px; }
+.eyebrow { display: block; margin-bottom: 12px; color: var(--teal); font: 800 11px/1 'DM Mono'; letter-spacing: .16em; text-transform: uppercase; }
+h1 { margin: 0 0 10px; font-size: clamp(26px, 3.6vw, 36px); font-weight: 800; letter-spacing: -.02em; line-height: 1.15; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 70ch; }
+
+.legend-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; color: var(--muted); font: 500 11px Manrope; }
+.chip { display: inline-block; padding: 3px 8px; border-radius: 20px; font: 800 9px 'DM Mono'; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.chip.implemented { color: #062a25; background: var(--teal); }
+.chip.proposed { color: #2a1c05; background: var(--amber); }
+.chip.gap { color: #2a0a0e; background: var(--bad); }
+.chip.designed { color: #170f2e; background: var(--violet); }
+.chip.example { color: var(--ink); background: #2c4054; }
+.chip.config { color: var(--ink); background: #1e3a4a; border: 1px solid #2c6f63; }
+
+.scenario-switch { display: flex; gap: 8px; padding: 5px; width: max-content; max-width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; }
+.scenario-btn { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font: 600 13px Manrope; cursor: pointer; transition: background .15s, color .15s; }
+.scenario-btn:hover { color: var(--ink); }
+.scenario-btn.active { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.scenario-btn .tag { font: 800 9px 'DM Mono'; letter-spacing: .1em; padding: 3px 7px; border-radius: 20px; }
+.scenario-btn .tag.allow { color: #062318; background: var(--good); }
+.scenario-btn .tag.deny { color: #2a0a0e; background: var(--bad); }
+.scenario-btn:not(.active) .tag { opacity: .55; }
+
+/* ---- diagram ---- */
+.diagram-figure { margin: 0; padding: 22px 22px 16px; background: linear-gradient(160deg, #101f31, #0b1726); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 24px 60px #0006; }
+.diagram-figure svg { display: block; width: 100%; height: auto; overflow: visible; }
+.diagram-legend { display: flex; gap: 18px; margin: 0 2px 4px; color: var(--muted); font: 500 10px 'DM Mono'; letter-spacing: .04em; }
+.diagram-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend-line { width: 18px; height: 0; border-top: 2px solid var(--muted); display: inline-block; }
+.legend-line.dashed { border-top-style: dashed; }
+figcaption { margin-top: 14px; color: var(--muted); font-size: 12.5px; line-height: 1.6; max-width: 90ch; }
+
+.core-box { fill: none; stroke: #3a5570; stroke-width: 1.2; stroke-dasharray: 6 5; }
+.core-title { fill: var(--muted); font: 800 10.5px 'DM Mono'; letter-spacing: .08em; }
+.node rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.6; transition: stroke .25s, filter .25s, stroke-width .25s; }
+.node .node-title { fill: var(--ink); font: 800 11.5px 'DM Mono'; letter-spacing: .04em; }
+.node .node-sub { fill: var(--muted); font: 500 9.5px Manrope; }
+.node[data-node="client"] rect { stroke: #3a5570; }
+.node[data-node="verify"] rect, .node[data-node="bind"] rect, .node[data-node="handler"] rect, .node[data-node="hrmsdb"] rect { stroke: #4a3d72; }
+.node[data-node="agent"] rect { stroke: #8a6a2e; }
+.node[data-node="auth"] rect, .node[data-node="authdb"] rect { stroke: #2c6f63; }
+.node.active[data-node="client"] rect { stroke: var(--ink); stroke-width: 2.4; filter: drop-shadow(0 0 10px #e8f4fb44); }
+.node.active[data-node="verify"] rect, .node.active[data-node="bind"] rect, .node.active[data-node="handler"] rect, .node.active[data-node="hrmsdb"] rect { stroke: var(--violet); stroke-width: 2.4; filter: drop-shadow(0 0 10px #a78bfa55); }
+.node.active[data-node="agent"] rect { stroke: var(--amber); stroke-width: 2.4; filter: drop-shadow(0 0 10px #ffbe5c55); }
+.node.active[data-node="auth"] rect, .node.active[data-node="authdb"] rect { stroke: var(--teal); stroke-width: 2.4; filter: drop-shadow(0 0 10px #51d6c355); }
+.node.decision-allow rect { stroke: var(--good) !important; stroke-width: 2.6; filter: drop-shadow(0 0 12px #5fd88f66) !important; }
+.node.decision-deny rect { stroke: var(--bad) !important; stroke-width: 2.6; filter: drop-shadow(0 0 12px #ff6f7d66) !important; }
+
+.arrow { stroke: var(--line); stroke-width: 1.6; fill: none; color: var(--line); transition: stroke .25s, stroke-width .25s; }
+.arrow.dashed { stroke-dasharray: 5 5; }
+.arrow.lane { stroke: #33485c; }
+.arrow-label { fill: var(--muted); font: 600 9.5px 'DM Mono'; letter-spacing: .03em; opacity: .6; transition: fill .25s, opacity .25s; }
+.arrow.active { stroke: var(--teal); stroke-width: 2.4; color: var(--teal); }
+.arrow-label.active { fill: var(--ink); opacity: 1; }
+@keyframes flow { to { stroke-dashoffset: -18; } }
+.arrow.solid.active { stroke-dasharray: 9 9; animation: flow 1.1s linear infinite; }
+
+/* ---- controls ---- */
+.controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; padding: 10px; }
+.ctrl-btn { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 9px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); font: 700 12px Manrope; cursor: pointer; transition: border-color .15s, background .15s; }
+.ctrl-btn:hover:not(:disabled) { border-color: #4a6580; background: var(--surface-2); }
+.ctrl-btn:disabled { opacity: .35; cursor: not-allowed; }
+.ctrl-btn:focus-visible, .scenario-btn:focus-visible, .dot:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.ctrl-btn.play.is-playing { border-color: var(--teal); color: var(--teal); }
+.dots { display: flex; gap: 7px; }
+.dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; }
+.dot.active { background: var(--teal); border-color: var(--teal); box-shadow: 0 0 0 4px #51d6c31f; }
+.dot.done { background: #2c4054; }
+
+/* ---- step panel ---- */
+.step-panel { background: linear-gradient(160deg, #101f31, #0b1726); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 60px #0006; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 22px 26px 0; }
+.step-count { font: 800 10px 'DM Mono'; letter-spacing: .14em; color: var(--muted); }
+.stage-tag { padding: 4px 10px; border-radius: 20px; background: #0a1725; border: 1px solid var(--line); color: var(--teal); font: 700 10px 'DM Mono'; letter-spacing: .08em; }
+h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
+#stepBody { margin: 12px 26px 0; max-width: 72ch; color: #c3d2e0; font-size: 14.5px; line-height: 1.7; }
+.outcome-badge { display: inline-flex; align-items: center; gap: 7px; margin: 14px 26px 0; padding: 8px 14px; border-radius: 8px; font: 800 12px 'DM Mono'; letter-spacing: .1em; }
+.outcome-badge.allow { color: #062318; background: var(--good); }
+.outcome-badge.deny { color: #2a0a0e; background: var(--bad); }
+.blocks { display: flex; flex-direction: column; gap: 12px; margin: 18px 26px 26px; }
+.block { background: #07131f; border: 1px solid #21354a; border-radius: 10px; overflow: hidden; }
+.block.gap { border-color: #5a2a33; }
+.block.proposed { border-color: #5c4a22; }
+.block.designed { border-color: #3d3466; }
+.block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #16283a; }
+.block-label { color: #6f879e; font: 800 9px 'DM Mono'; letter-spacing: .14em; text-transform: uppercase; }
+.block-where { color: #587086; font: 500 9.5px 'DM Mono'; }
+.block pre { margin: 0; padding: 14px 16px; color: #95e5da; font: 400 12px/1.65 'DM Mono'; white-space: pre-wrap; overflow-wrap: anywhere; }
+.block pre.go, .block pre.sql, .block pre.log { color: #d4dfe9; }
+.block pre.http { color: #cfe9f7; }
+.block p { margin: 0; padding: 12px 16px; color: #b7c7d6; font-size: 13px; line-height: 1.65; }
+.block.gap p { color: #f2c4ca; }
+.block.proposed p { color: #f3dcb0; }
+
+.step-fade { animation: fadeIn .28s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 760px) {
+  .step-head { padding-left: 18px; padding-right: 18px; }
+  #stepBody, .outcome-badge, .blocks { margin-left: 18px; margin-right: 18px; }
+}
+</style>
+  </head>
+  <body>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">The Authorization Handbook &middot; Enforcement Trace</span>
+    <h1>How a payslip request gets allowed - or denied, on the wire</h1>
+    <p class="lede">Vinay calls the same endpoint twice. Every request line, header, body, SQL statement and log line below is taken from <code>agentlabs-hrms-core</code>, <code>agentlabs-go-common/authagent</code> and <code>agentlabs-auth</code> as they are today, with file:line references. Identifiers and amounts are example data; paths, field names and shapes are not.</p>
+  </header>
+
+  <div class="legend-row">
+    <span class="chip implemented">implemented</span><span>read from the code, file:line given</span>
+    <span class="chip proposed">proposed</span><span>the contract in its target shape - a change is named</span>
+    <span class="chip gap">gap</span><span>what runs today differs from the model</span>
+    <span class="chip designed">designed only</span><span>exists in contracts/phase0, no code emits it</span>
+    <span class="chip config">config</span><span>value comes from an env var</span>
+  </div>
+
+  <div class="scenario-switch" role="tablist" aria-label="Choose which request to trace">
+    <button class="scenario-btn active" data-scenario="allow" role="tab" aria-selected="true">Employee 1042 - his own <span class="tag allow">ALLOW</span></button>
+    <button class="scenario-btn" data-scenario="deny" role="tab" aria-selected="false">Employee 1088 - Arjun's <span class="tag deny">DENY</span></button>
+  </div>
+
+  <figure class="diagram-figure">
+    <div class="diagram-legend">
+      <span><i class="legend-line"></i>asks</span>
+      <span><i class="legend-line dashed"></i>returns</span>
+    </div>
+    <svg id="diagram" viewBox="0 0 1100 470" role="img" aria-label="A request enters hrms-core, one Go process with four lanes: canonical token verification (offline against Auth's JWKS), identity binding via a direct SQL read of the Auth database, the in-process Auth Agent (which fetches a workload token and the policy bundle from Auth over HTTPS and evaluates it), and the tenant-scoped payroll handler that queries HRMS Postgres under row-level security.">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <rect class="core-box" x="220" y="52" width="360" height="404" rx="12"/>
+      <text class="core-title" x="240" y="76">HRMS-CORE &middot; ONE GO PROCESS (:8081) &middot; MIDDLEWARE CHAIN, TOP TO BOTTOM</text>
+
+      <line id="arr-client-req" class="arrow solid" x1="170" y1="248" x2="216" y2="248" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="193" y="238" text-anchor="middle">request</text>
+      <line id="arr-client-res" class="arrow dashed" x1="216" y1="274" x2="170" y2="274" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="193" y="290" text-anchor="middle">response</text>
+
+      <line class="arrow lane" x1="400" y1="150" x2="400" y2="156" marker-end="url(#arrow)"/>
+      <line class="arrow lane" x1="400" y1="218" x2="400" y2="228" marker-end="url(#arrow)"/>
+      <line class="arrow lane" x1="400" y1="310" x2="400" y2="336" marker-end="url(#arrow)"/>
+
+      <line id="arr-verify-jwks" class="arrow solid" x1="564" y1="126" x2="876" y2="126" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="720" y="116" text-anchor="middle">GET /.well-known/jwks.json (cached)</text>
+
+      <line id="arr-bind-authdb" class="arrow solid" x1="564" y1="180" x2="636" y2="180" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="600" y="171" text-anchor="middle">SQL</text>
+      <line id="arr-authdb-ret" class="arrow dashed" x1="636" y1="204" x2="564" y2="204" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="600" y="219" text-anchor="middle">ids, roles</text>
+
+      <line id="arr-agent-token" class="arrow solid" x1="564" y1="252" x2="876" y2="252" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="720" y="242" text-anchor="middle">POST /oauth2/token (client_credentials)</text>
+      <line id="arr-agent-bundle" class="arrow solid" x1="564" y1="276" x2="876" y2="276" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="720" y="292" text-anchor="middle">POST /api/v1/policy-bundles:resolve</text>
+      <line id="arr-bundle-ret" class="arrow dashed" x1="876" y1="304" x2="564" y2="304" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="720" y="318" text-anchor="middle">policy-bundle.v2</text>
+
+      <line id="arr-handler-db" class="arrow solid" x1="564" y1="366" x2="636" y2="366" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="600" y="357" text-anchor="middle">SQL</text>
+      <line id="arr-db-ret" class="arrow dashed" x1="636" y1="392" x2="564" y2="392" marker-end="url(#arrow)"/>
+      <text class="arrow-label" x="600" y="407" text-anchor="middle">rows</text>
+
+      <g class="node" data-node="client">
+        <rect x="16" y="232" width="154" height="64" rx="10"/>
+        <text class="node-title" x="93" y="259" text-anchor="middle">CLIENT</text>
+        <text class="node-sub" x="93" y="277" text-anchor="middle">client_agenthrms_web</text>
+      </g>
+
+      <g class="node" data-node="verify">
+        <rect x="240" y="92" width="324" height="58" rx="9"/>
+        <text class="node-title" x="402" y="114" text-anchor="middle">CANONICAL AUTH</text>
+        <text class="node-sub" x="402" y="132" text-anchor="middle">verify at+jwt offline (ES256, JWKS)</text>
+      </g>
+
+      <g class="node" data-node="bind">
+        <rect x="240" y="160" width="324" height="58" rx="9"/>
+        <text class="node-title" x="402" y="182" text-anchor="middle">IDENTITY BINDING + SCOPE GATE</text>
+        <text class="node-sub" x="402" y="200" text-anchor="middle">ResolveCanonicalPrincipal &middot; RequireOAuthScope</text>
+      </g>
+
+      <g class="node" data-node="agent">
+        <rect x="240" y="232" width="324" height="78" rx="9"/>
+        <text class="node-title" x="402" y="256" text-anchor="middle">AUTH AGENT</text>
+        <text class="node-sub" x="402" y="274" text-anchor="middle">authorizationRuntime.Middleware</text>
+        <text class="node-sub" x="402" y="290" text-anchor="middle">manifest &rarr; bundle &rarr; Policy.Evaluate &rarr; Decision</text>
+      </g>
+
+      <g class="node" data-node="handler">
+        <rect x="240" y="340" width="324" height="78" rx="9"/>
+        <text class="node-title" x="402" y="364" text-anchor="middle">TENANTCONN &rarr; PAYROLL HANDLER</text>
+        <text class="node-sub" x="402" y="382" text-anchor="middle">set_config(app.tenant_id) &middot; ListEmployeePayslips</text>
+        <text class="node-sub" x="402" y="398" text-anchor="middle">runs only after an explicit allow</text>
+      </g>
+
+      <g class="node" data-node="authdb">
+        <rect x="640" y="156" width="184" height="64" rx="10"/>
+        <text class="node-title" x="732" y="181" text-anchor="middle">AUTH DB</text>
+        <text class="node-sub" x="732" y="199" text-anchor="middle">AUTH_DATABASE_URL &middot; legacy mapping</text>
+      </g>
+
+      <g class="node" data-node="hrmsdb">
+        <rect x="640" y="346" width="184" height="64" rx="10"/>
+        <text class="node-title" x="732" y="371" text-anchor="middle">HRMS POSTGRES</text>
+        <text class="node-sub" x="732" y="389" text-anchor="middle">RLS app.tenant_id &middot; payslips</text>
+      </g>
+
+      <g class="node" data-node="auth">
+        <rect x="880" y="84" width="204" height="240" rx="10"/>
+        <text class="node-title" x="982" y="108" text-anchor="middle">AUTH</text>
+        <text class="node-sub" x="982" y="124" text-anchor="middle">issuer &middot; AUTH_ISSUER_URL</text>
+        <text class="node-sub" x="896" y="150" text-anchor="start">/.well-known/jwks.json</text>
+        <text class="node-sub" x="896" y="262" text-anchor="start">/oauth2/token</text>
+        <text class="node-sub" x="896" y="286" text-anchor="start">/api/v1/policy-bundles:resolve</text>
+        <text class="node-sub" x="896" y="310" text-anchor="start">returns facts, never a decision</text>
+      </g>
+    </svg>
+    <figcaption id="diagramCaption">The Agent is not a separate service: it is a middleware inside hrms-core. Token verification is offline (Auth is only touched for its public keys). The Agent - not the API handler - talks to Auth, using its own workload credential as the bearer and carrying the user's token as request data. The handler talks to HRMS Postgres only, and only after an explicit allow.</figcaption>
+  </figure>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn" aria-label="Previous step">&larr; Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="ctrl-btn" id="nextBtn" aria-label="Next step">Next &rarr;</button>
+    <button class="ctrl-btn play" id="playBtn" aria-label="Play through all steps">&#9654; Play</button>
+  </div>
+
+  <section class="step-panel">
+    <div class="step-head">
+      <span class="step-count">STEP <b id="stepNum">1</b> OF <span id="stepTotal">9</span></span>
+      <span class="stage-tag" id="stageTag"></span>
+      <h2 id="stepTitle"></h2>
+    </div>
+    <p id="stepBody"></p>
+    <div id="outcomeSlot"></div>
+    <div class="blocks" id="blocks"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var JWT_H = "eyJ0eXAiOiJhdCtqd3QiLCJhbGciOiJFUzI1NiIsImtpZCI6ImVzMjU2LTIwMjYtMDcifQ";
+  var JWT_C = "eyJpc3MiOiJodHRwczovL2F1dGguYWdlbnRsYWJzLmRldiIsInN1YiI6InBhaXJ3aXNlLXN1YmplY3QtYWdlbnRocm1zLTRjMWUiLCJhdWQiOiJodHRwczovL2hybXMtYXBpLmFnZW50bGFicy5kZXYiLCJleHAiOjE3ODg0MzE0MDAsImlhdCI6MTc4ODQzMDUwMCwibmJmIjoxNzg4NDMwNTAwLCJqdGkiOiJ0b2tlbi1EcHE2M2liS1NGWWJvcEJuSUY3WGhRIiwiY2xpZW50X2lkIjoiY2xpZW50X2FnZW50aHJtc193ZWIiLCJ0b2tlbl9wcm9maWxlIjoidXNlcl9hY2Nlc3NfdjEiLCJwcmluY2lwYWxfdHlwZSI6Imh1bWFuIiwiYXV0aG9yaXphdGlvbl9tb2RlIjoiZGlyZWN0IiwidGVuYW50X2lkIjoidGVuYW50LTAxSzBGNFFQQjJHMlBGWEIySDlHNEo2VDROIiwibWVtYmVyc2hpcF9pZCI6Im1lbWJlcnNoaXAtMDFLMEY0UjJSNE5WVFJQTVExWks3SjhIQTciLCJzaWQiOiJycC1zZXNzaW9uLTAxSzBGNFM3WTVKM1pRN0YxSzhCMk40VjZNIiwiYXV0aF90aW1lIjoxNzg4NDMwMzgwLCJhY3IiOiJ1cm46YWdlbnRsYWJzOmFjcjphYWwyIiwiYW1yIjpbInB3ZCIsIm90cCJdLCJzY29wZSI6Im9wZW5pZCBocm1zLmFjY2VzcyJ9";
+  var JWT_S = "XLMP-0-Ar6yu5mo6zIkXERao8t37vA4PiT6YqDsiNo3H5QHqaIXF_jccskri2LxTSkFwir48MbvN5lSyB_5C4A";
+  var JWT = JWT_H + "." + JWT_C + "." + JWT_S;
+  var BUNDLE_DIGEST = "sha256:79ed27eaecb384d2042bc37d5e86e7d431efc3682e714d0ceb7974886ae8376a";
+  var BUNDLE_ID = "bundle:79ed27eaecb384d2042bc37d5e86e7d4";
+
+  var SCENARIOS = {
+    allow: { employeeId: "1042", who: "his own", outcome: "allow", decisionId: "decision:72a0963e3cf85e469b2e37548cafa367" },
+    deny:  { employeeId: "1088", who: "Arjun's", outcome: "deny",  decisionId: "decision:ca49b875d55a420c1dc19038df4e0367" }
+  };
+
+  function L(lines) { return lines.join("\n"); }
+
+  var CLAIMS_JSON = L([
+    '{',
+    '  "iss": "https://auth.agentlabs.dev",',
+    '  "sub": "pairwise-subject-agenthrms-4c1e",',
+    '  "aud": "https://hrms-api.agentlabs.dev",',
+    '  "exp": 1788431400,',
+    '  "iat": 1788430500,',
+    '  "nbf": 1788430500,',
+    '  "jti": "token-Dpq63ibKSFYbopBnIF7XhQ",',
+    '  "client_id": "client_agenthrms_web",',
+    '  "token_profile": "user_access_v1",',
+    '  "principal_type": "human",',
+    '  "authorization_mode": "direct",',
+    '  "tenant_id": "tenant-01K0F4QPB2G2PFXB2H9G4J6T4N",',
+    '  "membership_id": "membership-01K0F4R2R4NVTRPMQ1ZK7J8HA7",',
+    '  "sid": "rp-session-01K0F4S7Y5J3ZQ7F1K8B2N4V6M",',
+    '  "auth_time": 1788430380,',
+    '  "acr": "urn:agentlabs:acr:aal2",',
+    '  "amr": ["pwd", "otp"],',
+    '  "scope": "openid hrms.access"',
+    '}'
+  ]);
+
+  var BUNDLE_JSON = L([
+    '{',
+    '  "schema_version": "agentlabs.auth.policy-bundle.v2",',
+    '  "bundle_id": "' + BUNDLE_ID + '",',
+    '  "bundle_digest": "' + BUNDLE_DIGEST + '",',
+    '  "tenant_application_id": "3301",',
+    '  "application": "hrms",',
+    '  "subject_id": "pairwise-subject-agenthrms-4c1e",',
+    '  "membership_id": "membership-01K0F4R2R4NVTRPMQ1ZK7J8HA7",',
+    '  "generation": 42,',
+    '  "issued_at": "2026-09-03T10:15:02Z",',
+    '  "roles": [',
+    '    {',
+    '      "binding_id": "role:3301:5121:5002",',
+    '      "role_id": "5002",',
+    '      "role_name": "Employee",',
+    '      "role_version": 1,',
+    '      "binding_version": 1,',
+    '      "source": "membership",',
+    '      "source_id": "membership-01K0F4R2R4NVTRPMQ1ZK7J8HA7",',
+    '      "scope": {},',
+    '      "valid_from": "2026-01-05T00:00:00Z"',
+    '    }',
+    '  ],',
+    '  "permission_assignments": [',
+    '    {',
+    '      "assignment_id": "role-permission:5002:7310",',
+    '      "permission_id": "7310",',
+    '      "permission": "hrms:payroll:payslip:self::list",',
+    '      "effect": "opaque",',
+    '      "assignment_version": 1,',
+    '      "source": "role",',
+    '      "source_id": "5002",',
+    '      "scope": { "employee_ids": ["$self"] },',
+    '      "provenance": "explicit"',
+    '    },',
+    '    {',
+    '      "assignment_id": "role-permission:5002:7311",',
+    '      "permission_id": "7311",',
+    '      "permission": "hrms:payroll:payslip:employee::list",',
+    '      "effect": "opaque",',
+    '      "assignment_version": 1,',
+    '      "source": "role",',
+    '      "source_id": "5002",',
+    '      "scope": { "employee_ids": ["$self"] },',
+    '      "provenance": "explicit"',
+    '    }',
+    '  ],',
+    '  "policy_artifacts": []',
+    '}'
+  ]);
+
+  var STEPS = [
+    {
+      stage: "CLIENT -> HRMS-CORE", title: "A request arrives",
+      nodes: ["client"], arrows: ["client-req"],
+      body: function (s) { return "Vinay's client asks for " + s.who + " payslips for one payroll run. The only things the request asserts are the path, the query and a bearer token. Everything the server will trust about who is calling comes from inside that token; nothing about reach is in it."; },
+      blocks: function (s) { return [
+        { label: "HTTP request, as sent", status: "implemented", kind: "http", text: L([
+          "GET /api/v1/payslips/employees/" + s.employeeId + "?payroll_run_id=2607 HTTP/1.1",
+          "Host: hrms-api.agentlabs.dev",
+          "Authorization: Bearer " + JWT,
+          "Accept: application/json"
+        ]) },
+        { label: "Decoded token: JOSE header + claims", where: "segments 1 and 2 of the bearer above decode to exactly this; authverify/types.go:106-128", status: "implemented", kind: "json", text: L([
+          '{ "typ": "at+jwt", "alg": "ES256", "kid": "es256-2026-07" }',
+          "",
+          CLAIMS_JSON
+        ]) },
+        { label: "What is deliberately not in the token", status: "implemented", kind: "note", text: "No roles, no permissions, no employee id. That is the issuer's contract, not an omission - internal/canonicaltoken/issuer.go:50-52: \"IssueAccessToken signs the immutable authentication and routing context ... Business permissions and resource lists are not representable.\" Reach arrives later, from the policy bundle (step 6). If the browser held the OIDC BFF session cookie instead of a bearer, oidcRP.CookieBearer runs first in the chain (cmd/server/main.go:503) and swaps it for this same token - session and JWT meet here." },
+        { label: "Environment-bound values", status: "config", kind: "note", text: "iss = AUTH_ISSUER_URL, aud = HRMS_AUTH_AUDIENCE, client_id must be listed in HRMS_AUTH_CLIENT_IDS (the local deploy uses client_agenthrms_web and client_agenthrms_cli). Identifiers, timestamps and the signature segment are example data; the claim set and header are exact." }
+      ]; }
+    },
+    {
+      stage: "STAGE 1/8 - HRMS-CORE - CanonicalAuth", title: "Verify the token - offline",
+      nodes: ["verify", "auth"], arrows: ["verify-jwks"],
+      body: function () { return "hrms-core does not ask Auth whether the token is valid. It verifies the ES256 signature itself against Auth's published keys, then applies a fixed list of claim gates. Auth is contacted only to fetch a key it has not cached."; },
+      blocks: function () { return [
+        { label: "Checks, in order", where: "middleware/canonical_auth.go:190-200, authagent/jwt.go:149-198 and 252-282", status: "implemented", kind: "go", text: L([
+          " 1. exactly one Authorization header, prefix \"Bearer \", no whitespace or commas inside the token",
+          " 2. compact form: three non-empty base64url segments",
+          " 3. JOSE header: typ == \"at+jwt\", alg == \"ES256\", kid != \"\"",
+          " 4. key = JWKS[kid]   ->  GET https://auth.agentlabs.dev/.well-known/jwks.json   (cached; fetched on a miss)",
+          " 5. ECDSA P-256 over sha256(segment1 + \".\" + segment2); signature must be 64 raw bytes (r || s)",
+          " 6. iss == AUTH_ISSUER_URL; exactly one aud, equal to HRMS_AUTH_AUDIENCE",
+          " 7. client_id in HRMS_AUTH_CLIENT_IDS; token_profile == \"user_access_v1\"",
+          " 8. sub, jti, tenant_id, membership_id, sid non-empty; principal_type == \"human\"; auth_time > 0; acr set; amr valid",
+          " 9. user profile: authorization_mode == \"direct\"; no delegation_id, task_id or act",
+          "10. time: exp > iat; nbf <= exp; exp - iat <= 20 min; now - 60s < exp; now + 60s >= nbf; now + 60s >= iat",
+          "11. scope split on spaces -> [\"openid\", \"hrms.access\"]"
+        ]) },
+        { label: "On any failure: the same 401", where: "canonical_auth.go:131-141, 202-220", status: "implemented", kind: "http", text: L([
+          "HTTP/1.1 401 Unauthorized",
+          "WWW-Authenticate: Bearer resource_metadata=\"<protected-resource metadata URL>\", error=\"invalid_token\"",
+          "Content-Type: application/json",
+          "",
+          "{\"error\":{\"code\":\"UNAUTHORIZED\",\"message\":\"invalid token\"}}",
+          "",
+          "(a malformed header returns the same status with message \"invalid authorization header\")"
+        ]) },
+        { label: "Why Auth is not on the request path here", status: "implemented", kind: "note", text: "There is no introspection endpoint. GET /api/v1/auth/validate exists in Auth but only accepts the legacy HS256 token, which hrms-core rejects structurally (alg must be ES256, typ must be at+jwt). Verification cost is one signature check per request; Auth's availability does not gate authentication." }
+      ]; }
+    },
+    {
+      stage: "HRMS-CORE -> AUTH DB (SQL)", title: "Bind to an HRMS identity, then the scope gate",
+      nodes: ["bind", "authdb"], arrows: ["bind-authdb", "authdb-ret"],
+      body: function () { return "Two identity systems coexist. The canonical subjects in the token drive authorization; the payroll tables and row-level security still key on numeric legacy ids. The bridge is one query, run inside the authenticator, directly against the Auth database."; },
+      blocks: function () { return [
+        { label: "Resolve the canonical principal", where: "platform/tenants/tenants.go:57-85 - $1 = tenant_id claim, $2 = membership_id claim", status: "implemented", kind: "sql", text: L([
+          "SELECT mapping.legacy_user_id, membership.tenant_id, legacy.email,",
+          "    ARRAY(",
+          "        SELECT role.name",
+          "        FROM user_roles AS user_role",
+          "        JOIN roles AS role ON role.id = user_role.role_id",
+          "        WHERE user_role.user_id = mapping.legacy_user_id",
+          "          AND role.tenant_id = membership.tenant_id",
+          "        ORDER BY role.name",
+          "    )",
+          "FROM legacy_user_identity_mappings AS mapping",
+          "JOIN identities AS identity",
+          "  ON identity.id = mapping.identity_id AND identity.status = 'active'",
+          "JOIN tenant_memberships AS membership",
+          "  ON membership.id = mapping.membership_id",
+          " AND membership.identity_id = mapping.identity_id AND membership.status = 'active'",
+          "JOIN tenants AS tenant",
+          "  ON tenant.id = membership.tenant_id AND tenant.status = 'active'",
+          "JOIN users AS legacy",
+          "  ON legacy.id = mapping.legacy_user_id",
+          " AND legacy.tenant_id = membership.tenant_id AND legacy.status = 'active'",
+          "WHERE tenant.subject = $1",
+          "  AND membership.subject = $2",
+          "  AND mapping.migration_state IN ('backfilled', 'verified')"
+        ]) },
+        { label: "Result -> request context", where: "canonical_auth.go:92-108, 149-161", status: "example", kind: "go", text: L([
+          "legacy_user_id   = 5121          -- users.id in the Auth DB; the handler's user_id",
+          "legacy_tenant_id = 7             -- tenants.id; becomes app.tenant_id for RLS (step 8)",
+          "email            = vinay@acme.example",
+          "roles            = [\"Employee\"]   -- role NAMES from the Auth DB, not permissions",
+          "",
+          "no row  ->  401 invalid token  (\"canonical principal is not active or mapped\")"
+        ]) },
+        { label: "Scope gate: RequireOAuthScope(\"hrms.access\")", where: "canonical_auth.go:20, 172-188", status: "implemented", kind: "http", text: L([
+          "requires the exact, case-sensitive scope \"hrms.access\" among the token's OAuth scopes",
+          "",
+          "HTTP/1.1 403 Forbidden",
+          "WWW-Authenticate: Bearer error=\"insufficient_scope\", scope=\"hrms.access\", resource_metadata=\"<url>\"",
+          "Content-Type: application/json",
+          "",
+          "{\"error\":{\"code\":\"INSUFFICIENT_SCOPE\",\"message\":\"required OAuth scope is missing\"}}"
+        ]) },
+        { label: "Two meanings of scope", status: "implemented", kind: "note", text: "This gate reads the OAuth scope claim - a coarse \"may this client type reach HRMS at all\" check. It is unrelated to reach over employees, which is the scope on a permission assignment in the bundle (step 6). The Handbook's warning about the word \"scope\" is exactly this collision." }
+      ]; }
+    },
+    {
+      stage: "STAGE 2/8 - AUTH AGENT (in-process)", title: "Resolve the operation",
+      nodes: ["agent"], arrows: [],
+      body: function (s) { return "Method plus path resolves to exactly one server-owned operation in the manifest. The manifest also declares which path parameter becomes trusted context - here the employee id, " + s.employeeId + ". The query string is never consulted."; },
+      blocks: function (s) { return [
+        { label: "Manifest row", where: "platform/authorization/manifest.go:255", status: "implemented", kind: "go", text: L([
+          'scoped(http.MethodGet, "/api/v1/payslips/employees/{employeeID}",',
+          '    "hrms.payslip.employee.list",                    // operation_id',
+          '    "hrms:payroll:payslip:employee::list",           // permission the caller must hold',
+          '    authagent.RiskMedium,',
+          '    "hrms:payroll:payslip::read",                    // legacy permission, compat only',
+          '    map[string]string{"employee_id": "employeeID"})  // path param -> trusted context key'
+        ]) },
+        { label: "Same row as published to Auth", where: "agentlabs.application-operation-manifest.v1; OperationDocument tags, manifest.go:30-39", status: "implemented", kind: "json", text: L([
+          '{',
+          '  "operation_id": "hrms.payslip.employee.list",',
+          '  "method": "GET",',
+          '  "path": "/api/v1/payslips/employees/{employeeID}",',
+          '  "permission": "hrms:payroll:payslip:employee::list",',
+          '  "legacy_permission": "hrms:payroll:payslip::read",',
+          '  "risk": "medium",',
+          '  "trusted_context_bindings": { "employee_id": "employeeID" }',
+          '}'
+        ]) },
+        { label: "Resolved: the decision request", where: "manifest.go:382-401 -> runtime.go:123-126", status: "implemented", kind: "go", text: L([
+          "authagent.DecisionRequest{",
+          '    OperationID: "hrms.payslip.employee.list",',
+          '    Context:     map[string]any{"employee_id": "' + s.employeeId + '"},   // a string, straight from the path',
+          "}"
+        ]) },
+        { label: "Fail-closed edges", where: "runtime.go:107-120, agent.go:79-90", status: "implemented", kind: "note", text: "An unmapped method+path is a 403 FORBIDDEN, not a pass-through. A required context key that is missing or empty yields reason missing_trusted_context. The permission grammar is HRMS-owned - ^hrms(:segment){1,6}::action$ (grammar.go:21) - and Auth stores these strings opaquely without evaluating them." },
+        { label: "Target attributes for by-id routes", status: "proposed", kind: "note", text: "This route's path parameter is already the ownership attribute, so nothing needs looking up. Routes that bind an object id instead (payslip_id on /payslips/{id}/download) can only be matched by *_ids scopes of that same kind today. The Handbook's target-resolution stage would add a context enricher that runs before Authorize and maps a bound payslip_id to its employee_id from the payslips table, so an employee_ids scope reaches it. Change: a ContextResolver hook in Runtime.Middleware between Resolve() and Authorize()." }
+      ]; }
+    },
+    {
+      stage: "AUTH AGENT -> AUTH", title: "The Agent gets its own credential",
+      nodes: ["agent", "auth"], arrows: ["agent-token"],
+      body: function () { return "Before it can ask Auth about Vinay, hrms-core must identify itself. It does so with its registry client credentials, once per tenant, and caches the result until thirty seconds before expiry."; },
+      blocks: function () { return [
+        { label: "Request", where: "authagent/registry.go:158-177; AUTH_REGISTRY_CLIENT_ID / _SECRET / _AUDIENCE", status: "implemented", kind: "http", text: L([
+          "POST /oauth2/token HTTP/1.1",
+          "Host: auth.agentlabs.dev",
+          "Authorization: Basic base64(AUTH_REGISTRY_CLIENT_ID + \":\" + AUTH_REGISTRY_CLIENT_SECRET)",
+          "Content-Type: application/x-www-form-urlencoded",
+          "Accept: application/json",
+          "",
+          "grant_type=client_credentials&tenant=tenant-01K0F4QPB2G2PFXB2H9G4J6T4N&resource=<AUTH_REGISTRY_AUDIENCE>&scope=auth.registry.read"
+        ]) },
+        { label: "Response, and what makes it acceptable", where: "registry.go:46-51, 183-197", status: "implemented", kind: "http", text: L([
+          "HTTP/1.1 200 OK",
+          "Content-Type: application/json",
+          "",
+          "{\"access_token\":\"<workload at+jwt, profile workload_access_v1>\",\"token_type\":\"Bearer\",\"expires_in\":3600,\"scope\":\"auth.registry.read\"}",
+          "",
+          "rejected unless: token_type is Bearer (case-insensitive), 0 < expires_in <= 3600, scope == \"auth.registry.read\" exactly"
+        ]) },
+        { label: "Two tokens, two roles", status: "implemented", kind: "note", text: "This workload token is hrms-core's identity toward Auth. Vinay's token is never used as an Authorization header to Auth - in the next step it travels as request data, so Auth can bind the two together and refuse a bundle for a subject the workload is not entitled to ask about." }
+      ]; }
+    },
+    {
+      stage: "STAGE 3/8 - AUTH AGENT -> AUTH", title: "Resolve the policy bundle",
+      nodes: ["agent", "auth"], arrows: ["agent-bundle", "bundle-ret"],
+      body: function () { return "This is the only call that carries Vinay's authority. Auth re-verifies both tokens, cross-checks tenant, installation, membership and client in SQL, and returns every active grant it holds for this membership - roles, permission assignments, scope, generation. It returns facts. It never returns a decision."; },
+      blocks: function () { return [
+        { label: "Request: two-token binding", where: "registry.go:94-125 and 200-215; ResolveBundleRequest, agentlabs-auth model.go:352-355", status: "implemented", kind: "http", text: L([
+          "POST /api/v1/policy-bundles:resolve HTTP/1.1",
+          "Host: auth.agentlabs.dev",
+          "Authorization: Bearer <workload token from step 5>",
+          "Content-Type: application/json",
+          "Accept: application/json",
+          "Cache-Control: no-store",
+          "",
+          "{\"subject_token\":\"" + JWT + "\",\"minimum_generation\":41}",
+          "",
+          "subject_token = Vinay's compact token, verbatim; minimum_generation = last generation seen for this membership (omitted when 0)"
+        ]) },
+        { label: "Response: bare policy-bundle.v2, no {data} envelope", where: "runtime_handler.go:24-56, 103-112; authagent/model.go:62-123", status: "implemented", kind: "http", text: L([
+          "HTTP/1.1 200 OK",
+          "Content-Type: application/json",
+          "Cache-Control: private, no-store",
+          "Pragma: no-cache",
+          "",
+          BUNDLE_JSON
+        ]) },
+        { label: "Integrity the client re-derives", where: "agent.go:259-285", status: "implemented", kind: "note", text: "hrms-core recomputes bundle_digest as sha256 over {schema_version, tenant_application_id, application, subject_id, membership_id, generation, roles, permission_assignments, policy_artifacts}, marshalled in that order; bundle_id is the first 16 bytes. The digest shown above is that computation over this exact bundle. A mismatch is reason authority_mismatch. Errors: 401 TOKEN_BINDING_INVALID with WWW-Authenticate: Bearer error=\"invalid_token\"; 400 BAD_REQUEST for a malformed body; an AUTHORITY_STALE code becomes reason authority_stale. Bundles are cached 30 s per membership (runtime.go:73)." },
+        { label: "The grant, in its target shape", status: "proposed", kind: "note", text: "The Employee role's two assignments carry scope {\"employee_ids\": [\"$self\"]} - the Handbook's employee_self: reach is a trusted relationship the application resolves at request time, never an id copied into the grant. Auth already stores and returns this unchanged (scope is opaque JSON to Auth: authorizationregistry/service.go:751), so no Auth change is needed for the shape. The change is on the hrms-core side, in step 7." },
+        { label: "Role-binding scope is not read", status: "gap", kind: "note", text: "The bundle carries scope on the role binding (roles[].scope) and on each assignment (permission_assignments[].scope). hrms-core's Policy.Evaluate reads only the assignment's (grammar.go:109-138); roles are consulted for validity alone. Unless Auth copies a binding's scope into every role-sourced assignment - its own fixture does not (branch_ids on the role, {} on the assignment) - a role bound at a narrow scope evaluates as global. Target rule: a role-sourced assignment's effective scope is assignment.scope intersected with its binding's scope, with the binding's scope applying when the assignment's is empty." }
+      ]; }
+    },
+    {
+      stage: "STAGE 4-6/8 - AUTH AGENT - Policy.Evaluate", title: "Evaluate: resolve reach, intersect with the target",
+      nodes: ["agent"], arrows: [], decision: true,
+      body: function (s) { return s.outcome === "allow"
+        ? "Grammar match, scope decode, then containment. The $self selector resolves through HRMS's own employee mapping to 1042 - the same id the path bound. Every part of the equation intersects."
+        : "Grammar match, scope decode, then containment. The $self selector resolves through HRMS's own employee mapping to 1042; the path bound 1088. The capability and the identity both check out - the reach does not contain the target."; },
+      blocks: function (s) {
+        var ok = s.outcome === "allow";
+        return [
+          { label: "Trace with this bundle and context", where: "grammar.go:90-150 (Evaluate), 152-180 (decodeScope), 182-240 (scopeMatches)", status: "implemented", kind: "go", text: L([
+            "activeRoles          {\"5002\": true}                          Employee: valid_from 2026-01-05, no valid_until",
+            "",
+            "assignment 7310      hrms:payroll:payslip:self::list",
+            "  Grammar.Matches    segment 4 \"self\" != \"employee\"          -> skip",
+            "",
+            "assignment 7311      hrms:payroll:payslip:employee::list",
+            "  Grammar.Matches    all segments equal, action equal          -> match",
+            "  decodeScope        {\"employee_ids\": [\"$self\"]}              key ends in _ids, non-empty, selector allowed on employee_ids -> ok",
+            "  scopeMatches       trusted[\"employee_id\"] = \"" + s.employeeId + "\"",
+            "                     candidate \"$self\"  ->  Relationships.IsSelf(principal, \"" + s.employeeId + "\")",
+            "                       SELECT id FROM employees WHERE tenant_id = 7 AND user_id = 5121 LIMIT 1   -> 1042",
+            "                       1042 == " + s.employeeId + "                                     -> " + (ok ? "PASS" : "FAIL"),
+            (ok ? "  Effect(\"opaque\")  -> allow" : "  (no other assignment matches; allowed stays false)"),
+            "",
+            (ok ? "result               allowed=true   matched=[\"role-permission:5002:7311\"]" : "result               allowed=false  matched=[]"),
+            (ok ? "effective_scope      {\"any_of\":[{\"employee_ids\":[\"1042\"]}]}" : "reason               permission_denied   (the Decision default, agent.go:74; only an allow rewrites it)")
+          ]) },
+          { label: "Wire the relationship resolver", where: "runtime.go:76 today: Policy{Grammar: Grammar{}}", status: "proposed", kind: "go", text: L([
+            "// today: Relationships is nil, so on this scoped route \"$self\" never matches (grammar.go:213-219)",
+            "// and \"$direct_report\" cannot match anywhere. Only the /me routes work, via static employee_relation: \"self\".",
+            "",
+            "type employeeRelationships struct{ repo payroll.Repository }",
+            "",
+            "func (r employeeRelationships) IsSelf(ctx context.Context, p authagent.Principal, employeeID string) (bool, error) {",
+            "    tenantID, userID := legacyIDsFromContext(ctx)               // 7, 5121 - bound in step 3",
+            "    own, err := r.repo.GetEmployeeIDByUserID(ctx, tenantID, userID) // repository.go:669-680, existing query",
+            "    return err == nil && own != 0 && strconv.FormatInt(own, 10) == employeeID, err",
+            "}",
+            "",
+            "agent, err := authagent.New(authagent.AgentConfig{",
+            "    ...,",
+            "    Policy: Policy{Grammar: Grammar{}, Relationships: employeeRelationships{repo: payrollRepo}},",
+            "})"
+          ]) },
+          { label: "Decision", where: "authagent.Decision, model.go:149-157 - an in-process value, never serialized to the wire", status: "implemented", kind: "go", text: ok ? L([
+            "authagent.Decision{",
+            "    Allowed:          true,",
+            "    DecisionID:       \"" + s.decisionId + "\",   // \"decision:\" + hex(16 random bytes)",
+            "    PolicyGeneration: 42,",
+            "    BundleDigest:     \"" + BUNDLE_DIGEST + "\",",
+            "    MatchedSources:   []string{\"role-permission:5002:7311\"},",
+            "    EffectiveScope:   json.RawMessage(\"{\\\"any_of\\\":[{\\\"employee_ids\\\":[\\\"1042\\\"]}]}\"),",
+            "    Reason:           \"allowed\",",
+            "}"
+          ]) : L([
+            "authagent.Decision{",
+            "    Allowed:          false,",
+            "    DecisionID:       \"" + s.decisionId + "\",",
+            "    PolicyGeneration: 42,",
+            "    BundleDigest:     \"" + BUNDLE_DIGEST + "\",",
+            "    MatchedSources:   []string{},",
+            "    EffectiveScope:   nil,",
+            "    Reason:           \"permission_denied\",",
+            "}"
+          ]) },
+          { label: "Resolved ids in EffectiveScope", status: "proposed", kind: "note", text: "Today Evaluate copies the assignment's raw scope into effective_scope, so it would still read \"$self\" after matching. Target: emit the resolved concrete ids ({\"employee_ids\":[\"1042\"]}) so step 8 can enforce the scope as a predicate without resolving it again. Change: in grammar.go:136, append the resolved scope rather than the declared one." },
+          { label: "Order of precedence", where: "agent.go:73-145", status: "implemented", kind: "note", text: "unauthenticated -> unknown_operation -> missing_trusted_context -> authority_unavailable / authority_stale -> authority_mismatch -> incompatible_policy -> policy_error -> permission_denied or allowed. A deny-effect assignment short-circuits the loop. After an allow, a generation barrier re-checks that no newer invalidation has been observed for this installation; if one has, the allow is downgraded to authority_stale before it can be used." }
+        ];
+      }
+    },
+    {
+      stage: "STAGE 7/8 - ENFORCE", title: "Enforce the decision",
+      nodes: [], arrows: [], decision: true, enforce: true,
+      body: function (s) { return s.outcome === "allow"
+        ? "Only now does a handler run. TenantConn pins a database connection to the legacy tenant id so row-level security applies to every query; the handler re-reads the employee id from the path and filters the run's payslips to it."
+        : "The Agent middleware writes the response itself. TenantConn and the handler are never reached, so no SQL runs and no payroll code sees the request."; },
+      blocks: function (s) {
+        if (s.outcome !== "allow") return [
+          { label: "Response, written by the middleware", where: "runtime.go:136-151 -> shared.RespondError, shared/response.go:43-54", status: "implemented", kind: "http", text: L([
+            "HTTP/1.1 403 Forbidden",
+            "Content-Type: application/json",
+            "",
+            "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"request is not authorized\"}}"
+          ]) },
+          { label: "Same body for every deny", status: "implemented", kind: "note", text: "permission_denied, unknown_operation, missing_trusted_context, authority_mismatch and incompatible_policy all produce this exact 403. Only authority_unavailable, authority_stale and policy_error differ: 503 {\"error\":{\"code\":\"AUTHORIZATION_UNAVAILABLE\",\"message\":\"authorization authority is unavailable\"}}. The reason is never in the response - it is only in the log (step 9)." }
+        ];
+        return [
+          { label: "TenantConn, before any handler code", where: "middleware/tenant.go:24-41 -> database.go:88-91", status: "implemented", kind: "sql", text: L([
+            "SELECT set_config('app.tenant_id', '7', false);   -- legacy tenant id from step 3, on a pinned connection",
+            "-- every RLS policy filters on app.tenant_id; reset on release:",
+            "SELECT set_config('app.tenant_id', '', false);"
+          ]) },
+          { label: "Handler: ListEmployeePayslips", where: "modules/payroll/handler.go:423-451", status: "implemented", kind: "go", text: L([
+            "employeeID = ParseInt(chi.URLParam(\"employeeID\"))   -> 1042   (<= 0 -> 400 \"invalid employee id\")",
+            "runID      = ParseInt(query[\"payroll_run_id\"])       -> 2607   (missing/<= 0 -> 400 \"valid payroll_run_id is required\")",
+            "all        = svc.GetPayslips(ctx, tenantID=7, runID=2607)",
+            "items      = all where EmployeeID == 1042"
+          ]) },
+          { label: "Query", where: "repository.go:574-575, 623-624 - RLS applies on top of the explicit tenant filter", status: "implemented", kind: "sql", text: L([
+            "SELECT id, tenant_id, payroll_run_id, employee_id, gross, deductions, net,",
+            "       country_deductions, line_items, negative_net_pay_flag, created_at",
+            "FROM payslips",
+            "WHERE tenant_id = $1 AND payroll_run_id = $2      -- $1 = 7, $2 = 2607",
+            "ORDER BY employee_id;"
+          ]) },
+          { label: "Enforce the decision's scope as a predicate", status: "proposed", kind: "sql", text: L([
+            "-- today: EffectiveScope is placed in the request context (DecisionMetadata) and nothing reads it -",
+            "-- DecisionFromContext (runtime.go:173) has no callers; the handler filters in memory by the path param.",
+            "-- target: the repository applies the decision's resolved scope, so the row filter and the authorization",
+            "-- decision cannot drift apart. From {\"any_of\":[{\"employee_ids\":[\"1042\"]}]}:",
+            "SELECT id, tenant_id, payroll_run_id, employee_id, gross, deductions, net,",
+            "       country_deductions, line_items, negative_net_pay_flag, created_at",
+            "FROM payslips",
+            "WHERE tenant_id = $1 AND payroll_run_id = $2",
+            "  AND employee_id = ANY($3)                       -- $3 = {1042}, from DecisionFromContext(ctx).EffectiveScope",
+            "ORDER BY employee_id;"
+          ]) },
+          { label: "Response", where: "go-common response.JSON envelope; PayslipResponse model.go:463-474; decimals are bare JSON numbers", status: "example", kind: "http", text: L([
+            "HTTP/1.1 200 OK",
+            "Content-Type: application/json",
+            "",
+            "{\"data\":[{\"id\":88213,\"tenant_id\":7,\"payroll_run_id\":2607,\"employee_id\":1042,\"gross\":142800,\"deductions\":[{\"name\":\"Provident Fund\",\"amount\":1800},{\"name\":\"Income Tax\",\"amount\":9450}],\"net\":131550,\"country_deductions\":[{\"name\":\"Provident Fund\",\"amount\":1800}],\"line_items\":[{\"key\":\"basic\",\"label\":\"Basic\",\"amount\":85000,\"group\":\"earning\",\"source\":\"salary_structure\"},{\"key\":\"pf_employee\",\"label\":\"Provident Fund\",\"amount\":1800,\"group\":\"statutory_deduction\",\"source\":\"statutory\"}],\"negative_net_pay_flag\":false}]}",
+            "",
+            "shape exact (field names, envelope, number types); ids, amounts, labels and source values are example data"
+          ]) }
+        ];
+      }
+    },
+    {
+      stage: "STAGE 8/8 - AUDIT, THEN RESPOND", title: "Record the decision, respond to the client",
+      nodes: ["client"], arrows: ["client-res"], outcome: true,
+      body: function (s) { return "Today the decision leaves exactly one trace: a structured log line. The business audit table records mutations only, so this GET writes no row. The record the Handbook calls an audit receipt exists as a design fixture and as a target contract - not yet as code."; },
+      blocks: function (s) {
+        var ok = s.outcome === "allow";
+        return [
+          { label: "The only record of the decision: one slog line", where: ok ? "runtime.go:161-165" : "runtime.go:137-142", status: "implemented", kind: "log", text: ok
+            ? "level=INFO msg=\"authorization allowed\" operation_id=hrms.payslip.employee.list decision_id=" + s.decisionId + " policy_generation=42 bundle_digest=" + BUNDLE_DIGEST
+            : "level=WARN msg=\"authorization denied\" operation_id=hrms.payslip.employee.list decision_id=" + s.decisionId + " reason=permission_denied policy_generation=42 bundle_digest=" + BUNDLE_DIGEST },
+          { label: "Business audit: mutations only", where: "middleware/audit.go:19, 34", status: "implemented", kind: "sql", text: L([
+            "-- this request is a GET: the audit middleware returns early and writes nothing.",
+            "-- for POST / PUT / DELETE the same middleware runs:",
+            "INSERT INTO hrms_audit_logs (tenant_id, user_id, action, resource_path) VALUES ($1, $2, $3, $4)",
+            "-- action = the HTTP method"
+          ]) },
+          { label: "Decision record, target shape", where: "emit from runtime.go:136-165, next to the log line; storage is a separate decision", status: "proposed", kind: "json", text: L([
+            "{",
+            "  \"schema_version\": \"agentlabs.auth.auth-agent-decision.v1\",",
+            "  \"decision_id\": \"" + s.decisionId + "\",",
+            "  \"occurred_at\": \"2026-09-03T10:15:03Z\",",
+            "  \"application\": \"hrms\",",
+            "  \"operation_id\": \"hrms.payslip.employee.list\",",
+            "  \"permission\": \"hrms:payroll:payslip:employee::list\",",
+            "  \"resource_audience\": \"https://hrms-api.agentlabs.dev\",",
+            "  \"tenant_application_id\": \"3301\",",
+            "  \"subject_id\": \"pairwise-subject-agenthrms-4c1e\",",
+            "  \"membership_id\": \"membership-01K0F4R2R4NVTRPMQ1ZK7J8HA7\",",
+            "  \"token_id\": \"token-Dpq63ibKSFYbopBnIF7XhQ\",",
+            "  \"trusted_context\": { \"employee_id\": \"" + s.employeeId + "\" },",
+            "  \"outcome\": \"" + s.outcome + "\",",
+            "  \"reason\": \"" + (ok ? "allowed" : "permission_denied") + "\",",
+            "  \"policy_generation\": 42,",
+            "  \"bundle_id\": \"" + BUNDLE_ID + "\",",
+            "  \"bundle_digest\": \"" + BUNDLE_DIGEST + "\",",
+            "  \"matched_sources\": " + (ok ? "[\"role-permission:5002:7311\"]" : "[]") + ",",
+            "  \"effective_scope\": " + (ok ? "{ \"any_of\": [ { \"employee_ids\": [\"1042\"] } ] }" : "null"),
+            "}"
+          ]) },
+          { label: "How this differs from the phase0 fixture", where: "agentlabs-auth contracts/phase0/fixtures/auth-agent-decision.v1.valid.json", status: "designed", kind: "note", text: "The phase0 record has the same intent but predates the implemented Decision: it uses matched_assignment_ids (here: matched_sources, the field the code has), a reason value permission_matched that is not in the implemented enum (here: the enum from model.go:161-172), and a freshness object the runtime does not compute. It lacks permission, membership_id, token_id, trusted_context, policy_generation and effective_scope - the fields an audit reader needs to reproduce the decision. Nothing emits either version today; the target above keeps the phase0 schema name and aligns every field with a value the code already holds." },
+          { label: "Final response to the client", status: "implemented", kind: "note", text: ok ? "The 200 body from step 8, unchanged. The decision id is not echoed to the client; correlating a response to its decision is done through the log line." : "The 403 body from step 8, unchanged. Nothing in it says which check failed; that is deliberate, and the reason lives only in the log line above." }
+        ];
+      }
+    }
+  ];
+
+  var scenarioKey = "allow";
+  var stepIndex = 0;
+  var playTimer = null;
+  var NODE_IDS = ["client", "verify", "bind", "agent", "handler", "authdb", "hrmsdb", "auth"];
+  var ARROW_IDS = ["client-req", "client-res", "verify-jwks", "bind-authdb", "authdb-ret", "agent-token", "agent-bundle", "bundle-ret", "handler-db", "db-ret"];
+
+  var dotsEl = document.getElementById("dots");
+  STEPS.forEach(function (_, i) {
+    var b = document.createElement("button");
+    b.className = "dot";
+    b.setAttribute("aria-label", "Go to step " + (i + 1));
+    b.addEventListener("click", function () { stop(); stepIndex = i; render(); });
+    dotsEl.appendChild(b);
+  });
+  document.getElementById("stepTotal").textContent = STEPS.length;
+
+  function setActive(kind, ids) {
+    var list = kind === "node" ? NODE_IDS : ARROW_IDS;
+    list.forEach(function (id) {
+      var el = kind === "node" ? document.querySelector('.node[data-node="' + id + '"]') : document.getElementById("arr-" + id);
+      if (!el) return;
+      el.classList.remove("active", "decision-allow", "decision-deny");
+      if (kind === "arrow") {
+        var label = el.nextElementSibling;
+        if (label && label.classList.contains("arrow-label")) label.classList.remove("active");
+      }
+    });
+    ids.forEach(function (id) {
+      var el = kind === "node" ? document.querySelector('.node[data-node="' + id + '"]') : document.getElementById("arr-" + id);
+      if (!el) return;
+      el.classList.add("active");
+      if (kind === "arrow") {
+        var label = el.nextElementSibling;
+        if (label && label.classList.contains("arrow-label")) label.classList.add("active");
+      }
+    });
+  }
+
+  function render() {
+    var s = SCENARIOS[scenarioKey];
+    var step = STEPS[stepIndex];
+    var ok = s.outcome === "allow";
+
+    document.querySelectorAll(".scenario-btn").forEach(function (b) {
+      var on = b.dataset.scenario === scenarioKey;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+
+    var nodes = step.nodes.slice();
+    var arrows = step.arrows.slice();
+    if (step.enforce) {
+      if (ok) { nodes = ["handler", "hrmsdb"]; arrows = ["handler-db", "db-ret"]; }
+      else { nodes = ["agent"]; arrows = ["client-res"]; }
+    }
+    setActive("node", nodes);
+    setActive("arrow", arrows);
+    if (step.decision || step.outcome) {
+      var agent = document.querySelector('.node[data-node="agent"]');
+      if (agent) agent.classList.add(ok ? "decision-allow" : "decision-deny");
+      if (step.outcome) {
+        var client = document.querySelector('.node[data-node="client"]');
+        if (client) client.classList.add(ok ? "decision-allow" : "decision-deny");
+      }
+    }
+
+    document.getElementById("stepNum").textContent = stepIndex + 1;
+    document.getElementById("stageTag").textContent = step.stage;
+    document.getElementById("stepTitle").textContent = step.title;
+    document.getElementById("stepBody").textContent = step.body(s);
+
+    var outcomeSlot = document.getElementById("outcomeSlot");
+    outcomeSlot.innerHTML = "";
+    if (step.decision || step.outcome) {
+      var badge = document.createElement("div");
+      badge.className = "outcome-badge " + s.outcome;
+      badge.textContent = ok ? "ALLOW" : "DENY";
+      outcomeSlot.appendChild(badge);
+    }
+
+    var blocksEl = document.getElementById("blocks");
+    blocksEl.innerHTML = "";
+    step.blocks(s).forEach(function (b) {
+      var wrap = document.createElement("div");
+      wrap.className = "block " + b.status;
+      var head = document.createElement("div");
+      head.className = "block-head";
+      var label = document.createElement("span");
+      label.className = "block-label";
+      label.textContent = b.label;
+      head.appendChild(label);
+      var chip = document.createElement("span");
+      chip.className = "chip " + b.status;
+      chip.textContent = b.status === "designed" ? "designed only" : b.status === "example" ? "example data" : b.status;
+      head.appendChild(chip);
+      if (b.where) {
+        var where = document.createElement("span");
+        where.className = "block-where";
+        where.textContent = b.where;
+        head.appendChild(where);
+      }
+      wrap.appendChild(head);
+      if (b.kind === "note") {
+        var p = document.createElement("p");
+        p.textContent = b.text;
+        wrap.appendChild(p);
+      } else {
+        var pre = document.createElement("pre");
+        pre.className = b.kind;
+        pre.textContent = b.text;
+        wrap.appendChild(pre);
+      }
+      blocksEl.appendChild(wrap);
+    });
+
+    ["stepTitle", "stepBody", "blocks"].forEach(function (id) {
+      var el = document.getElementById(id);
+      el.classList.remove("step-fade");
+      void el.offsetWidth;
+      el.classList.add("step-fade");
+    });
+
+    document.querySelectorAll(".dot").forEach(function (d, i) {
+      d.classList.toggle("active", i === stepIndex);
+      d.classList.toggle("done", i < stepIndex);
+    });
+    document.getElementById("prevBtn").disabled = stepIndex === 0;
+    document.getElementById("nextBtn").disabled = stepIndex === STEPS.length - 1;
+  }
+
+  function stop() {
+    if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    var playBtn = document.getElementById("playBtn");
+    playBtn.innerHTML = "&#9654; Play";
+    playBtn.classList.remove("is-playing");
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", function () { stop(); stepIndex = Math.max(0, stepIndex - 1); render(); });
+  document.getElementById("nextBtn").addEventListener("click", function () { stop(); stepIndex = Math.min(STEPS.length - 1, stepIndex + 1); render(); });
+  document.querySelectorAll(".scenario-btn").forEach(function (b) {
+    b.addEventListener("click", function () { stop(); scenarioKey = b.dataset.scenario; render(); });
+  });
+  document.getElementById("playBtn").addEventListener("click", function () {
+    if (playTimer) { stop(); return; }
+    if (stepIndex === STEPS.length - 1) stepIndex = 0;
+    var playBtn = document.getElementById("playBtn");
+    playBtn.innerHTML = "&#9208; Pause";
+    playBtn.classList.add("is-playing");
+    playTimer = setInterval(function () {
+      stepIndex += 1;
+      if (stepIndex >= STEPS.length) { stop(); stepIndex = STEPS.length - 1; render(); return; }
+      render();
+    }, 4200);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight") { stop(); stepIndex = Math.min(STEPS.length - 1, stepIndex + 1); render(); }
+    if (e.key === "ArrowLeft") { stop(); stepIndex = Math.max(0, stepIndex - 1); render(); }
+  });
+
+  render();
+})();
+</script>
+  </body>
+</html>

@@ -8,6 +8,7 @@ export default defineConfig({
         playground: resolve(__dirname, 'index.html'),
         concept: resolve(__dirname, 'concept.html'),
         projectsExplorer: resolve(__dirname, 'projects-explorer.html'),
+        enforcementTrace: resolve(__dirname, 'enforcement-trace.html'),
       },
     },
   },
