@@ -7,6 +7,7 @@ export default defineConfig({
       input: {
         playground: resolve(__dirname, 'index.html'),
         concept: resolve(__dirname, 'concept.html'),
+        projectsExplorer: resolve(__dirname, 'projects-explorer.html'),
       },
     },
   },

@@ -10,7 +10,7 @@ The lab separates:
 
 An authorization decision is the intersection of all three. The simulation is deliberately in-memory and is not an authorization implementation.
 
-The bench contains a complete concept guide, worked HRMS and projects/repositories examples, an Auth/Authz responsibility map, and an exportable design-question board. The explorer starts with familiar user intentions, walks each request through five explained stages, and offers a “change one thing” comparison. A collapsed manual workbench remains available afterward. See [the working design](docs/design.md).
+The bench contains a complete concept guide, worked HRMS and projects/repositories examples, an Auth/Authz responsibility map, and an exportable design-question board. Its HRMS and Projects/Repositories guided explorers start with familiar stories and walk each request through five explained stages. See [the working design](docs/design.md).
 
 ```bash
 npm install

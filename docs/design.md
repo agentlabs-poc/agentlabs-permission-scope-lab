@@ -82,7 +82,7 @@ Scope values are typed descriptors. They are not arbitrary user-supplied SQL exp
 
 ## The bench as a decision tool
 
-Each worked request combines a principal, requested permission, resource target, and expected decision. The default guided mode explains the request story, permission anatomy, role/direct assignment, scope origin, trusted target context, containment, enforcement predicate, and audit receipt in sequence. A secondary manual workbench allows experimentation after the concepts are visible. The evaluator helps confirm least privilege and exposes tenant escape, owner substitution, naked mutations, and un-delegated agents.
+Each worked request combines a principal, requested permission, resource target, and expected decision. The guided explorers explain the request story, permission anatomy, role/direct assignment, scope origin, trusted target context, containment, enforcement predicate, and audit receipt in sequence. Separate HRMS and Projects/Repositories paths demonstrate individual and group principals, dynamic and concrete scopes, exact resources, subtrees, and tenant isolation.
 
 The design board deliberately distinguishes `OPEN`, `PROPOSED`, and `AGREED`. Its JSON export captures current grants, explored scenarios, and question statuses. Export is a discussion artifact, not a production policy format.
 

@@ -34,11 +34,12 @@ const documentKey: DocumentKey = requestedDocument in documents ? requestedDocum
 const currentDocument = documents[documentKey]
 
 const documentLink = (key: DocumentKey) => `/concept.html?doc=${key}`
+const explorerLink = documentKey === 'projects' ? '/projects-explorer.html' : '/'
 
 app.innerHTML = `
   <header class="topbar concept-topbar">
     <a class="brand" href="${documentLink('concept')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg><span>Authorization Bench</span><small>Explain · inspect · decide</small></a>
-    <nav class="page-tabs"><a class="${documentKey === 'concept' ? 'active' : ''}" href="${documentLink('concept')}">Concept</a><a class="${documentKey === 'hrms' ? 'active' : ''}" href="${documentLink('hrms')}">HRMS</a><a class="${documentKey === 'projects' ? 'active' : ''}" href="${documentLink('projects')}">Projects & repos</a><a href="/">Request explorer</a></nav>
+    <nav class="page-tabs"><a class="${documentKey === 'concept' ? 'active' : ''}" href="${documentLink('concept')}">Concept</a><a class="${documentKey === 'hrms' ? 'active' : ''}" href="${documentLink('hrms')}">HRMS</a><a class="${documentKey === 'projects' ? 'active' : ''}" href="${documentLink('projects')}">Projects & repos</a><a href="${explorerLink}">Guided explorer</a></nav>
     <div class="canonical"><span>Source</span><code>${currentDocument.filename}</code></div>
   </header>
   <main class="concept-main">
@@ -47,7 +48,7 @@ app.innerHTML = `
       <h2>${currentDocument.title}</h2>
       <p>${currentDocument.description}</p>
       <p class="source-note">Rendered directly from <code>${currentDocument.filename}</code>.</p>
-      <a href="/">Open request explorer →</a>
+      <a href="${explorerLink}">Open guided explorer →</a>
     </aside>
     <article class="markdown-body">${marked.parse(currentDocument.markdown)}</article>
   </main>
