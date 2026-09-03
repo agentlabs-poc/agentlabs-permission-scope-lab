@@ -41,7 +41,105 @@ read       → operation
 
 The permission string should stay stable across users. It does **not** say which employee, department, company, or tenant the caller can reach.
 
-## 2. A grant is more than a permission
+## 2. Resource depth
+
+Resources can have semantic depth. The canonical grammar therefore permits zero or more subresource segments:
+
+```text
+<application>:<domain>:<resource>[:<subresource>...]::<verb>
+```
+
+For example:
+
+```text
+hrms:payroll::read
+hrms:payroll:ledger::read
+hrms:payroll:ledger:entry::read
+hrms:payroll:ledger:entry:attachment::read
+```
+
+Depth should express a real resource relationship. A name such as `salary_earning` is one resource segment, while `ledger:entry` describes an entry below a ledger.
+
+Three kinds of depth must remain separate:
+
+### Permission resource-type depth
+
+This names the class of operation:
+
+```text
+hrms:payroll:ledger:entry::read
+```
+
+### Target resource-instance depth
+
+This identifies the particular object being accessed:
+
+```text
+tenant/TENANT-001/payroll-ledger/PAY-000005/entry/ENTRY-017
+```
+
+Resource instance IDs never belong inside the permission string.
+
+### Assignment-scope depth
+
+This describes the reach of the grant:
+
+```text
+tenant:TENANT-001
+└── legal_entity:INDIA-PVT-LTD
+    └── department:ENG
+        └── employee:EMP-005
+```
+
+Scope is not necessarily one rigid tree. A payroll target can simultaneously carry tenant, legal-entity, department, employee-owner, and other trusted attributes. Authorization checks those dimensions against the assigned scope.
+
+A target presented to authorization might therefore be:
+
+```json
+{
+  "resource_type": "payroll:ledger:entry",
+  "resource_id": "ENTRY-017",
+  "tenant_id": "TENANT-001",
+  "legal_entity_id": "INDIA-PVT-LTD",
+  "department_id": "ENG",
+  "ledger_owner_id": "EMP-005"
+}
+```
+
+The working safety proposal is that parent capabilities do **not** automatically grant child capabilities:
+
+```text
+hrms:payroll:ledger::read
+```
+
+does not implicitly grant:
+
+```text
+hrms:payroll:ledger:entry::read
+```
+
+Any inheritance must be declared explicitly by a role, operation mapping, or wildcard. A proposed one-segment wildcard is:
+
+```text
+hrms:payroll:ledger:*::read
+```
+
+It would match:
+
+```text
+hrms:payroll:ledger:entry::read
+hrms:payroll:ledger:summary::read
+```
+
+but would not match the deeper:
+
+```text
+hrms:payroll:ledger:entry:attachment::read
+```
+
+This avoids a shallow wildcard silently gaining authority over deeper resource types introduced later. Parent inheritance and wildcard depth remain design decisions until deliberately agreed.
+
+## 3. A grant is more than a permission
 
 Assigning only this string is incomplete for scoped business data:
 
@@ -82,7 +180,7 @@ A payroll administrator can receive the same capability at a wider scope:
 
 The capability is identical; the reach is different.
 
-## 3. Scope vocabulary
+## 4. Scope vocabulary
 
 The first payroll scenario uses these scope types:
 
@@ -104,7 +202,7 @@ authenticated user:vinay
 employee EMP-005
 ```
 
-## 4. Roles and assignments
+## 5. Roles and assignments
 
 A role groups capabilities:
 
@@ -130,7 +228,7 @@ This separation lets the role remain reusable. It also makes privilege review cl
 
 A direct permission grant should use the same scoped-assignment shape. It must not bypass scope simply because it was assigned directly.
 
-## 5. Request consumption
+## 6. Request consumption
 
 Suppose Vinay calls:
 
@@ -167,7 +265,7 @@ WHERE tenant_id = :authenticated_tenant_id
 
 The request cannot broaden this predicate. Supplying another `employee_id` in a URL, body, header, CLI flag, or UI state does not change Vinay's reach.
 
-## 6. Auth and authorization-agent boundary
+## 7. Auth and authorization-agent boundary
 
 The working boundary is:
 
@@ -207,7 +305,7 @@ The API is an enforcement point. It:
 
 The UI and CLI do not create authority. They call the same protected APIs.
 
-## 7. Example decisions
+## 8. Example decisions
 
 | Principal | Capability | Assigned scope | Target | Decision |
 |---|---|---|---|---|
@@ -218,7 +316,7 @@ The UI and CLI do not create authority. They call the same protected APIs.
 | Vinay | ledger post | employee self | Vinay's ledger | Deny: capability absent |
 | PayBot | ledger read | no delegation | Vinay's ledger | Deny: no complete grant |
 
-## 8. Delegated jobs and agents
+## 9. Delegated jobs and agents
 
 Device login authenticates the human on whose behalf a job runs. Authentication alone must not give the job broader authority.
 
@@ -242,7 +340,7 @@ runner authority = user authority ∩ delegated authority
 
 This is deliberately still a question in the lab. The game must help us test and finalize it before implementation.
 
-## 9. Audit receipt
+## 10. Audit receipt
 
 A useful decision record contains the whole explanation:
 
@@ -262,7 +360,7 @@ A useful decision record contains the whole explanation:
 
 This record explains which assignment and policy version produced the decision. It must avoid copying sensitive payroll values unnecessarily.
 
-## 10. Failure rules
+## 11. Failure rules
 
 The working rules are:
 
@@ -277,7 +375,7 @@ The working rules are:
 9. Every decision identifies the assignment and policy version used.
 10. Broad wildcard grants require deliberate treatment because future operations may otherwise become reachable automatically.
 
-## 11. What the game is for
+## 12. What the game is for
 
 The game is not merely a visual explanation and is not a production authorization engine. It is an executable design instrument:
 
@@ -292,7 +390,7 @@ The game is not merely a visual explanation and is not a production authorizatio
 
 Payroll is the first scenario pack. Later packs can cover employee documents, leave, expenses, recruiting, AgentForge jobs, or other products while keeping the same authorization equation.
 
-## 12. Questions still open
+## 13. Questions still open
 
 The initial question board contains:
 
@@ -306,5 +404,7 @@ The initial question board contains:
 8. What belongs in access tokens versus server-side resolution?
 9. How are changed assignments invalidated?
 10. What is the canonical audit receipt?
+11. Do parent permissions imply child-resource permissions?
+12. Should wildcards match exactly one resource segment or support recursive depth?
 
 These are not implementation details. Their answers determine the final Auth/Authz shape, so they remain visible until deliberately agreed.

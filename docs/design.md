@@ -11,7 +11,7 @@ authority = principal × capability × assigned scope × trusted target context
 The permission grammar is:
 
 ```text
-<namespaced-noun>::<verb>
+<application>:<domain>:<resource>[:<subresource>...]::<verb>
 ```
 
 For example:
@@ -21,6 +21,8 @@ hrms:payroll:ledger::read
 ```
 
 The string identifies a stable capability. It does not contain the user, tenant, employee, department, validity window, or target record.
+
+Resource depth, target-instance depth, and assignment-scope depth are separate. Resource instance IDs never enter a permission string. The current safety proposal gives parent permissions no implicit authority over child resources and makes wildcard depth explicit; this remains open until agreed through the game.
 
 An effective assignment is therefore:
 
