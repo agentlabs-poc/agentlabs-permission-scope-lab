@@ -5,8 +5,15 @@ The Authorization Explanation Bench is an executable design conversation. Markdo
 ## Working equation
 
 ```text
-authority = principal × capability × assigned scope × trusted target context
+authority = principal ∩ permission ∩ scope ∩ target
 ```
+
+- **principal** — who is asking: a user, a group/team, or a service/agent.
+- **permission** — the stable `<namespaced-noun>::<verb>` capability string.
+- **scope** — the reach a grant covers, assigned at grant time (not inside the permission string).
+- **target** — the specific resource instance, plus its trusted attributes, resolved server-side—never asserted by the caller.
+
+Each part must intersect; an absent or unresolved part fails closed.
 
 The permission grammar is:
 

@@ -7,10 +7,17 @@ The Authorization Explanation Bench exists to answer a deceptively simple questi
 The short answer is that a permission string is only a **capability name**. It is not a complete authority.
 
 ```text
-Authority = Principal × Capability × Assigned Scope × Trusted Target Context
+Authority = Principal ∩ Permission ∩ Scope ∩ Target
 ```
 
-All four parts must intersect. If any part is absent or cannot be resolved, access fails closed.
+All four parts must intersect: the *assigned* scope, not any scope; the *trusted* target, not a caller-asserted one. If any part is absent or cannot be resolved, access fails closed.
+
+- **Principal** — who is asking: a user, a group/team, or a service/agent.
+- **Permission** — what capability is being invoked: the stable `<namespaced-noun>::<verb>` string.
+- **Scope** — how far the principal's grant reaches: a typed descriptor (`employee_self`, `department:<id>`, `tenant:<id>`, `resource_exact`, `resource_subtree`, …) attached at assignment time, not inside the permission string.
+- **Target** — the specific resource instance being requested, plus its trusted attributes (tenant, owner, department/project)—resolved server-side from the id, never asserted by the caller.
+
+The rest of this document works through each of the four in turn, then closes with how the whole vocabulary maps onto industry terms (§13).
 
 ## 1. The permission string
 
@@ -236,7 +243,7 @@ When `REPO-API` is requested, AgentForge supplies trusted target context:
 Authorization then checks:
 
 ```text
-Capability: agentforge:repository::read             ✓
+Permission: agentforge:repository::read              ✓
 Containment: PROJECT-A contains REPO-API             ✓
 Tenant: target and principal are in TENANT-001       ✓
 Decision                                              ALLOW
@@ -474,7 +481,7 @@ The UI and CLI do not create authority. They call the same protected APIs.
 
 ## 8. Example decisions
 
-| Principal | Capability | Assigned scope | Target | Decision |
+| Principal | Permission | Scope | Target | Decision |
 |---|---|---|---|---|
 | Vinay | ledger read | employee self | Vinay's ledger | Allow |
 | Vinay | ledger read | employee self | Arjun's ledger | Deny |
@@ -572,7 +579,7 @@ Nothing in this vocabulary is invented in isolation. Every term maps onto an est
 | Scope | Not in base RBAC; closest is ABAC's attribute constraints | The reach a grant covers over target instances |
 | Group / team | Group | A named set of principals; an assignment made to a group is inherited by every member |
 
-A role is only ever the second row plus the third: a name plus a set of permissions. Nothing about scope, target, or principal belongs on it—that is what the assignment supplies. This is why the same role can be assigned twice with two different reaches, to an individual principal or to a group principal, without being redefined either time.
+A role is only ever the second row plus the third—the same split §5 already draws between what a role says and what its assignment says. The detail worth adding here: the assignment's principal can be an individual or a group, and the role is redefined for neither. "Project Viewer" assigned to Maya's team at one scope is the same role as one assigned to a single user at another.
 
 ### Where real platforms diverge
 
