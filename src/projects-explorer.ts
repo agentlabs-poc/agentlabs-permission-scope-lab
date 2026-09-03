@@ -85,6 +85,73 @@ function shield() {
   return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>'
 }
 
+function wireJsonBlock(title: string, payload: unknown) {
+  return `<details class="wire-json"><summary>View wire JSON · ${title}</summary><pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre></details>`
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]!)
+}
+
+// What the code-hosting API receives from the caller. The caller can name a
+// target repository, but cannot assert team membership, scope, or tenant.
+function buildClientRequest(scenario: ProjectScenario) {
+  const [resource, verb] = scenario.permission.split('::')
+  return {
+    actor_token: scenario.principal.id,
+    operation: `${verb.toUpperCase()} /${resource.replace(/:/g, '/')}/${scenario.target.id}`,
+    requested_permission: scenario.permission,
+    requested_target_id: scenario.target.id,
+  }
+}
+
+// What Auth returns for this principal: team membership and the grant that
+// membership carries. No membership, no inherited grant.
+function buildGrantSet(scenario: ProjectScenario, membershipMatches: boolean) {
+  return {
+    principal_id: scenario.principal.id,
+    team_memberships: membershipMatches ? [scenario.membership.team] : [],
+    grants: membershipMatches ? [{
+      via_group: scenario.membership.team,
+      role: scenario.role.name,
+      permissions: scenario.role.permissions,
+      scope: { type: scenario.scope.type, resource_type: scenario.scope.resourceType, resource_id: scenario.scope.resourceId },
+      assigned_by: scenario.role.assignedBy,
+    }] : [],
+  }
+}
+
+// What the code-hosting Authorization Agent hands to the decision step, after
+// resolving trusted target attributes — never taken from the caller.
+function buildResolvedRequest(scenario: ProjectScenario) {
+  return {
+    principal: { id: scenario.principal.id, tenant_id: scenario.principal.tenant },
+    permission: scenario.permission,
+    resolved_context: { via_group: scenario.membership.team },
+    target: {
+      type: scenario.target.type,
+      id: scenario.target.id,
+      tenant_id: scenario.target.tenant,
+      project_id: scenario.target.project,
+      organization_id: scenario.target.organization,
+    },
+  }
+}
+
+function buildDecisionResult(scenario: ProjectScenario, allowed: boolean, membershipMatches: boolean, capabilityMatches: boolean, tenantMatches: boolean, containmentMatches: boolean, predicate: string) {
+  return {
+    decision: allowed ? 'allow' : 'deny',
+    checks: {
+      membership: membershipMatches ? 'pass' : 'fail',
+      capability: capabilityMatches ? 'pass' : 'fail',
+      tenant_boundary: tenantMatches ? 'pass' : 'fail',
+      scope_reach: containmentMatches ? 'pass' : 'fail',
+    },
+    enforced_predicate: allowed ? predicate : 'FALSE  /* no repository rows */',
+    audit: { principal: scenario.principal.id, via_group: scenario.membership.team, permission: scenario.permission, target: scenario.target.id, decision: allowed ? 'allow' : 'deny' },
+  }
+}
+
 function scopeContains(scenario: ProjectScenario) {
   if (scenario.scope.type === 'resource_exact') return scenario.target.type === scenario.scope.resourceType && scenario.target.id === scenario.scope.resourceId
   return scenario.scope.resourceType === 'codehost:project' && scenario.target.project === scenario.scope.resourceId
@@ -110,11 +177,11 @@ function render() {
     ? `tenant_id = ${scenario.principal.tenant}\nAND repository_id = ${scenario.scope.resourceId}`
     : `tenant_id = ${scenario.principal.tenant}\nAND project_id = ${scenario.scope.resourceId}`
   const steps = [
-    { eyebrow: 'REQUEST STORY', title: 'Start with the person and their request', body: `<p>${scenario.brief}</p><div class="guide-facts"><span><small>PERSON</small><b>${scenario.principal.name}</b><code>${scenario.principal.id}</code></span><span><small>OPERATION</small><b>Read repository</b><code>${scenario.permission}</code></span><span><small>TARGET</small><b>${scenario.target.name}</b><code>${scenario.target.id}</code></span></div><aside><b>Concept:</b> The user is the authenticated principal. The repository is the target resource. Their relationship is not assumed.</aside>` },
+    { eyebrow: 'REQUEST STORY', title: 'Start with the person and their request', body: `<p>${scenario.brief}</p><div class="guide-facts"><span><small>PERSON</small><b>${scenario.principal.name}</b><code>${scenario.principal.id}</code></span><span><small>OPERATION</small><b>Read repository</b><code>${scenario.permission}</code></span><span><small>TARGET</small><b>${scenario.target.name}</b><code>${scenario.target.id}</code></span></div><aside><b>Concept:</b> The user is the authenticated principal. The repository is the target resource. Their relationship is not assumed.</aside>${wireJsonBlock('client request → code-hosting API', buildClientRequest(scenario))}` },
     { eyebrow: 'GROUP PRINCIPAL', title: 'Expand team membership before evaluating the role', body: `<div class="membership-flow"><span><small>AUTHENTICATED USER</small><b>${scenario.principal.id}</b></span><i>member of</i><span><small>GROUP PRINCIPAL</small><b>${scenario.membership.team}</b></span><i>assigned</i><span><small>ROLE</small><b>${scenario.role.name}</b></span></div><dl class="guide-dl"><dt>Team members</dt><dd>${scenario.membership.members.join(', ')}</dd><dt>Membership match</dt><dd>${membershipMatches ? 'Yes' : 'No'}</dd><dt>Assignment created by</dt><dd>${scenario.role.assignedBy}</dd></dl><aside><b>Concept:</b> A Team is a group principal, not a resource scope. Team membership lets a person inherit assignments held by that group.</aside>` },
-    { eyebrow: 'CAPABILITY & ASSIGNMENT', title: 'Separate the role capability from its reach', body: `<div class="permission-anatomy"><span><small>APPLICATION</small>${resourceParts[0]}</span><i>:</i><span><small>RESOURCE</small>${resourceParts.slice(1).join(':')}</span><strong>::</strong><span class="verb"><small>VERB</small>${permissionParts[1]}</span></div><div class="assignment-record"><div><small>GROUP</small><code>${scenario.membership.team}</code></div><b>＋</b><div><small>ROLE CAPABILITY</small><code>${scenario.permission}</code></div><b>＋</b><div><small>ASSIGNED SCOPE</small><code>${scenario.scope.type}:${scenario.scope.resourceId}</code></div></div><aside><b>Concept:</b> The role explicitly provides repository-read capability. The assignment scope says where that capability reaches; project-read alone would not invent repository-read.</aside>` },
-    { eyebrow: 'TARGET & CONTAINMENT', title: 'Ask the application whether scope contains the target', body: `<div class="context-compare"><div><small>ASSIGNMENT SCOPE</small><h3>${scenario.scope.type}</h3><dl><dt>Resource type</dt><dd>${scenario.scope.resourceType}</dd><dt>Resource ID</dt><dd>${scenario.scope.resourceId}</dd></dl></div><div><small>TRUSTED TARGET</small><h3>${scenario.target.id}</h3><dl><dt>Tenant</dt><dd>${scenario.target.tenant}</dd><dt>Project</dt><dd>${scenario.target.project}</dd><dt>Organization</dt><dd>${scenario.target.organization}</dd></dl></div></div><div class="containment-checks"><span class="${tenantMatches ? 'yes' : 'no'}">${tenantMatches ? '✓' : '×'} Tenant ${tenantMatches ? 'matches' : 'does not match'}</span><span class="${containmentMatches ? 'yes' : 'no'}">${containmentMatches ? '✓' : '×'} Scope ${containmentMatches ? 'contains' : 'does not contain'} repository</span></div><aside><b>Concept:</b> The code-hosting application owns the Project → Repository containment graph and supplies trusted target attributes. Auth does not infer it from names or URLs.</aside>` },
-    { eyebrow: 'DECISION & ENFORCEMENT', title: allowed ? 'Access granted' : 'Access denied', body: `<div class="guided-result ${allowed ? 'allowed' : 'denied'}"><strong>${allowed ? 'ALLOW' : 'DENY'}</strong><p>${allowed ? 'Group membership, capability, tenant, and resource containment all match.' : !membershipMatches ? 'The user is not a member of the assigned team.' : !capabilityMatches ? 'The role does not contain the required capability.' : !tenantMatches ? 'The target belongs to another tenant.' : 'The assigned resource scope does not contain this repository.'}</p></div><div class="guided-output"><div><small>${allowed ? 'ENFORCED PREDICATE' : 'FAIL-CLOSED PREDICATE'}</small><pre>${allowed ? predicate : 'FALSE  /* no repository rows */'}</pre></div><div><small>AUDIT RECEIPT</small><code>principal=${scenario.principal.id}\nvia_group=${scenario.membership.team}\npermission=${scenario.permission}\ntarget=${scenario.target.id}\ndecision=${allowed ? 'allow' : 'deny'}</code></div></div><aside><b>Concept:</b> Membership identifies who receives the assignment; scope controls which resources it reaches. Both must be true at the same time.</aside>` },
+    { eyebrow: 'CAPABILITY & ASSIGNMENT', title: 'Separate the role capability from its reach', body: `<div class="permission-anatomy"><span><small>APPLICATION</small>${resourceParts[0]}</span><i>:</i><span><small>RESOURCE</small>${resourceParts.slice(1).join(':')}</span><strong>::</strong><span class="verb"><small>VERB</small>${permissionParts[1]}</span></div><div class="assignment-record"><div><small>GROUP</small><code>${scenario.membership.team}</code></div><b>＋</b><div><small>ROLE CAPABILITY</small><code>${scenario.permission}</code></div><b>＋</b><div><small>ASSIGNED SCOPE</small><code>${scenario.scope.type}:${scenario.scope.resourceId}</code></div></div><aside><b>Concept:</b> The role explicitly provides repository-read capability. The assignment scope says where that capability reaches; project-read alone would not invent repository-read.</aside>${wireJsonBlock('grant set · Auth → application', buildGrantSet(scenario, membershipMatches))}` },
+    { eyebrow: 'TARGET & CONTAINMENT', title: 'Ask the application whether scope contains the target', body: `<div class="context-compare"><div><small>ASSIGNMENT SCOPE</small><h3>${scenario.scope.type}</h3><dl><dt>Resource type</dt><dd>${scenario.scope.resourceType}</dd><dt>Resource ID</dt><dd>${scenario.scope.resourceId}</dd></dl></div><div><small>TRUSTED TARGET</small><h3>${scenario.target.id}</h3><dl><dt>Tenant</dt><dd>${scenario.target.tenant}</dd><dt>Project</dt><dd>${scenario.target.project}</dd><dt>Organization</dt><dd>${scenario.target.organization}</dd></dl></div></div><div class="containment-checks"><span class="${tenantMatches ? 'yes' : 'no'}">${tenantMatches ? '✓' : '×'} Tenant ${tenantMatches ? 'matches' : 'does not match'}</span><span class="${containmentMatches ? 'yes' : 'no'}">${containmentMatches ? '✓' : '×'} Scope ${containmentMatches ? 'contains' : 'does not contain'} repository</span></div><aside><b>Concept:</b> The code-hosting application owns the Project → Repository containment graph and supplies trusted target attributes. Auth does not infer it from names or URLs.</aside>${wireJsonBlock('resolved authorization request → PDP input', buildResolvedRequest(scenario))}` },
+    { eyebrow: 'DECISION & ENFORCEMENT', title: allowed ? 'Access granted' : 'Access denied', body: `<div class="guided-result ${allowed ? 'allowed' : 'denied'}"><strong>${allowed ? 'ALLOW' : 'DENY'}</strong><p>${allowed ? 'Group membership, capability, tenant, and resource containment all match.' : !membershipMatches ? 'The user is not a member of the assigned team.' : !capabilityMatches ? 'The role does not contain the required capability.' : !tenantMatches ? 'The target belongs to another tenant.' : 'The assigned resource scope does not contain this repository.'}</p></div><div class="guided-output"><div><small>${allowed ? 'ENFORCED PREDICATE' : 'FAIL-CLOSED PREDICATE'}</small><pre>${allowed ? predicate : 'FALSE  /* no repository rows */'}</pre></div><div><small>AUDIT RECEIPT</small><code>principal=${scenario.principal.id}\nvia_group=${scenario.membership.team}\npermission=${scenario.permission}\ntarget=${scenario.target.id}\ndecision=${allowed ? 'allow' : 'deny'}</code></div></div><aside><b>Concept:</b> Membership identifies who receives the assignment; scope controls which resources it reaches. Both must be true at the same time.</aside>${wireJsonBlock('decision result → API + audit sink', buildDecisionResult(scenario, allowed, membershipMatches, capabilityMatches, tenantMatches, containmentMatches, predicate))}` },
   ]
   if (stepIndex === steps.length - 1 && allowed === scenario.expected) explored.add(scenario.id)
   const step = steps[stepIndex]

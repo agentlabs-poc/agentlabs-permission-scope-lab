@@ -67,6 +67,59 @@ function predicateFor(scope: Scope, principal: Principal) {
   return `tenant_id = ${scope.targetId}`
 }
 
+function wireJsonBlock(title: string, payload: unknown) {
+  return `<details class="wire-json"><summary>View wire JSON · ${title}</summary><pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre></details>`
+}
+
+// What the Payroll API receives from the caller. Deliberately thin: the caller
+// may name a target, but cannot assert scope, tenant, or ownership.
+function buildClientRequest(principal: Principal, permission: Permission, target: Resource) {
+  const [resource, verb] = permission.split('::')
+  const path = resource.split(':').slice(2).join('/')
+  return {
+    actor_token: `session:user:${principal.id}`,
+    operation: `${verb.toUpperCase()} /payroll/${path}/${target.id}`,
+    requested_permission: permission,
+    requested_target_id: target.id,
+  }
+}
+
+// What Auth returns for this principal: the grant set an assignment produced.
+function buildGrantSet(principal: Principal, principalGrants: Grant[]) {
+  return {
+    principal_id: `user:${principal.id}`,
+    grants: principalGrants.map(g => ({ id: g.id, permission: g.permission, scope: g.scope, valid: g.valid, source: g.source })),
+  }
+}
+
+// What the HRMS Authorization Agent hands to the decision step, after crossing
+// the trust boundary: every field here is HRMS-resolved, never caller-supplied.
+function buildResolvedRequest(principal: Principal, permission: Permission, target: Resource) {
+  return {
+    principal: { id: `user:${principal.id}`, tenant_id: payrollScenario.tenantId },
+    permission,
+    resolved_context: principal.employeeId ? { employee_self: principal.employeeId } : {},
+    target: {
+      type: permission.split('::')[0],
+      id: target.id,
+      tenant_id: target.tenantId,
+      owner_employee_id: target.employeeId,
+      department_id: target.departmentId,
+    },
+  }
+}
+
+function buildDecisionResult(decision: NonNullable<typeof lastDecision>) {
+  return {
+    decision: decision.allowed ? 'allow' : 'deny',
+    matched_grant_id: decision.allowed && decision.grant ? decision.grant.id : null,
+    checks: Object.fromEntries(decision.checks.map(c => [c.label.toLowerCase().replace(/ /g, '_'), c.pass ? 'pass' : 'fail'])),
+    reason: decision.reason,
+    enforced_predicate: decision.predicate,
+    audit: { principal: `user:${selectedPrincipal}`, permission: selectedPermission, target: selectedResource, decision: decision.allowed ? 'allow' : 'deny' },
+  }
+}
+
 function evaluate(focusGuide = false) {
   const principal = principals.find(p => p.id === selectedPrincipal)!
   const resource = resources.find(r => r.id === selectedResource)!
@@ -156,7 +209,7 @@ function render() {
     {
       eyebrow: 'REQUEST STORY',
       title: 'Start with a human question',
-      body: `<p>${activeScenario.brief}</p><div class="guide-facts"><span><small>PRINCIPAL</small><b>${principal.name}</b><code>user:${principal.id}</code></span><span><small>OPERATION</small><b>${permissions.find(item => item.value === selectedPermission)?.label}</b><code>${selectedPermission}</code></span><span><small>TARGET</small><b>${target.employeeName}’s ledger</b><code>${target.id}</code></span></div><aside><b>Concept:</b> A request combines an authenticated principal, an operation, and a target. None of these alone determines authority.</aside>`,
+      body: `<p>${activeScenario.brief}</p><div class="guide-facts"><span><small>PRINCIPAL</small><b>${principal.name}</b><code>user:${principal.id}</code></span><span><small>OPERATION</small><b>${permissions.find(item => item.value === selectedPermission)?.label}</b><code>${selectedPermission}</code></span><span><small>TARGET</small><b>${target.employeeName}’s ledger</b><code>${target.id}</code></span></div><aside><b>Concept:</b> A request combines an authenticated principal, an operation, and a target. None of these alone determines authority.</aside>${wireJsonBlock('client request → Payroll API', buildClientRequest(principal, selectedPermission, target))}`,
     },
     {
       eyebrow: 'CAPABILITY',
@@ -166,17 +219,17 @@ function render() {
     {
       eyebrow: 'ASSIGNMENT & SCOPE',
       title: matchingGrant ? 'Find how the principal received reach' : 'Notice the missing authority',
-      body: matchingGrant ? `<div class="assignment-record"><div><small>PRINCIPAL</small><code>user:${principal.id}</code></div><b>＋</b><div><small>PERMISSION</small><code>${matchingGrant.permission}</code></div><b>＋</b><div><small>ASSIGNED SCOPE</small><code>${scopeLabel(matchingGrant.scope)}</code></div></div><dl class="guide-dl"><dt>Permission received through</dt><dd>${matchingGrant.source.type === 'role' ? `Role · ${matchingGrant.source.name}` : matchingGrant.source.name}</dd><dt>Scope type defined by</dt><dd>${matchingGrant.scope.type === 'tenant' ? 'Auth' : 'HRMS'}</dd><dt>Assignment created by</dt><dd>${matchingGrant.source.assignedBy}</dd><dt>Assignment stored by</dt><dd>Auth</dd><dt>Scope meaning resolved by</dt><dd>${matchingGrant.scope.type === 'tenant' ? 'Auth' : 'HRMS Authorization Agent'}</dd></dl><aside><b>Concept:</b> A role groups capabilities; its assignment gives those capabilities reach. Applications define scope vocabulary, applications create scopeable resources, and tenant administrators create the binding.</aside>` : `<div class="missing-assignment">No active assignment contains <code>${selectedPermission}</code> for <code>user:${principal.id}</code>.</div><p>A permission definition may exist globally without being granted to this principal. A missing assignment must fail closed.</p><aside><b>Concept:</b> Authentication is not authorization, and a permission catalogue is not a grant.</aside>`,
+      body: (matchingGrant ? `<div class="assignment-record"><div><small>PRINCIPAL</small><code>user:${principal.id}</code></div><b>＋</b><div><small>PERMISSION</small><code>${matchingGrant.permission}</code></div><b>＋</b><div><small>ASSIGNED SCOPE</small><code>${scopeLabel(matchingGrant.scope)}</code></div></div><dl class="guide-dl"><dt>Permission received through</dt><dd>${matchingGrant.source.type === 'role' ? `Role · ${matchingGrant.source.name}` : matchingGrant.source.name}</dd><dt>Scope type defined by</dt><dd>${matchingGrant.scope.type === 'tenant' ? 'Auth' : 'HRMS'}</dd><dt>Assignment created by</dt><dd>${matchingGrant.source.assignedBy}</dd><dt>Assignment stored by</dt><dd>Auth</dd><dt>Scope meaning resolved by</dt><dd>${matchingGrant.scope.type === 'tenant' ? 'Auth' : 'HRMS Authorization Agent'}</dd></dl><aside><b>Concept:</b> A role groups capabilities; its assignment gives those capabilities reach. Applications define scope vocabulary, applications create scopeable resources, and tenant administrators create the binding.</aside>` : `<div class="missing-assignment">No active assignment contains <code>${selectedPermission}</code> for <code>user:${principal.id}</code>.</div><p>A permission definition may exist globally without being granted to this principal. A missing assignment must fail closed.</p><aside><b>Concept:</b> Authentication is not authorization, and a permission catalogue is not a grant.</aside>`) + wireJsonBlock('grant set · Auth → HRMS', buildGrantSet(principal, grants.filter(g => g.principalId === selectedPrincipal))),
     },
     {
       eyebrow: 'TRUSTED TARGET CONTEXT',
       title: 'Compare assigned reach with the real resource',
-      body: `<div class="context-compare"><div><small>ASSIGNMENT REACH</small><h3>${matchingGrant ? scopeLabel(matchingGrant.scope) : 'No matching scope'}</h3><p>${matchingGrant?.scope.type === 'employee_self' ? `HRMS resolves user:${principal.id} → ${principal.employeeId}` : matchingGrant ? 'The assignment contains a concrete tenant or resource boundary.' : 'Nothing can contain the target without a matching grant.'}</p></div><div><small>TRUSTED TARGET</small><h3>${target.id}</h3><dl><dt>Tenant</dt><dd>${target.tenantId}</dd><dt>Owner</dt><dd>${target.employeeId}</dd><dt>Department</dt><dd>${target.departmentId}</dd></dl></div></div><div class="containment-checks"><span class="${tenantMatches ? 'yes' : 'no'}">${tenantMatches ? '✓' : '×'} Tenant boundary ${tenantMatches ? 'matches' : 'does not match'}</span><span class="${scopeMatches ? 'yes' : 'no'}">${scopeMatches ? '✓' : '×'} Assignment scope ${scopeMatches ? 'contains' : 'does not contain'} target</span></div><aside><b>Concept:</b> HRMS supplies trusted target attributes. Caller-provided employee IDs or tenant IDs cannot establish authority.</aside>`,
+      body: `<div class="context-compare"><div><small>ASSIGNMENT REACH</small><h3>${matchingGrant ? scopeLabel(matchingGrant.scope) : 'No matching scope'}</h3><p>${matchingGrant?.scope.type === 'employee_self' ? `HRMS resolves user:${principal.id} → ${principal.employeeId}` : matchingGrant ? 'The assignment contains a concrete tenant or resource boundary.' : 'Nothing can contain the target without a matching grant.'}</p></div><div><small>TRUSTED TARGET</small><h3>${target.id}</h3><dl><dt>Tenant</dt><dd>${target.tenantId}</dd><dt>Owner</dt><dd>${target.employeeId}</dd><dt>Department</dt><dd>${target.departmentId}</dd></dl></div></div><div class="containment-checks"><span class="${tenantMatches ? 'yes' : 'no'}">${tenantMatches ? '✓' : '×'} Tenant boundary ${tenantMatches ? 'matches' : 'does not match'}</span><span class="${scopeMatches ? 'yes' : 'no'}">${scopeMatches ? '✓' : '×'} Assignment scope ${scopeMatches ? 'contains' : 'does not contain'} target</span></div><aside><b>Concept:</b> HRMS supplies trusted target attributes. Caller-provided employee IDs or tenant IDs cannot establish authority.</aside>${wireJsonBlock('resolved authorization request → PDP input', buildResolvedRequest(principal, selectedPermission, target))}`,
     },
     {
       eyebrow: 'DECISION, ENFORCEMENT & AUDIT',
       title: lastDecision ? lastDecision.title : 'Evaluate the complete authority',
-      body: lastDecision ? `<div class="guided-result ${lastDecision.allowed ? 'allowed' : 'denied'}"><strong>${lastDecision.allowed ? 'ALLOW' : 'DENY'}</strong><p>${lastDecision.reason}</p></div><div class="guided-output"><div><small>ENFORCED PREDICATE</small><pre>${lastDecision.predicate}</pre></div><div><small>AUDIT RECEIPT</small><code>principal=user:${selectedPrincipal}\npermission=${selectedPermission}\ntarget=${selectedResource}\ndecision=${lastDecision.allowed ? 'allow' : 'deny'}</code></div></div><aside><b>Concept:</b> The API must enforce the decision as a data restriction. The audit receipt records which principal, assignment context, target, and policy produced it.</aside>${comparisonScenario ? `<button class="compare-request" data-compare-scenario="${comparisonScenario.id}"><span><small>CHANGE ONE THING</small><b>${comparisonScenario.brief}</b></span><em>Compare explanation →</em></button>` : ''}` : `<p>The system now has the complete story: principal, capability, assignment scope, and trusted target. Evaluate their intersection.</p><button class="guide-evaluate" data-guide-evaluate>Evaluate and explain →</button><aside><b>Expected:</b> This worked scenario should produce <strong>${activeScenario.expected ? 'ALLOW' : 'DENY'}</strong>. The explanation matters more than the label.</aside>`,
+      body: lastDecision ? `<div class="guided-result ${lastDecision.allowed ? 'allowed' : 'denied'}"><strong>${lastDecision.allowed ? 'ALLOW' : 'DENY'}</strong><p>${lastDecision.reason}</p></div><div class="guided-output"><div><small>ENFORCED PREDICATE</small><pre>${lastDecision.predicate}</pre></div><div><small>AUDIT RECEIPT</small><code>principal=user:${selectedPrincipal}\npermission=${selectedPermission}\ntarget=${selectedResource}\ndecision=${lastDecision.allowed ? 'allow' : 'deny'}</code></div></div><aside><b>Concept:</b> The API must enforce the decision as a data restriction. The audit receipt records which principal, assignment context, target, and policy produced it.</aside>${wireJsonBlock('decision result → API + audit sink', buildDecisionResult(lastDecision))}${comparisonScenario ? `<button class="compare-request" data-compare-scenario="${comparisonScenario.id}"><span><small>CHANGE ONE THING</small><b>${comparisonScenario.brief}</b></span><em>Compare explanation →</em></button>` : ''}` : `<p>The system now has the complete story: principal, capability, assignment scope, and trusted target. Evaluate their intersection.</p><button class="guide-evaluate" data-guide-evaluate>Evaluate and explain →</button><aside><b>Expected:</b> This worked scenario should produce <strong>${activeScenario.expected ? 'ALLOW' : 'DENY'}</strong>. The explanation matters more than the label.</aside>`,
     },
   ]
   const currentGuide = guideSteps[guideStep]
