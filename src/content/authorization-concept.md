@@ -1,4 +1,4 @@
-# Permission, scope, and authority
+# The Authorization Bible
 
 This document is about **authorization**, not authentication. Authentication already happened by the time any of this runs: a principal has been identified, in a tenant, and that identity is this document's starting input—not something it resolves. What's still open is authorization: given that identified principal, what are they actually allowed to do, and to which data?
 

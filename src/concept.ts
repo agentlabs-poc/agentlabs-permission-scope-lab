@@ -9,7 +9,7 @@ const requestedDocument = new URLSearchParams(window.location.search).get('doc')
 const documents = {
   concept: {
     label: 'Concept model',
-    title: 'The complete authorization model',
+    title: 'The Authorization Bible',
     description: 'Permission, scope, target context, resource depth, assignment, enforcement, and audit.',
     filename: 'authorization-concept.md',
     markdown: conceptGuide,
