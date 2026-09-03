@@ -67,8 +67,8 @@ function predicateFor(scope: Scope, principal: Principal) {
   return `tenant_id = ${scope.targetId}`
 }
 
-function wireJsonBlock(title: string, payload: unknown) {
-  return `<details class="wire-json"><summary>View wire JSON · ${title}</summary><pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre></details>`
+function wireJsonBlock(title: string, payload: unknown, note?: string) {
+  return `<details class="wire-json"><summary>View wire JSON · ${title}</summary><pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre>${note ? `<p class="wire-json-note">${note}</p>` : ''}</details>`
 }
 
 // What the Payroll API receives from the caller. Deliberately thin: the caller
@@ -209,7 +209,7 @@ function render() {
     {
       eyebrow: 'REQUEST STORY',
       title: 'Start with a human question',
-      body: `<p>${activeScenario.brief}</p><div class="guide-facts"><span><small>PRINCIPAL</small><b>${principal.name}</b><code>user:${principal.id}</code></span><span><small>OPERATION</small><b>${permissions.find(item => item.value === selectedPermission)?.label}</b><code>${selectedPermission}</code></span><span><small>TARGET</small><b>${target.employeeName}’s ledger</b><code>${target.id}</code></span></div><aside><b>Concept:</b> A request combines an authenticated principal, an operation, and a target. None of these alone determines authority.</aside>${wireJsonBlock('client request → Payroll API', buildClientRequest(principal, selectedPermission, target))}`,
+      body: `<p>${activeScenario.brief}</p><div class="guide-facts"><span><small>PRINCIPAL</small><b>${principal.name}</b><code>user:${principal.id}</code></span><span><small>OPERATION</small><b>${permissions.find(item => item.value === selectedPermission)?.label}</b><code>${selectedPermission}</code></span><span><small>TARGET</small><b>${target.employeeName}’s ledger</b><code>${target.id}</code></span></div><aside><b>Concept:</b> A request combines an authenticated principal, an operation, and a target. None of these alone determines authority.</aside>${wireJsonBlock('client request → Payroll API', buildClientRequest(principal, selectedPermission, target), `${principal.name}’s client doesn’t memorize ${target.id} — it came from an earlier, already-scoped call such as <code>GET /payroll/ledgers?scope=me</code>, which only ever lists ${principal.name}’s own records. An id is never secret; it only names a target. The next steps decide whether naming it is enough.`)}`,
     },
     {
       eyebrow: 'CAPABILITY',
@@ -224,7 +224,7 @@ function render() {
     {
       eyebrow: 'TRUSTED TARGET CONTEXT',
       title: 'Compare assigned reach with the real resource',
-      body: `<div class="context-compare"><div><small>ASSIGNMENT REACH</small><h3>${matchingGrant ? scopeLabel(matchingGrant.scope) : 'No matching scope'}</h3><p>${matchingGrant?.scope.type === 'employee_self' ? `HRMS resolves user:${principal.id} → ${principal.employeeId}` : matchingGrant ? 'The assignment contains a concrete tenant or resource boundary.' : 'Nothing can contain the target without a matching grant.'}</p></div><div><small>TRUSTED TARGET</small><h3>${target.id}</h3><dl><dt>Tenant</dt><dd>${target.tenantId}</dd><dt>Owner</dt><dd>${target.employeeId}</dd><dt>Department</dt><dd>${target.departmentId}</dd></dl></div></div><div class="containment-checks"><span class="${tenantMatches ? 'yes' : 'no'}">${tenantMatches ? '✓' : '×'} Tenant boundary ${tenantMatches ? 'matches' : 'does not match'}</span><span class="${scopeMatches ? 'yes' : 'no'}">${scopeMatches ? '✓' : '×'} Assignment scope ${scopeMatches ? 'contains' : 'does not contain'} target</span></div><aside><b>Concept:</b> HRMS supplies trusted target attributes. Caller-provided employee IDs or tenant IDs cannot establish authority.</aside>${wireJsonBlock('resolved authorization request → PDP input', buildResolvedRequest(principal, selectedPermission, target))}`,
+      body: `<div class="context-compare"><div><small>ASSIGNMENT REACH</small><h3>${matchingGrant ? scopeLabel(matchingGrant.scope) : 'No matching scope'}</h3><p>${matchingGrant?.scope.type === 'employee_self' ? `HRMS resolves user:${principal.id} → ${principal.employeeId}` : matchingGrant ? 'The assignment contains a concrete tenant or resource boundary.' : 'Nothing can contain the target without a matching grant.'}</p></div><div><small>TRUSTED TARGET</small><h3>${target.id}</h3><dl><dt>Tenant</dt><dd>${target.tenantId}</dd><dt>Owner</dt><dd>${target.employeeId}</dd><dt>Department</dt><dd>${target.departmentId}</dd></dl></div></div><div class="containment-checks"><span class="${tenantMatches ? 'yes' : 'no'}">${tenantMatches ? '✓' : '×'} Tenant boundary ${tenantMatches ? 'matches' : 'does not match'}</span><span class="${scopeMatches ? 'yes' : 'no'}">${scopeMatches ? '✓' : '×'} Assignment scope ${scopeMatches ? 'contains' : 'does not contain'} target</span></div><aside><b>Concept:</b> HRMS supplies trusted target attributes. Caller-provided employee IDs or tenant IDs cannot establish authority.</aside>${wireJsonBlock('resolved authorization request → PDP input', buildResolvedRequest(principal, selectedPermission, target), `target.* isn’t taken from the client — HRMS looks ${target.id} up in its own payroll store and reads back its actual tenant_id, owner_employee_id, and department_id. The client only said which record to look up, never what it contains.`)}`,
     },
     {
       eyebrow: 'DECISION, ENFORCEMENT & AUDIT',
