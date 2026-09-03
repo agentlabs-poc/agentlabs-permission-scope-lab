@@ -1,6 +1,6 @@
-# Permission Quest — working design
+# Authorization Explanation Bench — working design
 
-Permission Quest is an executable design conversation. Payroll is the first scenario pack; the authorization mechanics must remain reusable by other products and domains.
+The Authorization Explanation Bench is an executable design conversation. Markdown pages carry the explanations; payroll is the first interactive scenario pack. The authorization mechanics must remain reusable by other products and domains.
 
 ## Working equation
 
@@ -22,7 +22,7 @@ hrms:payroll:ledger::read
 
 The string identifies a stable capability. It does not contain the user, tenant, employee, department, validity window, or target record.
 
-Resource depth, target-instance depth, and assignment-scope depth are separate. Resource instance IDs never enter a permission string. The current safety proposal gives parent permissions no implicit authority over child resources and makes wildcard depth explicit; this remains open until agreed through the game.
+Resource depth, target-instance depth, and assignment-scope depth are separate. Resource instance IDs never enter a permission string. The current safety proposal gives parent permissions no implicit authority over child resources and makes wildcard depth explicit; this remains open until agreed through the bench.
 
 An effective assignment is therefore:
 
@@ -80,15 +80,15 @@ Scope values are typed descriptors. They are not arbitrary user-supplied SQL exp
 - emits the business audit record;
 - fails closed when a decision or scope cannot be resolved.
 
-## The game as a decision tool
+## The bench as a decision tool
 
-Each challenge combines a principal, requested permission, resource target, and expected decision. A correct outcome earns points; obtaining broad access is not itself success. The game rewards least privilege and denies tenant escape, owner substitution, naked mutations, and un-delegated agents.
+Each worked request combines a principal, requested permission, resource target, and expected decision. The evaluator helps confirm least privilege and exposes tenant escape, owner substitution, naked mutations, and un-delegated agents.
 
-The design board deliberately distinguishes `OPEN`, `PROPOSED`, and `AGREED`. Its JSON export captures the current grants, completed challenges, score, and question statuses. Export is a discussion artifact, not a production policy format.
+The design board deliberately distinguishes `OPEN`, `PROPOSED`, and `AGREED`. Its JSON export captures current grants, explored scenarios, and question statuses. Export is a discussion artifact, not a production policy format.
 
 ## Extension seam
 
-Scenario data lives in `src/scenario-pack.ts`. A pack declares principals, permissions, resources, initial grants, and adversarial challenges. The UI and decision loop consume that pack. Payroll-specific display fields still exist in this first spike and should become generic typed resource attributes when the second domain is added; doing that now would be speculative.
+Scenario data lives in `src/scenario-pack.ts`. A pack declares principals, permissions, resources, initial grants, and worked requests. The evaluator consumes that pack. Payroll-specific display fields still exist in this first spike and should become generic typed resource attributes when a second interactive domain is added.
 
 ## Open design questions
 

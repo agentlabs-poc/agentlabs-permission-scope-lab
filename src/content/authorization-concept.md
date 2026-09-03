@@ -1,6 +1,6 @@
 # Permission, scope, and authority
 
-Permission Quest exists to answer a deceptively simple question:
+The Authorization Explanation Bench exists to answer a deceptively simple question:
 
 > When we give a user a permission string, what exactly have we authorized them to do—and to which data?
 
@@ -342,6 +342,33 @@ authenticated user:vinay
 employee EMP-005
 ```
 
+### Where scopes come from
+
+Three related objects must not be collapsed into one:
+
+```text
+Scope type       Created by platform or application designers
+Scope target     Created by the owning business application
+Assignment scope Created by a tenant administrator
+```
+
+An application registers its scope vocabulary when it integrates with Auth. For example, HRMS registers `employee_self`, `department`, and `legal_entity`. Auth can provide generic types such as `tenant_self`, `resource_exact`, and `resource_subtree`.
+
+The owning application creates scopeable resources during normal business operation. HRMS creates departments and employees; AgentForge creates Spaces, Projects, and Repositories. Auth does not create those resources.
+
+The tenant administrator creates an assignment scope by selecting a registered scope type and, where required, an existing target:
+
+```text
+Role:       Payroll Administrator
+Principal:  user:maya
+Scope type: department
+Target:     FIN
+```
+
+The owning application validates that the target exists and belongs to the authenticated tenant. Auth stores the tenant-rooted reference. A tenant administrator cannot invent arbitrary scope semantics or use knowledge of another tenant's resource ID to grant access to it.
+
+A role's `tenant_self` or `employee_self` value can be a suggested assignment template. It becomes an effective scope only when the role is assigned. `tenant_self` is resolved to the concrete active tenant; `employee_self` remains a dynamic HRMS relationship resolved from trusted identity context.
+
 ## 5. Roles and assignments
 
 A role groups capabilities:
@@ -478,7 +505,7 @@ The runner's effective authority must be no greater than both the user's grant a
 runner authority = user authority ∩ delegated authority
 ```
 
-This is deliberately still a question in the lab. The game must help us test and finalize it before implementation.
+This is deliberately still a question in the bench. The worked examples must help us test and finalize it before implementation.
 
 ## 10. Audit receipt
 
@@ -515,9 +542,9 @@ The working rules are:
 9. Every decision identifies the assignment and policy version used.
 10. Broad wildcard grants require deliberate treatment because future operations may otherwise become reachable automatically.
 
-## 12. What the game is for
+## 12. What the explanation bench is for
 
-The game is not merely a visual explanation and is not a production authorization engine. It is an executable design instrument:
+The bench is not merely a static document and is not a production authorization engine. It is an executable design instrument:
 
 - create assignments;
 - target real-looking domain resources;
@@ -528,7 +555,7 @@ The game is not merely a visual explanation and is not a production authorizatio
 - move candidate answers from `OPEN` to `PROPOSED` to `AGREED`;
 - export the current design session.
 
-Payroll is the first scenario pack. Later packs can cover employee documents, leave, expenses, recruiting, AgentForge jobs, or other products while keeping the same authorization equation.
+Payroll is the first interactive scenario pack. Later packs can cover employee documents, leave, expenses, recruiting, AgentForge jobs, or other products while keeping the same authorization equation.
 
 ## 13. Questions still open
 

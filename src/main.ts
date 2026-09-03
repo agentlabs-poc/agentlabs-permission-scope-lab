@@ -31,7 +31,6 @@ let grantCounter = 3
 let questionCounter = 7
 let activeChallenge: number | null = null
 let completedChallenges = new Set<number>()
-let score = 0
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -104,7 +103,6 @@ function evaluate() {
   const challenge = challenges.find(item => item.id === activeChallenge)
   if (challenge && challenge.principalId === selectedPrincipal && challenge.permission === selectedPermission && challenge.resourceId === selectedResource && challenge.expected === allowed && !completedChallenges.has(challenge.id)) {
     completedChallenges.add(challenge.id)
-    score += challenge.points
   }
   render()
   document.querySelector('.decision-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
@@ -134,8 +132,7 @@ function exportSession() {
     exported_at: new Date().toISOString(),
     model: 'principal + permission + scope + trusted target context',
     grammar: '<namespaced-noun>::<verb>',
-    score,
-    completed_challenges: [...completedChallenges],
+    explored_scenarios: [...completedChallenges],
     grants,
     design_questions: designQuestions,
   }
@@ -159,17 +156,16 @@ function render() {
   const principalGrants = grants.filter(g => g.principalId === selectedPrincipal && g.valid)
   app.innerHTML = `
     <header class="topbar">
-      <a class="brand" href="#">${icon('shield')}<span>Permission Quest</span><small>Payroll scope lab</small></a>
-      <nav class="page-tabs"><a class="active" href="/">Playground</a><a href="/concept.html">Concept guide</a><a href="#boundary">System boundary</a><a href="#questions">Decision board</a></nav>
+      <a class="brand" href="/concept.html">${icon('shield')}<span>Authorization Bench</span><small>Explain · inspect · decide</small></a>
+      <nav class="page-tabs"><a href="/concept.html">Concept</a><a href="/concept.html?doc=hrms">HRMS</a><a href="/concept.html?doc=projects">Projects & repos</a><a class="active" href="/">Request explorer</a></nav>
       <div class="canonical"><span>Canonical grammar</span><code>&lt;namespaced-noun&gt;::<b>verb</b></code></div>
-      <div class="score"><small>SCORE</small><b>${score}</b></div>
     </header>
 
     <main>
       <section class="hero" id="play">
-        <div class="eyebrow">PLAYGROUND 01 · AUTHORITY</div>
+        <div class="eyebrow">INTERACTIVE EXPLANATION · PAYROLL</div>
         <h1>A permission is only half<br/>of an <em>authority.</em></h1>
-        <p>Build a grant, aim it at a payroll record, and see exactly where access is won or lost.</p>
+        <p>Construct a grant, apply it to a payroll request, and inspect exactly where access is allowed or denied.</p>
         <div class="equation">
           <span>${icon('key')}<small>CAPABILITY</small>Permission</span><b>∩</b>
           <span>${icon('target')}<small>REACH</small>Scope</span><b>∩</b>
@@ -179,15 +175,15 @@ function render() {
       </section>
 
       <section class="challenge-strip">
-        <div class="section-heading"><div><small>ADVERSARIAL LEVELS</small><h2>Pick a challenge</h2></div><span>${completedChallenges.size} / ${challenges.length} cleared</span></div>
+        <div class="section-heading"><div><small>WORKED REQUESTS</small><h2>Choose a scenario to explain</h2></div><span>${completedChallenges.size} / ${challenges.length} explored</span></div>
         <div class="challenge-list">
-          ${challenges.map(challenge => `<button class="challenge ${activeChallenge === challenge.id ? 'active' : ''} ${completedChallenges.has(challenge.id) ? 'complete' : ''}" data-challenge="${challenge.id}"><span>${completedChallenges.has(challenge.id) ? '✓' : String(challenge.id).padStart(2, '0')}</span><div><b>${challenge.title}</b><small>${challenge.brief}</small></div><em>${challenge.expected ? 'ALLOW' : 'DENY'} · ${challenge.points} XP</em></button>`).join('')}
+          ${challenges.map(challenge => `<button class="challenge ${activeChallenge === challenge.id ? 'active' : ''} ${completedChallenges.has(challenge.id) ? 'complete' : ''}" data-challenge="${challenge.id}"><span>${completedChallenges.has(challenge.id) ? '✓' : String(challenge.id).padStart(2, '0')}</span><div><b>${challenge.title}</b><small>${challenge.brief}</small></div><em>EXPECTED · ${challenge.expected ? 'ALLOW' : 'DENY'}</em></button>`).join('')}
         </div>
       </section>
 
       <section class="game-grid">
         <article class="panel step-panel">
-          <div class="step-title"><span>1</span><div><small>CHOOSE YOUR PLAYER</small><h2>Who is asking?</h2></div>${icon('user')}</div>
+          <div class="step-title"><span>1</span><div><small>SELECT PRINCIPAL</small><h2>Who is asking?</h2></div>${icon('user')}</div>
           <div class="principal-list">
             ${principals.map(p => `<button class="principal ${p.id === selectedPrincipal ? 'active' : ''}" data-principal="${p.id}"><span class="avatar" style="--avatar:${p.color}">${p.initials}</span><span><b>${p.name}</b><small>${p.title}</small></span><i></i></button>`).join('')}
           </div>
@@ -195,7 +191,7 @@ function render() {
         </article>
 
         <article class="panel step-panel builder-panel">
-          <div class="step-title"><span>2</span><div><small>FORGE AN ASSIGNMENT</small><h2>Capability + reach</h2></div>${icon('key')}</div>
+          <div class="step-title"><span>2</span><div><small>CONSTRUCT ASSIGNMENT</small><h2>Capability + reach</h2></div>${icon('key')}</div>
           <label>Permission <select id="permission">${permissions.map(p => `<option value="${p.value}" ${p.value === selectedPermission ? 'selected' : ''}>${p.label}</option>`).join('')}</select></label>
           <div class="permission-preview"><span>NOUN</span><code>${selectedPermission.split('::')[0]}</code><strong>::</strong><span>VERB</span><code>${selectedPermission.split('::')[1]}</code></div>
           <label>Assignment scope <select id="scope">
@@ -207,11 +203,11 @@ function render() {
           ${selectedScope === 'employee' ? `<label>Employee <select id="scope-target">${resources.filter(r => r.tenantId === 'TENANT-001').map(r => `<option value="${r.employeeId}">${r.employeeName} · ${r.employeeId}</option>`).join('')}</select></label>` : ''}
           ${selectedScope === 'department' ? '<label>Department <select id="scope-target"><option value="ENG">Engineering</option><option value="FIN">Finance</option></select></label>' : ''}
           ${selectedScope === 'tenant' ? '<label>Tenant <select id="scope-target"><option value="TENANT-001">TENANT-001</option><option value="TENANT-002">TENANT-002</option></select></label>' : ''}
-          <button class="primary" id="add-grant">Attach grant to ${principal.name} <span>＋</span></button>
+          <button class="primary" id="add-grant">Add assignment for ${principal.name} <span>＋</span></button>
         </article>
 
         <article class="panel step-panel request-panel">
-          <div class="step-title"><span>3</span><div><small>FIRE A REQUEST</small><h2>Aim at a ledger</h2></div>${icon('target')}</div>
+          <div class="step-title"><span>3</span><div><small>EVALUATE REQUEST</small><h2>Select a ledger target</h2></div>${icon('target')}</div>
           <label>Operation <select id="request-permission">${permissions.map(p => `<option value="${p.value}" ${p.value === selectedPermission ? 'selected' : ''}>${p.verb.toUpperCase()} · ${p.label}</option>`).join('')}</select></label>
           <label>Target resource <select id="resource">${resources.map(r => `<option value="${r.id}" ${r.id === selectedResource ? 'selected' : ''}>${r.employeeName} · ${r.id}</option>`).join('')}</select></label>
           ${(() => { const r = resources.find(x => x.id === selectedResource)!; return `<div class="resource-card"><span class="resource-type">PAYROLL LEDGER</span><b>${r.id}</b><strong>${r.amount}</strong><dl><dt>Owner</dt><dd>${r.employeeName} · ${r.employeeId}</dd><dt>Department</dt><dd>${r.departmentId}</dd><dt>Tenant</dt><dd>${r.tenantId}</dd></dl></div>` })()}
@@ -220,9 +216,9 @@ function render() {
       </section>
 
       <section class="grant-deck">
-        <div class="section-heading"><div><small>LIVE ASSIGNMENTS</small><h2>${principal.name}’s authority deck</h2></div><span>${principalGrants.length} active grant${principalGrants.length === 1 ? '' : 's'}</span></div>
+        <div class="section-heading"><div><small>EFFECTIVE ASSIGNMENTS</small><h2>${principal.name}’s current authority</h2></div><span>${principalGrants.length} active grant${principalGrants.length === 1 ? '' : 's'}</span></div>
         <div class="grant-list">
-          ${principalGrants.length ? principalGrants.map(g => `<div class="grant-card"><div class="grant-glyph">${icon('key')}</div><div><code>${g.permission}</code><p>${scopeLabel(g.scope)}</p></div><button data-revoke="${g.id}" title="Revoke grant">×</button></div>`).join('') : '<div class="empty">No active authority. Forge a grant above.</div>'}
+          ${principalGrants.length ? principalGrants.map(g => `<div class="grant-card"><div class="grant-glyph">${icon('key')}</div><div><code>${g.permission}</code><p>${scopeLabel(g.scope)}</p></div><button data-revoke="${g.id}" title="Revoke grant">×</button></div>`).join('') : '<div class="empty">No active authority. Add an assignment above.</div>'}
         </div>
       </section>
 
@@ -259,7 +255,7 @@ function render() {
 
       <section class="questions" id="questions">
         <div class="section-heading"><div><small>DESIGN WORKBENCH</small><h2>Questions that must become decisions</h2></div><button id="export-session">Export session JSON ↓</button></div>
-        <p class="questions-intro">Click a status to advance it. The board keeps uncertainty visible; the game should not accidentally turn an assumption into architecture.</p>
+        <p class="questions-intro">Click a status to advance it. The board keeps uncertainty visible; an explanation should not accidentally turn an assumption into architecture.</p>
         <div class="question-board">
           ${designQuestions.map(item => `<article><span class="question-number">Q${String(item.id).padStart(2, '0')}</span><p>${escapeHtml(item.question)}</p><button class="status-${item.status}" data-question="${item.id}">${item.status.toUpperCase()} <b>→</b></button></article>`).join('')}
         </div>
@@ -267,7 +263,7 @@ function render() {
         <div class="legend"><span><i class="open-dot"></i>OPEN · unanswered</span><span><i class="proposed-dot"></i>PROPOSED · candidate shape</span><span><i class="agreed-dot"></i>AGREED · accepted for the model</span></div>
       </section>
     </main>
-    <footer>Permission Quest · An in-memory design instrument, not a production policy engine.</footer>
+    <footer>Authorization Explanation Bench · An in-memory design instrument, not a production policy engine.</footer>
   `
 
   document.querySelectorAll<HTMLElement>('[data-principal]').forEach(el => el.onclick = () => { selectedPrincipal = el.dataset.principal as PrincipalId; selectedScopeTarget = principals.find(p => p.id === selectedPrincipal)?.employeeId ?? 'EMP-005'; lastDecision = null; render() })

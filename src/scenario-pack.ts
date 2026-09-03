@@ -43,7 +43,6 @@ export interface Challenge {
   permission: Permission
   resourceId: string
   expected: boolean
-  points: number
 }
 
 export interface ScenarioPack {
@@ -79,12 +78,12 @@ export const payrollScenario: ScenarioPack = {
     { id: 'PAY-EXT-007', label: 'External tenant payroll', employeeId: 'EMP-007', employeeName: 'Neha', departmentId: 'OPS', tenantId: 'TENANT-002', amount: '₹98,400' },
   ],
   challenges: [
-    { id: 1, title: 'My salary, my eyes', brief: 'Vinay reads his own September ledger.', principalId: 'vinay', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000005', expected: true, points: 100 },
-    { id: 2, title: 'Curious colleague', brief: 'Vinay tries to read Arjun’s salary.', principalId: 'vinay', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000023', expected: false, points: 100 },
-    { id: 3, title: 'Payroll desk', brief: 'Maya reads an employee ledger in her tenant.', principalId: 'maya', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000005', expected: true, points: 100 },
-    { id: 4, title: 'Tenant escape', brief: 'Maya aims her tenant grant at an external ledger.', principalId: 'maya', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-EXT-007', expected: false, points: 150 },
-    { id: 5, title: 'Naked mutation', brief: 'An employee attempts to post committed payroll.', principalId: 'vinay', permission: 'hrms:payroll:ledger::post', resourceId: 'PAY-000005', expected: false, points: 125 },
-    { id: 6, title: 'Confused deputy', brief: 'A service agent acts without delegated authority.', principalId: 'paybot', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000005', expected: false, points: 175 },
+    { id: 1, title: 'My salary, my eyes', brief: 'Vinay reads his own September ledger.', principalId: 'vinay', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000005', expected: true },
+    { id: 2, title: 'Curious colleague', brief: 'Vinay tries to read Arjun’s salary.', principalId: 'vinay', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000023', expected: false },
+    { id: 3, title: 'Payroll desk', brief: 'Maya reads an employee ledger in her tenant.', principalId: 'maya', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000005', expected: true },
+    { id: 4, title: 'Tenant escape', brief: 'Maya aims her tenant grant at an external ledger.', principalId: 'maya', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-EXT-007', expected: false },
+    { id: 5, title: 'Naked mutation', brief: 'An employee attempts to post committed payroll.', principalId: 'vinay', permission: 'hrms:payroll:ledger::post', resourceId: 'PAY-000005', expected: false },
+    { id: 6, title: 'Confused deputy', brief: 'A service agent acts without delegated authority.', principalId: 'paybot', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000005', expected: false },
   ],
   initialGrants: [
     { id: 1, principalId: 'vinay', permission: 'hrms:payroll:ledger::read', scope: { type: 'employee_self' }, valid: true },

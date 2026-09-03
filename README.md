@@ -1,6 +1,6 @@
-# Permission Quest
+# Authorization Explanation Bench
 
-A local concept lab for exploring scoped authorization with payroll examples.
+A local explanation bench for exploring scoped authorization through documented examples and an interactive request evaluator.
 
 The lab separates:
 
@@ -10,7 +10,7 @@ The lab separates:
 
 An authorization decision is the intersection of all three. The simulation is deliberately in-memory and is not an authorization implementation.
 
-The payroll content is an interchangeable scenario pack. The game also contains adversarial levels, an Auth/Authz responsibility map, a live decision trace, and an exportable design-question board. See [the working design](docs/design.md).
+The bench contains a complete concept guide, worked HRMS and projects/repositories examples, an Auth/Authz responsibility map, a live decision trace, and an exportable design-question board. The payroll evaluator remains an interchangeable scenario pack. See [the working design](docs/design.md).
 
 ```bash
 npm install
