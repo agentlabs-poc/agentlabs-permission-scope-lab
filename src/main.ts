@@ -29,7 +29,8 @@ let grants: Grant[] = structuredClone(payrollScenario.initialGrants)
 let lastDecision: null | { allowed: boolean; title: string; reason: string; grant?: Grant; predicate: string; checks: { label: string; pass: boolean; detail: string }[] } = null
 let grantCounter = 3
 let questionCounter = 7
-let activeChallenge: number | null = null
+let activeChallenge: number | null = 1
+let guideStep = 0
 let completedChallenges = new Set<number>()
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -76,7 +77,7 @@ function predicateFor(scope: Scope, principal: Principal) {
   return `tenant_id = ${scope.targetId}`
 }
 
-function evaluate() {
+function evaluate(focusGuide = false) {
   const principal = principals.find(p => p.id === selectedPrincipal)!
   const resource = resources.find(r => r.id === selectedResource)!
   const matching = grants.filter(g => g.principalId === selectedPrincipal && g.permission === selectedPermission && g.valid)
@@ -105,7 +106,7 @@ function evaluate() {
     completedChallenges.add(challenge.id)
   }
   render()
-  document.querySelector('.decision-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  document.querySelector(focusGuide ? '.guided-walkthrough' : '.decision-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 
 function loadChallenge(id: number) {
@@ -115,9 +116,16 @@ function loadChallenge(id: number) {
   selectedPermission = challenge.permission
   selectedResource = challenge.resourceId
   selectedScopeTarget = principals.find(p => p.id === selectedPrincipal)?.employeeId ?? 'EMP-005'
+  guideStep = 0
   lastDecision = null
   render()
-  document.querySelector('.game-grid')?.scrollIntoView({ behavior: 'smooth' })
+  document.querySelector('.guided-walkthrough')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+function moveGuide(direction: number) {
+  guideStep = Math.max(0, Math.min(4, guideStep + direction))
+  render()
+  document.querySelector('.guided-walkthrough')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
 function cycleQuestion(id: number) {
@@ -146,7 +154,7 @@ function exportSession() {
 function addGrant() {
   const scope = resolveScope(selectedScope)
   const exists = grants.some(g => g.principalId === selectedPrincipal && g.permission === selectedPermission && JSON.stringify(g.scope) === JSON.stringify(scope) && g.valid)
-  if (!exists) grants.push({ id: grantCounter++, principalId: selectedPrincipal, permission: selectedPermission, scope, valid: true })
+  if (!exists) grants.push({ id: grantCounter++, principalId: selectedPrincipal, permission: selectedPermission, scope, valid: true, source: { type: 'direct', name: 'Direct permission assignment', assignedBy: 'user:tenant-admin' } })
   lastDecision = null
   render()
 }
@@ -154,6 +162,41 @@ function addGrant() {
 function render() {
   const principal = principals.find(p => p.id === selectedPrincipal)!
   const principalGrants = grants.filter(g => g.principalId === selectedPrincipal && g.valid)
+  const target = resources.find(resource => resource.id === selectedResource)!
+  const activeScenario = challenges.find(scenario => scenario.id === activeChallenge) ?? challenges[0]
+  const matchingGrant = principalGrants.find(grant => grant.permission === selectedPermission)
+  const permissionParts = selectedPermission.split('::')
+  const resourceParts = permissionParts[0].split(':')
+  const scopeMatches = matchingGrant ? scopeContains(matchingGrant.scope, principal, target) : false
+  const tenantMatches = target.tenantId === payrollScenario.tenantId
+  const guideSteps = [
+    {
+      eyebrow: 'REQUEST STORY',
+      title: 'Start with a human question',
+      body: `<p>${activeScenario.brief}</p><div class="guide-facts"><span><small>PRINCIPAL</small><b>${principal.name}</b><code>user:${principal.id}</code></span><span><small>OPERATION</small><b>${permissions.find(item => item.value === selectedPermission)?.label}</b><code>${selectedPermission}</code></span><span><small>TARGET</small><b>${target.employeeName}’s ledger</b><code>${target.id}</code></span></div><aside><b>Concept:</b> A request combines an authenticated principal, an operation, and a target. None of these alone determines authority.</aside>`,
+    },
+    {
+      eyebrow: 'CAPABILITY',
+      title: 'Read the permission—without inventing scope',
+      body: `<div class="permission-anatomy"><span><small>APPLICATION</small>${resourceParts[0]}</span><i>:</i><span><small>DOMAIN</small>${resourceParts[1]}</span><i>:</i><span><small>RESOURCE</small>${resourceParts.slice(2).join(':')}</span><strong>::</strong><span class="verb"><small>VERB</small>${permissionParts[1]}</span></div><p><code>${selectedPermission}</code> names the required capability. It does not identify ${principal.name}, ${target.employeeId}, ${target.id}, or any tenant.</p><aside><b>Concept:</b> Permission strings remain stable. User, tenant, resource ID, and reach belong to assignments and request context.</aside>`,
+    },
+    {
+      eyebrow: 'ASSIGNMENT & SCOPE',
+      title: matchingGrant ? 'Find how the principal received reach' : 'Notice the missing authority',
+      body: matchingGrant ? `<div class="assignment-record"><div><small>PRINCIPAL</small><code>user:${principal.id}</code></div><b>＋</b><div><small>PERMISSION</small><code>${matchingGrant.permission}</code></div><b>＋</b><div><small>ASSIGNED SCOPE</small><code>${scopeLabel(matchingGrant.scope)}</code></div></div><dl class="guide-dl"><dt>Permission received through</dt><dd>${matchingGrant.source.type === 'role' ? `Role · ${matchingGrant.source.name}` : matchingGrant.source.name}</dd><dt>Scope type defined by</dt><dd>${matchingGrant.scope.type === 'tenant' ? 'Auth' : 'HRMS'}</dd><dt>Assignment created by</dt><dd>${matchingGrant.source.assignedBy}</dd><dt>Assignment stored by</dt><dd>Auth</dd><dt>Scope meaning resolved by</dt><dd>${matchingGrant.scope.type === 'tenant' ? 'Auth' : 'HRMS Authorization Agent'}</dd></dl><aside><b>Concept:</b> A role groups capabilities; its assignment gives those capabilities reach. Applications define scope vocabulary, applications create scopeable resources, and tenant administrators create the binding.</aside>` : `<div class="missing-assignment">No active assignment contains <code>${selectedPermission}</code> for <code>user:${principal.id}</code>.</div><p>A permission definition may exist globally without being granted to this principal. A missing assignment must fail closed.</p><aside><b>Concept:</b> Authentication is not authorization, and a permission catalogue is not a grant.</aside>`,
+    },
+    {
+      eyebrow: 'TRUSTED TARGET CONTEXT',
+      title: 'Compare assigned reach with the real resource',
+      body: `<div class="context-compare"><div><small>ASSIGNMENT REACH</small><h3>${matchingGrant ? scopeLabel(matchingGrant.scope) : 'No matching scope'}</h3><p>${matchingGrant?.scope.type === 'employee_self' ? `HRMS resolves user:${principal.id} → ${principal.employeeId}` : matchingGrant ? 'The assignment contains a concrete tenant or resource boundary.' : 'Nothing can contain the target without a matching grant.'}</p></div><div><small>TRUSTED TARGET</small><h3>${target.id}</h3><dl><dt>Tenant</dt><dd>${target.tenantId}</dd><dt>Owner</dt><dd>${target.employeeId}</dd><dt>Department</dt><dd>${target.departmentId}</dd></dl></div></div><div class="containment-checks"><span class="${tenantMatches ? 'yes' : 'no'}">${tenantMatches ? '✓' : '×'} Tenant boundary ${tenantMatches ? 'matches' : 'does not match'}</span><span class="${scopeMatches ? 'yes' : 'no'}">${scopeMatches ? '✓' : '×'} Assignment scope ${scopeMatches ? 'contains' : 'does not contain'} target</span></div><aside><b>Concept:</b> HRMS supplies trusted target attributes. Caller-provided employee IDs or tenant IDs cannot establish authority.</aside>`,
+    },
+    {
+      eyebrow: 'DECISION, ENFORCEMENT & AUDIT',
+      title: lastDecision ? lastDecision.title : 'Evaluate the complete authority',
+      body: lastDecision ? `<div class="guided-result ${lastDecision.allowed ? 'allowed' : 'denied'}"><strong>${lastDecision.allowed ? 'ALLOW' : 'DENY'}</strong><p>${lastDecision.reason}</p></div><div class="guided-output"><div><small>ENFORCED PREDICATE</small><pre>${lastDecision.predicate}</pre></div><div><small>AUDIT RECEIPT</small><code>principal=user:${selectedPrincipal}\npermission=${selectedPermission}\ntarget=${selectedResource}\ndecision=${lastDecision.allowed ? 'allow' : 'deny'}</code></div></div><aside><b>Concept:</b> The API must enforce the decision as a data restriction. The audit receipt records which principal, assignment context, target, and policy produced it.</aside>` : `<p>The system now has the complete story: principal, capability, assignment scope, and trusted target. Evaluate their intersection.</p><button class="guide-evaluate" data-guide-evaluate>Evaluate and explain →</button><aside><b>Expected:</b> This worked scenario should produce <strong>${activeScenario.expected ? 'ALLOW' : 'DENY'}</strong>. The explanation matters more than the label.</aside>`,
+    },
+  ]
+  const currentGuide = guideSteps[guideStep]
   app.innerHTML = `
     <header class="topbar">
       <a class="brand" href="/concept.html">${icon('shield')}<span>Authorization Bench</span><small>Explain · inspect · decide</small></a>
@@ -181,6 +224,23 @@ function render() {
         </div>
       </section>
 
+      <section class="guided-walkthrough">
+        <div class="guide-progress">
+          ${guideSteps.map((step, index) => `<button class="${index === guideStep ? 'active' : ''} ${index < guideStep ? 'visited' : ''}" data-guide-step="${index}"><span>${index < guideStep ? '✓' : index + 1}</span><small>${step.eyebrow}</small></button>`).join('')}
+        </div>
+        <article class="guide-stage">
+          <header><div><small>STEP ${guideStep + 1} OF ${guideSteps.length} · ${currentGuide.eyebrow}</small><h2>${currentGuide.title}</h2></div><span class="guide-scenario">${activeScenario.title}</span></header>
+          <div class="guide-content">${currentGuide.body}</div>
+          <footer class="guide-navigation">
+            <button data-guide-previous ${guideStep === 0 ? 'disabled' : ''}>← Previous concept</button>
+            <span>Use the steps above to revisit any concept.</span>
+            ${guideStep < guideSteps.length - 1 ? '<button class="next" data-guide-next>Next concept →</button>' : '<a href="#manual">Explore manually ↓</a>'}
+          </footer>
+        </article>
+      </section>
+
+      <details class="manual-workbench" id="manual">
+        <summary><span><small>OPTIONAL MANUAL WORKBENCH</small><b>Change the principal, grant, scope, operation, or target</b></span><em>Open controls ＋</em></summary>
       <section class="game-grid">
         <article class="panel step-panel">
           <div class="step-title"><span>1</span><div><small>SELECT PRINCIPAL</small><h2>Who is asking?</h2></div>${icon('user')}</div>
@@ -218,9 +278,10 @@ function render() {
       <section class="grant-deck">
         <div class="section-heading"><div><small>EFFECTIVE ASSIGNMENTS</small><h2>${principal.name}’s current authority</h2></div><span>${principalGrants.length} active grant${principalGrants.length === 1 ? '' : 's'}</span></div>
         <div class="grant-list">
-          ${principalGrants.length ? principalGrants.map(g => `<div class="grant-card"><div class="grant-glyph">${icon('key')}</div><div><code>${g.permission}</code><p>${scopeLabel(g.scope)}</p></div><button data-revoke="${g.id}" title="Revoke grant">×</button></div>`).join('') : '<div class="empty">No active authority. Add an assignment above.</div>'}
+          ${principalGrants.length ? principalGrants.map(g => `<div class="grant-card"><div class="grant-glyph">${icon('key')}</div><div><code>${g.permission}</code><p>${g.source.type === 'role' ? `${g.source.name} · ` : ''}${scopeLabel(g.scope)}</p></div><button data-revoke="${g.id}" title="Revoke grant">×</button></div>`).join('') : '<div class="empty">No active authority. Add an assignment above.</div>'}
         </div>
       </section>
+      </details>
 
       ${lastDecision ? `<section class="decision-panel ${lastDecision.allowed ? 'allow' : 'deny'}">
         <div class="decision-head"><div class="decision-seal">${lastDecision.allowed ? '✓' : '×'}</div><div><small>AUTHORIZATION DECISION</small><h2>${lastDecision.title}</h2><p>${lastDecision.reason}</p></div><strong>${lastDecision.allowed ? 'ALLOW' : 'DENY'}</strong></div>
@@ -268,13 +329,17 @@ function render() {
 
   document.querySelectorAll<HTMLElement>('[data-principal]').forEach(el => el.onclick = () => { selectedPrincipal = el.dataset.principal as PrincipalId; selectedScopeTarget = principals.find(p => p.id === selectedPrincipal)?.employeeId ?? 'EMP-005'; lastDecision = null; render() })
   document.querySelectorAll<HTMLButtonElement>('[data-challenge]').forEach(el => el.onclick = () => loadChallenge(Number(el.dataset.challenge)))
+  document.querySelectorAll<HTMLButtonElement>('[data-guide-step]').forEach(el => el.onclick = () => { guideStep = Number(el.dataset.guideStep); render() })
+  document.querySelector<HTMLButtonElement>('[data-guide-previous]')?.addEventListener('click', () => moveGuide(-1))
+  document.querySelector<HTMLButtonElement>('[data-guide-next]')?.addEventListener('click', () => moveGuide(1))
+  document.querySelector<HTMLButtonElement>('[data-guide-evaluate]')?.addEventListener('click', () => evaluate(true))
   document.querySelector<HTMLSelectElement>('#permission')!.onchange = e => { selectedPermission = (e.target as HTMLSelectElement).value as Permission; lastDecision = null; render() }
   document.querySelector<HTMLSelectElement>('#request-permission')!.onchange = e => { selectedPermission = (e.target as HTMLSelectElement).value as Permission; lastDecision = null; render() }
   document.querySelector<HTMLSelectElement>('#scope')!.onchange = e => { selectedScope = (e.target as HTMLSelectElement).value as ScopeType; lastDecision = null; render() }
   document.querySelector<HTMLSelectElement>('#scope-target')?.addEventListener('change', e => { selectedScopeTarget = (e.target as HTMLSelectElement).value })
   document.querySelector<HTMLSelectElement>('#resource')!.onchange = e => { selectedResource = (e.target as HTMLSelectElement).value; lastDecision = null; render() }
   document.querySelector<HTMLButtonElement>('#add-grant')!.onclick = addGrant
-  document.querySelector<HTMLButtonElement>('#evaluate')!.onclick = evaluate
+  document.querySelector<HTMLButtonElement>('#evaluate')!.onclick = () => evaluate()
   document.querySelectorAll<HTMLButtonElement>('[data-revoke]').forEach(el => el.onclick = () => { const grant = grants.find(g => g.id === Number(el.dataset.revoke)); if (grant) grant.valid = false; lastDecision = null; render() })
   document.querySelectorAll<HTMLButtonElement>('[data-question]').forEach(el => el.onclick = () => cycleQuestion(Number(el.dataset.question)))
   document.querySelector<HTMLButtonElement>('#export-session')!.onclick = exportSession

@@ -10,7 +10,7 @@ The lab separates:
 
 An authorization decision is the intersection of all three. The simulation is deliberately in-memory and is not an authorization implementation.
 
-The bench contains a complete concept guide, worked HRMS and projects/repositories examples, an Auth/Authz responsibility map, a live decision trace, and an exportable design-question board. The payroll evaluator remains an interchangeable scenario pack. See [the working design](docs/design.md).
+The bench contains a complete concept guide, worked HRMS and projects/repositories examples, an Auth/Authz responsibility map, a guided five-step request explanation, and an exportable design-question board. A collapsed manual workbench remains available after the guided walkthrough. See [the working design](docs/design.md).
 
 ```bash
 npm install

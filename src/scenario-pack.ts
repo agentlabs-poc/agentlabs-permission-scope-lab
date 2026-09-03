@@ -23,6 +23,11 @@ export interface Grant {
   permission: Permission
   scope: Scope
   valid: boolean
+  source: {
+    type: 'role' | 'direct'
+    name: string
+    assignedBy: string
+  }
 }
 
 export interface Resource {
@@ -86,7 +91,7 @@ export const payrollScenario: ScenarioPack = {
     { id: 6, title: 'Confused deputy', brief: 'A service agent acts without delegated authority.', principalId: 'paybot', permission: 'hrms:payroll:ledger::read', resourceId: 'PAY-000005', expected: false },
   ],
   initialGrants: [
-    { id: 1, principalId: 'vinay', permission: 'hrms:payroll:ledger::read', scope: { type: 'employee_self' }, valid: true },
-    { id: 2, principalId: 'maya', permission: 'hrms:payroll:ledger::read', scope: { type: 'tenant', targetId: 'TENANT-001' }, valid: true },
+    { id: 1, principalId: 'vinay', permission: 'hrms:payroll:ledger::read', scope: { type: 'employee_self' }, valid: true, source: { type: 'role', name: 'Employee Payroll Self Service', assignedBy: 'user:tenant-admin' } },
+    { id: 2, principalId: 'maya', permission: 'hrms:payroll:ledger::read', scope: { type: 'tenant', targetId: 'TENANT-001' }, valid: true, source: { type: 'role', name: 'Payroll Administrator', assignedBy: 'user:tenant-admin' } },
   ],
 }
