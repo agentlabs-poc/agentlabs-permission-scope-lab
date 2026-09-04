@@ -55,6 +55,13 @@ h1 { margin: 0 0 10px; font-size: clamp(26px, 3.6vw, 36px); font-weight: 800; le
 .scenario-btn .tag.allow { color: #062318; background: var(--good); }
 .scenario-btn .tag.deny { color: #2a0a0e; background: var(--bad); }
 .scenario-btn:not(.active) .tag { opacity: .55; }
+.scenario-btn .tag.code { color: #062318; background: var(--teal); }
+.scenario-btn .tag.doc { color: #170f2e; background: var(--violet); }
+
+.path-switch { margin: 14px 26px 0; transform: scale(.92); transform-origin: left; }
+.path-switch[hidden] { display: none; }
+.path-switch .scenario-btn { padding: 7px 12px; font-size: 12px; }
+.path-hint { margin: 8px 26px 0; color: var(--muted); font-size: 12px; font-style: italic; }
 
 /* ---- diagram ---- */
 .diagram-figure { margin: 0; padding: 22px 22px 16px; background: linear-gradient(160deg, #101f31, #0b1726); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 24px 60px #0006; }
@@ -73,11 +80,11 @@ figcaption { margin-top: 14px; color: var(--muted); font-size: 12.5px; line-heig
 .node[data-node="client"] rect { stroke: #3a5570; }
 .node[data-node="verify"] rect, .node[data-node="bind"] rect, .node[data-node="handler"] rect, .node[data-node="hrmsdb"] rect { stroke: #4a3d72; }
 .node[data-node="agent"] rect { stroke: #8a6a2e; }
-.node[data-node="auth"] rect, .node[data-node="authdb"] rect { stroke: #2c6f63; }
+.node[data-node="auth"] rect { stroke: #2c6f63; }
 .node.active[data-node="client"] rect { stroke: var(--ink); stroke-width: 2.4; filter: drop-shadow(0 0 10px #e8f4fb44); }
 .node.active[data-node="verify"] rect, .node.active[data-node="bind"] rect, .node.active[data-node="handler"] rect, .node.active[data-node="hrmsdb"] rect { stroke: var(--violet); stroke-width: 2.4; filter: drop-shadow(0 0 10px #a78bfa55); }
 .node.active[data-node="agent"] rect { stroke: var(--amber); stroke-width: 2.4; filter: drop-shadow(0 0 10px #ffbe5c55); }
-.node.active[data-node="auth"] rect, .node.active[data-node="authdb"] rect { stroke: var(--teal); stroke-width: 2.4; filter: drop-shadow(0 0 10px #51d6c355); }
+.node.active[data-node="auth"] rect { stroke: var(--teal); stroke-width: 2.4; filter: drop-shadow(0 0 10px #51d6c355); }
 .node.decision-allow rect { stroke: var(--good) !important; stroke-width: 2.6; filter: drop-shadow(0 0 12px #5fd88f66) !important; }
 .node.decision-deny rect { stroke: var(--bad) !important; stroke-width: 2.6; filter: drop-shadow(0 0 12px #ff6f7d66) !important; }
 
@@ -163,7 +170,7 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
       <span><i class="legend-line"></i>asks</span>
       <span><i class="legend-line dashed"></i>returns</span>
     </div>
-    <svg id="diagram" viewBox="0 0 1100 470" role="img" aria-label="A request enters hrms-core, one Go process with four lanes: canonical token verification (offline against Auth's JWKS), identity binding via a direct SQL read of the Auth database, the in-process Auth Agent (which fetches a workload token and the policy bundle from Auth over HTTPS and evaluates it), and the tenant-scoped payroll handler that queries HRMS Postgres under row-level security.">
+    <svg id="diagram" viewBox="0 0 1100 470" role="img" aria-label="A request enters hrms-core, one Go process with four lanes: canonical token verification (offline against Auth's JWKS), identity binding resolved entirely from hrms-core's own local tables with no connection to Auth's database, the in-process Auth Agent (which fetches a workload token and the policy bundle from Auth over HTTPS and evaluates it), and the tenant-scoped payroll handler that queries HRMS Postgres under row-level security.">
       <defs>
         <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
@@ -185,10 +192,7 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
       <line id="arr-verify-jwks" class="arrow solid" x1="564" y1="126" x2="876" y2="126" marker-end="url(#arrow)"/>
       <text class="arrow-label" x="720" y="116" text-anchor="middle">GET /.well-known/jwks.json (cached)</text>
 
-      <line id="arr-bind-authdb" class="arrow solid" x1="564" y1="180" x2="636" y2="180" marker-end="url(#arrow)"/>
-      <text class="arrow-label" x="600" y="171" text-anchor="middle">SQL</text>
-      <line id="arr-authdb-ret" class="arrow dashed" x1="636" y1="204" x2="564" y2="204" marker-end="url(#arrow)"/>
-      <text class="arrow-label" x="600" y="219" text-anchor="middle">ids, roles</text>
+      <text class="arrow-label" x="700" y="182" text-anchor="middle" opacity="0.55">no Auth call &middot; resolved from hrms-core's own tables</text>
 
       <line id="arr-agent-token" class="arrow solid" x1="564" y1="252" x2="876" y2="252" marker-end="url(#arrow)"/>
       <text class="arrow-label" x="720" y="242" text-anchor="middle">POST /oauth2/token (client_credentials)</text>
@@ -217,7 +221,7 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
       <g class="node" data-node="bind">
         <rect x="240" y="160" width="324" height="58" rx="9"/>
         <text class="node-title" x="402" y="182" text-anchor="middle">IDENTITY BINDING + SCOPE GATE</text>
-        <text class="node-sub" x="402" y="200" text-anchor="middle">ResolveCanonicalPrincipal &middot; RequireOAuthScope</text>
+        <text class="node-sub" x="402" y="200" text-anchor="middle">local compatibility-id lookup &middot; OAuth scope check</text>
       </g>
 
       <g class="node" data-node="agent">
@@ -232,12 +236,6 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
         <text class="node-title" x="402" y="364" text-anchor="middle">TENANTCONN &rarr; PAYROLL HANDLER</text>
         <text class="node-sub" x="402" y="382" text-anchor="middle">set_config(app.tenant_id) &middot; ListEmployeePayslips</text>
         <text class="node-sub" x="402" y="398" text-anchor="middle">runs only after an explicit allow</text>
-      </g>
-
-      <g class="node" data-node="authdb">
-        <rect x="640" y="156" width="184" height="64" rx="10"/>
-        <text class="node-title" x="732" y="181" text-anchor="middle">AUTH DB</text>
-        <text class="node-sub" x="732" y="199" text-anchor="middle">AUTH_DATABASE_URL &middot; legacy mapping</text>
       </g>
 
       <g class="node" data-node="hrmsdb">
@@ -272,6 +270,11 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
       <span class="stage-tag" id="stageTag"></span>
       <h2 id="stepTitle"></h2>
     </div>
+    <div class="scenario-switch path-switch" id="pathSwitch" role="tablist" aria-label="Trace this step as implemented, or as documented" hidden>
+      <button class="scenario-btn active" data-path="code" role="tab" aria-selected="true">As implemented <span class="tag code">CODE</span></button>
+      <button class="scenario-btn" data-path="doc" role="tab" aria-selected="false">As documented <span class="tag doc">CANONICAL</span></button>
+    </div>
+    <p class="path-hint" id="pathHint" hidden>hrms-core's own vocabulary and Auth's published contract diverge here — pick a lens.</p>
     <p id="stepBody"></p>
     <div id="outcomeSlot"></div>
     <div class="blocks" id="blocks"></div>
@@ -421,44 +424,27 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
       ]; }
     },
     {
-      stage: "HRMS-CORE -> AUTH DB (SQL)", title: "Bind to an HRMS identity, then the scope gate",
-      nodes: ["bind", "authdb"], arrows: ["bind-authdb", "authdb-ret"],
-      body: function () { return "Two identity systems coexist. The canonical subjects in the token drive authorization; the payroll tables and row-level security still key on numeric legacy ids. The bridge is one query, run inside the authenticator, directly against the Auth database."; },
-      blocks: function () { return [
-        { label: "Resolve the canonical principal", where: "platform/tenants/tenants.go:57-85 - $1 = tenant_id claim, $2 = membership_id claim", status: "implemented", kind: "sql", text: L([
-          "SELECT mapping.legacy_user_id, membership.tenant_id, legacy.email,",
-          "    ARRAY(",
-          "        SELECT role.name",
-          "        FROM user_roles AS user_role",
-          "        JOIN roles AS role ON role.id = user_role.role_id",
-          "        WHERE user_role.user_id = mapping.legacy_user_id",
-          "          AND role.tenant_id = membership.tenant_id",
-          "        ORDER BY role.name",
-          "    )",
-          "FROM legacy_user_identity_mappings AS mapping",
-          "JOIN identities AS identity",
-          "  ON identity.id = mapping.identity_id AND identity.status = 'active'",
-          "JOIN tenant_memberships AS membership",
-          "  ON membership.id = mapping.membership_id",
-          " AND membership.identity_id = mapping.identity_id AND membership.status = 'active'",
-          "JOIN tenants AS tenant",
-          "  ON tenant.id = membership.tenant_id AND tenant.status = 'active'",
-          "JOIN users AS legacy",
-          "  ON legacy.id = mapping.legacy_user_id",
-          " AND legacy.tenant_id = membership.tenant_id AND legacy.status = 'active'",
-          "WHERE tenant.subject = $1",
-          "  AND membership.subject = $2",
-          "  AND mapping.migration_state IN ('backfilled', 'verified')"
+      stage: "HRMS-CORE — canonical identity, resolved locally",
+      nodes: ["bind"], arrows: [],
+      titleCode: "Bind to an HRMS identity: the local resolver, not the Auth DB join",
+      bodyCode: function () { return "internal/platform/identity.LocalResolver.ResolveCanonicalPrincipal (resolver.go) replaces internal/platform/tenants, which opened a second connection straight into Auth's own Postgres (AUTH_DATABASE_URL) on every request. The replacement queries two of hrms-core's own tables — tenants and principal_identities — and mints a fresh row the first time it sees a new tenant or principal, instead of returning a lookup miss."; },
+      blocksCode: function () { return [
+        { label: "Resolved locally", where: "hrms-core internal/platform/identity/resolver.go:71-83, 110-159 (agentlabs-hrms-core#165)", status: "implemented", kind: "sql", text: L([
+          "SELECT id FROM tenants WHERE auth_tenant_subject = $1",
+          "SELECT user_id, email FROM principal_identities WHERE tenant_id = $1 AND membership_id = $2",
+          "",
+          "-- both tables are hrms-core's own (DATABASE_URL), not Auth's;",
+          "-- not RLS-scoped -- TenantConn has not run yet at this point in the chain",
+          "-- roles is always nil now -- nothing downstream reads role names any more (step 6)"
         ]) },
         { label: "Result -> request context", where: "canonical_auth.go:92-108, 149-161", status: "example", kind: "go", text: L([
-          "legacy_user_id   = 5121          -- users.id in the Auth DB; the handler's user_id",
-          "legacy_tenant_id = 7             -- tenants.id; becomes app.tenant_id for RLS (step 8)",
-          "email            = vinay@acme.example",
-          "roles            = [\"Employee\"]   -- role NAMES from the Auth DB, not permissions",
-          "",
-          "no row  ->  401 invalid token  (\"canonical principal is not active or mapped\")"
+          "legacy_user_id   = 5121          -- hrms-core's own principal_identities.user_id",
+          "legacy_tenant_id = 7             -- hrms-core's own tenants.id; becomes app.tenant_id for RLS (step 8)",
+          "email            = vinay@acme.example   -- persisted at login from Auth's OIDC UserInfo, not re-read here",
+          "roles            = []            -- always empty; see the Auth Agent bundle instead (step 6)"
         ]) },
-        { label: "Scope gate: RequireOAuthScope(\"hrms.access\")", where: "canonical_auth.go:20, 172-188", status: "implemented", kind: "http", text: L([
+        { label: "Behavior changed: an unmapped principal is now provisioned, not rejected", status: "implemented", kind: "note", text: "The old direct-SQL bridge failed the request when no matching row existed in Auth's database. The local resolver instead mints a fresh tenants/principal_identities row the first time it sees a well-formed tenant or membership subject. That's judged safe because canonical_auth.go's ES256/JWKS verification has already run by this point — the subject is not unauthenticated input, it's a claim Auth itself already vouched for (resolver.go:51-63's own doc comment makes this argument explicitly)." },
+        { label: "OAuth scope gate (unchanged by this fix)", where: "canonical_auth.go:20, 172-188", status: "implemented", kind: "http", text: L([
           "requires the exact, case-sensitive scope \"hrms.access\" among the token's OAuth scopes",
           "",
           "HTTP/1.1 403 Forbidden",
@@ -468,6 +454,21 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
           "{\"error\":{\"code\":\"INSUFFICIENT_SCOPE\",\"message\":\"required OAuth scope is missing\"}}"
         ]) },
         { label: "Two meanings of scope", status: "implemented", kind: "note", text: "This gate reads the OAuth scope claim - a coarse \"may this client type reach HRMS at all\" check. It is unrelated to reach over employees, which is the scope on a permission assignment in the bundle (step 6). The Handbook's warning about the word \"scope\" is exactly this collision." }
+      ]; },
+      titleDoc: "Consumer identity resolution: what Auth's own contract requires",
+      bodyDoc: function () { return "Auth's integration contract draws this boundary directly: consumer applications \"use Auth as an identity provider and authorization control plane. They do not read the Auth database.\" The beta cutover (Auth PR #237) enforced that boundary structurally, not just by convention — migration 56 dropped the tables a direct join would have depended on. Auth's own cutover record names hrms-core as one of the consumers that has completed the move to this boundary."; },
+      blocksDoc: function () { return [
+        { label: "Auth's own integration rule", where: "agentlabs-auth docs/INTEGRATION.md — \"Integration rules\"", status: "implemented", kind: "note", text: "\"Do not grant consumer services direct database access to Auth.\" / \"Legacy identity/application projection writes and direct access to their retired tables are unsupported.\"" },
+        { label: "What actually retired it", where: "agentlabs-auth docs/architecture/decisions/legacy-migration-and-enforcement-boundaries.md — \"Final cutover outcome\"; migrations/000056_retire_legacy_auth_compatibility.up.sql", status: "implemented", kind: "note", text: "Migration 56 (Auth PR #237, beta cutover 2026-09-04) dropped users, roles, user_roles, legacy_user_identity_mappings, legacy_application_mappings, auth_compatibility_usage, refresh_tokens, and applications outright — every table a direct join would have used. The migration's own gate refuses to run at all while any listed consumer is still \"pending\"." },
+        { label: "hrms-core's status in Auth's own cutover record", where: "agentlabs-auth contracts/release00/legacy-auth-consumer-cutover.v1.json", status: "implemented", kind: "json", text: L([
+          '"agentlabs-hrms-core": {',
+          '  "status": "complete",',
+          '  "observed_commit": "3a87931ea536c8b617e6e391c14affd03ade9f65",',
+          '  "notes": "Current main uses canonical identity and Auth Agent authorization;',
+          '            the remaining local-identity backfill command is pre-upgrade-only."',
+          '}'
+        ]) },
+        { label: "What this contract deliberately doesn't say", status: "implemented", kind: "note", text: "Auth's documentation defines the boundary - no direct database access, ever - but says nothing about how a consumer resolves its own compatibility ids once that access is gone; that mechanism is application-owned. hrms-core's actual replacement (LocalResolver, the tenants/principal_identities tables) exists only in hrms-core's code, not in any agentlabs-auth doc. Switch to \"As implemented\" to see it." }
       ]; }
     },
     {
@@ -735,9 +736,10 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
 
   var scenarioKey = "allow";
   var stepIndex = 0;
+  var pathMode = "code";
   var playTimer = null;
-  var NODE_IDS = ["client", "verify", "bind", "agent", "handler", "authdb", "hrmsdb", "auth"];
-  var ARROW_IDS = ["client-req", "client-res", "verify-jwks", "bind-authdb", "authdb-ret", "agent-token", "agent-bundle", "bundle-ret", "handler-db", "db-ret"];
+  var NODE_IDS = ["client", "verify", "bind", "agent", "handler", "hrmsdb", "auth"];
+  var ARROW_IDS = ["client-req", "client-res", "verify-jwks", "agent-token", "agent-bundle", "bundle-ret", "handler-db", "db-ret"];
 
   var dotsEl = document.getElementById("dots");
   STEPS.forEach(function (_, i) {
@@ -776,7 +778,7 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
     var step = STEPS[stepIndex];
     var ok = s.outcome === "allow";
 
-    document.querySelectorAll(".scenario-btn").forEach(function (b) {
+    document.querySelectorAll(".scenario-switch:not(.path-switch) .scenario-btn").forEach(function (b) {
       var on = b.dataset.scenario === scenarioKey;
       b.classList.toggle("active", on);
       b.setAttribute("aria-selected", on ? "true" : "false");
@@ -799,10 +801,24 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
       }
     }
 
+    var dual = !!step.blocksDoc;
+    var pathSwitchEl = document.getElementById("pathSwitch");
+    var pathHintEl = document.getElementById("pathHint");
+    pathSwitchEl.hidden = !dual;
+    pathHintEl.hidden = !dual;
+    if (dual) {
+      document.querySelectorAll(".path-switch .scenario-btn").forEach(function (b) {
+        var on = b.dataset.path === pathMode;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+    }
+    var useDoc = dual && pathMode === "doc";
+
     document.getElementById("stepNum").textContent = stepIndex + 1;
     document.getElementById("stageTag").textContent = step.stage;
-    document.getElementById("stepTitle").textContent = step.title;
-    document.getElementById("stepBody").textContent = step.body(s);
+    document.getElementById("stepTitle").textContent = useDoc ? step.titleDoc : (dual ? step.titleCode : step.title);
+    document.getElementById("stepBody").textContent = useDoc ? step.bodyDoc(s) : (dual ? step.bodyCode(s) : step.body(s));
 
     var outcomeSlot = document.getElementById("outcomeSlot");
     outcomeSlot.innerHTML = "";
@@ -815,7 +831,7 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
 
     var blocksEl = document.getElementById("blocks");
     blocksEl.innerHTML = "";
-    step.blocks(s).forEach(function (b) {
+    (useDoc ? step.blocksDoc(s) : (dual ? step.blocksCode(s) : step.blocks(s))).forEach(function (b) {
       var wrap = document.createElement("div");
       wrap.className = "block " + b.status;
       var head = document.createElement("div");
@@ -872,8 +888,11 @@ h2#stepTitle { flex-basis: 100%; margin: 8px 0 0; font-size: 21px; font-weight: 
 
   document.getElementById("prevBtn").addEventListener("click", function () { stop(); stepIndex = Math.max(0, stepIndex - 1); render(); });
   document.getElementById("nextBtn").addEventListener("click", function () { stop(); stepIndex = Math.min(STEPS.length - 1, stepIndex + 1); render(); });
-  document.querySelectorAll(".scenario-btn").forEach(function (b) {
+  document.querySelectorAll(".scenario-switch:not(.path-switch) .scenario-btn").forEach(function (b) {
     b.addEventListener("click", function () { stop(); scenarioKey = b.dataset.scenario; render(); });
+  });
+  document.querySelectorAll(".path-switch .scenario-btn").forEach(function (b) {
+    b.addEventListener("click", function () { stop(); pathMode = b.dataset.path; render(); });
   });
   document.getElementById("playBtn").addEventListener("click", function () {
     if (playTimer) { stop(); return; }
