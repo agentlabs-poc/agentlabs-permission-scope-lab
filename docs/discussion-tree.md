@@ -19,6 +19,12 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-041 approved REGISTRATION-003.** Relationship validation is an
+  explicit application-level registration choice; enabled applies to every
+  grant, including existing and role-based grants. Q-042 is active: enabling
+  validation when existing grants are incompatible. Earlier positions below
+  are retained history, not live questions.
+
 - **Current: Q-040 approved REGISTRATION-002 with optional relationship
   declarations in registration.** Q-041 is active: what Auth validates when
   that metadata is absent. Individual permission/key registration and runtime
@@ -197,7 +203,9 @@ Authorization handbook
 │   │   ├── Explicit key meanings and target mappings [formerly active; settled: Q-038; refines SCOPE-004]
 │   │   ├── Shared definition contract for validation/evaluation [formerly active: Q-039; registration refinement agreed]
 │   │   ├── Permission-scope compatibility declaration [formerly active: Q-040; optional feature agreed REGISTRATION-002]
-│   │   └── Omitted optional relationship metadata [active: Q-041]
+│   │   ├── Omitted optional relationship metadata [formerly active: Q-041; superseded by explicit choice]
+│   │   ├── Upfront application choice; all-grants validation when enabled [settled: REGISTRATION-003 / Q-041]
+│   │   └── Enabling validation with incompatible existing grants [active: Q-042]
 │   ├── AND within scope; alternatives through complete grants [settled: SCOPE-008]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
@@ -296,6 +304,8 @@ Update: Q-039 is now approved as refined in REGISTRATION-001: applications regis
 Q-040 → explicit permission-scope compatibility declarations (open).
 Update: Q-040 is approved with optionality qualification; REGISTRATION-002 binds optional declarations through registration.
 Q-041 → behavior when optional relationship metadata is absent (proposed, open).
+Update: Q-041 approved as refined in REGISTRATION-003: explicit upfront application-level choice, mandatory checks for every grant when enabled; omission-based mode inference superseded.
+Q-042 → enabling relationship validation when existing grants are incompatible (open).
 
 The log retains these for traceability; they are not current options:
 

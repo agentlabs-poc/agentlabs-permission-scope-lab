@@ -1,5 +1,23 @@
 # Handbook reconciliation register
 
+## Checkpoint following edd7635 — refined Q-041 approval
+
+REGISTRATION-003 records the explicit application-level choice approved in
+Q-041: enabling relationship validation makes it mandatory for every grant,
+including existing and role-based grants. Disabled mode retains other Auth
+validation and runtime scope enforcement. Missing relationship metadata cannot
+silently turn off an enabled mode.
+
+The earlier omission-based Q-041 proposal is preserved and explicitly
+superseded; it is not the approved rule. No field name, missing-choice default,
+automatic grant mutation, or revalidation algorithm is adopted. Q-042 remains
+open: enabling validation when existing grants are incompatible.
+
+Docs-only verification passed: `git diff --check`, 19 Markdown files, 96 local
+links, 42 JSON blocks, and 115 unique decision/question references present in
+the tree. REGISTRATION-003 is AGREED and Q-042 remains OPEN. No application
+source or implemented authorization behavior changed.
+
 ## Checkpoint following b516ff8 — qualified Q-040 approval
 
 REGISTRATION-002 records Q-040's approval with support-relationship declarations

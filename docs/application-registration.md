@@ -1,5 +1,11 @@
 # Application registration and Auth validation
 
+Current: REGISTRATION-003 / Q-041 is approved. Each application explicitly
+declares upfront whether relationship validation is enabled or disabled.
+Enabled means mandatory validation for every grant, not per-grant optionality.
+Earlier omission-based proposals below are preserved but superseded by this
+explicit registration-level choice.
+
 Latest: REGISTRATION-002 / Q-040 is approved with the user's qualification that
 declaring supported permission-scope relationships is an optional feature of
 the registration flow. Individual permission and scope registration remains
@@ -94,7 +100,10 @@ evaluate scope under explicitly supported application meanings. Unsupported
 relationships cannot become unrestricted access by ignoring scope entries.
 Valid registration is also not authority for a caller to issue a grant.
 
-### Q-041 — omitted optional declarations, proposed
+### Q-041 — historical omission-based proposal, superseded
+
+The proposal below was refined before approval: omission does not choose the
+mode. The application explicitly declares that choice under REGISTRATION-003.
 
 Recommended interpretation: without relationship metadata, Auth checks registered
 permissions and keys, canonical syntax, declared constraints, and grant-issuance
@@ -108,6 +117,45 @@ permission, absent versus empty, partial or invalid declarations, multi-key
 combinations, role changes, and metadata removal remain open. Calling the
 feature optional does not adopt silent fallback for invalid declarations.
 
+## Explicit application-level choice — REGISTRATION-003 / Q-041, agreed
+
+The application declares the relationship-validation choice upfront in its
+registration. Optionality means choosing whether to enable the feature for
+the application, not choosing whether an individual grant is checked.
+
+| Declared choice | Auth's obligation |
+|---|---|
+| Enabled | Every grant must pass the declared permission-scope relationship checks; there is no per-grant bypass. |
+| Disabled | Auth still checks registered permissions and scope keys, canonical format, declared constraints, and issuance authority, but does not check permission-scope compatibility. |
+
+In either mode, the endpoint-owned gate must establish that the actual target
+satisfies the complete scope before permitting access. Disabled compatibility
+validation does not authorize unsupported runtime relationships or ignoring
+scope restrictions.
+
+For example, if the enabled application's declared support contract excludes
+`dept` for repository-read, a grant combining them is rejected even if both
+identifiers are individually registered. Missing relationship metadata cannot
+silently disable an enabled mode or waive its validation requirement.
+
+"Every grant" includes role-based grants and existing grants, not only new
+direct grants. Registration or role changes that affect compatibility therefore
+need revalidation mechanics preserving this invariant; the approval does not
+yet select those mechanics, propagation timing, or a migration algorithm.
+
+No configuration field name or JSON representation is adopted. The choice
+must be explicit: there is no agreed omission-based default. Handling a missing
+choice, empty/partial declarations, multi-key combinations, role expansion,
+authorized mode changes, and compatibility updates still needs detail.
+
+### Q-042 — enabling validation with existing grants, open
+
+Next question: when enabling relationship validation would leave existing
+grants incompatible, should activation be rejected until those grants have
+been explicitly corrected? This is not yet decided. The user has agreed that
+enabled mode covers all grants; neither grandfathering invalid grants nor
+silently deleting, narrowing, or disabling them is adopted by this question.
+
 ## Still open
 
 - Registration representation, APIs, storage, distribution, and versioning.
@@ -117,6 +165,8 @@ feature optional does not adopt silent fallback for invalid declarations.
   grants and role evolution; Q-040 begins this branch.
   Update: Q-040 now settles optional declarations in registration. Q-041 and
   the detailed compatibility mechanics remain open.
+  Latest: Q-041 now settles the explicit application-level choice and all-grants
+  requirement. Q-042 begins existing-grant activation/change handling.
 - Concrete-reference checks, removal/rename behavior, existing grants, and
   synchronization/freshness guarantees.
 - Administrative scope containment and exact rejection/failure contracts.

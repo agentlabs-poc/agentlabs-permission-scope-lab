@@ -21,6 +21,12 @@ Q-040 subsequently approves optional permission-scope support-relationship
 declarations through registration (REGISTRATION-002). Representation and
 omission behavior (Q-041) remain open; this qualifies the earlier checkpoint.
 
+Q-041 then settles REGISTRATION-003: applications explicitly enable or disable
+relationship validation upfront. Enabled applies to all grants, including
+existing and role-based grants; disabled does not weaken runtime enforcement.
+This supersedes omission-based mode proposals. Change/revalidation mechanics
+remain open, beginning with Q-042.
+
 ## Read the current chapters
 
 | Material | What it preserves |
