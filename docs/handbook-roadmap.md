@@ -141,6 +141,9 @@ working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| DECISION-005 | AGREED AS REFINED | The evaluator supplies error_message and error_message_reason, both reach the UI, and the UI controls presentation; error_message is more user-facing. | User corrected the application-authored mapping proposal and explicitly rejected keeping the second message server-side in Q-053-A. Evaluator ownership avoids reconstructing the explanation in applications; both delivered fields are client-visible regardless of display. Previous proposals and rationale remain in decision-results.md. Exact value encoding, full schema, and safe-content rules remain open. |
+| DECISION-006 | AGREED | Evaluation errors use the same two message fields as denials, without collapsing the distinction between them. | User answered Q-054 “yes.” Consistent UI presentation does not imply equivalent authorization meaning: a timeout is not proof of missing permission. Both cases still stop protected execution. See decision-results.md for example, rationale, counterexample, and outstanding schema questions. |
+| DECISION-007 | PROPOSED | Add error_code for a stable machine-readable cause alongside the two readable messages. | Q-055 connects Q-052's machine-readable-reason requirement to the later two-message format. Software should not parse prose to determine cause. The alternative is using error_message_reason itself as a code. No new field or code catalogue is approved yet; see decision-results.md. |
 | DECISION-003 | AGREED | Completed authorization decisions are allow/deny; inability to complete evaluation is a separate error, not a third authorization decision. Deny and error both prevent protected execution. | User approved Q-051, requested a concrete Auth-service timeout example, and confirmed it. Required authority loading times out with no sufficient valid authority already available: this proves inability to evaluate, not absence of permission. No prepared handoff, error transport, JSON schema, HTTP mapping, or cache policy adopted. See decision-results.md for rationale, alternatives, and consequences. |
 | DECISION-004 | AGREED | Every completed deny must include an internal machine-readable reason for the calling endpoint and diagnostics. | User approved Q-052: “yes deny should include reason, very important” and reaffirmed recording rationale. A bare deny loses known cause information, forces callers to guess or reconstruct evaluation, and weakens diagnosis/audit. Reasons must reflect established conclusions, not mislabel timeouts or individual candidate failures. Exact codes/fields, precedence, and client disclosure remain open. See decision-results.md for rationale, alternatives, examples, and consequences. |
 | SVG-001 | APPROVED PRESENTATION | Show one client request through authentication middleware, endpoint handler, embedded Auth Agent, Auth authority loading, constrained application database access, and the response. Keep middleware, handler, and agent inside the application boundary and retain the one endpoint-owned authorization gate. | User found the responsibility-first SVG difficult to follow, preferred the earlier flow style, and approved the proposed client-to-handler layout. Short numbered arrows show execution order; detailed principles stay in the overview. The Finance certificate example does not revive prepared results, mandatory resolvers, fixed remote calls, or a new decision schema. Previous SVG/overview are archived; see system-overview.md. This is a presentation decision, not a new authorization rule. |
@@ -286,6 +289,27 @@ working handbook's checkpoint practice for the review checklist.
 | Q-048 | ~~OPEN~~ ANSWERED | Should a resolved grant be a request-evaluation view of an existing grant, preserving its source identity, associated permissions/scope/conditions, and applicable membership/delegation dependencies, rather than a new independent assignment or a bare permission list? | Next consolidation of RESOLUTION-003/004 and the subset invariant, not a new wire schema. Concrete resolved-grant fields and the distinction between authority expansion, request-specific evaluation, and the final decision remain to be discussed. Update: user approved the evaluation-ready dependent view and added obtaining Vinay's memberships, then grants for Vinay and his membership teams. RESOLUTION-006 records the meaning and logical flow. The earlier open-status wording is history; concrete fields and freshness remain open. The grant chapter captures rationale and examples. |
 
 ## Resume here
+
+Latest: Q-053 / DECISION-005 is **agreed as refined**: the evaluator provides
+`error_message` and `error_message_reason`; both reach the UI, which controls
+presentation. Q-053-A's server-only second message proposal is not adopted.
+Both values are client-visible; complete schemas, reason-value encoding, and
+safe-content rules remain open. The chapter preserves earlier proposals and
+rationale. **Q-054 / DECISION-006 is agreed**: use the same two message fields for
+evaluation errors without collapsing the distinction from completed denials.
+**Q-055 / DECISION-007 is proposed**: add error_code to carry the stable
+machine-readable cause while keeping the two messages readable. No new field is
+approved until that question is answered. Continue one question at a time.
+
+Historical checkpoint, superseded by the refinement above:
+
+Current direction: Q-053 / DECISION-005 was revised by the user: the evaluator
+provides both client and internal messages; the UI decides presentation. The
+original application-authored mapping proposal is preserved as superseded history
+in decision-results.md. **Q-053-A remains proposed**: retain the internal message
+server-side and send only the client-safe message to the requesting UI. The
+chapter records rationale and the response-inspection counterexample. Exact
+record layout and HTTP mapping remain open.
 
 Latest update: Q-052 / DECISION-004 is **agreed**. Every completed deny includes
 an internal machine-readable reason. The user emphasized its importance and the

@@ -85,6 +85,15 @@ machine-readable reason. Rationale, alternatives, examples, and consequences are
 recorded in the decision-results chapter. Continue one question at a time;
 the result schema, reason catalogue, and public error representation remain open.
 
+Q-053 / DECISION-005 is **agreed as refined**: evaluator-provided `error_message`
+and `error_message_reason` both reach the UI; the UI controls presentation.
+Q-053-A's server-only second-message proposal is not adopted.
+**Q-054 / DECISION-006 is agreed:** use the same message fields for evaluation
+errors while keeping them distinct from completed denials.
+**Q-055 / DECISION-007 is proposed:** add error_code for a stable machine-readable
+cause alongside the readable messages. See the
+[decision-results chapter](decision-results.md) for rationale and alternatives.
+
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**
 by this reconciliation. Do not reopen the settled endpoint-policy shape or

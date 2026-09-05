@@ -281,8 +281,12 @@ from evaluation errors. The approved Auth-service timeout example and rationale
 are in [decision results](decision-results.md). Existing fail-closed and
 single-gate rules remain unchanged. Q-052 / DECISION-004 is also **agreed**:
 every completed deny must include an internal machine-readable reason. The
-chapter records the rationale and consequences; codes, fields, and public
-disclosure remain open.
+chapter records the rationale and consequences. Q-053 / DECISION-005 settles
+evaluator-provided `error_message` and `error_message_reason`, both delivered to
+the UI for presentation. Q-054 / DECISION-006 uses these same fields for evaluation
+errors without conflating errors with completed denials. Q-055 / DECISION-007
+proposes, but has not approved, a separate stable `error_code`. Full schemas,
+reason-code definitions, and safe-content rules remain open.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)

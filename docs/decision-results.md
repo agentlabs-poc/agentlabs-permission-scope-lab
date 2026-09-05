@@ -126,3 +126,163 @@ reason names, fields, precedence, public responses, and reasons for other outcom
 remain separate questions. No JSON schema or exhaustive reason catalogue is
 adopted here. “No authorizing grant” is an explanatory example, not an approved
 wire-level code. HC-08-02 remains open until its full closure criterion is met.
+
+## Q-053 / DECISION-005 — client-facing disclosure of denial reasons
+
+### Agreed refinement — both evaluator-provided messages reach the UI
+
+The user explicitly answered Q-053-A: “the messages should reach ui. with
+error_message, error_message_reason. the error message is more user facing.”
+The evaluator supplies both named fields, and both reach the requesting UI.
+`error_message` is the more user-facing message; `error_message_reason` supplies
+the reason. The UI decides how to present them. The earlier recommendation to
+keep the second message server-side is **not adopted**.
+
+Rationale: the evaluator knows the established cause and can supply a consistent
+explanation without applications reconstructing it. Delivering both gives the UI
+the explanatory information as well as the primary display message. Calling the
+second field “internal” no longer describes its visibility: it is client-visible
+even if the UI does not display it. The deny/error distinction remains Q-051;
+message delivery does not permit execution or alter the decision.
+
+For illustration, the primary message could say “You do not have access to this
+certificate,” and the reason could explain “No grant authorizes this certificate
+read within Finance.” This describes meaning, not a finalized choice between
+reason prose and a machine-readable code. Q-052's machine-readable reason
+requirement remains; how it maps to this format is still to be clarified, without
+silently adding a third field.
+
+Security consequence: both delivered fields are inspectable by the recipient.
+Recommendation, not a separately approved redaction contract: the evaluator
+should keep secrets, unrelated users' data, and sensitive server diagnostics out
+of both fields. UI hiding is not a confidentiality boundary. Detailed safe-content
+rules remain open; the delivery decision itself is settled.
+
+The field names and delivery are agreed; the complete versioned result envelope,
+exact value contracts, and HTTP mapping remain open.
+
+### Earlier direction — evaluator supplies both messages, retained as history
+
+The user corrected the original proposal: “everything is provided from evaluator,
+it can have 2 records client message and internal message. ui decides how to show
+it.” Record evaluator ownership of both messages and UI ownership of presentation
+as the user's direction. Do not require the application to invent the client
+message from an internal reason. Exact record/field layout is not finalized.
+
+Rationale for this arrangement: the evaluator already knows the established
+cause, so it can produce consistent client-facing wording and internal diagnostic
+detail together. The UI can choose how to present the client-facing information
+without reproducing authorization reasoning. Q-052's machine-readable reason
+remains required; the messages do not silently replace that requirement.
+
+Example, explanatory wording only:
+
+- Client message: “You do not have access to this certificate.”
+- Internal message: “No complete grant authorizes certificate.read within Finance.”
+
+### Q-053-A — server-only second message proposal, not adopted; historical
+
+Recommend that both messages be available to the server-side endpoint, but only
+the client-safe message be delivered to the ordinary requesting client. The UI
+controls its presentation. Server-side diagnostic access remains separate.
+Hiding an internal message in the UI would not protect it if it were already
+included in a browser response: the recipient could inspect the response itself.
+
+This delivery boundary is **proposed, not yet approved**. The user's statement
+does not establish that internal diagnostics should be sent to the browser.
+Exact public response, localization, internal-access policy, and JSON schema
+remain open; no runtime behavior is implemented.
+
+**Q-053-A:** Should the endpoint keep the internal message server-side and send
+only the client-safe message to the requesting UI?
+
+### Original proposal — superseded by the user's direction, retained as history
+
+Status: **PROPOSED, not approved.** Q-052 requires an internal reason. This
+question concerns only who controls what the external client receives.
+
+Recommend that the evaluator provide the required reason to the endpoint, while
+the application explicitly maps it to a safe client-facing response. Do not
+automatically forward internal reasons or diagnostic details. The mapping may
+be shared application infrastructure; this does not require each handler to
+invent its own policy or add fields to the endpoint declaration.
+
+Example: the internal denial means “no authorizing grant for certificate.read
+within Finance.” The application could return “You do not have access to this
+certificate.” These are explanatory messages, not finalized codes or response
+schemas. The application must not turn the denial into authorization or replace
+the internally established reason with its public wording.
+
+Rationale: internal diagnosis needs the actual cause, but permission structure,
+membership, or other contextual details may not be suitable for the requesting
+client. The application knows the disclosure needs of its API and audience.
+Separating these responsibilities preserves internal explanation without making
+all internal detail public by default.
+
+The alternative is to forward the evaluator's reason directly. That is simpler
+but couples diagnostic detail to the public API and provides no explicit
+disclosure boundary. A deliberately approved safe public reason may still be
+specific; the proposal does not require every client to receive identical text.
+
+Counterexample: serializing the entire internal denial object to a client without
+an explicit safe mapping would bypass this boundary. Mapping the public response
+must not erase the internal reason or permit protected execution.
+
+Exact public codes, HTTP status, logging/redaction rules, and whether to conceal
+the existence of particular records remain open. No runtime change is adopted.
+
+**Q-053:** Should the application control client-facing disclosure through an
+explicit safe mapping, rather than forwarding internal denial reasons automatically?
+
+## Q-054 / DECISION-006 — same message fields for evaluation failures
+
+Status: **AGREED.** The user answered “yes” to using the same two fields for
+evaluation errors. Original status retained as history: ~~PROPOSED, not approved~~.
+
+Evaluation errors use the same `error_message` and `error_message_reason` fields
+as denials. The evaluator provides both, both reach the UI, and the UI controls
+presentation. Their distinct meaning under Q-051 remains: a completed denial is
+not inability to finish evaluation, even when their message formats match.
+
+Rationale: the UI can present both kinds of failure consistently without separate
+display contracts, while the actual outcome still distinguishes lack of authority
+from an operational evaluation failure. Sharing a message structure neither
+creates a third completed decision nor revives a prepared state. Both cases still
+block protected execution.
+
+Example: an Auth timeout with no sufficient valid authority could carry the
+primary message “We could not check your access,” with
+the reason meaning “The authorization service did not respond in time.” These
+are illustrative meanings, not reason-code or retry-policy decisions.
+
+The alternative is separate message-field names for denial and evaluation
+failure. That distinguishes their presentation structurally, but forces the UI
+to handle two message formats for the same display purpose. Reusing message
+fields must not erase the distinct decision/error status. No particular status
+field or transport wrapper is selected by this question.
+
+Counterexample: identical message keys do not justify logging an Auth timeout as
+a completed denial or proceeding with protected execution. Complete versioned
+envelopes, exact reason encoding, and safe-content rules remain open. This narrow
+agreement does not finish the full HC-08-02 checkpoint.
+
+## Q-055 / DECISION-007 — stable code alongside readable messages
+
+Status: **PROPOSED, not approved.** Recommend an `error_code` alongside the two
+readable messages, to represent the machine-readable cause required by Q-052.
+For an Auth timeout the illustrative code could be `AUTH_SERVICE_TIMEOUT`, while
+`error_message` and `error_message_reason` remain readable explanations.
+
+Rationale for proposing an additional field: software can identify the cause
+without parsing wording that might be edited or translated. UI explanation and
+machine classification then have distinct responsibilities. The code would be
+provided by the evaluator, not inferred by the UI from text. This does not by
+itself settle the separate completed-decision versus evaluation-error envelope.
+
+The alternative is to make `error_message_reason` itself a stable code, avoiding
+a new field but giving up its readable explanation, or to parse its prose, which
+makes machine behavior depend on wording. Exact code names, catalogue, evolution,
+and the full versioned schema are not adopted by this proposal.
+
+**Q-055:** Should we add `error_code` for the stable machine-readable cause while
+keeping both agreed message fields readable?
