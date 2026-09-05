@@ -1,5 +1,28 @@
 # Handbook reconciliation register
 
+## Checkpoint following 02ae3c9 — Q-046 ordinary grant lifecycle
+
+Q-046 approves ADMIN-006: validly issued ordinary human/group grants do not
+become invalid merely because their issuing administrator loses issuance
+authority. The grant chapter preserves the reasoning, alternative, example,
+dependency distinctions, security consequences, and remaining lifecycle details.
+Earlier proposed/open wording is retained and marked as history by this update.
+
+The continuing dependencies in RESOLUTION-004, DELEGATION-002, and AUTHORITY-002
+are unchanged. Issuance provenance is not confused with a supporting membership
+or human-delegation relationship. Removing issuance authority is not automatic
+cleanup of previously issued grants; explicit authorized revocation is required
+where withdrawal is intended. No schema or application behavior changes.
+
+Q-047 is open: request versus resolved request at the endpoint-owned gate.
+This returns to the request/resolution branch without declaring administrative
+scope encoding, lifecycle mechanics, or parked registration work complete.
+
+Docs-only verification passed: 23 Markdown files, 137 local links, 44 JSON
+blocks, and 123 unique decision/question IDs represented in the tree. Checks
+also covered agreed/open status, rationale coverage, retained earlier content,
+and `git diff --check`. No application source changed.
+
 ## Checkpoint following ac6062e — Q-045 with rationale
 
 Q-045 approves GROUP-001-A and GROUP-003: Auth-owned authorization groups and

@@ -1,5 +1,14 @@
 # Authorization Handbook — working edition
 
+Current: Q-046 approves ordinary grant lifecycle independence from the issuing
+administrator's later loss of issuance authority (ADMIN-006). The
+[grant chapter](grant-model.md#ordinary-grant-lifecycle--admin-006--q-046-agreed)
+records rationale, the cascading alternative not adopted, examples, and explicit
+revocation consequences. Human-dependent automation remains unchanged.
+Next: Q-047, request versus resolved request at the one endpoint-owned gate.
+Administrative encoding and detailed lifecycle mechanics remain open.
+Checkpoint summaries below are retained history, not additional live positions.
+
 Q-045 settles Auth-owned authorization groups/memberships, optional application
 sync, and human-only groups. [Groups and membership](groups-and-membership.md)
 records the rationale, rejected alternative, examples, and remaining mechanics.

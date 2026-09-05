@@ -1,5 +1,12 @@
 # Explanation coverage audit — through Q-043
 
+Q-046 follow-up: the grant chapter records ADMIN-006, the distinction between
+issuance provenance and continuing authority dependency, the cascading alternative
+not adopted, Maya/Vinay's example, four lifecycle outcomes, explicit-revocation
+consequences, and limits for invalid issuance and incident-response mechanics.
+Human-dependent automation and group-membership dependencies remain explicit.
+This is a focused coverage update, not a declaration that the handbook is complete.
+
 Q-045 follow-up: [groups and membership](groups-and-membership.md) records the
 two approved policies, reasons for central membership authority and human-only
 groups, the alternative not selected, five example/counterexample cases,

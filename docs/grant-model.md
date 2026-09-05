@@ -1,5 +1,56 @@
 # Working handbook chapter: grants, assignments, and roles
 
+## Ordinary grant lifecycle — ADMIN-006 / Q-046, agreed
+
+A validly issued ordinary human/group grant does not become invalid merely
+because its issuing administrator later loses grant-administration authority.
+The grant remains subject to its own scope, validity, conditions, revocation,
+and applicable recipient dependencies. Issuance provenance is retained for
+audit; it is not, by itself, a continuing authority dependency.
+
+### Rationale and alternative
+
+Creating an ordinary grant is an authorized administrative action, not lending
+the administrator's personal business access. ADMIN-002 already separates
+providing access from using it. Routine rotation of administrative duties
+should therefore not unexpectedly withdraw organizational access.
+
+The alternative considered was to invalidate every grant issued through an
+administrator when that administrator loses issuance authority. That would
+provide cascading withdrawal, but make all those grants depend on the
+administrator's continuing role and create potentially disruptive chains.
+Q-046 does not adopt that dependency for ordinary human/group grants.
+
+### Example and dependency distinctions
+
+Maya is authorized to create a Finance payslip-read grant for
+`finance-payroll-readers`. She validly creates it; Vinay receives access through
+membership. Maya subsequently changes departments and loses her issuance
+permission. The group's grant remains valid subject to its own constraints;
+Vinay must still have valid membership. Maya can no longer use the lost
+administrative authority to create further grants.
+
+| Subsequent event | Consequence |
+|---|---|
+| Maya loses the authority she used to issue the grant | This alone does not invalidate the ordinary group grant. |
+| Vinay loses the supporting group membership | Access derived through that membership is no longer available; unrelated valid routes remain separate. |
+| The grant expires or is explicitly revoked | It no longer supplies authority, regardless of Maya's current permissions. |
+| Vinay's agent relied on the affected group-derived access | Its access remains bounded by Vinay's current authority and delegation limits; Q-046 does not create independent automation. |
+
+### Security consequence and remaining limits
+
+Removing an administrator's permissions is not cleanup of previously issued
+grants. Where those grants must be withdrawn, explicit authorized revocation is
+required. Preserve who issued them and the relevant issuance evidence for audit
+and review; audit does not itself authorize or revoke anything.
+
+This rule concerns grants that were validly issued. It does not legitimize an
+unauthorized issuance, waive other validity checks, freeze a referenced role's
+permissions, or remove source-grant/membership dependencies from computed
+views. Incident-response procedures, exact audit records, revocation propagation,
+and other lifecycle mechanics remain open. No new grant field or format is
+introduced. Earlier Q-046-proposed text below is preserved as checkpoint history.
+
 Q-045 also settles group ownership and human-only membership. See
 [groups and membership](groups-and-membership.md) for the rationale, alternative,
 examples, and lifecycle limits. Q-046 asks about ordinary human/group grants

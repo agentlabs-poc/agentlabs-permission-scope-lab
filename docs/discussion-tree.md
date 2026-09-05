@@ -19,6 +19,14 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-046 settled ADMIN-006.** Ordinary human/group grants do not
+  depend merely on their issuing administrator retaining issuance authority.
+  Grant validity, membership dependencies, and human-dependent automation remain
+  enforced. Rationale and revocation consequences are in the grant chapter.
+  **Next: Q-047, request versus resolved request**, returning to stages 7/8.
+  Administrative encoding and detailed lifecycle mechanics remain open.
+  Earlier current-position labels below are preserved checkpoint history.
+
 - **Current: Q-045 settled GROUP-001-A and GROUP-003.** Auth owns authorization
   groups/membership; application sync is optional; members are humans. The
   [group chapter](groups-and-membership.md) preserves rationale and consequences.
@@ -230,6 +238,7 @@ Authorization handbook
 │   │   └── Q-043 framing withdrawn; vocabulary settled, admin model still open
 │   ├── Status, validity, provenance, membership changes [open]
 │   │   └── Ordinary grants after issuer-authority loss [active: Q-046]
+│   │       └── Now settled: ADMIN-006 / Q-046; prior active label is history
 │   └── Human-dependent service/agent authority
 │       ├── All services/agents depend on human authority [settled: AUTHORITY-002]
 │       ├── Loss of required upstream authority removes derived access [settled: DELEGATION-002]
@@ -265,6 +274,7 @@ Authorization handbook
 │   ├── Logical system block diagram [available: system-overview.md]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
 │   ├── Raw request → authorization request → resolved request [open; prepared deprecated]
+│   │   └── Meaning of request versus trusted evaluation view [active: Q-047]
 │   ├── Stored grants → applicable grants → expanded/resolved grants [open]
 │   └── Typed inputs/outputs, fact provenance, failures, context binding [open]
 ├── 8. Decision semantics [open]
@@ -357,6 +367,8 @@ Q-044 → ADMIN-004/005 governing rules approved; concrete administrative scope 
 Q-045 → group ownership and human-only membership consolidation (open).
 Update: Q-045 approved GROUP-001-A and GROUP-003; rationale is captured in groups-and-membership.md.
 Q-046 → ordinary human/group grant lifecycle after issuing-administrator authority changes (open).
+Update: Q-046 approved ADMIN-006; prior open label is history. Rationale and explicit-revocation consequences are in grant-model.md.
+Q-047 → return to requests/resolution: distinguish request inputs from trusted evaluation material without a prepared handoff or new authority (open).
 
 The log retains these for traceability; they are not current options:
 
