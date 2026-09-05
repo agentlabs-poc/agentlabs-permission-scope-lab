@@ -190,9 +190,10 @@ function render() {
     <header class="topbar">
       <a class="brand" href="/concept.html">${shield()}<span>Authorization Bench</span><small>Explain · inspect · decide</small></a>
       <nav class="page-tabs"><a href="/concept.html">Concept</a><a href="/concept.html?doc=hrms">HRMS</a><a href="/concept.html?doc=projects">Projects & repos</a><a class="active" href="/projects-explorer.html">Guided explorer</a></nav>
-      <div class="canonical"><span>Canonical grammar</span><code>&lt;namespaced-noun&gt;::<b>verb</b></code></div>
+      <div class="canonical"><span>Legacy lab grammar</span><code>&lt;namespaced-noun&gt;::<b>verb</b></code></div>
     </header>
     <main>
+      <aside class="historical-notice" role="note"><strong>Historical prototype — not the current authorization model.</strong> This explorer retains its original algorithm and terminology for comparison. Read the <a href="/concept.html?doc=concept">reconciled handbook and canonical diagram</a> for the approved one-gate boundary model. Simulator outcomes are not conformance evidence.</aside>
       <section class="explorer-heading">
         <div><small>GUIDED REQUEST EXPLORER</small><h1>Projects, repositories, teams, and members</h1><p>Understand how a user's team membership receives a role at an exact repository or project subtree.</p></div>
         <nav class="domain-switch"><a href="/">HRMS · Payroll</a><a class="active" href="/projects-explorer.html">Projects · Repositories</a></nav>

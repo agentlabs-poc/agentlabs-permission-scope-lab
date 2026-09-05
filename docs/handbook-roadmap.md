@@ -1,5 +1,25 @@
 # Authorization handbook — agreed roadmap
 
+## Current reconciliation and process override
+
+The user's approved discussion takes precedence over older `src/content` prose,
+diagrams, and lab implementations. The [current tree](discussion-tree.md) and
+[system overview](system-overview.md) reconcile through Q-050-F. Historical
+decision rows retain their original rationale; later refinements govern where
+their earlier open/next wording has changed.
+
+**Commit/push gate reopened:** the user explicitly instructed “lets commit and
+push, and continue with the rest.” PROCESS-004's checkpoint publishing can resume
+after verification. The earlier review freeze is preserved in historical notes.
+Publishing a checkpoint does not approve an open policy choice or authorize
+runtime migration.
+
+The user requested horizontal progress on critical/high-impact decisions.
+Decision results, operation-specific enforcement, and freshness/dependencies
+remain candidates; no exact ordering or new answer is recorded as approved.
+
+## Original roadmap and chronological decision record
+
 Roadmap approved: 2026-09-05.
 
 Use the [discussion tree](discussion-tree.md) to navigate branches, conclusions,
@@ -121,6 +141,7 @@ working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| SVG-001 | APPROVED PRESENTATION | Show one client request through authentication middleware, endpoint handler, embedded Auth Agent, Auth authority loading, constrained application database access, and the response. Keep middleware, handler, and agent inside the application boundary and retain the one endpoint-owned authorization gate. | User found the responsibility-first SVG difficult to follow, preferred the earlier flow style, and approved the proposed client-to-handler layout. Short numbered arrows show execution order; detailed principles stay in the overview. The Finance certificate example does not revive prepared results, mandatory resolvers, fixed remote calls, or a new decision schema. Previous SVG/overview are archived; see system-overview.md. This is a presentation decision, not a new authorization rule. |
 | INPUT-003 | AGREED | Application request contracts define and validate input types, nullability, format, and domain meaning; endpoint policy does not duplicate type/nullable/validation-expression fields. Presence/source requirements remain INPUT-002. Auth retains canonical authority/scope checks, and authorization and execution must use the same validated meaning after application-defined parsing/normalization. | User confirmed Q-050-F and noted the endpoint shape was already discussed and approved. Rationale: avoid duplicate request schemas that can disagree. A required field may be nullable only under its explicit application contract; null never means unrestricted authority or permission to skip a boundary. The department_id example distinguishes wrong type/null/empty/missing cases. No universal string-only input rule or new policy field is adopted. See endpoint-policy-format.md. |
 | INPUT-002 | AGREED | Every input listed in the endpoint policy must be present at its declared source. Reject a request missing a declared input; do not silently omit/default it or obtain it from another source. Required input presence is independent of the caller's grants, including tenant-wide {}. | User approved Q-050-E. Rationale: fixed predictable input contracts; optional-input absent behavior adds complexity and can weaken checks if mishandled. The PUT department_id example covers presence, omission, query fallback, broader grants, and additional application fields. Scope restrictions and actual endpoint enforcement remain separate from presence. Types, nullability, validation ordering, and error representation remain open; no optional/default fields or HTTP status are adopted. See endpoint-policy-format.md. |
 | ENFORCEMENT-003 | AGREED | Endpoint review must verify that authorization boundaries and request bindings actually constrain the data returned or changed, not merely that their inputs are used somewhere. | User approved Q-050-D. Rationale: input usage is not effective enforcement; logging, ineffective OR filters, and unchecked output paths are counterexamples. Review Finance certificate-read for trusted tenant AND Finance AND requested certificate containment. {} does not create a department restriction. This is a central review requirement, not a guarantee against incorrect permissions, untrusted context, stale dependencies, or every other breach; mandatory checks/tests remain. See endpoint-policy-format.md. |
@@ -263,6 +284,13 @@ working handbook's checkpoint practice for the review checklist.
 | Q-048 | ~~OPEN~~ ANSWERED | Should a resolved grant be a request-evaluation view of an existing grant, preserving its source identity, associated permissions/scope/conditions, and applicable membership/delegation dependencies, rather than a new independent assignment or a bare permission list? | Next consolidation of RESOLUTION-003/004 and the subset invariant, not a new wire schema. Concrete resolved-grant fields and the distinction between authority expansion, request-specific evaluation, and the final decision remain to be discussed. Update: user approved the evaluation-ready dependent view and added obtaining Vinay's memberships, then grants for Vinay and his membership teams. RESOLUTION-006 records the meaning and logical flow. The earlier open-status wording is history; concrete fields and freshness remain open. The grant chapter captures rationale and examples. |
 
 ## Resume here
+
+Current discussion: Q-051 / DECISION-003 is **PROPOSED, not approved**. Recommend
+completed allow/deny decisions with evaluation errors represented separately.
+The existing distinction and fail-closed obligation remain settled; exact result
+fields and error transport remain open. [Decision results](decision-results.md)
+records rationale, alternatives, examples, consequences, and remaining gaps.
+Publishing this proposal does not close an audit checkpoint.
 
 Current: Q-050-F approves INPUT-003, application-owned value validation with no
 type/nullability fields added to endpoint policy. The policy shape was already

@@ -1,289 +1,99 @@
-# GitHub-style example: projects, repositories, teams, and members
+# Projects and repositories: the same boundary model
 
-> HISTORICAL SCENARIO — preserve the examples, but do not treat their grant/scope
-> layouts, scope catalogs, or schema ownership as current canonical contracts.
-> SCOPE-007 defines the current scope format; `docs/grant-format.md` contains
-> current grant examples. Team and group are synonymous (TERM-001); recipient
-> groups are not automatically authenticated actors. Final identity vocabulary
-> and scope-key governance remain open. Implementation assertions about other
-> repositories below were not reverified in this reconciliation checkpoint.
-> The current endpoint-owned authorization flow is CONTRACT-006/007.
+This example reuses the agreed authorization model in a fictional Git-hosting
+application. It does not introduce built-in project types, automatic hierarchy,
+or a second grant format. The
+[original projects guide](../../docs/history/reconciliation-2026-09-05/src/content/projects-repositories-teams.md.txt)
+remains available as deprecated history.
 
-This second example tests whether the authorization model generalizes beyond payroll.
+## Register meanings, not universal hierarchy assumptions
 
-It is a conceptual code-hosting example using familiar GitHub-style nouns. It does not claim to reproduce GitHub's internal authorization implementation or exact permission names.
-
-**Implementation status: this is a target design, not what `agentlabs-auth` does today.** Its real role/permission grant tables (`authorization_subject_role_bindings`, `authorization_subject_permission_assignments`) bind to a single `membership_id` each—no `subject_type` column, no group/team reference anywhere. The bundle-resolution code filters strictly on `membership_id` and stamps every result `Source: "membership"`; there is no group join in that path at all. A `groups`/`group_memberships` table pair is described in a roadmap doc but exists in no applied migration. The one place "groups" appears in the real codebase is an upstream SSO identity provider's group claim during federation—and Auth's own docs are explicit that "raw upstream groups never grant application access." So everything below—Teams as group principals, `{"principal": {"type": "team", ...}}`—describes what this model should support, not a feature that works yet.
-
-It introduces two different structures:
-
-```text
-Resource containment                  Principal membership
-
-Organization                          Team Backend
-├── Project Commerce                  ├── user:vinay
-│   ├── Repository API                └── user:arjun
-│   └── Repository UI
-└── Project Internal                  Team Auditors
-    └── Repository Payroll            └── user:maya
-```
-
-A **Project or Repository is a resource**. A **Team is normally a group principal**. Mixing those concepts creates confusing policies.
-
-## 1. Permission vocabulary
-
-The code-hosting application registers:
-
-```text
-codehost:organization::read
-codehost:project::read
-codehost:project::manage
-codehost:repository::read
-codehost:repository::write
-codehost:repository::admin
-codehost:team::read
-codehost:team:member::manage
-```
-
-Resource depth is permitted where it expresses a real relationship. `team:member` means membership below a team. A repository remains its own resource type even when it is contained by a project.
-
-## 2. Resources created by the application
-
-```text
-ORG-ACME · tenant TENANT-001
-├── PROJECT-COMMERCE
-│   ├── REPO-API
-│   └── REPO-UI
-└── PROJECT-INTERNAL
-    └── REPO-PAYROLL
-```
-
-The code-hosting application owns this containment graph and supplies trusted target attributes:
+Assume this application registers `git:repository::read` and `project`.
+For that operation it defines the project boundary using the repository's
+containing project. Auth validates registration and grant acceptance; the
+application establishes or enforces the actual relationship at execution.
 
 ```json
 {
-  "resource_type": "codehost:repository",
-  "resource_id": "REPO-API",
-  "tenant_id": "TENANT-001",
-  "organization_id": "ORG-ACME",
-  "project_id": "PROJECT-COMMERCE"
+  "version": "1",
+  "recipient": { "type": "group", "id": "platform-engineers" },
+  "permissions": ["git:repository::read"],
+  "scope": { "project": "P-1" }
 }
 ```
 
-Auth does not independently guess containment from a URL or resource name.
+This abbreviated working grant permits human members to read repositories
+within P-1 under this explicitly defined meaning. It does not authorize writes,
+other projects, or another tenant. Lifecycle and dependency restrictions still
+apply even though their detailed fields are omitted here.
 
-## 3. Teams and members
+**Rationale:** project-based reach is meaningful because this application defines
+it, not because Auth guesses a folder tree. Exact/subtree permission and scope
+mechanics are not silently standardized by this example.
 
-Teams are tenant-owned group principals:
-
-```text
-teams
-┌──────────────┬────────────┬──────────────┐
-│ id           │ tenant_id  │ name         │
-├──────────────┼────────────┼──────────────┤
-│ TEAM-BACKEND │ TENANT-001 │ Backend      │
-│ TEAM-AUDIT   │ TENANT-001 │ Auditors     │
-└──────────────┴────────────┴──────────────┘
-```
-
-```text
-team_memberships
-┌──────────────┬────────────┬────────────┐
-│ team_id      │ tenant_id  │ principal  │
-├──────────────┼────────────┼────────────┤
-│ TEAM-BACKEND │ TENANT-001 │ user:vinay │
-│ TEAM-BACKEND │ TENANT-001 │ user:arjun │
-│ TEAM-AUDIT   │ TENANT-001 │ user:maya  │
-└──────────────┴────────────┴────────────┘
-```
-
-Removing Vinay from `TEAM-BACKEND` removes authority inherited through that team. It does not delete direct grants Vinay may hold separately.
-
-## 4. Repository Maintainer role
-
-The tenant administrator creates:
-
-```text
-Role: Repository Maintainer
-
-Permissions
-├── codehost:repository::read
-└── codehost:repository::write
-```
-
-The role is assigned to the team at one exact repository:
+## One endpoint policy, one permission
 
 ```json
 {
-  "principal": {
-    "type": "team",
-    "id": "TEAM-BACKEND"
-  },
-  "role": "Repository Maintainer",
-  "scope": {
-    "type": "resource_exact",
-    "resource_type": "codehost:repository",
-    "resource_id": "REPO-API"
+  "version": "1",
+  "method": "GET",
+  "path": "/api/v1/{tenant}/projects/{project}/repositories/{repo}",
+  "permission": "git:repository::read",
+  "inputs": {
+    "tenant": { "source": "path", "name": "tenant" },
+    "project": { "source": "path", "name": "project" },
+    "repo": { "source": "path", "name": "repo" }
   }
 }
 ```
 
-The results are:
+This uses the approved partial policy structure, not a completed production
+schema. The selected inputs are required at their exact sources. Their types and
+domain validity belong to the application's request contract. Path names do not
+automatically become trusted boundary facts.
 
-| Team member request | Target | Decision |
-|---|---|---:|
-| Vinay reads | REPO-API | Allow |
-| Vinay writes | REPO-API | Allow |
-| Vinay reads | REPO-UI | Deny |
-| Maya reads | REPO-API | Deny |
+For a request identifying P-1 and R-7, the one endpoint-owned gate must bind
+actual execution to the trusted tenant, authorized project, and requested
+repository. R-7 in P-2 must not be returned merely because the caller wrote P-1
+in the path. A constrained query can enforce the containment relationship
+without a canonical relationship block or mandatory resolver call.
 
-## 5. Project Viewer role with subtree reach
+## Teams are human authorization groups
 
-The role explicitly declares both project and repository read capability:
+Team and group are synonyms. Auth owns authorization membership; the application's
+collaboration team may be synchronized to that group or kept separate. Neither
+being a repository contributor nor creating a project automatically creates
+authorization membership.
 
-```text
-Role: Project Viewer
-├── codehost:project::read
-└── codehost:repository::read
-```
+An agent acting for Vinay remains dependent on Vinay and the delegated subset
+of his authority. It cannot become a first-class team member. Removing a required
+membership removes that route of derived access, not necessarily every other
+valid grant.
 
-The tenant administrator assigns it to `TEAM-AUDIT` at the Commerce project:
+## Keep complete grants intact
 
-```json
-{
-  "principal": {
-    "type": "team",
-    "id": "TEAM-AUDIT"
-  },
-  "role": "Project Viewer",
-  "scope": {
-    "type": "resource_subtree",
-    "resource_type": "codehost:project",
-    "resource_id": "PROJECT-COMMERCE"
-  }
-}
-```
+| Authority | What it does not imply |
+|---|---|
+| Read within P-1 | Write within P-1. |
+| Read tenant-wide via `{}`, plus write within P-1 | Write tenant-wide. Permission and scope cannot be mixed across grants. |
+| Two read grants for P-1 and P-2 | One new independent grant; they remain alternative complete bindings. |
+| Permission to administer grants | Repository access without an explicit authorized grant. |
 
-The scope contains resources that the application reports as descendants:
+A multi-key scope combines with AND only when each key's meaning is supported.
+A repo-only scope could be defined by an application, but it is not made a
+mandatory platform key by this guide. No wildcard or arbitrary selector
+expression is adopted.
 
-```text
-PROJECT-COMMERCE    Allow project read
-├── REPO-API         Allow repository read
-└── REPO-UI          Allow repository read
+## Boundaries of this example
 
-PROJECT-INTERNAL     Deny
-└── REPO-PAYROLL     Deny
-```
+Repository moves, source/destination authorization, list/count/export behavior,
+bulk partial success, relationship freshness, and concurrent changes still need
+their dedicated contracts. The read example does not settle them.
 
-The subtree does not invent capabilities. If the role omitted `codehost:repository::read`, project scope alone would not authorize repository reading.
-
-## 6. Direct member access
-
-A tenant administrator can give Maya temporary read access to one repository without adding her to a team:
-
-```json
-{
-  "principal": {
-    "type": "user",
-    "id": "user:maya"
-  },
-  "permission": "codehost:repository::read",
-  "scope": {
-    "type": "resource_exact",
-    "resource_type": "codehost:repository",
-    "resource_id": "REPO-PAYROLL"
-  },
-  "valid_until": "2026-09-30T23:59:59Z"
-}
-```
-
-The direct assignment uses the same scoped-grant model as a role assignment.
-
-## 7. Tenant configuration screen
-
-```text
-Active tenant
-Acme · TENANT-001 🔒
-
-Assign access
-Principal type   [ Team ▾ ]
-Principal        [ Backend ▾ ]
-Role             [ Repository Maintainer ▾ ]
-Scope type       [ Exact resource ▾ ]
-Resource type    [ Repository ▾ ]
-Repository       [ API · REPO-API ▾ ]
-Validity         [ No expiry ▾ ]
-```
-
-Before creating it, the UI explains:
-
-```text
-Members of Backend will be able to:
-✓ read REPO-API
-✓ write REPO-API
-
-They will not be able to:
-✗ administer REPO-API
-✗ access REPO-UI through this assignment
-✗ access repositories outside TENANT-001
-```
-
-## 8. Cross-tenant prevention
-
-Auth validates all four tenant roots:
-
-```text
-grantor tenant   = TENANT-001
-team tenant      = TENANT-001
-role tenant      = TENANT-001
-resource tenant  = TENANT-001
-```
-
-Any mismatch denies assignment creation. A tenant administrator cannot add a member from another tenant to bypass this boundary unless that principal first receives a valid membership in the active tenant.
-
-## 9. Request consumption
-
-Vinay requests `REPO-API`:
-
-```text
-Authenticated principal            user:vinay
-Expanded group principal           TEAM-BACKEND
-Required permission                codehost:repository::read
-Assignment scope                   resource_exact:REPO-API
-Trusted target                     REPO-API / PROJECT-COMMERCE / TENANT-001
-Decision                           ALLOW
-```
-
-Vinay requests `REPO-UI`:
-
-```text
-Capability via TEAM-BACKEND         ✓
-Tenant boundary                     ✓
-Exact resource scope                ✗
-Decision                            DENY
-```
-
-## 10. Schema ownership
-
-```text
-AUTH
-├── tenants and principal memberships
-├── group principals
-├── group memberships
-├── roles and role permissions
-├── principal/group role assignments
-├── assignment scopes
-├── validity and assignment versions
-└── assignment and decision audit
-
-CODE-HOSTING APPLICATION
-├── organizations
-├── projects
-├── repositories
-├── containment relationships
-├── operation-permission manifest
-├── scope target validation
-└── target-context resolution
-```
-
-This example proves that the core model supports both individual and group principals, exact resources and resource subtrees, without placing IDs inside permission strings.
+See [the complete use-case chapter](../../docs/use-case-examples.md),
+[registration](../../docs/application-registration.md),
+[scope](../../docs/scope-model.md), and
+[endpoint policy rationale](../../docs/endpoint-policy-format.md).
+The deprecated projects explorer has been removed from the active site. Its
+[archived source](../../docs/history/retired-pages-2026-09-05/README.md) remains
+available for historical comparison, not as a conformance test.

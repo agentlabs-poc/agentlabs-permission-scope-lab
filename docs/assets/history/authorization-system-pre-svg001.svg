@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1300" viewBox="0 0 1280 1300" role="img" aria-labelledby="title desc">
+  <title id="title">Authorization: two responsibility layers, one endpoint-owned gate</title>
+  <desc id="desc">Trusted identity and tenant context, Auth-owned authority, and an application-owned endpoint declaration feed one endpoint-owned gate. It binds and validates inputs, evaluates complete grants using shared rules and application meanings, and enforces authorized boundaries on the actual data operation. Failures stop protected output or effects. Application relationships may be established with facts or enforced through constrained execution. There is no prepared handoff or canonical relationship resolver block.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#8ca7c1"/></marker>
+    <marker id="red-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#f69d9d"/></marker>
+    <style>
+      text { font-family: system-ui, -apple-system, sans-serif; fill: #e4eef8; }
+      .heading { font-size: 28px; font-weight: 700; }
+      .title { font-size: 21px; font-weight: 700; }
+      .body { font-size: 17px; }
+      .small { font-size: 15px; fill: #bed0df; }
+      .label { font-size: 14px; fill: #8ae0cd; font-weight: 700; letter-spacing: 1px; }
+      .box { fill: #102333; stroke: #3c566f; stroke-width: 1.5; }
+      .flow { fill: none; stroke: #8ca7c1; stroke-width: 2; marker-end: url(#arrow); }
+      .fail { fill: none; stroke: #f69d9d; stroke-width: 2; marker-end: url(#red-arrow); }
+    </style>
+  </defs>
+  <rect width="1280" height="1300" rx="20" fill="#081521"/>
+  <text x="40" y="49" class="label">CANONICAL LOGICAL ARCHITECTURE · THROUGH Q-050-F</text>
+  <text x="40" y="92" class="heading">Two responsibility layers. One endpoint-owned gate.</text>
+  <text x="40" y="124" class="body">Authority comes from Auth; the application must constrain what actually happens.</text>
+
+  <rect x="40" y="158" width="375" height="174" rx="12" class="box"/>
+  <text x="60" y="188" class="label">REQUEST + TRUSTED CONTEXT</text>
+  <text x="60" y="219" class="title">Authenticate and bind identity</text>
+  <text x="60" y="248" class="body">Verified human / actor and tenant</text>
+  <text x="60" y="276" class="body">Caller path/body values are inputs</text>
+  <text x="60" y="308" class="small">Authentication failure stops the request.</text>
+
+  <rect x="453" y="158" width="375" height="174" rx="12" class="box"/>
+  <text x="473" y="188" class="label">AUTH · LAYER 1 AUTHORITY</text>
+  <text x="473" y="219" class="title">Dependent evaluation views</text>
+  <text x="473" y="248" class="body">Memberships → direct + group grants</text>
+  <text x="473" y="276" class="body">Roles, validity, conditions, dependencies</text>
+  <text x="473" y="308" class="small">Resolved grants are not an allow decision.</text>
+
+  <rect x="866" y="158" width="374" height="174" rx="12" class="box"/>
+  <text x="886" y="188" class="label">APPLICATION · DECLARATION</text>
+  <text x="886" y="219" class="title">One policy per method / route</text>
+  <text x="886" y="248" class="body">version: "1" · exactly one permission</text>
+  <text x="886" y="276" class="body">Selected inputs with source / name</text>
+  <text x="886" y="308" class="small">No canonical relationship block.</text>
+
+  <path d="M228 332V379" class="flow"/>
+  <path d="M640 332V379" class="flow"/>
+  <path d="M1053 332V379" class="flow"/>
+  <rect x="40" y="382" width="1200" height="824" rx="16" fill="#0b1d29" stroke="#54bea7" stroke-width="2"/>
+  <text x="64" y="416" class="label">ONE ENDPOINT-OWNED GATE · EMBEDDED AUTH AGENT WORKS ACROSS BOTH LAYERS</text>
+
+  <rect x="70" y="450" width="700" height="124" rx="12" class="box"/>
+  <text x="94" y="484" class="title">1  Bind and validate required material</text>
+  <text x="94" y="516" class="body">Exact declared sources; no missing-input default or fallback.</text>
+  <text x="94" y="544" class="body">Application validates values; route tenant must match trusted context.</text>
+  <path d="M420 574V614" class="flow"/>
+
+  <rect x="70" y="620" width="700" height="137" rx="12" class="box"/>
+  <text x="94" y="654" class="title">2  Evaluate complete authority using shared rules</text>
+  <text x="94" y="686" class="body">One required permission + scope boundary + all mandatory limits.</text>
+  <text x="94" y="714" class="body">AND within scope; alternative complete grants; no field mixing.</text>
+  <text x="94" y="741" class="small">Tenant, applicability, validity, conditions and human/delegation limits remain.</text>
+  <path d="M420 757V769M420 807V820" class="flow"/>
+  <text x="78" y="793" class="label">AUTHORITY WITHIN A BOUNDARY ≠ UNCHECKED ACCESS TO AN ID</text>
+
+  <rect x="70" y="826" width="700" height="168" rx="12" fill="#10372f" stroke="#54bea7" stroke-width="2"/>
+  <text x="94" y="861" class="title">3  Enforce boundaries on the actual operation</text>
+  <text x="94" y="895" class="body">Establish relationships or enforce them through constrained execution.</text>
+  <text x="94" y="925" class="body">Finance read example: trusted tenant AND Finance AND certificate ID.</text>
+  <text x="94" y="958" class="body">Every output / effect stays bound to the validated, authorized meaning.</text>
+  <text x="94" y="982" class="small">Logging inputs or returning an unchecked second lookup is not enforcement.</text>
+  <path d="M420 994V1050" class="flow"/>
+
+  <rect x="70" y="1056" width="700" height="114" rx="12" fill="#10372f" stroke="#54bea7" stroke-width="1.5"/>
+  <text x="94" y="1092" class="title">Only bounded protected output / effects</text>
+  <text x="94" y="1124" class="body">No bypass around the constraints relied on by authorization.</text>
+  <text x="94" y="1152" class="small">These are logical responsibilities, not a new decision-result wire schema.</text>
+
+  <rect x="888" y="450" width="324" height="328" rx="12" class="box"/>
+  <text x="908" y="483" class="label">APPLICATION · LAYER 2</text>
+  <text x="908" y="518" class="title">Meaning and enforcement</text>
+  <text x="908" y="552" class="body">Defines supported boundary keys</text>
+  <text x="908" y="580" class="body">and application relationships.</text>
+  <text x="908" y="620" class="body">Supplies facts when needed;</text>
+  <text x="908" y="648" class="body">constrains data and mutations.</text>
+  <text x="908" y="688" class="body">Cannot manufacture authority</text>
+  <text x="908" y="716" class="body">or weaken Layer 1 limits.</text>
+  <text x="908" y="756" class="small">No mandatory eager lookup / resolver.</text>
+
+  <path d="M770 512H825" fill="none" stroke="#f69d9d" stroke-width="2"/>
+  <path d="M770 688H825" fill="none" stroke="#f69d9d" stroke-width="2"/>
+  <path d="M770 910H825" fill="none" stroke="#f69d9d" stroke-width="2"/>
+  <path d="M825 512V1085H882" class="fail"/>
+  <circle cx="825" cy="688" r="4" fill="#f69d9d"/>
+  <circle cx="825" cy="910" r="4" fill="#f69d9d"/>
+  <text x="870" y="826" class="small" fill="#f69d9d">Invalid material, absent authority,</text>
+  <text x="870" y="851" class="small" fill="#f69d9d">or failed required enforcement</text>
+
+  <rect x="888" y="1036" width="324" height="134" rx="12" fill="#3a202c" stroke="#f69d9d" stroke-width="1.5"/>
+  <text x="908" y="1073" class="title">STOP protected execution</text>
+  <text x="908" y="1107" class="body">No protected disclosure or effects</text>
+  <text x="908" y="1136" class="body">outside established authority.</text>
+
+  <text x="40" y="1241" class="body">No prepared handoff. No canonical target entity. No fixed network-call count or deployment topology.</text>
+  <text x="40" y="1273" class="small">CONTRACT-006 / 008 / 010–012 · INPUT-002 / 003 · ENFORCEMENT-003 · ARCH-004 / 005 · SCOPE-007 / 008</text>
+</svg>

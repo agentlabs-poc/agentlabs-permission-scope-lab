@@ -2,13 +2,13 @@ import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  // Retired page URLs must return 404, not fall back to the handbook homepage.
+  appType: 'mpa',
   build: {
     rollupOptions: {
       input: {
-        playground: resolve(__dirname, 'index.html'),
+        handbook: resolve(__dirname, 'index.html'),
         concept: resolve(__dirname, 'concept.html'),
-        projectsExplorer: resolve(__dirname, 'projects-explorer.html'),
-        enforcementTrace: resolve(__dirname, 'enforcement-trace.html'),
       },
     },
   },

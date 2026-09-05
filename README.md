@@ -1,46 +1,48 @@
 # Authorization Explanation Bench
 
-Read the [working Authorization Handbook](docs/handbook.md) for the chapters
-being developed in the current discussion. ~~The original lab concept page has
-not yet been reconciled with these decisions.~~
-Reconciliation checkpoint: the original lab pages now carry historical-status
-and deprecation notices. The linked working chapters hold the current decisions;
-the original prose and interactive implementation have not been rewritten.
+Read the [working Authorization Handbook](docs/handbook.md) or open the local
+reader at `/` or `/concept.html?doc=concept`. The approved discussion—not the historical
+lab prose or simulations—is the source of truth.
 
-The [agreed handbook roadmap and decision log](docs/handbook-roadmap.md) tracks the
-work to finalize the shared authorization foundation. Start at its "Resume here"
-section for the next discussion. The [discussion tree](docs/discussion-tree.md)
-maps every branch, its conclusions, and the remaining work.
-The [working grant chapter](docs/grant-model.md) develops the agreed concepts
-with rationale, examples, and explicitly open details.
-The [current grant formats](docs/grant-format.md) use canonical v1 scope;
-earlier layouts remain available as explicitly deprecated examples.
-The [cross-domain use cases](docs/use-case-examples.md) exercise Git hosting,
-ticketing, HRMS, and accounting. The [reconciliation register](docs/reconciliation.md)
-separates current decisions, preserved history, and implementation gaps.
+The current model uses permissions, flat boundary scopes, complete grants,
+human-dependent authority, and one endpoint-owned gate. The endpoint declares
+one permission and selected input sources, then keeps actual execution within
+the authorized boundaries. There is no prepared handoff or canonical relationship
+block in endpoint policy.
 
-A local explanation bench for exploring scoped authorization through documented examples and an interactive request evaluator.
-
-> HISTORICAL LAB VOCABULARY — the three-part description below belongs to the
-> earlier simulation, not the current canonical vocabulary. TERM-005 / Q-043
-> uses permissions, scope boundaries, requests, and trusted request material.
-> See the [detailed explanation](docs/authorization-vocabulary.md). The lab
-> implementation has not been migrated.
-
-The lab separates:
-
-1. **Capability** — the stable `<namespaced-noun>::<verb>` permission.
-2. **Reach** — the scope attached when that permission or role is assigned.
-3. **Target** — the trusted resource and ownership context resolved for a request.
-
-An authorization decision is the intersection of all three. The simulation is deliberately in-memory and is not an authorization implementation.
-
-> Historical feature description below: "complete concept guide" describes the
-> earlier lab artifact, not completion of the current Authorization Handbook v1.
-
-The bench contains a complete concept guide, worked HRMS and projects/repositories examples, an Auth/Authz responsibility map, and an exportable design-question board. Its HRMS and Projects/Repositories guided explorers start with familiar stories and walk each request through five explained stages. See [the working design](docs/design.md).
+## Review locally
 
 ```bash
 npm install
 npm run dev
 ```
+
+- [Concept reader](src/content/authorization-concept.md): foundation and rationale.
+- [HRMS](src/content/hrms-tenant-setup.md): self, Finance, GET/PUT input examples.
+- [Projects](src/content/projects-repositories-teams.md): registered project boundaries.
+- [System overview and shared SVG](docs/system-overview.md): current architecture.
+- [Discussion tree](docs/discussion-tree.md): whole-handbook progress and open work.
+- [Decision log](docs/handbook-roadmap.md): numbered agreements and preserved history.
+- [Reconciliation register](docs/reconciliation.md): source status and verification.
+
+The homepage is now the handbook. All guided explorers and the standalone
+enforcement trace have been removed from the active site. Recoverable source is
+preserved for the [HRMS explorer](docs/history/retired-hrms-explorer-2026-09-05/README.md)
+and [previously retired pages](docs/history/retired-pages-2026-09-05/README.md).
+The HRMS and Projects handbook chapters remain available. Historical simulations are not
+implementations or conformance tests of the current handbook. The
+[original README and documents](docs/history/reconciliation-2026-09-05/README.md)
+are preserved.
+
+## Verification and current gate
+
+```bash
+node --test tests/*.test.mjs
+npm run build
+git diff --check
+```
+
+The handbook remains a working edition; full schemas and several high-impact
+behavioral contracts are unfinished. The user has explicitly reopened the
+commit/push gate for the verified checkpoint and continued handbook work.
+Earlier freeze notices in historical snapshots describe the review period.

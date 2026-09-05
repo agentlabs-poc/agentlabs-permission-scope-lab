@@ -237,15 +237,16 @@ function render() {
     <header class="topbar">
       <a class="brand" href="/concept.html">${icon('shield')}<span>Authorization Bench</span><small>Explain · inspect · decide</small></a>
       <nav class="page-tabs"><a href="/concept.html">Concept</a><a href="/concept.html?doc=hrms">HRMS</a><a href="/concept.html?doc=projects">Projects & repos</a><a class="active" href="/">Guided explorer</a></nav>
-      <div class="canonical"><span>Canonical grammar</span><code>&lt;namespaced-noun&gt;::<b>verb</b></code></div>
+      <div class="canonical"><span>Legacy lab grammar</span><code>&lt;namespaced-noun&gt;::<b>verb</b></code></div>
     </header>
 
     <main>
+      <aside class="historical-notice" role="note"><strong>Historical prototype — not the current authorization model.</strong> This explorer retains its original algorithm and terminology for comparison. Read the <a href="/concept.html?doc=concept">reconciled handbook and canonical diagram</a> for the approved one-gate boundary model. Simulator outcomes are not conformance evidence.</aside>
       <section class="hero" id="play">
         <div class="eyebrow">INTERACTIVE EXPLANATION · PAYROLL</div>
         <h1>A permission is only half<br/>of an <em>authority.</em></h1>
         <p>Construct a grant, apply it to a payroll request, and inspect exactly where access is allowed or denied.</p>
-        <nav class="domain-switch"><a class="active" href="/">HRMS · Payroll</a><a href="/projects-explorer.html">Projects · Repositories</a></nav>
+        <nav class="domain-switch"><a class="active" href="/">HRMS · Payroll</a><a href="/concept.html?doc=projects">Projects handbook</a></nav>
         <div class="equation">
           <span>${icon('key')}<small>CAPABILITY</small>Permission</span><b>∩</b>
           <span>${icon('target')}<small>REACH</small>Scope</span><b>∩</b>
@@ -260,7 +261,7 @@ function render() {
           <a href="/concept.html?doc=hrms"><span>01</span><div><small>I WANT TO CONFIGURE ACCESS</small><b>How does a tenant create Payroll Admin?</b><p>Walk through permissions, role creation, scope selection, assignment records, and tenant protection.</p></div><em>Start explanation →</em></a>
           <button data-path-scenario="1"><span>02</span><div><small>I AM AN EMPLOYEE</small><b>Why can I see my salary but not another employee’s?</b><p>Follow identity, employee-self scope, target ownership, and the enforced row restriction.</p></div><em>Start explanation ↓</em></button>
           <button data-path-scenario="3"><span>03</span><div><small>I AM A PAYROLL ADMIN</small><b>Why can I read payroll only inside my tenant?</b><p>See how a tenant-wide assignment reaches employees without crossing the tenant boundary.</p></div><em>Start explanation ↓</em></button>
-          <a href="/projects-explorer.html"><span>04</span><div><small>I WORK WITH TEAMS & REPOS</small><b>How do team membership and project scope combine?</b><p>Separate group principals from exact-resource and subtree assignment scopes.</p></div><em>Start guided explorer →</em></a>
+          <a href="/concept.html?doc=projects"><span>04</span><div><small>I WORK WITH TEAMS & REPOS</small><b>How do team membership and project scope combine?</b><p>Read the current handbook's human membership and application-defined boundary examples.</p></div><em>Read handbook →</em></a>
         </div>
       </section>
 

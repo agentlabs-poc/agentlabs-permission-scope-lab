@@ -1,5 +1,158 @@
 # Handbook reconciliation register
 
+## Publication checkpoint — commit/push gate reopened
+
+The user explicitly instructed “lets commit and push, and continue with the
+rest.” This lifts the earlier review freeze and authorizes the verified local
+checkpoint. Current entry points and AGENTS.md now reflect that instruction;
+earlier freeze notices remain historical, including archived originals.
+
+The checkpoint includes reconciled reader chapters, restored Q-041–Q-050-F
+decision visibility, the SVG-001 request-flow diagram, archived/removed
+simulators, the handbook homepage, reader/build regression tests, and the
+MEASURE-001 audit. The audit counts 34 completed and 35 open checkpoints out of
+69; publication alone changes none of those statuses. Its initial grouping
+remains an explicit audit rubric, not silently approved new authorization scope.
+
+## SVG-001 and restored Q-041–Q-050-F decision visibility
+
+The user found the responsibility-first SVG hard to understand and approved a
+request-flow replacement. The shared SVG now follows a certificate read from
+client to authentication middleware, handler input binding, embedded Auth Agent,
+Auth authority loading, handler-enforced database constraints, and response to
+the client. Short numbered arrows distinguish the main path, side requests,
+returned material, and denial. Detailed rules remain in the overview.
+
+Rationale: seeing who calls whom makes authorization resolution and actual-use
+enforcement easier to follow than a checklist of responsibilities. This is a
+logical example, not an externally verified runtime trace or fixed API sequence.
+Preloaded authority and application facts when needed remain permitted; no
+prepared handoff, new result schema, or mandatory relationship resolver is added.
+The [previous SVG](assets/history/authorization-system-pre-svg001.svg) and
+[previous overview](history/system-overview-pre-svg001.md.txt) were archived and
+byte-verified before editing.
+
+The user also noticed that Q-041–Q-050-F had disappeared from the main handbook
+page. The earlier reconciliation intentionally condensed those checkpoint
+paragraphs, but kept their original text in the archived entry page and their
+decisions/rationale in the log and chapters. It did not revoke or delete the
+decisions. The condensation made their visibility inadequate.
+
+The [main handbook decision trail](handbook.md#decision-trail--q-041-through-q-050-f)
+now explicitly restores Q-041 through Q-050-F, including Q-047-A and the overall
+Q-050 status, with rationale, examples/counterexamples, source links, and open
+details. Later refinements are reflected rather than reviving old “next/open”
+labels as current. Q-050 remains partially settled, not a completed schema.
+The reader links this trail explicitly. Commit and push remain frozen.
+
+Verification: all nine existing tests and the TypeScript/Vite build pass;
+`git diff --check` is clean. The document audit checks 30 Markdown files, 237
+local links, 44 JSON blocks, all 17 restored question references, and all 144
+log references in the tree without errors. Browser inspection confirms valid
+SVG XML, no node-text overflow, the new diagram loaded in the reader, and an
+accessible local decision-trail link. These are presentation/documentation
+checks, not runtime authorization conformance evidence.
+
+## Follow-up: remove the remaining guided explorer
+
+The user then requested removal of the remaining HRMS guided explorer. This
+supersedes the previous follow-up's decision to retain page 1. The handbook
+now loads at `/` as well as `concept.html`; the Concept, HRMS, and Projects
+reading tabs remain. Explorer navigation and launch links are removed.
+
+The old homepage, HRMS implementation, and scenario pack were copied and
+byte-verified before replacing/removing their active files. Their
+[archive](history/retired-hrms-explorer-2026-09-05/README.md) preserves recovery.
+The rationale is a handbook-only active site without deprecated simulations;
+this changes presentation and entry points, not authorization decisions.
+
+The new build regression first failed because the homepage loaded the simulator
+instead of the handbook. All nine tests pass after the change, including shared
+handbook entry, no bundled simulator modules, retained chapters, retired URLs,
+and reader links. Earlier checkpoint descriptions of a retained HRMS homepage
+are historical. No commit or push is authorized; the gate remains frozen.
+
+## Follow-up: remove deprecated pages 2 and 3 from the active site
+
+After reviewing the inventory, the user explicitly approved removing the
+Projects & Repositories guided explorer and standalone enforcement trace.
+The HRMS/Payroll explorer (page 1) remains; the Projects handbook chapter is
+also retained. This narrows the earlier broad suggestion to remove guided
+exploration generally.
+
+The two HTML entry points and the dedicated Projects simulation source are
+removed from active paths and build entries. Navigation now points to the
+current Projects handbook, not the removed simulator. Multi-page server mode
+ensures the retired URLs return 404 instead of silently serving the HRMS page.
+
+All three removed files were copied byte-for-byte and verified before removal;
+see the [retired-page archive](history/retired-pages-2026-09-05/README.md).
+Rationale: deprecated simulations should not remain active navigation or compete
+with the agreed architecture; archiving preserves comparison and recovery.
+No authorization rule or surviving HRMS evaluator algorithm changes.
+
+The active-page regression tests first failed on the two extra build entries
+and HTTP 200 responses for retired URLs; after removal all eight tests passed,
+including retained-page and existing reader-link tests. The TypeScript/Vite
+build also passed. Earlier checkpoint statements about both explorers/trace
+being active with warnings are now historical.
+
+Commit/push gate remains frozen. This is a local, recoverable removal only.
+
+## Local reconciliation — 2026-09-05, after 8b44880; commit gate frozen
+
+The user identified drift between the discussed architecture and `src/content`,
+including the block diagram, and explicitly made the approved discussion the
+source of truth. The subsequent commit/push freeze overrides earlier routine
+checkpoint publication. This reconciliation is local and uncommitted; it does
+not add a canonical authorization decision.
+
+### Changes and rationale
+
+| Surface | Reconciliation | Why |
+|---|---|---|
+| Three `src/content` reader guides | Replace active legacy explanations with current-model summaries, versioned working examples, and detailed chapter links. | An old model below a banner still dominates the reader; approved explanations must be the active body. |
+| Shared system SVG and overview | Show one endpoint-owned gate, explicit required inputs, complete authority evaluation, and mandatory bounded execution with failure paths. | Finance authority does not prove certificate membership; the application must enforce actual output/effects. No prepared handoff or mandatory relationship resolver is revived. |
+| Reader integration | Import the canonical SVG directly; package local Markdown/archive links for production; use responsive image styling. | Avoid a second diagram copy and broken review links while publishing is frozen. Linked chapters open source Markdown, not a new chapter-navigation application. |
+| Handbook, README, tree, log | One current status view through Q-050-F, horizontal open branches, and the commit-gate override. | Earlier “current/next/open” checkpoints must not compete with later agreements or reopen settled policy shape. |
+| Interactive explorers and enforcement trace | Prominent historical/deprecated notices; original algorithms retained. | Reconciliation is not runtime migration or verification of other repositories' implementation claims. |
+
+Nine pre-edit originals are preserved in the
+[reconciliation archive](history/reconciliation-2026-09-05/README.md), including
+the complete old prose, tree, overview, SVG, README, and standalone trace.
+Their bytes match HEAD `8b44880c1a63a71402dc335d8ed23db6f2205719`.
+The old tree remains additionally collapsed as checkpoint history in the live map.
+The older pre-Q-043 SVG is also retained.
+
+### Verification evidence and limitations
+
+- Reader-link regression tests: three passing tests. The local chapter/archive
+  remapping cases first failed against unchanged relative-link rendering, then
+  passed after the renderer mapped emitted asset URLs. External/fragment links
+  retain their normal meaning.
+- TypeScript/Vite production build passed; `git diff --check` passed.
+- Documentation scan: 28 Markdown files, 198 local links, 44 JSON example blocks,
+  and all 143 unique decision/question log IDs represented in the tree; no errors.
+- Browser checks: concept and HRMS readers rendered updated content with local
+  links returning HTTP 200. Production Projects reader loaded emitted chapter,
+  archive, and shared SVG assets successfully. The concept page at 390px had no
+  horizontal overflow. The SVG parsed without XML errors and was visually checked.
+- Both historical explorers and the standalone trace display their warning and
+  link to the current reader. Their authorization algorithms were not changed.
+
+These are documentation, rendering, and preservation checks—not an authorization
+security audit, conformance suite, or validation of another service's behavior.
+The handbook remains unfinished: full schemas/results, administrative scope
+encoding, update/move/list/bulk semantics, freshness/concurrency, detailed
+delegation/audit, and publication still need discussion. No percentage or new
+priority ordering is treated as an approved requirement.
+
+The local development preview is served with `npm run dev`; start review at
+`/concept.html?doc=concept`, not the historical homepage simulator.
+No commit or push is permitted until the user explicitly reopens the gate.
+
+## Earlier reconciliation checkpoints — retained history
+
 ## Checkpoint following ba46bfa — Q-050-F validation ownership clarification
 
 Q-050-F approves INPUT-003: application request contracts own input type,

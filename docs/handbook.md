@@ -1,196 +1,332 @@
 # Authorization Handbook — working edition
 
-Current: Q-050-F approves INPUT-003: the application owns input value validation;
-endpoint policy gains no type/nullability fields. [Rationale and cases](endpoint-policy-format.md)
-preserve presence-versus-validity and validated-meaning consistency. The policy
-shape was already agreed and is not reopened. Next branch: decision-result
-contracts; remaining structural policy validation/publication stays tracked.
-Earlier ownership-open checkpoint notes below are history.
+## Current position
 
-Current: Q-050-E approves INPUT-002: every declared input is required at its
-specified source, without silent omission/default/fallback. `{}` does not waive
-input requirements or invent narrower scope restrictions. [PUT cases and rationale](endpoint-policy-format.md)
-distinguish input presence from value validity. Next: input value validation and
-remaining policy validation/publication. Earlier missing-input-open notes are
-retained history where this approval now settles presence/source behavior.
+The approved discussion through **Q-050-F** is the source of truth. Reader pages
+and the [shared system diagram](system-overview.md) are locally reconciled to
+that model. This is not Handbook v1 publication or an authorization implementation
+migration. The user has now authorized committing and pushing this checkpoint
+and continuing the handbook discussion. The prior commit/push freeze is lifted.
 
-Current: Q-050-D approves ENFORCEMENT-003. Endpoint review must verify that
-boundaries and request bindings actually constrain returned/changed data, not
-merely that inputs appear in code. [Rationale and counterexamples](endpoint-policy-format.md)
-include ineffective filters and `{}`; this is not a guarantee against every
-breach. Q-050's remaining input/policy validation and publication are next.
-Older Q-050-D-open notes below are preserved history.
+The [previous entry page](history/reconciliation-2026-09-05/docs/handbook.md.txt)
+preserves the earlier sequential checkpoint summaries. Those earlier “next” and
+“open” labels are historical, not competing current directions.
 
-Current: Q-050-C approves CONTRACT-012: no relationship block; endpoint
-implementation must establish or enforce actual execution within authorized
-boundaries. [Policy rationale and examples](endpoint-policy-format.md) preserve
-the conscious tradeoff and earlier proposal not adopted. Q-050-D is an open
-review refinement: constraints must restrict output/effects, not merely appear
-in input usage. Full policy validation/publication and update/move contracts
-remain open. Older relationship-binding-open notes below are history.
+The reconciliation condensed this page's individual Q-041–Q-050-F checkpoints;
+it did not revoke their decisions or remove the underlying chapters/log. The
+visible decision trail below restores those references with current status,
+rationale, examples, and links. Navigation cleanup must not hide agreed decisions.
 
-Current: Q-050-B approves CONTRACT-011's [partial endpoint policy format](endpoint-policy-format.md),
-including explicit path/body input bindings. GET and PUT examples preserve the
-rationale and proposed-versus-current-fact distinction. Q-050 remains unfinished;
-next is Q-050-C, relationship bindings. Earlier policy-structure-open notes below
-are checkpoint history; no complete policy schema has been published.
+## The agreed shape
 
-Current: Q-050-A approves the [shared version convention](contract-publication.md):
-required top-level `version: "1"` as a string; missing, malformed, or unsupported
-versions are rejected. CONTRACT-010 distinguishes contract version from document
-revision. Q-050's full endpoint policy schema remains open. Older statements
-that version syntax is unselected are history, not the current convention.
+- Permission identifies the operation; scope selects its boundary within the
+  trusted implicit tenant. No additional canonical “target” entity is required.
+- Scope is a required flat string-value object: AND within one scope, alternatives
+  through complete grants, explicit `{}` for no narrower tenant-local restriction.
+  Missing/null scope is invalid. Applications register supported key meanings.
+- Auth owns human authorization groups/memberships. Team means group.
+  Group grants are preferred, not exclusive; self resolves per authorizing human.
+- Services/agents are human-dependent subsets, never independent group members.
+  Resolved grants preserve their source bindings and dependencies.
+- A protected method/route declares exactly one permission and selected inputs
+  with exact sources. Every declared input is required; the application validates
+  values. Published JSON/YAML contracts have top-level string `version: "1"`.
+- One endpoint-owned gate combines shared authority evaluation and mandatory
+  application enforcement. No prepared handoff or canonical relationship block.
+- Authority within Finance does not by itself prove a requested certificate
+  belongs to Finance. Actual output/effects must remain constrained to authorized
+  boundaries and relevant request bindings.
 
-Publication requirement: **every published JSON/YAML contract includes a version**
-(CONTRACT-009). Existing JSON examples remain working illustrations until full
-versioned contracts are settled. [Contract publication](contract-publication.md)
-records rationale and open details. The endpoint policy contract has not yet
-been discussed; Q-050 is next, before returning to decision results/enforcement.
+These summaries do not replace the rationale, alternatives, examples,
+counterexamples, and open questions in the chapters below (PROCESS-003).
 
-Current: Q-049 approves CONTRACT-008. Each protected endpoint predeclares
-**one required permission**, inputs, sources, and how to establish any required
-relationship. Auth rejects zero/multiple-permission or missing/invalid declarations;
-they cannot permit execution. [Endpoint authorization](endpoint-authorization.md)
-records rationale, examples, design obligations, and the earlier proposal not
-adopted. Multiple permissions per grant remain supported. Earlier plural/open
-endpoint-combination notes are historical, not unfinished v1 choices.
-Next branch: decision results and enforcement contracts; exact schemas remain open.
+## Decision trail — Q-041 through Q-050-F
 
-Current: Q-048 approves RESOLUTION-006, the dependent resolved-grant view and
-membership-based retrieval flow. Obtain Vinay's valid memberships, then grants
-for Vinay directly and for those groups, preserving every source binding and
-dependency. The [grant chapter](grant-model.md) records rationale, JSON example,
-counterexamples, and open mechanics. Next branch: decision semantics, including
-multiple required permissions; no additional combination policy is approved yet.
-Earlier checkpoint summaries below are retained history.
+These decisions remain part of the handbook. “Agreed” applies to the stated
+rule, not every related schema or implementation. The
+[chronological log](handbook-roadmap.md) retains the original questions,
+alternatives, and approvals; the entries here reflect subsequent refinements.
 
-Current: Q-047 and Q-047-A agree request/resolved-request meanings and clarify
-CONTRACT-007: the endpoint predeclares permissions, inputs, sources, and how to
-establish any required relationship. [Endpoint authorization](endpoint-authorization.md)
-explains fixed declarations, scope-dependent material needs, and the `{}` case.
-Resolved does not mean allowed. Next branch: resolved grants (Q-048, open).
-Earlier checkpoint summaries below are retained history.
+### Q-041 — Explicit registration-validation mode, agreed
 
-Current: Q-046 approves ordinary grant lifecycle independence from the issuing
-administrator's later loss of issuance authority (ADMIN-006). The
-[grant chapter](grant-model.md#ordinary-grant-lifecycle--admin-006--q-046-agreed)
-records rationale, the cascading alternative not adopted, examples, and explicit
-revocation consequences. Human-dependent automation remains unchanged.
-Next: Q-047, request versus resolved request at the one endpoint-owned gate.
-Administrative encoding and detailed lifecycle mechanics remain open.
-Checkpoint summaries below are retained history, not additional live positions.
+REGISTRATION-003: the application declares upfront whether permission–scope
+support-relationship validation is enabled. If enabled, all grants—including
+existing and role-based grants—must pass it. Missing metadata is not a way to
+disable checks. If disabled, other canonical/registration/issuance checks and
+runtime boundary enforcement still apply.
 
-Q-045 settles Auth-owned authorization groups/memberships, optional application
-sync, and human-only groups. [Groups and membership](groups-and-membership.md)
-records the rationale, rejected alternative, examples, and remaining mechanics.
-Q-046 is next in authority-model closure; older group-open notes are history.
+**Rationale:** one explicit application-level choice is predictable; inferring
+the mode from absent metadata would permit ambiguity or bypass. This is
+registration compatibility, not the endpoint relationship block later rejected.
+Representation and detailed lifecycle mechanics remain open.
+[Explanation and alternatives](application-registration.md).
 
-Current: Q-044 approves the five [grant-administration rules](grant-model.md).
-ADMIN-004/005 are settled at rule level; exact encoding remains open. Q-045
-next consolidates group ownership/membership directions. Older administration
-open-status notes below describe earlier checkpoints.
+### Q-042 — Existing grants before enabling validation, agreed
 
-Q-043 now agrees TERM-005: use permissions, scope boundaries, requests, and
-trusted request material without an additional canonical entity. The detailed
-[vocabulary explanation](authorization-vocabulary.md) preserves the reasoning,
-case checks, security counterexamples, and remaining gaps. Administration
-remains open; the earlier Q-043 framing is withdrawn.
+REGISTRATION-004: reject activation if existing grants are incompatible. Report
+the incompatibilities and preserve the previous configuration until authorized
+corrections are made. Do not silently delete, rewrite, or grandfather grants.
 
-Current discussion: stage 5, grant administration, Q-043 under ADMIN-004/005.
-Q-042 is agreed; further registration lifecycle details are parked by user
-direction. Earlier checkpoint summaries below are retained context.
+**Rationale:** enabling a security rule must not secretly alter existing authority
+or retain exceptions to an all-grants rule. For example, an incompatible role
+grant must be corrected before activation succeeds. Further registration
+lifecycle mechanics are parked by the user's direction, not silently settled.
+[Activation example and consequences](application-registration.md).
 
-This is the entry point for the handbook being developed through our discussions.
-Chapters preserve the explanation, rationale, examples, counterexamples, and
-remaining questions, not just short decision summaries.
+### Q-043 — Permission/boundary/request vocabulary, agreed as reformulated
 
-This is an evolving working edition. Agreement on a concept does not finalize
-its JSON schema, implementation, or every related branch.
+TERM-005: no additional canonical “target” entity or wrapper is required.
+Describe authorization using permissions, scope boundaries, requests, and
+sufficient trusted request material, bound to the actual operation.
 
-Current checkpoint: scope is a boundary selector, scope requirements combine
-with AND, and alternative authority comes through separate complete grants.
-Authorization uses one endpoint-owned gate (CONTRACT-006), not the earlier
-two-mode/prepared model. SCOPE-007's flat string-value scope is canonical:
-explicit {} means tenant-wide reach; missing/null scope is invalid.
+**Rationale:** the extra abstraction did not add a necessary distinction across
+read/list/create/move/administrative examples. Removing it does not remove
+relationship proof or enforcement: FIN in a path still does not prove C-17
+belongs to Finance. The earlier administration framing was withdrawn; this
+vocabulary decision did not finalize administrative scope encoding.
+[Tenability checks and counterexamples](authorization-vocabulary.md).
 
-Q-039 adds REGISTRATION-001: applications register supported permissions and
-scope contracts; Auth validates grant acceptance without interpreting domain
-meaning. Registration format and permission-scope compatibility remain open.
+### Q-044 — Five grant-administration rules, agreed at rule level
 
-Q-040 subsequently approves optional permission-scope support-relationship
-declarations through registration (REGISTRATION-002). Representation and
-omission behavior (Q-041) remain open; this qualifies the earlier checkpoint.
+ADMIN-004/005: use the ordinary grant model; require the specific administrative
+operation; check the complete requested assignment; keep its bounds associated;
+and apply normal canonical/registration/tenant validation.
 
-Q-041 then settles REGISTRATION-003: applications explicitly enable or disable
-relationship validation upfront. Enabled applies to all grants, including
-existing and role-based grants; disabled does not weaken runtime enforcement.
-This supersedes omission-based mode proposals. Change/revalidation mechanics
-remain open, beginning with Q-042.
+**Rationale:** granting access is not using access, and fields from unrelated
+administrative grants cannot be mixed to manufacture broader issuance authority.
+Finance payroll-read provisioning cannot donate its permission to Engineering
+certificate-read provisioning. Self-assignment remains explicit, authorized, and
+audited. Exact admin scope encoding, containment mechanics, and before/after
+change contracts remain open.
+[Five rules, Finance example, and counterexamples](grant-model.md#grant-administration--q-044-agreed-rules).
 
-## Read the current chapters
+### Q-045 — Auth-owned human groups and membership, agreed
 
-| Material | What it preserves |
+GROUP-001-A / GROUP-003: Auth owns authorization groups and memberships; team
+and group mean the same thing. Groups contain humans, not first-class services
+or agents. Applications may sync business groups into Auth or keep them separate.
+Group-based human access remains preferred, not the only permitted route.
+
+**Rationale:** one authorization-membership authority avoids treating application
+business relationships as implicit grants. A proxy can receive only a delegated
+subset through its human, preserving the dependency on that human's membership.
+Nesting, synchronization timing, and detailed delegation encoding remain open.
+[Membership examples and ownership rationale](groups-and-membership.md).
+
+### Q-046 — Ordinary grants after issuer-authority loss, agreed
+
+ADMIN-006: an ordinary human/group grant that was validly issued does not become
+invalid solely because its issuing administrator later loses issuance authority.
+Its own validity, conditions, revocation, and recipient dependencies still apply.
+
+**Rationale:** routine administrator rotation should not unexpectedly revoke
+organizational access. Withdrawing an issued grant requires explicit authorized
+revocation. This differs from a service/agent's continuing dependence on its
+authorizing human: the latter remains a live subset relationship. Invalid
+issuance and incident-response mechanics are not settled by this rule.
+[Lifecycle example and cascading alternative](grant-model.md#ordinary-grant-lifecycle--admin-006--q-046-agreed).
+
+### Q-047 and Q-047-A — Request, resolved material, and declaration, agreed
+
+RESOLUTION-005: the authorization request identifies the declared operation,
+verified identity/tenant context, and selected inputs. A resolved request is its
+evaluation view with sufficient trusted material for the relevant boundaries;
+resolved does not mean allowed.
+
+Q-047-A clarified that the endpoint predeclares its permission, inputs, and
+sources. Later Q-049 fixes exactly one permission, and Q-050-C assigns required
+relationship enforcement to implementation rather than a policy block.
+
+**Rationale:** inputs identify the request but do not automatically become scope
+boundaries or established facts. With `{}`, department adds no narrower scope
+restriction, yet the fixed input contract and actual request binding remain.
+No prepared handoff or mandatory eager fact lookup is reinstated.
+[Declared-material and empty-scope examples](endpoint-authorization.md#endpoint-declaration-and-request-resolution--q-047--q-047-a-agreed).
+
+### Q-048 — Dependent resolved grants and membership retrieval, agreed
+
+RESOLUTION-006: obtain Vinay's valid memberships, then grants for Vinay directly
+and for those groups. Resolved views establish relevant references/human context
+while retaining source identity, associated permissions/scope/conditions/validity,
+and membership/delegation dependencies.
+
+**Rationale:** flattening to a permission list loses restrictions; copying a group
+grant into an independent direct grant loses its membership dependency. Live role
+expansion and self anchoring do not produce a new assignment or an allow.
+Transport, cache/freshness, and concrete resolved-view schemas remain open; this
+is a logical dependency flow, not a required API-call count.
+[Resolved-grant example and counterexamples](grant-model.md#resolved-grants-and-membership-based-retrieval--resolution-006--q-048-agreed).
+
+### Q-049 — Exactly one required permission per endpoint, agreed
+
+CONTRACT-008: Auth mandates exactly one required permission for each protected
+method/route. Missing, zero/multiple-permission, or invalid declarations cannot
+permit execution. That permission must cover the complete protected operation.
+
+**Rationale:** one fixed requirement keeps the endpoint contract simple and
+reviewable. The earlier multiple-required-permission combination proposal was
+not adopted. A grant may still contain multiple permissions, and a human may
+have multiple direct/group grants; those are different concerns.
+[Endpoint examples and preserved alternative](endpoint-authorization.md#one-required-permission-per-protected-endpoint--contract-008--q-049-agreed).
+
+### Q-050 — Endpoint policy contract, partially settled; overall open
+
+CONTRACT-009 requires versions in every published JSON/YAML contract. Q-050-A
+through Q-050-F below settle the convention, partial policy shape, relationship
+responsibility, review requirement, input presence, and value-validation ownership.
+
+**Rationale:** agreeing requirements is not the same as publishing a complete
+schema. The remaining structural validation, nested input syntax, further source
+kinds, publication/compatibility details, and update/move semantics are still
+open. Settled subquestions must not vanish or be repeatedly reopened because
+their parent remains unfinished.
+[Policy chapter](endpoint-policy-format.md) and [publication](contract-publication.md).
+
+### Q-050-A — Shared contract version convention, agreed
+
+CONTRACT-010: use a required top-level string `version`, initially `"1"`; quote
+it in YAML. Reject missing, malformed, or unsupported versions without guessing
+or fallback. Interpret the version within its contract type, not as a document
+edit revision.
+
+**Rationale:** explicit interpretation avoids ambiguity while allowing contract
+types to evolve independently. Numeric `1` is not the adopted string value;
+adding `"version": "1"` alone does not complete the remaining schema.
+[Version examples and naming alternative](contract-publication.md).
+
+### Q-050-B — Partial policy structure and GET/PUT bindings, agreed
+
+CONTRACT-011: `version`, `method`, `path`, one `permission`, and named
+`inputs` with explicit `source`/`name`. A local input name can differ from
+its source field and is not automatically a scope key.
+
+**Rationale:** explicit bindings distinguish requested material from established
+facts without a shorthand selector grammar. In the approved PUT example,
+`proposed_dept` comes from body field `department_id`; requesting FIN does
+not prove the existing certificate belongs to Finance or authorize a move.
+[GET/PUT JSON and field rationale](endpoint-policy-format.md#get-example-selected-path-parameters).
+
+### Q-050-C — No relationship block; mandatory endpoint enforcement, agreed
+
+CONTRACT-012: policy does not add `relationships`, named resolvers, or argument
+maps. The endpoint implementation must establish or enforce relationships needed
+to keep actual output/effects inside authorized boundaries.
+
+**Rationale:** this consciously keeps the canonical contract small and places
+application-specific enforcement with its owner. Finance-read authority does
+not authorize an unchecked C-17 lookup. A tenant AND Finance AND C-17 query can
+enforce the relationship directly. Auth alone cannot detect every defective
+handler; enforcement is mandatory, not optional business validation.
+[Grant/query example and rejected proposal](endpoint-policy-format.md#no-relationship-block--contract-012--q-050-c-agreed).
+
+### Q-050-D — Review actual constraints, not merely input usage, agreed
+
+ENFORCEMENT-003: review whether boundaries and request bindings constrain the
+data returned or changed. Logging department, using an ineffective OR filter,
+or returning unchecked data after a correct lookup does not meet this requirement.
+
+**Rationale:** protection comes from the constraint on the actual operation,
+not a variable appearing in code. `{}` does not invent department restrictions
+just to use an input. This is central review guidance, not a guarantee that it
+catches wrong permissions, stale dependencies, or every other breach.
+[Review cases and limits](endpoint-policy-format.md#endpoint-review-requirement--enforcement-003--q-050-d-agreed).
+
+### Q-050-E — Required inputs at their declared sources, agreed
+
+INPUT-002: every declared input must be present at its exact source. Do not
+silently omit/default it or fall back to another source, even when a tenant-wide
+grant applies. Additional payload fields do not automatically become auth inputs.
+
+**Rationale:** the endpoint has a fixed input contract independent of grant
+breadth. Omitting PUT's body `department_id` is not repaired by a query
+parameter or broader authority. Presence alone does not establish validity;
+Q-050-F separately settles who validates the value.
+[Presence, omission, and fallback cases](endpoint-policy-format.md#required-inputs-at-their-declared-sources--input-002--q-050-e-agreed).
+
+### Q-050-F — Application-owned input value validation, agreed
+
+INPUT-003: the application's request contract defines and validates types,
+nullability, format, and domain meaning. Do not duplicate these as type/nullable/
+validation-expression fields in endpoint policy. Authorization and execution
+must use the same validated meaning after parsing or normalization.
+
+**Rationale:** two input schemas can disagree. Required presence is distinct
+from valid value: a required field may accept null only when its application
+contract explicitly allows it, and null never means unrestricted authority.
+Auth retains its own canonical checks. This confirms the existing policy shape;
+it is not a new schema or an invitation to seek the same approval again.
+[Value cases, counterexamples, and responsibility split](endpoint-policy-format.md#application-owned-value-validation--input-003--q-050-f-agreed).
+
+## Read the chapters
+
+| Chapter | Purpose |
 |---|---|
-| [Groups and membership](groups-and-membership.md) | Ownership and human-only membership decisions, their rationale, optional-sync distinction, examples, and dependent automated access. |
-| [Explanation coverage audit](explanation-audit.md) | Evidence of which recent explanations were checked, where reasoning/examples live, and what remains incomplete. |
-| [Authorization vocabulary and request material](authorization-vocabulary.md) | Q-043's approved explanation, why it is tenable across operations, and the evidence-to-execution requirement. |
-| [Application registration](application-registration.md) | Agreed registration/validation responsibilities, permission and scope examples, and the boundary between canonical checks and application interpretation. |
-| [Cross-domain use cases](use-case-examples.md) | Sixteen worked scenario groups across Git hosting, ticketing, HRMS, and accounting, with grants, endpoint material, and expected outcomes. |
-| [Reconciliation register](reconciliation.md) | Current-versus-historical status, retained deprecations, and unresolved implementation/design gaps. |
-| [System block diagram](system-overview.md) | Scalable SVG and text views of the agreed endpoint-owned gate, explicit source declarations, shared evaluator, and enforcement. |
-| [Current grant formats](grant-format.md) | Current direct/group, role-reference, and expanded-view examples using canonical scope, with a map to deprecated layouts. |
-| [Scope boundaries](scope-model.md) | Canonical boundary-selector definition and v1 key-value format, AND within scope, alternatives through grants, and empty/invalid scope rules. |
-| [Grants, assignments, and roles](grant-model.md) | Definitions, tenant context, permission/scope binding, groups, per-human self, role changes and expansion, dependency, positive grants, and administrative authority. |
-| [Endpoint-owned authorization](endpoint-authorization.md) | Current single-gate model, selected endpoint inputs, authority and application facts, enforcement, and the deprecation map. |
-| [Earlier authorization flow](authorization-flow.md) | Deprecated two-mode design, preserved with its rationale and examples. |
-| [Grant JSON examples](grant-examples.md) | GRANT-EX-007 uses canonical v1 scope; six earlier examples preserve historical syntax and grant/role/dependency explanations. |
-| [Earlier endpoint-completion cases](endpoint-completion-cases.md) | Seven application-fact cases; their two-mode classification is deprecated and preserved. |
+| [System overview and SVG](system-overview.md) | Current responsibility layers, single gate, inputs, complete authority, and actual-use enforcement. |
+| [Vocabulary](authorization-vocabulary.md) | Permission/boundary/request-material terms, tenability checks, and the retired vocabulary's rationale. |
+| [Scope boundaries](scope-model.md) | Canonical scope semantics/format, self, AND/alternatives, empty/invalid cases, and earlier proposals. |
+| [Grants and roles](grant-model.md) | Complete bindings, groups, live roles, dependent resolution, administration, and lifecycle distinctions. |
+| [Grant formats](grant-format.md) | Working current-scope examples and deprecated layout correspondence; complete schemas remain open. |
+| [Groups and membership](groups-and-membership.md) | Auth ownership, human-only membership, optional application sync, and preferred group access. |
+| [Application registration](application-registration.md) | Abstract validation, application meanings, optional support checks, and activation rules. |
+| [Endpoint authorization](endpoint-authorization.md) | One endpoint-owned gate, request versus resolved material, and retained historical decisions. |
+| [Endpoint policy format](endpoint-policy-format.md) | Approved version/method/path/permission/inputs shape; GET/PUT, value validation, and mandatory enforcement. |
+| [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
+| [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
+| [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
 
-## Follow progress and decisions
+## Follow the whole discussion
 
-- [Discussion tree and mind map](discussion-tree.md): a compact whole-handbook
-  overview followed by all eleven stages, concluded questions, open siblings,
-  the active branch, and explicit return points.
-- [Roadmap and decision log](handbook-roadmap.md): stable proposal/question IDs,
-  agreement status, user decisions, and historical alternatives.
+Current open question: [Q-051 / DECISION-003 — decision results](decision-results.md).
+The recommended separation of completed allow/deny decisions from evaluation
+errors is recorded for discussion, **not approved**. Existing fail-closed and
+single-gate rules remain unchanged.
 
-PROCESS-003 requires definitions, rationale, examples/counterexamples,
-consequences, and unresolved details to remain reconstructable. We update the
-chapters when a decision changes, keeping superseded alternatives in the log.
+The [discussion tree](discussion-tree.md) is the mind map: settled principles,
+unfinished branches, and return points. The [decision log](handbook-roadmap.md)
+retains stable references and agreement status.
 
-## Checkpoint and reconciliation practice
+The user requested horizontal progress on high-impact decisions. The next
+selection should come from decision results, enforcement across operation types,
+or freshness/dependency behavior—not another approval of the settled endpoint
+policy shape. The exact priority order is still a proposal, not an adopted rule.
 
-PROCESS-004: commit and push meaningful documentation checkpoints as the
-discussion progresses. At branch closures and periodically during longer
-branches, review the following together:
+Full contracts, update/move/list/bulk behavior, administrative scope encoding,
+delegation mechanics, revocation/concurrency, audit, conformance testing, and
+publication/governance remain unfinished. The subsequent
+[MEASURE-001 audit](handbook-completion-audit.md) counts 34 of 69 checkpoints
+closed (49.3%); this supersedes the earlier absence of a measured baseline, not
+the distinction between documented agreement and implementation readiness.
 
-- Chapters and examples agree with the decision log, including terminology.
-- The discussion tree retains all open questions, dependencies, and return points.
-- Explanations preserve rationale and counterexamples, not just conclusions.
-- Contradictions with the original lab handbook are reconciled where decisions
-  are settled; unresolved choices and implementation gaps remain explicit.
+## Preservation and implementation status
 
-Keep superseded decisions as history. Reconciliation does not authorize silently
-deciding open questions or changing application behavior.
+The [reconciliation register](reconciliation.md) distinguishes current text,
+retained history, and implementation gaps. The refreshed
+[concept](../src/content/authorization-concept.md),
+[HRMS](../src/content/hrms-tenant-setup.md), and
+[projects](../src/content/projects-repositories-teams.md) pages summarize the
+approved model and link the detailed chapters.
 
-PROCESS-006 explicitly resumes recording after the discussion-only pause and
-requires earlier designs to be retained with deprecation labels.
+Original prose and diagrams remain in the
+[reconciliation archive](history/reconciliation-2026-09-05/README.md).
+All guided explorers and the standalone enforcement trace have been removed
+from the active site by user approval. The homepage is now the handbook;
+source is preserved for the [HRMS explorer](history/retired-hrms-explorer-2026-09-05/README.md)
+and [earlier retired pages](history/retired-pages-2026-09-05/README.md).
+Their algorithms and external implementation claims have not been migrated or
+reverified. The Projects handbook chapter is retained.
 
-## Relationship to the original lab handbook
+Earlier [two-mode flow](authorization-flow.md),
+[endpoint-completion cases](endpoint-completion-cases.md), and
+[grant layouts](grant-examples.md) retain rationale with deprecation labels.
+Historical options are not live alternatives unless deliberately reopened.
 
-The original [lab concept page](../src/content/authorization-concept.md) predates
-this discussion ~~and has not yet been reconciled with the working edition.~~ The
-lab's interactive evaluator and enforcement trace also have not been updated
-to implement our decisions. Treat their behavior and claims as source material
-for later review, not as evidence that the new model is implemented.
+## Working discipline
 
-Reconciliation checkpoint: original lab pages and the older design now carry
-historical/deprecation notices, with the substantive prose preserved. Current
-chapters and examples are aligned to approved scope and endpoint decisions.
-This is not a full rewrite or an implementation migration; see the
-[reconciliation register](reconciliation.md) for resolved drift and open gaps.
+Record meaning, rationale, alternatives, examples/counterexamples, consequences,
+and open dependencies. Reconcile chapters, log, tree, examples, and diagrams
+periodically. Preserve superseded material instead of deleting it.
 
-The working chapters currently consolidate the grants and authorization-flow
-branches and begin the scope-model discussion. Several other branches still have only partial discussion or decision
-notes. We will develop those chapters as their questions are settled and review
-coverage against the entire tree before declaring v1 complete.
+PROCESS-004's checkpoint commit/push practice was suspended during the user's
+explicit review freeze. The user has now reopened the gate with “lets commit
+and push, and continue with the rest.” Verification and preservation remain
+required; later user instructions can change the gate again.

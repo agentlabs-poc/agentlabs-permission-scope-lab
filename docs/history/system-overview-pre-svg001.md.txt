@@ -1,18 +1,5 @@
 # Authorization system — canonical logical overview
 
-## SVG-001 — follow a request, not a responsibility checklist
-
-The user approved a client-to-handler request-flow layout. The diagram follows
-one certificate read: client, authentication middleware, endpoint handler,
-embedded Auth Agent, authority loading from Auth, constrained application data
-access, and the response back to the client. Middleware, handler, and embedded
-agent sit inside the application boundary. Evaluation and enforcement remain
-inside one endpoint-owned authorization gate.
-
-This replaces the less readable responsibility-first layout, not the approved
-authorization rules. Its [previous SVG](assets/history/authorization-system-pre-svg001.svg)
-and [overview text](history/system-overview-pre-svg001.md.txt) remain archived.
-
 **Current through Q-050-F.** This diagram represents the approved discussion,
 not the historical lab implementation or a verified deployment topology.
 The [pre-reconciliation overview](history/reconciliation-2026-09-05/docs/system-overview.md.txt)
@@ -23,40 +10,7 @@ is also retained.
 
 [Open the shared scalable SVG](assets/authorization-system.svg).
 
-![Certificate-read request from client through middleware, handler, embedded Auth Agent, Auth authority, constrained database access, and back to the client](assets/authorization-system.svg)
-
-### Reading the numbered request flow
-
-1. The client submits the request and token. It does not select the endpoint's
-   permission or supply authoritative grant/membership facts.
-2. Authentication middleware establishes verified identity and trusted tenant
-   context. It does not finish business authorization with an allow/prepared result.
-3. The handler binds and validates required inputs from the server-owned endpoint
-   policy, then invokes the embedded Auth Agent with the declared permission and
-   relevant material.
-4. Authority loading supplies valid human memberships, direct/group grants,
-   current role permissions, validity/conditions, and dependencies. Shared loading
-   or valid preloaded material may satisfy this; the arrows do not mandate a
-   fresh remote call for every request. The embedded agent resolves and evaluates
-   complete grants using the shared canonical rules.
-5. In this example a valid route establishes certificate-read authority within
-   Finance. No valid authority means stop. Finance authority does not establish
-   that unchecked C-17 belongs to Finance; the result labels are explanatory,
-   not a new decision-result schema.
-6. The handler enforces that relationship with a constrained lookup: trusted
-   tenant AND authorized Finance department AND requested certificate. This is
-   still mandatory endpoint authorization work, not optional business validation.
-7. Only matching authorized data can enter the handler's response. A missing or
-   out-of-boundary row cannot be disclosed; exact response-status semantics remain
-   open. Authentication, input, authority, or enforcement failure must prevent
-   protected disclosure/effects.
-8. The application returns the response to the client.
-
-This is a concrete logical example, not a verified trace of an existing service.
-Applications may instead establish necessary facts before evaluation and ensure
-consistent enforcement at actual use. The main diagram uses direct constrained
-execution for clarity; no mandatory eager lookup/resolver or separate Auth access
-to the application's database is introduced.
+![Two responsibility layers within one endpoint-owned authorization gate](assets/authorization-system.svg)
 
 The reader imports this exact SVG from `docs/assets`; there is no second
 hand-maintained current diagram in `src/content`. The standalone enforcement

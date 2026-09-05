@@ -1,125 +1,144 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1160" viewBox="0 0 1280 1160" role="img" aria-labelledby="diagram-title diagram-description">
-  <title id="diagram-title">AgentLabs authorization: one endpoint-owned gate</title>
-  <desc id="diagram-description">A request is authenticated before entering an endpoint-owned authorization gate. A server-owned declaration supplies the required permission and material sources. The gate gathers sufficient material from verified context, selected request inputs, Auth authority, and required application facts. A shared evaluator checks complete grants. Allow proceeds through enforcement to the protected operation; denial or failure stops. There is no prepared handoff. This is a logical responsibility diagram, not a deployment topology.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1520" viewBox="0 0 1440 1520" role="img" aria-labelledby="diagram-title diagram-description">
+  <title id="diagram-title">Client to handler: how a certificate-read request is authorized</title>
+  <desc id="diagram-description">A client sends GET /api/v1/acme/FIN/C-17 with a token. Application authentication middleware establishes verified identity and tenant context. The endpoint handler binds the inputs and permission from its policy and invokes the embedded Auth Agent. The agent obtains memberships, direct and group grants, role permissions, and dependencies from Auth and evaluates complete authority. Denial stops the request. Finance-read authority proceeds to a handler-owned database read constrained by trusted tenant, Finance department, and certificate C-17. Only matching authorized data can be returned through the handler to the client. Middleware, handler, and embedded agent are inside the application; evaluation and enforcement form one endpoint-owned gate. Arrows explain logical request flow, not fixed network calls or SDK contracts.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#697a90"/>
-    </marker>
-    <marker id="allow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#18815d"/>
-    </marker>
-    <marker id="deny-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b94b56"/>
-    </marker>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#647b96"/></marker>
+    <marker id="green-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#258264"/></marker>
+    <marker id="red-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#b84c59"/></marker>
     <style>
-      text { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
-      .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.7px; fill: #52637a; }
-      .heading { font-size: 32px; font-weight: 700; fill: #172b44; }
-      .subtitle { font-size: 16px; fill: #5b6b80; }
-      .node-title { font-size: 19px; font-weight: 650; fill: #172b44; }
-      .body { font-size: 14px; fill: #455972; }
-      .small { font-size: 12px; fill: #5b6b80; }
-      .tag { font-size: 11px; font-weight: 700; letter-spacing: 1.1px; fill: #52637a; }
-      .edge { fill: none; stroke: #697a90; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
-      .allow-edge { fill: none; stroke: #18815d; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#allow-arrow); }
-      .deny-edge { fill: none; stroke: #b94b56; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#deny-arrow); }
+      text { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #243c55; }
+      .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1.4px; fill: #59718b; }
+      .heading { font-size: 32px; font-weight: 700; fill: #162d46; }
+      .title { font-size: 21px; font-weight: 650; }
+      .body { font-size: 16px; fill: #496078; }
+      .small { font-size: 13px; fill: #59718b; }
+      .step { font-size: 14px; font-weight: 600; fill: #496078; }
+      .flow { fill: none; stroke: #647b96; stroke-width: 2; stroke-linejoin: round; marker-end: url(#arrow); }
+      .return { fill: none; stroke: #647b96; stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#arrow); }
+      .success { fill: none; stroke: #258264; stroke-width: 2; marker-end: url(#green-arrow); }
+      .deny { fill: none; stroke: #b84c59; stroke-width: 2; marker-end: url(#red-arrow); }
+      .node { fill: #fff; stroke: #b5c8db; stroke-width: 1.5; }
     </style>
   </defs>
+  <rect width="1440" height="1520" rx="18" fill="#f7f9fc"/>
+  <text x="50" y="52" class="eyebrow">AGENTLABS / AUTHORIZATION HANDBOOK · SVG-001</text>
+  <text x="50" y="99" class="heading">Follow one request: client → handler → response</text>
+  <text x="50" y="131" class="body">Certificate read example · Auth supplies authority; the handler enforces the actual data boundary.</text>
 
-  <rect width="1280" height="1160" fill="#f7f9fc"/>
-  <text x="48" y="56" class="eyebrow">AGENTLABS / AUTHORIZATION HANDBOOK</text>
-  <text x="48" y="100" class="heading">One endpoint-owned authorization gate</text>
-  <text x="48" y="132" class="subtitle">Canonical logical model · One declaration · Shared evaluation · No prepared handoff</text>
+  <rect x="390" y="300" width="610" height="980" rx="24" fill="#edf3fb" stroke="#b9cce2" stroke-width="1.5"/>
+  <text x="416" y="330" class="eyebrow">APPLICATION</text>
+  <rect x="425" y="505" width="535" height="640" rx="18" fill="#f5f9fd" stroke="#99bdb0" stroke-width="1.5"/>
+  <text x="446" y="533" class="eyebrow">ENDPOINT HANDLER · ONE AUTHORIZATION GATE</text>
 
-  <!-- Logical ownership boundary; not a separate deployment or network service. -->
-  <rect x="376" y="405" width="528" height="545" rx="24" fill="#edf3fb" stroke="#c3d2e5" stroke-width="1.5"/>
-  <text x="400" y="436" class="tag">ENDPOINT-OWNED GATE</text>
+  <!-- Main request path and the handler's side interactions. -->
+  <path d="M685 245V355" class="flow"/>
+  <text x="710" y="285" class="step">1  request + token</text>
+  <path d="M685 445V503" class="flow"/>
+  <text x="710" y="476" class="step">2  verified context</text>
+  <path d="M320 612H448" class="flow"/>
+  <text x="334" y="596" class="small">policy</text>
+  <path d="M685 665V743" class="flow"/>
+  <text x="710" y="710" class="step">3  authorize</text>
+  <path d="M920 786H1098" class="flow"/>
+  <text x="958" y="771" class="small">4  load authority</text>
+  <path d="M1100 847H922" class="return"/>
+  <text x="969" y="872" class="small">grant views</text>
+  <path d="M450 815H322" class="deny"/>
+  <text x="345" y="799" class="step" style="fill:#b84c59">deny</text>
+  <path d="M685 880V978" class="success"/>
+  <text x="710" y="931" class="step" style="fill:#258264">5  read within FIN</text>
+  <path d="M920 1020H1098" class="flow"/>
+  <text x="950" y="1004" class="small">6  constrained read</text>
+  <path d="M1100 1085H922" class="return"/>
+  <text x="955" y="1111" class="small">matching row only</text>
+  <path d="M685 1110V1188" class="success"/>
+  <text x="710" y="1173" class="step">7  build response</text>
+  <path d="M685 1260V1358" class="success"/>
+  <text x="710" y="1324" class="step">8  response to client</text>
 
-  <!-- Connections are drawn before nodes so their endpoints meet node borders. -->
-  <path d="M640 236 V278" class="edge"/>
-  <path d="M640 364 V480" class="edge"/>
-  <path d="M330 365 H352 V505 H416" class="edge"/>
-  <path d="M330 561 H416" class="edge"/>
-  <path d="M950 561 H864" class="edge"/>
-  <path d="M640 606 V652" class="edge"/>
-  <path d="M640 770 V830" class="allow-edge"/>
-  <path d="M864 704 H1091 V716" class="deny-edge"/>
-  <path d="M640 912 V986" class="allow-edge"/>
-  <text x="660" y="805" class="tag" style="fill:#18815d">ALLOW</text>
-  <text x="947" y="689" class="tag" style="fill:#a13d48">DENY / FAILURE</text>
-
-  <g id="request">
-    <rect x="520" y="176" width="240" height="60" rx="14" fill="#ffffff" stroke="#c3cedb" stroke-width="1.5"/>
-    <text x="640" y="212" text-anchor="middle" class="node-title">Request</text>
+  <g id="client-request">
+    <rect x="460" y="165" width="450" height="80" rx="15" class="node"/>
+    <text x="685" y="197" text-anchor="middle" class="title">Client</text>
+    <text x="685" y="223" text-anchor="middle" class="body">GET /api/v1/acme/FIN/C-17 + token</text>
   </g>
 
   <g id="authentication">
-    <rect x="440" y="278" width="400" height="86" rx="16" fill="#ffffff" stroke="#b4c8e0" stroke-width="1.5"/>
-    <text x="640" y="313" text-anchor="middle" class="node-title">Authenticate</text>
-    <text x="640" y="339" text-anchor="middle" class="body">Establish verified identity and trusted tenant</text>
+    <rect x="450" y="355" width="470" height="90" rx="15" class="node"/>
+    <text x="685" y="390" text-anchor="middle" class="title">Authentication middleware</text>
+    <text x="685" y="420" text-anchor="middle" class="body">Verify identity and establish trusted tenant context</text>
   </g>
 
-  <g id="endpoint-declaration">
-    <rect x="48" y="288" width="282" height="148" rx="16" fill="#fffaf0" stroke="#e1c785" stroke-width="1.5"/>
-    <text x="70" y="314" class="tag" style="fill:#856724">SERVER-OWNED CONTRACT</text>
-    <text x="70" y="344" class="node-title">Endpoint declaration</text>
-    <text x="70" y="372" class="body">Required permission</text>
-    <text x="70" y="395" class="body">Identified material + its sources</text>
-    <text x="70" y="418" class="small">Method / route · selected path / body</text>
+  <g id="endpoint-policy">
+    <rect x="60" y="550" width="260" height="170" rx="15" fill="#fffaf0" stroke="#ddc589" stroke-width="1.5"/>
+    <text x="80" y="580" class="eyebrow">SERVER-OWNED POLICY</text>
+    <text x="80" y="614" class="title">Endpoint declaration</text>
+    <text x="80" y="644" class="body">One read permission</text>
+    <text x="80" y="670" class="body">Required inputs + sources</text>
+    <text x="80" y="698" class="small">version "1" · method / route</text>
   </g>
 
-  <g id="auth-authority">
-    <rect x="48" y="485" width="282" height="152" rx="16" fill="#eff6ff" stroke="#a9c5e8" stroke-width="1.5"/>
-    <text x="70" y="513" class="tag" style="fill:#35649d">AUTH-OWNED AUTHORITY</text>
-    <text x="70" y="544" class="node-title">Applicable grants</text>
-    <text x="70" y="574" class="body">Roles and memberships</text>
-    <text x="70" y="598" class="body">Delegation dependencies</text>
-    <text x="70" y="621" class="small">Shared loading; freshness contract applies</text>
+  <g id="handler-inputs">
+    <rect x="450" y="555" width="470" height="110" rx="15" class="node"/>
+    <text x="685" y="589" text-anchor="middle" class="title">Handler binds request material</text>
+    <text x="685" y="619" text-anchor="middle" class="body">Tenant acme · requested dept FIN · certificate C-17</text>
+    <text x="685" y="644" text-anchor="middle" class="small">Validate required inputs; bind route tenant to trusted context.</text>
   </g>
 
-  <g id="application-facts">
-    <rect x="950" y="485" width="282" height="152" rx="16" fill="#effaf7" stroke="#a4d4c4" stroke-width="1.5"/>
-    <text x="972" y="513" class="tag" style="fill:#30745d">APPLICATION-OWNED FACTS</text>
-    <text x="972" y="544" class="node-title">Required resource facts</text>
-    <text x="972" y="574" class="body">Attributes and relationships</text>
-    <text x="972" y="598" class="body">Only as needed to decide</text>
-    <text x="972" y="621" class="small">Bounded internal lookups; no disclosure</text>
+  <g id="embedded-agent">
+    <rect x="450" y="745" width="470" height="135" rx="15" fill="#f4f0fc" stroke="#b9a9d8" stroke-width="1.5"/>
+    <text x="685" y="781" text-anchor="middle" class="title">Embedded Auth Agent</text>
+    <text x="685" y="812" text-anchor="middle" class="body">Resolve grants and evaluate complete authority</text>
+    <text x="685" y="841" text-anchor="middle" class="body">Required permission + scope + mandatory limits</text>
+    <text x="685" y="865" text-anchor="middle" class="small">Evaluation happens here, not in pre-handler middleware.</text>
   </g>
 
-  <g id="material-gathering">
-    <rect x="416" y="480" width="448" height="126" rx="16" fill="#ffffff" stroke="#adc3de" stroke-width="1.5"/>
-    <text x="640" y="518" text-anchor="middle" class="node-title">Gather sufficient material</text>
-    <text x="640" y="548" text-anchor="middle" class="body">Verified context + identified path / body inputs</text>
-    <text x="640" y="574" text-anchor="middle" class="body">Obtain authority and required application facts</text>
+  <g id="auth-service">
+    <rect x="1100" y="725" width="285" height="180" rx="15" fill="#eff6ff" stroke="#a9c5e8" stroke-width="1.5"/>
+    <text x="1120" y="758" class="title">Auth service</text>
+    <text x="1120" y="790" class="body">Human memberships</text>
+    <text x="1120" y="816" class="body">Direct + group grants, roles</text>
+    <text x="1120" y="842" class="body">Validity and dependencies</text>
+    <text x="1120" y="881" class="small">Example authority: certificate read in FIN</text>
   </g>
 
-  <g id="shared-evaluator">
-    <rect x="416" y="652" width="448" height="118" rx="16" fill="#f6f2ff" stroke="#baace0" stroke-width="1.5"/>
-    <text x="640" y="689" text-anchor="middle" class="node-title">Shared authorization evaluator</text>
-    <text x="640" y="719" text-anchor="middle" class="body">Permission + boundary checks using material</text>
-    <text x="640" y="745" text-anchor="middle" class="small">Applicability · validity · conditions · tenant / dependency limits</text>
+  <g id="denied">
+    <rect x="65" y="800" width="255" height="153" rx="15" fill="#fff2f3" stroke="#dba4ad" stroke-width="1.5"/>
+    <text x="85" y="835" class="title" style="fill:#a63e4c">Stop → error to client</text>
+    <text x="85" y="868" class="body">No protected disclosure</text>
+    <text x="85" y="894" class="body">or unauthorized effects.</text>
+    <text x="85" y="926" class="small">Authn, input and enforcement</text>
+    <text x="85" y="944" class="small">failures must also stop execution.</text>
   </g>
 
-  <g id="stop">
-    <rect x="950" y="716" width="282" height="112" rx="16" fill="#fff2f3" stroke="#dea7ae" stroke-width="1.5"/>
-    <text x="1091" y="753" text-anchor="middle" class="node-title" style="fill:#9e3543">Stop</text>
-    <text x="1091" y="782" text-anchor="middle" class="body">No protected output or mutation</text>
-    <text x="1091" y="807" text-anchor="middle" class="small">Failure never establishes authority</text>
+  <g id="handler-enforcement">
+    <rect x="450" y="980" width="470" height="130" rx="15" fill="#edf9f2" stroke="#9dcab1" stroke-width="1.5"/>
+    <text x="685" y="1017" text-anchor="middle" class="title">Handler enforces the boundary</text>
+    <text x="685" y="1048" text-anchor="middle" class="body">Read C-17 only inside authorized tenant + Finance</text>
+    <text x="685" y="1078" text-anchor="middle" class="small">Finance in the path is not proof that C-17 belongs to Finance.</text>
   </g>
 
-  <g id="enforcement">
-    <rect x="416" y="830" width="448" height="82" rx="16" fill="#edf9f2" stroke="#a1cbb1" stroke-width="1.5"/>
-    <text x="640" y="862" text-anchor="middle" class="node-title" style="fill:#246446">Enforce the decision</text>
-    <text x="640" y="888" text-anchor="middle" class="body">Bind actual use to the authorized restrictions</text>
+  <g id="application-database">
+    <rect x="1100" y="980" width="285" height="200" rx="15" fill="#effaf7" stroke="#a4d4c4" stroke-width="1.5"/>
+    <text x="1120" y="1015" class="title">Application database</text>
+    <text x="1120" y="1049" class="body">Constrained lookup:</text>
+    <text x="1120" y="1078" class="body">trusted tenant = acme</text>
+    <text x="1120" y="1104" class="body">AND department = FIN</text>
+    <text x="1120" y="1130" class="body">AND certificate = C-17</text>
+    <text x="1120" y="1162" class="small">An Engineering row cannot pass.</text>
   </g>
 
-  <g id="protected-operation">
-    <rect x="416" y="986" width="448" height="78" rx="16" fill="#ffffff" stroke="#a1cbb1" stroke-width="1.5"/>
-    <text x="640" y="1019" text-anchor="middle" class="node-title">Protected operation / response</text>
-    <text x="640" y="1044" text-anchor="middle" class="body">Proceed only under established authority</text>
+  <g id="handler-response">
+    <rect x="450" y="1190" width="470" height="70" rx="15" class="node"/>
+    <text x="685" y="1219" text-anchor="middle" class="title">Handler returns authorized data</text>
+    <text x="685" y="1244" text-anchor="middle" class="small">No matching authorized row → no certificate disclosure.</text>
   </g>
 
-  <path d="M48 1090 H1232" stroke="#dce3ec"/>
-  <text x="48" y="1117" class="small">Logical responsibilities, not deployment topology or a required number of network calls.</text>
-  <text x="48" y="1139" class="small">Authentication and material-gathering failures also stop execution. CONTRACT-006 / CONTRACT-007 / INPUT-001 / ENFORCEMENT-002</text>
+  <g id="client-response">
+    <rect x="460" y="1360" width="450" height="70" rx="15" class="node"/>
+    <text x="685" y="1403" text-anchor="middle" class="title">Client receives response</text>
+  </g>
+
+  <path d="M50 1460H1390" stroke="#d8e2ed"/>
+  <text x="50" y="1484" class="small">Logical flow, not fixed API calls: authority may be preloaded; application facts may feed evaluation when needed.</text>
+  <text x="50" y="1506" class="small">This example enforces the relationship in the query. One endpoint-owned gate; no prepared handoff or canonical relationship block.</text>
 </svg>

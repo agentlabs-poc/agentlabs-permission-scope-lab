@@ -1,5 +1,19 @@
 # Endpoint policy format — approved partial structure
 
+## Current reading guide — reconciled through Q-050-F
+
+The adopted shape is `version`, `method`, `path`, exactly one `permission`, and
+named `inputs` with `source`/`name`. There is **no relationship block**. Every
+declared input is required at its exact source; the application owns value
+validation. Endpoint implementation must constrain actual output/effects.
+
+The GET/PUT examples below remain current partial-structure examples. Sequential
+discussion notes retain earlier proposals and then-open details as history:
+relationship-block design, required presence, and validation ownership are now
+settled, not still-open alternatives. Remaining full structural validation,
+nested input syntax, other source kinds, publication, and update/move rules are
+not finalized. See the [current system overview](system-overview.md).
+
 ## Application-owned value validation — INPUT-003 / Q-050-F, agreed
 
 The application request contract defines and validates input types, nullability,

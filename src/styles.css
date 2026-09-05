@@ -269,6 +269,12 @@ select:focus { border-color:var(--teal); box-shadow:0 0 0 3px #51d6c318; }
 .concept-aside p { color:#9bafc1; font-size:12px; line-height:1.65; }
 .concept-aside a { display:inline-block; margin-top:8px; color:var(--amber); font-size:11px; text-decoration:none; }
 .markdown-body { min-width:0; color:#bacadb; font-size:15px; line-height:1.78; }
+.markdown-body img { display:block; width:100%; max-width:100%; height:auto; }
+.system-diagram { margin:0 0 36px; }
+.system-diagram figcaption { margin-top:8px; font-size:13px; }
+.reconciliation-notice,.historical-notice { padding:16px 20px; border:1px solid #977546; border-radius:10px; background:#28251e; color:#f3d8a8; line-height:1.6; }
+.historical-notice { margin:24px 0; }
+.historical-notice a { color:#8de4d6; text-decoration:underline; }
 .markdown-body h1 { margin:0 0 26px; color:#f0f6fc; font-size:52px; line-height:1.08; letter-spacing:-.045em; }
 .markdown-body h2 { margin:55px 0 15px; padding-top:8px; color:#edf5fc; font-size:28px; letter-spacing:-.03em; border-top:1px solid #2a3e52; }
 .markdown-body h3 { margin:30px 0 10px; color:#dce9f4; font-size:19px; }
