@@ -479,7 +479,8 @@ candidate failed; detailed denial traces remain a separate question.
 
 Counterexample: an Auth timeout cannot use this completed deny shape to claim
 that no permission exists. Evaluation failure remains separate under Q-051; its
-concrete representation is the next result variant to discuss, not settled here.
+concrete representation is now agreed in Q-064 below. Historically, that variant
+was the next open question when Q-063 was approved.
 This decision does not require returning sensitive diagnostics to the client.
 
 Full validation, exact code catalogue, HTTP mapping, and complete schema publication
@@ -487,8 +488,9 @@ remain open. **Q-063 — answered yes:** this is the minimal deny-result shape.
 
 ## Q-064 / DECISION-012 — minimal evaluation-error JSON
 
-Status: **PROPOSED, not approved.** Recommend using the agreed error fields
-without a `decision` field when evaluation could not complete:
+Status: **AGREED.** The user answered “agreed” to Q-064. Original status retained
+as history: ~~PROPOSED, not approved~~. Evaluation errors use the agreed error
+fields without a `decision` field because evaluation could not complete:
 
 ```json
 {
@@ -506,12 +508,13 @@ reach the UI under Q-053/054; their presentation does not create authority.
 
 Rationale: absence of a completed decision reflects the fact that neither allow
 nor deny was established. Reusing the existing error fields avoids a third
-`decision` value or another status field in this minimal proposal. The endpoint
+`decision` value or another status field in this minimal format. The endpoint
 must stop protected execution, as already agreed for evaluation failure.
 
 The alternative is an explicit evaluation-status field or a distinct nested
 error envelope. That makes the variant visibly tagged but adds structure beyond
-the current fields. This proposal does not select exception-based transport,
+the current fields. These alternatives are not adopted for the minimal shape.
+This decision does not select exception-based transport,
 HTTP mapping, or a retry policy.
 
 Validation consequence: omission of `decision` alone must not make an arbitrary
@@ -520,5 +523,44 @@ the complete expected error shape; malformed results cannot become allow or a
 completed policy denial. Full validation, variant/code compatibility, and the
 code catalogue remain open and must be finalized before publishing the schema.
 
-**Q-064:** Should this be the minimal evaluation-error shape, with no `decision`
-field because no authorization decision was reached?
+**Q-064 — answered yes:** this is the minimal evaluation-error shape, with no
+`decision` field because no authorization decision was reached. The example's
+`AUTH_SERVICE_TIMEOUT` spelling remains illustrative, not a finalized code entry.
+
+## Q-065 / DECISION-013 — reject mixtures of result variants
+
+Status: **PROPOSED, not approved.** Recommend rejecting a result that mixes
+variant-specific fields from the agreed allow, deny, and evaluation-error shapes,
+rather than choosing one interpretation and ignoring the contradictory fields.
+
+Intentionally invalid example under this proposal:
+
+```json
+{
+  "version": "1",
+  "decision": "allow",
+  "grant_ids": ["G-17"],
+  "error_code": "AUTH_SERVICE_TIMEOUT"
+}
+```
+
+This claims a completed allow while also carrying an error field that does not
+belong to the allow variant. The proposed rule rejects this response as malformed
+and blocks protected execution; it does not infer either completed denial or a
+verified timeout from the conflicting payload.
+
+Rationale: the same response must not lead one consumer to authorize execution
+while another treats it as failed evaluation. The alternative, accepting the
+leading discriminator and ignoring conflicting fields, permits inconsistent
+handling and can hide integration defects.
+
+Under this proposal, allow does not carry the three error fields; deny does not
+carry `grant_ids`; evaluation-error results carry neither `decision` nor
+`grant_ids`. Denial traces and success warnings are not implicitly introduced by
+reusing another variant's fields. Fail-closed behavior is already agreed; the
+new question is the explicit rejection of mixed known-variant fields.
+
+Required value types, grant-ID cardinality, unrelated unknown extension fields,
+code/variant compatibility, and the full schema remain separate validation
+questions. **Q-065:** Should mixed result variants be rejected rather than
+partially interpreted?
