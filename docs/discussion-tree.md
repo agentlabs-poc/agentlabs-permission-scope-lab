@@ -20,9 +20,9 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 ## Current position
 
 - Active branch: **6. Scope and target → scope-key definitions and governance**.
-  Brief sidebar: CONTRACT-007 / Q-035, endpoint declaration of permission and
-  material sources. [System block diagram](system-overview.md) maps the agreed
-  logical model; return to this scope branch after the sidebar.
+  Sidebar concluded: CONTRACT-007 / Q-035 is agreed. The endpoint declares its
+  permission, material, and sources. [System block diagram](system-overview.md)
+  includes the requested SVG; return to scope-key definitions now.
   SCOPE-006/008 and SCOPE-007's canonical v1 format are agreed; Q-034 is answered.
   Next: scope-key definitions/governance, before returning to ADMIN-004/005.
   SCOPE-004 remains open. SCOPE-002's earlier typed-format direction is historical;
@@ -169,7 +169,7 @@ Authorization handbook
 │   ├── Earlier split declarations and mode validation [deprecated: CONTRACT-001, CONTRACT-003]
 │   ├── One endpoint-owned gate and shared evaluator [settled: CONTRACT-006]
 │   ├── Method/route action mapping and identified path/body inputs [settled: INPUT-001]
-│   ├── Explicit required material/source declaration [sidebar: CONTRACT-007 / Q-035]
+│   ├── Explicit required material/source declaration [settled: CONTRACT-007 / Q-035]
 │   ├── Logical system block diagram [available: system-overview.md]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
 │   ├── Raw request → authorization request → resolved request [open; prepared deprecated]
@@ -242,7 +242,7 @@ Q-031 → canonical scope definition and proposed key-value shape (SCOPE-006/007
 Q-032 → AND within scope, alternatives through grants (SCOPE-008 agreed).
 Q-033 → endpoint-owned gate and recording resumed (CONTRACT-006, PROCESS-006).
 Q-034 → canonical v1 scope and explicit empty-object semantics (SCOPE-007 agreed).
-Q-035 → endpoint permission/material-source declaration sidebar (CONTRACT-007 proposed).
+Q-035 → endpoint permission/material-source declaration (CONTRACT-007 agreed; sidebar concluded).
 
 The log retains these for traceability; they are not current options:
 

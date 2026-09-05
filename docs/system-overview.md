@@ -3,7 +3,13 @@
 This block diagram maps the agreed logical model: CHARTER-002, CONTRACT-006,
 INPUT-001, ENFORCEMENT-002, and SCOPE-006/007/008. It does not introduce a new
 authorization stage, deployment topology, network call count, or wire schema.
-The detailed source-binding declaration refinement is proposed as CONTRACT-007.
+The explicit permission/material/source declaration is agreed as CONTRACT-007.
+
+[Open the scalable SVG diagram](assets/authorization-system.svg).
+
+![Authorization system: one endpoint-owned gate, material sources, shared evaluator, and enforcement](assets/authorization-system.svg)
+
+## Text equivalent
 
 ```text
                             Endpoint declaration
@@ -53,7 +59,10 @@ perform a new network call. Scope has no independent network service implied by
 this diagram: it owns boundary semantics, and the shared evaluation uses those
 definitions. Definition storage/registration remains open.
 
-## Declaration refinement — CONTRACT-007, proposed
+## Declaration contract — CONTRACT-007, agreed
+
+User approved the permission + material + source-binding requirement in Q-035.
+This settles the conceptual requirement, not the declaration's JSON/API syntax.
 
 Every protected endpoint has one authoritative declaration covering:
 

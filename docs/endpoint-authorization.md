@@ -7,8 +7,8 @@ deprecated, not deleting or silently rewriting them. The earlier
 No application implementation has been changed to match this chapter.
 
 The [canonical logical block diagram](system-overview.md) maps this agreed model.
-CONTRACT-007 proposes making each endpoint's required material and its sources
-explicit in the single declaration; detailed declaration syntax remains open.
+CONTRACT-007 requires each endpoint's permission, required material, and material
+sources to be explicit in the single declaration; detailed syntax remains open.
 
 ## One authorization gate — CONTRACT-006
 

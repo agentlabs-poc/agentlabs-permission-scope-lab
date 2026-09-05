@@ -17,7 +17,7 @@ explicit {} means tenant-wide reach; missing/null scope is invalid.
 
 | Material | What it preserves |
 |---|---|
-| [System block diagram](system-overview.md) | Logical view of the agreed endpoint-owned gate, material sources, shared evaluator, and enforcement; source-binding refinement is proposed. |
+| [System block diagram](system-overview.md) | Scalable SVG and text views of the agreed endpoint-owned gate, explicit source declarations, shared evaluator, and enforcement. |
 | [Current grant formats](grant-format.md) | Current direct/group, role-reference, and expanded-view examples using canonical scope, with a map to deprecated layouts. |
 | [Scope and target](scope-model.md) | Canonical boundary-selector definition and v1 key-value format, AND within scope, alternatives through grants, and empty/invalid scope rules. |
 | [Grants, assignments, and roles](grant-model.md) | Definitions, tenant context, permission/scope binding, groups, per-human self, role changes and expansion, dependency, positive grants, and administrative authority. |
