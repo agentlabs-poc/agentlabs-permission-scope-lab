@@ -107,6 +107,7 @@ working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| SCOPE-002 | PROPOSED | A grant selects an explicitly defined scope type and supplies only its permitted inputs; it does not invent the scope meaning or introduce arbitrary interpreted fields. Scope definitions must make applicable resource relationships and accepted inputs explicit. | Q-026 compares declared scope types with a general expression grammar using existing department and employee_self examples. No new fields or finalized schema are adopted. Definition ownership, registration, compatibility, composition, and containment remain open. See scope-model.md. |
 | PROCESS-005 | AGREED | Justify every proposed new field: establish the needed distinction, explain its semantics, and check whether existing concepts already express it before adoption. Illustrative JSON is not approval of new canonical syntax. | User challenged permissions_subset_of, scope_within, recipient inside scope, and grant_selector: "we need to be sure why we add any new field". G-11's unreviewed scope syntax is withdrawn; semantic needs and representation remain separate. |
 | ADMIN-005 | PROPOSED | Use the same canonical grant binding for administration: recipient is the administrator user/group, permission is an operation on Auth resources such as grant creation, and scope selects the grant targets that may be administered. How to express target-grant recipient, permission, and scope limits must be justified through the shared scope model, not silently introduced as new syntax. | User challenged both Q-023's standalone format and Q-024's new nested fields. G-11 syntax is withdrawn under PROCESS-005. The unified model remains the working direction; exact scope grammar, bootstrap, containment, and lifecycle rules are not finalized. |
 | ADMIN-004 | PROPOSED | Authorizing grant creation requires the requested administrative operation and the whole proposed grant to fit applicable administrative authority: eligible recipient, assignable permissions, resource reach, and required validity/conditions. Bounds remain associated; unrelated administrative grants cannot donate fields to manufacture broader authority. | Q-023 tests Finance payroll-read provisioning to one approved group. Administrative operation and business permission being assigned are different layers. Exact bound representation, role expansion/change handling, relationship-scope containment, multi-route administration, update/revoke rules, and onward administration remain open. |
@@ -192,13 +193,14 @@ working handbook's checkpoint practice for the review checklist.
 | Q-022 | ANSWERED | Yes: providing access and using access are separate. Providing oneself access must be explicit and audited, not implicitly inherited from administration. | ADMIN-002 and ADMIN-003 agreed; exact administrative bounds and audit guarantees remain open. |
 | Q-023 | ANSWER INCORPORATED | User challenges the apparent new format and proposes expressing administration with the existing grant, permission, and scope concepts; some initial grants may be seeded during bootstrap. | ADMIN-005 / Q-024 refines the representation. ADMIN-004's bounds remain proposed, not silently agreed by this feedback. |
 | Q-024 | ANSWER INCORPORATED | User challenges the newly introduced scope fields and requires justification for every addition. | PROCESS-005 records the requirement. ADMIN-005 remains proposed; withdraw G-11 syntax and explain intended constraints independently of representation. |
-| Q-025 | OPEN | Before returning to administrative JSON, should we settle the shared scope model: what scope may contain and how it selects an authorization target? | Proposed detour to stage 6; return to ADMIN-004/005 with a worked administrative test. SCOPE-001 supplies agreed semantics, not a finalized grammar. |
+| Q-025 | ANSWERED | Yes: settle the shared scope model before returning to administrative JSON. | Stage 6 is active; return to ADMIN-004/005. scope-model.md retains the discussion sequence, definitions, examples, alternatives, and open decisions. |
+| Q-026 | OPEN | Should a grant select a defined scope type and supply only its permitted inputs, with scope meaning defined outside the individual grant? | SCOPE-002 proposed; existing department and employee_self examples illustrate the distinction without adding fields. |
 
 ## Resume here
 
-- Current position: [discussion tree](discussion-tree.md), returning to stage 5 →
-  Q-025: proposed scope-model detour after withdrawing Q-024's unreviewed fields.
-  Return to ADMIN-004/005 after defining the shared scope representation.
+- Current position: [discussion tree](discussion-tree.md), stage 6 →
+  SCOPE-002 / Q-026: declared scope meanings versus grant-supplied values.
+  Q-025 approved the detour. Return to ADMIN-004/005 after settling shared scope.
   GROUP-004 / Q-021 is closed. handbook.md indexes the detailed working chapters,
   while the original lab page remains unreconciled.
   After grant authority/lifecycle
@@ -288,7 +290,7 @@ working handbook's checkpoint practice for the review checklist.
 - Q-022 settled separate administration and explicit audited self-assignment.
   Next discussion topic: the exact boundaries on what access an administrator
   may assign, and to whom. Q-024's scope-field challenge is recorded under
-  PROCESS-005. Q-025 proposes settling the shared scope model before returning
+  PROCESS-005. Q-025 approved settling the shared scope model before returning
   to ADMIN-004/005; administrative bounds and representation remain open.
   After grant authority/lifecycle questions, compare
   declared, prepared, and resolved forms. Keep other branches in the tree open.

@@ -18,8 +18,9 @@ PROCESS-005 requires justification and reuse checks before adopting any new fiel
 
 ## Current position
 
-- Active branch: **5. Grants → scope-model dependency** (Q-025 proposes a stage 6
-  detour; return to ADMIN-004/005). Q-024's unreviewed scope fields are withdrawn.
+- Active branch: **6. Scope and target → declared scope meaning** (SCOPE-002 / Q-026).
+  Q-025 approved this detour; return to ADMIN-004/005. Q-024's fields stay withdrawn.
+  The detailed chapter is [scope and target](scope-model.md).
 - Just concluded: ADMIN-002/003 / Q-022 — administration does not confer business
   access; self-assignment must be explicit, authorized, and audited.
 - Returned from the group/self sidebar to bounds on grant administration and
@@ -75,7 +76,7 @@ Authorization handbook
 │   ├── Naming grammar, catalog ownership, registration [open]
 │   ├── Hierarchies, wildcards, aliases, evolution [open]
 │   └── Mapping operations; multiple required permissions [open]
-├── 5. Grants and lifecycle [active]
+├── 5. Grants and lifecycle [open; return after scope model]
 │   ├── Capability/scope/conditions stay bound [settled: GRANT-001]
 │   ├── Multiple permissions under shared constraints [settled: GRANT-002]
 │   ├── Direct and group-derived grants [settled: GRANT-003]
@@ -97,8 +98,9 @@ Authorization handbook
 │       ├── Loss of required upstream authority removes derived access [settled: DELEGATION-002]
 │       ├── Who may delegate what; identity attribution [working: DELEGATION-001]
 │       └── Delegation encoding, ceilings, expiry, growth, chains, reactivation [open]
-├── 6. Scope and target [open]
+├── 6. Scope and target [active]
 │   ├── Explicit selections and attribute/relationship selectors [settled: SCOPE-001]
+│   ├── Declared scope meanings and permitted inputs [working: SCOPE-002 / Q-026]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
 │   ├── Exact/subtree, multi-dimensional scope, empty/missing scope [open]
@@ -166,7 +168,8 @@ Q-021 → group-based access preferred, not exclusive (returned to administratio
 Q-022 → separate administration and explicit audited self-assignment (ADMIN-002/003 agreed).
 Q-023 → whole-grant bounds; user challenges separate format (ADMIN-004 still proposed).
 Q-024 → new scope fields challenged; syntax withdrawn (PROCESS-005; ADMIN-005 open).
-Q-025 → proposed stage 6 scope-model detour; return to ADMIN-004/005.
+Q-025 → approved stage 6 scope-model detour; return to ADMIN-004/005.
+Q-026 → declared scope meanings and grant-supplied values (SCOPE-002 proposed).
 
 The log retains these for traceability; they are not current options:
 

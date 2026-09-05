@@ -11,6 +11,7 @@ its JSON schema, implementation, or every related branch.
 
 | Material | What it preserves |
 |---|---|
+| [Scope and target](scope-model.md) | Agreed scope foundations, field-justification discipline, proposed scope-definition model, and the planned return to administrative grants. |
 | [Grants, assignments, and roles](grant-model.md) | Definitions, tenant context, permission/scope binding, groups, per-human self, role changes and expansion, dependency, positive grants, and administrative authority. |
 | [Authorization flow and endpoint contracts](authorization-flow.md) | Auth/application boundary, auth-first design, the two endpoint modes, certificate examples, required enforcement, and the difference between resolution and enforcement. |
 | [Grant JSON examples](grant-examples.md) | Six worked illustrations, including direct/group recipients, implicit tenant, multiple permissions, roles, expanded grant identity, and Employees-group self scope. |
@@ -51,6 +52,6 @@ to implement our decisions. Treat their behavior and claims as source material
 for later review, not as evidence that the new model is implemented.
 
 The working chapters currently consolidate the grants and authorization-flow
-branches. Several other branches still have only partial discussion or decision
+branches and begin the scope-model discussion. Several other branches still have only partial discussion or decision
 notes. We will develop those chapters as their questions are settled and review
 coverage against the entire tree before declaring v1 complete.

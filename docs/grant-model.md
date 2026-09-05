@@ -332,11 +332,13 @@ It does not itself give Maya payroll-reading access.
 SCOPE-001 already allows target selection by references, attributes, and
 relationships. It does not yet define a common expression grammar, supported
 relations, evidence requirements, or scope-containment procedure. The next
-proposed detour, Q-025, is to settle that shared scope model before writing more
+approved detour, Q-025, is to settle that shared scope model before writing more
 administrative JSON, then return to ADMIN-004/005 to test whether it expresses
 the required bounds. Neither a general predicate language nor admin-specific
 fields have been adopted. A bare department label has not been shown sufficient
 to express the proposed recipient and permission limits either.
+
+Continue in [scope and target](scope-model.md), SCOPE-002 / Q-026, then return here.
 
 The user's bootstrap direction is compatible with seeding initial ordinary
 grants through a trusted initialization process. It does not require a second
