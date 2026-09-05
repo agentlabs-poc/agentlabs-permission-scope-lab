@@ -17,11 +17,10 @@ reconciliation across the handbook, log, tree, examples, and original lab prose.
 
 ## Current position
 
-- Active branch: **5. Grants → administrative bounds** (ADMIN-002/003 agreed;
-  Q-022 answered; exact bounds next).
-- Just concluded: GROUP-004 / Q-021 — membership-based access is preferred;
-  direct human grants remain supported. Documentation detail reviewed and
-  indexed in handbook.md, including the new authorization-flow.md chapter.
+- Active branch: **5. Grants → unified administrative grant** (ADMIN-005 / Q-024
+  proposed; ADMIN-004 bounds remain open after Q-023's representation feedback).
+- Just concluded: ADMIN-002/003 / Q-022 — administration does not confer business
+  access; self-assignment must be explicit, authorized, and audited.
 - Returned from the group/self sidebar to bounds on grant administration and
   remaining lifecycle questions in stage 5;
   then declared request, prepared context, and resolved
@@ -89,7 +88,8 @@ Authorization handbook
 │   ├── Authority to administer grants [settled: ADMIN-001]
 │   ├── Administration does not confer business access [settled: ADMIN-002]
 │   ├── Explicit authorized, audited self-assignment [settled: ADMIN-003]
-│   ├── Grantor bounds, recipients, scope validation [active: next question pending]
+│   ├── Grantor bounds, recipients, scope validation [active: ADMIN-004 / Q-023]
+│   ├── Same grant model for administrative authority [working: ADMIN-005 / Q-024]
 │   ├── Status, validity, provenance, membership changes [open]
 │   └── Human-dependent service/agent authority
 │       ├── All services/agents depend on human authority [settled: AUTHORITY-002]
@@ -163,6 +163,8 @@ Q-019 → positive-only v1 decision;
 Q-020 → grant-administration authority;
 Q-021 → group-based access preferred, not exclusive (returned to administration bounds).
 Q-022 → separate administration and explicit audited self-assignment (ADMIN-002/003 agreed).
+Q-023 → whole-grant bounds; user challenges separate format (ADMIN-004 still proposed).
+Q-024 → unified administrative grant with grant-target scope (ADMIN-005 proposed).
 
 The log retains these for traceability; they are not current options:
 

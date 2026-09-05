@@ -279,6 +279,104 @@ applicable authority and delegation restrictions under AUTHORITY-002.
 
 ## Branches still to conclude
 
+### Whole-grant administrative bounds — ADMIN-004 / Q-023, proposed
+
+The administrative action and the business permission being assigned are two
+different layers. Maya asks to create a grant; the proposed grant would let its
+recipient read payroll. Authorizing the first does not mean Maya can exercise
+the second, or create any arbitrary grant.
+
+The proposal checks the whole proposed grant against administrative bounds:
+eligible recipients, assignable permissions, permitted resource reach, and any
+required validity or conditions, alongside the allowed administrative operation.
+The trusted enclosing tenant remains implicit and enforced.
+
+### Same grant structure for administration — ADMIN-005 / Q-024, proposed
+
+The original Q-023 illustration showed administrative_operation,
+allowed_recipients, assignable_permissions, and maximum_resource_scope as a
+standalone description. It was not intended as a canonical record, but looked
+like a second authority format. The user challenged that shape. The refined
+proposal uses the existing grant model, not a new administrative grant entity.
+
+Auth resources are resources too. An administrative grant binds a recipient to
+an operation on grants, groups, memberships, or roles, within a scope. For grant
+creation, the authorization target is the proposed grant; it need not already
+exist in storage. Scope selects which proposed grants may be created. Exact
+create-target and scope-evaluation contracts remain stage 6/7 work.
+
+This abbreviated JSON is an ordinary grant to an administrator group, not the
+business grant it authorizes creating. Status, validity, and conditions are
+omitted only for focus, as in other abbreviated examples. The grant-selector
+syntax and permission name below are illustrative, not a finalized new grammar:
+
+```json
+{
+  "id": "G-11",
+  "recipient": { "type": "group", "id": "finance-access-admins" },
+  "permissions": ["auth:grant::create"],
+  "scope": {
+    "type": "grant_selector",
+    "recipient": { "type": "group", "id": "finance-payroll-readers" },
+    "permissions_subset_of": ["hrms:payroll:payslip::read"],
+    "scope_within": { "type": "department", "id": "FIN" }
+  }
+}
+```
+
+Maya receives G-11's administrative authority through valid membership in
+finance-access-admins. The outer recipient is who may administer. The recipient
+inside scope selects who may receive a target grant. Likewise, the outer
+permission authorizes creating grants; the permission predicate inside scope
+limits the business capabilities those target grants may contain. All scope
+predicates apply together. The target grant would use the same canonical
+recipient/permissions/scope binding, with finance-payroll-readers as recipient,
+payroll-read as permission, and Finance as its scope.
+
+This is not extra business access for finance-access-admins. A single grant
+structure does not require every resource type to use identical scope
+predicates. Simply labeling this administrative scope department FIN would be
+underspecified: it would not identify the eligible target recipients or the
+permissions that can be assigned.
+
+The user's bootstrap direction is compatible with seeding initial ordinary
+grants through a trusted initialization process. It does not require a second
+runtime grant format or imply that a grant can authorize its own creation.
+The bootstrap trust root, seed ownership, scope of initial authority, and
+subsequent administration remain to be designed. No universal superuser bypass
+is adopted by this proposal.
+
+| Proposed action | Result under these illustrative bounds |
+|---|---|
+| Create a Finance payroll-read grant for finance-payroll-readers | Within the shown bounds; other applicable checks still apply. |
+| Create a tenant-wide payroll-read grant for that group | Outside the resource-scope bound. |
+| Create a Finance payroll-edit grant for that group | Outside the assignable-permission bound. |
+| Create a Finance payroll-read grant directly for Maya | Outside the recipient bound. |
+| Edit or revoke an existing grant | Not authorized by grant.create alone. |
+
+Maya's self-assignment is not universally prohibited: different authority could
+explicitly include her among eligible recipients under ADMIN-003. Nor does this
+example authorize her to add herself to the permitted group; that is a separate
+administrative operation. Specifying a group recipient does not by itself settle
+who may join it or whether business-department membership must be synchronized.
+
+Scope comparison must establish semantic containment, not compare labels or
+assume a hierarchy. A narrower target selection is acceptable only when shown
+to fit the permitted reach. Relationship-based scopes, current role permissions,
+later role changes, and recipient-relative self scopes need explicit treatment.
+
+Following GRANT-001, administrative bounds stay associated with the authority
+that supplies them. Permission to provision Finance payroll-read and separate
+authority to provision Engineering certificate-read cannot be mixed into
+Engineering payroll-read authority. More general multi-route administrative
+combination rules remain open.
+
+This proposal does not introduce a second required approval, finalized grant
+schema, universal time limit, or authority to pass administrative powers onward.
+Those details and update/revoke semantics remain separate discussion branches.
+
+### Other open branches
+
 - Group-applicability view fields and membership evidence (the dependency itself
   is settled by RESOLUTION-004).
 - Administrative bounds and delegation permissions; the need for explicit

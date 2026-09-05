@@ -107,6 +107,8 @@ working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| ADMIN-005 | PROPOSED | Use the same canonical grant binding for administration: recipient is the administrator user/group, permission is an operation on Auth resources such as grant creation, and scope selects the grant targets that may be administered. Recipient, permission, and resource-scope limits are predicates over the target grant, not a second top-level administrative authority format. | User challenged Q-023's standalone bounds illustration and proposed the same grant/permission/scope model, with initial grants seeded during bootstrap. Revised example in grant-model.md uses an ordinary grant; its grant-selector scope grammar remains illustrative. Bootstrap trust/seed mechanics, scope containment, and lifecycle rules are not finalized. |
+| ADMIN-004 | PROPOSED | Authorizing grant creation requires the requested administrative operation and the whole proposed grant to fit applicable administrative authority: eligible recipient, assignable permissions, resource reach, and required validity/conditions. Bounds remain associated; unrelated administrative grants cannot donate fields to manufacture broader authority. | Q-023 tests Finance payroll-read provisioning to one approved group. Administrative operation and business permission being assigned are different layers. Exact bound representation, role expansion/change handling, relationship-scope containment, multi-route administration, update/revoke rules, and onward administration remain open. |
 | ADMIN-002 | AGREED | Authority to assign access is separate from authority to use that access. An administrator need not personally possess the business access being assigned, but assignment must remain within authorized administrative bounds. | User answered Q-022: "we should keep them seperate can provide access does not mean can access". Rejects requiring personal business-access possession as a universal prerequisite. Does not relax human-dependent service/agent limits. |
 | ADMIN-003 | AGREED | Administrative authority must not implicitly supply business access to the administrator. Self-assignment is not categorically forbidden: it must be an explicit access-changing operation, authorized within the administrator's bounds, and captured in the audit trail. | User noted that providing access may include providing it to themselves, "but then that has to be explicit, which audit will capture". Audit supplies accountability, not authorization or prevention by itself. No additional approval workflow is adopted. Audit schema, delivery/integrity guarantees, indirect group/role effects, and administrative bounds remain to be specified. |
 | PROCESS-004 | AGREED | Commit and push meaningful documentation checkpoints throughout the discussion. Periodically reconcile the chapters, decision log, discussion tree, examples, and original handbook; retain superseded history and explicitly unresolved questions. | User instructed: "keep commiting and pusing. every now and then we need to reconcile". Reconciliation must not silently settle open policy choices or imply the application implements the handbook. |
@@ -187,11 +189,13 @@ working handbook's checkpoint practice for the review checklist.
 | Q-020 | ANSWERED | Yes: administering grants requires explicit authority, not mere possession of the business capability. | ADMIN-001 agreed; administrative bounds remain open. |
 | Q-021 | ANSWERED | No prohibition: group-based access is preferred, while direct human grants remain supported. | GROUP-004 agreed; GRANT-003 unchanged. |
 | Q-022 | ANSWERED | Yes: providing access and using access are separate. Providing oneself access must be explicit and audited, not implicitly inherited from administration. | ADMIN-002 and ADMIN-003 agreed; exact administrative bounds and audit guarantees remain open. |
+| Q-023 | ANSWER INCORPORATED | User challenges the apparent new format and proposes expressing administration with the existing grant, permission, and scope concepts; some initial grants may be seeded during bootstrap. | ADMIN-005 / Q-024 refines the representation. ADMIN-004's bounds remain proposed, not silently agreed by this feedback. |
+| Q-024 | OPEN | Does using one grant structure, with administrative permissions and a scope selecting the grant targets being administered, capture the intended unified model? | ADMIN-005 proposed; exact scope grammar and bootstrap mechanics remain open. |
 
 ## Resume here
 
 - Current position: [discussion tree](discussion-tree.md), returning to stage 5 →
-  administrative bounds after agreeing ADMIN-002 and ADMIN-003 under Q-022.
+  ADMIN-005 / Q-024: one grant model for administration; ADMIN-004 bounds remain open.
   GROUP-004 / Q-021 is closed. handbook.md indexes the detailed working chapters,
   while the original lab page remains unreconciled.
   After grant authority/lifecycle
@@ -280,7 +284,8 @@ working handbook's checkpoint practice for the review checklist.
   handbook.md is the working entry point. Original lab prose is not yet reconciled.
 - Q-022 settled separate administration and explicit audited self-assignment.
   Next discussion topic: the exact boundaries on what access an administrator
-  may assign, and to whom. No next question has been issued yet.
+  may assign, and to whom. ADMIN-005 / Q-024 refines ADMIN-004's representation
+  after the user challenged a separate administrative format.
   After grant authority/lifecycle questions, compare
   declared, prepared, and resolved forms. Keep other branches in the tree open.
 - Coverage percentages require a later endpoint audit and are not assumed proven.
