@@ -562,19 +562,20 @@ carry `grant_ids`; evaluation-error results carry neither `decision` nor
 reusing another variant's fields. Fail-closed behavior is already agreed; the
 newly settled requirement is the explicit rejection of mixed known-variant fields.
 
-Required value types, grant-ID cardinality, unrelated unknown extension fields,
-code/variant compatibility, and the full schema remain separate validation
-questions. **Q-065 — answered yes:** mixed result variants are rejected rather
+Grant-ID cardinality is now settled by Q-066 below. Remaining value validation,
+unrelated unknown extension fields, code/variant compatibility, and the full
+schema remain separate questions. **Q-065 — answered yes:** mixed result variants are rejected rather
 than partially interpreted.
 
 ## Q-066 / DECISION-014 — non-empty supporting-grant list for allow
 
-Status: **PROPOSED, not approved.** Recommend requiring `grant_ids` on allow to
-be a non-empty array of non-empty string identifiers for supporting grants.
-Missing, null, empty-array, or empty-identifier values would not satisfy this
+Status: **AGREED.** The user answered “yes” to Q-066. Original status retained
+as history: ~~PROPOSED, not approved~~. `grant_ids` on allow must be a non-empty
+array of non-empty string identifiers for supporting grants.
+Missing, null, empty-array, or empty-identifier values do not satisfy this
 result contract. No permission-ID or grant-ID grammar is introduced here.
 
-Intentionally invalid example under this proposal:
+Intentionally invalid example under the agreed Q-066 rule:
 
 ```json
 {
@@ -593,11 +594,49 @@ The alternative is allowing an empty list when logging is disabled or references
 are inconvenient to provide. That conflicts with Q-060's distinction between
 evidence availability and optional persistent recording. A valid example is the
 already-agreed `grant_ids: ["G-17"]`; only grants supporting the decision belong
-in this list, not all grants held by the human.
+in this list, not all grants held by the human. The empty-list alternative is
+not adopted; turning off persistent recording does not change the allow contract.
 
-Under this proposal a malformed allow blocks protected execution; it is not
+Under this rule a malformed allow blocks protected execution; it is not
 reclassified as a completed policy denial. This does not select all-versus-first
 supporting routes, historical grant versions, ID normalization, or a new grant
 lookup. Those remain separate from the minimum presence/type/cardinality rule.
 
-**Q-066:** Must every allow contain at least one supporting grant identifier?
+**Q-066 — answered yes:** every allow contains at least one supporting grant identifier.
+
+## Q-067 / DECISION-015 — unknown result fields
+
+Status: **PROPOSED, not approved.** Recommend rejecting fields not defined by the
+supported result contract, rather than silently ignoring them. Q-065 already
+rejects known fields belonging to a different result variant; this question is
+about entirely unrecognized fields.
+
+Intentionally invalid example under this proposal:
+
+```json
+{
+  "version": "1",
+  "decision": "allow",
+  "grant_ids": ["G-17"],
+  "debug_note": "checked"
+}
+```
+
+`debug_note` is an illustrative, undefined field, not a newly proposed contract
+field. Under this proposal even apparently harmless extra data is rejected at
+this result boundary. Protected execution cannot proceed on the malformed result;
+this is not a completed policy denial or proof that the actor lacks permission.
+
+Rationale: sender and receiver should agree on the result contract, and typos or
+uncoordinated extensions should be visible instead of disappearing during parsing.
+The alternative is to ignore unknown fields for easier forward compatibility.
+That is more permissive, but senders may incorrectly assume consumers use added
+information. Strict rejection trades that flexibility for explicit compatibility.
+
+The rule concerns this result object, not arbitrary application business data or
+a separately defined transport envelope. Future extensions need an explicitly
+supported contract change; this does not design a new extension mechanism or
+finalize version migration. Other outstanding value and error-code validation
+questions remain separate.
+
+**Q-067:** Should unknown fields in an authorization result be rejected?

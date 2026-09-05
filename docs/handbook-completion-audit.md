@@ -186,7 +186,7 @@ not the whole surrounding topic.
 | Checkpoint | Status | Completion criterion | Evidence or outstanding gap |
 |---|---|---|---|
 | HC-08-01 | DONE | Settle alternative complete positive grants, no cross-grant field mixing, and no explicit deny grants in v1. | DECISION-001/002 / GRANT-001; [grant model](grant-model.md). |
-| HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-065 settle core meanings, three minimal shapes, and mixed-variant rejection in [decision results](decision-results.md). Full validation, code catalogue/compatibility, and missing/unknown cases remain unfinished; Q-066 grant-ID cardinality is proposed. No fractional completion credit. |
+| HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-066 settle core meanings, minimal shapes, mixed-variant rejection, and grant-ID cardinality in [decision results](decision-results.md). Full validation, code catalogue/compatibility, and missing/unknown cases remain unfinished; Q-067 unknown-field rejection is proposed. No fractional completion credit. |
 | HC-08-03 | OPEN | Specify conditions and their evaluation when evidence is missing, invalid, or unsupported. | Stage 8 [roadmap](handbook-roadmap.md) and open decision branches in [grant model](grant-model.md). |
 | HC-08-04 | OPEN | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Decision result/audit explanation is open in [tree](discussion-tree.md); event storage is separately counted under stage 9. |
 

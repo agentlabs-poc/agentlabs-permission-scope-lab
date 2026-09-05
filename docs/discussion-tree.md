@@ -113,9 +113,9 @@ and error_code/error_message/error_message_reason.
 **Q-064 / DECISION-012 is agreed:** evaluation-error JSON with version and the
 three error fields, without decision.
 **Q-065 / DECISION-013 is agreed:** reject mixed known-variant fields instead
-of partially interpreting a result. **Q-066 / DECISION-014 is proposed:** require
-a non-empty supporting-grant ID list for allow. Full validation and result
-contracts remain unfinished.
+of partially interpreting a result. **Q-066 / DECISION-014 is agreed:** require
+a non-empty supporting-grant ID list for allow. **Q-067 / DECISION-015 is proposed:**
+reject unknown result fields. Full validation and result contracts remain unfinished.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**
