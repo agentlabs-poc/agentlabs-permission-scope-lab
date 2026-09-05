@@ -1,5 +1,18 @@
 # Handbook reconciliation register
 
+## Checkpoint following ac6062e — Q-045 with rationale
+
+Q-045 approves GROUP-001-A and GROUP-003: Auth-owned authorization groups and
+memberships, optional application business-membership sync, and human-only
+membership. The dedicated group chapter records the rationale, unselected
+alternative, examples/counterexamples, dependencies, and unresolved mechanics.
+This fulfills the user's explicit reminder to preserve rationale under
+PROCESS-003. Earlier OPEN/PROPOSED wording is retained and qualified.
+
+Q-046 is a new open lifecycle question, not an approved issuer-dependency rule.
+No service independence, nesting, synchronization timing, or new schema is
+introduced by this checkpoint.
+
 ## Checkpoint following 675b434 — Q-044 administration rules
 
 Q-044 approves ADMIN-004/005 at the governing-rule level: ordinary grant model,

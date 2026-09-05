@@ -1,5 +1,11 @@
 # Working handbook chapter: grants, assignments, and roles
 
+Q-045 also settles group ownership and human-only membership. See
+[groups and membership](groups-and-membership.md) for the rationale, alternative,
+examples, and lifecycle limits. Q-046 asks about ordinary human/group grants
+after the issuing administrator loses administration authority; that lifecycle
+rule remains proposed and does not change human-dependent automation.
+
 Current: Q-044 approves ADMIN-004/005 at the governing-rule level. The ordinary
 grant model applies to administration, with complete-assignment and associated
 boundary checks. Exact administrative scope encoding and containment remain

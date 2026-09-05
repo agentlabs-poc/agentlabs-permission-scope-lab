@@ -1,5 +1,10 @@
 # Authorization Handbook — working edition
 
+Q-045 settles Auth-owned authorization groups/memberships, optional application
+sync, and human-only groups. [Groups and membership](groups-and-membership.md)
+records the rationale, rejected alternative, examples, and remaining mechanics.
+Q-046 is next in authority-model closure; older group-open notes are history.
+
 Current: Q-044 approves the five [grant-administration rules](grant-model.md).
 ADMIN-004/005 are settled at rule level; exact encoding remains open. Q-045
 next consolidates group ownership/membership directions. Older administration
@@ -46,6 +51,7 @@ remain open, beginning with Q-042.
 
 | Material | What it preserves |
 |---|---|
+| [Groups and membership](groups-and-membership.md) | Ownership and human-only membership decisions, their rationale, optional-sync distinction, examples, and dependent automated access. |
 | [Explanation coverage audit](explanation-audit.md) | Evidence of which recent explanations were checked, where reasoning/examples live, and what remains incomplete. |
 | [Authorization vocabulary and request material](authorization-vocabulary.md) | Q-043's approved explanation, why it is tenable across operations, and the evidence-to-execution requirement. |
 | [Application registration](application-registration.md) | Agreed registration/validation responsibilities, permission and scope examples, and the boundary between canonical checks and application interpretation. |

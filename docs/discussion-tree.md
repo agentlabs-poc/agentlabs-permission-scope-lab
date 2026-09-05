@@ -19,6 +19,12 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-045 settled GROUP-001-A and GROUP-003.** Auth owns authorization
+  groups/membership; application sync is optional; members are humans. The
+  [group chapter](groups-and-membership.md) preserves rationale and consequences.
+  Q-046 next addresses issuer-authority changes for ordinary human/group grants.
+  Human-dependent automation remains unchanged; sync mechanics stay parked.
+
 - **Current: Q-044 settled ADMIN-004/005's governing rules.** Ordinary grants
   express administrative authority; complete assignments must fit associated
   bounds and normal validation still applies. Encoding/containment stay open.
@@ -188,8 +194,11 @@ Authorization handbook
 ├── 3. Core vocabulary [open]
 │   ├── Group and team are synonyms [settled: TERM-001]
 │   ├── Groups/memberships in Auth; optional app sync [working: GROUP-001-A]
+│   │   └── Ownership principle now agreed [Q-045; earlier working label is history]
 │   ├── Human-only group membership [working: GROUP-003]
+│   │   └── Member-type principle now agreed [Q-045; mechanics open]
 │   │   └── Consolidate group ownership/membership directions [active: Q-045]
+│   │       └── Consolidation concluded [Q-045 agreed]
 │   ├── Principal, actor, subject, user identity, membership [open]
 │   ├── Resource type versus instance; context [open]
 │   ├── Permission/boundary/request-material vocabulary [settled: TERM-005 / Q-043]
@@ -220,6 +229,7 @@ Authorization handbook
 │   │   └── Ordinary model now agreed [Q-044; prior working label is history]
 │   │   └── Q-043 framing withdrawn; vocabulary settled, admin model still open
 │   ├── Status, validity, provenance, membership changes [open]
+│   │   └── Ordinary grants after issuer-authority loss [active: Q-046]
 │   └── Human-dependent service/agent authority
 │       ├── All services/agents depend on human authority [settled: AUTHORITY-002]
 │       ├── Loss of required upstream authority removes derived access [settled: DELEGATION-002]
@@ -345,6 +355,8 @@ Q-043 → canonical grant administration with grant-administration request mater
 Update: Q-043 was reformulated and settled TERM-005 after a tenability check. Original framing is withdrawn, not an approved administration model; its exact wording is preserved in history/q043-vocabulary.md.
 Q-044 → ADMIN-004/005 governing rules approved; concrete administrative scope contracts remain open.
 Q-045 → group ownership and human-only membership consolidation (open).
+Update: Q-045 approved GROUP-001-A and GROUP-003; rationale is captured in groups-and-membership.md.
+Q-046 → ordinary human/group grant lifecycle after issuing-administrator authority changes (open).
 
 The log retains these for traceability; they are not current options:
 

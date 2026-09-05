@@ -1,5 +1,11 @@
 # Explanation coverage audit — through Q-043
 
+Q-045 follow-up: [groups and membership](groups-and-membership.md) records the
+two approved policies, reasons for central membership authority and human-only
+groups, the alternative not selected, five example/counterexample cases,
+membership/automation dependencies, and remaining sync/freshness details.
+The user explicitly reaffirmed PROCESS-003's rationale requirement.
+
 Q-044 follow-up: the grant chapter now records all five approved administration
 rules, the Finance grant JSON, five expected outcomes, separation from personal
 access, and the still-open scope encoding/containment. Earlier statements below
