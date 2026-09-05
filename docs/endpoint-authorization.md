@@ -1,6 +1,80 @@
 # Working handbook chapter: endpoint-owned authorization
 
+The endpoint policy's JSON/YAML contract has **not yet been discussed or
+finalized**. The rules below are requirements, not an adopted schema. Under
+CONTRACT-009, every published contract must include a version. See
+[contract publication](contract-publication.md). Q-050 will address the endpoint
+policy contract; no field names or version values are being invented here.
+
+## One required permission per protected endpoint — CONTRACT-008 / Q-049, agreed
+
+> The endpoint predeclares one required permission, inputs, sources, and how
+> to establish any required relationship.
+
+Every protected endpoint must declare exactly one required permission in v1.
+Auth validates and enforces that declaration: zero or multiple required permissions
+are invalid, and missing or invalid declarations must not permit execution.
+The permission represents the endpoint's complete protected operation. The
+declaration is server-owned; the caller does not select its required permission.
+Exact validation timing, transport syntax, and framework integration remain open.
+
+### Rationale and endpoint design obligation
+
+One required permission removes endpoint-level AND/OR permission-expression
+logic and gives each endpoint one explicit authorization requirement. It does
+not remove scope or other mandatory checks. This keeps the endpoint contract
+simple while leaving authority packaging through grants and roles flexible.
+
+The tradeoff is deliberate operation design. If an endpoint bundles distinct
+protected operations, a deliberately defined permission must cover the complete
+operation, or the endpoint must be redesigned. Checking a narrow permission and
+then performing unrelated privileged work is not compliant. This rule does not
+settle multi-object, collection, bulk, or cross-application execution contracts.
+
+| Endpoint operation | Its one required permission |
+|---|---|
+| Read a certificate | `hrms:employee:certificate::read` |
+| Download a certificate | `hrms:employee:certificate::download` |
+| Revoke a certificate | `hrms:employee:certificate::revoke` |
+
+The download permission's defined meaning must cover the data disclosure inherent
+in downloading. The download endpoint does not additionally require read, and
+download does not automatically authorize the separate read endpoint. These
+examples do not introduce permission hierarchy or implicit permission expansion.
+
+### Grants remain flexible; checks remain complete
+
+A grant may still contain multiple permissions sharing its scope and conditions.
+Vinay may still have many direct and group-derived grants. For the endpoint's
+one required permission, complete valid applicable grants remain alternative
+authority routes under DECISION-001. Each route retains its own scope, validity,
+conditions, and dependencies; no permission/scope field mixing is permitted.
+Tenant isolation, human/delegation limits, application constraints, and binding
+the decision to actual execution remain mandatory.
+
+For example, Finance-scoped read cannot substitute for missing download authority.
+A download grant confined to Engineering cannot borrow Finance reach from the
+read grant. This follows from complete-grant evaluation, not from requiring
+both permissions at the download endpoint.
+
+### Earlier Q-049 proposal — not adopted
+
+The assistant initially proposed AND across multiple endpoint-required permissions,
+allowing different complete grants to satisfy different requirements. Its rationale
+was to avoid depending on how permissions were packaged into grants. The example
+required read AND download: direct G-21 supplied Finance read, and group G-22
+supplied Finance download; making G-22 Engineering-only would fail the Finance
+download requirement. Grant validity and membership were assumed in that example.
+
+The user instead requested exactly one permission per endpoint, mandated by Auth,
+for design simplicity, and approved that revision. The earlier multi-permission
+proposal was never approved and is not a v1 option. Multiple permissions in a
+grant remain supported. Older plural endpoint wording and open-combination notes
+below are retained history, qualified by CONTRACT-008 rather than deleted.
+
 ## Endpoint declaration and request resolution — Q-047 / Q-047-A, agreed
+
+Historical plural wording, narrowed to exactly one required permission by Q-049:
 
 > The endpoint predeclares permissions, inputs, sources, and how to establish
 > any required relationship.
@@ -25,6 +99,9 @@ separate persisted entities, a prepared handoff, or newly adopted JSON fields.
 Resolution does not manufacture authority or require unnecessary lookups before
 an obvious denial. Exact schemas and multi-permission combination rules remain
 open; the approved plural wording does not silently choose AND or OR for them.
+
+Update: CONTRACT-008 now excludes multi-permission endpoint declarations in v1.
+The preceding open-combination statement is historical; exact schemas remain open.
 
 ### Declared inputs versus material needed for a scope check
 

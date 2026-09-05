@@ -1,5 +1,33 @@
 # Handbook reconciliation register
 
+## Checkpoint following 5eebca9 — Q-049 exactly one required permission
+
+Additional user requirement in this checkpoint: CONTRACT-009 requires versions
+in all published JSON/YAML contracts, including grants and endpoint policies.
+The endpoint policy contract is explicitly not yet discussed; Q-050 is next.
+contract-publication.md captures rationale and the publication prerequisite.
+Existing unversioned JSON remains working illustration; no version field, value,
+placement, compatibility rule, or final endpoint policy schema is adopted.
+
+Q-049 approves CONTRACT-008: every protected endpoint predeclares exactly one
+required permission, alongside inputs, sources, and relationship establishment.
+Auth mandates the rule; missing/invalid or zero/multiple-permission declarations
+cannot permit execution. Endpoint permission meaning must cover the complete
+protected operation. The detailed chapter preserves rationale, tradeoff, examples,
+and the assistant's earlier AND-across-permissions proposal as not adopted.
+
+CONTRACT-007's plural clarification is now narrowed by CONTRACT-008. Earlier
+open multi-permission endpoint notes in the handbook, tree, grant chapter, and
+overview are historical, not a remaining v1 choice. Multi-permission grants and
+multiple direct/group grants remain supported; DECISION-001's complete alternative
+routes and mandatory constraints are unchanged. No permission implication,
+wire syntax, validation timing, or application implementation is introduced.
+
+Docs-only verification passed: 24 Markdown files, 146 local links, 45 JSON
+blocks, and 131 unique decision/question IDs in the tree. Approved/open status,
+rationale/example coverage, preservation of every earlier nonblank line, and
+`git diff --check` passed. No application source or authorization data changed.
+
 ## Checkpoint following 6f41e8b — Q-048 resolved grants and retrieval sources
 
 Q-048 approves RESOLUTION-006: dependent evaluation-ready views of existing

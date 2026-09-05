@@ -19,6 +19,14 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-049 settled CONTRACT-008:** exactly one required permission per
+  protected endpoint, mandated by Auth. Multi-permission endpoint declarations
+  are not a remaining v1 option; multi-permission grants remain supported.
+  **CONTRACT-009:** every published JSON/YAML contract includes a version.
+  **Next: Q-050, endpoint policy contract**, explicitly not yet discussed.
+  Requirements are agreed, but version syntax and the policy schema are not.
+  Return to decision results/enforcement afterwards. Earlier positions are history.
+
 - **Current: Q-048 settled RESOLUTION-006.** Obtain the human's valid memberships,
   then direct and membership-group grants; resolved views retain each source and
   dependency. The grant chapter captures rationale, the Finance/self JSON example,
@@ -232,6 +240,7 @@ Authorization handbook
 │   │   └── Registration principle now settled [REGISTRATION-001 / Q-039; mechanics open]
 │   ├── Hierarchies, wildcards, aliases, evolution [open]
 │   └── Mapping operations; multiple required permissions [open]
+│       └── Exactly one required permission per endpoint [settled: CONTRACT-008 / Q-049; prior multiple-permission open label is history]
 ├── 5. Grants and lifecycle [active; returned from scope model after Q-042]
 │   ├── Capability/scope/conditions stay bound [settled: GRANT-001]
 │   ├── Multiple permissions under shared constraints [settled: GRANT-002]
@@ -286,6 +295,7 @@ Authorization handbook
 │   ├── One endpoint-owned gate and shared evaluator [settled: CONTRACT-006]
 │   ├── Method/route action mapping and identified path/body inputs [settled: INPUT-001]
 │   ├── Explicit required material/source declaration [settled: CONTRACT-007 / Q-035]
+│   │   └── Endpoint policy JSON/YAML contract [active: Q-050; schema not yet discussed]
 │   │   └── Permissions, inputs, sources, relationship bindings [clarified: Q-047-A]
 │   ├── Logical system block diagram [available: system-overview.md]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
@@ -391,6 +401,9 @@ Q-047 → return to requests/resolution: distinguish request inputs from trusted
 Update: Q-047 / Q-047-A approved RESOLUTION-005 and clarified CONTRACT-007; prior open label is history. The endpoint chapter records rationale and selective material examples.
 Q-048 → resolved grant as a dependent evaluation view, not a new assignment (open).
 Update: Q-048 approved RESOLUTION-006, including Vinay's membership/direct/group retrieval flow. Prior open label is history; next is decision semantics, with detailed schemas still open.
+Q-049 → CONTRACT-008 approved: exactly one required permission per protected endpoint. Earlier AND-across-permissions proposal not adopted.
+Publication sidebar → CONTRACT-009 requires a version in every published JSON/YAML contract; syntax and compatibility remain open.
+Q-050 → endpoint policy contract discussion, including version representation (open).
 
 The log retains these for traceability; they are not current options:
 

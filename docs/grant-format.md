@@ -1,5 +1,11 @@
 # Current grant formats — canonical v1 scope
 
+Publication status — CONTRACT-009: every published JSON/YAML contract must
+include a version. The unversioned examples below remain **working illustrations,
+not complete published contracts**. Agreed scope semantics remain current;
+version representation and the complete grant schema are not yet settled.
+See [contract publication requirements](contract-publication.md).
+
 Q-048 agrees the resolved-grant meaning and membership-based retrieval flow in
 the [grant chapter](grant-model.md). Views for a human include direct grants
 and grants through valid group memberships, retaining the original bindings and

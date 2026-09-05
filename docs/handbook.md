@@ -1,5 +1,20 @@
 # Authorization Handbook — working edition
 
+Publication requirement: **every published JSON/YAML contract includes a version**
+(CONTRACT-009). Existing JSON examples remain working illustrations until full
+versioned contracts are settled. [Contract publication](contract-publication.md)
+records rationale and open details. The endpoint policy contract has not yet
+been discussed; Q-050 is next, before returning to decision results/enforcement.
+
+Current: Q-049 approves CONTRACT-008. Each protected endpoint predeclares
+**one required permission**, inputs, sources, and how to establish any required
+relationship. Auth rejects zero/multiple-permission or missing/invalid declarations;
+they cannot permit execution. [Endpoint authorization](endpoint-authorization.md)
+records rationale, examples, design obligations, and the earlier proposal not
+adopted. Multiple permissions per grant remain supported. Earlier plural/open
+endpoint-combination notes are historical, not unfinished v1 choices.
+Next branch: decision results and enforcement contracts; exact schemas remain open.
+
 Current: Q-048 approves RESOLUTION-006, the dependent resolved-grant view and
 membership-based retrieval flow. Obtain Vinay's valid memberships, then grants
 for Vinay directly and for those groups, preserving every source binding and

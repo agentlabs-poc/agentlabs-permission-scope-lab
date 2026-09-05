@@ -1,5 +1,13 @@
 # Working handbook chapter: grants, assignments, and roles
 
+Q-049 / CONTRACT-008 now mandates exactly one required permission per protected
+endpoint, validated by Auth. This does not limit the number of permissions in a
+grant or the number of direct/group grants available to a human. Complete grants
+remain alternative routes for the endpoint's one permission. See
+[endpoint authorization](endpoint-authorization.md) for rationale and examples.
+Earlier multi-permission endpoint-contract gaps below are historical after Q-049;
+grant packaging, concrete schemas, and other lifecycle/enforcement gaps remain.
+
 ## Resolved grants and membership-based retrieval — RESOLUTION-006 / Q-048, agreed
 
 A resolved grant is an evaluation-ready view of an existing grant, with the

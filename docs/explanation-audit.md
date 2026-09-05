@@ -1,5 +1,18 @@
 # Explanation coverage audit — through Q-043
 
+Publication follow-up: contract-publication.md records CONTRACT-009's version
+requirement, rationale, working-example status, and unselected version syntax/
+compatibility rules. Endpoint policy requirements are explicitly distinguished
+from its undiscussed JSON/YAML contract (Q-050). No example has been silently
+promoted to a complete versioned contract.
+
+Q-049 follow-up: the endpoint chapter records exactly-one-permission validation,
+the simplicity rationale, complete-operation design obligation, read/download/
+revoke mapping, no implicit permission hierarchy, preserved multi-permission
+grants, and the original AND proposal explicitly not adopted. Earlier plural
+endpoint wording and open-combination notes are qualified rather than removed.
+Validation timing/schema and multi-object enforcement remain open.
+
 Q-048 follow-up: the grant chapter records the resolved-grant definition and
 Vinay's membership/direct/group retrieval flow, the G-17 Finance/self example,
 what resolution establishes versus what evaluation must still check, rationale

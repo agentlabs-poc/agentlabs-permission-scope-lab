@@ -1,5 +1,15 @@
 # Authorization system — canonical logical overview
 
+The diagram depicts agreed responsibilities, not a finalized endpoint policy
+JSON/YAML schema. That contract is Q-050, still open. Every published contract
+must include a version under CONTRACT-009; version syntax is not yet selected.
+
+Current declaration wording under CONTRACT-008 / Q-049: **the endpoint predeclares
+one required permission, inputs, sources, and how to establish any required
+relationship.** Auth mandates exactly one; invalid declarations cannot permit
+execution. The diagram's singular required-permission label remains consistent.
+The prior plural clarification below is preserved history, now narrowed by Q-049.
+
 Q-047-A clarifies the endpoint-declaration block: **the endpoint predeclares
 permissions, inputs, sources, and how to establish any required relationship.**
 The existing diagram's permission/material-source label is shorthand for this
