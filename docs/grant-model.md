@@ -1,5 +1,84 @@
 # Working handbook chapter: grants, assignments, and roles
 
+## Resolved grants and membership-based retrieval — RESOLUTION-006 / Q-048, agreed
+
+A resolved grant is an evaluation-ready view of an existing grant, with the
+relevant references and human context established, while preserving its original
+authority, restrictions, and dependencies. It is not a new assignment or a bare
+permission list. Resolved does not mean that the request is allowed.
+
+### Logical retrieval flow
+
+The user approved Q-048 and added that we need Vinay's memberships, then resolved
+grants for Vinay and the teams of which he is a member:
+
+1. Establish Vinay's verified identity and enclosing tenant context.
+2. Obtain his valid authorization-group memberships from Auth-owned authority.
+3. Retrieve direct grants assigned to Vinay and group grants assigned to those
+   groups. Direct grants remain supported, though group grants are preferred.
+4. Establish evaluation views for Vinay, retaining each source grant and the
+   membership supporting each group-derived route. Resolve relevant role
+   references and human-relative scope meanings without widening authority.
+5. Evaluate the relevant complete grants against the request material, with
+   validity, conditions, tenant, and any delegation constraints enforced.
+
+This is a logical dependency flow, not a requirement for separate API calls,
+a particular service response, or eagerly loading every grant before any denial.
+Fetching already computed views is compatible with it if those views preserve
+the dependencies and satisfy the eventual freshness contract. A caller-supplied
+list of group names is not membership proof. An empty valid membership list does
+not remove legitimate direct grants; failure to obtain membership is not evidence
+that group membership is absent. Detailed retrieval/error contracts remain open.
+
+### Example: Finance and self through Employees
+
+This uses the existing working grant layout; lifecycle details are omitted for
+focus, not removed from evaluation:
+
+```json
+{
+  "id": "G-17",
+  "recipient": { "type": "group", "id": "employees" },
+  "permissions": ["hrms:employee:certificate::read"],
+  "scope": { "dept": "FIN", "user": "$self" }
+}
+```
+
+For Vinay requesting C-17, the view remains G-17 with group recipient Employees.
+Valid membership establishes why this authority is available through Vinay.
+`$self` means Vinay's self relationship, not the group collectively. Finance and
+self remain AND-bound restrictions on this grant's certificate-read permission.
+For a role-referencing grant, its current permissions and role provenance are
+established under RESOLUTION-003; scope and other constraints remain associated.
+
+Resolution has clarified the authority source, recipient relationship, capability
+references, and human-relative boundary meaning. It has not established merely
+by doing so that C-17 belongs to Vinay or Finance. Relevant trusted request
+material must establish boundary satisfaction for the decision. Scope `{}`
+introduces no narrower department/self restriction to resolve, while other
+mandatory checks remain. No universal lookup or new handoff state is introduced.
+
+### Rationale, counterexamples, and dependencies
+
+Flattening this into "Vinay can read certificates" would lose Finance/self
+restrictions and the membership dependency. Converting it into a direct grant
+would let the derived route survive membership removal. Both alternatives
+conflict with the agreed complete-grant and dependency invariants.
+
+| Change or attempted shortcut | Consequence |
+|---|---|
+| Vinay loses Employees membership | G-17 no longer supplies authority through that membership; unrelated valid routes remain separate. |
+| A different grant supplies tenant-wide certificate-read | It does not donate broader scope to a different permission in G-17 or another grant. Evaluate each complete binding. |
+| C-17 belongs to another employee | G-17's self boundary is not satisfied, even though its meaning is resolved for Vinay. |
+| Vinay's agent acts on his behalf | Use the human's supporting authority with delegation limits; the agent does not acquire first-class group membership. |
+
+Source identity and constraints survive computation and caching; a view is not
+independent authority after supporting state changes. Q-046's issuer-provenance
+rule is distinct: ordinary issuance history is not a live membership/delegation
+dependency. Exact freshness, cache invalidation, wire fields, delegation encoding,
+and multi-permission decision contracts remain open. This approval consolidates
+meaning and retrieval sources, not those implementation mechanics.
+
 ## Ordinary grant lifecycle — ADMIN-006 / Q-046, agreed
 
 A validly issued ordinary human/group grant does not become invalid merely

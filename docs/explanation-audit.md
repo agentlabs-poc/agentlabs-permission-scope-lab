@@ -1,5 +1,11 @@
 # Explanation coverage audit — through Q-043
 
+Q-048 follow-up: the grant chapter records the resolved-grant definition and
+Vinay's membership/direct/group retrieval flow, the G-17 Finance/self example,
+what resolution establishes versus what evaluation must still check, rationale
+against flattening/independent assignment, four counterexamples, and open retrieval,
+cache/freshness, schema, and decision details. No whole-handbook completion claim.
+
 Q-047 / Q-047-A follow-up: the endpoint chapter records the approved declaration
 wording, request/resolved-request/decision distinction, and fixed declaration
 versus scope-dependent material needs. Three scope cases include `{}`, with

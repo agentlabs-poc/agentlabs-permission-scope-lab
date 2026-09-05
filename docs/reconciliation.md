@@ -1,5 +1,24 @@
 # Handbook reconciliation register
 
+## Checkpoint following 6f41e8b — Q-048 resolved grants and retrieval sources
+
+Q-048 approves RESOLUTION-006: dependent evaluation-ready views of existing
+grants, not new assignments or allow decisions. The user additionally specified
+obtaining Vinay's membership list and grants for Vinay and his membership teams.
+The grant chapter records the logical flow, Auth-owned membership evidence,
+direct/group distinction, G-17 JSON, rationale, counterexamples, and constraints.
+
+This consolidates RESOLUTION-003/004 and SELF-001 without changing group recipients
+into direct users or introducing independent automated authority. No API call
+count, final wire schema, eager-fetch rule, or freshness mechanism is adopted.
+Earlier Q-048-open positions are retained history. The next branch is decision
+semantics; multi-permission combination remains open, as do concrete contracts.
+
+Docs-only verification passed: 23 Markdown files, 141 local links, 45 JSON
+blocks, and 127 unique decision/question IDs in the tree. Approval status,
+rationale/example coverage, previous content preservation, and `git diff --check`
+passed. No application source or external authorization data changed.
+
 ## Checkpoint following a5bd63f — Q-047 and Q-047-A declaration clarification
 
 The user agreed to request/resolved-request meanings, refined how declared

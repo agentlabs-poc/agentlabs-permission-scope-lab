@@ -1,5 +1,11 @@
 # Current grant formats — canonical v1 scope
 
+Q-048 agrees the resolved-grant meaning and membership-based retrieval flow in
+the [grant chapter](grant-model.md). Views for a human include direct grants
+and grants through valid group memberships, retaining the original bindings and
+dependencies. Resolved is not allowed. The transport schema remains open; the
+expanded example below is not silently promoted to a complete resolved format.
+
 This chapter updates the working grant examples to use SCOPE-007's canonical
 scope format. The earlier [grant examples](grant-examples.md), GRANT-EX-001
 through GRANT-EX-006, remain intact and explicitly deprecated as layouts.

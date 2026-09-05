@@ -19,6 +19,13 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-048 settled RESOLUTION-006.** Obtain the human's valid memberships,
+  then direct and membership-group grants; resolved views retain each source and
+  dependency. The grant chapter captures rationale, the Finance/self JSON example,
+  counterexamples, and open retrieval/schema/freshness mechanics. Next branch:
+  stage 8 decision semantics, including multiple required permissions. Earlier
+  checkpoint labels below are history, not additional live questions.
+
 - **Current: Q-047 / Q-047-A settled RESOLUTION-005 and clarified CONTRACT-007.**
   The endpoint predeclares permissions, inputs, sources, and how to establish
   any required relationship. Scope and other mandatory checks determine which
@@ -287,6 +294,7 @@ Authorization handbook
 │   │       └── Now settled: RESOLUTION-005 / Q-047 / Q-047-A; prior active label is history
 │   ├── Stored grants → applicable grants → expanded/resolved grants [open]
 │   │   └── Resolved-grant meaning and retained dependencies [active: Q-048]
+│   │       └── Now settled: RESOLUTION-006 / Q-048, including membership-based retrieval; prior active label is history
 │   └── Typed inputs/outputs, fact provenance, failures, context binding [open]
 ├── 8. Decision semantics [open]
 │   ├── Grant binding and subset invariants [settled: GRANT-001, RESOLUTION-001]
@@ -382,6 +390,7 @@ Update: Q-046 approved ADMIN-006; prior open label is history. Rationale and exp
 Q-047 → return to requests/resolution: distinguish request inputs from trusted evaluation material without a prepared handoff or new authority (open).
 Update: Q-047 / Q-047-A approved RESOLUTION-005 and clarified CONTRACT-007; prior open label is history. The endpoint chapter records rationale and selective material examples.
 Q-048 → resolved grant as a dependent evaluation view, not a new assignment (open).
+Update: Q-048 approved RESOLUTION-006, including Vinay's membership/direct/group retrieval flow. Prior open label is history; next is decision semantics, with detailed schemas still open.
 
 The log retains these for traceability; they are not current options:
 

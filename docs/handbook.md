@@ -1,5 +1,13 @@
 # Authorization Handbook — working edition
 
+Current: Q-048 approves RESOLUTION-006, the dependent resolved-grant view and
+membership-based retrieval flow. Obtain Vinay's valid memberships, then grants
+for Vinay directly and for those groups, preserving every source binding and
+dependency. The [grant chapter](grant-model.md) records rationale, JSON example,
+counterexamples, and open mechanics. Next branch: decision semantics, including
+multiple required permissions; no additional combination policy is approved yet.
+Earlier checkpoint summaries below are retained history.
+
 Current: Q-047 and Q-047-A agree request/resolved-request meanings and clarify
 CONTRACT-007: the endpoint predeclares permissions, inputs, sources, and how to
 establish any required relationship. [Endpoint authorization](endpoint-authorization.md)
