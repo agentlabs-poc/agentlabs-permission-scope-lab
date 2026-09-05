@@ -15,6 +15,24 @@ A permission identifies an operation. A scope selects the boundary within which
 a grant can supply that permission. Both are needed, along with an applicable
 recipient, valid authority, and all mandatory constraints.
 
+The earlier permission explanation is retained in the active
+[permission chapter](../../docs/permission-model.md). A permission string is an
+operation name, not complete authority: the same payroll-ledger read permission
+can be granted for self, Finance, or tenant-wide reach through different scopes.
+
+The earlier naming convention separates the namespaced noun from its operation:
+
+```text
+hrms:payroll:ledger::read
+└ namespaced noun ┘  verb
+```
+
+Here `hrms` identifies the application, `payroll` the domain, `ledger` the resource
+type, and `read` the operation. Employee IDs, departments, and tenant reach stay
+out of the permission name. This restores the explanation; formal adoption of
+the naming convention is Q-056, still proposed. Naming depth does not itself
+establish scope reach or permission inheritance.
+
 There is no additional canonical “target” entity or required resource wrapper
 (TERM-005). A request can identify a certificate, list, or proposed change using
 ordinary application inputs. Removing a wrapper does not remove the obligation

@@ -90,9 +90,16 @@ and `error_message_reason` both reach the UI; the UI controls presentation.
 Q-053-A's server-only second-message proposal is not adopted.
 **Q-054 / DECISION-006 is agreed:** use the same message fields for evaluation
 errors while keeping them distinct from completed denials.
-**Q-055 / DECISION-007 is proposed:** add error_code for a stable machine-readable
+**Q-055 / DECISION-007 is agreed:** add error_code for a stable machine-readable
 cause alongside the readable messages. See the
 [decision-results chapter](decision-results.md) for rationale and alternatives.
+
+Permission-retention sidebar: the user requested the earlier detailed explanation
+remain active; it is restored in [Permission](permission-model.md) and the reader.
+**Q-056 / PERMISSION-002 is proposed:** canonical adoption of the retained naming
+convention. Inheritance, wildcards, and catalog evolution stay open. Then return
+to decision-result contracts. Neither retention nor these narrow agreements
+alone closes the audit's broader contract checkpoints.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

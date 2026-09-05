@@ -268,21 +268,31 @@ agreement does not finish the full HC-08-02 checkpoint.
 
 ## Q-055 / DECISION-007 — stable code alongside readable messages
 
-Status: **PROPOSED, not approved.** Recommend an `error_code` alongside the two
-readable messages, to represent the machine-readable cause required by Q-052.
+Status: **AGREED.** The user explicitly answered “Q-055 yes.” Original status
+retained as history: ~~PROPOSED, not approved~~. The evaluator supplies an
+`error_code` alongside the two readable messages, to represent the
+machine-readable cause required by Q-052. The code accompanies the messages
+delivered to the UI; it is not inferred by parsing their text.
 For an Auth timeout the illustrative code could be `AUTH_SERVICE_TIMEOUT`, while
 `error_message` and `error_message_reason` remain readable explanations.
 
-Rationale for proposing an additional field: software can identify the cause
+Rationale for the additional field: software can identify the cause
 without parsing wording that might be edited or translated. UI explanation and
-machine classification then have distinct responsibilities. The code would be
+machine classification then have distinct responsibilities. The code is
 provided by the evaluator, not inferred by the UI from text. This does not by
 itself settle the separate completed-decision versus evaluation-error envelope.
 
 The alternative is to make `error_message_reason` itself a stable code, avoiding
 a new field but giving up its readable explanation, or to parse its prose, which
 makes machine behavior depend on wording. Exact code names, catalogue, evolution,
-and the full versioned schema are not adopted by this proposal.
+and the full versioned schema are not finalized by this decision. These
+alternatives are not adopted: `error_message_reason` remains readable text, and
+clients should use the code rather than matching that text for machine handling.
 
-**Q-055:** Should we add `error_code` for the stable machine-readable cause while
+Counterexample: changing the explanation's wording must not change how software
+identifies the cause. The illustrative `AUTH_SERVICE_TIMEOUT` spelling is not
+yet a finalized catalogue entry, and a code does not authorize automatic retry
+or collapse the distinction between evaluation error and completed denial.
+
+**Q-055 — answered yes:** Should we add `error_code` for the stable machine-readable cause while
 keeping both agreed message fields readable?

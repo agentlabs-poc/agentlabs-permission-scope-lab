@@ -263,6 +263,7 @@ it is not a new schema or an invitation to seek the same approval again.
 |---|---|
 | [System overview and SVG](system-overview.md) | Current responsibility layers, single gate, inputs, complete authority, and actual-use enforcement. |
 | [Vocabulary](authorization-vocabulary.md) | Permission/boundary/request-material terms, tenability checks, and the retired vocabulary's rationale. |
+| [Permission](permission-model.md) | Restored detailed operation/reach explanation, namespaced naming examples, rationale, and explicitly open grammar rules. |
 | [Scope boundaries](scope-model.md) | Canonical scope semantics/format, self, AND/alternatives, empty/invalid cases, and earlier proposals. |
 | [Grants and roles](grant-model.md) | Complete bindings, groups, live roles, dependent resolution, administration, and lifecycle distinctions. |
 | [Grant formats](grant-format.md) | Working current-scope examples and deprecated layout correspondence; complete schemas remain open. |
@@ -285,8 +286,10 @@ chapter records the rationale and consequences. Q-053 / DECISION-005 settles
 evaluator-provided `error_message` and `error_message_reason`, both delivered to
 the UI for presentation. Q-054 / DECISION-006 uses these same fields for evaluation
 errors without conflating errors with completed denials. Q-055 / DECISION-007
-proposes, but has not approved, a separate stable `error_code`. Full schemas,
-reason-code definitions, and safe-content rules remain open.
+approves a stable `error_code` alongside the two readable messages. Full schemas,
+reason-code definitions, and safe-content rules remain open. The permission
+explanation has been restored at the user's request; Q-056 asks about formally
+adopting its retained naming convention, without silently closing grammar gaps.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)
