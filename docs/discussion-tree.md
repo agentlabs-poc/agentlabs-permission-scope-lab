@@ -14,11 +14,12 @@ IDs and proposal-versus-agreement status; PROCESS-002 governs tree traversal;
 PROCESS-003 requires detailed, reconstructable notes and working chapters.
 PROCESS-004 requires meaningful checkpoint commits/pushes and periodic
 reconciliation across the handbook, log, tree, examples, and original lab prose.
+PROCESS-005 requires justification and reuse checks before adopting any new field.
 
 ## Current position
 
-- Active branch: **5. Grants → unified administrative grant** (ADMIN-005 / Q-024
-  proposed; ADMIN-004 bounds remain open after Q-023's representation feedback).
+- Active branch: **5. Grants → scope-model dependency** (Q-025 proposes a stage 6
+  detour; return to ADMIN-004/005). Q-024's unreviewed scope fields are withdrawn.
 - Just concluded: ADMIN-002/003 / Q-022 — administration does not confer business
   access; self-assignment must be explicit, authorized, and audited.
 - Returned from the group/self sidebar to bounds on grant administration and
@@ -164,7 +165,8 @@ Q-020 → grant-administration authority;
 Q-021 → group-based access preferred, not exclusive (returned to administration bounds).
 Q-022 → separate administration and explicit audited self-assignment (ADMIN-002/003 agreed).
 Q-023 → whole-grant bounds; user challenges separate format (ADMIN-004 still proposed).
-Q-024 → unified administrative grant with grant-target scope (ADMIN-005 proposed).
+Q-024 → new scope fields challenged; syntax withdrawn (PROCESS-005; ADMIN-005 open).
+Q-025 → proposed stage 6 scope-model detour; return to ADMIN-004/005.
 
 The log retains these for traceability; they are not current options:
 

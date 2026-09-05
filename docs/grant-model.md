@@ -305,39 +305,38 @@ creation, the authorization target is the proposed grant; it need not already
 exist in storage. Scope selects which proposed grants may be created. Exact
 create-target and scope-evaluation contracts remain stage 6/7 work.
 
-This abbreviated JSON is an ordinary grant to an administrator group, not the
-business grant it authorizes creating. Status, validity, and conditions are
-omitted only for focus, as in other abbreviated examples. The grant-selector
-syntax and permission name below are illustrative, not a finalized new grammar:
+The follow-up G-11 JSON also introduced unreviewed syntax: grant_selector,
+recipient nested inside scope, permissions_subset_of, and scope_within. The
+user challenged each addition. That example is withdrawn from the working
+chapter, not adopted as a scope grammar; its history remains in Git and this
+explanation. Keeping the outer grant structure does not by itself establish
+that newly invented scope fields are justified.
 
-```json
-{
-  "id": "G-11",
-  "recipient": { "type": "group", "id": "finance-access-admins" },
-  "permissions": ["auth:grant::create"],
-  "scope": {
-    "type": "grant_selector",
-    "recipient": { "type": "group", "id": "finance-payroll-readers" },
-    "permissions_subset_of": ["hrms:payroll:payslip::read"],
-    "scope_within": { "type": "department", "id": "FIN" }
-  }
-}
-```
+PROCESS-005 requires explaining the need for each new field and checking whether
+existing concepts already express it before adopting it. The following table
+records intent, not accepted field definitions:
 
-Maya receives G-11's administrative authority through valid membership in
-finance-access-admins. The outer recipient is who may administer. The recipient
-inside scope selects who may receive a target grant. Likewise, the outer
-permission authorizes creating grants; the permission predicate inside scope
-limits the business capabilities those target grants may contain. All scope
-predicates apply together. The target grant would use the same canonical
-recipient/permissions/scope binding, with finance-payroll-readers as recipient,
-payroll-read as permission, and Finance as its scope.
+| Withdrawn syntax | Intended meaning | Why the representation is not settled |
+|---|---|---|
+| grant_selector | The target being selected is a grant. | Target resource type may already follow from the permission/operation declaration; another discriminator may be redundant. |
+| recipient inside scope | Restrict the recipient of the proposed target grant, not the administrator receiving authority. | Recipient is an existing target-grant attribute; its use in a scope expression does not justify a new special nested field. |
+| permissions_subset_of | Prevent the target grant from assigning business permissions outside the administrator's assignable set. | This describes a set relation; a dedicated field has not been shown necessary. Role references and current-role expansion also need treatment. |
+| scope_within | Prevent the target grant from reaching resources beyond the administrator's assignable reach. | Semantic containment between scopes is not mere field or label comparison. Relationship/self scopes and future changes make this a substantive open problem, not a solved operator. |
 
-This is not extra business access for finance-access-admins. A single grant
-structure does not require every resource type to use identical scope
-predicates. Simply labeling this administrative scope department FIN would be
-underspecified: it would not identify the eligible target recipients or the
-permissions that can be assigned.
+For the same motivating example, Maya is a member of finance-access-admins and
+may create grants for finance-payroll-readers that contain only payroll-read
+and reach only Finance resources. This is a proposed requirement expressed in
+plain language, not a finalized administrative scope or four mandatory fields.
+It does not itself give Maya payroll-reading access.
+
+SCOPE-001 already allows target selection by references, attributes, and
+relationships. It does not yet define a common expression grammar, supported
+relations, evidence requirements, or scope-containment procedure. The next
+proposed detour, Q-025, is to settle that shared scope model before writing more
+administrative JSON, then return to ADMIN-004/005 to test whether it expresses
+the required bounds. Neither a general predicate language nor admin-specific
+fields have been adopted. A bare department label has not been shown sufficient
+to express the proposed recipient and permission limits either.
 
 The user's bootstrap direction is compatible with seeding initial ordinary
 grants through a trusted initialization process. It does not require a second
@@ -346,7 +345,7 @@ The bootstrap trust root, seed ownership, scope of initial authority, and
 subsequent administration remain to be designed. No universal superuser bypass
 is adopted by this proposal.
 
-| Proposed action | Result under these illustrative bounds |
+| Proposed action | Result under the proposed plain-language bounds |
 |---|---|
 | Create a Finance payroll-read grant for finance-payroll-readers | Within the shown bounds; other applicable checks still apply. |
 | Create a tenant-wide payroll-read grant for that group | Outside the resource-scope bound. |
