@@ -260,6 +260,10 @@ working handbook's checkpoint practice for the review checklist.
 
 ## Resume here
 
+Q-050-B follow-up: user approved the PUT body-input example as presented.
+The existing rationale remains: explicit extraction does not prove an existing
+relationship. Q-050-C remains open; no update/move rule is adopted by this approval.
+
 Current: Q-050-B approves CONTRACT-011's partial endpoint policy structure.
 The dedicated format chapter includes GET and PUT body examples with rationale.
 Next: Q-050-C relationship bindings. Q-050 as a whole remains open; versioned

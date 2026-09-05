@@ -1,5 +1,12 @@
 # Handbook reconciliation register
 
+## Checkpoint following cbc387d — PUT example confirmation
+
+The user explicitly approved the presented PUT example. The endpoint policy
+chapter and resume log record that confirmation under Q-050-B. The rationale
+remains explicit body extraction without treating proposed values as current
+relationship proof. Q-050-C and update/move rules remain open; no schema changes.
+
 ## Checkpoint following 2358a51 — Q-050-B partial endpoint policy and PUT example
 
 Q-050-B approves CONTRACT-011: version, method, path, one permission, and named

@@ -1,5 +1,10 @@
 # Endpoint policy format — approved partial structure
 
+Approval follow-up: the user approved the presented PUT example after requesting
+it. This confirms the body-to-local-input illustration under Q-050-B, including
+the distinction between a requested department and established current facts.
+It does not approve relationship syntax or source/destination update rules.
+
 Q-050-B approves CONTRACT-011: `version`, `method`, `path`, one `permission`,
 and named `inputs` with explicit `source`/`name` bindings. Relationship bindings
 are not yet settled (Q-050-C); these examples are approved structure illustrations,
