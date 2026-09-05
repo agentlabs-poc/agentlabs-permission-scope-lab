@@ -129,8 +129,8 @@ branches while retaining the unfinished details in the audit.
 |---|---|---|---|
 | 1 — governing rule agreed; details open | Boundary-changing writes | Can move data into or out of a caller's authority. | HC-09-04 |
 | 2 — new-check revocation rule agreed; details open | Revocation, freshness, and in-flight changes | Determines when removed authority stops being usable. | HC-09-06/07 |
-| 3 — now | Administrative bounds and delegation lifecycle | Controls creation and persistence of authority. | HC-05-08/10 |
-| 4 | Collections, exports, and bulk operations | A single operation can expose or change many records. | HC-09-03/05 |
+| 3 — restoration rule agreed; administration and details open | Administrative bounds and delegation lifecycle | Controls creation and persistence of authority. | HC-05-08/10 |
+| 4 — now | Collections, exports, and bulk operations | A single operation can expose or change many records. | HC-09-03/05 |
 
 **Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
 and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
@@ -138,10 +138,14 @@ No new policy fields or extra gate; composition and concurrency remain open.
 **Q-069 / FRESHNESS-001 is agreed:** no use of revoked grants by new checks after
 Auth confirms revocation, even through stale cache. See
 [authority freshness](authority-freshness.md) for the timing boundary and trade-off.
-**Q-070 / DELEGATION-003 is proposed:** require explicit authorized renewal of
-affected delegation after its required support breaks, even if human access is
-later restored. See [delegation lifecycle](delegation-lifecycle.md). Do not revisit
-the already-agreed invalidation principle or expand into format details here.
+**Q-070 / DELEGATION-003 is agreed as corrected:** affected access is inactive
+without human support and works again when support returns under a still-valid
+delegation. Explicit renewal is not adopted. See
+[delegation lifecycle](delegation-lifecycle.md).
+**Q-071 / ENFORCEMENT-005 is proposed:** ordinary scoped lists return authorized
+subsets, rather than denying solely because out-of-scope records exist. See
+[collection enforcement](collection-enforcement.md). Administration bounds,
+restoration mechanics, and collection details remain open.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

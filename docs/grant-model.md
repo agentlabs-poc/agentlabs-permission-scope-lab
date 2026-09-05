@@ -449,9 +449,11 @@ direct human grants must not be read as permitting independent service grants.
 Exact delegation encoding and evaluation contracts remain open.
 
 The impact-first [delegation lifecycle discussion](delegation-lifecycle.md)
-now asks Q-070 about automatic reactivation versus explicit renewal after a
-supporting relationship breaks. It is proposed, not approved; the existing
-human-subset and affected-authority-only rules are not reopened.
+records Q-070's agreed automatic reactivation: affected delegated access is
+inactive while human support is absent and works again when support returns,
+provided the delegation itself remains valid. Explicit renewal was not adopted.
+The human-subset and affected-authority-only rules remain; lifecycle mechanics
+are still open.
 
 ## Administration without business access — ADMIN-002, ADMIN-003 / Q-022
 

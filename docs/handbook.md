@@ -273,7 +273,8 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Endpoint policy format](endpoint-policy-format.md) | Approved version/method/path/permission/inputs shape; GET/PUT, value validation, and mandatory enforcement. |
 | [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
 | [Authority freshness](authority-freshness.md) | Impact-first revocation timing discussion, stale-cache trade-offs, and in-flight-operation questions kept distinct. |
-| [Delegation lifecycle](delegation-lifecycle.md) | Impact-first restoration question: renewed authorization versus automatic return of previously invalidated delegated access. |
+| [Delegation lifecycle](delegation-lifecycle.md) | Agreed automatic restoration of affected access when human support returns; explicit-renewal proposal preserved as not adopted. |
+| [Collection enforcement](collection-enforcement.md) | Impact-first authorized-subset listing proposal, with counts/pagination/export and bulk-write gaps kept separate. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -308,9 +309,10 @@ details are parked under the user's impact-first horizontal instruction, not
 excluded. Q-068 requires move authority over both current and proposed boundaries;
 the operation chapter records the approved detailed example and rationale.
 Q-069 requires no stale-cache grace period for checks started after confirmed
-grant revocation; in-flight operations and mechanisms remain open. Q-070 proposes
-explicit renewal before a broken delegation regains validity when the human's
-access returns; that restoration rule is not yet approved.
+grant revocation; in-flight operations and mechanisms remain open. Q-070 selects
+automatic restoration: affected delegated access is inactive while human support
+is absent and works again when it returns, within a still-valid delegation.
+Q-071 now proposes authorized-subset behavior for scoped collection reads.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 

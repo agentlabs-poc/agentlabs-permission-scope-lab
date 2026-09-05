@@ -9,11 +9,51 @@ relationship when it breaks. Losing unrelated rights does not invalidate all
 of an agent's access. These rules remain agreed; no independent service authority
 or first-class agent group membership is introduced here.
 
-The [grant chapter](grant-model.md) deliberately leaves restoration and delegation
-lifecycle details open. Q-070 addresses restoration, not the already-settled
+The [grant chapter](grant-model.md) previously left restoration open. Q-070 now
+settles automatic restoration when supporting human authority returns; other
+delegation lifecycle details remain open. It does not reopen the already-settled
 requirement to remove unsupported access.
 
 ## Q-070 / DELEGATION-003 — restoring a broken delegation
+
+### Current conclusion — agreed as corrected by the user
+
+The user clarified: “deligation is subset of vinay, 2 is invalid and becomes
+in active. at 3-> works again.” This selects **automatic reactivation**, not the
+previously recommended explicit renewal. No additional approval step is required
+solely because the human temporarily lost and later regained supporting access.
+
+| State | Human's Finance authority | Affected delegated Finance access |
+|---|---|---|
+| 1. Vinay has supporting access | Valid | Usable within the delegation's limits. |
+| 2. Vinay loses supporting access | Not valid | Inactive; cannot authorize Finance access. |
+| 3. Vinay regains supporting access | Valid again | Automatically usable again where current authority covers the still-valid delegation. |
+
+Rationale: delegation is a continuing restriction of Vinay's applicable authority,
+not independent authority and not automatically a permanently revoked record when
+his rights shrink. Removing human support makes the affected effective access
+inactive. Restoring that support makes the corresponding access available again
+under the existing delegation limits and mandatory constraints. This keeps the
+model dependent on current entitlement without a separate renewal workflow.
+
+This does not revive a delegation that has itself been explicitly revoked,
+expired, or otherwise remains invalid. Nor does it restore access beyond Vinay's
+current rights or beyond the delegation's own limits. Unrelated supported access
+is unaffected. “Inactive” describes effective access here; no stored status enum,
+new JSON field, or automatic account deletion is adopted.
+
+The trade-off is intentional: old still-valid automation can regain access when
+its human regains support. To prevent that return, an authorized actor must
+invalidate the delegation itself rather than rely on temporary loss of human
+rights. The exact lifecycle operation and administration permissions remain open.
+Missing evidence is still not proof that the underlying relationship broke.
+
+**Q-070 — answered with a correction:** no explicit renewal is required for this
+case; step 2 is inactive and step 3 works again. Supporting-reference mechanics,
+freshness, concurrent changes, expiry representation, growth, and redelegation
+remain open. Move horizontally next to [collection access](collection-enforcement.md).
+
+### Original explicit-renewal proposal — not adopted, retained as history
 
 Status: **PROPOSED, not approved.** Recommend that once a required supporting
 relationship has broken and the affected delegated authority is invalidated,
