@@ -1,5 +1,12 @@
 # Authorization Handbook — working edition
 
+Current: Q-047 and Q-047-A agree request/resolved-request meanings and clarify
+CONTRACT-007: the endpoint predeclares permissions, inputs, sources, and how to
+establish any required relationship. [Endpoint authorization](endpoint-authorization.md)
+explains fixed declarations, scope-dependent material needs, and the `{}` case.
+Resolved does not mean allowed. Next branch: resolved grants (Q-048, open).
+Earlier checkpoint summaries below are retained history.
+
 Current: Q-046 approves ordinary grant lifecycle independence from the issuing
 administrator's later loss of issuance authority (ADMIN-006). The
 [grant chapter](grant-model.md#ordinary-grant-lifecycle--admin-006--q-046-agreed)

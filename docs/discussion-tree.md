@@ -19,6 +19,14 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-047 / Q-047-A settled RESOLUTION-005 and clarified CONTRACT-007.**
+  The endpoint predeclares permissions, inputs, sources, and how to establish
+  any required relationship. Scope and other mandatory checks determine which
+  trusted material is needed; resolved is not allowed. Rationale and `{}` cases
+  are in the endpoint chapter. **Next: Q-048, resolved grants**, still in stage 7.
+  No new wire schema or multi-permission combination policy is adopted.
+  Earlier current-position labels below are preserved checkpoint history.
+
 - **Current: Q-046 settled ADMIN-006.** Ordinary human/group grants do not
   depend merely on their issuing administrator retaining issuance authority.
   Grant validity, membership dependencies, and human-dependent automation remain
@@ -271,11 +279,14 @@ Authorization handbook
 │   ├── One endpoint-owned gate and shared evaluator [settled: CONTRACT-006]
 │   ├── Method/route action mapping and identified path/body inputs [settled: INPUT-001]
 │   ├── Explicit required material/source declaration [settled: CONTRACT-007 / Q-035]
+│   │   └── Permissions, inputs, sources, relationship bindings [clarified: Q-047-A]
 │   ├── Logical system block diagram [available: system-overview.md]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
 │   ├── Raw request → authorization request → resolved request [open; prepared deprecated]
 │   │   └── Meaning of request versus trusted evaluation view [active: Q-047]
+│   │       └── Now settled: RESOLUTION-005 / Q-047 / Q-047-A; prior active label is history
 │   ├── Stored grants → applicable grants → expanded/resolved grants [open]
+│   │   └── Resolved-grant meaning and retained dependencies [active: Q-048]
 │   └── Typed inputs/outputs, fact provenance, failures, context binding [open]
 ├── 8. Decision semantics [open]
 │   ├── Grant binding and subset invariants [settled: GRANT-001, RESOLUTION-001]
@@ -369,6 +380,8 @@ Update: Q-045 approved GROUP-001-A and GROUP-003; rationale is captured in group
 Q-046 → ordinary human/group grant lifecycle after issuing-administrator authority changes (open).
 Update: Q-046 approved ADMIN-006; prior open label is history. Rationale and explicit-revocation consequences are in grant-model.md.
 Q-047 → return to requests/resolution: distinguish request inputs from trusted evaluation material without a prepared handoff or new authority (open).
+Update: Q-047 / Q-047-A approved RESOLUTION-005 and clarified CONTRACT-007; prior open label is history. The endpoint chapter records rationale and selective material examples.
+Q-048 → resolved grant as a dependent evaluation view, not a new assignment (open).
 
 The log retains these for traceability; they are not current options:
 

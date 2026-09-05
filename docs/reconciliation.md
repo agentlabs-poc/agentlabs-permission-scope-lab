@@ -1,5 +1,26 @@
 # Handbook reconciliation register
 
+## Checkpoint following a5bd63f — Q-047 and Q-047-A declaration clarification
+
+The user agreed to request/resolved-request meanings, refined how declared
+material relates to scope, and explicitly approved: "endpoint predeclares
+permissions, inputs, sources and how to establish any required relationship."
+CONTRACT-007 is clarified; RESOLUTION-005 records the conceptual request views.
+The endpoint chapter retains rationale, three scope cases, counterexamples,
+and security consequences. The overview explains the existing diagram label
+as shorthand; no new component or authorization handoff is introduced.
+
+Empty scope imposes no additional department/certificate restriction, not loss
+of operation identity, tenant isolation, conditions, or delegation constraints.
+Scope need not repeat every declared input. Declaration/schema syntax and
+multi-permission combination semantics remain open. Q-048 opens the resolved
+grant branch; it is not an approved new result format.
+
+Docs-only verification passed: 23 Markdown files, 139 local links, 44 JSON
+blocks, and 126 unique decision/question IDs including suffixed questions in
+the tree. Approved/open status, rationale/example coverage, previous content
+preservation, and `git diff --check` passed. No application source changed.
+
 ## Checkpoint following 02ae3c9 — Q-046 ordinary grant lifecycle
 
 Q-046 approves ADMIN-006: validly issued ordinary human/group grants do not

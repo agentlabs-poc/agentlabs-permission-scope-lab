@@ -1,5 +1,13 @@
 # Authorization system — canonical logical overview
 
+Q-047-A clarifies the endpoint-declaration block: **the endpoint predeclares
+permissions, inputs, sources, and how to establish any required relationship.**
+The existing diagram's permission/material-source label is shorthand for this
+contract. The declaration stays fixed; the gate establishes the sufficient
+trusted material needed by the relevant checks, not every possible fact.
+See [the detailed request and scope examples](endpoint-authorization.md).
+This clarification adds no decision location or deployment component.
+
 TERM-005 / Q-043 aligns the current diagram and explanation with permission,
 boundary checks, and request material. The [vocabulary chapter](authorization-vocabulary.md)
 captures the rationale. The [previous diagram](assets/history/authorization-system-pre-q043.svg)

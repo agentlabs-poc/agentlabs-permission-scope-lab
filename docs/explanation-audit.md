@@ -1,5 +1,12 @@
 # Explanation coverage audit — through Q-043
 
+Q-047 / Q-047-A follow-up: the endpoint chapter records the approved declaration
+wording, request/resolved-request/decision distinction, and fixed declaration
+versus scope-dependent material needs. Three scope cases include `{}`, with
+the request-identification rationale, Finance/Engineering counterexample, tenant
+and application-contract safeguards, and limits for conditions/delegation.
+No wire schema, multi-permission combination rule, or eager-fetch rule is implied.
+
 Q-046 follow-up: the grant chapter records ADMIN-006, the distinction between
 issuance provenance and continuing authority dependency, the cascading alternative
 not adopted, Maya/Vinay's example, four lifecycle outcomes, explicit-revocation

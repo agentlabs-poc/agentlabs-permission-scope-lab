@@ -1,5 +1,84 @@
 # Working handbook chapter: endpoint-owned authorization
 
+## Endpoint declaration and request resolution — Q-047 / Q-047-A, agreed
+
+> The endpoint predeclares permissions, inputs, sources, and how to establish
+> any required relationship.
+
+This is the approved clarification of CONTRACT-007, not a new declaration
+format. The single declaration is server-owned and fixed for the endpoint;
+it is not rebuilt from each caller's grants. Application-defined scope meanings
+remain registered contracts, not meanings invented by the endpoint.
+
+### Request, resolved request, and decision
+
+- **Authorization request:** the declared operation, verified identity/tenant
+  context, and selected request inputs.
+- **Resolved request:** an evaluation view of the same request with sufficient
+  trusted material to assess the relevant authorization boundaries. Request
+  claims remain distinguishable from established facts.
+- **Decision:** whether applicable authority permits the requested operation
+  using that material. Resolved does not mean allowed.
+
+These are conceptual distinctions inside the one endpoint-owned gate, not
+separate persisted entities, a prepared handoff, or newly adopted JSON fields.
+Resolution does not manufacture authority or require unnecessary lookups before
+an obvious denial. Exact schemas and multi-permission combination rules remain
+open; the approved plural wording does not silently choose AND or OR for them.
+
+### Declared inputs versus material needed for a scope check
+
+For `GET /api/v1/{tenant}/{dept}/{cert}`, the endpoint predeclares these inputs
+and their sources, the required permission, and how to establish relationships
+when needed. The route tenant must be bound to trusted tenant context. Declared
+inputs remain available even when one grant's scope does not need all of them.
+
+Assuming the application has registered the illustrated boundary keys and
+their meanings for certificate-read:
+
+| Grant scope | Scope evaluation needed |
+|---|---|
+| `{}` | Enclosing tenant only; this scope imposes no additional department or certificate restriction. |
+| `{"dept":"FIN"}` | Establish that the operation on the requested certificate stays within Finance. The path department alone need not establish this relationship. |
+| `{"dept":"FIN","cert":"C-17"}` | Establish both the Finance boundary and the C-17 restriction. |
+
+The middle case uses the certificate identifier to establish its department
+without making `cert` a selected boundary key. A scope need not repeat every
+declared input. Conversely, having a path input named `dept` does not establish
+that the requested certificate actually belongs to that department.
+
+With an applicable `{}` grant, do not fetch department facts solely to enforce
+a department restriction that this scope does not contain. Department and
+certificate still identify the requested operation; they have not disappeared
+from the declaration. The operation must stay within the trusted tenant and
+remain bound to the requested certificate. If the application route contract
+requires that certificate to belong to the supplied department, that remains
+application validation rather than a restriction invented for the empty scope.
+
+Grant validity, conditions, and human/delegation limits continue to apply.
+An empty scope in one grant does not erase other mandatory constraints. Required
+material for those constraints may differ from material needed for scope alone.
+
+### Rationale, counterexample, and remaining work
+
+Separate request identification from authority restriction. Treating every
+declared input as a mandatory selected boundary would contradict `{}`'s agreed
+tenant-wide meaning and cause unnecessary fact gathering. Treating unused inputs
+as absent could instead lose the binding to the actual requested operation.
+
+For example, `FIN/C-17` does not prove Finance membership if established facts
+place C-17 in Engineering. A Finance-only grant cannot authorize that operation
+merely by matching the path string. A tenant-wide grant does not impose that
+Finance restriction, but still cannot bypass tenant isolation or the endpoint's
+application contract. No universal extra lookup is required when trusted context
+or an appropriately constrained operation already establishes what is needed.
+
+The approved principle is selective, sufficient trusted material under a fixed
+declaration. Concrete declaration syntax, relationship-binding representation,
+conflict handling, collection enforcement, and freshness remain open. Earlier
+permission/material wording below remains compatible shorthand, not a second
+declaration or a requirement to resolve every possible relationship eagerly.
+
 TERM-005 / Q-043 uses request material and boundary evaluation without an
 additional canonical entity. [Detailed rationale](authorization-vocabulary.md)
 retains the requirement to bind evidence to actual execution.
