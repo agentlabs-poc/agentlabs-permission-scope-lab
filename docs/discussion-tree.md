@@ -142,9 +142,12 @@ Auth confirms revocation, even through stale cache. See
 without human support and works again when support returns under a still-valid
 delegation. Explicit renewal is not adopted. See
 [delegation lifecycle](delegation-lifecycle.md).
-**Q-071 / ENFORCEMENT-005 is proposed:** ordinary scoped lists return authorized
-subsets, rather than denying solely because out-of-scope records exist. See
-[collection enforcement](collection-enforcement.md). Administration bounds,
+**Q-071 / ENFORCEMENT-005 is agreed as corrected:** deny the partially authorized
+collection request; do not derive and return an authorized subset. The user
+rejected grant-derived filtering as too much authorization intelligence in the
+endpoint. **Q-072 / ENFORCEMENT-006 is proposed:** distinguish an explicitly
+Finance-bounded request from an all-departments request for Finance-only authority.
+See [collection enforcement](collection-enforcement.md). Administration bounds,
 restoration mechanics, and collection details remain open.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
