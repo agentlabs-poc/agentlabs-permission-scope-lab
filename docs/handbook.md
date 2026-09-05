@@ -271,6 +271,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Application registration](application-registration.md) | Abstract validation, application meanings, optional support checks, and activation rules. |
 | [Endpoint authorization](endpoint-authorization.md) | One endpoint-owned gate, request versus resolved material, and retained historical decisions. |
 | [Endpoint policy format](endpoint-policy-format.md) | Approved version/method/path/permission/inputs shape; GET/PUT, value validation, and mandatory enforcement. |
+| [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -300,7 +301,10 @@ shape with version, decision, and grant_ids. Q-063 approves the deny variant
 using version, decision, and the agreed error code/two message fields. Q-064
 approves an evaluation-error variant with no decision field. Q-065 requires
 rejecting mixed variant-specific fields. Q-066 requires a non-empty supporting-grant
-ID list for allow. Q-067 proposes rejecting unknown result fields; it is not approved.
+ID list for allow. Q-067 requires rejecting unknown result fields. Further format
+details are parked under the user's impact-first horizontal instruction, not
+excluded. Q-068 now proposes authorizing both current and proposed boundaries for
+a move; the operation chapter records the rationale without treating it as agreed.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 

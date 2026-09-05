@@ -21,3 +21,12 @@ proposal into an agreed rule during reconciliation.
 Preserve superseded material with clear deprecation labels or linked archives.
 Record rationale, examples/counterexamples, consequences, and open questions,
 not just conclusions. Keep reference numbers on discussion questions/proposals.
+
+## Discussion pacing — impact-first horizontal coverage
+
+The user explicitly asked for horizontal coverage based on impact. Ask one
+question at a time and continue after each answer without waiting for “proceed.”
+Prioritize unresolved authority and enforcement decisions across branches before
+extended field-by-field validation. Keep lower-level gaps visible for a later
+contract-completion pass; parking them does not approve or exclude them. Do not
+mark a whole branch complete after settling only its governing principle.

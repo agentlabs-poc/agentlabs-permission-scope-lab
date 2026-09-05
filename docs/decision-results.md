@@ -606,12 +606,14 @@ lookup. Those remain separate from the minimum presence/type/cardinality rule.
 
 ## Q-067 / DECISION-015 — unknown result fields
 
-Status: **PROPOSED, not approved.** Recommend rejecting fields not defined by the
-supported result contract, rather than silently ignoring them. Q-065 already
+Status: **AGREED.** The user explicitly answered “067 agree” while directing
+horizontal, impact-first coverage. Original status retained as history:
+~~PROPOSED, not approved~~. Reject fields not defined by the supported result
+contract rather than silently ignoring them. Q-065 already
 rejects known fields belonging to a different result variant; this question is
 about entirely unrecognized fields.
 
-Intentionally invalid example under this proposal:
+Intentionally invalid example under the agreed Q-067 rule:
 
 ```json
 {
@@ -623,7 +625,7 @@ Intentionally invalid example under this proposal:
 ```
 
 `debug_note` is an illustrative, undefined field, not a newly proposed contract
-field. Under this proposal even apparently harmless extra data is rejected at
+field. Under this rule even apparently harmless extra data is rejected at
 this result boundary. Protected execution cannot proceed on the malformed result;
 this is not a completed policy denial or proof that the actor lacks permission.
 
@@ -631,7 +633,8 @@ Rationale: sender and receiver should agree on the result contract, and typos or
 uncoordinated extensions should be visible instead of disappearing during parsing.
 The alternative is to ignore unknown fields for easier forward compatibility.
 That is more permissive, but senders may incorrectly assume consumers use added
-information. Strict rejection trades that flexibility for explicit compatibility.
+information. Strict rejection trades that flexibility for explicit compatibility;
+the ignore-unknown-fields alternative is not adopted.
 
 The rule concerns this result object, not arbitrary application business data or
 a separately defined transport envelope. Future extensions need an explicitly
@@ -639,4 +642,12 @@ supported contract change; this does not design a new extension mechanism or
 finalize version migration. Other outstanding value and error-code validation
 questions remain separate.
 
-**Q-067:** Should unknown fields in an authorization result be rejected?
+**Q-067 — answered yes:** unknown authorization-result fields are rejected.
+
+### Return point after Q-067 — details parked, not excluded
+
+The user requested impact-first horizontal coverage rather than further
+field-by-field questions. Remaining message-value validation, code catalogue and
+compatibility, historical provenance, and full schema publication stay open for
+the contract-completion pass. The next branch is
+[state-changing operations](operation-enforcement.md), beginning with Q-068.

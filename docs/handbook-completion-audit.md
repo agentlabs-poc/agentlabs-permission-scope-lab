@@ -186,7 +186,7 @@ not the whole surrounding topic.
 | Checkpoint | Status | Completion criterion | Evidence or outstanding gap |
 |---|---|---|---|
 | HC-08-01 | DONE | Settle alternative complete positive grants, no cross-grant field mixing, and no explicit deny grants in v1. | DECISION-001/002 / GRANT-001; [grant model](grant-model.md). |
-| HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-066 settle core meanings, minimal shapes, mixed-variant rejection, and grant-ID cardinality in [decision results](decision-results.md). Full validation, code catalogue/compatibility, and missing/unknown cases remain unfinished; Q-067 unknown-field rejection is proposed. No fractional completion credit. |
+| HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-067 settle core meanings, minimal shapes, mixed/unknown-field rejection, and grant-ID cardinality in [decision results](decision-results.md). Full value validation, code catalogue/compatibility, and remaining failure cases are unfinished. Further details are parked under PROCESS-007, not excluded. No fractional credit. |
 | HC-08-03 | OPEN | Specify conditions and their evaluation when evidence is missing, invalid, or unsupported. | Stage 8 [roadmap](handbook-roadmap.md) and open decision branches in [grant model](grant-model.md). |
 | HC-08-04 | OPEN | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Decision result/audit explanation is open in [tree](discussion-tree.md); event storage is separately counted under stage 9. |
 
@@ -197,7 +197,7 @@ not the whole surrounding topic.
 | HC-09-01 | DONE | Require actual output/effects to stay within authorized boundaries and request bindings. | CONTRACT-012 / Q-050-C; [endpoint policy](endpoint-policy-format.md). |
 | HC-09-02 | DONE | Require review of effective constraints rather than mere input usage, with counterexamples. | ENFORCEMENT-003 / Q-050-D; [endpoint policy](endpoint-policy-format.md). |
 | HC-09-03 | OPEN | Define collection, count, export, and row/field restriction contracts. | Stage 9 [roadmap](handbook-roadmap.md) and [endpoint authorization](endpoint-authorization.md). |
-| HC-09-04 | OPEN | Define create/update/move authorization for existing and proposed state. | PUT binding is not a move policy; [endpoint policy](endpoint-policy-format.md) leaves these rules open. |
+| HC-09-04 | OPEN | Define create/update/move authorization for existing and proposed state. | PUT binding is not a move policy. Q-068 proposes both-boundary authorization in [operation-specific enforcement](operation-enforcement.md), not yet agreed; create/update details, composition, and transition enforcement remain open. |
 | HC-09-05 | OPEN | Define bulk authorization, partial success, and operation transaction semantics. | Bulk branch remains open in [tree](discussion-tree.md). |
 | HC-09-06 | OPEN | Define freshness, caching, revocation propagation, and stale membership/dependency behavior. | Stage 9 [tree](discussion-tree.md); conceptual dependency invalidation does not establish propagation timing. |
 | HC-09-07 | OPEN | Define concurrent-change/check-to-use consistency guarantees. | [System overview](system-overview.md) leaves concurrency/atomicity mechanisms open. |

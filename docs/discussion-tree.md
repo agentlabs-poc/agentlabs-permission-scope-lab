@@ -114,16 +114,36 @@ and error_code/error_message/error_message_reason.
 three error fields, without decision.
 **Q-065 / DECISION-013 is agreed:** reject mixed known-variant fields instead
 of partially interpreting a result. **Q-066 / DECISION-014 is agreed:** require
-a non-empty supporting-grant ID list for allow. **Q-067 / DECISION-015 is proposed:**
-reject unknown result fields. Full validation and result contracts remain unfinished.
+a non-empty supporting-grant ID list for allow. **Q-067 / DECISION-015 is agreed:**
+reject unknown result fields. Remaining field-level work is parked, not excluded;
+full validation and result contracts remain unfinished.
+
+### Current impact-first pass — PROCESS-007
+
+The user requested horizontal coverage based on impact. The following is the
+assistant's recommended next pass, not approval of the unanswered policy choices.
+Settle governing behavior before returning to fine-grained formats; move across
+branches while retaining the unfinished details in the audit.
+
+| Priority | Branch | Why this is high impact | Audit anchors |
+|---|---|---|---|
+| 1 — now | Boundary-changing writes | Can move data into or out of a caller's authority. | HC-09-04 |
+| 2 | Revocation, freshness, and in-flight changes | Determines when removed authority stops being usable. | HC-09-06/07 |
+| 3 | Administrative bounds and delegation lifecycle | Controls creation and persistence of authority. | HC-05-08/10 |
+| 4 | Collections, exports, and bulk operations | A single operation can expose or change many records. | HC-09-03/05 |
+
+**Q-068 / ENFORCEMENT-004 is proposed:** should a move cover both current and
+proposed boundaries? See [operation-specific enforcement](operation-enforcement.md).
+This does not re-open the one-permission/one-gate model or add policy fields.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**
-by this reconciliation. Do not reopen the settled endpoint-policy shape or
+by the earlier reconciliation. PROCESS-007 now sets the impact-first direction
+and the table above is the current recommended pass. Do not reopen the settled endpoint-policy shape or
 return to the parked registration-detail rabbit hole without a reason.
 
 Earlier reconciliation note, now qualified: a completion percentage had no
-explicit measurement baseline. [MEASURE-001](handbook-completion-audit.md) now
+explicit measurement baseline. [MEASURE-001](handbook-completion-audit.md)
 now counts 35 completed and 34 open checkpoints out of 69 (50.7% closure). This is a
 proposed checkpoint rubric, not an effort estimate or release-readiness score.
 The earlier count was 34/69; Q-059 completes HC-04-04. Decision-result checkpoints
