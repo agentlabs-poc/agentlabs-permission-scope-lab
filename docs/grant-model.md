@@ -448,6 +448,11 @@ covered; unrelated retained rights may continue to support access. Examples of
 direct human grants must not be read as permitting independent service grants.
 Exact delegation encoding and evaluation contracts remain open.
 
+The impact-first [delegation lifecycle discussion](delegation-lifecycle.md)
+now asks Q-070 about automatic reactivation versus explicit renewal after a
+supporting relationship breaks. It is proposed, not approved; the existing
+human-subset and affected-authority-only rules are not reopened.
+
 ## Administration without business access — ADMIN-002, ADMIN-003 / Q-022
 
 ADMIN-001 separates using a capability from administering its assignment.

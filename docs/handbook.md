@@ -273,6 +273,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Endpoint policy format](endpoint-policy-format.md) | Approved version/method/path/permission/inputs shape; GET/PUT, value validation, and mandatory enforcement. |
 | [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
 | [Authority freshness](authority-freshness.md) | Impact-first revocation timing discussion, stale-cache trade-offs, and in-flight-operation questions kept distinct. |
+| [Delegation lifecycle](delegation-lifecycle.md) | Impact-first restoration question: renewed authorization versus automatic return of previously invalidated delegated access. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -306,8 +307,10 @@ ID list for allow. Q-067 requires rejecting unknown result fields. Further forma
 details are parked under the user's impact-first horizontal instruction, not
 excluded. Q-068 requires move authority over both current and proposed boundaries;
 the operation chapter records the approved detailed example and rationale.
-Q-069 now proposes revocation freshness for new checks; no stale-cache grace
-period is recommended, but that timing contract is not yet agreed.
+Q-069 requires no stale-cache grace period for checks started after confirmed
+grant revocation; in-flight operations and mechanisms remain open. Q-070 proposes
+explicit renewal before a broken delegation regains validity when the human's
+access returns; that restoration rule is not yet approved.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 
