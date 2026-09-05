@@ -112,9 +112,10 @@ minimal allow JSON with version, decision, and grant_ids.
 and error_code/error_message/error_message_reason.
 **Q-064 / DECISION-012 is agreed:** evaluation-error JSON with version and the
 three error fields, without decision.
-**Q-065 / DECISION-013 is proposed:** reject mixed known-variant fields instead
-of partially interpreting a result. Full validation and result contracts remain
-unfinished.
+**Q-065 / DECISION-013 is agreed:** reject mixed known-variant fields instead
+of partially interpreting a result. **Q-066 / DECISION-014 is proposed:** require
+a non-empty supporting-grant ID list for allow. Full validation and result
+contracts remain unfinished.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

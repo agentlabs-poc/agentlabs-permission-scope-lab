@@ -529,11 +529,12 @@ code catalogue remain open and must be finalized before publishing the schema.
 
 ## Q-065 / DECISION-013 — reject mixtures of result variants
 
-Status: **PROPOSED, not approved.** Recommend rejecting a result that mixes
-variant-specific fields from the agreed allow, deny, and evaluation-error shapes,
-rather than choosing one interpretation and ignoring the contradictory fields.
+Status: **AGREED.** The user answered “agree” to Q-065. Original status retained
+as history: ~~PROPOSED, not approved~~. Reject a result that mixes variant-specific
+fields from the agreed allow, deny, and evaluation-error shapes rather than
+choosing one interpretation and ignoring the contradictory fields.
 
-Intentionally invalid example under this proposal:
+Intentionally invalid example under the agreed rule:
 
 ```json
 {
@@ -545,22 +546,58 @@ Intentionally invalid example under this proposal:
 ```
 
 This claims a completed allow while also carrying an error field that does not
-belong to the allow variant. The proposed rule rejects this response as malformed
+belong to the allow variant. The agreed rule rejects this response as malformed
 and blocks protected execution; it does not infer either completed denial or a
 verified timeout from the conflicting payload.
 
 Rationale: the same response must not lead one consumer to authorize execution
 while another treats it as failed evaluation. The alternative, accepting the
 leading discriminator and ignoring conflicting fields, permits inconsistent
-handling and can hide integration defects.
+handling and can hide integration defects. That permissive alternative is not
+adopted; the consumer must not repair a mixed result by dropping conflicting fields.
 
-Under this proposal, allow does not carry the three error fields; deny does not
+Under this rule, allow does not carry the three error fields; deny does not
 carry `grant_ids`; evaluation-error results carry neither `decision` nor
 `grant_ids`. Denial traces and success warnings are not implicitly introduced by
 reusing another variant's fields. Fail-closed behavior is already agreed; the
-new question is the explicit rejection of mixed known-variant fields.
+newly settled requirement is the explicit rejection of mixed known-variant fields.
 
 Required value types, grant-ID cardinality, unrelated unknown extension fields,
 code/variant compatibility, and the full schema remain separate validation
-questions. **Q-065:** Should mixed result variants be rejected rather than
-partially interpreted?
+questions. **Q-065 — answered yes:** mixed result variants are rejected rather
+than partially interpreted.
+
+## Q-066 / DECISION-014 — non-empty supporting-grant list for allow
+
+Status: **PROPOSED, not approved.** Recommend requiring `grant_ids` on allow to
+be a non-empty array of non-empty string identifiers for supporting grants.
+Missing, null, empty-array, or empty-identifier values would not satisfy this
+result contract. No permission-ID or grant-ID grammar is introduced here.
+
+Intentionally invalid example under this proposal:
+
+```json
+{
+  "version": "1",
+  "decision": "allow",
+  "grant_ids": []
+}
+```
+
+Rationale: in the agreed positive-grant model, an allow has supporting authority,
+and Q-060 requires its grant references to be available in the result. An empty
+list would remove that evidence while still claiming authorization succeeded.
+An explicit tenant-wide scope still belongs to a grant and is not an exception.
+
+The alternative is allowing an empty list when logging is disabled or references
+are inconvenient to provide. That conflicts with Q-060's distinction between
+evidence availability and optional persistent recording. A valid example is the
+already-agreed `grant_ids: ["G-17"]`; only grants supporting the decision belong
+in this list, not all grants held by the human.
+
+Under this proposal a malformed allow blocks protected execution; it is not
+reclassified as a completed policy denial. This does not select all-versus-first
+supporting routes, historical grant versions, ID normalization, or a new grant
+lookup. Those remain separate from the minimum presence/type/cardinality rule.
+
+**Q-066:** Must every allow contain at least one supporting grant identifier?

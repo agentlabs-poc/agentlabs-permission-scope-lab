@@ -298,8 +298,9 @@ to be logged. Q-061's proposed returned-boundary fields are not required;
 endpoint enforcement remains unchanged. Q-062 approves a minimal allow JSON
 shape with version, decision, and grant_ids. Q-063 approves the deny variant
 using version, decision, and the agreed error code/two message fields. Q-064
-approves an evaluation-error variant with no decision field. Q-065 proposes
-rejecting mixed variant-specific fields; that validation rule is not yet approved.
+approves an evaluation-error variant with no decision field. Q-065 requires
+rejecting mixed variant-specific fields. Q-066 proposes requiring a non-empty
+supporting-grant ID list for allow; that validation rule is not yet approved.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 
