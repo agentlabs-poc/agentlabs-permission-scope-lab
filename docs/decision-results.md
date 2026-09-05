@@ -449,8 +449,8 @@ outside the evaluation that produced it or promise historical grant recovery.
 
 ## Q-063 / DECISION-011 — minimal deny-result JSON
 
-Status: **PROPOSED, not approved.** Assemble the completed deny decision and
-the already-agreed error code and message fields into this representation:
+Status: **AGREED.** The user answered “agree” to Q-063. Original status retained
+as history: ~~PROPOSED, not approved~~. The minimal deny representation is:
 
 ```json
 {
@@ -472,7 +472,7 @@ separate from readable messages, and implements the agreed requirement that a
 deny explain its cause. The evaluator provides both messages for UI presentation.
 No new field names are introduced beyond the already agreed fields.
 
-No `grant_ids` field is proposed for this minimum: Q-060 requires supporting
+No `grant_ids` field is required for this minimum: Q-060 requires supporting
 references for an allow, not a list of rejected candidates for a deny. An empty
 array or separate evaluation trace would add data without establishing why any
 candidate failed; detailed denial traces remain a separate question.
@@ -480,7 +480,45 @@ candidate failed; detailed denial traces remain a separate question.
 Counterexample: an Auth timeout cannot use this completed deny shape to claim
 that no permission exists. Evaluation failure remains separate under Q-051; its
 concrete representation is the next result variant to discuss, not settled here.
-This proposal does not require returning sensitive diagnostics to the client.
+This decision does not require returning sensitive diagnostics to the client.
 
 Full validation, exact code catalogue, HTTP mapping, and complete schema publication
-remain open. **Q-063:** Should this be the minimal deny-result shape?
+remain open. **Q-063 — answered yes:** this is the minimal deny-result shape.
+
+## Q-064 / DECISION-012 — minimal evaluation-error JSON
+
+Status: **PROPOSED, not approved.** Recommend using the agreed error fields
+without a `decision` field when evaluation could not complete:
+
+```json
+{
+  "version": "1",
+  "error_code": "AUTH_SERVICE_TIMEOUT",
+  "error_message": "We could not check your access.",
+  "error_message_reason": "The authorization service did not respond in time."
+}
+```
+
+This uses the approved Q-051 timeout case: required authority could not be loaded
+and no sufficient valid authority was already available. The code spelling is
+illustrative pending the catalogue. Both messages are evaluator-provided and
+reach the UI under Q-053/054; their presentation does not create authority.
+
+Rationale: absence of a completed decision reflects the fact that neither allow
+nor deny was established. Reusing the existing error fields avoids a third
+`decision` value or another status field in this minimal proposal. The endpoint
+must stop protected execution, as already agreed for evaluation failure.
+
+The alternative is an explicit evaluation-status field or a distinct nested
+error envelope. That makes the variant visibly tagged but adds structure beyond
+the current fields. This proposal does not select exception-based transport,
+HTTP mapping, or a retry policy.
+
+Validation consequence: omission of `decision` alone must not make an arbitrary
+or truncated response a valid evaluation-error result. Consumers must validate
+the complete expected error shape; malformed results cannot become allow or a
+completed policy denial. Full validation, variant/code compatibility, and the
+code catalogue remain open and must be finalized before publishing the schema.
+
+**Q-064:** Should this be the minimal evaluation-error shape, with no `decision`
+field because no authorization decision was reached?
