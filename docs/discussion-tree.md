@@ -99,8 +99,9 @@ Permission-retention sidebar: the user requested the earlier detailed explanatio
 remain active; it is restored in [Permission](permission-model.md) and the reader.
 **Q-056 / PERMISSION-002 is agreed with depth:** variable-length namespace before
 the `::` verb separator; the original deeper examples are restored.
-**Q-057 / PERMISSION-003 is proposed:** no automatic parent-to-child permission
-inheritance. Wildcards and catalog evolution stay open. Then return
+**Q-057 / PERMISSION-003 is agreed:** no automatic parent-to-child permission
+inheritance. **Q-058 / PERMISSION-004 is proposed:** exclude wildcard permission
+names from v1. Aliases and catalog evolution stay open. Then return
 to decision-result contracts. Neither retention nor these narrow agreements
 alone closes the audit's broader contract checkpoints.
 

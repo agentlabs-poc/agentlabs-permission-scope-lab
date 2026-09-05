@@ -289,9 +289,10 @@ errors without conflating errors with completed denials. Q-055 / DECISION-007
 approves a stable `error_code` alongside the two readable messages. Full schemas,
 reason-code definitions, and safe-content rules remain open. The permission
 explanation has been restored at the user's request; Q-056 adopts its naming
-convention with variable-depth application namespaces. Q-057 proposes no automatic
-permission inheritance from name prefixes. Character validation, catalog evolution,
-and wildcard behavior are not silently closed by naming-convention approval.
+convention with variable-depth application namespaces. Q-057 agrees that name
+prefixes do not automatically confer deeper permissions. Q-058 proposes excluding
+wildcard permission names from v1. Character validation, aliases, and catalog
+evolution remain separate open questions.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)

@@ -42,8 +42,10 @@ hrms:payroll:ledger:entry:attachment::read
 
 The application defines those levels; Auth does not hardcode their business
 meaning. `:` separates namespace levels and `::` separates the verb. Naming
-depth does not establish scope reach. Q-057 separately proposes no automatic
-parent-to-child permission inheritance; that rule is not yet approved.
+depth does not establish scope reach. Q-057 agrees that parent permission names
+do not automatically authorize deeper permissions; a grant or role can explicitly
+list both. Q-058 proposes leaving wildcard permission names out of v1; that
+separate proposal is not yet approved.
 
 There is no additional canonical “target” entity or required resource wrapper
 (TERM-005). A request can identify a certificate, list, or proposed change using

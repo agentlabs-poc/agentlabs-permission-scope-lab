@@ -115,9 +115,9 @@ things. Names describe operations; they do not establish facts about a particula
 ledger or entry. Deeper naming alone does not settle permission inheritance.
 
 The original parent/child inheritance and wildcard examples were explicitly
-working proposals, not adopted rules. They remain in the archive, not the active
-canonical contract. Their v1 treatment is a separate open decision. No wildcard
-support follows from retaining namespaced permission examples.
+working proposals. Q-057 now adopts the no-automatic-inheritance rule below;
+wildcard support remains open under Q-058. Original alternatives remain archived.
+No wildcard support follows from retaining namespaced permission examples.
 
 ### Why retain this explanation?
 
@@ -136,8 +136,9 @@ their full naming reconciliation remains an editorial follow-up.
 
 ### Q-057 / PERMISSION-003 — parent names do not automatically grant child permissions
 
-Status: **PROPOSED, not approved.** Recommend that granting
-`hrms:payroll:ledger::read` not automatically grant
+Status: **AGREED.** The user answered “agree.” Original status retained as history:
+~~PROPOSED, not approved~~. Granting
+`hrms:payroll:ledger::read` does not automatically grant
 `hrms:payroll:ledger:entry::read`. These name separate permissions unless an
 explicit, separately agreed authority mechanism supplies both; ordinary roles
 can already list both permissions.
@@ -146,11 +147,43 @@ Rationale: adding a more specialized operation later should not silently expand
 existing access simply because its name shares a prefix. The alternative,
 automatic inheritance, shortens broad assignments but makes namespace changes
 affect existing authority. The earlier Markdown proposed the non-inheritance
-rule but explicitly left its adoption open.
+rule but explicitly left its adoption open; the user's Q-057 answer now settles it.
 
-This question does not settle wildcard support, permission aliases, or the
+Counterexample: registering `hrms:payroll:ledger:entry:attachment::read` later
+must not make existing ledger-read grants authorize that new permission merely
+because its name shares the same prefix. To provide both permissions, a grant or
+role can explicitly list both. Such explicit changes retain their own authority
+and lifecycle checks; naming itself is not an additional source of authority.
+
+This decision does not settle wildcard support, permission aliases, or the
 application-level effects covered by a particular registered operation. Scope
 and actual-use enforcement remain mandatory for any granted permission.
+
+### Q-058 / PERMISSION-004 — wildcard permission names in v1
+
+Status: **PROPOSED, not approved.** Recommend leaving wildcard permission names
+out of v1. Grants and roles would list explicit registered permissions instead
+of patterns such as `hrms:payroll:ledger:*::read`.
+
+Rationale: a wildcard needs additional rules about matching depth and whether it
+includes permissions registered later. Explicit lists keep intended operations
+visible and avoid adding those rules to the foundational v1 contract. Roles can
+still bundle a set of permissions; this proposal does not freeze role membership
+or change the agreed live-role model.
+
+The alternative, illustrated in the earlier Markdown, is a one-segment wildcard.
+It makes broad assignments shorter but still needs an explicit future-permission
+and matching contract. The original illustration remains archived, not adopted.
+
+Example: for ledger entry and summary reads, explicitly list
+`hrms:payroll:ledger:entry::read` and `hrms:payroll:ledger:summary::read` instead
+of using the pattern above. An unrelated new permission would not be included
+merely by matching that pattern. If this exclusion is approved, unsupported
+wildcard strings must not be silently expanded into authority.
+
+**Q-058:** Should v1 exclude wildcard permission names and use explicit registered
+permissions, which roles can bundle? Aliases, complete character validation,
+catalog evolution, and runtime migration remain separate questions.
 
 ## How permission participates in authorization
 
