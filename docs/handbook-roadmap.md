@@ -112,6 +112,7 @@ working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| CONTRACT-007 | PROPOSED | Each protected endpoint's single server-owned declaration identifies its required permission and required authorization material, including where that material is obtained. Distinguish request parameters/proposed values from verified context and authoritative application facts; shared authority/context infrastructure need not be duplicated. | User asks to capture this thought and add a canonical system block diagram. This refines agreed INPUT-001/CONTRACT-006 without adopting new fields, a declaration grammar, or another decision phase. Q-035 tests the refinement. Sources may be declared for conditional requirements; the gate gathers sufficient material rather than eagerly fetching every possible fact. See system-overview.md. |
 | PROCESS-006 | AGREED | Resume recording and checkpoint commits/pushes after the discussion pause. Preserve earlier designs and mark them deprecated rather than deleting or silently replacing them. | User approved Q-033: "we should start recoding. do not replace earlier one just mark them as depricated. i approve the above." Discussion-only Q-030–Q-033 is now captured with its actual approval status. |
 | SCOPE-006 | AGREED | Scope is a boundary selector that identifies a set of targets within the enclosing tenant. A target satisfies the scope when it falls within the selected boundary. Permission covers the operation; a valid applicable grant must cover both operation and target. | User defined scope as a boundary selector, affirmed the permission distinction, and requested a canonical definition. Q-030/Q-031 capture the pause-period discussion. No query language or new fields follow from this definition. |
 | SCOPE-007 | AGREED | Canonical v1 scope is a required flat JSON object of defined boundary keys and non-empty string values: concrete references or reserved $self for the authorizing human where supported. Entries combine with AND; order is irrelevant. Explicit {} is tenant-wide reach within the trusted enclosing tenant. Missing/null/non-object scope, unknown/duplicate keys, empty/non-string values, unsupported symbols, arrays, nested objects, and wildcard operators are invalid. Never drop invalid restrictions or default invalid/missing scope to {}. | User answered Q-034: "agreed" after the minimal format and empty-object distinction were presented. Scope syntax is canonical; key definitions/governance, containment, lifecycle, complete grant/request schemas, and implementation remain separate. GRANT-EX-007 uses current scope syntax; earlier typed scope examples are preserved as deprecated history. |
@@ -218,13 +219,16 @@ working handbook's checkpoint practice for the review checklist.
 | Q-032 | ANSWERED | AND within one scope; OR through separate grants, each with its own scope. | SCOPE-008 agreed through the subsequent approval of the reviewed model. |
 | Q-033 | ANSWERED | Yes: approve one endpoint-owned authorization gate, shared evaluator, and no prepared authorization outcome. Resume recording and deprecate, rather than delete, earlier designs. | CONTRACT-006, ENFORCEMENT-002, PROCESS-006. INPUT-001 captures the accompanying endpoint-material clarification. |
 | Q-034 | ANSWERED | Agreed: adopt the minimal v1 format; explicit {} means tenant-wide reach for the grant's permissions, while omitted or null scope is invalid. | SCOPE-007 canonical. No automatic default to {} or silent dropping of invalid restrictions. Earlier syntax remains preserved as historical examples. |
+| Q-035 | OPEN | Does the single endpoint declaration identify both the required permission and the authorization material with its sources, while the endpoint-owned gate gathers sufficient material and resolves through the shared evaluator? | CONTRACT-007 proposed refinement of INPUT-001/CONTRACT-006. The requested logical block diagram maps already agreed components; deployment and declaration syntax remain open. |
 
 ## Resume here
 
 - Current position: [discussion tree](discussion-tree.md), stage 6 →
   SCOPE-006/008 boundary semantics and SCOPE-007's canonical v1 format are agreed.
   Q-034 is answered; next address scope-key definitions and governance, with no
-  next question issued yet. Q-033 approves CONTRACT-006's
+  new scope question issued yet. Sidebar CONTRACT-007 / Q-035 captures endpoint
+  material-source declarations; system-overview.md provides the logical block
+  diagram. Return to scope-key definitions after the sidebar. Q-033 approves CONTRACT-006's
   endpoint-owned gate; INPUT-001 captures
   selected endpoint request inputs. Recording has resumed under PROCESS-006.
   SCOPE-004 / Q-028 remains open; explanation did not establish agreement.

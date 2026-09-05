@@ -6,6 +6,10 @@ deprecated, not deleting or silently rewriting them. The earlier
 [two-mode authorization flow](authorization-flow.md) remains as historical prose.
 No application implementation has been changed to match this chapter.
 
+The [canonical logical block diagram](system-overview.md) maps this agreed model.
+CONTRACT-007 proposes making each endpoint's required material and its sources
+explicit in the single declaration; detailed declaration syntax remains open.
+
 ## One authorization gate — CONTRACT-006
 
 The endpoint owns gathering sufficient authorization material, invoking a shared
