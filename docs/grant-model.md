@@ -1,5 +1,12 @@
 # Working handbook chapter: grants, assignments, and roles
 
+Current scope format is SCOPE-007 / Q-034: a required flat key-value object,
+AND within scope, with explicit {} for tenant-wide reach and no missing/null
+default. See [scope and target](scope-model.md). Earlier grant examples retain
+their historical scope syntax; GRANT-EX-007 shows the canonical scope form.
+The [current grant formats](grant-format.md) also restate direct/group, role,
+and expanded-view layouts without deleting the earlier examples.
+
 This chapter consolidates agreed concepts with rationale, examples, consequences,
 and unresolved boundaries. It is not a final implementation specification.
 The [decision log](handbook-roadmap.md) records approvals; the

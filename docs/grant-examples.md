@@ -1,6 +1,16 @@
 # Grant examples
 
+Current scope syntax is canonical under SCOPE-007 / Q-034. GRANT-EX-007 below
+uses that syntax. GRANT-EX-001 through GRANT-EX-006 are preserved historical
+illustrations: their typed scope shapes are deprecated, not canonical v1.
+See [current grant formats](grant-format.md) for their updated counterparts.
+Their grant-binding, role, and dependency explanations remain useful; the
+complete grant wire schema is still not finalized.
+
 ## GRANT-EX-001 — capability and scope remain bound
+
+> DEPRECATED LAYOUT — preserved for history. See [current grant formats](grant-format.md)
+> for the corresponding layout with canonical v1 scope.
 
 This JSON illustrates the agreed GRANT-001 concept. Field names, permission
 catalog entries, scope encoding, and validity encoding are illustrative, not a
@@ -72,6 +82,9 @@ service/agent delegation is represented.
 
 ## GRANT-EX-002 — group recipient
 
+> DEPRECATED LAYOUT — preserved for history. See [current grant formats](grant-format.md)
+> for the corresponding layout with canonical v1 scope.
+
 This separate, abbreviated example is also inside trusted tenant context T-1.
 It is not added to the grant set used in the outcome table above. Status,
 validity, and conditions are omitted here only to focus on the recipient.
@@ -92,6 +105,9 @@ group into the authenticated caller. The grant's scope and conditions remain
 attached when its authority is made applicable through membership.
 
 ## GRANT-EX-003 — multiple permissions and multiple grant sources
+
+> DEPRECATED LAYOUT — preserved for history. See [current grant formats](grant-format.md)
+> for the corresponding layout with canonical v1 scope.
 
 This separate example illustrates agreed concepts GRANT-002 and GRANT-003 inside
 trusted tenant context T-1. Maya is a valid member of `certificate-operators`.
@@ -140,6 +156,9 @@ specify conflict/deny precedence or the general algebra for combining grants.
 
 ## GRANT-EX-004 — reusable role, separately scoped grants
 
+> DEPRECATED LAYOUT — preserved for history. See [current grant formats](grant-format.md)
+> for the corresponding layout with canonical v1 scope.
+
 This illustrates agreed concept ROLE-001. The JSON groups a role
 definition and two grants for explanation; it is not a finalized API payload.
 Tenant context is implicit. Grant status, validity, and conditions are omitted
@@ -181,6 +200,9 @@ validity, and conditions stay attached. Freshness mechanics remain open.
 
 ## GRANT-EX-005 — expanded role-based grant
 
+> DEPRECATED LAYOUT — preserved for history. See [current grant formats](grant-format.md)
+> for the corresponding layout with canonical v1 scope.
+
 This illustrates agreed RESOLUTION-003, using G-6 from the preceding example.
 The current Certificate Reader definition contains read and download. Expansion
 makes those permissions explicit for evaluation and retains the role source.
@@ -216,6 +238,9 @@ established, and the target may still require an application lookup.
 
 ## GRANT-EX-006 — one group grant, per-human self scope
 
+> DEPRECATED LAYOUT — preserved for history. See [current grant formats](grant-format.md)
+> for the corresponding layout with canonical v1 scope.
+
 This illustrates SELF-001 inside the enclosing trusted tenant. The scope encoding
 is illustrative; status, validity, and conditions are omitted for brevity.
 
@@ -246,3 +271,56 @@ user-to-employee information leaves this scope unresolved, never group-wide.
 
 The original grant and membership dependency remain attached to each evaluation;
 no independent per-user grant is created.
+
+## GRANT-EX-007 — canonical v1 scope format
+
+These are separate illustrative bindings, not a claim that one human receives
+all three. The scope objects use the agreed canonical SCOPE-007 format. The
+surrounding grant schema is still illustrative; validity/status/conditions are
+omitted for focus, not removed from the grant model. Tenant context is implicit
+and must be trusted. Assume this application defines dept and user boundary keys
+with the indicated meanings; these are not mandatory keys for every application.
+
+```json
+[
+  {
+    "id": "G-14",
+    "recipient": { "type": "group", "id": "employees" },
+    "permissions": ["hrms:payroll:payslip::read"],
+    "scope": { "user": "$self" }
+  },
+  {
+    "id": "G-15",
+    "recipient": { "type": "group", "id": "finance-certificate-readers" },
+    "permissions": ["hrms:employee:certificate::read"],
+    "scope": { "dept": "FIN", "user": "$self" }
+  },
+  {
+    "id": "G-16",
+    "recipient": { "type": "group", "id": "certificate-auditors" },
+    "permissions": ["hrms:employee:certificate::read"],
+    "scope": {}
+  }
+]
+```
+
+| Grant | Scope meaning |
+|---|---|
+| G-14 | Each human member's own payslips, through the application's defined personal boundary. |
+| G-15 | Certificates in Finance AND within the human member's personal boundary. |
+| G-16 | Certificate-read reach throughout the enclosing tenant, subject to all other applicable grant and outer restrictions. |
+
+Group membership and source-grant dependencies remain attached. For a proxy,
+$self stays anchored to the authorizing human, with delegation restrictions.
+The user scope key is not the group recipient; it selects a target boundary.
+
+Explicit {} is deliberate tenant-wide reach, not a missing-value default. A
+missing scope or scope:null is invalid, as are unsupported keys, duplicate keys,
+empty/non-string values, nested objects, arrays, and wildcard operators. Invalid
+entries must not be silently dropped to widen the boundary. Actual key/reference
+validation and target facts are required; this example is not a runtime test.
+
+An alternative Finance OR Engineering route uses two complete grants with
+their respective scope objects, not an array or OR operator inside one scope.
+Who may issue or widen any of these grants is governed by administrative
+authority; these examples do not grant that authority to their recipients.

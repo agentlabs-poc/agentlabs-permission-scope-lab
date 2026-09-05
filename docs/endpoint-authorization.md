@@ -76,15 +76,17 @@ Required application facts establish actual target membership, rather than
 trusting the request's relationship claims. Permission and scope are evaluated
 as parts of each complete grant, never recombined across unrelated grants.
 
-SCOPE-007's candidate key-value syntax can illustrate the agreed AND rule:
+SCOPE-007's canonical key-value syntax illustrates the agreed AND rule:
 
 ```json
 { "dept": "dept-1", "user": "$self" }
 ```
 
-If this representation is adopted, the target must be both within dept-1 and
-within the authorizing human's self boundary. Key names and the symbolic value
-syntax remain unfinalized. This is not a new request or resolved-grant schema.
+The target must be both within dept-1 and
+within the authorizing human's self boundary. These application key meanings
+must be defined; the format and $self token are canonical under Q-034. This is
+not a new request or resolved-grant schema. An explicit empty scope {} is
+tenant-wide; omitted or null scope is invalid, never defaulted to {}.
 
 Alternative authority is supplied through separate complete applicable grants,
 each retaining its own scope, conditions, and dependencies (DECISION-001 and
@@ -121,7 +123,7 @@ essential: removing prepared removes a handoff state, not authorization work.
 
 ## Still to settle
 
-- Scope key/value grammar, defined key meanings, symbolic values, and validation.
+- Defined scope-key meanings, governance, and enforcement of canonical validation.
 - Action/permission mapping, identified path/body input declarations, and conflicts.
 - Concrete authorization request, evaluator result, and resolved-grant forms.
 - Scope containment for grant administration; ADMIN-004/005 remain open.

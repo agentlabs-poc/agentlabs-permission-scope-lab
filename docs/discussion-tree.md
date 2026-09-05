@@ -19,21 +19,64 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
-- Active branch: **6. Scope and target → canonical boundary definition and syntax**.
-  SCOPE-006/008 are agreed; SCOPE-007's minimal format is drafted and Q-034 tests
-  explicit empty scope versus missing scope. Draft syntax remains proposed.
-  SCOPE-002/004 are still open, not adopted through later scope discussion.
+- Active branch: **6. Scope and target → scope-key definitions and governance**.
+  SCOPE-006/008 and SCOPE-007's canonical v1 format are agreed; Q-034 is answered.
+  Next: scope-key definitions/governance, before returning to ADMIN-004/005.
+  SCOPE-004 remains open. SCOPE-002's earlier typed-format direction is historical;
+  its definition-governance questions remain open under the canonical key-value model.
   Q-025 approved this detour; return to ADMIN-004/005. Q-024's fields stay withdrawn.
   The detailed chapter is [scope and target](scope-model.md).
-- Just concluded: CONTRACT-006 / Q-033 — one endpoint-owned authorization gate;
-  ENFORCEMENT-002 preserves safe gathering/enforcement without prepared.
-  INPUT-001 captures method/route action mapping and identified path/body inputs.
+- Just concluded: SCOPE-007 / Q-034 — flat string-value scope, explicit {} for
+  tenant-wide reach, no missing/null default, and strict validation.
+  CONTRACT-006's one endpoint-owned gate remains current with INPUT-001 and
+  ENFORCEMENT-002; the older two-mode design remains deprecated.
 - Returned from the group/self sidebar to bounds on grant administration and
   remaining lifecycle questions in stage 5;
   then declared request and resolved
   request/grants. Return to the remaining siblings in the tree before v1.
 - A parent branch stays open until all its required children are settled or
   explicitly excluded from v1. Settled examples do not close the whole branch.
+- Current grant layouts have been reconciled in [current grant formats](grant-format.md).
+  The six earlier layouts remain deprecated examples; GRANT-EX-007 uses canonical
+  scope. Complete lifecycle and resolved-grant schemas are not declared finished.
+
+## Mind map at a glance
+
+This overview is the user's requested whole-handbook mind map. It shows progress
+by topic, not by a guessed completion percentage. The detailed tree below keeps
+the individual reference IDs and open siblings. No entire stage is claimed
+complete simply because its central concept is settled.
+
+```text
+Authorization Handbook — working v1
+├── 1. Purpose/authority       Core boundary agreed; governance open
+├── 2. Principles             Core invariants agreed; remaining rules open
+├── 3. Vocabulary             Several terms agreed; identity/fact terms open
+├── 4. Permissions            Operation vs reach agreed; catalog/grammar open
+├── 5. Grants                 Bindings/roles/dependencies agreed; RETURN HERE
+│   └── Administration        Separation/audit agreed; assignable bounds open
+├── 6. Scope                  Definition + v1 format agreed; WE ARE HERE
+│   └── Next                  Define keys, their meanings, and ownership
+├── 7. Requests/resolution    One endpoint-owned gate agreed; data shapes open
+├── 8. Decision semantics     AND/alternative grants agreed; remaining cases open
+├── 9. Enforcement/lifecycle  Safety rule agreed; freshness/audit/concurrency open
+├── 10. Challenge/verify      Examples available; comprehensive validation open
+└── 11. Publish v1            Final reconciliation and implementation roadmap open
+```
+
+The immediate path is:
+
+```text
+6. Scope-key definitions and remaining scope semantics
+   → 5. Administrative grants and grant lifecycle
+   → 7. Authorization request and resolved request/grant contracts
+   → Remaining open siblings across all stages, then validation/publication
+```
+
+Before moving between branches, update this position and preserve the return
+point. Deprecations are visible history, not unfinished work we must revive.
+Current grant-format reconciliation does not close administrative bounds or
+declare that the original application handbook/UI implements the new design.
 
 ## Traversal rules
 
@@ -95,7 +138,7 @@ Authorization handbook
 │   ├── Authority to administer grants [settled: ADMIN-001]
 │   ├── Administration does not confer business access [settled: ADMIN-002]
 │   ├── Explicit authorized, audited self-assignment [settled: ADMIN-003]
-│   ├── Grantor bounds, recipients, scope validation [active: ADMIN-004 / Q-023]
+│   ├── Grantor bounds, recipients, scope validation [return point: ADMIN-004 / Q-023]
 │   ├── Same grant model for administrative authority [working: ADMIN-005 / Q-024]
 │   ├── Status, validity, provenance, membership changes [open]
 │   └── Human-dependent service/agent authority
@@ -105,16 +148,17 @@ Authorization handbook
 │       └── Delegation encoding, ceilings, expiry, growth, chains, reactivation [open]
 ├── 6. Scope and target [active]
 │   ├── Explicit selections and attribute/relationship selectors [settled: SCOPE-001]
-│   ├── Declared scope meanings and permitted inputs [working: SCOPE-002 / Q-026]
+│   ├── Earlier typed format; definition-governance questions [partly deprecated: SCOPE-002 / Q-026]
 │   ├── Scope ownership; shared and app-defined meanings [settled: SCOPE-003 / Q-027]
 │   ├── Explicit resource compatibility [working: SCOPE-004 / Q-028]
 │   ├── Selector/query enforcement and fixed endpoint modes [deprecated: SCOPE-005 / Q-029]
 │   ├── Canonical boundary-selector definition [settled: SCOPE-006]
-│   ├── Key-value boundary representation [working: SCOPE-007]
+│   ├── Canonical key-value representation; empty/missing scope [settled: SCOPE-007]
+│   ├── Scope keys: meaning, ownership, accepted references [active; no next question issued]
 │   ├── AND within scope; alternatives through complete grants [settled: SCOPE-008]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
-│   ├── Exact/subtree, multi-dimensional scope, empty/missing scope [open]
+│   ├── Exact/subtree and application boundary meanings [open]
 │   └── Targets for read/list/create/update/move; relationship timing [open]
 ├── 7. Requests and resolution [open]
 │   ├── Two endpoint-declared modes [deprecated: CONTRACT-002]
@@ -142,7 +186,8 @@ Authorization handbook
 │   ├── Revocation freshness, caches, concurrent change, resource moves [open]
 │   └── Audit storage, correlation, versions, information disclosure [open]
 ├── 10. Challenge the model [open]
-│   ├── Grant illustrations [available: GRANT-EX-001 through GRANT-EX-006]
+│   ├── Current grant layouts [available: grant-format.md, GRANT-EX-007]
+│   ├── Earlier grant layouts [deprecated syntax: GRANT-EX-001 through GRANT-EX-006]
 │   ├── Beyond-self completion cases [available: EC-001 through EC-007]
 │   ├── Complete HRMS and repository scenarios with expected outcomes [open]
 │   ├── Adversarial/missing/stale/conflicting input cases [open]
@@ -191,7 +236,7 @@ Q-030 → scope as boundary selector (SCOPE-006 agreed).
 Q-031 → canonical scope definition and proposed key-value shape (SCOPE-006/007).
 Q-032 → AND within scope, alternatives through grants (SCOPE-008 agreed).
 Q-033 → endpoint-owned gate and recording resumed (CONTRACT-006, PROCESS-006).
-Q-034 → minimal scope format's empty-object semantics (SCOPE-007 draft pending).
+Q-034 → canonical v1 scope and explicit empty-object semantics (SCOPE-007 agreed).
 
 The log retains these for traceability; they are not current options:
 

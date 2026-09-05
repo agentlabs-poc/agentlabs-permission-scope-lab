@@ -18,35 +18,35 @@ is represented through separate complete grants, each with its own scope and
 restrictions. DECISION-001's alternative-route semantics and mandatory outer
 tenant/delegation limits continue to apply.
 
-SCOPE-007 is still a candidate representation, not finalized wire schema:
+SCOPE-007 is the agreed canonical v1 scope format, approved in Q-034:
 
 ```json
 { "dept": "dept-1", "user": "$self" }
 ```
 
-Under the proposed key-value shape, a key identifies a defined boundary and its
+Under the canonical key-value shape, a key identifies a defined boundary and its
 value selects that boundary. The above illustrates targets inside dept-1 AND
 inside the authorizing human's self boundary. The user key is not the grant's
 recipient field. SELF-001 anchors self to the human, including group-derived
-and human-proxy access; the spelling $self is not yet canonical.
+and human-proxy access; $self is the canonical reserved token for that human.
 
-The boundary meaning and AND/alternative-grant semantics are settled. Key naming
-and definition ownership, permitted value forms, symbolic value syntax, empty or
-missing scopes, unknown keys, validation, containment, and persistence are not.
-No wildcard, array, arbitrary query, or additional scope field is approved merely
-because the concept is now clear.
+The boundary meaning, AND/alternative-grant semantics, flat string-value format,
+$self token, empty-object semantics, and basic rejection rules below are settled.
+Application key definitions and their governance, scope containment, lifecycle,
+and persistence remain open. No arrays, nested objects, wildcards, or arbitrary
+query syntax are part of v1.
 
 CONTRACT-006 establishes one endpoint-owned authorization gate, with no prepared
 handoff. The current [endpoint authorization chapter](endpoint-authorization.md)
 explains input material, evaluation, and enforcement. Endpoint placement is not
 part of scope's definition.
 
-## SCOPE-007 — minimal v1 format draft, awaiting approval
+## SCOPE-007 — canonical v1 format, agreed
 
-The user requested making the scope format canonical. The draft below
-formalizes the existing key-value direction without new wrapper fields or
-operators. New restrictions and empty-object semantics remain proposals until
-approved; Q-034 explicitly tests the security-sensitive empty-scope choice.
+The user approved the presented minimal format and Q-034's explicit empty-scope
+choice. The following is canonical v1 scope syntax, without new wrapper fields
+or operators. This agreement does not finalize the complete grant schema or
+claim the application already implements this format.
 
 ### Shape and interpretation
 
@@ -56,12 +56,12 @@ approved; Q-034 explicitly tests the security-sensitive empty-scope choice.
   or database field. Applications need not support a universal department key.
 - A concrete string selects a concrete boundary reference under that key's
   meaning and the trusted tenant/application context.
-- The draft reserves the exact token $self for the authorizing human, resolved
+- The format reserves the exact token $self for the authorizing human, resolved
   through trusted context and the key's defined relationship. It is not a
   caller-supplied identity or automatically the automated actor. Unsupported
   key/token combinations are invalid; the token does not define arbitrary
   relationship traversals. Literal use of the reserved token is not supported
-  in this minimal draft.
+  in v1.
 - All entries apply with AND (already agreed under SCOPE-008). Alternative
   grants supply OR, preserving each grant's complete restrictions.
 
@@ -77,7 +77,7 @@ and inside the authorizing human's personal boundary. The user key selects a
 target boundary; it is not the recipient of the grant. The scope does not grant
 an operation by itself.
 
-### Minimal validation, proposed
+### Required validation
 
 Reject missing/null/non-object scope, unknown keys, duplicate keys, empty or
 non-string values, and unsupported symbolic references. Do not drop an invalid
@@ -86,13 +86,13 @@ must retain every required restriction. Failure cannot establish authority
 through that invalid scope; general error handling remains part of resolution.
 
 No arrays, nested objects, OR operators, or wildcard operators are in this
-minimal draft. The bare * token is rejected, not treated as tenant-wide access.
+v1 format. The bare * token is rejected, not treated as tenant-wide access.
 Do not coerce types or guess key meanings. Concrete-reference validation follows
 the defined boundary; endpoint material is not automatically trusted evidence.
 
-### Q-034 — explicit empty object versus absence
+### Q-034 — explicit empty object versus absence, agreed
 
-Recommended: an explicitly supplied empty object means no additional boundary
+An explicitly supplied empty object means no additional boundary
 restriction inside the trusted enclosing tenant:
 
 ```json
@@ -105,17 +105,18 @@ permissions or administration authority to issue such a grant. Omitting scope
 or supplying null remains invalid; no missing-scope default to {} is permitted.
 
 This avoids adding a tenant selector field when tenant is already implicit.
-The alternative is to reject {} and separately design an explicit tenant-wide
-representation. That would add a representation choice we have not yet agreed.
-The risk of the recommended shape is that losing entries can widen a scope;
+The alternative considered was rejecting {} and designing another explicit
+tenant-wide form. That alternative was not selected in Q-034.
+The risk of the agreed shape is that losing entries can widen a scope;
 strict validation, authorized grant changes, and audit must not silently turn
-malformed or omitted scope into {}. The explicit choice is pending, not current
-authority for any implementation.
+malformed or omitted scope into {}. Canonical documentation is not evidence of
+implementation support or authority for an administrator to widen a grant.
 
-A canonical wire shape will not by itself settle scope-definition lifecycle,
-scope containment for administration, or evaluator/endpoint interfaces. The
-earlier type/id examples stay historical illustrations until this draft is
-approved and a separate reconciliation makes the current examples consistent.
+A canonical wire shape does not by itself settle scope-definition lifecycle,
+scope containment for administration, or evaluator/endpoint interfaces. Earlier
+type/id and employee_self examples below are retained as historical syntax,
+not the canonical v1 scope representation. GRANT-EX-007 in
+[grant examples](grant-examples.md) uses the current canonical scope format.
 
 ## Historical development and still-open proposals
 
@@ -163,7 +164,11 @@ within scope. The request is not thereby an operation on the department itself.
 Whether a payslip belongs to Finance requires the appropriate trusted facts;
 the presence of FIN in the URI does not establish that relationship.
 
-## SCOPE-002 / Q-026 — declared scope meanings, proposed
+## SCOPE-002 / Q-026 — historical typed-format proposal, partially deprecated
+
+> The earlier type-plus-parameters representation below is historical after
+> SCOPE-007. Its definition-governance questions remain open. Original reasoning
+> is preserved; it is not an alternative current canonical scope format.
 
 Q-026's response challenges treating department as a universal type and asks
 whether a scope-owned selector model is the better canonical arrangement.

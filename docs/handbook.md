@@ -10,23 +10,26 @@ its JSON schema, implementation, or every related branch.
 Current checkpoint: scope is a boundary selector, scope requirements combine
 with AND, and alternative authority comes through separate complete grants.
 Authorization uses one endpoint-owned gate (CONTRACT-006), not the earlier
-two-mode/prepared model. Exact key-value scope grammar remains proposed.
+two-mode/prepared model. SCOPE-007's flat string-value scope is canonical:
+explicit {} means tenant-wide reach; missing/null scope is invalid.
 
 ## Read the current chapters
 
 | Material | What it preserves |
 |---|---|
-| [Scope and target](scope-model.md) | Canonical boundary-selector definition, AND within scope, alternatives through grants, and the still-proposed key-value syntax. |
+| [Current grant formats](grant-format.md) | Current direct/group, role-reference, and expanded-view examples using canonical scope, with a map to deprecated layouts. |
+| [Scope and target](scope-model.md) | Canonical boundary-selector definition and v1 key-value format, AND within scope, alternatives through grants, and empty/invalid scope rules. |
 | [Grants, assignments, and roles](grant-model.md) | Definitions, tenant context, permission/scope binding, groups, per-human self, role changes and expansion, dependency, positive grants, and administrative authority. |
 | [Endpoint-owned authorization](endpoint-authorization.md) | Current single-gate model, selected endpoint inputs, authority and application facts, enforcement, and the deprecation map. |
 | [Earlier authorization flow](authorization-flow.md) | Deprecated two-mode design, preserved with its rationale and examples. |
-| [Grant JSON examples](grant-examples.md) | Six worked illustrations, including direct/group recipients, implicit tenant, multiple permissions, roles, expanded grant identity, and Employees-group self scope. |
+| [Grant JSON examples](grant-examples.md) | GRANT-EX-007 uses canonical v1 scope; six earlier examples preserve historical syntax and grant/role/dependency explanations. |
 | [Earlier endpoint-completion cases](endpoint-completion-cases.md) | Seven application-fact cases; their two-mode classification is deprecated and preserved. |
 
 ## Follow progress and decisions
 
-- [Discussion tree](discussion-tree.md): all eleven stages, concluded questions,
-  open siblings, active branch, and return points.
+- [Discussion tree and mind map](discussion-tree.md): a compact whole-handbook
+  overview followed by all eleven stages, concluded questions, open siblings,
+  the active branch, and explicit return points.
 - [Roadmap and decision log](handbook-roadmap.md): stable proposal/question IDs,
   agreement status, user decisions, and historical alternatives.
 

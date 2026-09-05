@@ -10,6 +10,8 @@ section for the next discussion. The [discussion tree](docs/discussion-tree.md)
 maps every branch, its conclusions, and the remaining work.
 The [working grant chapter](docs/grant-model.md) develops the agreed concepts
 with rationale, examples, and explicitly open details.
+The [current grant formats](docs/grant-format.md) use canonical v1 scope;
+earlier layouts remain available as explicitly deprecated examples.
 
 A local explanation bench for exploring scoped authorization through documented examples and an interactive request evaluator.
 
