@@ -72,6 +72,39 @@ WHERE tenant_id = :authenticated_tenant_id
 
 The request cannot broaden this predicate. Supplying another `employee_id` in a URL, body, header, CLI flag, or UI state does not change Vinay's reach—none of stages 1–6 read anything from the caller except which operation and which target id they're naming.
 
+### What "the request" actually contains
+
+It is easy to smuggle resolved fields back into the request and call them caller-supplied. The caller contributes exactly three things, nothing else, ever:
+
+```json
+{
+  "verb": "GET",
+  "path": "/api/payroll/ledger/me",
+  "token": "<bearer at+jwt>"
+}
+```
+
+Everything a decision needs beyond this is *derived*, not supplied—each field traces to exactly one of the three above, never to the caller directly:
+
+```json
+{
+  "principal": { "id": "user:vinay", "tenant_id": "TENANT-001" },
+  "operation_id": "hrms.payroll.ledger.read",
+  "permission": "hrms:payroll:ledger::read",
+  "trusted_context": {},
+  "grant": { "permission": "hrms:payroll:ledger::read", "scope": { "type": "employee_self" } },
+  "resolved_context": { "employee_self": "EMP-005" }
+}
+```
+
+- `principal` comes from `token` (Auth verifies the signature, returns identity).
+- `operation_id` and `permission` come from `verb` + `path` together, through the manifest—a fixed table, no data lookup.
+- `trusted_context` comes from `path` again, but a different part of it: whichever path segment the manifest's own binding config names as trusted (empty here—`/me` carries no id of its own; see §6 for a route that does).
+- `grant` comes from `principal`, loaded from Auth (§4).
+- `resolved_context` comes from `principal` again, via the one relationship lookup dynamic scope needs (§5's "Static vs. dynamic scope").
+
+The decision at §7 is then a pure comparison inside the second object—nothing new enters after this point. A "client request" object that includes `permission` or a resolved employee id has already skipped a step; that field was never sent, it was computed.
+
 ## 2. Who owns which stage
 
 No single system runs all eight stages:
@@ -318,6 +351,17 @@ Scope target     Created by the owning business application
 Assignment scope Created by a tenant administrator
 ```
 
+Lined up against permission registration (§3), there are four different registration granularities here, easy to conflate:
+
+| Thing | Registered with Auth? | When |
+|---|---|---|
+| Permission string (`hrms:payroll:ledger::read`) | Yes—full catalog | Once, at integration/manifest-publish time |
+| Scope *type* (`department` as a concept) | Yes—just the type name | Once, at integration time |
+| Scope *target* (a specific department, `FIN`) | No | Never bulk-registered |
+| One assignment referencing that target (`Maya @ department:FIN`) | Yes—but as one grant record, not a catalog entry | Per-assignment, validated live |
+
+Permission strings and scope types are both small, static, one-time-registered catalogs. Scope targets are the opposite—an open-ended, constantly-changing set the owning application manages entirely on its own, that Auth never mirrors. An assignment is the only place a specific target and Auth ever meet, and even then only as a single reference inside one grant record, not as an addition to any catalog.
+
 An application registers its scope vocabulary when it integrates with Auth. For example, HRMS registers `employee_self`, `department`, and `legal_entity`. Auth can provide generic types such as `tenant_self`, `resource_exact`, and `resource_subtree`.
 
 The owning application creates scopeable resources during normal business operation. HRMS creates departments and employees; AgentForge creates Spaces, Projects, and Repositories. Auth does not create those resources.
@@ -333,7 +377,43 @@ Target:     FIN
 
 The owning application validates that the target exists and belongs to the authenticated tenant. Auth stores the tenant-rooted reference. A tenant administrator cannot invent arbitrary scope semantics or use knowledge of another tenant's resource ID to grant access to it.
 
+This validation step only applies when the scope names a concrete target—`employee:<id>`, `department:<id>`, `legal_entity:<id>`, `tenant:<id>`, `resource_exact`, `resource_subtree`. `employee_self` and `tenant_self` carry no target field at all: there is nothing for the tenant administrator to select, nothing for the owning application to confirm exists, because the scope names a relationship, not an instance—so neither is registered as a fixed target the way the six types above are. What they resolve to is not identical in timing, though (see "Static vs. dynamic scope" below): `tenant_self` is inferred once, immediately at assignment creation, and stored from then on as a plain `tenant:<id>`; `employee_self` is inferred fresh at decision time, on every request, with no assignment-time equivalent.
+
 A role's `tenant_self` or `employee_self` value can be a suggested assignment template. It becomes an effective scope only when the role is assigned. `tenant_self` is resolved to the concrete active tenant; `employee_self` remains a dynamic HRMS relationship resolved from trusted identity context.
+
+### Three axes for choosing a scope type
+
+The scope types above aren't one flat list—they differ along three independent axes, and conflating them is the most common source of confusion when designing a new one.
+
+**Axis 1 — who owns the vocabulary, i.e. who has to register the type at all:**
+
+| Category | Types | Who registers it |
+|---|---|---|
+| Application-specific | `employee_self`, `employee`, `department`, `legal_entity` | The owning app (HRMS)—has to teach Auth this word exists, once, at integration time |
+| Auth-generic, built-in | `tenant_self`, `resource_exact`, `resource_subtree` | Nobody—every application gets these for free, cross-application |
+
+**Axis 2 — static value vs. dynamic relationship, i.e. whether containment needs a live lookup:**
+
+| Kind | Types | How containment resolves |
+|---|---|---|
+| **Static** — a fixed value baked into the grant | `employee:<id>`, `department:<id>`, `legal_entity:<id>`, `tenant:<id>`, `resource_exact`, `resource_subtree` | Compare the fixed value against the target's own attribute. No principal-side lookup needed. |
+| **Dynamic at assignment time only** — resolved once, then stored as a plain static value | `tenant_self` | Collapses into `tenant:<id>` the moment the assignment is created (every assignment already lives inside one tenant, so there's nothing left to resolve after); behaves exactly like the static row from then on. |
+| **Dynamic at request time, always** — a placeholder meaning "resolve against whoever's asking, right now" | `employee_self` | Requires resolving the principal first (`$self` → which employee holds this token), fresh on every request—the one case that genuinely cannot be answered from the grant and request alone, ever. |
+
+`tenant_self` is not merely cheap to resolve—it does not need resolving at request time at all. Every assignment already lives inside exactly one tenant, so "the tenant I'm currently acting in" is redundant with a fact the assignment record already carries; it collapses into a plain `tenant:<id>` once, at assignment-creation time, and is never re-evaluated after. `employee_self` has no such shortcut: nothing about an assignment record implies which employee a principal maps to, so it stays genuinely dynamic, re-resolved on every single request—employee identity is never in the token (§1, "what is deliberately not in the token"), so this is a real query every time, distinct from resolving the target itself (§6).
+
+**Axis 3 — reach, narrowest to broadest.** This is *why* so many types exist at all: each trades precision against how much it auto-covers as new resources get created, with no assignment change:
+
+```text
+resource_exact:<id>            narrowest — one instance, forever, never auto-expands
+employee_self / employee:<id>  one person's records — auto-expands to their future records only if "self"
+department:<id>                a group — auto-expands as people join or leave the department
+legal_entity:<id>               wider group
+tenant:<id>                     everything in the tenant
+resource_subtree:<type>:<id>    everything under one node — breadth depends entirely on which node is chosen
+```
+
+A grant using `resource_exact` never needs re-granting for that one resource, but also never covers a new one. A grant using `employee_self` never needs re-granting *ever*, for any future resource that comes to belong to that principal—the tradeoff explored fully in the payroll self-service example above (§5, "Where scopes come from").
 
 ### Scope depth
 
@@ -380,6 +460,29 @@ HRMS looks the id up in its own payroll store and reads back its actual attribut
 Nothing in that object came from the request. The client named which record to look up; HRMS supplied what it contains. An id is therefore never secret—knowing `PAY-000023` is not what stops Vinay from reading Arjun's ledger. Stage 6 is what stops it, by checking this resolved target against the assigned scope from §5.
 
 An unknown or unresolvable target id fails closed, the same as an unknown permission or scope (§11).
+
+### Whether resolving the target needs a lookup depends on the route, not the model
+
+The example above (`PAY-000005` → look it up → learn it's `ENTRY-017`, owned by `EMP-005`) needs a real store read because the id in the path is *opaque*—nothing about the string `PAY-000005` reveals who owns it. That lookup is not a property of stage 5 in general; it is a property of *this route's own design*.
+
+A route can instead bind the ownership attribute directly into the path:
+
+```http
+GET /api/payroll/employees/EMP-005/ledger
+```
+
+Here the target *is* `EMP-005`, read straight from the path—no store read at all. Stage 5 becomes a pure string read, and stage 6 compares it directly against whatever `employee_self` resolved to in §5. Confirmed against the real system's own manifest, one route at a time: a route bound on the ownership attribute needs "nothing... looking up"; a route bound on an opaque object id "can only be matched by `*_ids` scopes... today," and closing that gap needs a purpose-built context enricher between resolving the operation and evaluating the policy—work that exists as a named, not-yet-built change, not as something this model already does automatically.
+
+So: opaque ids buy a stable, meaningless-until-resolved identifier at the cost of a lookup on every request. Attribute-bound ids buy a lookup-free stage 5 at the cost of exposing that attribute in every URL for that route, forever. Neither is "more correct"—it is a route-design choice made once, per API, with a lasting cost either way.
+
+### Route design decides mechanism, not security
+
+Neither shape is safer than the other. Both are exposed to the same real vulnerability class if stage 6 is ever skipped—OWASP calls it **API1:2023, Broken Object Level Authorization (BOLA)**, and it is the most common real-world API vulnerability, precisely because each route shape invites a different version of the identical mistake:
+
+- An attribute-bound route tempts trusting the path value *as if naming it were authorization*—"the URL says `EMP-005`, so serve `EMP-005`"—skipping the comparison against what scope actually resolved. That is BOLA in zero extra lines of code.
+- An opaque-id route tempts doing the lookup, getting a real row back, and returning it—because it resolved, it must be fine—without ever checking whether the resolved owner matches the caller. That is BOLA one step later.
+
+Same root failure; route design only decides where in the code the missing check would go. What actually determines security quality is unconditional discipline: does *every* request run stage 6 (§7) before any data returns, no matter how stage 5 resolved the target? That is an implementation question, orthogonal to URL shape—not something a route-design choice can buy or sell away.
 
 ## 7. Checking containment
 
@@ -602,6 +705,14 @@ Nothing in this vocabulary is invented in isolation. Every term maps onto an est
 
 A role is only ever the second row plus the third—the same split §4 already draws between what a role says and what its assignment says. The detail worth adding here: the assignment's principal can be an individual or a group, and the role is redefined for neither. "Project Viewer" assigned to Maya's team at one scope is the same role as one assigned to a single user at another.
 
+### Auth is mechanism, not policy
+
+Every row in the table above is something Auth stores and returns without interpreting: permission strings, scope, grants, and—if teams are ever added—team membership are all opaque custody data. Auth's own architecture doc says this outright, describing what an Auth Agent may do with a resolved bundle: *"Another application may use relationship-based access control, ordered rules, ACLs, or a policy engine such as Cedar, Rego, or Zanzibar-style tuples. Auth stores the artifacts without imposing one resolution model."* Nothing about *how* to resolve any of it is Auth's decision, for any application, ever.
+
+This is the classic **mechanism, not policy** split from systems design—the same principle behind a microkernel exposing IPC and scheduling while device semantics live in userspace, or TCP moving bytes with no opinion about what they mean. Auth is Layer 1: generic, dumb, reusable across every application. Each application's own Auth Agent is Layer 2: the place all the domain-specific complexity actually lives—HRMS's `employee_self` relationship resolver, code-hosting's containment graph, or nothing at all for a low-stakes application that just needs a flat allow-list.
+
+The real cost of keeping Layer 1 this thin: nothing gets solved once, centrally, for every application. It gets solved N times, once per Auth Agent, at whatever quality and risk tolerance that application's own team chooses to invest. That is also the honest answer to whether Auth should validate a scope target's existence (§5, "Where scopes come from")—validation is a Layer 2 decision, not a Layer 1 one, and Auth staying silent on it is the same choice Zanzibar's own designers made deliberately, not a gap this bench happened to inherit by accident.
+
 ### Where real platforms diverge
 
 "Role" and "scope" do not mean the same thing everywhere, and it is worth knowing the differences before this model meets an external system:
@@ -610,6 +721,17 @@ A role is only ever the second row plus the third—the same split §4 already d
 - **Azure RBAC** matches even more closely: a Role Definition is the permission bundle; a Role Assignment is `{principal, role, scope}`, and Azure's `scope` is literally a resource-hierarchy path (`/subscriptions/.../resourceGroups/...`)—the same "reach over a resource tree" idea as this bench's `department:<id>`, `tenant:<id>`, and `resource_subtree` scopes.
 - **AWS IAM diverges.** An AWS "Role" is not a permission bundle—it is an *assumable identity* (a special kind of principal). The actual permission bundle in AWS is called a **Policy**, attached to a Role, User, or Group. Anyone arriving from an AWS background will not mean the same thing by "role" that this bench does.
 - **OAuth 2.0 already owns the word "scope"**, and means something different by it: an OAuth scope such as `read:contacts` is closer to this bench's *permission* than to its *reach*. If this system ever issues or accepts OAuth tokens, "scope" becomes ambiguous between the two meanings in the same sentence—worth a disambiguating term (this bench's equation already says `reach`) before that becomes a real integration surface rather than bench vocabulary.
+- **Microsoft Entra ID (Azure AD) issues two different claims depending on the Principal**, and neither is scope in this bench's sense. A signed-in user acting through a client app gets a `scp` claim (space-delimited delegated-permission strings, e.g. `"scp": "User.Read Mail.Send"`); an app acting with no user gets a `roles` claim instead (an array of app-role values). Both are this bench's *permission*, not its *reach*—Microsoft folds coarse reach into the permission string itself by naming convention (`User.Read` = self, `User.Read.All` = tenant-wide), rather than keeping it a separate bound attribute the way this bench's `scope` does. Entra ID also has no equivalent to `employee_self`: whether a specific mailbox or file belongs to the caller is resolved entirely by the resource provider (Exchange, SharePoint)—the same split this bench draws between Auth (stops at the permission/scope claim) and the owning application (resolves the target, §6).
+
+### Scope-reach: two real paradigms, not five types
+
+No real system defines this bench's five scope types as a matching, named vocabulary—that list is this bench's own invention. Industry practice instead converges on two different unifying mechanisms:
+
+**Hierarchical resource scoping** collapses `tenant`, `department`, `resource_exact`, and `resource_subtree` into one mechanism: reach is a path prefix into a resource tree, not four separate typed descriptors. Azure RBAC's `scope` is literally a path (`/subscriptions/{s}/resourceGroups/{rg}/...`); GCP IAM inherits down an Organization → Folder → Project → Resource hierarchy; Kubernetes RBAC scopes a `Role` to one namespace or a `ClusterRole` to none; AWS IAM matches a resource ARN exactly or with a wildcard. None of these needs a separate "exact" type versus a "subtree" type—breadth falls out of how much of the path or ARN is specified.
+
+**Relationship-based access control (ReBAC)**—Google's Zanzibar model, and its open implementations SpiceDB, OpenFGA, and Ory Keto—goes further and folds in `employee_self` and `department` too. Reach is expressed as relationship tuples (`document:PAY-000005#owner@user:vinay`, `repo:REPO-API#viewer@group:TEAM-BACKEND#member`) and userset rewrite rules (a folder's `viewer` set includes anyone who is a `viewer` on its parent). One graph-traversal mechanism covers everything this bench splits into five named types; `employee_self` stops being a special case and becomes just the relationship where the subject is the resource's own `owner`.
+
+**Most conventional IAM systems have no first-class equivalent to `employee_self` at all.** AWS approximates it with a policy-variable trick—substituting `${aws:username}` into a resource ARN, so "your own resources" only works when the ARN already contains the username as a literal string—narrower than a true relationship, and nothing like it exists natively in Azure RBAC, GCP IAM, or Kubernetes RBAC. This gap is exactly why Zanzibar-style ReBAC exists: hierarchical path-scoping never solved "whichever resource happens to belong to whoever is asking" natively.
 
 ## 14. Questions still open
 

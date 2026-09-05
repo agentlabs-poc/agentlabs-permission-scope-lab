@@ -4,6 +4,8 @@ This second example tests whether the authorization model generalizes beyond pay
 
 It is a conceptual code-hosting example using familiar GitHub-style nouns. It does not claim to reproduce GitHub's internal authorization implementation or exact permission names.
 
+**Implementation status: this is a target design, not what `agentlabs-auth` does today.** Its real role/permission grant tables (`authorization_subject_role_bindings`, `authorization_subject_permission_assignments`) bind to a single `membership_id` each—no `subject_type` column, no group/team reference anywhere. The bundle-resolution code filters strictly on `membership_id` and stamps every result `Source: "membership"`; there is no group join in that path at all. A `groups`/`group_memberships` table pair is described in a roadmap doc but exists in no applied migration. The one place "groups" appears in the real codebase is an upstream SSO identity provider's group claim during federation—and Auth's own docs are explicit that "raw upstream groups never grant application access." So everything below—Teams as group principals, `{"principal": {"type": "team", ...}}`—describes what this model should support, not a feature that works yet.
+
 It introduces two different structures:
 
 ```text

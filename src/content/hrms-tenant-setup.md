@@ -63,16 +63,19 @@ hrms:payroll:statutory_liability::reconcile
 
 It also registers supported scope types:
 
-| Scope type | Owner | Resolution |
-|---|---|---|
-| `tenant_self` | Auth | Active authenticated tenant |
-| `employee_self` | HRMS | Authenticated user → employee link |
-| `employee` | HRMS | A selected employee in the active tenant |
-| `department` | HRMS | A selected department and its applicable employees |
-| `legal_entity` | HRMS | A selected legal entity and its contained resources |
-| `resource_exact` | Shared | One validated resource instance |
+| Scope type | Registered by | Kind | Resolved when | Contains the target when |
+|---|---|---|---|---|
+| `tenant_self` | Auth (built-in) | Convenience input | Once, at assignment creation—collapses into `tenant:<id>` immediately, see §4 | *(not stored as-is; see `tenant:<id>`)* |
+| `tenant:<id>` | Auth (built-in) | Static | — | target's tenant == `<id>` |
+| `legal_entity:<id>` | HRMS | Static | — | target's legal entity == `<id>` |
+| `department:<id>` | HRMS | Static | — | target's department == `<id>` |
+| `employee:<id>` | HRMS | Static | — | target's owner == `<id>` |
+| `employee_self` | HRMS | Dynamic | Every request—no assignment-time shortcut exists | target's owner == principal's resolved employee |
+| `resource_exact:<type>:<id>` | Auth (built-in) | Static | — | target's type and id == `<type>` and `<id>`, exactly |
 
 The tenant administrator selects from this vocabulary. They cannot invent a new scope resolver or arbitrary query expression.
+
+`tenant_self` and `employee_self` look like the same idea—"whichever X the current principal has"—but they resolve at different times, and that difference is real, not cosmetic. Every assignment already lives inside exactly one tenant (its own `tenant_id` column), so "the tenant I'm currently acting in" is redundant with a fact that's already true; Auth can safely resolve it once, at assignment creation, and store a plain `tenant:<id>` from then on (§4 shows exactly this: the stored row's `scope_type` is `tenant`, not `tenant_self`). Employee identity carries no such structural shortcut—nothing about the assignment record implies which employee `user:vinay` maps to—so `employee_self` cannot collapse the same way, and stays dynamic, re-evaluated against trusted HRMS context on every single request (§7).
 
 ## 3. Tenant admin creates the role
 
