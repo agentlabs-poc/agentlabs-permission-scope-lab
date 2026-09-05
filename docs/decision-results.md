@@ -354,6 +354,33 @@ endpoint for traceability?
 
 ## Q-061 / DECISION-009 — evaluated boundary information with allow
 
+### Current conclusion — not required
+
+Status: **NOT ADOPTED.** The user answered “not required.” Do not require scope
+or evaluated-boundary fields in the allow result. Q-060's supporting-grant
+references remain required; they serve traceability rather than a new boundary
+delivery contract.
+
+Design rationale: this keeps the result focused on the decision and its
+supporting references rather than duplicating enforcement information in a new
+return format. This explains the consequence of the user's choice; the user
+did not separately prescribe how internal endpoint/evaluator context is stored.
+
+The existing endpoint-owned gate and actual-use enforcement obligations remain
+unchanged. The endpoint must use its correctly bound request/evaluation material
+to constrain output and effects. It must not treat the absence of returned scope
+as tenant-wide authority or use a later changed grant to broaden a prior decision.
+No second lookup, prepared state, or new policy field is required by this choice.
+
+Example: an allow supported by G-17 does not need to repeat `{"dept":"FIN"}`
+in its result. The Finance certificate endpoint must still constrain the actual
+read to the trusted tenant, applicable Finance boundary, and requested certificate.
+Returning that certificate through an unchecked ID-only read remains incorrect.
+
+The original proposal and its trade-offs follow as history, not current rules.
+
+### Original proposal — not adopted, retained for rationale
+
 Status: **PROPOSED, not approved.** Recommend that the allow result return the
 evaluated boundary information the endpoint must enforce, associated with each
 supporting authority route. Supporting references explain why access was allowed;
@@ -383,3 +410,34 @@ authority is created by returning this dependent evaluation information.
 
 **Q-061:** Should an allow result carry its evaluated boundaries alongside the
 supporting-grant references for endpoint enforcement?
+
+## Q-062 / DECISION-010 — minimal allow-result JSON
+
+Status: **PROPOSED, not approved.** Assemble the already-agreed version, completed
+allow decision, and supporting references into this minimal representation:
+
+```json
+{
+  "version": "1",
+  "decision": "allow",
+  "grant_ids": ["G-17"]
+}
+```
+
+The concrete `decision` and `grant_ids` field names are proposed here. `version`
+follows CONTRACT-010. The grant IDs identify supporting grants from this evaluation,
+not every grant held by the human or a new grant assignment. The existing trusted
+tenant/request context still binds the result. Q-061 adds no scope field, and
+denial/evaluation-error message fields are not part of this allow example.
+
+Rationale: an ID array represents the references required by Q-060 without
+embedding complete grant records or redundant boundary data. The alternative is
+a list of reference objects, useful if required reference metadata is later
+identified but adding structure not yet justified by the current minimum.
+
+This is a proposed base shape, not the complete published result schema.
+Grant-version/snapshot evidence, full validation, request correlation, and other
+result variants remain separate questions. It does not make a result reusable
+outside the evaluation that produced it or promise historical grant recovery.
+
+**Q-062:** Should this be the minimal allow-result shape?
