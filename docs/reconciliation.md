@@ -1,5 +1,23 @@
 # Handbook reconciliation register
 
+## Checkpoint following 8e1c16f — Q-039 approval
+
+REGISTRATION-001 records the approved refinement of Q-039: applications register
+supported permissions and scope contracts; Auth validates grant acceptance
+against them and canonical authority rules without interpreting application
+business meaning. [Application registration](application-registration.md)
+contains the detailed rationale, example, counterexamples, and remaining gaps.
+
+Earlier Q-039-open statements below describe the preceding checkpoint. They are
+preserved, not the current status. Registration format, authorized registration
+management, versioning, reference checks, and compatibility declarations remain
+open; Q-040 is the next proposal. No new schema or implementation is adopted.
+
+Verification for this checkpoint: `git diff --check` and `npm run build` passed.
+The documentation scan checked 19 Markdown files, 96 local links, 42 JSON
+blocks, and 111 unique decision/question references present in the tree.
+The build remains a packaging check, not proof of authorization implementation.
+
 ## Checkpoint following d581fba
 
 User requested reconciliation, commit/push, and preservation by deprecation or

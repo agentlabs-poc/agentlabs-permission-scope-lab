@@ -13,10 +13,15 @@ Authorization uses one endpoint-owned gate (CONTRACT-006), not the earlier
 two-mode/prepared model. SCOPE-007's flat string-value scope is canonical:
 explicit {} means tenant-wide reach; missing/null scope is invalid.
 
+Q-039 adds REGISTRATION-001: applications register supported permissions and
+scope contracts; Auth validates grant acceptance without interpreting domain
+meaning. Registration format and permission-scope compatibility remain open.
+
 ## Read the current chapters
 
 | Material | What it preserves |
 |---|---|
+| [Application registration](application-registration.md) | Agreed registration/validation responsibilities, permission and scope examples, and the boundary between canonical checks and application interpretation. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen worked scenario groups across Git hosting, ticketing, HRMS, and accounting, with grants, endpoint material, and expected outcomes. |
 | [Reconciliation register](reconciliation.md) | Current-versus-historical status, retained deprecations, and unresolved implementation/design gaps. |
 | [System block diagram](system-overview.md) | Scalable SVG and text views of the agreed endpoint-owned gate, explicit source declarations, shared evaluator, and enforcement. |

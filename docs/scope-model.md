@@ -2,6 +2,12 @@
 
 ## Current agreed foundation — recording resumed after Q-033
 
+Latest: Q-039 / REGISTRATION-001 now agrees application registration of supported
+permissions and scope contracts, with Auth validating grant acceptance without
+domain interpretation. See [application registration](application-registration.md).
+Earlier Q-039-proposed statements are preserved history; registration format,
+compatibility declarations (Q-040), and lifecycle remain open.
+
 Q-038 subsequently settles application ownership of scope-key meanings and
 explicit supported target relationships, with endpoint-specific trusted fact
 bindings (SCOPE-004's conceptual core). Earlier broad statements that key

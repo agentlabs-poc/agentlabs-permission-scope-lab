@@ -43,6 +43,14 @@ the evaluator in the main-path diagram.
 
 ## Responsibilities
 
+REGISTRATION-001 / Q-039 adds a grant-lifecycle responsibility: applications
+register supported permissions and scope contracts; Auth validates grant
+acceptance against them and canonical authority rules without interpreting
+application-domain meaning. See [application registration](application-registration.md).
+This is not another request-authorization stage. Earlier statements that all
+registration remains open now apply only to the still-open format, governance,
+compatibility declarations, and lifecycle mechanics.
+
 ### Two responsibility layers — ARCH-004 / Q-036, agreed
 
 Layer 1 is the canonical authorization foundation: permissions, grants, roles,

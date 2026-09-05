@@ -19,6 +19,13 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-039 is approved as REGISTRATION-001.** Applications register
+  scope and permission contracts; Auth validates grant acceptance while remaining
+  domain-agnostic. Q-040 is next: explicit permission-scope compatibility.
+  Return afterwards to remaining scope governance and ADMIN-004/005.
+
+### Preserved position history through Q-038
+
 - Current as of Q-038: application-owned scope meanings, supported target
   relationships, and endpoint-specific trusted fact bindings are agreed.
   Q-028's conceptual question is answered; SCOPE-004's detailed validation
@@ -148,6 +155,7 @@ Authorization handbook
 ├── 4. Permissions and operations [open]
 │   ├── Capability separate from scope [settled: PERMISSION-001]
 │   ├── Naming grammar, catalog ownership, registration [open]
+│   │   └── Registration principle now settled [REGISTRATION-001 / Q-039; mechanics open]
 │   ├── Hierarchies, wildcards, aliases, evolution [open]
 │   └── Mapping operations; multiple required permissions [open]
 ├── 5. Grants and lifecycle [open; return after scope model]
@@ -182,7 +190,8 @@ Authorization handbook
 │   ├── Canonical key-value representation; empty/missing scope [settled: SCOPE-007]
 │   ├── Scope keys: meaning, ownership, accepted references [active; no next question issued]
 │   │   ├── Explicit key meanings and target mappings [formerly active; settled: Q-038; refines SCOPE-004]
-│   │   └── Shared definition contract for validation/evaluation [active: Q-039]
+│   │   ├── Shared definition contract for validation/evaluation [formerly active: Q-039; registration refinement agreed]
+│   │   └── Permission-scope compatibility declaration [active: Q-040]
 │   ├── AND within scope; alternatives through complete grants [settled: SCOPE-008]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
@@ -277,6 +286,8 @@ Q-037 → embedded auth agent across both sources (ARCH-005 agreed; sidebar conc
 Q-038 → scope-key meanings and explicit supported target relationships (open; return to stage 6).
 Update: Q-038 is now agreed and answers Q-028's conceptual compatibility question; detailed validation mechanisms remain open.
 Q-039 → application-owned definition contract shared across grant validation and request evaluation (open).
+Update: Q-039 is now approved as refined in REGISTRATION-001: applications register permission/scope contracts; Auth validates without domain interpretation.
+Q-040 → explicit permission-scope compatibility declarations (open).
 
 The log retains these for traceability; they are not current options:
 
