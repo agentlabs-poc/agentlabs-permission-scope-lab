@@ -41,6 +41,82 @@ handoff. The current [endpoint authorization chapter](endpoint-authorization.md)
 explains input material, evaluation, and enforcement. Endpoint placement is not
 part of scope's definition.
 
+## SCOPE-007 — minimal v1 format draft, awaiting approval
+
+The user requested making the scope format canonical. The draft below
+formalizes the existing key-value direction without new wrapper fields or
+operators. New restrictions and empty-object semantics remain proposals until
+approved; Q-034 explicitly tests the security-sensitive empty-scope choice.
+
+### Shape and interpretation
+
+- Scope is a required JSON object mapping defined boundary keys to single,
+  non-empty string values. Key order has no semantic effect.
+- Each key identifies a scope-owned boundary meaning, not an arbitrary request
+  or database field. Applications need not support a universal department key.
+- A concrete string selects a concrete boundary reference under that key's
+  meaning and the trusted tenant/application context.
+- The draft reserves the exact token $self for the authorizing human, resolved
+  through trusted context and the key's defined relationship. It is not a
+  caller-supplied identity or automatically the automated actor. Unsupported
+  key/token combinations are invalid; the token does not define arbitrary
+  relationship traversals. Literal use of the reserved token is not supported
+  in this minimal draft.
+- All entries apply with AND (already agreed under SCOPE-008). Alternative
+  grants supply OR, preserving each grant's complete restrictions.
+
+```json
+{
+  "dept": "dept-1",
+  "user": "$self"
+}
+```
+
+For the existing motivating meanings, the target must be both inside dept-1
+and inside the authorizing human's personal boundary. The user key selects a
+target boundary; it is not the recipient of the grant. The scope does not grant
+an operation by itself.
+
+### Minimal validation, proposed
+
+Reject missing/null/non-object scope, unknown keys, duplicate keys, empty or
+non-string values, and unsupported symbolic references. Do not drop an invalid
+entry and evaluate the remainder: that could widen the boundary. Validation
+must retain every required restriction. Failure cannot establish authority
+through that invalid scope; general error handling remains part of resolution.
+
+No arrays, nested objects, OR operators, or wildcard operators are in this
+minimal draft. The bare * token is rejected, not treated as tenant-wide access.
+Do not coerce types or guess key meanings. Concrete-reference validation follows
+the defined boundary; endpoint material is not automatically trusted evidence.
+
+### Q-034 — explicit empty object versus absence
+
+Recommended: an explicitly supplied empty object means no additional boundary
+restriction inside the trusted enclosing tenant:
+
+```json
+{}
+```
+
+That represents tenant-wide reach for the grant's permissions, subject to its
+other restrictions and all mandatory outer bounds. It does not itself supply
+permissions or administration authority to issue such a grant. Omitting scope
+or supplying null remains invalid; no missing-scope default to {} is permitted.
+
+This avoids adding a tenant selector field when tenant is already implicit.
+The alternative is to reject {} and separately design an explicit tenant-wide
+representation. That would add a representation choice we have not yet agreed.
+The risk of the recommended shape is that losing entries can widen a scope;
+strict validation, authorized grant changes, and audit must not silently turn
+malformed or omitted scope into {}. The explicit choice is pending, not current
+authority for any implementation.
+
+A canonical wire shape will not by itself settle scope-definition lifecycle,
+scope containment for administration, or evaluator/endpoint interfaces. The
+earlier type/id examples stay historical illustrations until this draft is
+approved and a separate reconciliation makes the current examples consistent.
+
 ## Historical development and still-open proposals
 
 The earlier discussions below are retained. SCOPE-002 and SCOPE-004 were not

@@ -20,7 +20,8 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 ## Current position
 
 - Active branch: **6. Scope and target → canonical boundary definition and syntax**.
-  SCOPE-006/008 are agreed; SCOPE-007's exact key-value grammar remains proposed.
+  SCOPE-006/008 are agreed; SCOPE-007's minimal format is drafted and Q-034 tests
+  explicit empty scope versus missing scope. Draft syntax remains proposed.
   SCOPE-002/004 are still open, not adopted through later scope discussion.
   Q-025 approved this detour; return to ADMIN-004/005. Q-024's fields stay withdrawn.
   The detailed chapter is [scope and target](scope-model.md).
@@ -190,6 +191,7 @@ Q-030 → scope as boundary selector (SCOPE-006 agreed).
 Q-031 → canonical scope definition and proposed key-value shape (SCOPE-006/007).
 Q-032 → AND within scope, alternatives through grants (SCOPE-008 agreed).
 Q-033 → endpoint-owned gate and recording resumed (CONTRACT-006, PROCESS-006).
+Q-034 → minimal scope format's empty-object semantics (SCOPE-007 draft pending).
 
 The log retains these for traceability; they are not current options:
 
