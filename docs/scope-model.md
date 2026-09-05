@@ -43,7 +43,7 @@ the presence of FIN in the URI does not establish that relationship.
 
 Q-026's response challenges treating department as a universal type and asks
 whether a scope-owned selector model is the better canonical arrangement.
-SCOPE-003 / Q-027 below develops that direction. SCOPE-002 is not yet agreed;
+SCOPE-003 / Q-027 below settles that responsibility separation. SCOPE-002 is not yet agreed;
 neither a fixed catalog nor a type-plus-parameters representation is finalized.
 
 The recommendation is that a grant selects an explicitly defined scope type and
@@ -94,7 +94,10 @@ application-specific definitions, and the minimum parameter representation.
 It does not authorize introducing a special scope type for every administrative
 combination or assume that existing department/self forms already suffice.
 
-## SCOPE-003 / Q-027 — scope-owned target selection, proposed
+## SCOPE-003 / Q-027 — scope-owned target selection, agreed
+
+User agreed to this responsibility boundary in Q-027. This does not settle
+SCOPE-002's representation, the standard/application-specific catalog, or storage.
 
 The user proposes that scope owns its definition and grants neither define nor
 interpret it; applications need different scope concepts. Department is an
@@ -109,7 +112,7 @@ or a precomputed enumeration. Selection alone does not authorize an operation;
 recipient applicability, permission, validity, conditions, tenant, and dependent
 authority limits remain part of the complete authorization decision.
 
-The proposed responsibilities are:
+The agreed responsibilities are:
 
 | Concept | Responsibility |
 |---|---|
@@ -156,6 +159,44 @@ scope definitions with shared selector building blocks using concrete cases.
 Do not finalize either a closed universal type list or a free-form expression
 language yet. Compatibility, definition authority, registration/naming,
 composition, target matching, and scope containment remain open.
+
+## SCOPE-004 / Q-028 — explicit resource compatibility, proposed
+
+Given SCOPE-003, the next question is when a scope's selection meaning is valid
+for a particular resource. The recommendation is explicit compatibility: a
+scope may be used only where its target relationship has been defined, never
+guessed from a familiar name or a coincidentally matching field.
+
+For an illustrative Finance department scope:
+
+| Resource | Definition needed before department scope can select it |
+|---|---|
+| Payslip | The declared relationship establishing which department the payslip belongs to. |
+| Certificate | The declared relationship establishing which department the certificate belongs to. |
+| Repository | An explicit repository-to-department relationship; without one this scope is unsupported. |
+
+If a repository creator happens to work in Finance, that alone does not prove
+the repository belongs to Finance. An application could deliberately define a
+creator-based relationship, but the evaluator must not invent that rule. The
+same caution applies to interpreting self as owner, creator, or assignee.
+
+This permits reuse: one scope meaning may support several resource types when
+their mappings are explicitly defined. It does not require creating a new scope
+type for every resource or forcing every application to implement department.
+No compatible_resources field, registry format, or endpoint syntax is proposed.
+Where compatibility is declared remains to be decided.
+
+Compatibility does not confer a permission. A valid department scope paired
+with payslip-read still does not authorize payslip-edit. Conversely, having the
+read permission does not make an unsupported scope meaningful. Validate the
+pairing when constructing a grant; resolution cannot treat an unsupported or
+unresolvable pairing as established authority. Exact validation interfaces and
+error responses remain open.
+
+GRANT-002's multi-permission binding must retain a meaningful scope for the
+included permissions. How that is validated across resources, and how later
+ROLE-002 role changes interact with compatibility, are explicit follow-ups;
+neither silently broadening scope nor silently inventing a mapping is justified.
 
 ## Return-point tests, not adopted syntax
 

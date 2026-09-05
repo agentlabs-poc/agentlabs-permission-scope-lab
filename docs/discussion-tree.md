@@ -18,11 +18,11 @@ PROCESS-005 requires justification and reuse checks before adopting any new fiel
 
 ## Current position
 
-- Active branch: **6. Scope and target → scope-owned selection** (SCOPE-003 / Q-027).
+- Active branch: **6. Scope and target → resource compatibility** (SCOPE-004 / Q-028).
   Q-025 approved this detour; return to ADMIN-004/005. Q-024's fields stay withdrawn.
   The detailed chapter is [scope and target](scope-model.md).
-- Just concluded: ADMIN-002/003 / Q-022 — administration does not confer business
-  access; self-assignment must be explicit, authorized, and audited.
+- Just concluded: SCOPE-003 / Q-027 — scope owns target-selection semantics;
+  grants bind scope without defining its meaning. Scope representation remains open.
 - Returned from the group/self sidebar to bounds on grant administration and
   remaining lifecycle questions in stage 5;
   then declared request, prepared context, and resolved
@@ -101,7 +101,8 @@ Authorization handbook
 ├── 6. Scope and target [active]
 │   ├── Explicit selections and attribute/relationship selectors [settled: SCOPE-001]
 │   ├── Declared scope meanings and permitted inputs [working: SCOPE-002 / Q-026]
-│   ├── Scope ownership; shared and app-defined meanings [working: SCOPE-003 / Q-027]
+│   ├── Scope ownership; shared and app-defined meanings [settled: SCOPE-003 / Q-027]
+│   ├── Explicit resource compatibility [working: SCOPE-004 / Q-028]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
 │   ├── Exact/subtree, multi-dimensional scope, empty/missing scope [open]
@@ -171,7 +172,8 @@ Q-023 → whole-grant bounds; user challenges separate format (ADMIN-004 still p
 Q-024 → new scope fields challenged; syntax withdrawn (PROCESS-005; ADMIN-005 open).
 Q-025 → approved stage 6 scope-model detour; return to ADMIN-004/005.
 Q-026 → scope-type/ownership challenge; SCOPE-002 not yet agreed.
-Q-027 → scope-owned target selection and grant binding (SCOPE-003 proposed).
+Q-027 → scope-owned target selection and grant binding (SCOPE-003 agreed).
+Q-028 → explicit scope/resource compatibility (SCOPE-004 proposed).
 
 The log retains these for traceability; they are not current options:
 
