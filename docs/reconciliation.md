@@ -1,5 +1,25 @@
 # Handbook reconciliation register
 
+## Checkpoint following ba46bfa — Q-050-F validation ownership clarification
+
+Q-050-F approves INPUT-003: application request contracts own input type,
+nullability, format, and domain validation. Endpoint policy remains unchanged,
+without duplicated type/nullable/validation-expression fields. The user correctly
+noted the shape was already approved; this records ownership explicitly rather
+than reopening structure. The chapter captures rationale, five value examples,
+required-versus-nullable distinctions, and validated-meaning consistency.
+
+INPUT-002 presence/source checks, Auth's canonical validation, and endpoint-owned
+boundary enforcement remain. Earlier ownership-open wording is history; individual
+application schemas and structural policy-validation/publication details are not
+all finalized. Return to decision-result contracts without reviving discarded
+relationship syntax or repeatedly seeking approval for settled structure.
+
+Docs-only verification passed: 25 Markdown files, 161 local links, 51 JSON
+blocks, and 143 unique decision/question IDs in the tree. Agreed/open status,
+rationale/example coverage, preservation of earlier nonblank content, and
+`git diff --check` passed. No policy parser or application behavior changed.
+
 ## Checkpoint following 3ed7d43 — Q-050-E required declared inputs
 
 Q-050-E approves INPUT-002: every declared input must be present at its specified

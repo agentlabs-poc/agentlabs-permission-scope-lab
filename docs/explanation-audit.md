@@ -1,5 +1,11 @@
 # Explanation coverage audit — through Q-043
 
+Q-050-F follow-up: INPUT-003 records application-owned value validation with no
+new policy fields. The policy chapter preserves duplicate-schema rationale,
+five department_id cases, required-versus-nullable distinction, same validated
+meaning for authorization/execution, and continued canonical checks. User's
+reminder that the shape was already approved is recorded; it is not reopened.
+
 Q-050-E follow-up: INPUT-002 is approved. The policy chapter captures the fixed
 input-contract rationale, optional-input alternative not selected, five PUT
 presence/source cases including {}, and the limits for types/nullability/errors.

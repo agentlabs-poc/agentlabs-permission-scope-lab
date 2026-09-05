@@ -19,6 +19,12 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-050-F settled INPUT-003.** Application-owned value validation;
+  no type/nullability fields added to endpoint policy. The shape was already
+  approved and is not reopened. Next branch: decision-result contracts. Remaining
+  structural policy validation/publication details and update/move semantics stay
+  open. Earlier value-validation-ownership-open labels below are history.
+
 - **Current: Q-050-E settled INPUT-002.** Every declared input is required at
   its source; no silent omission/default/fallback, even with `{}` grants.
   The policy chapter records rationale, optional-input alternative, and PUT cases.
@@ -331,6 +337,7 @@ Authorization handbook
 │   │       └── Shared version convention [settled: CONTRACT-010 / Q-050-A; full policy schema remains open]
 │   │       ├── Method/path, one permission, source/name inputs [settled partial structure: CONTRACT-011 / Q-050-B; GET and PUT examples]
 │   │       ├── Required declared inputs; no default/source fallback [settled: INPUT-002 / Q-050-E]
+│   │       ├── Application-owned value validation; no duplicate policy schema [settled: INPUT-003 / Q-050-F]
 │   │       └── Relationship bindings and trusted fact connections [active: Q-050-C]
 │   │           └── Revised and settled: CONTRACT-012 / Q-050-C, no relationship block; endpoint enforcement mandatory
 │   │   └── Permissions, inputs, sources, relationship bindings [clarified: Q-047-A]
@@ -449,6 +456,7 @@ Update: Q-050-C approved CONTRACT-012 instead: endpoint-enforced relationships w
 Q-050-D → review criterion for actual constraint enforcement on output/mutations, not mere input usage (open).
 Update: Q-050-D approved ENFORCEMENT-003, including the limits of this review. Prior open label is history; next is remaining input/policy validation.
 Q-050-E → INPUT-002 approved: required input presence at declared source, independent of scope breadth; value validation remains open.
+Q-050-F → INPUT-003 approved: application owns input type/nullability/domain validation, policy shape unchanged. Prior ownership-open labels are history; return to decision-result contracts.
 
 The log retains these for traceability; they are not current options:
 

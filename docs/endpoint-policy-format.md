@@ -1,5 +1,47 @@
 # Endpoint policy format — approved partial structure
 
+## Application-owned value validation — INPUT-003 / Q-050-F, agreed
+
+The application request contract defines and validates input types, nullability,
+format, and domain meaning. Do not duplicate these definitions as `type`,
+`nullable`, or validation-expression fields in endpoint policy. The policy shape
+approved in Q-050-B remains unchanged; Q-050-F explicitly settles validation
+ownership, not another round of approval for the same structure.
+
+### Rationale and responsibilities
+
+Duplicating the application request schema in authorization policy would create
+two definitions that can disagree. Instead, INPUT-002 governs declared presence
+and source binding, application validation governs valid values, Auth retains its
+canonical authority/scope checks, and the endpoint enforces actual execution.
+If application-defined parsing or normalization occurs, authorization and execution
+must use the same validated meaning; they cannot authorize one interpretation
+and execute another. No default or source fallback is introduced.
+
+### Example and counterexamples
+
+Suppose the application defines `department_id` as a non-empty, non-null string:
+
+| Body material | Consequence |
+|---|---|
+| `department_id: "FIN"` | Passes this value-shape check only; authority and other application checks still apply. |
+| `department_id: 42` | Reject for wrong type under this application contract. |
+| `department_id: null` | Reject because this example's field is not nullable. |
+| `department_id: ""` | Reject because this example's field must be non-empty. |
+| Field omitted | Reject under INPUT-002's already-agreed presence rule. |
+
+This is not a universal string-only rule. Other application inputs can represent
+numbers, booleans, or structured values. A required field may be nullable when
+its application contract explicitly permits it; null must never silently mean
+unrestricted authority, missing restrictions, or permission to skip a necessary
+boundary check. Application validation cannot make an invalid grant or unsupported
+scope valid. Existing scope syntax and registered contracts remain enforced.
+
+The user noted that the shape was already clear and approved it explicitly if
+needed. Treat it as settled. Earlier types/nullability-open wording below is
+history for ownership; individual application schemas, remaining structural
+policy-validation details, error representation, and publication remain open.
+
 ## Required inputs at their declared sources — INPUT-002 / Q-050-E, agreed
 
 Every input listed in the endpoint policy must be present at its declared

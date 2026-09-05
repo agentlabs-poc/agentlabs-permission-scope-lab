@@ -1,5 +1,14 @@
 # Working handbook chapter: endpoint-owned authorization
 
+Q-050-F / INPUT-003 settles application-owned input type/nullability/domain
+validation without adding fields to the approved endpoint policy. Presence/source
+checks remain INPUT-002, Auth retains canonical authority/scope validation, and
+actual enforcement remains endpoint-owned. Authorization and execution must use
+the same validated meaning after any application-defined parsing/normalization.
+[Examples and rationale](endpoint-policy-format.md) distinguish required from
+nullable and valid input from authority. Earlier value-validation-ownership-open
+notes are history; this does not change or reopen the approved policy shape.
+
 Q-050-E / INPUT-002 now requires every declared input at its specified source:
 no silent omission, defaults, or source fallback. This fixed input contract is
 independent of grant breadth, including `{}`. [PUT cases and rationale](endpoint-policy-format.md)

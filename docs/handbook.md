@@ -1,5 +1,12 @@
 # Authorization Handbook — working edition
 
+Current: Q-050-F approves INPUT-003: the application owns input value validation;
+endpoint policy gains no type/nullability fields. [Rationale and cases](endpoint-policy-format.md)
+preserve presence-versus-validity and validated-meaning consistency. The policy
+shape was already agreed and is not reopened. Next branch: decision-result
+contracts; remaining structural policy validation/publication stays tracked.
+Earlier ownership-open checkpoint notes below are history.
+
 Current: Q-050-E approves INPUT-002: every declared input is required at its
 specified source, without silent omission/default/fallback. `{}` does not waive
 input requirements or invent narrower scope restrictions. [PUT cases and rationale](endpoint-policy-format.md)
