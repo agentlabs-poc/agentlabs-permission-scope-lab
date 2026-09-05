@@ -103,9 +103,10 @@ the `::` verb separator; the original deeper examples are restored.
 inheritance. **Q-058 / PERMISSION-004 is agreed:** wildcard permission names are
 outside v1. **Q-059 / PERMISSION-005 is agreed:** no permission aliases in v1.
 These three decisions close HC-04-04; catalog evolution stays open.
-**Q-060 / DECISION-008 is proposed:** return supporting-grant references with an
-allow result to the endpoint. This resumes decision-result contracts, which
-remain unfinished.
+**Q-060 / DECISION-008 is agreed:** return supporting-grant references with allow
+to the endpoint, without requiring every request to be persistently audited.
+**Q-061 / DECISION-009 is proposed:** return evaluated boundary information
+alongside those references. Decision-result contracts remain unfinished.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

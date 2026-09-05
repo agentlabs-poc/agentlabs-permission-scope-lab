@@ -299,9 +299,13 @@ keeping both agreed message fields readable?
 
 ## Q-060 / DECISION-008 — supporting-grant references with allow
 
-Status: **PROPOSED, not approved.** Returning from the permission sidebar,
-recommend that an allow result provide the server-side endpoint with references
-to the complete grant routes actually used to justify that allow.
+Status: **AGREED.** The user approved Q-060 and clarified that the evidence may
+be needed for audit even though not every request will be tracked. Original
+status retained as history: ~~PROPOSED, not approved~~.
+
+An allow result provides the server-side endpoint with references to the complete
+grant routes actually used to justify that allow. The evidence is available in
+the result regardless of whether that request is selected for audit recording.
 
 DECISION-001 already preserves route provenance during evaluation; this question
 is specifically whether that evidence is available in the returned allow result,
@@ -320,10 +324,62 @@ logs is smaller, but makes that association depend on a separate lookup. An
 allow result with supporting references makes the association explicit while
 remaining a dependent evaluation result, not a reusable authorization grant.
 
-This proposal concerns server-side result evidence, not automatic UI disclosure.
+### Audit availability is separate from recording every request
+
+The user clarified: “eventually may need it for audit. we may not track all
+request. but incase required. we should have it.” This decision makes supporting
+references available; it does **not** require persistent audit records for every
+request. Selection, storage, retention, and any operation-specific mandatory
+audit rules remain separate decisions.
+
+Rationale for the distinction: producing evidence when evaluation knows the
+supporting authority enables an audit path without forcing all requests into
+persistent storage. A caller that chooses to record the result can retain that
+evidence instead of rerunning authorization later against potentially changed
+grants. Conversely, if evidence is not persisted, this rule does not promise
+that a historical decision can later be reconstructed. Reference-only results
+also do not settle grant snapshots or historical version retention.
+
+Counterexample: omitting supporting references because audit logging is currently
+disabled loses the result's agreed traceability. Persisting every request is not
+the only way to make those references available to an audit-capable caller.
+
+This decision concerns server-side result evidence, not automatic UI disclosure.
 It does not select field names, grant snapshot/version format, provenance-chain
 encoding, audit storage, or how many alternative routes to evaluate and return.
 Returning a grant identifier is not a substitute for enforcing all restrictions.
 
-**Q-060:** Should the allow result return its supporting-grant references to the
+**Q-060 — answered yes:** Should the allow result return its supporting-grant references to the
 endpoint for traceability?
+
+## Q-061 / DECISION-009 — evaluated boundary information with allow
+
+Status: **PROPOSED, not approved.** Recommend that the allow result return the
+evaluated boundary information the endpoint must enforce, associated with each
+supporting authority route. Supporting references explain why access was allowed;
+the associated boundaries explain the allowed reach for execution.
+
+Example: a Finance read authorized through G-17 returns its Finance boundary,
+illustrated by the scope fragment `{"dept":"FIN"}`, alongside the supporting
+reference. The trusted tenant remains the mandatory outer boundary. The endpoint
+must still constrain its actual read to that tenant, Finance, and the requested
+certificate; the boundary is not proof that an unchecked certificate belongs to
+Finance.
+
+Rationale: references alone would require the endpoint to recover boundaries
+from other state or reload grants, potentially obtaining values different from
+those evaluated. Returning the evaluated boundaries keeps enforcement tied to
+the decision. This carries forward the existing enforcement obligation; it is
+not a prepared state or a second business-authorization decision.
+
+The alternative is to keep the boundary only in shared request/evaluator context
+and return references alone. That can work if the context remains correctly bound,
+but leaves the return contract less explicit. The proposed result must not flatten
+different grant routes into a broader invented scope or discard mandatory limits.
+
+Exact fields, resolved-value representation, condition/delegation evidence,
+multi-route encoding, and UI disclosure remain open. No new permission or scope
+authority is created by returning this dependent evaluation information.
+
+**Q-061:** Should an allow result carry its evaluated boundaries alongside the
+supporting-grant references for endpoint enforcement?

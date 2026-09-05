@@ -292,8 +292,11 @@ explanation has been restored at the user's request; Q-056 adopts its naming
 convention with variable-depth application namespaces. Q-057 agrees that name
 prefixes do not automatically confer deeper permissions. Q-058 excludes wildcard
 permission names from v1. Q-059 excludes permission aliases from v1. Character
-validation and catalog evolution remain open. Q-060 proposes supporting-grant
-references in returned allow results; it is not yet approved.
+validation and catalog evolution remain open. Q-060 approves supporting-grant
+references in allow results, available for audit without requiring every request
+to be logged. Q-061 proposes returning evaluated boundary information alongside
+those references; it is not yet approved. The chapter preserves the rationale
+and distinguishes available evidence from persistent historical audit.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)
