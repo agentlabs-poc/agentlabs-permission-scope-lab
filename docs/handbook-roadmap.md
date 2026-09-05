@@ -141,6 +141,8 @@ working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| DECISION-003 | AGREED | Completed authorization decisions are allow/deny; inability to complete evaluation is a separate error, not a third authorization decision. Deny and error both prevent protected execution. | User approved Q-051, requested a concrete Auth-service timeout example, and confirmed it. Required authority loading times out with no sufficient valid authority already available: this proves inability to evaluate, not absence of permission. No prepared handoff, error transport, JSON schema, HTTP mapping, or cache policy adopted. See decision-results.md for rationale, alternatives, and consequences. |
+| DECISION-004 | PROPOSED | Include an internal machine-readable reason with a completed deny. | Q-052 asks this one question; the example is conclusively finding no complete authorizing grant route. A bare deny loses cause information at the caller; exact codes/fields and public disclosure remain open. See decision-results.md. |
 | SVG-001 | APPROVED PRESENTATION | Show one client request through authentication middleware, endpoint handler, embedded Auth Agent, Auth authority loading, constrained application database access, and the response. Keep middleware, handler, and agent inside the application boundary and retain the one endpoint-owned authorization gate. | User found the responsibility-first SVG difficult to follow, preferred the earlier flow style, and approved the proposed client-to-handler layout. Short numbered arrows show execution order; detailed principles stay in the overview. The Finance certificate example does not revive prepared results, mandatory resolvers, fixed remote calls, or a new decision schema. Previous SVG/overview are archived; see system-overview.md. This is a presentation decision, not a new authorization rule. |
 | INPUT-003 | AGREED | Application request contracts define and validate input types, nullability, format, and domain meaning; endpoint policy does not duplicate type/nullable/validation-expression fields. Presence/source requirements remain INPUT-002. Auth retains canonical authority/scope checks, and authorization and execution must use the same validated meaning after application-defined parsing/normalization. | User confirmed Q-050-F and noted the endpoint shape was already discussed and approved. Rationale: avoid duplicate request schemas that can disagree. A required field may be nullable only under its explicit application contract; null never means unrestricted authority or permission to skip a boundary. The department_id example distinguishes wrong type/null/empty/missing cases. No universal string-only input rule or new policy field is adopted. See endpoint-policy-format.md. |
 | INPUT-002 | AGREED | Every input listed in the endpoint policy must be present at its declared source. Reject a request missing a declared input; do not silently omit/default it or obtain it from another source. Required input presence is independent of the caller's grants, including tenant-wide {}. | User approved Q-050-E. Rationale: fixed predictable input contracts; optional-input absent behavior adds complexity and can weaken checks if mishandled. The PUT department_id example covers presence, omission, query fallback, broader grants, and additional application fields. Scope restrictions and actual endpoint enforcement remain separate from presence. Types, nullability, validation ordering, and error representation remain open; no optional/default fields or HTTP status are adopted. See endpoint-policy-format.md. |
@@ -285,7 +287,13 @@ working handbook's checkpoint practice for the review checklist.
 
 ## Resume here
 
-Current discussion: Q-051 / DECISION-003 is **PROPOSED, not approved**. Recommend
+Update: Q-051 is **agreed**, including the concrete timeout example. The original
+proposal below is historical. Q-052 / DECISION-004 is now the sole next question:
+an internal machine-readable reason for deny, **proposed, not approved**.
+Keep discussion one question at a time as the user requested. Full decision-result
+contracts remain unfinished; HC-08-02 and the 34/69 closure score stay unchanged.
+
+Historical proposal: Q-051 / DECISION-003 was **PROPOSED, not approved**. Recommend
 completed allow/deny decisions with evaluation errors represented separately.
 The existing distinction and fail-closed obligation remain settled; exact result
 fields and error transport remain open. [Decision results](decision-results.md)

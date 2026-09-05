@@ -276,10 +276,11 @@ it is not a new schema or an invitation to seek the same approval again.
 
 ## Follow the whole discussion
 
-Current open question: [Q-051 / DECISION-003 — decision results](decision-results.md).
-The recommended separation of completed allow/deny decisions from evaluation
-errors is recorded for discussion, **not approved**. Existing fail-closed and
-single-gate rules remain unchanged.
+Q-051 / DECISION-003 is **agreed**: completed allow/deny decisions are separate
+from evaluation errors. The approved Auth-service timeout example and rationale
+are in [decision results](decision-results.md). Existing fail-closed and
+single-gate rules remain unchanged. Q-052 / DECISION-004 is the next **open
+proposal**: an internal machine-readable reason for a completed deny.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)

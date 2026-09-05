@@ -75,10 +75,14 @@ Authorization Handbook — working edition, not published v1
 
 ## Next discussion selection
 
-Current discussion: [Q-051 / DECISION-003](decision-results.md), **proposed**:
-keep completed decisions as allow/deny and represent evaluation failure
-separately. Existing fail-closed behavior is settled; this asks about the result
-contract, not a return to prepared authorization. No approval is inferred.
+Q-051 / DECISION-003 is **agreed**, including the Auth-service timeout example:
+completed decisions are allow/deny; evaluation errors are separate and supply
+no authorization. The [decision-results chapter](decision-results.md) retains
+the original proposed status as history and records the rationale.
+
+Current discussion: **Q-052 / DECISION-004, proposed** — should a completed deny
+include an internal machine-readable reason? Discuss one question at a time;
+the result schema and public error representation remain open.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**
@@ -89,7 +93,7 @@ Earlier reconciliation note, now qualified: a completion percentage had no
 explicit measurement baseline. [MEASURE-001](handbook-completion-audit.md) now
 counts 34 completed and 35 open checkpoints out of 69 (49.3% closure). This is a
 proposed checkpoint rubric, not an effort estimate or release-readiness score.
-Opening Q-051 does not change that count.
+Q-051's narrow agreement does not finish HC-08-02 or change that count.
 
 ## Return points and non-reopened decisions
 
