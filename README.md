@@ -1,5 +1,16 @@
 # Authorization Explanation Bench
 
+Read the [working Authorization Handbook](docs/handbook.md) for the chapters
+being developed in the current discussion. The original lab concept page has
+not yet been reconciled with these decisions.
+
+The [agreed handbook roadmap and decision log](docs/handbook-roadmap.md) tracks the
+work to finalize the shared authorization foundation. Start at its "Resume here"
+section for the next discussion. The [discussion tree](docs/discussion-tree.md)
+maps every branch, its conclusions, and the remaining work.
+The [working grant chapter](docs/grant-model.md) develops the agreed concepts
+with rationale, examples, and explicitly open details.
+
 A local explanation bench for exploring scoped authorization through documented examples and an interactive request evaluator.
 
 The lab separates:
