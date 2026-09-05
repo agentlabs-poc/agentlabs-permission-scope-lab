@@ -18,7 +18,7 @@ PROCESS-005 requires justification and reuse checks before adopting any new fiel
 
 ## Current position
 
-- Active branch: **6. Scope and target → declared scope meaning** (SCOPE-002 / Q-026).
+- Active branch: **6. Scope and target → scope-owned selection** (SCOPE-003 / Q-027).
   Q-025 approved this detour; return to ADMIN-004/005. Q-024's fields stay withdrawn.
   The detailed chapter is [scope and target](scope-model.md).
 - Just concluded: ADMIN-002/003 / Q-022 — administration does not confer business
@@ -101,6 +101,7 @@ Authorization handbook
 ├── 6. Scope and target [active]
 │   ├── Explicit selections and attribute/relationship selectors [settled: SCOPE-001]
 │   ├── Declared scope meanings and permitted inputs [working: SCOPE-002 / Q-026]
+│   ├── Scope ownership; shared and app-defined meanings [working: SCOPE-003 / Q-027]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
 │   ├── Exact/subtree, multi-dimensional scope, empty/missing scope [open]
@@ -169,7 +170,8 @@ Q-022 → separate administration and explicit audited self-assignment (ADMIN-00
 Q-023 → whole-grant bounds; user challenges separate format (ADMIN-004 still proposed).
 Q-024 → new scope fields challenged; syntax withdrawn (PROCESS-005; ADMIN-005 open).
 Q-025 → approved stage 6 scope-model detour; return to ADMIN-004/005.
-Q-026 → declared scope meanings and grant-supplied values (SCOPE-002 proposed).
+Q-026 → scope-type/ownership challenge; SCOPE-002 not yet agreed.
+Q-027 → scope-owned target selection and grant binding (SCOPE-003 proposed).
 
 The log retains these for traceability; they are not current options:
 

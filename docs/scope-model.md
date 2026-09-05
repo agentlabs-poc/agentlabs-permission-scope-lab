@@ -41,6 +41,11 @@ the presence of FIN in the URI does not establish that relationship.
 
 ## SCOPE-002 / Q-026 — declared scope meanings, proposed
 
+Q-026's response challenges treating department as a universal type and asks
+whether a scope-owned selector model is the better canonical arrangement.
+SCOPE-003 / Q-027 below develops that direction. SCOPE-002 is not yet agreed;
+neither a fixed catalog nor a type-plus-parameters representation is finalized.
+
 The recommendation is that a grant selects an explicitly defined scope type and
 supplies only the inputs that definition permits. A grant does not invent the
 scope's meaning or add arbitrary interpreted fields. Definition, supplied
@@ -88,6 +93,69 @@ scope types, their resource/permission compatibility, reusable versus
 application-specific definitions, and the minimum parameter representation.
 It does not authorize introducing a special scope type for every administrative
 combination or assume that existing department/self forms already suffice.
+
+## SCOPE-003 / Q-027 — scope-owned target selection, proposed
+
+The user proposes that scope owns its definition and grants neither define nor
+interpret it; applications need different scope concepts. Department is an
+application-specific example, not a mandatory type for every application.
+The user also suggests shared types such as self and asks us to reconsider the
+canonical arrangement before adding more structure.
+
+In the semantic sense, scope acts as a selector: it describes which targets are
+within a grant's reach under the relevant trusted context. This does not mean
+arbitrary query syntax, a user-authored database filter, a new selector entity,
+or a precomputed enumeration. Selection alone does not authorize an operation;
+recipient applicability, permission, validity, conditions, tenant, and dependent
+authority limits remain part of the complete authorization decision.
+
+The proposed responsibilities are:
+
+| Concept | Responsibility |
+|---|---|
+| Permission | Identify the operation on a resource type. |
+| Scope | Own the meaning of target selection and the valid inputs needed to express it. |
+| Grant | Bind a recipient to permissions over that scope, preserving scope use and other restrictions. |
+| Request/target | Identify the operation sought and the resource or proposed resource it acts on; representation remains open. |
+| Authorization resolution/enforcement | Obtain and validate appropriate facts, interpret scope through its defined semantics, and enforce the complete decision. |
+
+"Grant does not understand scope" means grant semantics must not special-case
+department, employee ownership, or future application relationships. It does
+not mean accepting opaque unvalidated content: the authorization system must
+validate and evaluate scope through its definition. An unknown or incompatible
+scope cannot be used as authority. This does not decide a deployment topology,
+central service, new catalog, or physical storage layout.
+
+The standard/application-defined distinction is a candidate organization of
+scope meanings, not yet a canonical field or a required list of types:
+
+| Candidate kind | Example | Important limitation |
+|---|---|---|
+| Shared semantic concept | Self | The human anchor is shared under SELF-001, but the target relationship must be explicitly defined for each compatible resource. |
+| Application-defined concept | Department-based reach | Only applications/resources with a declared department relationship can use it; others need not implement it. |
+
+For payslips, self may use a trusted employee-ownership relationship. A document
+application could use a defined document-owner relationship instead; that is an
+illustrative possibility, not an adopted policy. Self must not automatically
+mean creator, assignee, owner, or token subject by guessing a field. Existing
+human/group/proxy rules still apply. A reusable shared meaning therefore does
+not guarantee a universal resolver or identical data model.
+
+ADMIN-005 remains a useful test: Auth's grants are its domain resources, so the
+same scope contract must be tested against selecting proposed grants. No
+grant_selector or other withdrawn field is reinstated by that observation.
+
+Canonical semantic ownership is not the same as requiring every scope value to
+be a separately stored mutable object. Whether a grant embeds a scope value or
+references one, and how definition/value edits affect existing grants, are
+separate open decisions. Avoid importing live-update or revocation behavior
+from the role model without agreement.
+
+The recommendation is to settle this separation first, then compare declared
+scope definitions with shared selector building blocks using concrete cases.
+Do not finalize either a closed universal type list or a free-form expression
+language yet. Compatibility, definition authority, registration/naming,
+composition, target matching, and scope containment remain open.
 
 ## Return-point tests, not adopted syntax
 
