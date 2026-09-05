@@ -65,12 +65,12 @@ Assuming these are the only grants, Maya has valid tenant membership, the
 evaluation occurs within the illustrated validity interval, and all other
 required checks succeed:
 
-| Requested action | Target facts | Result supported by these grants |
+| Requested action | Resource facts | Result supported by these grants |
 |---|---|---|
 | Read | Certificate in Finance, T-1 | Allowed through G-1 |
 | Read | Certificate in Engineering, T-1 | Allowed through G-1 |
 | Revoke | Certificate in Finance, T-1 | Allowed through G-2 |
-| Revoke | Certificate in Engineering, T-1 | Denied: G-2 does not reach the target |
+| Revoke | Certificate in Engineering, T-1 | Denied: G-2 does not reach the resource |
 | Read or revoke | Certificate in T-2 | Denied: outside the grants' tenant boundary |
 
 Resolution must never construct `certificate::revoke @ tenant:T-1` by combining
@@ -234,7 +234,7 @@ An explicitly listed permission grant can use the same evaluation form, with
 its own grant source and no role source. This is an expanded view, not a new
 independent assignment and not necessarily a fully resolved authorization input.
 For example, an employee-self scope would still need its application relationship
-established, and the target may still require an application lookup.
+established, and the resource may still require an application lookup.
 
 ## GRANT-EX-006 — one group grant, per-human self scope
 
@@ -312,13 +312,13 @@ with the indicated meanings; these are not mandatory keys for every application.
 
 Group membership and source-grant dependencies remain attached. For a proxy,
 $self stays anchored to the authorizing human, with delegation restrictions.
-The user scope key is not the group recipient; it selects a target boundary.
+The user scope key is not the group recipient; it selects a scope boundary.
 
 Explicit {} is deliberate tenant-wide reach, not a missing-value default. A
 missing scope or scope:null is invalid, as are unsupported keys, duplicate keys,
 empty/non-string values, nested objects, arrays, and wildcard operators. Invalid
 entries must not be silently dropped to widen the boundary. Actual key/reference
-validation and target facts are required; this example is not a runtime test.
+validation and resource facts are required; this example is not a runtime test.
 
 An alternative Finance OR Engineering route uses two complete grants with
 their respective scope objects, not an array or OR operator inside one scope.

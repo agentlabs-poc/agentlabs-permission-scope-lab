@@ -107,7 +107,7 @@ branch, not permission to ignore incompatible restrictions.
 ## Expanded view of that same grant
 
 The following computed view is still G-6. It is not an additional independent
-grant or proof that target-specific authorization is complete. This retains
+grant or proof that request-specific authorization is complete. This retains
 RESOLUTION-003's original example and uses current scope syntax; the final
 resolved-grant schema is still open.
 

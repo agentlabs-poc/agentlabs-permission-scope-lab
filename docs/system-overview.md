@@ -1,5 +1,10 @@
 # Authorization system — canonical logical overview
 
+TERM-005 / Q-043 aligns the current diagram and explanation with permission,
+boundary checks, and request material. The [vocabulary chapter](authorization-vocabulary.md)
+captures the rationale. The [previous diagram](assets/history/authorization-system-pre-q043.svg)
+is preserved as deprecated history, not the current vocabulary.
+
 This block diagram maps the agreed logical model: CHARTER-002, CONTRACT-006,
 INPUT-001, ENFORCEMENT-002, and SCOPE-006/007/008. It does not introduce a new
 authorization stage, deployment topology, network call count, or wire schema.
@@ -57,7 +62,7 @@ Layer 1 is the canonical authorization foundation: permissions, grants, roles,
 authority dependencies, tenant and delegation limits, scope structure and
 combination rules, and shared evaluation semantics. It defines rules that
 applications must not reinterpret. Layer 2 supplies application-specific
-operations, scope-key meanings for targets, trusted fact sources, additional
+operations, scope-key meanings for resources, trusted fact sources, additional
 restrictions, and enforcement of the actual data operation. Together they
 establish effective authorization; authentication establishes identity.
 
@@ -114,7 +119,7 @@ handoff. Neither a new service deployment nor a fixed number of calls is implied
 | Authentication/context | Establish verified actor/human identity and trusted tenant context; do not issue a partial business-authorization result. |
 | Endpoint-owned gate | Gather sufficient material and invoke the shared evaluator; do not perform protected output or mutation first. |
 | Auth authority source | Supply applicable grants, roles, memberships, and delegation dependencies under the still-to-be-finalized freshness contract. |
-| Application fact source | Establish target attributes and domain relationships needed by the operation and scope, through bounded internal access. |
+| Application fact source | Establish resource attributes and domain relationships needed by the operation and scope, through bounded internal access. |
 | Shared evaluator | Check recipient applicability, required permission, scope boundary membership, validity/conditions, and mandatory outer/dependency limits without mixing unrelated grant fields. |
 | Enforcement/operation | Bind execution to the decision and its restrictions; keep check and actual use consistent. |
 
@@ -161,7 +166,7 @@ mechanism is still open.
 "Required material" does not mean eagerly load the union of every conceivable
 fact. The endpoint contract must provide a defined source for what its supported
 authorization needs, and the gate obtains enough to decide. It can deny for lack
-of permission before fetching unnecessary target metadata. Material collection
+of permission before fetching unnecessary resource metadata. Material collection
 does not become an independent middleware authorization phase or a prepared
 outcome.
 

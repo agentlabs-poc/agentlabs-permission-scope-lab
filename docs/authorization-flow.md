@@ -1,5 +1,8 @@
 # Working handbook chapter: authorization flow and endpoint contracts
 
+> Vocabulary below is historical as well as the flow design. TERM-005 / Q-043
+> supplies the current [request-material explanation](authorization-vocabulary.md).
+
 > DEPRECATED DESIGN — preserved as requested. Q-033 approved CONTRACT-006's
 > [endpoint-owned authorization gate](endpoint-authorization.md). The two-mode
 > flow and prepared handoff below are historical, not current requirements.

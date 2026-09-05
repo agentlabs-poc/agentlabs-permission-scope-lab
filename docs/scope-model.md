@@ -1,28 +1,37 @@
-# Working handbook chapter: scope and target
+# Working handbook chapter: scope boundaries
+
+Q-043 / TERM-005 aligns this chapter's vocabulary with permissions, scope
+boundaries, requests, and request material. [Reasoning and case checks](authorization-vocabulary.md)
+explain why no additional canonical entity is required. [Superseded wording](history/q043-vocabulary.md)
+is preserved exactly; existing safety requirements remain unchanged.
 
 ## Current agreed foundation — recording resumed after Q-033
 
-Latest: Q-039 / REGISTRATION-001 now agrees application registration of supported
+Historical checkpoint after Q-039: REGISTRATION-001 agrees application registration of supported
 permissions and scope contracts, with Auth validating grant acceptance without
 domain interpretation. See [application registration](application-registration.md).
 Earlier Q-039-proposed statements are preserved history; registration format,
 compatibility declarations (Q-040), and lifecycle remain open.
 
 Q-038 subsequently settles application ownership of scope-key meanings and
-explicit supported target relationships, with endpoint-specific trusted fact
+explicit supported resource relationships, with endpoint-specific trusted fact
 bindings (SCOPE-004's conceptual core). Earlier broad statements that key
 definitions remain open must now be read with that agreement. Shared definition
-governance, representation, and validation mechanics remain open under Q-039.
+governance, representation, and validation mechanics remained open at Q-039.
+Current update: Q-040/041 settle optional relationships with an explicit
+application-level validation choice; Q-042 settles the activation safeguard.
+Remaining registration lifecycle detail is parked. These historical notes
+do not reopen those decisions or the Q-038 ownership agreement.
 
 SCOPE-006 supplies the canonical definition:
 
-> Scope is a boundary selector that identifies a set of targets within the
-> enclosing tenant. A target satisfies the scope when it falls within the
-> selected boundary.
+> Scope is a boundary selector that defines the reach of granted permissions
+> within the enclosing tenant. Request material must establish that the
+> requested operation remains within the selected boundary.
 
 Permission determines the operation. Scope defines its permitted reach. A grant
-binds recipient, permission(s), and scope with validity/conditions. Target
-membership satisfies the scope check, not the entire authorization decision.
+binds recipient, permission(s), and scope with validity/conditions. Satisfying
+the boundary requirements completes the scope check, not the entire decision.
 Scope owns its boundary semantics under SCOPE-003; a grant does not define them.
 
 SCOPE-008: requirements within one scope combine with AND. Alternative authority
@@ -37,7 +46,7 @@ SCOPE-007 is the agreed canonical v1 scope format, approved in Q-034:
 ```
 
 Under the canonical key-value shape, a key identifies a defined boundary and its
-value selects that boundary. The above illustrates targets inside dept-1 AND
+value selects that boundary. The above illustrates resources inside dept-1 AND
 inside the authorizing human's self boundary. The user key is not the grant's
 recipient field. SELF-001 anchors self to the human, including group-derived
 and human-proxy access; $self is the canonical reserved token for that human.
@@ -84,9 +93,9 @@ claim the application already implements this format.
 }
 ```
 
-For the existing motivating meanings, the target must be both inside dept-1
+For the existing motivating meanings, the requested resources must lie both inside dept-1
 and inside the authorizing human's personal boundary. The user key selects a
-target boundary; it is not the recipient of the grant. The scope does not grant
+scope boundary; it is not the recipient of the grant. The scope does not grant
 an operation by itself.
 
 ### Required validation
@@ -132,7 +141,7 @@ not the canonical v1 scope representation. GRANT-EX-007 in
 
 ## Scope-key meaning and endpoint fact bindings — Q-038, agreed
 
-The application defines a scope key's boundary meaning and the target
+The application defines a scope key's boundary meaning and the resource
 relationships for which that meaning is supported. The endpoint declares how
 to obtain trusted material needed to evaluate that meaning. It does not invent
 an independent interpretation merely because a request parameter or database
@@ -152,7 +161,7 @@ the department owning that certificate. A repository has no department boundary
 unless its application explicitly defines a supported relationship. These
 examples are not universal meanings or a newly adopted resource catalog.
 
-An endpoint supplies established target facts through its declared binding.
+An endpoint supplies established resource facts through its declared binding.
 A path segment named `dept` does not prove a payslip belongs to that department;
 nor may a handler silently use the requesting employee's current department
 instead of the defined payroll-record relationship. Unsupported relationships
@@ -160,7 +169,7 @@ cannot become unrestricted access by ignoring the scope entry. Missing required
 evidence cannot establish authorization through that route.
 
 Layer 1 supplies canonical scope format and evaluation rules. Layer 2 supplies
-the application's defined target relationships and trusted facts. The embedded
+the application's defined resource relationships and trusted facts. The embedded
 auth agent evaluates the boundary using both, under the single endpoint-owned
 gate. Application-owned meanings remain subject to canonical rules, including
 the human anchor of `$self`; application ownership is not permission to redefine
@@ -214,7 +223,7 @@ SELF-001: self resolves for the human being authorized, including group-derived
 access; a proxy remains anchored to its authorizing human and delegation limits.
 
 When reading payslip P-17 under a Finance department scope, P-17 is the protected
-target. Finance is a reference used to determine whether that payslip falls
+resource. Finance is a reference used to determine whether that payslip falls
 within scope. The request is not thereby an operation on the department itself.
 Whether a payslip belongs to Finance requires the appropriate trusted facts;
 the presence of FIN in the URI does not establish that relationship.
@@ -278,7 +287,7 @@ application-specific definitions, and the minimum parameter representation.
 It does not authorize introducing a special scope type for every administrative
 combination or assume that existing department/self forms already suffice.
 
-## SCOPE-003 / Q-027 — scope-owned target selection, agreed
+## SCOPE-003 / Q-027 — scope-owned boundary selection, agreed
 
 User agreed to this responsibility boundary in Q-027. This does not settle
 SCOPE-002's representation, the standard/application-specific catalog, or storage.
@@ -289,7 +298,7 @@ application-specific example, not a mandatory type for every application.
 The user also suggests shared types such as self and asks us to reconsider the
 canonical arrangement before adding more structure.
 
-In the semantic sense, scope acts as a selector: it describes which targets are
+In the semantic sense, scope acts as a selector: it describes which resources are
 within a grant's reach under the relevant trusted context. This does not mean
 arbitrary query syntax, a user-authored database filter, a new selector entity,
 or a precomputed enumeration. Selection alone does not authorize an operation;
@@ -301,9 +310,9 @@ The agreed responsibilities are:
 | Concept | Responsibility |
 |---|---|
 | Permission | Identify the operation on a resource type. |
-| Scope | Own the meaning of target selection and the valid inputs needed to express it. |
+| Scope | Own the meaning of boundary selection and the valid inputs needed to express it. |
 | Grant | Bind a recipient to permissions over that scope, preserving scope use and other restrictions. |
-| Request/target | Identify the operation sought and the resource or proposed resource it acts on; representation remains open. |
+| Request and material | Identify the operation sought and the resource or proposed resource it acts on; representation remains open. |
 | Authorization resolution/enforcement | Obtain and validate appropriate facts, interpret scope through its defined semantics, and enforce the complete decision. |
 
 "Grant does not understand scope" means grant semantics must not special-case
@@ -318,7 +327,7 @@ scope meanings, not yet a canonical field or a required list of types:
 
 | Candidate kind | Example | Important limitation |
 |---|---|---|
-| Shared semantic concept | Self | The human anchor is shared under SELF-001, but the target relationship must be explicitly defined for each compatible resource. |
+| Shared semantic concept | Self | The human anchor is shared under SELF-001, but the resource relationship must be explicitly defined for each compatible resource. |
 | Application-defined concept | Department-based reach | Only applications/resources with a declared department relationship can use it; others need not implement it. |
 
 For payslips, self may use a trusted employee-ownership relationship. A document
@@ -342,13 +351,13 @@ The recommendation is to settle this separation first, then compare declared
 scope definitions with shared selector building blocks using concrete cases.
 Do not finalize either a closed universal type list or a free-form expression
 language yet. Compatibility, definition authority, registration/naming,
-composition, target matching, and scope containment remain open.
+composition, boundary evaluation, and scope containment remain open.
 
 ## SCOPE-004 / Q-028 — explicit resource compatibility, proposed
 
 Given SCOPE-003, the next question is when a scope's selection meaning is valid
 for a particular resource. The recommendation is explicit compatibility: a
-scope may be used only where its target relationship has been defined, never
+scope may be used only where its resource relationship has been defined, never
 guessed from a familiar name or a coincidentally matching field.
 
 For an illustrative Finance department scope:
@@ -454,7 +463,7 @@ WHERE tenant_id = :trusted_tenant
 Here trusted_tenant is T-1, authorized_department is FIN established from the
 grant and permitted request selection, and requested_certificate is C-17. Do
 not substitute an unchecked caller department for authorized_department. The
-complete request includes the department-qualified target; if request and
+complete request includes the department-qualified resource; if request and
 authority differ, do not silently drop the requested department constraint.
 
 The handler is not receiving unrestricted authorization for C-17. It is allowed
@@ -490,12 +499,12 @@ finish deciding the restriction or access is completion.
 
 ### Query-like meaning without premature query syntax
 
-SCOPE-005 proposes treating scope as declarative target selection that the
+SCOPE-005 proposes treating scope as declarative boundary selection that the
 application may translate into a safe query restriction where supported. The
 requested selection narrows, never replaces, the authorized selection:
 
 ```text
-Returned targets = requested targets intersect authorized targets
+Returned resources = requested resources intersect authorized resources
 ```
 
 The complete authorization still checks permission, recipient applicability,

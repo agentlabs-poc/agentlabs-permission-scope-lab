@@ -1,8 +1,13 @@
 # Working handbook chapter: grants, assignments, and roles
 
+Q-043 settles TERM-005's vocabulary correction, not the proposed administrative
+scope model. [Authorization vocabulary](authorization-vocabulary.md) explains
+the boundary/request-material approach and its safety requirements. Earlier
+wording revised here is retained in the [deprecated record](history/q043-vocabulary.md).
+
 Current scope format is SCOPE-007 / Q-034: a required flat key-value object,
 AND within scope, with explicit {} for tenant-wide reach and no missing/null
-default. See [scope and target](scope-model.md). Earlier grant examples retain
+default. See [scope boundaries](scope-model.md). Earlier grant examples retain
 their historical scope syntax; GRANT-EX-007 shows the canonical scope form.
 The [current grant formats](grant-format.md) also restate direct/group, role,
 and expanded-view layouts without deleting the earlier examples.
@@ -43,7 +48,7 @@ authorized object. This decision concerns the logical model, not table layout.
 
 Every example is evaluated within a trusted enclosing tenant. We omit repeated
 tenant fields from individual grant examples. Recipients, groups, scope
-references, and targets must resolve inside that tenant boundary.
+references, and resources must resolve inside that tenant boundary.
 
 A tenant-wide scope means the enclosing tenant. A Finance scope cannot reach a
 different tenant's Finance department simply because their identifiers match.
@@ -217,7 +222,7 @@ The view is computed; it is not another stored grant created by assigning access
 "Expanded" is deliberately narrower than "fully resolved." Knowing a role's
 permissions does not establish which employee a self selector refers to, or
 whether a requested certificate is in Finance. Application facts and a concrete
-target may still be needed. It is also not a completed allow decision.
+resource may still be needed. It is also not a completed allow decision.
 
 ## Consequences for services and agents — AUTHORITY-002, DELEGATION-002
 
@@ -308,9 +313,9 @@ proposal uses the existing grant model, not a new administrative grant entity.
 
 Auth resources are resources too. An administrative grant binds a recipient to
 an operation on grants, groups, memberships, or roles, within a scope. For grant
-creation, the authorization target is the proposed grant; it need not already
+creation, request material describes the proposed grant; it need not already
 exist in storage. Scope selects which proposed grants may be created. Exact
-create-target and scope-evaluation contracts remain stage 6/7 work.
+creation-request and scope-evaluation contracts remain stage 6/7 work.
 
 The follow-up G-11 JSON also introduced unreviewed syntax: grant_selector,
 recipient nested inside scope, permissions_subset_of, and scope_within. The
@@ -325,10 +330,10 @@ records intent, not accepted field definitions:
 
 | Withdrawn syntax | Intended meaning | Why the representation is not settled |
 |---|---|---|
-| grant_selector | The target being selected is a grant. | Target resource type may already follow from the permission/operation declaration; another discriminator may be redundant. |
-| recipient inside scope | Restrict the recipient of the proposed target grant, not the administrator receiving authority. | Recipient is an existing target-grant attribute; its use in a scope expression does not justify a new special nested field. |
-| permissions_subset_of | Prevent the target grant from assigning business permissions outside the administrator's assignable set. | This describes a set relation; a dedicated field has not been shown necessary. Role references and current-role expansion also need treatment. |
-| scope_within | Prevent the target grant from reaching resources beyond the administrator's assignable reach. | Semantic containment between scopes is not mere field or label comparison. Relationship/self scopes and future changes make this a substantive open problem, not a solved operator. |
+| grant_selector | The resource being selected is a grant. | Resource resource type may already follow from the permission/operation declaration; another discriminator may be redundant. |
+| recipient inside scope | Restrict the recipient of the proposed resource grant, not the administrator receiving authority. | Recipient is an existing proposed-grant attribute; its use in a scope expression does not justify a new special nested field. |
+| permissions_subset_of | Prevent the resource grant from assigning business permissions outside the administrator's assignable set. | This describes a set relation; a dedicated field has not been shown necessary. Role references and current-role expansion also need treatment. |
+| scope_within | Prevent the resource grant from reaching resources beyond the administrator's assignable reach. | Semantic containment between scopes is not mere field or label comparison. Relationship/self scopes and future changes make this a substantive open problem, not a solved operator. |
 
 For the same motivating example, Maya is a member of finance-access-admins and
 may create grants for finance-payroll-readers that contain only payroll-read
@@ -336,7 +341,7 @@ and reach only Finance resources. This is a proposed requirement expressed in
 plain language, not a finalized administrative scope or four mandatory fields.
 It does not itself give Maya payroll-reading access.
 
-SCOPE-001 already allows target selection by references, attributes, and
+SCOPE-001 already allows boundary selection by references, attributes, and
 relationships. It does not yet define a common expression grammar, supported
 relations, evidence requirements, or scope-containment procedure. The next
 approved detour, Q-025, is to settle that shared scope model before writing more
@@ -345,15 +350,16 @@ the required bounds. Neither a general predicate language nor admin-specific
 fields have been adopted. A bare department label has not been shown sufficient
 to express the proposed recipient and permission limits either.
 
-~~Continue in [scope and target](scope-model.md), SCOPE-002 / Q-026, then return here.~~
+~~Continue in [scope boundaries](scope-model.md), SCOPE-002 / Q-026, then return here.~~
 
 Current return after Q-042: core scope/registration principles are agreed and
 the user has parked further registration lifecycle detail. Resume ADMIN-005
-with Q-043: ordinary grant/permission/scope concepts, with the grant being
-created or changed as target. Then revisit ADMIN-004's assignable bounds.
+with the ordinary grant/permission/scope concepts and material describing the
+proposed creation or change. Q-043 settles vocabulary only; ADMIN-004's
+assignable bounds and ADMIN-005's representation still require discussion.
 ADMIN-001/002/003 separation and explicit audited self-assignment remain agreed.
 No withdrawn G-11 fields or containment algorithm are adopted by this return;
-the canonical administration model remains a proposal pending Q-043.
+the canonical administration model remains a proposal after Q-043's vocabulary decision.
 
 The user's bootstrap direction is compatible with seeding initial ordinary
 grants through a trusted initialization process. It does not require a second
@@ -377,7 +383,7 @@ administrative operation. Specifying a group recipient does not by itself settle
 who may join it or whether business-department membership must be synchronized.
 
 Scope comparison must establish semantic containment, not compare labels or
-assume a hierarchy. A narrower target selection is acceptable only when shown
+assume a hierarchy. A narrower boundary selection is acceptable only when shown
 to fit the permitted reach. Relationship-based scopes, current role permissions,
 later role changes, and recipient-relative self scopes need explicit treatment.
 

@@ -1,5 +1,9 @@
 # Authorization Explanation Bench — working design
 
+> TERM-005 / Q-043 additionally deprecates the older authorization vocabulary
+> used below. Preserve this lab design as history; the current explanation is
+> [permissions, boundaries, and request material](authorization-vocabulary.md).
+
 > HISTORICAL LAB DESIGN — preserved, not the current canonical contract.
 > Scope syntax below is deprecated under SCOPE-007. The current model uses one
 > endpoint-owned gate (CONTRACT-006), explicit permission/material/source

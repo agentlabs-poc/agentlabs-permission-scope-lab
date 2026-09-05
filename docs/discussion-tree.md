@@ -19,6 +19,13 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-043 settled TERM-005's vocabulary correction.** Use permission,
+  scope boundaries, requests, and trusted request material; no extra entity.
+  [Detailed rationale](authorization-vocabulary.md) and [explanation audit](explanation-audit.md)
+  capture examples and remaining gaps. Stay in stage 5, ADMIN-004/005; their
+  representation and assignable bounds remain open. Registration detail stays
+  parked. Earlier Q-043-open positions below are historical.
+
 - **Current: stage 5, grant administration — ADMIN-004/005, Q-043.** Q-042
   is agreed as REGISTRATION-004. The user directed ending the registration
   detour; remaining lifecycle details are parked, not finalized or removed
@@ -50,7 +57,7 @@ Requests/resolution   → NEXT after remaining grant questions
 
 ### Preserved position history through Q-038
 
-- Current as of Q-038: application-owned scope meanings, supported target
+- Current as of Q-038: application-owned scope meanings, supported resource
   relationships, and endpoint-specific trusted fact bindings are agreed.
   Q-028's conceptual question is answered; SCOPE-004's detailed validation
   mechanics remain open. Q-039 is now active: sharing definition contracts
@@ -60,7 +67,7 @@ Requests/resolution   → NEXT after remaining grant questions
 - Latest: Q-037 / ARCH-005 is agreed, closing the embedded-agent sidebar below.
   Auth and application supply their respective material; shared evaluation and
   endpoint enforcement remain one gate. Return to stage 6: Q-038 now asks about
-  explicitly defined scope-key meanings and supported target relationships.
+  explicitly defined scope-key meanings and supported resource relationships.
   Earlier "clarify" and "no next question" notes below are historical positions.
 
 - Q-036 / ARCH-004 is agreed: canonical Layer 1 and application-specific
@@ -68,7 +75,7 @@ Requests/resolution   → NEXT after remaining grant questions
   Clarify the embedded auth agent's integration across these sources, then return
   to scope-key meanings and ownership. See [system responsibilities](system-overview.md).
 
-- Active branch: **6. Scope and target → scope-key definitions and governance**.
+- Active branch: **6. Scope boundaries → scope-key definitions and governance**.
   Sidebar concluded: CONTRACT-007 / Q-035 is agreed. The endpoint declares its
   permission, material, and sources. [System block diagram](system-overview.md)
   includes the requested SVG; return to scope-key definitions now.
@@ -77,7 +84,7 @@ Requests/resolution   → NEXT after remaining grant questions
   SCOPE-004 remains open. SCOPE-002's earlier typed-format direction is historical;
   its definition-governance questions remain open under the canonical key-value model.
   Q-025 approved this detour; return to ADMIN-004/005. Q-024's fields stay withdrawn.
-  The detailed chapter is [scope and target](scope-model.md).
+  The detailed chapter is [scope boundaries](scope-model.md).
 - Just concluded: SCOPE-007 / Q-034 — flat string-value scope, explicit {} for
   tenant-wide reach, no missing/null default, and strict validation.
   CONTRACT-006's one endpoint-owned gate remains current with INPUT-001 and
@@ -177,7 +184,8 @@ Authorization handbook
 │   ├── Groups/memberships in Auth; optional app sync [working: GROUP-001-A]
 │   ├── Human-only group membership [working: GROUP-003]
 │   ├── Principal, actor, subject, user identity, membership [open]
-│   ├── Resource type versus instance; target; context [open]
+│   ├── Resource type versus instance; context [open]
+│   ├── Permission/boundary/request-material vocabulary [settled: TERM-005 / Q-043]
 │   └── Domain fact as explanatory vocabulary [working: TERM-002]
 ├── 4. Permissions and operations [open]
 │   ├── Capability separate from scope [settled: PERMISSION-001]
@@ -201,14 +209,14 @@ Authorization handbook
 │   ├── Explicit authorized, audited self-assignment [settled: ADMIN-003]
 │   ├── Grantor bounds, recipients, scope validation [return point: ADMIN-004 / Q-023]
 │   ├── Same grant model for administrative authority [working: ADMIN-005 / Q-024]
-│   │   └── Ordinary model with grant-as-target [active: Q-043]
+│   │   └── Q-043 framing withdrawn; vocabulary settled, admin model still open
 │   ├── Status, validity, provenance, membership changes [open]
 │   └── Human-dependent service/agent authority
 │       ├── All services/agents depend on human authority [settled: AUTHORITY-002]
 │       ├── Loss of required upstream authority removes derived access [settled: DELEGATION-002]
 │       ├── Who may delegate what; identity attribution [working: DELEGATION-001]
 │       └── Delegation encoding, ceilings, expiry, growth, chains, reactivation [open]
-├── 6. Scope and target [formerly active; remaining detail parked after Q-042]
+├── 6. Scope boundaries [formerly active; remaining detail parked after Q-042]
 │   ├── Explicit selections and attribute/relationship selectors [settled: SCOPE-001]
 │   ├── Earlier typed format; definition-governance questions [partly deprecated: SCOPE-002 / Q-026]
 │   ├── Scope ownership; shared and app-defined meanings [settled: SCOPE-003 / Q-027]
@@ -217,7 +225,7 @@ Authorization handbook
 │   ├── Canonical boundary-selector definition [settled: SCOPE-006]
 │   ├── Canonical key-value representation; empty/missing scope [settled: SCOPE-007]
 │   ├── Scope keys: meaning, ownership, accepted references [active; no next question issued]
-│   │   ├── Explicit key meanings and target mappings [formerly active; settled: Q-038; refines SCOPE-004]
+│   │   ├── Explicit key meanings and fact bindings [formerly active; settled: Q-038; refines SCOPE-004]
 │   │   ├── Shared definition contract for validation/evaluation [formerly active: Q-039; registration refinement agreed]
 │   │   ├── Permission-scope compatibility declaration [formerly active: Q-040; optional feature agreed REGISTRATION-002]
 │   │   ├── Omitted optional relationship metadata [formerly active: Q-041; superseded by explicit choice]
@@ -227,7 +235,7 @@ Authorization handbook
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
 │   ├── Exact/subtree and application boundary meanings [open]
-│   └── Targets for read/list/create/update/move; relationship timing [open]
+│   └── Request material for read/list/create/update/move; relationship timing [open]
 ├── 7. Requests and resolution [open]
 │   ├── Two endpoint-declared modes [deprecated: CONTRACT-002]
 │   ├── One declaration per HTTP method/route [retained: CONTRACT-004; mode part deprecated]
@@ -303,7 +311,7 @@ Q-023 → whole-grant bounds; user challenges separate format (ADMIN-004 still p
 Q-024 → new scope fields challenged; syntax withdrawn (PROCESS-005; ADMIN-005 open).
 Q-025 → approved stage 6 scope-model detour; return to ADMIN-004/005.
 Q-026 → scope-type/ownership challenge; SCOPE-002 not yet agreed.
-Q-027 → scope-owned target selection and grant binding (SCOPE-003 agreed).
+Q-027 → scope-owned boundary selection and grant binding (SCOPE-003 agreed).
 Q-028 → explicit scope/resource compatibility (SCOPE-004 proposed).
 Q-029 → route/JSON two-mode query walkthrough (SCOPE-005 deprecated, never agreed).
 Q-030 → scope as boundary selector (SCOPE-006 agreed).
@@ -314,7 +322,7 @@ Q-034 → canonical v1 scope and explicit empty-object semantics (SCOPE-007 agre
 Q-035 → endpoint permission/material-source declaration (CONTRACT-007 agreed; sidebar concluded).
 Q-036 → canonical Layer 1/application Layer 2 responsibilities (ARCH-004 agreed; runtime integration clarification, then return to scope-key meanings).
 Q-037 → embedded auth agent across both sources (ARCH-005 agreed; sidebar concluded).
-Q-038 → scope-key meanings and explicit supported target relationships (open; return to stage 6).
+Q-038 → scope-key meanings and explicit supported resource relationships (open; return to stage 6).
 Update: Q-038 is now agreed and answers Q-028's conceptual compatibility question; detailed validation mechanisms remain open.
 Q-039 → application-owned definition contract shared across grant validation and request evaluation (open).
 Update: Q-039 is now approved as refined in REGISTRATION-001: applications register permission/scope contracts; Auth validates without domain interpretation.
@@ -324,7 +332,8 @@ Q-041 → behavior when optional relationship metadata is absent (proposed, open
 Update: Q-041 approved as refined in REGISTRATION-003: explicit upfront application-level choice, mandatory checks for every grant when enabled; omission-based mode inference superseded.
 Q-042 → enabling relationship validation when existing grants are incompatible (open).
 Update: Q-042 agreed as REGISTRATION-004; further registration lifecycle detail parked by user direction. Return to stage 5.
-Q-043 → canonical grant administration with grant-as-target (open; ADMIN-005 before ADMIN-004 bounds).
+Q-043 → canonical grant administration with grant-administration request material (open; ADMIN-005 before ADMIN-004 bounds).
+Update: Q-043 was reformulated and settled TERM-005 after a tenability check. Original framing is withdrawn, not an approved administration model; its exact wording is preserved in history/q043-vocabulary.md.
 
 The log retains these for traceability; they are not current options:
 

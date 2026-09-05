@@ -80,7 +80,7 @@
   <g id="application-facts">
     <rect x="950" y="485" width="282" height="152" rx="16" fill="#effaf7" stroke="#a4d4c4" stroke-width="1.5"/>
     <text x="972" y="513" class="tag" style="fill:#30745d">APPLICATION-OWNED FACTS</text>
-    <text x="972" y="544" class="node-title">Required resource facts</text>
+    <text x="972" y="544" class="node-title">Required target facts</text>
     <text x="972" y="574" class="body">Attributes and relationships</text>
     <text x="972" y="598" class="body">Only as needed to decide</text>
     <text x="972" y="621" class="small">Bounded internal lookups; no disclosure</text>
@@ -96,7 +96,7 @@
   <g id="shared-evaluator">
     <rect x="416" y="652" width="448" height="118" rx="16" fill="#f6f2ff" stroke="#baace0" stroke-width="1.5"/>
     <text x="640" y="689" text-anchor="middle" class="node-title">Shared authorization evaluator</text>
-    <text x="640" y="719" text-anchor="middle" class="body">Permission + boundary checks using material</text>
+    <text x="640" y="719" text-anchor="middle" class="body">Permission + target within scope boundary</text>
     <text x="640" y="745" text-anchor="middle" class="small">Applicability · validity · conditions · tenant / dependency limits</text>
   </g>
 

@@ -1,5 +1,11 @@
 # Authorization Handbook — working edition
 
+Q-043 now agrees TERM-005: use permissions, scope boundaries, requests, and
+trusted request material without an additional canonical entity. The detailed
+[vocabulary explanation](authorization-vocabulary.md) preserves the reasoning,
+case checks, security counterexamples, and remaining gaps. Administration
+remains open; the earlier Q-043 framing is withdrawn.
+
 Current discussion: stage 5, grant administration, Q-043 under ADMIN-004/005.
 Q-042 is agreed; further registration lifecycle details are parked by user
 direction. Earlier checkpoint summaries below are retained context.
@@ -35,12 +41,14 @@ remain open, beginning with Q-042.
 
 | Material | What it preserves |
 |---|---|
+| [Explanation coverage audit](explanation-audit.md) | Evidence of which recent explanations were checked, where reasoning/examples live, and what remains incomplete. |
+| [Authorization vocabulary and request material](authorization-vocabulary.md) | Q-043's approved explanation, why it is tenable across operations, and the evidence-to-execution requirement. |
 | [Application registration](application-registration.md) | Agreed registration/validation responsibilities, permission and scope examples, and the boundary between canonical checks and application interpretation. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen worked scenario groups across Git hosting, ticketing, HRMS, and accounting, with grants, endpoint material, and expected outcomes. |
 | [Reconciliation register](reconciliation.md) | Current-versus-historical status, retained deprecations, and unresolved implementation/design gaps. |
 | [System block diagram](system-overview.md) | Scalable SVG and text views of the agreed endpoint-owned gate, explicit source declarations, shared evaluator, and enforcement. |
 | [Current grant formats](grant-format.md) | Current direct/group, role-reference, and expanded-view examples using canonical scope, with a map to deprecated layouts. |
-| [Scope and target](scope-model.md) | Canonical boundary-selector definition and v1 key-value format, AND within scope, alternatives through grants, and empty/invalid scope rules. |
+| [Scope boundaries](scope-model.md) | Canonical boundary-selector definition and v1 key-value format, AND within scope, alternatives through grants, and empty/invalid scope rules. |
 | [Grants, assignments, and roles](grant-model.md) | Definitions, tenant context, permission/scope binding, groups, per-human self, role changes and expansion, dependency, positive grants, and administrative authority. |
 | [Endpoint-owned authorization](endpoint-authorization.md) | Current single-gate model, selected endpoint inputs, authority and application facts, enforcement, and the deprecation map. |
 | [Earlier authorization flow](authorization-flow.md) | Deprecated two-mode design, preserved with its rationale and examples. |

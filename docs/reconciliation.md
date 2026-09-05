@@ -1,5 +1,30 @@
 # Handbook reconciliation register
 
+## Checkpoint following c631a3c — Q-043 vocabulary and explanation audit
+
+TERM-005 records the approved vocabulary correction after the user's tenability
+check. Current chapters and the SVG use permissions, boundaries, request material,
+and ordinary application facts without an extra canonical entity. The earlier
+administration framing is withdrawn, not approved under another name.
+
+[Detailed reasoning](authorization-vocabulary.md) includes five operation cases
+and security counterexamples. The [explanation audit](explanation-audit.md)
+checks actual chapter coverage across recent discussions and identifies open
+work. [Exact superseded wording](history/q043-vocabulary.md) and the prior SVG
+preserve history; the earlier lab pages remain explicitly historical.
+
+ADMIN-004/005 remain open and registration lifecycle detail stays parked. This
+checkpoint does not change grant JSON, application behavior, or security rules.
+
+Verification: the documentation scan passed for 22 Markdown files, 130 local
+links, 43 JSON blocks, and 118 unique decision/question references present in
+the tree. Fourteen current chapters and the current SVG contain none of the
+retired vocabulary. Changed original Markdown lines remain in their source or
+the deprecated record; the old SVG is preserved byte-for-byte. `git diff --check`
+and `npm run build` passed. The updated SVG was rendered and visually checked.
+These checks support the documentation checkpoint, not production authorization
+correctness or completion of all handbook branches.
+
 ## Checkpoint following 61a8967 — Q-042 and branch return
 
 Q-042 agrees REGISTRATION-004: existing grants must pass before relationship
@@ -83,8 +108,8 @@ an open proposal about sharing definition contracts; recording it is not approva
 
 | Topic | Current agreed basis | Current explanation |
 |---|---|---|
-| Scope meaning and ownership | SCOPE-003/006 | [Scope and target](scope-model.md): boundary selector; scope owns its meaning, grant binds its use. |
-| Application meanings and target compatibility | Q-038; conceptual core of SCOPE-004 | Applications define supported boundary relationships; endpoints bind trusted facts rather than infer meanings from matching names. Grant-validation mechanics remain open. |
+| Scope meaning and ownership | SCOPE-003/006 | [Scope boundaries](scope-model.md): boundary selector; scope owns its meaning, grant binds its use. |
+| Application meanings and scope compatibility | Q-038; conceptual core of SCOPE-004 | Applications define supported boundary relationships; endpoints bind trusted facts rather than infer meanings from matching names. Grant-validation mechanics remain open. |
 | Scope format and combination | SCOPE-007/008 | Required flat string-valued object; AND within scope, alternatives through complete grants; explicit {} tenant-wide; missing/null invalid. |
 | Grant binding, roles, dependencies | GRANT-001/002/003, ROLE-001/002, RESOLUTION-003/004 | [Current grant formats](grant-format.md) and [grant chapter](grant-model.md). Complete lifecycle/transport schemas remain open. |
 | Endpoint gate and material | CONTRACT-006/007, INPUT-001 | [Endpoint authorization](endpoint-authorization.md): one gate, explicit permission/material/source declaration, no prepared handoff. |
@@ -126,7 +151,7 @@ The log records rationale at the time of each decision. An old sentence saying
 | Q-031 / SCOPE-008 still described key-value syntax as proposed. | Q-034 approved SCOPE-007. |
 | CONTRACT-002 had settled two modes. | CONTRACT-006 later deprecated them; CONTRACT-007 specifies the single declaration's material sources. |
 | ARCH-004 / Q-036 left embedded-agent integration as a follow-up. | Q-037 approves ARCH-005's integration responsibility, without fixing deployment or interface syntax. |
-| Q-028 and scope chapter introductions left explicit target relationships open. | Q-038 agrees application-defined meanings and supported target relationships. SCOPE-004 remains only partially agreed because validation mechanisms are still open. |
+| Q-028 and scope chapter introductions left explicit resource relationships open. | Q-038 agrees application-defined meanings and supported resource relationships. SCOPE-004 remains only partially agreed because validation mechanisms are still open. |
 
 This is cross-referencing already approved decisions, not retroactive approval
 of proposals such as scope-key governance or administrative containment.
@@ -152,7 +177,7 @@ not claims that the interactive engine implements them.
 ## Explicit remaining gaps
 
 - ~~Scope-key meanings, ownership, and definition lifecycle: current discussion.~~
-  Q-038 settles application ownership and explicit target meanings. Shared
+  Q-038 settles application ownership and explicit boundary meanings. Shared
   definition governance (Q-039), concrete definitions, and lifecycle remain open.
 - Administrative scope containment, bootstrap, and grant lifecycle: return point.
 - Exact endpoint declaration, request, result, and resolved-grant schemas.

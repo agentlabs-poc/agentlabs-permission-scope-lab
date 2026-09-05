@@ -1,5 +1,10 @@
 # The Authorization Handbook
 
+> VOCABULARY DEPRECATED — TERM-005 / Q-043 removes the older extra authorization
+> abstraction from canonical vocabulary. Current reasoning, case checks, and
+> safety requirements are in `docs/authorization-vocabulary.md`. This original
+> lab page and its interactive implementation remain preserved, not migrated.
+
 > HISTORICAL LAB HANDBOOK — preserved for reference. This is not the current
 > canonical working edition. Current chapters are in `docs/handbook.md`;
 > the logical diagram is in `docs/system-overview.md`.

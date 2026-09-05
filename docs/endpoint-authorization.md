@@ -1,5 +1,9 @@
 # Working handbook chapter: endpoint-owned authorization
 
+TERM-005 / Q-043 uses request material and boundary evaluation without an
+additional canonical entity. [Detailed rationale](authorization-vocabulary.md)
+retains the requirement to bind evidence to actual execution.
+
 CONTRACT-006 is the current agreed model, approved in Q-033. The user authorized
 resuming documentation and explicitly requested preserving earlier designs as
 deprecated, not deleting or silently rewriting them. The earlier
@@ -36,7 +40,7 @@ cannot permit protected execution.
 This is one logical decision location, not a requirement for one database call,
 one literal function invocation, or eagerly loading all possible facts. If no
 applicable grant supplies the required permission, the gate may deny without
-fetching unnecessary target metadata. Shared role expansion and authority loading
+fetching unnecessary resource metadata. Shared role expansion and authority loading
 may still be reused without being independent authorization decisions.
 
 ## Material selected by the endpoint — INPUT-001
@@ -53,13 +57,13 @@ permission or expand the set of authorization-relevant fields arbitrarily.
 | Server-owned endpoint declaration | Mapping from this method and route to action/required permission, and identified input bindings. |
 | Request | Selected path parameters and explicitly identified body parameters. |
 | Auth | Applicable direct/group grants, role definitions, memberships, and delegation dependencies. |
-| Application, when required | Trusted target attributes and relationships needed to evaluate the selected boundaries. |
+| Application, when required | Trusted resource attributes and relationships needed to evaluate the selected boundaries. |
 
 Request inputs are material, not automatically authoritative claims about an
 existing resource. A submitted department can identify the requested boundary
 or a proposed value; it does not by itself prove an existing certificate belongs
 there. For creation/update, selected body values can describe the proposed
-target/change, subject to validation and any required current-state facts.
+resource or change, subject to validation and any required current-state facts.
 The exact request representation, field mapping, and conflict handling are open.
 
 The endpoint does not need an application lookup on every request. It obtains
@@ -76,7 +80,7 @@ is carried in the route, it must also be bound to trusted tenant context.
 
 The endpoint obtains applicable authority. A grant's permission must cover
 certificate-read; its scope selects the boundary in which C-17 must fall.
-Required application facts establish actual target membership, rather than
+Required application facts establish that C-17 is inside the relevant boundary, rather than
 trusting the request's relationship claims. Permission and scope are evaluated
 as parts of each complete grant, never recombined across unrelated grants.
 
@@ -86,7 +90,7 @@ SCOPE-007's canonical key-value syntax illustrates the agreed AND rule:
 { "dept": "dept-1", "user": "$self" }
 ```
 
-The target must be both within dept-1 and
+The certificate must be both within dept-1 and
 within the authorizing human's self boundary. These application key meanings
 must be defined; the format and $self token are canonical under Q-034. This is
 not a new request or resolved-grant schema. An explicit empty scope {} is

@@ -36,8 +36,8 @@ authority rules. It does not interpret application-specific business meaning.
 | Auth validates | Application interprets and establishes |
 |---|---|
 | A permission is registered for the relevant application. | What business operation that permission represents. |
-| A scope key is registered for the relevant application. | What target relationship that boundary key represents. |
-| Scope follows canonical syntax and declared constraints. | Trusted facts establishing whether a particular target is inside the selected boundary. |
+| A scope key is registered for the relevant application. | What resource relationship that boundary key represents. |
+| Scope follows canonical syntax and declared constraints. | Trusted facts establishing whether a particular resource is inside the selected boundary. |
 
 The distinction is not that Auth does no reasoning at all. Auth still enforces
 canonical validity rules and the caller's authority to create or change a
@@ -118,7 +118,7 @@ mode. The application explicitly declares that choice under REGISTRATION-003.
 Recommended interpretation: without relationship metadata, Auth checks registered
 permissions and keys, canonical syntax, declared constraints, and grant-issuance
 authority, but does not claim to have established their compatibility. The
-endpoint-owned gate must still establish supported target relationships and
+endpoint-owned gate must still establish supported resource relationships and
 satisfy the complete scope before access. If relationship metadata is supplied,
 Auth additionally validates against it.
 
@@ -138,7 +138,7 @@ the application, not choosing whether an individual grant is checked.
 | Enabled | Every grant must pass the declared permission-scope relationship checks; there is no per-grant bypass. |
 | Disabled | Auth still checks registered permissions and scope keys, canonical format, declared constraints, and issuance authority, but does not check permission-scope compatibility. |
 
-In either mode, the endpoint-owned gate must establish that the actual target
+In either mode, the endpoint-owned gate must establish that the actual resource
 satisfies the complete scope before permitting access. Disabled compatibility
 validation does not authorize unsupported runtime relationships or ignoring
 scope restrictions.

@@ -24,7 +24,7 @@ current working layout. See [current grant formats](grant-format.md).
   is not misreported here as a completed policy denial.
 - Returning data or mutating state waits for authorization. Necessary internal
   fact lookups remain tenant/request constrained. A path or body assertion
-  alone does not establish an existing target's relationships.
+  alone does not establish an existing resource's relationships.
 
 ## Git hosting
 
@@ -219,7 +219,7 @@ particular cache-consistency guarantee.
 | Human-relative self and group dependency | UC-HRMS-001/004, UC-TICKET-002. |
 | Human-dependent agent subset | UC-GIT-004. |
 | Current role expansion | UC-GIT-003, UC-ACCOUNT-004. |
-| Declared inputs versus actual target facts | UC-GIT-001, UC-TICKET-004. |
+| Declared inputs versus actual resource facts | UC-GIT-001, UC-TICKET-004. |
 | Required-material failure prevents execution | UC-ACCOUNT-002. |
 
 These are documentation consistency cases, not tests against an implemented

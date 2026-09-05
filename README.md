@@ -21,6 +21,12 @@ separates current decisions, preserved history, and implementation gaps.
 
 A local explanation bench for exploring scoped authorization through documented examples and an interactive request evaluator.
 
+> HISTORICAL LAB VOCABULARY — the three-part description below belongs to the
+> earlier simulation, not the current canonical vocabulary. TERM-005 / Q-043
+> uses permissions, scope boundaries, requests, and trusted request material.
+> See the [detailed explanation](docs/authorization-vocabulary.md). The lab
+> implementation has not been migrated.
+
 The lab separates:
 
 1. **Capability** — the stable `<namespaced-noun>::<verb>` permission.
