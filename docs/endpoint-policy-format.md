@@ -1,5 +1,110 @@
 # Endpoint policy format — approved partial structure
 
+## No relationship block — CONTRACT-012 / Q-050-C, agreed
+
+The adopted policy retains `version`, `method`, `path`, one `permission`, and
+selected `inputs` with their sources. No `relationships` block, named resolver,
+or argument-mapping contract is adopted.
+
+> The endpoint predeclares one required permission and selected inputs with
+> their sources. The endpoint implementation must establish or enforce the
+> application relationships necessary to keep execution within the authorized
+> boundaries.
+
+This refines CONTRACT-007/008's earlier predeclared-relationship wording. The
+relationship responsibility remains mandatory in implementation, not policy
+syntax. The GET/PUT examples below remain structurally applicable. Full policy
+validation, missing-input handling, nested-body selection, and publication remain
+open; relationship-block design is no longer an unanswered v1 option.
+
+### Rationale and conscious tradeoff
+
+The user chose simplicity by placing relationship enforcement with the endpoint.
+Auth establishes authority for the supplied boundary under the complete grant
+and mandatory constraints. The endpoint keeps actual execution within that
+boundary, without needing a canonical relationship language or resolver interface.
+
+Auth cannot independently detect every incorrectly implemented endpoint. This
+is a conscious responsibility split, not permission to trust arbitrary claims
+about existing records. Endpoint enforcement is mandatory authorization work,
+not optional business validation. Review/tests must cover mismatched tenant,
+department, certificate, and applicable self boundaries. This responsibility
+split introduces neither independent downstream authority nor a prepared handoff.
+
+### Grant, request, and enforcement example
+
+Assume valid membership and other grant constraints. This working grant example
+supplies Finance certificate-read; lifecycle details are omitted for focus:
+
+```json
+{
+  "version": "1",
+  "recipient": { "type": "group", "id": "certificate-readers" },
+  "permissions": ["hrms:employee:certificate::read"],
+  "scope": { "dept": "FIN" }
+}
+```
+
+For `GET /api/v1/acme/FIN/C-17`, Auth can establish that Vinay may read within
+Finance. That does not establish that unchecked C-17 belongs to Finance. The
+endpoint must bind execution to the trusted tenant, requested certificate, and
+authorized Finance boundary. A constrained lookup can enforce this directly:
+
+```sql
+WHERE tenant_id = :trusted_tenant
+  AND department_id = :requested_department
+  AND certificate_id = :requested_certificate
+```
+
+This illustrates application enforcement, not a query grammar in policies or
+grants. An Engineering certificate cannot be returned by this operation. An
+unchecked ID-only lookup followed by disclosure violates the contract even if
+scope evaluation accepted the supplied Finance value.
+
+With `{}`, no additional department restriction comes from that grant's scope.
+Tenant isolation, validity, conditions, human/delegation limits, and application
+requirements remain. A self-scoped operation must similarly remain within the
+authorizing human's defined self relationship. PUT's requested Finance is not
+proof of current Finance membership; exact update/move rules remain open.
+
+### Earlier relationship proposal — not adopted
+
+The original Q-050-C proposal added this block to the versioned GET policy.
+This is a historical fragment, not an approved standalone contract:
+
+```json
+{
+  "relationships": {
+    "dept": {
+      "resolver": "certificate.department",
+      "arguments": { "certificate": "cert" }
+    }
+  }
+}
+```
+
+Its rationale was explicit binding of registered boundary meanings to application
+facts, separate from request extraction. The argument named a local input; the
+resolver supplied a fact, not an authorization decision. After requesting a
+grant example, the user chose mandatory endpoint enforcement to avoid this added
+machinery. The proposal was never approved. Earlier Q-050-C-open notes below are
+preserved history, superseded by CONTRACT-012; the actual relationship still matters.
+
+### Review follow-up — Q-050-D, proposed refinement
+
+The user suggested reviewing whether all material is used to generate output,
+with the expectation that this would catch any breach. The proposed refinement
+is to verify that every authorization constraint relied on actually restricts
+the output or mutation, not merely that its input appears somewhere in code.
+Logging the department, or using it in an OR branch that still admits other
+departments, does not enforce Finance containment. Conversely, `{}` imposes no
+department scope restriction merely because a department input is declared.
+
+This is a strong review criterion, not a guarantee of detecting every breach.
+Wrong permissions, untrusted context, stale dependencies, or output paths bypassing
+the checked operation can escape a simple input-usage review. The refinement is
+proposed, not a new approved rule or replacement for mandatory checks/tests.
+
 Approval follow-up: the user approved the presented PUT example after requesting
 it. This confirms the body-to-local-input illustration under Q-050-B, including
 the distinction between a requested department and established current facts.

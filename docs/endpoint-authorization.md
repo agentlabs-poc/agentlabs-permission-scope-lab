@@ -1,5 +1,32 @@
 # Working handbook chapter: endpoint-owned authorization
 
+## Current responsibility split — CONTRACT-012 / Q-050-C
+
+The endpoint predeclares one required permission and selected inputs with their
+sources. It must establish or enforce application relationships in implementation
+to keep the actual operation within authorized boundaries. There is no adopted
+relationship block or named-resolver contract. [The policy chapter](endpoint-policy-format.md)
+preserves rationale, the grant/GET example, constrained lookup, tradeoff, and
+original proposal not adopted.
+
+Auth can establish authority within a supplied Finance boundary; this is not
+permission to return an unchecked certificate merely because its route says
+Finance. The endpoint must establish containment or enforce it directly through
+the actual data operation. No protected output or effect may escape the authorized
+boundary. This stays within CONTRACT-006's single endpoint-owned gate, not a
+return to pre-handler business authorization or a prepared response.
+
+The endpoint may use trusted facts already available or a constrained operation;
+it need not eagerly fetch a relationship fact before every scope evaluation.
+Q-047's distinction remains: request claims do not become factual proof because
+their values match a grant. Tenant, grant validity/conditions, and human/delegation
+limits remain mandatory. Review/tests must cover relevant mismatches; exact
+update/move, consistency, collection, and result contracts remain open.
+
+Earlier predeclared-relationship wording below is retained history, qualified by
+CONTRACT-012. Q-050-D's subsequent input-usage review refinement remains proposed,
+not an assertion that this review alone detects every security breach.
+
 Q-050-B / CONTRACT-011 now approves the partial endpoint policy fields:
 `version`, `method`, `path`, one `permission`, and named `inputs` with
 `source`/`name`. [GET and PUT examples](endpoint-policy-format.md) explain field

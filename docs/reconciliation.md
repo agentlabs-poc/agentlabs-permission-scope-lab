@@ -1,5 +1,31 @@
 # Handbook reconciliation register
 
+## Checkpoint following deef0b3 — Q-050-C endpoint enforcement responsibility
+
+Q-050-C approves CONTRACT-012: no relationship block, named resolver, or argument
+mapping contract. Endpoint implementation must establish or enforce actual
+execution within authorized boundaries. The policy chapter records rationale,
+the conscious trust tradeoff, grant/GET/constrained-query example, and the original
+resolver proposal as not adopted. Earlier declarative-relationship requirements
+are qualified in current chapters; the application relationship is not discarded.
+
+The one endpoint-owned gate, registered scope meanings, tenant isolation, complete
+grant constraints, and human/delegation limits remain. This is not an unchecked
+business-operation allow, an optional business check, or a prepared handoff.
+Full validation/publication, missing-input semantics, and update/move contracts
+remain open. The diagram is unchanged; its responsibilities do not mandate
+canonical relationship syntax or universal eager fact lookup.
+
+Q-050-D captures the subsequent user review suggestion. The proposed refinement
+checks actual constraint enforcement on output/effects rather than mere usage of
+all inputs; it does not claim to catch every breach. It remains open pending
+agreement and does not replace the approved enforcement responsibility.
+
+Docs-only verification passed: 25 Markdown files, 155 local links, 51 JSON
+blocks, and 138 unique decision/question IDs in the tree. Agreed/open status,
+rationale/counterexample coverage, preservation of earlier nonblank content,
+and `git diff --check` passed. No application behavior or authorization data changed.
+
 ## Checkpoint following cbc387d — PUT example confirmation
 
 The user explicitly approved the presented PUT example. The endpoint policy

@@ -1,5 +1,11 @@
 # Contract publication and versioning — CONTRACT-009
 
+Q-050-C / CONTRACT-012 now excludes a relationship block from endpoint policy;
+application relationships are mandatory endpoint enforcement responsibilities.
+The versioned policy's core fields stay as approved in Q-050-B. Full validation
+and publication remain open, but relationship-block design is no longer pending.
+Earlier relationship-binding-open notes below are retained history.
+
 Endpoint policy status update: Q-050-B approves the partial fields and input
 bindings in [endpoint policy format](endpoint-policy-format.md), not the whole
 schema. Q-050-C relationship bindings and full publication remain open. Earlier

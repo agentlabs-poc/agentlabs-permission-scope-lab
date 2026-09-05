@@ -1,5 +1,14 @@
 # Authorization system — canonical logical overview
 
+Q-050-C / CONTRACT-012 clarifies the responsibility split: Auth evaluates bounded
+authority; the endpoint must keep actual output/effects within those boundaries.
+No relationship block or resolver interface is part of the adopted policy.
+The existing diagram's material/evaluation/enforcement responsibilities remain;
+it does not require a resolver call or eager fact lookup for every boundary.
+This is one endpoint-owned gate, not two business-authorization locations.
+Earlier declarative-relationship requirements are retained history. See
+[the policy example and rationale](endpoint-policy-format.md).
+
 Q-050-B now supplies an approved partial policy representation for the declaration
 block: version, method/path, one permission, and named source/name input bindings.
 [GET and PUT examples](endpoint-policy-format.md) distinguish requested values

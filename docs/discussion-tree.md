@@ -19,6 +19,13 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-050-C settled CONTRACT-012 as revised.** No relationship block;
+  endpoint implementation must keep output/effects within authorized boundaries.
+  The policy chapter records rationale, grant/query example, and rejected resolver
+  proposal. **Q-050-D is open:** review actual constraint enforcement, not merely
+  input usage; no guarantee against every breach. Remaining policy validation,
+  publication, and update/move contracts are still open. Earlier labels are history.
+
 - **Current: Q-050-B settled CONTRACT-011's partial policy structure.** Version,
   method/path, one permission, and named source/name inputs are agreed. The
   endpoint-policy-format chapter contains GET and PUT examples and their rationale.
@@ -311,6 +318,7 @@ Authorization handbook
 │   │       └── Shared version convention [settled: CONTRACT-010 / Q-050-A; full policy schema remains open]
 │   │       ├── Method/path, one permission, source/name inputs [settled partial structure: CONTRACT-011 / Q-050-B; GET and PUT examples]
 │   │       └── Relationship bindings and trusted fact connections [active: Q-050-C]
+│   │           └── Revised and settled: CONTRACT-012 / Q-050-C, no relationship block; endpoint enforcement mandatory
 │   │   └── Permissions, inputs, sources, relationship bindings [clarified: Q-047-A]
 │   ├── Logical system block diagram [available: system-overview.md]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
@@ -422,6 +430,8 @@ Q-050 → endpoint policy contract discussion, including version representation 
 Q-050-A → CONTRACT-010 approved: version field/string, type-local meaning, revision distinction, and strict rejection rules. Q-050's remaining policy schema stays open.
 Q-050-B → CONTRACT-011 approved partial structure; requested PUT body example added with rationale and current/proposed distinction.
 Q-050-C → relationship bindings and trusted facts (open); full Q-050 policy schema remains unfinished.
+Update: Q-050-C approved CONTRACT-012 instead: endpoint-enforced relationships without a policy block. Prior open label/proposal is history; other full-policy gaps remain.
+Q-050-D → review criterion for actual constraint enforcement on output/mutations, not mere input usage (open).
 
 The log retains these for traceability; they are not current options:
 

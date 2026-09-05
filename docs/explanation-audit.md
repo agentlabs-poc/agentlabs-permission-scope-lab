@@ -1,5 +1,12 @@
 # Explanation coverage audit — through Q-043
 
+Q-050-C follow-up: the policy chapter records mandatory endpoint boundary
+enforcement without a relationship block, the simplicity rationale and conscious
+trust tradeoff, a grant/GET/constrained-query example, empty/self/PUT distinctions,
+and the original resolver proposal as not adopted. Q-050-D records the user's
+review suggestion and the proposed constraint-enforcement refinement, including
+why input usage is not a guarantee against all breaches. That refinement is open.
+
 Q-050-B follow-up: endpoint-policy-format.md records the approved partial fields,
 each field's rationale, explicit source/name versus shorthand, GET and PUT JSON,
 body/local-name mapping, the Engineering-to-Finance counterexample, and open

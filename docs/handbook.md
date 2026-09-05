@@ -1,5 +1,13 @@
 # Authorization Handbook — working edition
 
+Current: Q-050-C approves CONTRACT-012: no relationship block; endpoint
+implementation must establish or enforce actual execution within authorized
+boundaries. [Policy rationale and examples](endpoint-policy-format.md) preserve
+the conscious tradeoff and earlier proposal not adopted. Q-050-D is an open
+review refinement: constraints must restrict output/effects, not merely appear
+in input usage. Full policy validation/publication and update/move contracts
+remain open. Older relationship-binding-open notes below are history.
+
 Current: Q-050-B approves CONTRACT-011's [partial endpoint policy format](endpoint-policy-format.md),
 including explicit path/body input bindings. GET and PUT examples preserve the
 rationale and proposed-versus-current-fact distinction. Q-050 remains unfinished;

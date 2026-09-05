@@ -1,5 +1,16 @@
 # Working handbook chapter: scope boundaries
 
+Q-050-C / CONTRACT-012 keeps scope as a boundary selector while assigning
+application relationship enforcement to endpoint implementation, without a
+relationship block in policy. Auth may establish authority within supplied
+Finance material; the endpoint must ensure the actual operation stays there,
+using trusted facts or constrained execution. Matching a path value alone is
+not proof about an unchecked certificate. Scope meanings, tenant isolation,
+self anchoring, and other mandatory constraints remain unchanged. See
+[the grant and constrained-lookup example](endpoint-policy-format.md).
+Earlier requirements for declarative relationship bindings are historical;
+application meanings and mandatory enforcement remain necessary.
+
 Q-043 / TERM-005 aligns this chapter's vocabulary with permissions, scope
 boundaries, requests, and request material. [Reasoning and case checks](authorization-vocabulary.md)
 explain why no additional canonical entity is required. [Superseded wording](history/q043-vocabulary.md)
