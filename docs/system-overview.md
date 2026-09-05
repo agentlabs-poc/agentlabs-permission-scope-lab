@@ -43,6 +43,63 @@ the evaluator in the main-path diagram.
 
 ## Responsibilities
 
+### Two responsibility layers — ARCH-004 / Q-036, agreed
+
+Layer 1 is the canonical authorization foundation: permissions, grants, roles,
+authority dependencies, tenant and delegation limits, scope structure and
+combination rules, and shared evaluation semantics. It defines rules that
+applications must not reinterpret. Layer 2 supplies application-specific
+operations, scope-key meanings for targets, trusted fact sources, additional
+restrictions, and enforcement of the actual data operation. Together they
+establish effective authorization; authentication establishes identity.
+
+Layer 2 is not merely a filter after an independently complete Layer 1 allow.
+Canonical scope evaluation may need Layer 2 meanings and facts before it can
+decide. Layer 2 cannot manufacture authority absent from Layer 1 or override its
+constraints. These layers preserve CONTRACT-006's single endpoint-owned gate,
+not a middleware allow/prepared result followed by endpoint completion.
+
+For example, an employee-group grant permits payslip read with scope
+`{"user":"$self"}`. Layer 1 establishes grant applicability and anchors `$self`
+to the authorizing human, Vinay. The application defines `user` for payslips as
+their owning employee and supplies trusted ownership information for P-17,
+including any employee-to-human identity mapping. Shared evaluation uses those
+facts to determine whether P-17 falls inside the self boundary. The application
+may additionally require that the payslip has been published. That illustrative
+restriction is not a new meaning of `$self` or a mandatory platform-wide rule.
+
+The user suggested that most Layer 1 material comes from the Auth service,
+Layer 2 material comes from the application, and an application-embedded auth
+agent works across both. This is a follow-up integration clarification: logical
+responsibilities do not by themselves fix service placement, network calls, or
+whether the shared evaluator is packaged as middleware, a library, or an SDK.
+No new grant/request fields or application implementation are adopted here.
+
+### Embedded auth agent — ARCH-005 / Q-037, agreed
+
+Q-037 settles the integration clarification above. Auth primarily supplies
+authority material such as grants, roles, memberships, and dependencies. The
+application supplies operation declarations, domain meanings, trusted facts,
+additional restrictions, and enforcement. The application-embedded auth agent
+works across both using the shared canonical evaluation rules. Layer 1 is not
+confined to the Auth service: its rules also govern the evaluator used inside
+the application.
+
+The reusable integration need not understand every application's database.
+Application-provided bindings supply the necessary meanings and facts; their
+exact interface remains open. For a payslip request, Auth supplies applicable
+self-scoped read authority, the application establishes ownership, the shared
+agent evaluates the complete requirements, and the endpoint enforces the result
+before returning the payslip.
+
+"Auth middleware" may describe this overall embedded integration. It must not
+be interpreted as requiring a complete business-authorization decision in
+pre-handler HTTP middleware, which may not yet have sufficient material.
+CONTRACT-006's one endpoint-owned gate remains current, without an allow/prepared
+handoff. Neither a new service deployment nor a fixed number of calls is implied.
+
+### Components in the existing logical diagram
+
 | Component | Responsibility |
 |---|---|
 | Endpoint declaration | Identify the required permission and relevant material/source bindings for this operation. Detailed binding schema is still open. |

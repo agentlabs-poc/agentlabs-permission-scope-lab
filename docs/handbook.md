@@ -17,6 +17,8 @@ explicit {} means tenant-wide reach; missing/null scope is invalid.
 
 | Material | What it preserves |
 |---|---|
+| [Cross-domain use cases](use-case-examples.md) | Sixteen worked scenario groups across Git hosting, ticketing, HRMS, and accounting, with grants, endpoint material, and expected outcomes. |
+| [Reconciliation register](reconciliation.md) | Current-versus-historical status, retained deprecations, and unresolved implementation/design gaps. |
 | [System block diagram](system-overview.md) | Scalable SVG and text views of the agreed endpoint-owned gate, explicit source declarations, shared evaluator, and enforcement. |
 | [Current grant formats](grant-format.md) | Current direct/group, role-reference, and expanded-view examples using canonical scope, with a map to deprecated layouts. |
 | [Scope and target](scope-model.md) | Canonical boundary-selector definition and v1 key-value format, AND within scope, alternatives through grants, and empty/invalid scope rules. |
@@ -59,10 +61,16 @@ requires earlier designs to be retained with deprecation labels.
 ## Relationship to the original lab handbook
 
 The original [lab concept page](../src/content/authorization-concept.md) predates
-this discussion and has not yet been reconciled with the working edition. The
+this discussion ~~and has not yet been reconciled with the working edition.~~ The
 lab's interactive evaluator and enforcement trace also have not been updated
 to implement our decisions. Treat their behavior and claims as source material
 for later review, not as evidence that the new model is implemented.
+
+Reconciliation checkpoint: original lab pages and the older design now carry
+historical/deprecation notices, with the substantive prose preserved. Current
+chapters and examples are aligned to approved scope and endpoint decisions.
+This is not a full rewrite or an implementation migration; see the
+[reconciliation register](reconciliation.md) for resolved drift and open gaps.
 
 The working chapters currently consolidate the grants and authorization-flow
 branches and begin the scope-model discussion. Several other branches still have only partial discussion or decision

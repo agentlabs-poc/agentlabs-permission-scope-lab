@@ -19,6 +19,24 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- Current as of Q-038: application-owned scope meanings, supported target
+  relationships, and endpoint-specific trusted fact bindings are agreed.
+  Q-028's conceptual question is answered; SCOPE-004's detailed validation
+  mechanics remain open. Q-039 is now active: sharing definition contracts
+  across grant validation and request evaluation. Earlier active-position notes
+  below are retained history, not additional unanswered copies of Q-038.
+
+- Latest: Q-037 / ARCH-005 is agreed, closing the embedded-agent sidebar below.
+  Auth and application supply their respective material; shared evaluation and
+  endpoint enforcement remain one gate. Return to stage 6: Q-038 now asks about
+  explicitly defined scope-key meanings and supported target relationships.
+  Earlier "clarify" and "no next question" notes below are historical positions.
+
+- Q-036 / ARCH-004 is agreed: canonical Layer 1 and application-specific
+  Layer 2 jointly establish authorization within the single endpoint-owned gate.
+  Clarify the embedded auth agent's integration across these sources, then return
+  to scope-key meanings and ownership. See [system responsibilities](system-overview.md).
+
 - Active branch: **6. Scope and target → scope-key definitions and governance**.
   Sidebar concluded: CONTRACT-007 / Q-035 is agreed. The endpoint declares its
   permission, material, and sources. [System block diagram](system-overview.md)
@@ -42,6 +60,9 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 - Current grant layouts have been reconciled in [current grant formats](grant-format.md).
   The six earlier layouts remain deprecated examples; GRANT-EX-007 uses canonical
   scope. Complete lifecycle and resolved-grant schemas are not declared finished.
+- Reconciliation checkpoint: [register](reconciliation.md) identifies current
+  versus historical material without deletion. [Cross-domain use cases](use-case-examples.md)
+  adds 16 scenario groups; this does not close stage 10 or interrupt the scope-key branch.
 
 ## Mind map at a glance
 
@@ -63,7 +84,7 @@ Authorization Handbook — working v1
 ├── 7. Requests/resolution    One endpoint-owned gate agreed; data shapes open
 ├── 8. Decision semantics     AND/alternative grants agreed; remaining cases open
 ├── 9. Enforcement/lifecycle  Safety rule agreed; freshness/audit/concurrency open
-├── 10. Challenge/verify      Examples available; comprehensive validation open
+├── 10. Challenge/verify      16 cross-domain cases; comprehensive validation open
 └── 11. Publish v1            Final reconciliation and implementation roadmap open
 ```
 
@@ -108,6 +129,8 @@ Authorization handbook
 │   ├── Shared rules across AgentLabs [settled: CHARTER-001]
 │   ├── Auth versus application responsibility [settled: CHARTER-002]
 │   ├── Reusable evaluator/application integration [working: ARCH-001]
+│   ├── Canonical/application responsibility layers [settled: ARCH-004 / Q-036]
+│   ├── Embedded agent integrates Auth/application material [settled: ARCH-005 / Q-037]
 │   └── Audience, exceptions, ownership of handbook changes [open]
 ├── 2. Principles [open]
 │   ├── Establish authority or prevent protected execution [settled: PRINCIPLE-001]
@@ -153,11 +176,13 @@ Authorization handbook
 │   ├── Explicit selections and attribute/relationship selectors [settled: SCOPE-001]
 │   ├── Earlier typed format; definition-governance questions [partly deprecated: SCOPE-002 / Q-026]
 │   ├── Scope ownership; shared and app-defined meanings [settled: SCOPE-003 / Q-027]
-│   ├── Explicit resource compatibility [working: SCOPE-004 / Q-028]
+│   ├── Explicit resource compatibility [formerly working: SCOPE-004 / Q-028; meaning agreed Q-038, mechanics open]
 │   ├── Selector/query enforcement and fixed endpoint modes [deprecated: SCOPE-005 / Q-029]
 │   ├── Canonical boundary-selector definition [settled: SCOPE-006]
 │   ├── Canonical key-value representation; empty/missing scope [settled: SCOPE-007]
 │   ├── Scope keys: meaning, ownership, accepted references [active; no next question issued]
+│   │   ├── Explicit key meanings and target mappings [formerly active; settled: Q-038; refines SCOPE-004]
+│   │   └── Shared definition contract for validation/evaluation [active: Q-039]
 │   ├── AND within scope; alternatives through complete grants [settled: SCOPE-008]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
@@ -191,6 +216,10 @@ Authorization handbook
 │   ├── Revocation freshness, caches, concurrent change, resource moves [open]
 │   └── Audit storage, correlation, versions, information disclosure [open]
 ├── 10. Challenge the model [open]
+│   ├── Git hosting [available: UC-GIT-001 through UC-GIT-004]
+│   ├── Ticketing [available: UC-TICKET-001 through UC-TICKET-004]
+│   ├── HRMS [available: UC-HRMS-001 through UC-HRMS-004]
+│   ├── Accounting [available: UC-ACCOUNT-001 through UC-ACCOUNT-004]
 │   ├── Current grant layouts [available: grant-format.md, GRANT-EX-007]
 │   ├── Earlier grant layouts [deprecated syntax: GRANT-EX-001 through GRANT-EX-006]
 │   ├── Beyond-self completion cases [available: EC-001 through EC-007]
@@ -243,6 +272,11 @@ Q-032 → AND within scope, alternatives through grants (SCOPE-008 agreed).
 Q-033 → endpoint-owned gate and recording resumed (CONTRACT-006, PROCESS-006).
 Q-034 → canonical v1 scope and explicit empty-object semantics (SCOPE-007 agreed).
 Q-035 → endpoint permission/material-source declaration (CONTRACT-007 agreed; sidebar concluded).
+Q-036 → canonical Layer 1/application Layer 2 responsibilities (ARCH-004 agreed; runtime integration clarification, then return to scope-key meanings).
+Q-037 → embedded auth agent across both sources (ARCH-005 agreed; sidebar concluded).
+Q-038 → scope-key meanings and explicit supported target relationships (open; return to stage 6).
+Update: Q-038 is now agreed and answers Q-028's conceptual compatibility question; detailed validation mechanisms remain open.
+Q-039 → application-owned definition contract shared across grant validation and request evaluation (open).
 
 The log retains these for traceability; they are not current options:
 

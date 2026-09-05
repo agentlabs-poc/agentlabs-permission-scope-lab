@@ -2,6 +2,12 @@
 
 ## Current agreed foundation — recording resumed after Q-033
 
+Q-038 subsequently settles application ownership of scope-key meanings and
+explicit supported target relationships, with endpoint-specific trusted fact
+bindings (SCOPE-004's conceptual core). Earlier broad statements that key
+definitions remain open must now be read with that agreement. Shared definition
+governance, representation, and validation mechanics remain open under Q-039.
+
 SCOPE-006 supplies the canonical definition:
 
 > Scope is a boundary selector that identifies a set of targets within the
@@ -117,6 +123,49 @@ scope containment for administration, or evaluator/endpoint interfaces. Earlier
 type/id and employee_self examples below are retained as historical syntax,
 not the canonical v1 scope representation. GRANT-EX-007 in
 [grant examples](grant-examples.md) uses the current canonical scope format.
+
+## Scope-key meaning and endpoint fact bindings — Q-038, agreed
+
+The application defines a scope key's boundary meaning and the target
+relationships for which that meaning is supported. The endpoint declares how
+to obtain trusted material needed to evaluate that meaning. It does not invent
+an independent interpretation merely because a request parameter or database
+column has the same name. This agrees the conceptual core of SCOPE-004 and
+answers the earlier Q-028; the exact compatibility-validation mechanism is not
+thereby adopted.
+
+For example, a grant scope may be:
+
+```json
+{ "dept": "dept-1" }
+```
+
+Illustrative application definitions could interpret `dept` for a payslip as
+the department responsible for its payroll record, and for a certificate as
+the department owning that certificate. A repository has no department boundary
+unless its application explicitly defines a supported relationship. These
+examples are not universal meanings or a newly adopted resource catalog.
+
+An endpoint supplies established target facts through its declared binding.
+A path segment named `dept` does not prove a payslip belongs to that department;
+nor may a handler silently use the requesting employee's current department
+instead of the defined payroll-record relationship. Unsupported relationships
+cannot become unrestricted access by ignoring the scope entry. Missing required
+evidence cannot establish authorization through that route.
+
+Layer 1 supplies canonical scope format and evaluation rules. Layer 2 supplies
+the application's defined target relationships and trusted facts. The embedded
+auth agent evaluates the boundary using both, under the single endpoint-owned
+gate. Application-owned meanings remain subject to canonical rules, including
+the human anchor of `$self`; application ownership is not permission to redefine
+that token or widen authority.
+
+Q-039 proposes sharing those definitions as one contract used for grant
+validation and request evaluation. This remains a proposal: it does not yet
+adopt a registry, definition schema, distribution mechanism, or requirement for
+Auth to access the application's database. Multi-permission compatibility,
+role evolution, reference validation, and administrative scope containment
+remain separate open details.
 
 ## Historical development and still-open proposals
 

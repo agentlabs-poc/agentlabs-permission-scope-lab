@@ -1,5 +1,14 @@
 # HRMS example: configuring Payroll Administration
 
+> HISTORICAL SCENARIO — preserved, not a finalized provisioning contract.
+> Typed scopes and `tenant_self` below are deprecated under SCOPE-007; current
+> examples are in `docs/grant-format.md`. Scope-key registration, bootstrap,
+> assignment storage, and grant-administration bounds remain open. An
+> administrator need not personally possess the business access they assign
+> (ADMIN-002). Do not interpret the historical delegation-ceiling language as
+> restoring that rejected prerequisite. Current request handling uses the
+> endpoint-owned gate and declared material sources (CONTRACT-006/007).
+
 This example follows the full journey from tenant setup to an authorized payroll-ledger request.
 
 ```text

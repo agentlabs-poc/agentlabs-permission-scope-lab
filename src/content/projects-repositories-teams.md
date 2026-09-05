@@ -1,5 +1,14 @@
 # GitHub-style example: projects, repositories, teams, and members
 
+> HISTORICAL SCENARIO — preserve the examples, but do not treat their grant/scope
+> layouts, scope catalogs, or schema ownership as current canonical contracts.
+> SCOPE-007 defines the current scope format; `docs/grant-format.md` contains
+> current grant examples. Team and group are synonymous (TERM-001); recipient
+> groups are not automatically authenticated actors. Final identity vocabulary
+> and scope-key governance remain open. Implementation assertions about other
+> repositories below were not reverified in this reconciliation checkpoint.
+> The current endpoint-owned authorization flow is CONTRACT-006/007.
+
 This second example tests whether the authorization model generalizes beyond payroll.
 
 It is a conceptual code-hosting example using familiar GitHub-style nouns. It does not claim to reproduce GitHub's internal authorization implementation or exact permission names.

@@ -1,5 +1,13 @@
 # Authorization Explanation Bench — working design
 
+> HISTORICAL LAB DESIGN — preserved, not the current canonical contract.
+> Scope syntax below is deprecated under SCOPE-007. The current model uses one
+> endpoint-owned gate (CONTRACT-006), explicit permission/material/source
+> declarations (CONTRACT-007), and human-dependent service/agent authority
+> (AUTHORITY-002). Identity terminology, permission grammar, registration,
+> schemas, and audit mechanisms below are not silently adopted by this notice.
+> See the [working handbook](handbook.md) and [reconciliation register](reconciliation.md).
+
 The Authorization Explanation Bench is an executable design conversation. Markdown pages carry the explanations; payroll is the first interactive scenario pack. The authorization mechanics must remain reusable by other products and domains.
 
 ## Working equation
@@ -52,6 +60,10 @@ A permission without an evaluable scope is incomplete for scoped data and must f
 Caller-controlled values may identify a requested target, but they cannot establish the caller's scope or trusted identity relationship.
 
 ## Current scope vocabulary
+
+> DEPRECATED VOCABULARY/FORMAT — "current" in this historical heading refers
+> to the earlier lab. Canonical v1 scope is the flat key-value format in
+> [scope and target](scope-model.md), not the typed descriptors below.
 
 - `employee_self`: dynamic; HRMS resolves the authenticated user's employee.
 - `employee:<id>`: one employee.

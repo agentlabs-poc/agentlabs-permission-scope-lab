@@ -1,5 +1,22 @@
 # The Authorization Handbook
 
+> HISTORICAL LAB HANDBOOK — preserved for reference. This is not the current
+> canonical working edition. Current chapters are in `docs/handbook.md`;
+> the logical diagram is in `docs/system-overview.md`.
+>
+> Current decisions: scope is a boundary selector, encoded as a required flat
+> key-value object (SCOPE-006/007); entries combine with AND and alternative
+> grants provide OR (SCOPE-008). Explicit `{}` is tenant-wide; missing/null
+> scope is invalid. Authorization uses one endpoint-owned gate without a
+> prepared handoff (CONTRACT-006). Each endpoint declares required permission,
+> material, and sources, including identified path/body inputs (CONTRACT-007).
+> Services and agents remain human-dependent (AUTHORITY-002).
+>
+> Earlier typed scopes, request/receipt schemas, registration models, identity
+> terminology, external comparisons, and implementation claims below remain
+> historical or unverified where not explicitly agreed in the decision log.
+> The interactive evaluator has not been migrated to the current handbook.
+
 This document is about **authorization**, not authentication. Authentication already happened by the time any of this runs: a principal has been identified, in a tenant, and that identity is this document's starting input—not something it resolves. What's still open is authorization: given that identified principal, what are they actually allowed to do, and to which data?
 
 HRMS serves many tenants at once, and every tenant has its own employees, managers, and payroll administrators. A payroll ledger is sensitive: an employee should see their own, a payroll administrator should see every employee's—but only inside their own tenant, never another company's. The same shape of problem repeats for code repositories, documents, and every other resource this platform will host. Getting it wrong in either direction is a real failure: too loose leaks another employee's salary or another tenant's data; too strict blocks a payroll administrator from doing their job. A permission string alone can't express that difference—"can read payroll ledgers" says nothing about *whose*—so the rest of this document builds up what has to sit alongside it.
@@ -73,6 +90,11 @@ WHERE tenant_id = :authenticated_tenant_id
 The request cannot broaden this predicate. Supplying another `employee_id` in a URL, body, header, CLI flag, or UI state does not change Vinay's reach—none of stages 1–6 read anything from the caller except which operation and which target id they're naming.
 
 ### What "the request" actually contains
+
+> HISTORICAL INPUT EXAMPLE — any restriction below to method/path/token alone
+> is not the current contract. INPUT-001 and CONTRACT-007 include explicitly
+> identified body inputs and declared material sources. Inputs still do not
+> automatically prove existing target relationships.
 
 It is easy to smuggle resolved fields back into the request and call them caller-supplied. The caller contributes exactly three things, nothing else, ever:
 
@@ -256,6 +278,10 @@ Commerce    Tenant → Store → Catalogue → Product
 
 ## 4. Loading the grant
 
+> HISTORICAL LAYOUT — current equivalents are in `docs/grant-format.md`.
+> Grant/role/binding semantics remain relevant; typed scope objects and the
+> exact stored/expanded payloads below are not the canonical v1 scope format.
+
 Assigning only this string is incomplete for scoped business data:
 
 ```text
@@ -320,6 +346,12 @@ This separation lets the role remain reusable. It also makes privilege review cl
 A direct permission grant should use the same scoped-assignment shape. It must not bypass scope simply because it was assigned directly.
 
 ## 5. Resolving scope
+
+> DEPRECATED SCOPE REPRESENTATION — retain the following explanation as history.
+> SCOPE-007 now uses flat string-valued boundary keys, the reserved `$self`
+> human reference where supported, and explicit `{}` for tenant-wide reach.
+> Scope-key governance and definition lifecycle remain open; the scope-type
+> catalogs, `tenant_self` conversion, and registration rules below are not adopted.
 
 The first payroll scenario uses these scope types:
 
@@ -639,6 +671,10 @@ runner authority = user authority ∩ delegated authority
 This is deliberately still a question in the bench. The worked examples must help us test and finalize it before implementation.
 
 ## 10. Audit receipt
+
+> HISTORICAL RECEIPT EXAMPLE — audit accountability is required for explicit
+> access-changing self-assignment (ADMIN-003), but this receipt's exact schema,
+> persistence, failure behavior, and integrity mechanisms are not finalized.
 
 A useful decision record—stage 8's output—contains the whole explanation:
 
