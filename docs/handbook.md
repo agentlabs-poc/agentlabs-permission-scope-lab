@@ -7,15 +7,21 @@ remaining questions, not just short decision summaries.
 This is an evolving working edition. Agreement on a concept does not finalize
 its JSON schema, implementation, or every related branch.
 
+Current checkpoint: scope is a boundary selector, scope requirements combine
+with AND, and alternative authority comes through separate complete grants.
+Authorization uses one endpoint-owned gate (CONTRACT-006), not the earlier
+two-mode/prepared model. Exact key-value scope grammar remains proposed.
+
 ## Read the current chapters
 
 | Material | What it preserves |
 |---|---|
-| [Scope and target](scope-model.md) | Agreed scope foundations, field-justification discipline, proposed scope-definition model, and the planned return to administrative grants. |
+| [Scope and target](scope-model.md) | Canonical boundary-selector definition, AND within scope, alternatives through grants, and the still-proposed key-value syntax. |
 | [Grants, assignments, and roles](grant-model.md) | Definitions, tenant context, permission/scope binding, groups, per-human self, role changes and expansion, dependency, positive grants, and administrative authority. |
-| [Authorization flow and endpoint contracts](authorization-flow.md) | Auth/application boundary, auth-first design, the two endpoint modes, certificate examples, required enforcement, and the difference between resolution and enforcement. |
+| [Endpoint-owned authorization](endpoint-authorization.md) | Current single-gate model, selected endpoint inputs, authority and application facts, enforcement, and the deprecation map. |
+| [Earlier authorization flow](authorization-flow.md) | Deprecated two-mode design, preserved with its rationale and examples. |
 | [Grant JSON examples](grant-examples.md) | Six worked illustrations, including direct/group recipients, implicit tenant, multiple permissions, roles, expanded grant identity, and Employees-group self scope. |
-| [Endpoint-completion cases](endpoint-completion-cases.md) | Seven beyond-self cases, counterexamples, and a mode-selection test. |
+| [Earlier endpoint-completion cases](endpoint-completion-cases.md) | Seven application-fact cases; their two-mode classification is deprecated and preserved. |
 
 ## Follow progress and decisions
 
@@ -42,6 +48,9 @@ branches, review the following together:
 
 Keep superseded decisions as history. Reconciliation does not authorize silently
 deciding open questions or changing application behavior.
+
+PROCESS-006 explicitly resumes recording after the discussion-only pause and
+requires earlier designs to be retained with deprecation labels.
 
 ## Relationship to the original lab handbook
 

@@ -1,5 +1,11 @@
 # Working handbook chapter: authorization flow and endpoint contracts
 
+> DEPRECATED DESIGN — preserved as requested. Q-033 approved CONTRACT-006's
+> [endpoint-owned authorization gate](endpoint-authorization.md). The two-mode
+> flow and prepared handoff below are historical, not current requirements.
+> Auth-first declarations, trusted facts, and fail-closed enforcement remain;
+> the current chapter states them without the deprecated mode mechanism.
+
 This chapter preserves the endpoint discussion, its rationale, examples, and
 open details. Agreed decisions are identified by reference ID. Related proposed
 implementation contracts are explicitly identified; no API schema or current

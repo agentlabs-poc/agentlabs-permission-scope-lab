@@ -15,18 +15,21 @@ PROCESS-003 requires detailed, reconstructable notes and working chapters.
 PROCESS-004 requires meaningful checkpoint commits/pushes and periodic
 reconciliation across the handbook, log, tree, examples, and original lab prose.
 PROCESS-005 requires justification and reuse checks before adopting any new field.
+PROCESS-006 resumes recording and preserves earlier designs with deprecation labels.
 
 ## Current position
 
-- Active branch: **6. Scope and target → endpoint selector/query walkthrough**
-  (SCOPE-005 / Q-029). SCOPE-004 / Q-028 remains open after clarification requests.
+- Active branch: **6. Scope and target → canonical boundary definition and syntax**.
+  SCOPE-006/008 are agreed; SCOPE-007's exact key-value grammar remains proposed.
+  SCOPE-002/004 are still open, not adopted through later scope discussion.
   Q-025 approved this detour; return to ADMIN-004/005. Q-024's fields stay withdrawn.
   The detailed chapter is [scope and target](scope-model.md).
-- Just concluded: SCOPE-003 / Q-027 — scope owns target-selection semantics;
-  grants bind scope without defining its meaning. Scope representation remains open.
+- Just concluded: CONTRACT-006 / Q-033 — one endpoint-owned authorization gate;
+  ENFORCEMENT-002 preserves safe gathering/enforcement without prepared.
+  INPUT-001 captures method/route action mapping and identified path/body inputs.
 - Returned from the group/self sidebar to bounds on grant administration and
   remaining lifecycle questions in stage 5;
-  then declared request, prepared context, and resolved
+  then declared request and resolved
   request/grants. Return to the remaining siblings in the tree before v1.
 - A parent branch stays open until all its required children are settled or
   explicitly excluded from v1. Settled examples do not close the whole branch.
@@ -104,17 +107,22 @@ Authorization handbook
 │   ├── Declared scope meanings and permitted inputs [working: SCOPE-002 / Q-026]
 │   ├── Scope ownership; shared and app-defined meanings [settled: SCOPE-003 / Q-027]
 │   ├── Explicit resource compatibility [working: SCOPE-004 / Q-028]
-│   ├── Selector/query enforcement and fixed endpoint modes [working: SCOPE-005 / Q-029]
+│   ├── Selector/query enforcement and fixed endpoint modes [deprecated: SCOPE-005 / Q-029]
+│   ├── Canonical boundary-selector definition [settled: SCOPE-006]
+│   ├── Key-value boundary representation [working: SCOPE-007]
+│   ├── AND within scope; alternatives through complete grants [settled: SCOPE-008]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
 │   ├── Exact/subtree, multi-dimensional scope, empty/missing scope [open]
 │   └── Targets for read/list/create/update/move; relationship timing [open]
 ├── 7. Requests and resolution [open]
-│   ├── Two endpoint-declared modes [settled: CONTRACT-002]
-│   ├── One declaration per HTTP method/route [settled: CONTRACT-004]
-│   ├── Declaration details and mode validation [working: CONTRACT-001, CONTRACT-003]
+│   ├── Two endpoint-declared modes [deprecated: CONTRACT-002]
+│   ├── One declaration per HTTP method/route [retained: CONTRACT-004; mode part deprecated]
+│   ├── Earlier split declarations and mode validation [deprecated: CONTRACT-001, CONTRACT-003]
+│   ├── One endpoint-owned gate and shared evaluator [settled: CONTRACT-006]
+│   ├── Method/route action mapping and identified path/body inputs [settled: INPUT-001]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
-│   ├── Raw request → authorization request → prepared/resolved request [open]
+│   ├── Raw request → authorization request → resolved request [open; prepared deprecated]
 │   ├── Stored grants → applicable grants → expanded/resolved grants [open]
 │   └── Typed inputs/outputs, fact provenance, failures, context binding [open]
 ├── 8. Decision semantics [open]
@@ -125,8 +133,9 @@ Authorization handbook
 │   ├── Conditions, dependencies, conflicting and missing information [open]
 │   └── Decision reasons, contributing grants, audit explanation [open]
 ├── 9. Enforcement and change over time [open]
-│   ├── Prepared cannot authorize protected output [settled: ENFORCEMENT-001]
-│   ├── Additional resolution versus applying restrictions [settled: CONTRACT-005]
+│   ├── Earlier prepared/middleware-allow enforcement [deprecated: ENFORCEMENT-001]
+│   ├── Safe fact gathering and actual-use enforcement [settled: ENFORCEMENT-002]
+│   ├── Earlier completion-mode selection [deprecated: CONTRACT-005; distinction retained in CONTRACT-006]
 │   ├── Query/row/field restrictions, bulk/partial results, mutations [open]
 │   ├── Membership synchronization guarantees [open: SYNC-001]
 │   ├── Revocation freshness, caches, concurrent change, resource moves [open]
@@ -149,7 +158,7 @@ Authorization handbook
 |---|---|---|---|
 | Teams/groups | Team means group; many grants can apply through membership. | Consolidate ownership/human-only proposals; synchronization and nesting. | 3 and 5 |
 | Services and agents | All authority is human-dependent and remains a subset; no independent-service path. | Delegation encoding, grantor powers, ceilings, change propagation. | 5 and 9 |
-| Middleware versus endpoint | Each endpoint has one mode; middleware-complete uses allow/deny, endpoint-completion uses deny/prepared. | Complete declaration schema, input provenance, mode validation, examples. | 7 |
+| Middleware versus endpoint | CONTRACT-006: one endpoint-owned gate. Earlier two-mode and prepared design is deprecated, preserved in authorization-flow.md. | Concrete declaration/input/result schemas, fact provenance, enforcement interfaces. | 7 |
 | Cases beyond self | Ownership, containment, relationships, and resource conditions can require application facts. | Test actual operations; do not assume coverage percentages or adopt every illustrative policy. | 9 and 10 |
 | Grant examples | Tenant is enclosing context; each capability stays attached to its scope and conditions. | Final schema, roles, resolved forms, combination semantics. | 5, 7 and 8 |
 | Positive-grant combination | Valid complete grants are alternative routes; explicit deny grants are outside v1. | Other constraints and multi-operation combination rules. | Returned to 5 for administration, then 8 |
@@ -176,7 +185,11 @@ Q-025 → approved stage 6 scope-model detour; return to ADMIN-004/005.
 Q-026 → scope-type/ownership challenge; SCOPE-002 not yet agreed.
 Q-027 → scope-owned target selection and grant binding (SCOPE-003 agreed).
 Q-028 → explicit scope/resource compatibility (SCOPE-004 proposed).
-Q-029 → route/JSON selector and query-enforcement walkthrough (SCOPE-005 proposed).
+Q-029 → route/JSON two-mode query walkthrough (SCOPE-005 deprecated, never agreed).
+Q-030 → scope as boundary selector (SCOPE-006 agreed).
+Q-031 → canonical scope definition and proposed key-value shape (SCOPE-006/007).
+Q-032 → AND within scope, alternatives through grants (SCOPE-008 agreed).
+Q-033 → endpoint-owned gate and recording resumed (CONTRACT-006, PROCESS-006).
 
 The log retains these for traceability; they are not current options:
 
@@ -186,8 +199,9 @@ The log retains these for traceability; they are not current options:
   superseded/not adopted under AUTHORITY-002.
 - RESOLUTION-002 and ARCH-003: universal dynamic three-way middleware outcomes
   or universal handler preparation — superseded by CONTRACT-002.
-- ARCH-002/Q-010: intermediate discussion; its unresolved mode question is now
-  resolved by CONTRACT-002/CONTRACT-004. Preserve its no-app-DB middleware boundary.
+- ARCH-002/Q-010: intermediate discussion, now deprecated. CONTRACT-002 first
+  settled two modes; CONTRACT-006 now deprecates that design in favor of one
+  endpoint-owned gate. Required application facts remain endpoint-owned.
 
 Scope selector syntax, example JSON, and application-specific policies remain
 illustrative until their respective branches close.

@@ -1,5 +1,53 @@
 # Working handbook chapter: scope and target
 
+## Current agreed foundation — recording resumed after Q-033
+
+SCOPE-006 supplies the canonical definition:
+
+> Scope is a boundary selector that identifies a set of targets within the
+> enclosing tenant. A target satisfies the scope when it falls within the
+> selected boundary.
+
+Permission determines the operation. Scope defines its permitted reach. A grant
+binds recipient, permission(s), and scope with validity/conditions. Target
+membership satisfies the scope check, not the entire authorization decision.
+Scope owns its boundary semantics under SCOPE-003; a grant does not define them.
+
+SCOPE-008: requirements within one scope combine with AND. Alternative authority
+is represented through separate complete grants, each with its own scope and
+restrictions. DECISION-001's alternative-route semantics and mandatory outer
+tenant/delegation limits continue to apply.
+
+SCOPE-007 is still a candidate representation, not finalized wire schema:
+
+```json
+{ "dept": "dept-1", "user": "$self" }
+```
+
+Under the proposed key-value shape, a key identifies a defined boundary and its
+value selects that boundary. The above illustrates targets inside dept-1 AND
+inside the authorizing human's self boundary. The user key is not the grant's
+recipient field. SELF-001 anchors self to the human, including group-derived
+and human-proxy access; the spelling $self is not yet canonical.
+
+The boundary meaning and AND/alternative-grant semantics are settled. Key naming
+and definition ownership, permitted value forms, symbolic value syntax, empty or
+missing scopes, unknown keys, validation, containment, and persistence are not.
+No wildcard, array, arbitrary query, or additional scope field is approved merely
+because the concept is now clear.
+
+CONTRACT-006 establishes one endpoint-owned authorization gate, with no prepared
+handoff. The current [endpoint authorization chapter](endpoint-authorization.md)
+explains input material, evaluation, and enforcement. Endpoint placement is not
+part of scope's definition.
+
+## Historical development and still-open proposals
+
+The earlier discussions below are retained. SCOPE-002 and SCOPE-004 were not
+approved as schemas or compatibility mechanisms. SCOPE-005's two-mode query
+walkthrough is DEPRECATED and was never agreed. Later agreed boundary language
+above is authoritative; the historical wording does not silently finalize fields.
+
 Q-025 authorizes settling the shared scope model before returning to
 administrative grants. [The decision log](handbook-roadmap.md) records agreement
 status; [the discussion tree](discussion-tree.md) preserves the return to
@@ -198,7 +246,10 @@ included permissions. How that is validated across resources, and how later
 ROLE-002 role changes interact with compatibility, are explicit follow-ups;
 neither silently broadening scope nor silently inventing a mapping is justified.
 
-## SCOPE-005 / Q-029 — selectors and the endpoint flow, proposed
+## SCOPE-005 / Q-029 — selectors and the endpoint flow, deprecated proposal
+
+> Deprecated by CONTRACT-006 / Q-033. Retained for history; middleware-complete,
+> endpoint-completion, and prepared below are no longer the current model.
 
 The user requested explanation through GET /api/v1/tenant/{dept}/{cert}, with
 some material available to middleware and other facts available only at the

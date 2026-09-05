@@ -1,5 +1,10 @@
 # Endpoint-completion: candidate cases
 
+> HISTORICAL MODE CLASSIFICATION — preserved, not deleted. CONTRACT-006 now uses
+> one [endpoint-owned authorization gate](endpoint-authorization.md), without
+> prepared or a choice of two modes. These examples remain useful fact and
+> enforcement tests; the mode-selection guidance below is deprecated.
+
 These are illustrative tests of the handbook model, not newly agreed permission,
 scope, condition, or grant types, and not claims about current implementation.
 
