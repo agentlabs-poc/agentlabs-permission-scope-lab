@@ -17,7 +17,8 @@ reconciliation across the handbook, log, tree, examples, and original lab prose.
 
 ## Current position
 
-- Active branch: **5. Grants → administrative bounds** (next question not issued yet).
+- Active branch: **5. Grants → administrative bounds** (ADMIN-002/003 agreed;
+  Q-022 answered; exact bounds next).
 - Just concluded: GROUP-004 / Q-021 — membership-based access is preferred;
   direct human grants remain supported. Documentation detail reviewed and
   indexed in handbook.md, including the new authorization-flow.md chapter.
@@ -86,6 +87,8 @@ Authorization handbook
 │   ├── Group-derived applicability [settled: RESOLUTION-004]
 │   ├── Membership and role revision mechanics [open]
 │   ├── Authority to administer grants [settled: ADMIN-001]
+│   ├── Administration does not confer business access [settled: ADMIN-002]
+│   ├── Explicit authorized, audited self-assignment [settled: ADMIN-003]
 │   ├── Grantor bounds, recipients, scope validation [active: next question pending]
 │   ├── Status, validity, provenance, membership changes [open]
 │   └── Human-dependent service/agent authority
@@ -159,6 +162,7 @@ Q-018 → positive-grant combination;
 Q-019 → positive-only v1 decision;
 Q-020 → grant-administration authority;
 Q-021 → group-based access preferred, not exclusive (returned to administration bounds).
+Q-022 → separate administration and explicit audited self-assignment (ADMIN-002/003 agreed).
 
 The log retains these for traceability; they are not current options:
 

@@ -99,11 +99,16 @@ need primary sources when we assess them.
 
 ## Decision log
 
+ADMIN-002 and ADMIN-003 are agreed under Q-022; grant-model.md explains the
+separation of administration, business access, and explicit audited self-assignment.
+
 PROCESS-004 governs checkpoint commits and periodic reconciliation; see the
 working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| ADMIN-002 | AGREED | Authority to assign access is separate from authority to use that access. An administrator need not personally possess the business access being assigned, but assignment must remain within authorized administrative bounds. | User answered Q-022: "we should keep them seperate can provide access does not mean can access". Rejects requiring personal business-access possession as a universal prerequisite. Does not relax human-dependent service/agent limits. |
+| ADMIN-003 | AGREED | Administrative authority must not implicitly supply business access to the administrator. Self-assignment is not categorically forbidden: it must be an explicit access-changing operation, authorized within the administrator's bounds, and captured in the audit trail. | User noted that providing access may include providing it to themselves, "but then that has to be explicit, which audit will capture". Audit supplies accountability, not authorization or prevention by itself. No additional approval workflow is adopted. Audit schema, delivery/integrity guarantees, indirect group/role effects, and administrative bounds remain to be specified. |
 | PROCESS-004 | AGREED | Commit and push meaningful documentation checkpoints throughout the discussion. Periodically reconcile the chapters, decision log, discussion tree, examples, and original handbook; retain superseded history and explicitly unresolved questions. | User instructed: "keep commiting and pusing. every now and then we need to reconcile". Reconciliation must not silently settle open policy choices or imply the application implements the handbook. |
 | PLAN-001 | AGREED | Follow the eleven-stage roadmap and refine the handbook through focused discussions, worked examples, and recorded decisions. The assistant steers the discussion. | User approved the proposed roadmap on 2026-09-05: "looks good pin it. you steer the discussion." |
 | PROCESS-001 | AGREED | Give every proposed rule and discussion question a stable reference ID. Treat suggestions from either participant as candidates until deliberately agreed; use examples to assess the model and the need for canonical terms. | User requested reference numbers and clarified: "even i am proposing and we need to see if the shape is getting right." |
@@ -181,13 +186,14 @@ working handbook's checkpoint practice for the review checklist.
 | Q-019 | ANSWERED | Yes: v1 grants are positive-only; explicit deny grants are excluded. Denied decisions and mandatory restrictions still apply. | DECISION-002 agreed. |
 | Q-020 | ANSWERED | Yes: administering grants requires explicit authority, not mere possession of the business capability. | ADMIN-001 agreed; administrative bounds remain open. |
 | Q-021 | ANSWERED | No prohibition: group-based access is preferred, while direct human grants remain supported. | GROUP-004 agreed; GRANT-003 unchanged. |
+| Q-022 | ANSWERED | Yes: providing access and using access are separate. Providing oneself access must be explicit and audited, not implicitly inherited from administration. | ADMIN-002 and ADMIN-003 agreed; exact administrative bounds and audit guarantees remain open. |
 
 ## Resume here
 
 - Current position: [discussion tree](discussion-tree.md), returning to stage 5 →
-  ADMIN-001's administrative bounds after closing GROUP-004 / Q-021.
-  Current user request also checks handbook detail; handbook.md indexes the
-  detailed working chapters, while the original lab page remains unreconciled.
+  administrative bounds after agreeing ADMIN-002 and ADMIN-003 under Q-022.
+  GROUP-004 / Q-021 is closed. handbook.md indexes the detailed working chapters,
+  while the original lab page remains unreconciled.
   After grant authority/lifecycle
   questions, define the request and its
   prepared/resolved forms (stage 7). The endpoint-mode discussion established
@@ -272,8 +278,9 @@ working handbook's checkpoint practice for the review checklist.
 - Documentation detail has been reviewed: grant-model.md and authorization-flow.md
   preserve narrative rationale, examples, consequences, and open contracts;
   handbook.md is the working entry point. Original lab prose is not yet reconciled.
-- Next discussion topic: boundaries on grant administration. No new question ID
-  has been issued in this documentation-status turn.
+- Q-022 settled separate administration and explicit audited self-assignment.
+  Next discussion topic: the exact boundaries on what access an administrator
+  may assign, and to whom. No next question has been issued yet.
   After grant authority/lifecycle questions, compare
   declared, prepared, and resolved forms. Keep other branches in the tree open.
 - Coverage percentages require a later endpoint audit and are not assumed proven.

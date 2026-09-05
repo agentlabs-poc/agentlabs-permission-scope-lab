@@ -166,8 +166,8 @@ revoking grants requires explicit administrative authority within its allowed
 bounds. Editing role permissions and changing group membership are also
 access-changing operations that require the corresponding authorization.
 
-This rule does not create an unlimited administrator role or settle whether
-an administrator must personally possess the business authority being assigned.
+This rule does not create an unlimited administrator role. ADMIN-002 separately
+settles that personal possession of the assigned business access is not required.
 The allowed recipient set, assignable capabilities, maximum scope, tenant
 boundary, and lifecycle constraints need explicit decisions in this branch.
 
@@ -223,6 +223,59 @@ If the human loses supporting rights, resolution removes access no longer
 covered; unrelated retained rights may continue to support access. Examples of
 direct human grants must not be read as permitting independent service grants.
 Exact delegation encoding and evaluation contracts remain open.
+
+## Administration without business access — ADMIN-002, ADMIN-003 / Q-022
+
+ADMIN-001 separates using a capability from administering its assignment.
+ADMIN-002 establishes the reverse separation too: authorization to assign
+business access does not require, or itself confer, that business access.
+
+The agreed model is bounded administrative authority that does not
+require personal business access. For example, Maya may administer payroll-read
+grants for approved payroll groups within Finance without being able to read
+Finance payslips herself. Her administrative authority must specify which
+recipients, business capabilities, scopes, and applicable constraints she may
+assign. It must not merely say that she can manage any grant in the tenant.
+
+The alternative considered required both administrative authority and personal possession
+of the business access being assigned. This adds a possession ceiling, but
+would require a payroll-access administrator to receive payroll-reading access
+in order to provision it. Q-022 rejected this universal possession prerequisite.
+Business access alone remains insufficient to administer grants.
+
+### Explicit self-assignment and audit
+
+ADMIN-003 does not categorically prohibit Maya from assigning herself access.
+It requires an explicit, authorized, audited operation. Before that operation,
+administration alone does not permit reading payroll. If Maya is an eligible
+recipient within her administrative bounds, she may explicitly assign herself
+Finance payroll-read access. Subsequent business requests are evaluated against
+that grant and all applicable restrictions, not against her administrator status.
+
+If her bounds permit assigning only to specified groups, she cannot instead
+create a direct grant to herself. Recording an unauthorized operation does not
+make it authorized. Audit makes changes attributable and reviewable; enforcement
+must reject changes outside administrative authority before they take effect.
+
+The distinction is deliberate access acquisition versus implicit administrator
+access, not a guarantee that an administrator can never acquire business access.
+No mandatory second approver or separate self-assignment permission is adopted.
+
+An illustrative audit narrative is: Maya requested payroll-read access for Maya
+within Finance; the system evaluated her administrative authority, recorded the
+outcome and resulting grant change, and later access used that grant. Exact
+event fields, before/after evidence, timestamps, integrity, retention, and
+behavior when audit recording fails remain open audit-design work.
+
+Self-benefiting group membership or role edits must not become unexamined routes
+around administrative bounds. ADMIN-001 already requires authorization for those
+operations; exact controls and recording of their indirect access effects remain
+open. Bootstrap and whether human/group grants survive the issuing administrator
+losing authority are also still open.
+
+These decisions concern administering human/group access. They do not introduce
+independent service/agent authority: a proxy remains bounded by its human's
+applicable authority and delegation restrictions under AUTHORITY-002.
 
 ## Branches still to conclude
 
