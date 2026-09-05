@@ -413,8 +413,8 @@ supporting-grant references for endpoint enforcement?
 
 ## Q-062 / DECISION-010 — minimal allow-result JSON
 
-Status: **PROPOSED, not approved.** Assemble the already-agreed version, completed
-allow decision, and supporting references into this minimal representation:
+Status: **AGREED.** The user answered “062 agree.” Original status retained as
+history: ~~PROPOSED, not approved~~. The minimal allow representation is:
 
 ```json
 {
@@ -424,7 +424,7 @@ allow decision, and supporting references into this minimal representation:
 }
 ```
 
-The concrete `decision` and `grant_ids` field names are proposed here. `version`
+The concrete `decision` and `grant_ids` field names are agreed here. `version`
 follows CONTRACT-010. The grant IDs identify supporting grants from this evaluation,
 not every grant held by the human or a new grant assignment. The existing trusted
 tenant/request context still binds the result. Q-061 adds no scope field, and
@@ -435,9 +435,52 @@ embedding complete grant records or redundant boundary data. The alternative is
 a list of reference objects, useful if required reference metadata is later
 identified but adding structure not yet justified by the current minimum.
 
-This is a proposed base shape, not the complete published result schema.
+Counterexample: `grant_ids` must not be a dump of the human's unrelated grants,
+and the allow must not be reused to authorize a different request. Omitting scope
+does not remove the endpoint's existing enforcement responsibility. Producing the
+references does not mandate persistent audit logging for every request (Q-060).
+
+This is an approved base shape, not the complete published result schema.
 Grant-version/snapshot evidence, full validation, request correlation, and other
 result variants remain separate questions. It does not make a result reusable
 outside the evaluation that produced it or promise historical grant recovery.
 
-**Q-062:** Should this be the minimal allow-result shape?
+**Q-062 — answered yes:** this is the minimal allow-result shape.
+
+## Q-063 / DECISION-011 — minimal deny-result JSON
+
+Status: **PROPOSED, not approved.** Assemble the completed deny decision and
+the already-agreed error code and message fields into this representation:
+
+```json
+{
+  "version": "1",
+  "decision": "deny",
+  "error_code": "NO_AUTHORIZING_GRANT",
+  "error_message": "You do not have access to this certificate.",
+  "error_message_reason": "No grant authorizes this certificate read within Finance."
+}
+```
+
+The example assumes sufficient valid evidence conclusively establishes that no
+complete authority route authorizes this request. `NO_AUTHORIZING_GRANT` is an
+illustrative code, not an approved exhaustive catalogue or a reason for every
+denial. Other denial causes must preserve their actual established meaning.
+
+Rationale: this uses the same `decision` field as allow, keeps the stable code
+separate from readable messages, and implements the agreed requirement that a
+deny explain its cause. The evaluator provides both messages for UI presentation.
+No new field names are introduced beyond the already agreed fields.
+
+No `grant_ids` field is proposed for this minimum: Q-060 requires supporting
+references for an allow, not a list of rejected candidates for a deny. An empty
+array or separate evaluation trace would add data without establishing why any
+candidate failed; detailed denial traces remain a separate question.
+
+Counterexample: an Auth timeout cannot use this completed deny shape to claim
+that no permission exists. Evaluation failure remains separate under Q-051; its
+concrete representation is the next result variant to discuss, not settled here.
+This proposal does not require returning sensitive diagnostics to the client.
+
+Full validation, exact code catalogue, HTTP mapping, and complete schema publication
+remain open. **Q-063:** Should this be the minimal deny-result shape?

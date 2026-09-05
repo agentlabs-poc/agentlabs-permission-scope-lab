@@ -106,9 +106,11 @@ These three decisions close HC-04-04; catalog evolution stays open.
 **Q-060 / DECISION-008 is agreed:** return supporting-grant references with allow
 to the endpoint, without requiring every request to be persistently audited.
 **Q-061 / DECISION-009 is not adopted:** no returned boundary fields required;
-existing endpoint enforcement is unchanged. **Q-062 / DECISION-010 is proposed:**
-minimal allow JSON with version, decision, and grant_ids. Full result contracts
-remain unfinished.
+existing endpoint enforcement is unchanged. **Q-062 / DECISION-010 is agreed:**
+minimal allow JSON with version, decision, and grant_ids.
+**Q-063 / DECISION-011 is proposed:** minimal deny JSON with version, decision,
+and error_code/error_message/error_message_reason. Full result contracts remain
+unfinished.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

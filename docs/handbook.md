@@ -295,9 +295,11 @@ permission names from v1. Q-059 excludes permission aliases from v1. Character
 validation and catalog evolution remain open. Q-060 approves supporting-grant
 references in allow results, available for audit without requiring every request
 to be logged. Q-061's proposed returned-boundary fields are not required;
-endpoint enforcement remains unchanged. Q-062 proposes a minimal allow JSON
-shape with version, decision, and grant_ids; it is not approved. The chapter
-preserves rationale and distinguishes available evidence from persistent audit.
+endpoint enforcement remains unchanged. Q-062 approves a minimal allow JSON
+shape with version, decision, and grant_ids. Q-063 proposes the deny variant
+using version, decision, and the agreed error code/two message fields; it is not
+approved. The chapter preserves rationale and distinguishes available evidence
+from persistent audit.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)
