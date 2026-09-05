@@ -29,9 +29,21 @@ hrms:payroll:ledger::read
 
 Here `hrms` identifies the application, `payroll` the domain, `ledger` the resource
 type, and `read` the operation. Employee IDs, departments, and tenant reach stay
-out of the permission name. This restores the explanation; formal adoption of
-the naming convention is Q-056, still proposed. Naming depth does not itself
-establish scope reach or permission inheritance.
+out of the permission name. Q-056 adopts the convention with variable depth:
+
+```text
+<app>:<domain>[:<subdomain-or-resource>...]::<verb>
+
+hrms:payroll::read
+hrms:payroll:ledger::read
+hrms:payroll:ledger:entry::read
+hrms:payroll:ledger:entry:attachment::read
+```
+
+The application defines those levels; Auth does not hardcode their business
+meaning. `:` separates namespace levels and `::` separates the verb. Naming
+depth does not establish scope reach. Q-057 separately proposes no automatic
+parent-to-child permission inheritance; that rule is not yet approved.
 
 There is no additional canonical “target” entity or required resource wrapper
 (TERM-005). A request can identify a certificate, list, or proposed change using

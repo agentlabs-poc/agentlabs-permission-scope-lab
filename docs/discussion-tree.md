@@ -28,7 +28,8 @@ Authorization Handbook — working edition, not published v1
 ├── 4. Permissions [partly complete]
 │   ├── Operation distinct from reach [PERMISSION-001]
 │   ├── Exactly one required permission per endpoint [Q-049]
-│   └── Catalog grammar/evolution, hierarchy and wildcard semantics [OPEN]
+│   ├── Namespaced noun :: verb with variable depth [Q-056]
+│   └── Detailed name validation/evolution, hierarchy and wildcards [OPEN]
 ├── 5. Grants and authority [core rules agreed; mechanics open]
 │   ├── Whole permission/scope/condition binding; many grants per human
 │   ├── Human group access preferred, direct access supported
@@ -96,8 +97,10 @@ cause alongside the readable messages. See the
 
 Permission-retention sidebar: the user requested the earlier detailed explanation
 remain active; it is restored in [Permission](permission-model.md) and the reader.
-**Q-056 / PERMISSION-002 is proposed:** canonical adoption of the retained naming
-convention. Inheritance, wildcards, and catalog evolution stay open. Then return
+**Q-056 / PERMISSION-002 is agreed with depth:** variable-length namespace before
+the `::` verb separator; the original deeper examples are restored.
+**Q-057 / PERMISSION-003 is proposed:** no automatic parent-to-child permission
+inheritance. Wildcards and catalog evolution stay open. Then return
 to decision-result contracts. Neither retention nor these narrow agreements
 alone closes the audit's broader contract checkpoints.
 

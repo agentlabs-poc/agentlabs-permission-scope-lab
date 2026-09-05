@@ -9,9 +9,11 @@ approved scope and endpoint model. The
 remains unchanged, including its earlier proposals. Retention does not reinstate
 deprecated scope formats, additional canonical entities, or runtime claims.
 
-The operation-versus-reach definition is agreed under PERMISSION-001. The earlier
-naming convention is retained below; **Q-056 asks whether to adopt that convention
-canonically**, since PERMISSION-001 explicitly left grammar open.
+The operation-versus-reach definition is agreed under PERMISSION-001. **Q-056 /
+PERMISSION-002 adopts the naming convention with variable namespace depth**:
+the user confirmed “this is right” and requested the deeper explanation from
+earlier Markdown. The previous pending-grammar status is retained as history:
+Q-056 was proposed because PERMISSION-001 had explicitly left grammar open.
 
 ## Canonical meaning — PERMISSION-001
 
@@ -45,7 +47,7 @@ the actual data it returns. Likewise, a matching Finance grant and request value
 does not prove a certificate belongs to Finance; actual execution must enforce
 that boundary under CONTRACT-012.
 
-## Retained naming explanation — Q-056 / PERMISSION-002, proposed
+## Canonical naming explanation — Q-056 / PERMISSION-002, agreed with depth
 
 The earlier handbook described this convention:
 
@@ -69,10 +71,48 @@ this explanation does not require every application to have a department or an
 identical domain hierarchy. Namespace organization avoids ambiguous operation
 names across applications; it does not itself grant access or establish trust.
 
-The original also illustrated deeper nouns such as
-`hrms:payroll:ledger:entry::read`. Naming depth, application data relationships,
-and scope reach are different things. A deeper name does not by itself prove
-containment, imply permission inheritance, or authorize an operation.
+### Namespace depth — restored from the earlier Markdown
+
+The earlier “Resource-type depth” section used:
+
+```text
+<application>:<domain>:<resource>[:<subresource>...]::<verb>
+```
+
+It also included shorter names such as `hrms:payroll::read`. The variable-depth
+convention can therefore be explained using the user's domain terminology as:
+
+```text
+<app>:<domain>[:<subdomain-or-resource>...]::<verb>
+```
+
+Square brackets mean optional additional namespace segments in this explanatory
+notation; they are not literal characters in a permission name. Use `:` between
+namespace segments and retain `::` before the final verb, as in the earlier file.
+The user requested more depth, not a change to that separator.
+
+```text
+hrms:payroll::read
+hrms:payroll:ledger::read
+hrms:payroll:ledger:entry::read
+hrms:payroll:ledger:entry:attachment::read
+```
+
+The application defines what its deeper segments mean: domain, subdomain,
+resource, or subresource. Auth does not hardcode these meanings or require every
+application to have the same number of levels. In the final example, `hrms` is
+the application, the noun is `payroll:ledger:entry:attachment`, and `read` is the
+operation. A name like `salary_earning` is a single segment, whereas `ledger:entry`
+has two. No numeric maximum depth or character-validation rules are selected here.
+
+Rationale: real application vocabularies have different depths. A fixed
+app/domain/resource-only shape would flatten meaningful distinctions or require
+artificial names. Variable depth retains a common readable convention without
+making Auth interpret the application's domain structure.
+
+Naming depth, application data relationships, and scope reach remain different
+things. Names describe operations; they do not establish facts about a particular
+ledger or entry. Deeper naming alone does not settle permission inheritance.
 
 The original parent/child inheritance and wildcard examples were explicitly
 working proposals, not adopted rules. They remain in the archive, not the active
@@ -87,10 +127,30 @@ catalogs easier to review than unrestricted application-specific spellings.
 The alternative is to let each application choose any registered identifier;
 that keeps naming flexible but sacrifices a common readable structure.
 
-**Q-056:** Should we retain `<namespaced-noun>::<verb>` as the canonical permission
-naming convention? Detailed character validation, namespace ownership, catalog
+**Q-056 — answered yes, with deeper namespace explanation:** retain
+`<namespaced-noun>::<verb>` with variable-depth application namespaces. Detailed
+character validation, namespace ownership, catalog
 evolution, aliases, and hierarchy/wildcard behavior are not bundled into this
-question. Existing shorthand examples are not silently renamed by this proposal.
+decision. Existing shorthand examples are not silently renamed by this approval;
+their full naming reconciliation remains an editorial follow-up.
+
+### Q-057 / PERMISSION-003 — parent names do not automatically grant child permissions
+
+Status: **PROPOSED, not approved.** Recommend that granting
+`hrms:payroll:ledger::read` not automatically grant
+`hrms:payroll:ledger:entry::read`. These name separate permissions unless an
+explicit, separately agreed authority mechanism supplies both; ordinary roles
+can already list both permissions.
+
+Rationale: adding a more specialized operation later should not silently expand
+existing access simply because its name shares a prefix. The alternative,
+automatic inheritance, shortens broad assignments but makes namespace changes
+affect existing authority. The earlier Markdown proposed the non-inheritance
+rule but explicitly left its adoption open.
+
+This question does not settle wildcard support, permission aliases, or the
+application-level effects covered by a particular registered operation. Scope
+and actual-use enforcement remain mandatory for any granted permission.
 
 ## How permission participates in authorization
 
