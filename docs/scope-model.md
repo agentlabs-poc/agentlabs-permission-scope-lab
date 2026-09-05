@@ -198,6 +198,136 @@ included permissions. How that is validated across resources, and how later
 ROLE-002 role changes interact with compatibility, are explicit follow-ups;
 neither silently broadening scope nor silently inventing a mapping is justified.
 
+## SCOPE-005 / Q-029 — selectors and the endpoint flow, proposed
+
+The user requested explanation through GET /api/v1/tenant/{dept}/{cert}, with
+some material available to middleware and other facts available only at the
+endpoint. The user also proposes that scope acts as a selector and may become
+query-like. Q-028 is still open: do not treat this feedback as approval of a
+compatibility registry or a new field. The following example connects that
+proposal to the already agreed CONTRACT-002/005 endpoint modes.
+
+### Grant and requested path
+
+Assume verified human Vinay, trusted enclosing tenant T-1, and this sole
+applicable grant, with validity and other required constraints satisfied. This
+abbreviated grant reuses existing illustrative binding/scope syntax. It is not a
+new schema; status, validity, and conditions are omitted only for focus.
+
+```json
+{
+  "id": "G-13",
+  "recipient": { "type": "user", "id": "vinay" },
+  "permissions": ["hrms:employee:certificate::read"],
+  "scope": { "type": "department", "id": "FIN" }
+}
+```
+
+For the user's route template, tenant is the trusted enclosing context in this
+illustration; if a route also carries a tenant identifier, bind and validate it
+against that context. The actual request here is:
+
+```http
+GET /api/v1/tenant/FIN/C-17
+```
+
+The following JSON only displays extracted route parameters, not a proposed
+authorization-request record or new canonical fields:
+
+```json
+{ "dept": "FIN", "cert": "C-17" }
+```
+
+Middleware knows identity, tenant, operation mapping, grant scope, and requested
+department/certificate. FIN is a requested selection. It does not prove the
+stored certificate C-17 has a Finance department relationship. The proposed
+selector meaning for this example is certificate department equals FIN; that
+meaning and its trusted data mapping are application-defined, not inferred by
+matching the URI variable name to a column name.
+
+If the requested department were ENG, the sole FIN grant cannot authorize this
+department-qualified request. Middleware may deny conclusively without querying
+the application database. With other applicable grants, all valid alternative
+routes must be considered before a conclusive denial.
+
+### Middleware-complete contract: apply a fully determined restriction
+
+For a contract that can establish the complete allowed restriction in
+middleware, the handler enforces it in the resource lookup. Under the explicit
+example mapping certificate department to department_id, a parameterized query
+could look like this; table/column names are application data, not scope fields:
+
+```sql
+SELECT * FROM certificates
+WHERE tenant_id = :trusted_tenant
+  AND department_id = :authorized_department
+  AND id = :requested_certificate;
+```
+
+Here trusted_tenant is T-1, authorized_department is FIN established from the
+grant and permitted request selection, and requested_certificate is C-17. Do
+not substitute an unchecked caller department for authorized_department. The
+complete request includes the department-qualified target; if request and
+authority differ, do not silently drop the requested department constraint.
+
+The handler is not receiving unrestricted authorization for C-17. It is allowed
+to retrieve C-17 only inside the established tenant and Finance selection. If
+C-17 is actually in Engineering, this lookup returns no matching row and no
+certificate data is disclosed. Missing/out-of-scope response semantics remain
+an endpoint contract detail; the query does not establish global nonexistence.
+
+This is enforcement of fully determined restrictions, not a second
+authorization-completion step. It therefore can fit middleware-complete mode
+under CONTRACT-005, if the endpoint and all its supported scopes/delegations
+satisfy that fixed contract. An ID-only lookup after checking FIN in the path
+would not enforce the restriction.
+
+### Endpoint-completion contract: obtain facts to finish authorization
+
+For a separately declared endpoint-completion contract, middleware supplies
+prepared context unless it can deny. The handler obtains the bounded internal
+facts and invokes the evaluator to complete authorization before protected
+output. It never receives middleware allow, even if one request is easy.
+
+For example, the handler may establish the actual department of the requested
+certificate from application metadata and submit it for final evaluation. A
+different supported scope might require an application-only human-to-employee
+relationship before the authorized selection can be resolved. The fact-access
+path must remain appropriately tenant/request constrained; preparation does
+not authorize returning the certificate or an unbounded database read.
+
+These are alternative design-time contracts, not runtime modes that middleware
+chooses per caller. A database lookup alone is not a reason for completion:
+applying an already complete restriction is enforcement; obtaining facts to
+finish deciding the restriction or access is completion.
+
+### Query-like meaning without premature query syntax
+
+SCOPE-005 proposes treating scope as declarative target selection that the
+application may translate into a safe query restriction where supported. The
+requested selection narrows, never replaces, the authorized selection:
+
+```text
+Returned targets = requested targets intersect authorized targets
+```
+
+The complete authorization still checks permission, recipient applicability,
+tenant, validity, conditions, and delegation bounds. A query predicate alone is
+not the entire decision. For a single-item request the intersection can contain
+at most that item; a list contract may enforce the same authorized restriction
+across its result set. Mutation/create/aggregate semantics remain separate work.
+
+Stored scope, an interpreted selector, and an executable query are different
+representations, not three approved canonical entities. A query-capable selector
+does not require storing arbitrary SQL or executable code in a grant, nor does
+it show that every scope can be compiled to one query. Exact grammar, mapping
+ownership, supported operations, and the evaluator/handler interface remain open.
+
+Q-028's substantive concern is that the declared scope meaning and the query
+mapping agree: a department selector for a certificate must not silently test
+the creator's department instead. An auth-aware endpoint/application mapping
+can establish this; a separate compatibility registry has not been adopted.
+
 ## Return-point tests, not adopted syntax
 
 - Read a particular certificate or payslip within an explicit selection.

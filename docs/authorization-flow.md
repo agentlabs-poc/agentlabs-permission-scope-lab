@@ -152,6 +152,11 @@ unrelated human permission does not invalidate still-covered access.
 
 ## Details still open
 
+The [scope chapter's endpoint walkthrough](scope-model.md) (SCOPE-005 / Q-029)
+illustrates a department-qualified certificate request, an existing-form grant,
+and a constrained lookup. It distinguishes query enforcement of a fully known
+restriction from endpoint completion; query grammar and interfaces remain open.
+
 - CONTRACT-001: exact operation declaration and required-fact interfaces.
 - CONTRACT-003: mode validation across every supported scope/delegation form;
   handling incompatible configuration without silently changing modes.

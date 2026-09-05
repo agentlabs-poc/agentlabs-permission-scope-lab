@@ -107,6 +107,7 @@ working handbook's checkpoint practice for the review checklist.
 
 | ID | Status | Decision | Rationale / evidence |
 |---|---|---|---|
+| SCOPE-005 | PROPOSED | Scope describes authorized target selection; where supported the application may translate it into a safe query restriction, intersected with the requested selection. A fully determined restriction can be enforced by a middleware-complete endpoint; endpoint-completion obtains facts and completes evaluation under its fixed contract. | User asks for route/JSON examples and proposes selector/query-like scope. Q-029 tests the flow in scope-model.md, reusing agreed CONTRACT-002/005. Does not adopt arbitrary SQL in grants, a query grammar, universal query compilation, or dynamic endpoint modes. |
 | SCOPE-003 | AGREED | Scope owns target-selection semantics; a grant binds its use to recipient and permissions without defining its domain meaning. Application-defined concepts such as department are optional; shared concepts such as self require explicit application/resource relationships. Authorization validates and evaluates scope through its definition. | User answered Q-027: "agree." Establishes responsibility separation, not a new entity, field, fixed catalog, general expression grammar, independent storage requirement, or mutable scope-reference model. SCOPE-002's representation remains open. See scope-model.md. |
 | SCOPE-004 | PROPOSED | A scope may be used for a resource only where its target-selection meaning for that resource is explicitly defined. Do not infer compatibility from matching field names or use an unrelated relationship. Validate scope/resource compatibility when binding permissions; unsupported or unresolved use must not establish authority. | Q-028 tests department scope on payslips, certificates, and repositories. Supports reusable meanings with explicit resource mappings, not a mandatory per-resource scope type. Multi-permission compatibility, role evolution, declaration location, and failure handling require detailed follow-up. |
 | SCOPE-002 | PROPOSED | A grant selects an explicitly defined scope type and supplies only its permitted inputs; it does not invent the scope meaning or introduce arbitrary interpreted fields. Scope definitions must make applicable resource relationships and accepted inputs explicit. | Q-026 compares declared scope types with a general expression grammar using existing department and employee_self examples. No new fields or finalized schema are adopted. Definition ownership, registration, compatibility, composition, and containment remain open. See scope-model.md. |
@@ -199,11 +200,13 @@ working handbook's checkpoint practice for the review checklist.
 | Q-026 | ANSWER INCORPORATED | User notes that department is not universal, suggests standard and application-specific concepts, and proposes that scope owns its definition independently of grants. Asks whether treating scope as a selector should change the canonical arrangement. | SCOPE-003 / Q-027 develops the proposal. SCOPE-002's type/parameter shape is not treated as agreed. |
 | Q-027 | ANSWERED | Yes: scope owns target-selection meaning; grant binds its use without defining it. | SCOPE-003 agreed; storage, scope catalog, grammar, and representation remain open. |
 | Q-028 | OPEN | Should a scope be usable only with resources for which its target-selection meaning has been explicitly defined, rather than inferred from a shared name or field? | SCOPE-004 proposed; distinguish scope compatibility from authorization to perform the operation. |
+| Q-029 | OPEN | Does scope as authorized selection, narrowed by the request and enforced through a constrained query where supported, match the intended middleware/endpoint model? | SCOPE-005 proposed. Q-028 remains open after requests for clearer explanation; the concrete route/JSON walkthrough does not introduce new scope fields. |
 
 ## Resume here
 
 - Current position: [discussion tree](discussion-tree.md), stage 6 →
-  SCOPE-004 / Q-028: scope/resource compatibility after agreeing SCOPE-003 / Q-027.
+  SCOPE-005 / Q-029: concrete route, selector, and query-enforcement walkthrough.
+  SCOPE-004 / Q-028 remains open; explanation did not establish agreement.
   SCOPE-002 representation remains proposed.
   Q-025 approved the detour. Return to ADMIN-004/005 after settling shared scope.
   GROUP-004 / Q-021 is closed. handbook.md indexes the detailed working chapters,
