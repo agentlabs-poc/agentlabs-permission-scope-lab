@@ -1,5 +1,10 @@
 # Explanation coverage audit — through Q-043
 
+Q-044 follow-up: the grant chapter now records all five approved administration
+rules, the Finance grant JSON, five expected outcomes, separation from personal
+access, and the still-open scope encoding/containment. Earlier statements below
+that administration rules are unapproved are historical to the Q-043 audit.
+
 The user asked whether the handbook captures sufficient explanation, then
 explicitly asked for a check against the actual text. This audit covers the
 recent discussions and the core chapters they depend on. It is not a claim

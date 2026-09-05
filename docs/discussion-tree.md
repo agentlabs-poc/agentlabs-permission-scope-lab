@@ -19,6 +19,12 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-044 settled ADMIN-004/005's governing rules.** Ordinary grants
+  express administrative authority; complete assignments must fit associated
+  bounds and normal validation still applies. Encoding/containment stay open.
+  Q-045 next consolidates earlier group ownership and human-only membership
+  directions. Registration implementation detail stays parked.
+
 - **Current: Q-043 settled TERM-005's vocabulary correction.** Use permission,
   scope boundaries, requests, and trusted request material; no extra entity.
   [Detailed rationale](authorization-vocabulary.md) and [explanation audit](explanation-audit.md)
@@ -183,6 +189,7 @@ Authorization handbook
 │   ├── Group and team are synonyms [settled: TERM-001]
 │   ├── Groups/memberships in Auth; optional app sync [working: GROUP-001-A]
 │   ├── Human-only group membership [working: GROUP-003]
+│   │   └── Consolidate group ownership/membership directions [active: Q-045]
 │   ├── Principal, actor, subject, user identity, membership [open]
 │   ├── Resource type versus instance; context [open]
 │   ├── Permission/boundary/request-material vocabulary [settled: TERM-005 / Q-043]
@@ -208,7 +215,9 @@ Authorization handbook
 │   ├── Administration does not confer business access [settled: ADMIN-002]
 │   ├── Explicit authorized, audited self-assignment [settled: ADMIN-003]
 │   ├── Grantor bounds, recipients, scope validation [return point: ADMIN-004 / Q-023]
+│   │   └── Five administration rules [settled: Q-044; exact encoding open]
 │   ├── Same grant model for administrative authority [working: ADMIN-005 / Q-024]
+│   │   └── Ordinary model now agreed [Q-044; prior working label is history]
 │   │   └── Q-043 framing withdrawn; vocabulary settled, admin model still open
 │   ├── Status, validity, provenance, membership changes [open]
 │   └── Human-dependent service/agent authority
@@ -334,6 +343,8 @@ Q-042 → enabling relationship validation when existing grants are incompatible
 Update: Q-042 agreed as REGISTRATION-004; further registration lifecycle detail parked by user direction. Return to stage 5.
 Q-043 → canonical grant administration with grant-administration request material (open; ADMIN-005 before ADMIN-004 bounds).
 Update: Q-043 was reformulated and settled TERM-005 after a tenability check. Original framing is withdrawn, not an approved administration model; its exact wording is preserved in history/q043-vocabulary.md.
+Q-044 → ADMIN-004/005 governing rules approved; concrete administrative scope contracts remain open.
+Q-045 → group ownership and human-only membership consolidation (open).
 
 The log retains these for traceability; they are not current options:
 

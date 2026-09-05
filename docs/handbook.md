@@ -1,5 +1,10 @@
 # Authorization Handbook — working edition
 
+Current: Q-044 approves the five [grant-administration rules](grant-model.md).
+ADMIN-004/005 are settled at rule level; exact encoding remains open. Q-045
+next consolidates group ownership/membership directions. Older administration
+open-status notes below describe earlier checkpoints.
+
 Q-043 now agrees TERM-005: use permissions, scope boundaries, requests, and
 trusted request material without an additional canonical entity. The detailed
 [vocabulary explanation](authorization-vocabulary.md) preserves the reasoning,

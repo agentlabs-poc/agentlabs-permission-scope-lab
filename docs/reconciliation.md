@@ -1,5 +1,18 @@
 # Handbook reconciliation register
 
+## Checkpoint following 675b434 — Q-044 administration rules
+
+Q-044 approves ADMIN-004/005 at the governing-rule level: ordinary grant model,
+explicit administrative operation, complete requested-assignment checks,
+associated bounds, and normal validation. The grant chapter preserves the
+Finance JSON example and all counterexamples; no administrative scope fields
+or containment algorithm are adopted. Earlier proposed-status text is retained
+with current qualification. Q-045 is open for group-policy consolidation.
+
+Docs-only checks passed: `git diff --check`, 22 Markdown files, 131 local links,
+44 JSON blocks, 120 unique decision/question references in the tree, and all
+five approved rules present in the chapter. No application source changed.
+
 ## Checkpoint following c631a3c — Q-043 vocabulary and explanation audit
 
 TERM-005 records the approved vocabulary correction after the user's tenability

@@ -1,5 +1,73 @@
 # Working handbook chapter: grants, assignments, and roles
 
+Current: Q-044 approves ADMIN-004/005 at the governing-rule level. The ordinary
+grant model applies to administration, with complete-assignment and associated
+boundary checks. Exact administrative scope encoding and containment remain
+open. Earlier proposed-status notes below are preserved historical positions.
+
+## Grant administration — Q-044, agreed rules
+
+1. **Ordinary grant model.** Administrative authority is a grant binding a user
+   or group to administrative permissions within a scope boundary. No separate
+   authority format or new administrative scope keys are introduced here.
+2. **Explicit administrative operation.** Permission to create grants does not
+   automatically permit updating or revoking them. The required permission
+   must correspond to the administrative operation actually requested.
+3. **Complete requested assignment.** The proposed recipient, permissions,
+   scope, and applicable validity/conditions must fit the administrator's
+   authority. For changes, consider relevant existing and proposed material.
+   Concrete before/after contracts remain to be specified.
+4. **Associated bounds.** Unrelated administrative grants cannot donate fields
+   to manufacture authority. Finance payroll-read provisioning plus Engineering
+   certificate-read provisioning does not authorize Engineering payroll-read.
+5. **Normal validation.** Administration does not bypass registered permission
+   and scope contracts, enabled relationship validation, canonical validity
+   checks, or tenant boundaries.
+
+Providing access still does not confer personal access (ADMIN-002), and
+self-assignment remains explicit, authorized, and audited (ADMIN-003). This
+approval does not impose personal business-access possession or a second approver.
+
+### Example: Finance payroll provisioning
+
+Assume Maya may create payroll-read grants for `finance-payroll-readers` within
+Finance. She requests this business grant; lifecycle fields are omitted for focus:
+
+```json
+{
+  "recipient": {
+    "type": "group",
+    "id": "finance-payroll-readers"
+  },
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": { "dept": "FIN" }
+}
+```
+
+| Request under the stated authority | Outcome |
+|---|---|
+| Create the displayed grant | Permitted subject to other required checks. |
+| Use Engineering or tenant-wide scope | Outside Maya's authorized reach. |
+| Add payroll-write | Outside her assignable permissions. |
+| Make Maya the direct recipient | Outside her permitted recipient boundary. |
+| Revoke an existing grant | Requires corresponding administrative permission. |
+
+Maya cannot read payslips merely because she can create the first grant. Nor
+does this authority permit changing group membership to obtain indirect access;
+membership and role administration require their own authorization.
+
+Maya's administrative authority is described in prose because its exact scope
+encoding is not settled. A bare `dept` entry has not been shown sufficient to
+express recipient, assignable-permission, and containment limits together.
+
+### What this closes and what remains
+
+The complete-assignment/associated-bound rules of ADMIN-004 and ordinary-grant
+model of ADMIN-005 are agreed. Scope encoding, containment, bootstrap, onward
+administration, and detailed role/lifecycle mechanics remain concrete-contract
+work. No withdrawn G-11 field or operator is revived. Q-045 next consolidates
+the earlier group ownership and human-only membership proposals.
+
 Q-043 settles TERM-005's vocabulary correction, not the proposed administrative
 scope model. [Authorization vocabulary](authorization-vocabulary.md) explains
 the boundary/request-material approach and its safety requirements. Earlier
