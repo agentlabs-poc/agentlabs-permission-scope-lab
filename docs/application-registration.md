@@ -1,5 +1,15 @@
 # Application registration and Auth validation
 
+Q-042 now agrees REGISTRATION-004: all existing grants must pass before
+relationship validation is enabled. Otherwise reject activation, report the
+incompatible grants, and preserve the previous configuration pending explicit
+authorized correction of grants or declarations. Do not silently modify or
+delete grants, or grandfather incompatible grants into enabled mode.
+
+The user directed moving to another branch. Remaining registration lifecycle
+details are parked, not finalized or excluded from v1. Return to grant
+administration, ADMIN-004/005, with Q-043. Earlier Q-042-open prose is history.
+
 Current: REGISTRATION-003 / Q-041 is approved. Each application explicitly
 declares upfront whether relationship validation is enabled or disabled.
 Enabled means mandatory validation for every grant, not per-grant optionality.
@@ -148,7 +158,7 @@ must be explicit: there is no agreed omission-based default. Handling a missing
 choice, empty/partial declarations, multi-key combinations, role expansion,
 authorized mode changes, and compatibility updates still needs detail.
 
-### Q-042 — enabling validation with existing grants, open
+### Q-042 — historical activation question, now answered above
 
 Next question: when enabling relationship validation would leave existing
 grants incompatible, should activation be rejected until those grants have

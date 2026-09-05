@@ -1,5 +1,19 @@
 # Handbook reconciliation register
 
+## Checkpoint following 61a8967 — Q-042 and branch return
+
+Q-042 agrees REGISTRATION-004: existing grants must pass before relationship
+validation is enabled; otherwise reject activation, report incompatibilities,
+and preserve the prior configuration pending explicit authorized correction.
+User directed ending this detour. Remaining registration lifecycle mechanics
+are parked, not finalized. Discussion returns to stage 5, ADMIN-004/005, starting
+with Q-043's canonical administration model. No withdrawn admin fields or new
+administration rules are adopted by moving branches.
+
+Docs-only checks passed: `git diff --check`, 19 Markdown files, 96 local links,
+42 JSON blocks, and 117 unique decision/question references in the tree.
+REGISTRATION-004 is AGREED; Q-043 is OPEN. No application source changed.
+
 ## Checkpoint following edd7635 — refined Q-041 approval
 
 REGISTRATION-003 records the explicit application-level choice approved in

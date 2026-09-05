@@ -1,5 +1,9 @@
 # Authorization Handbook — working edition
 
+Current discussion: stage 5, grant administration, Q-043 under ADMIN-004/005.
+Q-042 is agreed; further registration lifecycle details are parked by user
+direction. Earlier checkpoint summaries below are retained context.
+
 This is the entry point for the handbook being developed through our discussions.
 Chapters preserve the explanation, rationale, examples, counterexamples, and
 remaining questions, not just short decision summaries.

@@ -345,7 +345,15 @@ the required bounds. Neither a general predicate language nor admin-specific
 fields have been adopted. A bare department label has not been shown sufficient
 to express the proposed recipient and permission limits either.
 
-Continue in [scope and target](scope-model.md), SCOPE-002 / Q-026, then return here.
+~~Continue in [scope and target](scope-model.md), SCOPE-002 / Q-026, then return here.~~
+
+Current return after Q-042: core scope/registration principles are agreed and
+the user has parked further registration lifecycle detail. Resume ADMIN-005
+with Q-043: ordinary grant/permission/scope concepts, with the grant being
+created or changed as target. Then revisit ADMIN-004's assignable bounds.
+ADMIN-001/002/003 separation and explicit audited self-assignment remain agreed.
+No withdrawn G-11 fields or containment algorithm are adopted by this return;
+the canonical administration model remains a proposal pending Q-043.
 
 The user's bootstrap direction is compatible with seeding initial ordinary
 grants through a trusted initialization process. It does not require a second

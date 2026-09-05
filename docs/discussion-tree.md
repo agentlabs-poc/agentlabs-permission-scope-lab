@@ -19,6 +19,19 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: stage 5, grant administration — ADMIN-004/005, Q-043.** Q-042
+  is agreed as REGISTRATION-004. The user directed ending the registration
+  detour; remaining lifecycle details are parked, not finalized or removed
+  from v1. Return to the saved administration branch.
+
+```text
+Scope and registration → agreed foundations; remaining details parked
+Grant administration  → CURRENT: canonical model, then assignable bounds
+Requests/resolution   → NEXT after remaining grant questions
+```
+
+### Historical positions before the return to grant administration
+
 - **Current: Q-041 approved REGISTRATION-003.** Relationship validation is an
   explicit application-level registration choice; enabled applies to every
   grant, including existing and role-based grants. Q-042 is active: enabling
@@ -82,7 +95,10 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
   versus historical material without deletion. [Cross-domain use cases](use-case-examples.md)
   adds 16 scenario groups; this does not close stage 10 or interrupt the scope-key branch.
 
-## Mind map at a glance
+## Historical mind map at a glance — before the return to stage 5
+
+The position markers in this snapshot are preserved history. The current
+position above and detailed tree below now place us in grant administration.
 
 This overview is the user's requested whole-handbook mind map. It shows progress
 by topic, not by a guessed completion percentage. The detailed tree below keeps
@@ -169,7 +185,7 @@ Authorization handbook
 │   │   └── Registration principle now settled [REGISTRATION-001 / Q-039; mechanics open]
 │   ├── Hierarchies, wildcards, aliases, evolution [open]
 │   └── Mapping operations; multiple required permissions [open]
-├── 5. Grants and lifecycle [open; return after scope model]
+├── 5. Grants and lifecycle [active; returned from scope model after Q-042]
 │   ├── Capability/scope/conditions stay bound [settled: GRANT-001]
 │   ├── Multiple permissions under shared constraints [settled: GRANT-002]
 │   ├── Direct and group-derived grants [settled: GRANT-003]
@@ -185,13 +201,14 @@ Authorization handbook
 │   ├── Explicit authorized, audited self-assignment [settled: ADMIN-003]
 │   ├── Grantor bounds, recipients, scope validation [return point: ADMIN-004 / Q-023]
 │   ├── Same grant model for administrative authority [working: ADMIN-005 / Q-024]
+│   │   └── Ordinary model with grant-as-target [active: Q-043]
 │   ├── Status, validity, provenance, membership changes [open]
 │   └── Human-dependent service/agent authority
 │       ├── All services/agents depend on human authority [settled: AUTHORITY-002]
 │       ├── Loss of required upstream authority removes derived access [settled: DELEGATION-002]
 │       ├── Who may delegate what; identity attribution [working: DELEGATION-001]
 │       └── Delegation encoding, ceilings, expiry, growth, chains, reactivation [open]
-├── 6. Scope and target [active]
+├── 6. Scope and target [formerly active; remaining detail parked after Q-042]
 │   ├── Explicit selections and attribute/relationship selectors [settled: SCOPE-001]
 │   ├── Earlier typed format; definition-governance questions [partly deprecated: SCOPE-002 / Q-026]
 │   ├── Scope ownership; shared and app-defined meanings [settled: SCOPE-003 / Q-027]
@@ -205,7 +222,7 @@ Authorization handbook
 │   │   ├── Permission-scope compatibility declaration [formerly active: Q-040; optional feature agreed REGISTRATION-002]
 │   │   ├── Omitted optional relationship metadata [formerly active: Q-041; superseded by explicit choice]
 │   │   ├── Upfront application choice; all-grants validation when enabled [settled: REGISTRATION-003 / Q-041]
-│   │   └── Enabling validation with incompatible existing grants [active: Q-042]
+│   │   └── Enabling validation with incompatible existing grants [formerly active; settled: REGISTRATION-004 / Q-042]
 │   ├── AND within scope; alternatives through complete grants [settled: SCOPE-008]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
@@ -306,6 +323,8 @@ Update: Q-040 is approved with optionality qualification; REGISTRATION-002 binds
 Q-041 → behavior when optional relationship metadata is absent (proposed, open).
 Update: Q-041 approved as refined in REGISTRATION-003: explicit upfront application-level choice, mandatory checks for every grant when enabled; omission-based mode inference superseded.
 Q-042 → enabling relationship validation when existing grants are incompatible (open).
+Update: Q-042 agreed as REGISTRATION-004; further registration lifecycle detail parked by user direction. Return to stage 5.
+Q-043 → canonical grant administration with grant-as-target (open; ADMIN-005 before ADMIN-004 bounds).
 
 The log retains these for traceability; they are not current options:
 
