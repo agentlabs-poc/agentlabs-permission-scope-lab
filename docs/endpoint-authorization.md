@@ -1,5 +1,12 @@
 # Working handbook chapter: endpoint-owned authorization
 
+Q-050-E / INPUT-002 now requires every declared input at its specified source:
+no silent omission, defaults, or source fallback. This fixed input contract is
+independent of grant breadth, including `{}`. [PUT cases and rationale](endpoint-policy-format.md)
+distinguish presence checks from value validation. Field types/nullability and
+error details remain open; earlier missing-input gaps below are qualified by this
+approval, not a claim that all input validation is complete.
+
 Q-050-D now approves ENFORCEMENT-003: review that authorization boundaries and
 request bindings actually constrain returned or changed data, not merely that
 inputs appear in code. [The review examples](endpoint-policy-format.md) cover

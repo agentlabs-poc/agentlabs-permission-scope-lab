@@ -1,5 +1,12 @@
 # Authorization Handbook — working edition
 
+Current: Q-050-E approves INPUT-002: every declared input is required at its
+specified source, without silent omission/default/fallback. `{}` does not waive
+input requirements or invent narrower scope restrictions. [PUT cases and rationale](endpoint-policy-format.md)
+distinguish input presence from value validity. Next: input value validation and
+remaining policy validation/publication. Earlier missing-input-open notes are
+retained history where this approval now settles presence/source behavior.
+
 Current: Q-050-D approves ENFORCEMENT-003. Endpoint review must verify that
 boundaries and request bindings actually constrain returned/changed data, not
 merely that inputs appear in code. [Rationale and counterexamples](endpoint-policy-format.md)

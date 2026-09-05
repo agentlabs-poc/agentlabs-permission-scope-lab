@@ -1,5 +1,47 @@
 # Endpoint policy format — approved partial structure
 
+## Required inputs at their declared sources — INPUT-002 / Q-050-E, agreed
+
+Every input listed in the endpoint policy must be present at its declared
+source. Do not silently omit it, default it, or obtain it from another source.
+A request missing a declared input is rejected; a broader grant does not waive
+the endpoint's input contract.
+
+### Rationale and alternative
+
+The endpoint has a fixed, predictable input contract independent of the caller's
+grants. Optional declared inputs with explicit absent-value behavior were the
+alternative considered; they were not selected for this v1 rule because they
+add contract machinery and require care that absence cannot weaken authorization.
+No optional flag or default-value field is introduced.
+
+Presence and scope evaluation have different responsibilities. An applicable
+`{}` grant does not impose a department restriction, but it does not make a
+declared department input optional. The endpoint still enforces actual execution
+within whatever boundaries apply under CONTRACT-012.
+
+### PUT examples and counterexamples
+
+The PUT policy below binds local `proposed_dept` to body field `department_id`.
+
+| Request material | Input-binding consequence |
+|---|---|
+| Body contains `department_id: "FIN"` | Bind `proposed_dept` to `"FIN"`; this does not by itself pass authorization or application validation. |
+| Body omits `department_id` | Reject the request for the missing declared input. |
+| Body omits it but a query parameter supplies it | Still reject; the declared source is the body, not the query. |
+| Body omits it and Vinay has a tenant-wide `{}` grant | Still reject; authority breadth does not change required input presence. |
+| Body includes other application fields | They do not automatically become authorization inputs; application validation governs them. |
+
+### What this approval does not settle
+
+A present value is not necessarily valid. Field types, nullability, domain
+validation, nested-body syntax, error representation, and validation ordering
+remain to be specified as appropriate. This rule does not classify every null
+or empty value as valid or invalid, or mandate an HTTP response status. The
+source is explicit and mandatory; no automatic fallback or default is permitted.
+Full policy validation/publication remains open. Earlier missing-input-open notes
+below are history specifically for presence/source behavior settled by INPUT-002.
+
 ## Endpoint review requirement — ENFORCEMENT-003 / Q-050-D, agreed
 
 > Verify that the authorization boundaries and request bindings actually

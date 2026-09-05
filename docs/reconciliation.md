@@ -1,5 +1,23 @@
 # Handbook reconciliation register
 
+## Checkpoint following 3ed7d43 — Q-050-E required declared inputs
+
+Q-050-E approves INPUT-002: every declared input must be present at its specified
+source; missing inputs reject the request, without silent omission/default/fallback.
+The policy chapter records rationale, optional-input alternative, five PUT cases,
+and the distinction from scope restrictions and actual endpoint enforcement.
+Tenant-wide {} does not waive declared input requirements.
+
+Earlier missing-input-open notes are preserved and qualified for this settled
+presence/source behavior. Present values still need appropriate validation;
+types, nullability, error representation, ordering, complete policy publication,
+and update/move contracts remain open. No implementation or new schema field.
+
+Docs-only verification passed: 25 Markdown files, 159 local links, 51 JSON
+blocks, and 141 unique decision/question IDs in the tree. Agreed/open status,
+rationale/example coverage, preservation of earlier nonblank content, and
+`git diff --check` passed. No policy parser or application behavior changed.
+
 ## Checkpoint following 59d0acf — Q-050-D review requirement
 
 Q-050-D approves ENFORCEMENT-003: review actual boundary/request restrictions on

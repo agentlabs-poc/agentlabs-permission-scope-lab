@@ -1,5 +1,10 @@
 # Explanation coverage audit — through Q-043
 
+Q-050-E follow-up: INPUT-002 is approved. The policy chapter captures the fixed
+input-contract rationale, optional-input alternative not selected, five PUT
+presence/source cases including {}, and the limits for types/nullability/errors.
+No new policy fields, silent defaults, or complete-validation claim are introduced.
+
 Q-050-D follow-up: ENFORCEMENT-003 is now approved. The policy chapter records
 the exact review wording, its rationale, Finance conjunction example, five
 review cases, the {} qualification, and limits against a blanket security
