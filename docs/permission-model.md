@@ -116,7 +116,7 @@ ledger or entry. Deeper naming alone does not settle permission inheritance.
 
 The original parent/child inheritance and wildcard examples were explicitly
 working proposals. Q-057 now adopts the no-automatic-inheritance rule below;
-wildcard support remains open under Q-058. Original alternatives remain archived.
+Q-058 excludes wildcard permission names from v1. Original alternatives remain archived.
 No wildcard support follows from retaining namespaced permission examples.
 
 ### Why retain this explanation?
@@ -161,14 +161,15 @@ and actual-use enforcement remain mandatory for any granted permission.
 
 ### Q-058 / PERMISSION-004 — wildcard permission names in v1
 
-Status: **PROPOSED, not approved.** Recommend leaving wildcard permission names
-out of v1. Grants and roles would list explicit registered permissions instead
+Status: **AGREED — outside v1.** The user answered “not in v1.” Original status
+retained as history: ~~PROPOSED, not approved~~. Grants and roles list explicit
+registered permissions instead
 of patterns such as `hrms:payroll:ledger:*::read`.
 
 Rationale: a wildcard needs additional rules about matching depth and whether it
 includes permissions registered later. Explicit lists keep intended operations
 visible and avoid adding those rules to the foundational v1 contract. Roles can
-still bundle a set of permissions; this proposal does not freeze role membership
+still bundle a set of permissions; this decision does not freeze role membership
 or change the agreed live-role model.
 
 The alternative, illustrated in the earlier Markdown, is a one-segment wildcard.
@@ -178,12 +179,38 @@ and matching contract. The original illustration remains archived, not adopted.
 Example: for ledger entry and summary reads, explicitly list
 `hrms:payroll:ledger:entry::read` and `hrms:payroll:ledger:summary::read` instead
 of using the pattern above. An unrelated new permission would not be included
-merely by matching that pattern. If this exclusion is approved, unsupported
-wildcard strings must not be silently expanded into authority.
+merely by matching that pattern. Unsupported wildcard permission patterns are
+not valid v1 authority and must not be accepted or silently expanded. Do not
+strip the wildcard and reinterpret the remainder as an authorized permission.
 
-**Q-058:** Should v1 exclude wildcard permission names and use explicit registered
-permissions, which roles can bundle? Aliases, complete character validation,
+Counterexample: `hrms:payroll:ledger:*::read` cannot act as a shortcut for all
+current or future ledger-child permissions in v1. Any future wildcard feature
+requires a separate explicit contract; this decision does not promise one.
+
+**Q-058 — answered: not in v1.** Exclude wildcard permission names; use explicit registered
+permissions, which roles can bundle. Aliases, complete character validation,
 catalog evolution, and runtime migration remain separate questions.
+
+### Q-059 / PERMISSION-005 — permission aliases in v1
+
+Status: **PROPOSED, not approved.** Recommend no permission-alias mechanism in
+v1. Each registered permission has one canonical identifier; two different
+identifiers do not become interchangeable through an alias mapping.
+
+For example, the evaluator would not treat `hrms:payroll:ledger::view` as another
+name for `hrms:payroll:ledger::read`. If both names are separately registered,
+they remain distinct permissions. The application may still choose readable UI
+labels; labels are not alternative authorization identifiers.
+
+Rationale: aliases add equivalence and rename rules across registration, grants,
+endpoint declarations, and audit. A single identifier keeps those references
+unambiguous. The alternative is an explicit alias table, useful for compatibility
+but requiring additional governance and migration semantics. Those are not
+settled by choosing a naming convention.
+
+**Q-059:** Should v1 exclude permission aliases? This does not settle all future
+rename/migration procedures or require deleting historical names. After this
+focused question, return to the unfinished decision-result contract.
 
 ## How permission participates in authorization
 

@@ -44,8 +44,9 @@ The application defines those levels; Auth does not hardcode their business
 meaning. `:` separates namespace levels and `::` separates the verb. Naming
 depth does not establish scope reach. Q-057 agrees that parent permission names
 do not automatically authorize deeper permissions; a grant or role can explicitly
-list both. Q-058 proposes leaving wildcard permission names out of v1; that
-separate proposal is not yet approved.
+list both. Q-058 excludes wildcard permission names from v1: grants and roles
+list explicit registered permissions, not wildcard patterns. Permission-alias
+exclusion is a separate open proposal under Q-059.
 
 There is no additional canonical “target” entity or required resource wrapper
 (TERM-005). A request can identify a certificate, list, or proposed change using
