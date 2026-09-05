@@ -1,5 +1,11 @@
 # Current grant formats — canonical v1 scope
 
+Q-050-A / CONTRACT-010 now settles the shared top-level version field and string
+value, initially `"1"`, plus missing/malformed/unsupported-version rejection.
+The complete grant schema remains open. Unversioned working examples below are
+retained illustrations, not publishable full contracts; earlier version-syntax
+open wording is historical after this approval.
+
 Publication status — CONTRACT-009: every published JSON/YAML contract must
 include a version. The unversioned examples below remain **working illustrations,
 not complete published contracts**. Agreed scope semantics remain current;

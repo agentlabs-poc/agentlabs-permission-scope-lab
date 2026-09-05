@@ -1,5 +1,11 @@
 # Authorization Handbook — working edition
 
+Current: Q-050-A approves the [shared version convention](contract-publication.md):
+required top-level `version: "1"` as a string; missing, malformed, or unsupported
+versions are rejected. CONTRACT-010 distinguishes contract version from document
+revision. Q-050's full endpoint policy schema remains open. Older statements
+that version syntax is unselected are history, not the current convention.
+
 Publication requirement: **every published JSON/YAML contract includes a version**
 (CONTRACT-009). Existing JSON examples remain working illustrations until full
 versioned contracts are settled. [Contract publication](contract-publication.md)

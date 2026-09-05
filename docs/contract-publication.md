@@ -1,5 +1,55 @@
 # Contract publication and versioning — CONTRACT-009
 
+## Shared version convention — CONTRACT-010 / Q-050-A, agreed
+
+Every published JSON/YAML contract has a required top-level `version` field.
+Its value is a string, initially `"1"`; quote the value in YAML as well.
+This is approved metadata, not a complete grant or endpoint policy:
+
+```json
+{
+  "version": "1"
+}
+```
+
+The value identifies the contract format and meaning, not an individual
+document's edit revision. Updating a grant's scope within the same contract
+does not by itself change its contract version. The version is interpreted
+within its contract type: grant `"1"` and endpoint policy `"1"` refer to their
+respective definitions and need not evolve together. Version alone does not
+identify a contract type; establishing that type remains part of the surrounding
+contract/integration design.
+
+### Rationale and alternative
+
+A top-level field identifies the applicable definition before interpreting its
+contents. A string keeps JSON/YAML representation consistent and avoids treating
+the identifier as an arithmetic value. `schema_version` was considered as a more
+explicit name; the simpler `version` was selected with its meaning defined once.
+Separating contract version from document revision avoids a new contract version
+for each ordinary grant edit. Independent contract-type versions avoid forcing
+unrelated grant-format changes when endpoint policy formats evolve.
+
+### Rejection rules and counterexamples
+
+Consumers reject missing, malformed, or unsupported versions. They must not
+guess a default, silently downgrade, or interpret an unknown version as current.
+
+| Version material | Consequence |
+|---|---|
+| Top-level `"version": "1"`, supported for the expected contract type | Version check passes; all other contract and authorization checks remain. |
+| Version omitted | Reject; no implicit `"1"`. |
+| Numeric `"version": 1` or `"version": null` | Reject; the required string representation is absent. |
+| A version the consumer does not support | Reject; do not reinterpret it as `"1"`. |
+| Version supplied only inside `scope` | Does not meet the top-level requirement; version metadata is not a scope boundary key. |
+
+Scope `{}` retains its tenant-wide meaning. This convention does not finalize
+any complete contract. Compatibility, migration rules, future version numbering,
+full endpoint policy/grant schemas, and document-revision representation remain
+open. Older statements below that version field/value/placement or unsupported
+version behavior are undecided are preserved history, superseded specifically
+by CONTRACT-010.
+
 ## Agreed publication requirement
 
 Every published JSON/YAML contract must include a version. This applies to

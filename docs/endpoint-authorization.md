@@ -1,5 +1,10 @@
 # Working handbook chapter: endpoint-owned authorization
 
+Q-050-A now settles version metadata under CONTRACT-010: a required top-level
+`version` string, initially `"1"`, with rejection of missing/malformed/unsupported
+versions. The rest of the endpoint policy JSON/YAML schema remains open under
+Q-050. Earlier version-field/value-open notes below are retained history.
+
 The endpoint policy's JSON/YAML contract has **not yet been discussed or
 finalized**. The rules below are requirements, not an adopted schema. Under
 CONTRACT-009, every published contract must include a version. See

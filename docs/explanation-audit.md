@@ -1,5 +1,11 @@
 # Explanation coverage audit — through Q-043
 
+Q-050-A follow-up: contract-publication.md records the approved version syntax,
+string/type-local interpretation, distinction from document revision, rationale,
+alternative field name, five validation cases, and remaining schema/compatibility
+work. The endpoint policy contract remains explicitly open; a version metadata
+fragment is not presented as a complete published policy.
+
 Publication follow-up: contract-publication.md records CONTRACT-009's version
 requirement, rationale, working-example status, and unselected version syntax/
 compatibility rules. Endpoint policy requirements are explicitly distinguished

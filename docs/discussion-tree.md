@@ -19,6 +19,12 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-050-A settled CONTRACT-010.** Required top-level string
+  `version: "1"`; reject missing/malformed/unsupported versions. Contract
+  versions are distinct from document revisions and interpreted per contract type.
+  **Q-050 remains open:** endpoint policy structure and binding syntax are next.
+  Earlier version-syntax-open statements below are retained history.
+
 - **Current: Q-049 settled CONTRACT-008:** exactly one required permission per
   protected endpoint, mandated by Auth. Multi-permission endpoint declarations
   are not a remaining v1 option; multi-permission grants remain supported.
@@ -296,6 +302,7 @@ Authorization handbook
 │   ├── Method/route action mapping and identified path/body inputs [settled: INPUT-001]
 │   ├── Explicit required material/source declaration [settled: CONTRACT-007 / Q-035]
 │   │   └── Endpoint policy JSON/YAML contract [active: Q-050; schema not yet discussed]
+│   │       └── Shared version convention [settled: CONTRACT-010 / Q-050-A; full policy schema remains open]
 │   │   └── Permissions, inputs, sources, relationship bindings [clarified: Q-047-A]
 │   ├── Logical system block diagram [available: system-overview.md]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
@@ -404,6 +411,7 @@ Update: Q-048 approved RESOLUTION-006, including Vinay's membership/direct/group
 Q-049 → CONTRACT-008 approved: exactly one required permission per protected endpoint. Earlier AND-across-permissions proposal not adopted.
 Publication sidebar → CONTRACT-009 requires a version in every published JSON/YAML contract; syntax and compatibility remain open.
 Q-050 → endpoint policy contract discussion, including version representation (open).
+Q-050-A → CONTRACT-010 approved: version field/string, type-local meaning, revision distinction, and strict rejection rules. Q-050's remaining policy schema stays open.
 
 The log retains these for traceability; they are not current options:
 

@@ -1,5 +1,24 @@
 # Handbook reconciliation register
 
+## Checkpoint following add96eb — Q-050-A version convention
+
+Q-050-A approves CONTRACT-010: required top-level version string, initially "1",
+interpreted per contract type rather than as a document edit revision. Consumers
+reject missing, malformed, or unsupported versions without guessing/fallback.
+The publication chapter records rationale, alternative field name, examples,
+counterexamples, and remaining compatibility/migration/schema details.
+
+Earlier version-field/value/placement and unsupported-version-open wording is
+preserved as history and qualified in the index, log, tree, grant-format chapter,
+endpoint chapter, and overview. Q-050's full endpoint policy contract remains
+open. Unversioned grant illustrations are not converted into purportedly complete
+contracts merely by adding a version field. No application implementation changes.
+
+Docs-only verification passed: 24 Markdown files, 147 local links, 46 JSON
+blocks, and 133 unique decision/question IDs in the tree. Approved/open status,
+rationale coverage, preservation of earlier nonblank lines, and `git diff --check`
+passed. These are documentation checks, not an implemented contract validator.
+
 ## Checkpoint following 5eebca9 — Q-049 exactly one required permission
 
 Additional user requirement in this checkpoint: CONTRACT-009 requires versions

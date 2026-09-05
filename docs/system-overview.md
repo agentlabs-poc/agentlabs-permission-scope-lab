@@ -1,5 +1,10 @@
 # Authorization system — canonical logical overview
 
+Update: Q-050-A / CONTRACT-010 settles top-level string `version: "1"` and
+missing/malformed/unsupported-version rejection. This does not finalize the
+endpoint policy schema or add a diagram component. Prior version-syntax-open
+wording below is retained checkpoint history.
+
 The diagram depicts agreed responsibilities, not a finalized endpoint policy
 JSON/YAML schema. That contract is Q-050, still open. Every published contract
 must include a version under CONTRACT-009; version syntax is not yet selected.
