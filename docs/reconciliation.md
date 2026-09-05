@@ -1,5 +1,24 @@
 # Handbook reconciliation register
 
+## Checkpoint following 2358a51 — Q-050-B partial endpoint policy and PUT example
+
+Q-050-B approves CONTRACT-011: version, method, path, one permission, and named
+inputs with source/name bindings. The new endpoint policy chapter records the
+GET structure, rationale for every field, shorthand alternative not selected,
+and the requested PUT example taking a proposed department from a body field.
+
+Q-050-C relationship bindings remain open, as do the complete policy schema and
+update/move rules. The PUT example cannot treat requested Finance as proof of
+the current certificate's department. Versioned partial illustrations are not
+presented as deployable published policies. Earlier policy-not-discussed notes
+are preserved history and qualified by the current partial approval.
+
+Docs-only verification passed: 25 Markdown files, 151 local links, 49 JSON
+blocks, and 136 unique decision/question IDs in the tree. GET/PUT version and
+source/name bindings, the body extraction example, rationale/open-status coverage,
+preservation of previous nonblank lines, and `git diff --check` passed.
+These are documentation checks, not an implemented policy parser or application.
+
 ## Checkpoint following add96eb — Q-050-A version convention
 
 Q-050-A approves CONTRACT-010: required top-level version string, initially "1",

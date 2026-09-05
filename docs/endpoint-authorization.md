@@ -1,5 +1,12 @@
 # Working handbook chapter: endpoint-owned authorization
 
+Q-050-B / CONTRACT-011 now approves the partial endpoint policy fields:
+`version`, `method`, `path`, one `permission`, and named `inputs` with
+`source`/`name`. [GET and PUT examples](endpoint-policy-format.md) explain field
+rationale and path versus body inputs. The full policy remains open: relationship
+bindings are Q-050-C. Earlier statements that no policy structure is discussed
+are preserved history, not the current partial-approval status.
+
 Q-050-A now settles version metadata under CONTRACT-010: a required top-level
 `version` string, initially `"1"`, with rejection of missing/malformed/unsupported
 versions. The rest of the endpoint policy JSON/YAML schema remains open under

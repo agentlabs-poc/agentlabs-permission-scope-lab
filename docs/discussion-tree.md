@@ -19,6 +19,12 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-050-B settled CONTRACT-011's partial policy structure.** Version,
+  method/path, one permission, and named source/name inputs are agreed. The
+  endpoint-policy-format chapter contains GET and PUT examples and their rationale.
+  **Next: Q-050-C relationship bindings.** Full policy validation/publication and
+  update/move semantics remain open. Earlier not-discussed notes are history.
+
 - **Current: Q-050-A settled CONTRACT-010.** Required top-level string
   `version: "1"`; reject missing/malformed/unsupported versions. Contract
   versions are distinct from document revisions and interpreted per contract type.
@@ -303,6 +309,8 @@ Authorization handbook
 │   ├── Explicit required material/source declaration [settled: CONTRACT-007 / Q-035]
 │   │   └── Endpoint policy JSON/YAML contract [active: Q-050; schema not yet discussed]
 │   │       └── Shared version convention [settled: CONTRACT-010 / Q-050-A; full policy schema remains open]
+│   │       ├── Method/path, one permission, source/name inputs [settled partial structure: CONTRACT-011 / Q-050-B; GET and PUT examples]
+│   │       └── Relationship bindings and trusted fact connections [active: Q-050-C]
 │   │   └── Permissions, inputs, sources, relationship bindings [clarified: Q-047-A]
 │   ├── Logical system block diagram [available: system-overview.md]
 │   ├── Requested IDs versus established resource facts [working: FACT-001]
@@ -412,6 +420,8 @@ Q-049 → CONTRACT-008 approved: exactly one required permission per protected e
 Publication sidebar → CONTRACT-009 requires a version in every published JSON/YAML contract; syntax and compatibility remain open.
 Q-050 → endpoint policy contract discussion, including version representation (open).
 Q-050-A → CONTRACT-010 approved: version field/string, type-local meaning, revision distinction, and strict rejection rules. Q-050's remaining policy schema stays open.
+Q-050-B → CONTRACT-011 approved partial structure; requested PUT body example added with rationale and current/proposed distinction.
+Q-050-C → relationship bindings and trusted facts (open); full Q-050 policy schema remains unfinished.
 
 The log retains these for traceability; they are not current options:
 

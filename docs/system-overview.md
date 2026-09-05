@@ -1,5 +1,11 @@
 # Authorization system — canonical logical overview
 
+Q-050-B now supplies an approved partial policy representation for the declaration
+block: version, method/path, one permission, and named source/name input bindings.
+[GET and PUT examples](endpoint-policy-format.md) distinguish requested values
+from established facts. Relationship bindings and full schema publication remain
+open; this does not add an authorization stage or deployment component.
+
 Update: Q-050-A / CONTRACT-010 settles top-level string `version: "1"` and
 missing/malformed/unsupported-version rejection. This does not finalize the
 endpoint policy schema or add a diagram component. Prior version-syntax-open

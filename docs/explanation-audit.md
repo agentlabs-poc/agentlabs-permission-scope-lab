@@ -1,5 +1,11 @@
 # Explanation coverage audit — through Q-043
 
+Q-050-B follow-up: endpoint-policy-format.md records the approved partial fields,
+each field's rationale, explicit source/name versus shorthand, GET and PUT JSON,
+body/local-name mapping, the Engineering-to-Finance counterexample, and open
+relationship/update/move semantics. The user requested the PUT example; its body
+is clearly a proposed value, not current-state proof or a new published contract.
+
 Q-050-A follow-up: contract-publication.md records the approved version syntax,
 string/type-local interpretation, distinction from document revision, rationale,
 alternative field name, five validation cases, and remaining schema/compatibility

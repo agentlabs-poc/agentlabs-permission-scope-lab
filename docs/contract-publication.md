@@ -1,5 +1,10 @@
 # Contract publication and versioning — CONTRACT-009
 
+Endpoint policy status update: Q-050-B approves the partial fields and input
+bindings in [endpoint policy format](endpoint-policy-format.md), not the whole
+schema. Q-050-C relationship bindings and full publication remain open. Earlier
+statements that the policy has not been discussed are preserved history.
+
 ## Shared version convention — CONTRACT-010 / Q-050-A, agreed
 
 Every published JSON/YAML contract has a required top-level `version` field.

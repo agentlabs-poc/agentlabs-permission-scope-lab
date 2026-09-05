@@ -1,5 +1,11 @@
 # Authorization Handbook — working edition
 
+Current: Q-050-B approves CONTRACT-011's [partial endpoint policy format](endpoint-policy-format.md),
+including explicit path/body input bindings. GET and PUT examples preserve the
+rationale and proposed-versus-current-fact distinction. Q-050 remains unfinished;
+next is Q-050-C, relationship bindings. Earlier policy-structure-open notes below
+are checkpoint history; no complete policy schema has been published.
+
 Current: Q-050-A approves the [shared version convention](contract-publication.md):
 required top-level `version: "1"` as a string; missing, malformed, or unsupported
 versions are rejected. CONTRACT-010 distinguishes contract version from document
