@@ -17,6 +17,10 @@ Q-039 adds REGISTRATION-001: applications register supported permissions and
 scope contracts; Auth validates grant acceptance without interpreting domain
 meaning. Registration format and permission-scope compatibility remain open.
 
+Q-040 subsequently approves optional permission-scope support-relationship
+declarations through registration (REGISTRATION-002). Representation and
+omission behavior (Q-041) remain open; this qualifies the earlier checkpoint.
+
 ## Read the current chapters
 
 | Material | What it preserves |

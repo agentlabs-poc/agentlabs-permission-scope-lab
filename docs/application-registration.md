@@ -1,5 +1,11 @@
 # Application registration and Auth validation
 
+Latest: REGISTRATION-002 / Q-040 is approved with the user's qualification that
+declaring supported permission-scope relationships is an optional feature of
+the registration flow. Individual permission and scope registration remains
+agreed under Q-039. Omission behavior is proposed separately in Q-041;
+older Q-040-open statements below are preserved historical snapshots.
+
 REGISTRATION-001 / Q-039 is agreed. The user refined the shared-definition
 proposal: applications register their supported scopes and permissions; Auth
 validates before accepting grants and remains abstract and domain-agnostic.
@@ -56,6 +62,52 @@ registration of both a permission and a scope key does not by itself establish
 that they are a supported combination. Permission-scope compatibility is the
 next question, Q-040, not an implicitly approved validation mechanism.
 
+## Optional relationship declarations — Q-040, approved with qualification
+
+The registration flow binds the application's permissions and scopes to any
+declared support relationships. Auth validates those declarations without
+understanding application business concepts. Declaring the relationships is
+an optional feature, not a mandatory registration requirement.
+
+```text
+Application registers supported permissions and scope keys
+                         |
+                         v
+Optionally declares their supported relationships in registration
+                         |
+                         v
+Auth uses registered contracts when validating grant acceptance
+```
+
+This is a logical dependency flow, not three required API calls or a finalized
+registration ordering protocol. It adds no grant fields. Representation and
+update transaction mechanics remain open.
+
+For illustration, an application might declare that payslip-read supports
+`dept` and `user`, while repository-read supports `project` and `repository`.
+Where the declared contract excludes `dept` for repository-read, Auth can reject
+that combination through metadata validation without interpreting departments.
+These are example mappings, not universal catalogs or finalized array fields.
+
+Optional registration metadata does not remove Q-038's runtime requirement to
+evaluate scope under explicitly supported application meanings. Unsupported
+relationships cannot become unrestricted access by ignoring scope entries.
+Valid registration is also not authority for a caller to issue a grant.
+
+### Q-041 — omitted optional declarations, proposed
+
+Recommended interpretation: without relationship metadata, Auth checks registered
+permissions and keys, canonical syntax, declared constraints, and grant-issuance
+authority, but does not claim to have established their compatibility. The
+endpoint-owned gate must still establish supported target relationships and
+satisfy the complete scope before access. If relationship metadata is supplied,
+Auth additionally validates against it.
+
+This omission behavior is not yet approved. Optionality per application versus
+permission, absent versus empty, partial or invalid declarations, multi-key
+combinations, role changes, and metadata removal remain open. Calling the
+feature optional does not adopt silent fallback for invalid declarations.
+
 ## Still open
 
 - Registration representation, APIs, storage, distribution, and versioning.
@@ -63,6 +115,8 @@ next question, Q-040, not an implicitly approved validation mechanism.
   namespace/identity protection. Registration is not authority to self-grant.
 - Declaring supported permission-scope combinations, including multi-permission
   grants and role evolution; Q-040 begins this branch.
+  Update: Q-040 now settles optional declarations in registration. Q-041 and
+  the detailed compatibility mechanics remain open.
 - Concrete-reference checks, removal/rename behavior, existing grants, and
   synchronization/freshness guarantees.
 - Administrative scope containment and exact rejection/failure contracts.

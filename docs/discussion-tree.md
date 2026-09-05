@@ -19,6 +19,11 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-040 approved REGISTRATION-002 with optional relationship
+  declarations in registration.** Q-041 is active: what Auth validates when
+  that metadata is absent. Individual permission/key registration and runtime
+  scope requirements remain required. The Q-039 position below is history.
+
 - **Current: Q-039 is approved as REGISTRATION-001.** Applications register
   scope and permission contracts; Auth validates grant acceptance while remaining
   domain-agnostic. Q-040 is next: explicit permission-scope compatibility.
@@ -191,7 +196,8 @@ Authorization handbook
 │   ├── Scope keys: meaning, ownership, accepted references [active; no next question issued]
 │   │   ├── Explicit key meanings and target mappings [formerly active; settled: Q-038; refines SCOPE-004]
 │   │   ├── Shared definition contract for validation/evaluation [formerly active: Q-039; registration refinement agreed]
-│   │   └── Permission-scope compatibility declaration [active: Q-040]
+│   │   ├── Permission-scope compatibility declaration [formerly active: Q-040; optional feature agreed REGISTRATION-002]
+│   │   └── Omitted optional relationship metadata [active: Q-041]
 │   ├── AND within scope; alternatives through complete grants [settled: SCOPE-008]
 │   ├── Self resolves per human even in group-derived grants [settled: SELF-001]
 │   ├── Scope type, descriptor, referenced resource, resolved scope [open]
@@ -288,6 +294,8 @@ Update: Q-038 is now agreed and answers Q-028's conceptual compatibility questio
 Q-039 → application-owned definition contract shared across grant validation and request evaluation (open).
 Update: Q-039 is now approved as refined in REGISTRATION-001: applications register permission/scope contracts; Auth validates without domain interpretation.
 Q-040 → explicit permission-scope compatibility declarations (open).
+Update: Q-040 is approved with optionality qualification; REGISTRATION-002 binds optional declarations through registration.
+Q-041 → behavior when optional relationship metadata is absent (proposed, open).
 
 The log retains these for traceability; they are not current options:
 

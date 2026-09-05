@@ -1,5 +1,21 @@
 # Handbook reconciliation register
 
+## Checkpoint following b516ff8 — qualified Q-040 approval
+
+REGISTRATION-002 records Q-040's approval with support-relationship declarations
+as an optional registration feature. Registration binds those relationships;
+Auth stays domain-agnostic. Q-041 proposes omission behavior and remains open.
+Neither mandatory relationship metadata nor "omitted means all combinations
+supported" is adopted. Individual registration, canonical checks, issuance
+authority, and runtime scope requirements are not made optional.
+
+The registration chapter, log, and tree preserve the earlier proposal and
+explain the user's qualification. No schema or implementation is adopted.
+
+Checks for this docs-only checkpoint passed: `git diff --check`, 19 Markdown
+files, 96 local links, 42 JSON blocks, and 113 unique decision/question references
+present in the tree. The new Q-041 remains OPEN. No application source changed.
+
 ## Checkpoint following 8e1c16f — Q-039 approval
 
 REGISTRATION-001 records the approved refinement of Q-039: applications register
