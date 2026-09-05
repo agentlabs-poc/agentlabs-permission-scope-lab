@@ -296,3 +296,34 @@ or collapse the distinction between evaluation error and completed denial.
 
 **Q-055 — answered yes:** Should we add `error_code` for the stable machine-readable cause while
 keeping both agreed message fields readable?
+
+## Q-060 / DECISION-008 — supporting-grant references with allow
+
+Status: **PROPOSED, not approved.** Returning from the permission sidebar,
+recommend that an allow result provide the server-side endpoint with references
+to the complete grant routes actually used to justify that allow.
+
+DECISION-001 already preserves route provenance during evaluation; this question
+is specifically whether that evidence is available in the returned allow result,
+rather than remaining only inside the evaluator. It does not create new grants
+or require returning every grant the human holds.
+
+Example: Vinay's Finance group grant G-17 supplies the required read permission
+within Finance, under its applicable restrictions and dependencies. The allow
+result identifies G-17 as supporting authority so the endpoint can associate the
+operation with why it was authorized. This reference does not prove that C-17
+belongs to Finance or replace the endpoint's constrained read.
+
+Rationale: the endpoint and audit path should not have to reconstruct which
+authority justified access. A bare allow with evidence held only in evaluator
+logs is smaller, but makes that association depend on a separate lookup. An
+allow result with supporting references makes the association explicit while
+remaining a dependent evaluation result, not a reusable authorization grant.
+
+This proposal concerns server-side result evidence, not automatic UI disclosure.
+It does not select field names, grant snapshot/version format, provenance-chain
+encoding, audit storage, or how many alternative routes to evaluate and return.
+Returning a grant identifier is not a substitute for enforcing all restrictions.
+
+**Q-060:** Should the allow result return its supporting-grant references to the
+endpoint for traceability?

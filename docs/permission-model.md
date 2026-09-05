@@ -193,11 +193,12 @@ catalog evolution, and runtime migration remain separate questions.
 
 ### Q-059 / PERMISSION-005 — permission aliases in v1
 
-Status: **PROPOSED, not approved.** Recommend no permission-alias mechanism in
-v1. Each registered permission has one canonical identifier; two different
+Status: **AGREED — no aliases in v1.** The user answered “no alias.” Original
+status retained as history: ~~PROPOSED, not approved~~. Each registered permission
+has one canonical identifier; two different
 identifiers do not become interchangeable through an alias mapping.
 
-For example, the evaluator would not treat `hrms:payroll:ledger::view` as another
+For example, the evaluator does not treat `hrms:payroll:ledger::view` as another
 name for `hrms:payroll:ledger::read`. If both names are separately registered,
 they remain distinct permissions. The application may still choose readable UI
 labels; labels are not alternative authorization identifiers.
@@ -206,9 +207,16 @@ Rationale: aliases add equivalence and rename rules across registration, grants,
 endpoint declarations, and audit. A single identifier keeps those references
 unambiguous. The alternative is an explicit alias table, useful for compatibility
 but requiring additional governance and migration semantics. Those are not
-settled by choosing a naming convention.
+settled by choosing a naming convention. The alias-table alternative is not
+adopted for v1.
 
-**Q-059:** Should v1 exclude permission aliases? This does not settle all future
+Counterexample: a grant containing only the registered `ledger::view` permission
+cannot satisfy an endpoint requiring the separately registered `ledger::read`
+permission merely because an application considers the words similar. Display
+labels do not change this. Rename/migration work must not silently rewrite
+existing authority under an assumed alias rule.
+
+**Q-059 — answered: no aliases.** This does not settle all future
 rename/migration procedures or require deleting historical names. After this
 focused question, return to the unfinished decision-result contract.
 

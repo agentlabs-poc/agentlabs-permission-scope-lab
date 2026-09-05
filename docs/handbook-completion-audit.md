@@ -17,12 +17,25 @@ The user requested a measured score rather than the previous approximate 60%.
 
 ## Result
 
+Update after Q-059 (2026-09-06): HC-04-04 is now DONE. Q-057 settles no automatic
+parent/child inheritance; Q-058 and Q-059 exclude wildcard permission names and
+aliases from v1. [Permission](permission-model.md) records rationale and examples.
+The checkpoint asks for a decision on these features, not their implementation,
+so its criterion is satisfied and the denominator remains 69. No row is removed
+as a deferred deliverable. Naming governance and full result contracts stay open.
+
+Original snapshot, retained as history: 34 DONE / 35 OPEN / 69 total (49.3%
+closure, 50.7% remaining); stage 4 was 2 DONE / 4 total / 2 remaining; HC-04-04
+was OPEN. Current counts below incorporate its closure only.
+
 - Defined checkpoints: **69**.
-- Completed checkpoints: **34**.
-- Open checkpoints: **35**.
-- Closure score: **34 / 69 × 100 = 49.3%**.
-- Remaining-checkpoint score: **35 / 69 × 100 = 50.7%**.
-- Approved scope exclusions applied by this audit: **0**.
+- Completed checkpoints: **35**.
+- Open checkpoints: **34**.
+- Closure score: **35 / 69 × 100 = 50.7%**.
+- Remaining-checkpoint score: **34 / 69 × 100 = 49.3%**.
+- Checkpoint rows excluded from the denominator: **0**.
+- Feature exclusions resolving HC-04-04: wildcard permission names and aliases
+  outside v1 (Q-058 / Q-059).
 
 The previous 60% was an impression and must not be represented as measured.
 It is superseded for this audit by the explicit count above. This does **not**
@@ -69,7 +82,7 @@ contract may cost more work than several completed conceptual checkpoints.
 | 1. Purpose and architecture | 2 | 4 | 2 |
 | 2. Principles | 4 | 5 | 1 |
 | 3. Vocabulary and identity | 3 | 5 | 2 |
-| 4. Permissions | 2 | 4 | 2 |
+| 4. Permissions | 3 | 4 | 1 |
 | 5. Grants and authority | 7 | 13 | 6 |
 | 6. Scope and registration | 5 | 7 | 2 |
 | 7. Requests and resolution | 6 | 10 | 4 |
@@ -77,7 +90,7 @@ contract may cost more work than several completed conceptual checkpoints.
 | 9. Enforcement and time | 2 | 9 | 7 |
 | 10. Challenge and verify | 2 | 4 | 2 |
 | 11. Publish the foundation | 0 | 4 | 4 |
-| **Total** | **34** | **69** | **35** |
+| **Total** | **35** | **69** | **34** |
 
 ## Detailed closure register
 
@@ -121,7 +134,7 @@ not the whole surrounding topic.
 | HC-04-01 | DONE | Separate the operation identified by a permission from scope reach. | PERMISSION-001; [grant model](grant-model.md). |
 | HC-04-02 | DONE | Mandate exactly one required permission covering each protected method/route. | CONTRACT-008 / Q-049; [endpoint authorization](endpoint-authorization.md). |
 | HC-04-03 | OPEN | Finalize permission naming/catalog governance and evolution rules. | Stage 4 [tree](discussion-tree.md); historical lab grammar is not an adopted full catalog contract. |
-| HC-04-04 | OPEN | Decide v1 treatment of permission hierarchies, wildcards, and aliases. | Stage 4 [roadmap](handbook-roadmap.md); explicit exclusion would also close this item, not assumed support. |
+| HC-04-04 | DONE | Decide v1 treatment of permission hierarchies, wildcards, and aliases. | Q-057: no automatic permission inheritance; Q-058: no wildcard permission names in v1; Q-059: no permission aliases in v1. Rationale, alternatives, and examples in [Permission](permission-model.md). Original OPEN state retained in the update history above. |
 
 ### 5. Grants and authority
 
@@ -223,7 +236,7 @@ not the whole surrounding topic.
   a production authorization engine. This score does not require completing
   an engine to finish the handbook, but implementation claims need evidence
   or explicit unverified status.
-- The remaining permission hierarchy decision does not reopen SCOPE-007's ban
+- The permission hierarchy decisions do not reopen SCOPE-007's ban
   on arbitrary wildcard/array/expression scope syntax.
 - The scope-reference row does not impose universal department/project types,
   revive a canonical target wrapper, or require a relationship block.
@@ -242,6 +255,7 @@ not the whole surrounding topic.
 6. Recheck final consistency and release acceptance; a high subtotal cannot
    override an unresolved security contract or publish the handbook by itself.
 
-This report records analysis only. It does not approve the rubric as canonical,
-settle open questions, alter prior agreements, commit, or push. The user's
-commit/push gate remains frozen.
+This report records analysis only and does not approve its rubric as canonical
+or settle open policy questions. Closure updates follow the user's documented
+decisions. Original process note retained as history: the commit/push gate was
+frozen at the initial audit snapshot; the user subsequently reopened it.

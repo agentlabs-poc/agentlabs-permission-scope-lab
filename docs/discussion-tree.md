@@ -101,10 +101,11 @@ remain active; it is restored in [Permission](permission-model.md) and the reade
 the `::` verb separator; the original deeper examples are restored.
 **Q-057 / PERMISSION-003 is agreed:** no automatic parent-to-child permission
 inheritance. **Q-058 / PERMISSION-004 is agreed:** wildcard permission names are
-outside v1. **Q-059 / PERMISSION-005 is proposed:** exclude permission aliases
-from v1. Catalog evolution stays open. Then return
-to decision-result contracts. Neither retention nor these narrow agreements
-alone closes the audit's broader contract checkpoints.
+outside v1. **Q-059 / PERMISSION-005 is agreed:** no permission aliases in v1.
+These three decisions close HC-04-04; catalog evolution stays open.
+**Q-060 / DECISION-008 is proposed:** return supporting-grant references with an
+allow result to the endpoint. This resumes decision-result contracts, which
+remain unfinished.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**
@@ -113,9 +114,10 @@ return to the parked registration-detail rabbit hole without a reason.
 
 Earlier reconciliation note, now qualified: a completion percentage had no
 explicit measurement baseline. [MEASURE-001](handbook-completion-audit.md) now
-counts 34 completed and 35 open checkpoints out of 69 (49.3% closure). This is a
+now counts 35 completed and 34 open checkpoints out of 69 (50.7% closure). This is a
 proposed checkpoint rubric, not an effort estimate or release-readiness score.
-Q-051's narrow agreement does not finish HC-08-02 or change that count.
+The earlier count was 34/69; Q-059 completes HC-04-04. Decision-result checkpoints
+remain open despite their partial agreements.
 
 ## Return points and non-reopened decisions
 

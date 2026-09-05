@@ -291,8 +291,9 @@ reason-code definitions, and safe-content rules remain open. The permission
 explanation has been restored at the user's request; Q-056 adopts its naming
 convention with variable-depth application namespaces. Q-057 agrees that name
 prefixes do not automatically confer deeper permissions. Q-058 excludes wildcard
-permission names from v1. Q-059 proposes excluding permission aliases; it is not
-yet approved. Character validation and catalog evolution remain open questions.
+permission names from v1. Q-059 excludes permission aliases from v1. Character
+validation and catalog evolution remain open. Q-060 proposes supporting-grant
+references in returned allow results; it is not yet approved.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)
@@ -306,8 +307,9 @@ policy shape. The exact priority order is still a proposal, not an adopted rule.
 Full contracts, update/move/list/bulk behavior, administrative scope encoding,
 delegation mechanics, revocation/concurrency, audit, conformance testing, and
 publication/governance remain unfinished. The subsequent
-[MEASURE-001 audit](handbook-completion-audit.md) counts 34 of 69 checkpoints
-closed (49.3%); this supersedes the earlier absence of a measured baseline, not
+[MEASURE-001 audit](handbook-completion-audit.md) now counts 35 of 69 checkpoints
+closed (50.7%), up from 34/69 after Q-059 closes HC-04-04; this supersedes the
+earlier absence of a measured baseline, not
 the distinction between documented agreement and implementation readiness.
 
 ## Preservation and implementation status
