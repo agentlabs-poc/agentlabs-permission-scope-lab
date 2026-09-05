@@ -1,5 +1,10 @@
 # Explanation coverage audit — through Q-043
 
+Q-050-D follow-up: ENFORCEMENT-003 is now approved. The policy chapter records
+the exact review wording, its rationale, Finance conjunction example, five
+review cases, the {} qualification, and limits against a blanket security
+guarantee. Earlier proposed-status coverage below is preserved history.
+
 Q-050-C follow-up: the policy chapter records mandatory endpoint boundary
 enforcement without a relationship block, the simplicity rationale and conscious
 trust tradeoff, a grant/GET/constrained-query example, empty/self/PUT distinctions,

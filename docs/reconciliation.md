@@ -1,5 +1,23 @@
 # Handbook reconciliation register
 
+## Checkpoint following 59d0acf — Q-050-D review requirement
+
+Q-050-D approves ENFORCEMENT-003: review actual boundary/request restrictions on
+returned or changed data, not mere input usage. The policy chapter records the
+rationale, Finance conjunction, five review cases, {} qualification, and limits.
+The requirement does not claim to detect every breach or replace other mandatory
+checks/tests. Earlier proposed/open text is retained and qualified in current
+chapters, the tree, and the authoritative log.
+
+CONTRACT-012's no-relationship-block policy remains unchanged. Q-050's remaining
+input/policy validation and publication, update/move semantics, and decision-result
+contracts remain open. No implementation or schema field is introduced here.
+
+Docs-only verification passed: 25 Markdown files, 157 local links, 51 JSON
+blocks, and 139 unique decision/question IDs in the tree. Agreed/open status,
+rationale/review-case coverage, previous content preservation, and
+`git diff --check` passed. These checks do not constitute an application security review.
+
 ## Checkpoint following deef0b3 — Q-050-C endpoint enforcement responsibility
 
 Q-050-C approves CONTRACT-012: no relationship block, named resolver, or argument

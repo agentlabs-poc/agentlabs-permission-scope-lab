@@ -19,6 +19,12 @@ PROCESS-006 resumes recording and preserves earlier designs with deprecation lab
 
 ## Current position
 
+- **Current: Q-050-D settled ENFORCEMENT-003.** Review actual boundary/request
+  enforcement on output and mutations, not merely input usage. The policy chapter
+  records examples and why this does not guarantee detection of every breach.
+  Next: remaining Q-050 input/policy validation before publication. Update/move
+  and decision-result contracts remain open. Earlier proposed/open labels are history.
+
 - **Current: Q-050-C settled CONTRACT-012 as revised.** No relationship block;
   endpoint implementation must keep output/effects within authorized boundaries.
   The policy chapter records rationale, grant/query example, and rejected resolver
@@ -339,6 +345,7 @@ Authorization handbook
 ├── 9. Enforcement and change over time [open]
 │   ├── Earlier prepared/middleware-allow enforcement [deprecated: ENFORCEMENT-001]
 │   ├── Safe fact gathering and actual-use enforcement [settled: ENFORCEMENT-002]
+│   ├── Review actual output/mutation constraints, not mere input usage [settled: ENFORCEMENT-003 / Q-050-D]
 │   ├── Earlier completion-mode selection [deprecated: CONTRACT-005; distinction retained in CONTRACT-006]
 │   ├── Query/row/field restrictions, bulk/partial results, mutations [open]
 │   ├── Membership synchronization guarantees [open: SYNC-001]
@@ -432,6 +439,7 @@ Q-050-B → CONTRACT-011 approved partial structure; requested PUT body example 
 Q-050-C → relationship bindings and trusted facts (open); full Q-050 policy schema remains unfinished.
 Update: Q-050-C approved CONTRACT-012 instead: endpoint-enforced relationships without a policy block. Prior open label/proposal is history; other full-policy gaps remain.
 Q-050-D → review criterion for actual constraint enforcement on output/mutations, not mere input usage (open).
+Update: Q-050-D approved ENFORCEMENT-003, including the limits of this review. Prior open label is history; next is remaining input/policy validation.
 
 The log retains these for traceability; they are not current options:
 

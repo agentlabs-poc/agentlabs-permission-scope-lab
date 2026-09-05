@@ -1,5 +1,36 @@
 # Endpoint policy format — approved partial structure
 
+## Endpoint review requirement — ENFORCEMENT-003 / Q-050-D, agreed
+
+> Verify that the authorization boundaries and request bindings actually
+> constrain the data returned or changed, not merely that their inputs are
+> used somewhere.
+
+This is the approved refinement of the user's material-usage review suggestion.
+It makes CONTRACT-012's endpoint responsibility reviewable: trace the constraints
+to the operation that produces protected output or effects. Merely finding the
+input name in a handler does not establish enforcement.
+
+For Finance certificate-read, review that the operation is restricted to the
+trusted tenant AND Finance AND the requested certificate. The same requirement
+applies to mutation effects, not just response data.
+
+| Reviewed behavior | Interpretation |
+|---|---|
+| Tenant, Finance, and certificate predicates jointly restrict the data operation | Enforces these bindings, subject to the other mandatory checks. |
+| Department appears only in logging | Usage without boundary enforcement. |
+| An OR branch still admits Engineering records | Department usage does not establish Finance containment. |
+| A correct filtered lookup is followed by returning unchecked data from another path | The actual output is not bound to the checked operation. |
+| The applicable grant has scope `{}` | No department restriction arises from that scope; do not invent one just to use every declared input. Tenant and other mandatory constraints remain. |
+
+Rationale: constraints protect access only when they restrict the actual operation.
+This review is central but not sufficient to guarantee detection of every breach:
+incorrect permission declarations, untrusted context, stale membership evidence,
+and other defects still require their corresponding checks and tests. No new
+policy field or query language is adopted. Earlier Q-050-D-proposed wording below
+is preserved history, now superseded by this approval. Full policy validation,
+missing-input handling, update/move rules, and publication remain open.
+
 ## No relationship block — CONTRACT-012 / Q-050-C, agreed
 
 The adopted policy retains `version`, `method`, `path`, one `permission`, and

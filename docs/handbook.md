@@ -1,5 +1,12 @@
 # Authorization Handbook — working edition
 
+Current: Q-050-D approves ENFORCEMENT-003. Endpoint review must verify that
+boundaries and request bindings actually constrain returned/changed data, not
+merely that inputs appear in code. [Rationale and counterexamples](endpoint-policy-format.md)
+include ineffective filters and `{}`; this is not a guarantee against every
+breach. Q-050's remaining input/policy validation and publication are next.
+Older Q-050-D-open notes below are preserved history.
+
 Current: Q-050-C approves CONTRACT-012: no relationship block; endpoint
 implementation must establish or enforce actual execution within authorized
 boundaries. [Policy rationale and examples](endpoint-policy-format.md) preserve

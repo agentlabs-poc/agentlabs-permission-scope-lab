@@ -1,5 +1,12 @@
 # Working handbook chapter: endpoint-owned authorization
 
+Q-050-D now approves ENFORCEMENT-003: review that authorization boundaries and
+request bindings actually constrain returned or changed data, not merely that
+inputs appear in code. [The review examples](endpoint-policy-format.md) cover
+logging, ineffective OR filters, unchecked output paths, and `{}`. This does not
+guarantee detection of every breach or replace other checks/tests. Earlier
+Q-050-D-proposed wording below is retained history after this approval.
+
 ## Current responsibility split — CONTRACT-012 / Q-050-C
 
 The endpoint predeclares one required permission and selected inputs with their
