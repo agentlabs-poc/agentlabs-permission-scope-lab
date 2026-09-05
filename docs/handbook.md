@@ -279,8 +279,10 @@ it is not a new schema or an invitation to seek the same approval again.
 Q-051 / DECISION-003 is **agreed**: completed allow/deny decisions are separate
 from evaluation errors. The approved Auth-service timeout example and rationale
 are in [decision results](decision-results.md). Existing fail-closed and
-single-gate rules remain unchanged. Q-052 / DECISION-004 is the next **open
-proposal**: an internal machine-readable reason for a completed deny.
+single-gate rules remain unchanged. Q-052 / DECISION-004 is also **agreed**:
+every completed deny must include an internal machine-readable reason. The
+chapter records the rationale and consequences; codes, fields, and public
+disclosure remain open.
 
 The [discussion tree](discussion-tree.md) is the mind map: settled principles,
 unfinished branches, and return points. The [decision log](handbook-roadmap.md)

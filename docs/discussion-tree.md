@@ -80,9 +80,10 @@ completed decisions are allow/deny; evaluation errors are separate and supply
 no authorization. The [decision-results chapter](decision-results.md) retains
 the original proposed status as history and records the rationale.
 
-Current discussion: **Q-052 / DECISION-004, proposed** — should a completed deny
-include an internal machine-readable reason? Discuss one question at a time;
-the result schema and public error representation remain open.
+Q-052 / DECISION-004 is **agreed**: every completed deny must include an internal
+machine-readable reason. Rationale, alternatives, examples, and consequences are
+recorded in the decision-results chapter. Continue one question at a time;
+the result schema, reason catalogue, and public error representation remain open.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

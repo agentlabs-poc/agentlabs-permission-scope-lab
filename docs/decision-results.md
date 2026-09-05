@@ -81,21 +81,48 @@ evaluation errors separately, with both deny and error blocking protected execut
 
 ## Q-052 / DECISION-004 — an internal reason for denial
 
-Status: **PROPOSED, not approved.** One question only: should a completed deny
-include a machine-readable reason for the calling endpoint and internal
-diagnostics? Recommend yes; a bare deny identifies the outcome but not its cause.
+Status: **AGREED.** The user confirmed: “yes deny should include reason, very
+important” and explicitly reaffirmed recording rationale. Original status
+retained as history: ~~PROPOSED, not approved~~.
+
+### Agreed rule
+
+Every completed deny must include a machine-readable reason for the calling
+endpoint and internal diagnostics. The reason is required, not optional.
+A bare deny identifies the outcome but not its cause.
+
+### Example and counterexample
 
 Example: Vinay's authority loads successfully, and evaluation conclusively finds
 no complete grant route authorizing `certificate.read` for the request. The result
 is deny with the meaning “no authorizing grant.” The reason must describe the
 established conclusion, not infer one from a timeout or a single failed candidate.
 
+Counterexample: returning only deny and expecting the endpoint to guess whether
+authority was absent or an outer boundary prevented access does not satisfy this
+rule. Nor may a timeout be mislabeled “no authorizing grant”: Q-051 requires
+an evaluation error when the required check could not complete.
+
+### Rationale, alternatives, and consequences
+
+The reason preserves why the evaluator rejected the request at the point where
+that conclusion is known. It lets the endpoint and internal diagnostics explain
+the result consistently, supports audit and troubleshooting, and avoids callers
+guessing the cause or reimplementing evaluation to recover it. Machine-readable
+reasons avoid dependence on parsing free-form prose. This explains the user's
+emphasis that the reason is an important part of a denial, not merely helpful
+optional logging.
+
 The alternative is a bare deny with explanation available only through separate
 logs. It keeps the result smaller, but the endpoint cannot directly distinguish
-known causes. A machine-readable reason would support consistent diagnosis
-without requiring callers to parse free-form text.
+known causes. That alternative is not adopted. Implementations must preserve the
+reason alongside the denial; including a reason does not change the denial's
+effect or authorize any protected execution.
 
-This proposal does not require exposing internal reasons to the client. Exact
+### Remaining questions
+
+This decision does not require exposing internal reasons to the client. Exact
 reason names, fields, precedence, public responses, and reasons for other outcomes
 remain separate questions. No JSON schema or exhaustive reason catalogue is
-proposed here.
+adopted here. “No authorizing grant” is an explanatory example, not an approved
+wire-level code. HC-08-02 remains open until its full closure criterion is met.
