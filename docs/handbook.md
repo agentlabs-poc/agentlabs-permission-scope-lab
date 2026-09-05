@@ -272,6 +272,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Endpoint authorization](endpoint-authorization.md) | One endpoint-owned gate, request versus resolved material, and retained historical decisions. |
 | [Endpoint policy format](endpoint-policy-format.md) | Approved version/method/path/permission/inputs shape; GET/PUT, value validation, and mandatory enforcement. |
 | [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
+| [Authority freshness](authority-freshness.md) | Impact-first revocation timing discussion, stale-cache trade-offs, and in-flight-operation questions kept distinct. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -303,8 +304,10 @@ approves an evaluation-error variant with no decision field. Q-065 requires
 rejecting mixed variant-specific fields. Q-066 requires a non-empty supporting-grant
 ID list for allow. Q-067 requires rejecting unknown result fields. Further format
 details are parked under the user's impact-first horizontal instruction, not
-excluded. Q-068 now proposes authorizing both current and proposed boundaries for
-a move; the operation chapter records the rationale without treating it as agreed.
+excluded. Q-068 requires move authority over both current and proposed boundaries;
+the operation chapter records the approved detailed example and rationale.
+Q-069 now proposes revocation freshness for new checks; no stale-cache grace
+period is recommended, but that timing contract is not yet agreed.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 

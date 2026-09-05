@@ -127,14 +127,17 @@ branches while retaining the unfinished details in the audit.
 
 | Priority | Branch | Why this is high impact | Audit anchors |
 |---|---|---|---|
-| 1 — now | Boundary-changing writes | Can move data into or out of a caller's authority. | HC-09-04 |
-| 2 | Revocation, freshness, and in-flight changes | Determines when removed authority stops being usable. | HC-09-06/07 |
+| 1 — governing rule agreed; details open | Boundary-changing writes | Can move data into or out of a caller's authority. | HC-09-04 |
+| 2 — now | Revocation, freshness, and in-flight changes | Determines when removed authority stops being usable. | HC-09-06/07 |
 | 3 | Administrative bounds and delegation lifecycle | Controls creation and persistence of authority. | HC-05-08/10 |
 | 4 | Collections, exports, and bulk operations | A single operation can expose or change many records. | HC-09-03/05 |
 
-**Q-068 / ENFORCEMENT-004 is proposed:** should a move cover both current and
-proposed boundaries? See [operation-specific enforcement](operation-enforcement.md).
-This does not re-open the one-permission/one-gate model or add policy fields.
+**Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
+and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
+No new policy fields or extra gate; composition and concurrency remain open.
+**Q-069 / FRESHNESS-001 is proposed:** no use of revoked grants by new checks after
+Auth confirms revocation, even through stale cache. See
+[authority freshness](authority-freshness.md) for the timing boundary and trade-off.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

@@ -2,6 +2,12 @@
 
 ## Current reading guide — reconciled through Q-050-F
 
+Later refinement: [Q-068 / ENFORCEMENT-004](operation-enforcement.md) now requires
+move authority over both current and proposed boundaries for the same-tenant
+department-changing move. Earlier statements below leaving that choice open
+describe their historical checkpoint. Grant composition, other create/update
+cases, and concurrency remain open; the policy structure is unchanged.
+
 The adopted shape is `version`, `method`, `path`, exactly one `permission`, and
 named `inputs` with `source`/`name`. There is **no relationship block**. Every
 declared input is required at its exact source; the application owns value
