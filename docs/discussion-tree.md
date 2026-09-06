@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-078–080 settled; Q-081 proposed; audit layer excluded
+## Current position — Q-082 settled; Q-081 revised proposed; audit layer excluded
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -29,8 +29,8 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 │   ├── Whole grants, live roles, human-dependent proxies, separate admin agreed
 │   ├── Automatic delegation reactivation agreed [Q-070]
 │   ├── Direct human membership only; nested groups unsupported [Q-077]
-│   ├── Permanent revoke; reversible enable/disable; create/delete agreed [Q-078–080]
-│   ├── Administrative status representation PROPOSED [Q-081] <-- NOW
+│   ├── Create, enable, disable, delete agreed; separate revoke superseded [Q-082]
+│   ├── Enabled/disabled status representation PROPOSED [Q-081 revised] <-- NOW
 │   └── Admin encoding, bootstrap, lifecycle, chains, group/role changes OPEN
 ├── 6. Scope and registration [5/7]
 │   └── Flat AND boundaries and registration agreed; detailed evolution PARKED
@@ -41,7 +41,7 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 │   └── Conditions, full validation, code catalog, provenance OPEN
 ├── 9. Enforcement and time [2/8 in scope; 1 excluded]
 │   ├── Both-boundary moves agreed [Q-068]
-│   ├── No revoked-grant use by new checks after confirmation [Q-069]
+│   ├── No stale use after confirmed grant deletion [Q-069, terminology Q-082]
 │   ├── Deny instead of automatic collection filtering [Q-071]
 │   ├── Explicit Finance request vs tenant-wide request agreed [Q-072]
 │   ├── Complete-batch authorization before effects agreed [Q-073]
@@ -187,7 +187,7 @@ branches while retaining the unfinished details in the audit.
 | 6 — execution-time rule agreed; details open | Queued/background work | Delayed execution must not accidentally preserve removed authority. | HC-09-09 |
 | 7 — excluded by user | Authority-change audit | Another layer's responsibility, not handbook scope. | HC-09-08 EXCLUDED |
 | 8 — nesting unsupported; lifecycle details open | Group membership composition | Determines which group grants become applicable and which dependencies resolution follows. | HC-05-12 |
-| 9 — operation meanings agreed; representation now | Ordinary grant lifecycle | Distinguishes creation/removal, reversible suspension, terminal revocation, and effective authority. | HC-05-11 / HC-07-08 |
+| 9 — four operations agreed; representation now | Ordinary grant lifecycle | Distinguishes creation, reversible suspension, permanent deletion, and effective authority. | HC-05-11 / HC-07-08 |
 
 **Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
 and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
@@ -218,11 +218,12 @@ and system design in another layer. The proposal is not adopted; see
 [scope decision and retained history](authority-change-audit.md).
 **Q-077 / GROUP-005 is agreed:** nested authorization groups are not supported;
 use explicit human-to-group links. See [groups and membership](groups-and-membership.md).
-**Q-078 / GRANT-004 is agreed:** explicit grant revocation is terminal for that
-identity. **Q-079 / GRANT-005 and Q-080 / GRANT-006 are agreed user additions:**
-reversible enable/disable and create/delete. **Q-081 / GRANT-007 is proposed:**
-one administrative status field with enabled/disabled/revoked, distinct from
-effective validity. See [grant lifecycle](grant-lifecycle.md).
+**Q-082 / GRANT-008 is agreed:** create, enable, disable, and delete are the four
+canonical operations. The separate revoke operation is superseded; permanent
+withdrawal remains terminal through delete. Q-079's reversible suspension remains.
+**Q-081 revised / GRANT-007 is proposed:** enabled/disabled status only, distinct
+from effective validity. Its original three-state variant was never approved.
+See [grant lifecycle](grant-lifecycle.md).
 Administration bounds, restoration mechanics, collection details, transaction
 guarantees, and full job integration remain open. Audit-system deliverables are
 excluded, not remaining handbook work; older snapshots are superseded on that point.

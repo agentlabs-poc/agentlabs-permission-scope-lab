@@ -1,5 +1,88 @@
 # Grant lifecycle — canonical discussion
 
+## Q-082 / GRANT-008 — delete is the single permanent-removal operation
+
+Status: **AGREED.** The user questioned whether revoke was technically delete,
+then answered “agree” to consolidating the two into one canonical operation:
+**delete**. The separate revoke operation is superseded, not an additional API
+operation or permission alias. Its permanent-withdrawal meaning survives in delete.
+
+The current lifecycle operations are:
+
+| Operation | Canonical meaning |
+|---|---|
+| Create | Establish a new grant through authorized administration. |
+| Enable | Make an existing disabled grant eligible for evaluation again. |
+| Disable | Reversibly stop this grant supplying authority. |
+| Delete | Permanently remove this grant from usable authority. Restoring access requires a newly authorized grant. |
+
+Rationale: revoke and delete had the same authorization effect. The distinction
+introduced earlier concerned keeping a marked record versus removing it from
+the usable collection, not a separate authorization capability. Storage and
+retention choices do not justify a second canonical operation. One removal
+operation avoids duplicate lifecycle transitions and a redundant revoked state.
+
+Example: disabling G-17 lets an authorized administrator later enable G-17.
+Deleting G-17 does not: Finance access must be established through a new grant,
+for example G-18, authorized against current administrative bounds. Matching its
+old permission and scope does not revive the deleted grant identity. A retained
+internal record is not usable authority and cannot be enabled back into existence.
+
+All four operations require appropriate administrative authorization. Enable is
+not allow: scope, permission, validity, conditions, recipient dependencies, and
+human/proxy limits still apply. Deleting or disabling one grant does not veto an
+independent valid route. Q-070's automatic return of a still-valid delegation
+when human support returns remains distinct from enabling a disabled grant or
+restoring a deleted one.
+
+Q-078's permanence rule is retained under delete; Q-079's reversible suspension
+and Q-080's creation/removal remain agreed. Q-081's original three-value status
+proposal is **SUPERSEDED, never approved**. The revised representation below
+remains proposed; Q-082 answers the operation question, not the complete schema.
+
+Earlier uses of grant “revocation” in Q-069/Q-075 describe authority withdrawal;
+the canonical permanent-removal operation is now delete. Their no-stale-use and
+execution-time-check guarantees are not weakened by the terminology consolidation.
+Business permissions named revoke in domain examples are unrelated operation
+names and are not renamed by this grant-lifecycle decision.
+
+## Q-081 revised / GRANT-007 — enabled or disabled administrative status
+
+Status: **PROPOSED, not approved.** Reuse the illustrated `status` field with only
+`enabled` and `disabled`. No canonical `revoked` or `deleted` status is required:
+delete removes the grant from usable authority; implementation bookkeeping is
+outside this grant representation. No physical deletion requirement is implied.
+
+Versioned grant illustration; not the complete grant schema. Validity and
+condition details are omitted for focus, not removed from the model:
+
+```json
+{
+  "version": "1",
+  "id": "G-17",
+  "recipient": {"type": "group", "id": "finance-readers"},
+  "permissions": ["hrms:employee:certificate::read"],
+  "scope": {"dept": "FIN"},
+  "status": "enabled"
+}
+```
+
+Rationale: this field represents the reversible administrative switch, not a
+request decision or a claim that all dependencies are valid. The earlier `active`
+spelling remains an illustrative historical convention, not a second canonical
+value. Initial-state defaults, full schema validation, expiry/renewal, and exact
+administrative operation contracts remain open; HC-05-11 and HC-07-08 stay open.
+
+**Q-081 revised:** Should `status` use only `enabled` and `disabled`, while delete
+removes the grant and effective authorization remains evaluated?
+
+<details>
+<summary>Historical Q-078–Q-081 record — separate revoke and three-state proposal superseded by Q-082</summary>
+
+The original text below is preserved. Its five-operation table and three-state
+proposal do not override the current four-operation model above. Other agreed
+meanings survive as explained in Q-082.
+
 ## Q-078 / GRANT-004 — explicit revocation is terminal for that grant
 
 Status: **AGREED.** The user answered Q-078 “yes,” then separately added reversible
@@ -148,3 +231,5 @@ closing those broader checkpoints with this partial representation.
 
 **Q-081:** Should the grant use one `status` field with `enabled`, `disabled`, and
 `revoked`, keeping create/delete as operations and effective validity derived?
+
+</details>

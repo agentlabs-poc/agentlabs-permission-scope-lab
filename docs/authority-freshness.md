@@ -1,5 +1,12 @@
 # Authority freshness and revocation — impact-first discussion
 
+Terminology update after Q-082: the canonical permanent-removal operation is
+**delete**, not a separate revoke operation. The historical revocation wording
+below means permanent grant withdrawal. Its agreed timing guarantee still holds:
+after Auth confirms deletion, new checks cannot use that grant via stale cache.
+See [grant lifecycle](grant-lifecycle.md). No cache protocol or in-flight timing
+rule is newly selected by this terminology reconciliation.
+
 ## Q-069 / FRESHNESS-001 — revoked grants and new authorization checks
 
 Status: **AGREED.** The user answered “yes” to Q-069. Original status retained

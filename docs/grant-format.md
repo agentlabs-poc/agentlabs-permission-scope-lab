@@ -25,9 +25,11 @@ Their agreed binding, role, and dependency semantics are not deprecated.
 
 ## What changes and what stays
 
-Lifecycle update: Q-078 settles terminal revocation; Q-079 supports reversible
-enable/disable, and Q-080 supports create/delete. Q-081 proposes the `status`
-representation in [grant lifecycle](grant-lifecycle.md), not yet approved.
+Lifecycle update: Q-082 consolidates permanent removal into delete, superseding
+the separate revoke operation. Create, enable, disable, and delete are agreed.
+Q-081 revised proposes `status: enabled/disabled` in
+[grant lifecycle](grant-lifecycle.md), not yet approved. The former three-value
+proposal is preserved there as superseded, not a canonical enum.
 The older `active` spelling below remains illustrative, not a competing canonical
 enum; no historical grant examples are removed.
 

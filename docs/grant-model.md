@@ -1,5 +1,11 @@
 # Working handbook chapter: grants, assignments, and roles
 
+Lifecycle terminology after Q-082: the canonical grant operations are create,
+enable, disable, and delete. A separate revoke operation is superseded; older
+references to permanent grant revocation mean deletion from usable authority.
+The permanence, dependent-subset, and complete-binding rules remain. See
+[grant lifecycle](grant-lifecycle.md) for current meanings and retained history.
+
 Q-049 / CONTRACT-008 now mandates exactly one required permission per protected
 endpoint, validated by Auth. This does not limit the number of permissions in a
 grant or the number of direct/group grants available to a human. Complete grants

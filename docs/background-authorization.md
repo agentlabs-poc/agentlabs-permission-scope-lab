@@ -1,5 +1,9 @@
 # Background authorization — impact-first discussion
 
+Terminology update after Q-082: the example's permanent grant revocation is now
+the canonical **delete** operation. Execution-time authorization still applies;
+the old wording is retained, not a separate grant lifecycle operation.
+
 ## Q-075 / ENFORCEMENT-009 — queued work needs execution-time authorization
 
 Status: **AGREED.** The user answered Q-075 “agree” after the queued Finance
