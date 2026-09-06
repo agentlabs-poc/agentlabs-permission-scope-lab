@@ -1,0 +1,543 @@
+# Q-101 — Parent-grant lineage with explicit withdrawal and resumption
+
+**PINNED — agreed discussion rules, scratchpad only.** The user asked to frame
+and pin the parent-grant-only direction after clarifying direct-human and
+subteam cases. This is not promotion into the frozen lab or a claim that every
+lifecycle, reuse, and wire-contract detail is complete.
+
+**Latest structural clarification — Q-101E-3:** relevant bindings may be
+**removed or explicitly disabled** before a parent change/removal. The earlier
+removal-only wording in Q-101E-1/E-2 is superseded and retained as history below.
+Assignment re-enablement validates the current relationships and authority; it
+does not restore the old structural assumptions. Bottom-up ordering remains.
+
+## Q-101A–C — Agreed clarification: assignment, enablement, and effectiveness
+
+**Recorded on the user's instruction. These rules supersede the earlier open
+disable-granularity and descendant-resumption questions preserved below.**
+
+| Concept | Agreed meaning |
+|---|---|
+| Assignment | Connects a grant to a recipient. Assignment alone does not mean enabled or effective authority. |
+| Grant enablement | Grant-wide, not recipient-specific. A disabled grant supplies no authority through any assignment. If grant enablement cannot pass its required validation, it remains disabled for everyone. |
+| Effective authority | Requires enabled, valid grant lineage and the relevant valid assignment and support. An enabled grant can be ineffective because required upstream authority is disabled. |
+
+### Q-101A — Shared grant disablement
+
+If the same G2 is assigned to TeamY and directly to Nutan, explicitly disabling
+G2 stops authority supplied by G2 for both. Their assignment records remain;
+other valid grants are unaffected. An assignment cannot override disablement.
+This is not a new status on a scope selector: it describes the grant's scoped
+authority becoming ineffective.
+
+Removing A1 alone in the original direct-human case is a different operation
+from disabling shared G2. The latter deliberately affects every G2 recipient.
+
+### Q-101B — Shared grant enablement
+
+For the combined example, TeamY is under Team1 and requires G1 support at
+Team1. If that required support is still missing, enabling shared G2 fails;
+G2 remains disabled for everyone, including Nutan. There is no partial grant
+enablement for Nutan while ignoring TeamY's required support. Assignment and
+grant enablement remain separate controls; assigning G2 does not enable it.
+
+### Q-101C — Descendant effectiveness is not stored disablement
+
+G3 derives from G2. Assume all other required grants, assignments, relationships,
+and boundaries remain valid:
+
+```text
+Operation                 G2 state       G3 state       G3 authority
+Disable G2                Disabled       Enabled        Ineffective
+Validated enable of G2    Enabled        Enabled        Effective again
+```
+
+Disabling G2 does not automatically write a disabled state to G3. When G2 is
+validly enabled, a still-enabled G3 resumes without its own enable operation.
+If G3 was explicitly disabled, it stays disabled and needs explicit validated
+enablement. Resumption never overrides another invalid dependency or boundary.
+
+### Supporting group-assignment removal is the protected operation
+
+```text
+G1 -- A1 assignment --> Team1
+                         | parent of
+G2 ----- assignment --> TeamY
+G2 -- parent_grant_id --> G1
+G3 -- parent_grant_id --> G2
+
+Remove A1 while dependent G2 is enabled --> REJECT
+Explicitly disable G2                  --> G2 disabled; G3 ineffective
+Remove A1 after required checks        --> May proceed; child records remain
+Restore valid parent support           --> G2 still disabled; G3 ineffective
+Explicitly validate and enable G2      --> Still-enabled G3 can resume
+```
+
+Mere ineffectiveness is not the explicit child disablement required before
+breaking its supporting group assignment. For example, temporarily disabling
+G1 does not substitute for explicitly disabling dependent G2 before removing
+A1. The protection concerns affected child dependencies, not unrelated direct
+assignments. Multiple affected children must not escape this protection.
+
+### Rationale
+
+- Assignment records describe attachment, not a promise of effective access.
+- Grant-wide enablement keeps reuse coherent: the same disabled grant cannot
+  simultaneously supply authority to another recipient.
+- Effective authority follows the valid lineage without unnecessary persistent
+  status changes on every descendant.
+- Breaking supporting assignments is deliberately stricter than temporary
+  disablement: explicit child disablement prevents support restoration from
+  silently reactivating that child.
+- These rules resolve Q-101A, Q-101B, and Q-101C without introducing a
+  `parent_assignment_id` or requiring every descendant to be explicitly disabled
+  merely because an ancestor was disabled.
+
+## The canonical direction for this scratch model
+
+> A child grant identifies its parent through `parent_grant_id`. Auth derives
+> the relevant team support from the recipient's team hierarchy and current
+> assignments. A separate `parent_assignment_id` is not required for the cases
+> established here. Parent withdrawal and child resumption are explicit,
+> authorized operations—not automatic cascading state changes.
+
+**Clarification:** “child resumption” above means re-enabling the child that was
+explicitly disabled before support withdrawal. It does not prohibit a
+still-enabled descendant becoming effective again after its parent is validly
+enabled, as settled in Q-101C.
+
+“Parent grant ID is enough” means enough as the **explicit grant-lineage link**
+under these rules. It does not mean enough as the entire evaluation input.
+Auth still needs trusted tenant context, grant definitions, assignments, team
+hierarchy, relevant human/delegation relationships, validity, and selected revisions.
+
+## Keep the relationships separate
+
+| Relationship | Meaning |
+|---|---|
+| Grant lineage | G2 derives its permission/scope ceiling from G1. |
+| Assignment | A grant is attached to a human or team. Assignments remain separate records; their IDs may still identify them for CRUD. |
+| Team hierarchy | TeamY is a child of Team1; TeamY's authority cannot escape Team1's authority. |
+| Membership | A human receives a team's valid assigned business authority. |
+| Ownership/administration | Separately granted permission to administer teams or authority; membership is not ownership. |
+
+Omitting a parent-assignment reference does not remove assignments or their
+administration. An ownership grant does not become a business source merely
+because it permits administration. Department scope is not team membership.
+
+## Grant examples
+
+Tenant is the mandatory implied boundary. These definitions show permission and
+scope lineage; they do not settle where every lifecycle field is stored.
+
+Parent G1:
+
+```json
+{
+  "version": "1",
+  "id": "G1",
+  "permissions": [
+    "hrms:payroll:payslip::read",
+    "hrms:payroll:payslip::write"
+  ],
+  "scope": {"dept": "FIN"}
+}
+```
+
+Child G2:
+
+```json
+{
+  "version": "1",
+  "id": "G2",
+  "parent_grant_id": "G1",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {}
+}
+```
+
+G2's permissions must be a subset of G1's effective permissions. Its effective
+scope is G1's effective scope AND G2's additional constraints. Here `{}` keeps
+FIN unchanged. It does not mean tenant-wide effective authority. Parent scope
+cannot be removed or replaced; conflicting values cannot authorize wider reach.
+
+## Direct-human case: Nutan
+
+G1 is assigned to Team1 and TeamX. Maya is a member of both teams and has a
+separate administrative grant permitting assignment. She assigns derived G2
+directly to Nutan. No ownership grant is involved.
+
+Removing A1, Team1's assignment of G1, does **not by itself affect Nutan's direct
+G2 assignment**. G2 derives from G1; it is not implicitly bound to A1 merely
+because Maya could access G1 through Team1. In the discussed case G1 remains
+valid and assigned through TeamX, and the other necessary conditions hold.
+
+This does not make G2 independent of G1 or establish that stored parent
+definitions alone always supply valid authority. It also does not make Maya a
+permanent personal dependency solely because she issued the assignment. Existing
+explicit human-dependent agent/service relationships are a separate case.
+
+## Subteam case: TeamY under Team1
+
+The same symbols below describe a separate scenario: G2 is assigned to TeamY,
+which is a subteam of Team1. A1 assigns the required parent G1 to Team1.
+
+```text
+Team hierarchy:       Team1
+                       └── TeamY
+
+Grant lineage:        G2 ── parent_grant_id ──> G1
+Assignments:          G1 ── A1 ──> Team1
+                      G2 ────────> TeamY
+```
+
+For TeamY, Auth must establish that Team1 validly holds the required parent
+authority. G1 being assigned to an unrelated TeamX is not replacement support
+for TeamY. The grant ID plus the known parent-team context identifies which
+holding must be validated, without declaring an A1-ID dependency on G2.
+
+### Required controlled sequence
+
+| Step | Required result |
+|---|---|
+| Attempt to remove A1 while dependent G2 is enabled | Reject the removal. |
+| Explicitly disable G2 using appropriate administrative authority | G2 no longer supplies that child authority; its records can remain. |
+| Remove A1 after satisfying the dependent-disable prerequisite and other checks | Parent assignment may be removed; G2 and its child assignment are not automatically deleted. |
+| Attempt to enable G2 while Team1 lacks required G1 support | Reject enablement. |
+| Restore valid G1 support to Team1 | G2 stays disabled. No automatic resumption. |
+| Explicitly enable G2 | Require current administrative authorization, valid parent-team support, and permission/scope boundary validation again. |
+
+There is no mandatory automatic “on hold” stored state. The user clarified that
+G2 was explicitly disabled **before** A1 could be removed. The system must not
+remove A1 first and silently disable G2 afterward as the normal workflow.
+
+Removing parent support must not leave affected enabled subteam authority
+behind. The exact method of enumerating affected grants, and sequencing deeper
+chains, remains an implementation-contract question, not a reason to skip checks.
+
+Disabling is not deleting. The child grant and its assignment need not disappear.
+Likewise restoring support is not permission to silently enable a disabled child.
+No automatic replacement or migration of a missing parent grant is introduced.
+
+## The four examined cases
+
+| Case | Pinned conclusion | Limit retained |
+|---|---|---|
+| G1 assigned to multiple teams | A subteam validates G1 support in its own parent-team context, not anywhere G1 happens to exist. | Controlled removal must respect affected enabled child authority. |
+| G2 assigned directly to Nutan | Removing A1 alone does not break Nutan's unrelated direct G2 assignment in the stated valid-G1 scenario. | Global parent validity/orphan behavior is not inferred solely from G1's existence. |
+| G2 reused across teams with different parents | Permission/scope lineage stays G2 → G1; required team support is evaluated in each recipient team's context. | **Resolved by Q-101A/B:** disabling G2 affects every assignment; failed required enablement validation leaves G2 disabled for everyone. Earlier granularity question is preserved in history below. |
+| Required parent support removed and later restored | Disable G2 first, remove support, restore valid support, then explicitly validate and enable G2. | Recreating a grant definition or adopting another revision is not silently equivalent to restoring the same parent authority. |
+
+The four cases now have a coherent governing direction. This is **not** a claim
+that every reuse/lifecycle edge case or canonical schema has been finalized.
+
+## Rationale
+
+- Keep the stored lineage small: the parent grant identifies inherited authority,
+  while the recipient's team context identifies the required team holding.
+- Avoid accidentally tying Nutan's direct grant to an unrelated team assignment
+  or confusing the issuer's membership with ownership or continuing dependency.
+- Make parent-support withdrawal deliberate: reject unsafe removal instead of
+  silently breaking enabled descendants.
+- Make recovery deliberate: restoring parent support must not revive explicitly
+  disabled child access without a new authorized enable operation.
+- Keep assignment records for administration and retrieval without requiring a
+  second lineage reference merely because assignments have IDs.
+
+## Reconciliation with earlier discussion
+
+The proposed `parent_assignment_id` field is **not adopted for this direction**.
+The earlier A1-specific alternative for Nutan is not the selected meaning.
+The assistant's automatic “on hold, possibly resume” explanation is superseded
+by the user's disable-before-removal and explicit-enable clarification.
+
+The [earlier direct-human note and SVG](q101-direct-human-dependency.md) remain
+history. [Q-098](team-grant-parent-lineage.md) retains the requirement for parent-
+team support, but its earlier wording requiring a specific parent-assignment
+identity is refined by this scratch direction. These changes are **not yet
+reconciled into the frozen handbook**; its selected-assignment wording remains
+the earlier published checkpoint until explicit promotion is authorized.
+
+## Q-101D — Settled by the existing orphan rule
+
+The user clarified that this case was already covered by the canonical orphan
+concept; it does not require inventing a new mandatory removal prerequisite.
+
+```text
+G1 -- last valid assignment --> TeamX
+G2 -- parent_grant_id -------> G1
+G2 -- direct assignment -----> Nutan
+
+Remove the last required support
+    --> G2 becomes orphaned
+    --> G2 and descendants requiring that support are ineffective
+```
+
+This concerns loss of required parent support, not merely an unassigned reusable
+definition or a legitimate parentless root. Stored grants and assignments can
+remain, but their presence cannot authorize through an orphaned lineage.
+Ineffectiveness does not by itself prescribe a persistent disabled-state write.
+
+An operation/workflow layer above canonical resolution may warn about or
+prevent an operation that would create an orphan. Such prevention is an
+additional safeguard, not a universal prerequisite of the orphan definition.
+The earlier specifically agreed supporting-subteam-assignment removal guard
+remains a distinct operation rule; Q-101D does not generalize that guard into
+mandatory disable-before-removal for every orphan-producing operation.
+
+**Rationale:** canonical resolution must refuse unsupported authority regardless
+of whether a higher-layer warning or prevention rule was applied. This keeps
+the authorization consequence deterministic and separates it from operational
+protection against accidental orphaning. It is consistent with the existing
+[Q-094 orphan definition](../agentlabs-permission-scope-lab/docs/authority-lineage.md).
+
+<details>
+<summary>Earlier Q-101D question — answered by the existing orphan rule</summary>
+
+- **Q-101D — Last parent holding/orphan:** the direct-human example retained
+  valid G1 support at TeamX. Settle what removing G1's last valid assignment
+  means for derived grants directly assigned to humans, even if G1's definition
+  remains stored. In particular, clarify whether that last removal is blocked
+  until affected derived grants are explicitly disabled. No answer is adopted
+  by recording this question.
+
+</details>
+
+## Current remaining cases—not new decisions
+
+**Framing checkpoint:** the parent-ID framing covers the discussed cases;
+Q-101A–D are settled. No examined case currently requires a separate
+`parent_assignment_id`. This is a bounded conclusion, not proof that all
+implementation and lifecycle contracts are complete. The user requested
+continued scratchpad recording and explanation of remaining item 1.
+
+- **Item 1 / Q-101E — Revision and rebinding contracts:** specify authorized
+  changes to a grant's parent/revision and changes to team parentage. Do not
+  reopen Q-089-B's immutable role revisions and explicit validated adoption,
+  Q-094's orphan consequence, or Q-101C's ancestor disablement/resumption.
+  Permanent grant removal is already canonical **delete** under Q-082, not a
+  separate revoke operation. Expiry representation and other lifecycle schema
+  details remain contract work, not a new parent-ID framing question.
+- **Implementation safeguards:** dependency enumeration and atomic
+  validation/write handling must preserve the rules under concurrent changes.
+  Cycle rejection and tenant isolation remain necessary. These safeguards do
+  not by themselves imply a new lineage field.
+- **Documentation reconciliation:** reconcile the frozen lab's older
+  specific-supporting-assignment wording when promotion is authorized, while
+  retaining superseded explanations and rationale as history.
+
+### Q-101E-3 — Disabled bindings permit structural changes: AGREED CORRECTION
+
+The user corrected the removal-only restriction: changing/removing a parent is
+also possible when the relevant binding is disabled. A disabled assignment may
+remain stored during the change. Its existence does not force deletion first.
+
+| Situation | Governing result |
+|---|---|
+| Affected binding remains enabled | Do not change/remove its bound parent beneath it. |
+| All relevant bindings have been removed or explicitly disabled, bottom-up | Parent change/removal may proceed subject to operation authorization and the applicable boundary checks. |
+| Structural change finishes with an assignment retained disabled | It remains disabled; no automatic re-enablement or reassignment. |
+| Request to enable that assignment | Validate current parent relationships, supporting assignments, grant enablement/validity, permission/scope boundaries, and administrative authority. |
+| Current required support or relationship alignment is invalid | Reject enablement; the assignment remains disabled. |
+| Current conditions are valid | Explicit assignment enablement may succeed; effective access still requires all applicable checks. |
+
+```text
+Disable affected assignments from the bottom upward
+                         |
+                         v
+Change/remove the permitted parent relationship
+                         |
+                         v
+Retained assignments remain disabled
+                         |
+                         v
+Explicit enable request --> validate CURRENT binding and authority
+                            valid: may enable
+                          invalid: reject; remain disabled
+```
+
+Example: disable A2, the G2-to-TeamY assignment, after handling any affected
+lower dependencies. Move TeamY from Team1 to TeamX. A2 remains stored disabled.
+Enabling A2 must now establish G2's required parent authority at TeamX; prior
+support at Team1 is not sufficient. The operation does not automatically change
+G2's parent reference or copy authority from the old team.
+
+**Rationale:** a disabled binding supplies no authority, so it can be retained
+through a structural change without granting access under the new structure.
+Safety depends on validating the new reality before explicit enablement, not
+on requiring deletion and recreation of every binding. Disabled still differs
+from absent for storage and administration; it is no longer a removal-only
+structural lock. Grant-wide disablement, assignment-specific disablement, and
+lineage ineffectiveness remain distinct concepts.
+
+This corrects Q-101E-1/E-2's removal-only statements, not their dependency-aware
+ordering or the obligation to inspect every affected branch. No runtime
+implementation, new wire field, or automatic repair/rebinding is adopted.
+
+<details>
+<summary>Earlier Q-101E-1/E-2 framing — removal-only restriction superseded by Q-101E-3</summary>
+
+### Q-101E-1 — Parent change with a subgroup-assignment guard: historical approval
+
+The user approved parent changes with this restriction: a grant's parent cannot
+change while that grant has an assignment to a subgroup. Once those subgroup
+assignments are removed, the parent may change through authorized administration
+and the existing complete-result boundary validation.
+
+| Situation | Parent change |
+|---|---|
+| G2 has an assignment to a subgroup | Reject. |
+| G2 is disabled but its subgroup assignment remains | Still reject: disablement is not removal of the assignment. |
+| One subgroup assignment is removed but another remains | Still reject. |
+| No subgroup assignments remain | The subgroup-assignment guard is cleared; ordinary authorization and boundary checks still apply. |
+
+“Free to change” removes this particular structural restriction; it does not
+grant unrestricted administrative authority or bypass checks on remaining
+assignments, inherited boundaries, or dependent authority. Removing an
+assignment must itself respect applicable dependency-removal safeguards. No
+automatic removal, migration, or disabling of assignments is introduced.
+
+**Rationale:** a subgroup's assigned grant is tied to the authority of its parent
+team. Repointing the grant's parent while that subgroup assignment remains would
+change its supporting lineage beneath the existing team relationship. Requiring
+assignment removal makes that structural change explicit while allowing the
+reusable grant to acquire a different parent afterward. This concerns changing
+grant lineage, not moving a team or changing membership.
+
+<details>
+<summary>Original Q-101E-1 question and example — answered by the guard above</summary>
+
+Hypothetical grant definitions, with tenant implied and all unrelated details
+omitted:
+
+| Grant | Parent | Permissions | Additional scope | Effective scope |
+|---|---|---|---|---|
+| G1 | Upstream omitted | Read, write | dept = FIN | FIN |
+| H1 | Upstream omitted | Read, write | dept = ENG | ENG |
+| G2, before | G1 | Read | {} | FIN |
+| G2, proposed change | H1 | Read | {} | ENG |
+
+G2 is directly assigned to Nutan. Changing only its parent reference from G1 to
+H1 would change the source of its inherited boundary. The unchanged `{}` does
+not preserve FIN: with the proposed parent it would inherit ENG. This is a
+proposed authority change requiring validation, not an already permitted edit
+or an example of independent authority.
+
+**Question:** may an existing G2 change `parent_grant_id` through an explicit
+authorized operation that validates the complete resulting authority and
+affected assignments, or is its parent fixed for that grant identity so a
+different parent requires a newly authorized grant and assignment?
+
+**Why this needs a contract:** runtime parent-ID resolution tells us how to
+evaluate the selected lineage; it does not by itself authorize replacing that
+lineage. The existing no-silent-expansion and authority-validation rules remain
+mandatory whichever mutation contract is selected. No in-place propagation,
+new revision field, automatic rebinding, or chosen answer is adopted here.
+
+</details>
+
+### Q-101E-2 — Dependent bindings and bottom-up assignment changes: historical approval
+
+The user clarified that assignments and parent-child relationships are
+dependent. A bound parent relationship cannot be removed or changed without
+first removing the relevant assignment. Assignment removal or disablement must
+start with the bottom-most affected child and proceed upward.
+
+```text
+G1 -- A1 --> Team1
+ ^             ^
+ | parent      | parent
+G2 -- A2 --> TeamY
+ ^             ^
+ | parent      | parent
+G3 -- A3 --> TeamZ
+
+For a change affecting this entire dependent chain:
+process A3 first --> then A2 --> then A1, only as far as needed
+```
+
+Each adjacent pair is a four-part binding: parent grant assigned to parent
+team, child grant derived from that parent grant, child team related to that
+parent team, and child grant assigned to child team. Neither parent link may
+be rewritten beneath a remaining binding assignment. Equivalent authority at
+a proposed new parent is not an exception to this structural guard.
+
+**Removal and disablement remain distinct:** disabling an assignment withdraws
+its authority route but leaves its stored binding. It therefore does not alone
+satisfy the requirement to remove the assignment before changing the bound
+parent relationship. Bottom-up disablement can prepare the affected chain for
+removal; do not treat a disabled assignment as absent.
+
+The traversal concerns all affected dependency branches, not unrelated direct
+assignments or memberships. Check shared grant use and dependent bindings before
+considering a relationship free to change. Stop at the level required by the
+operation; this does not require deleting an entire hierarchy for every edit.
+For example, changing the leaf TeamZ's parent requires releasing its A3 binding,
+not automatically removing A2 and A1 as well.
+
+This rule concerns **assignment** removal/disablement and structural parent
+changes. It does not supersede Q-101C: disabling the **grant** G2 makes G3
+ineffective without automatically writing a disabled state to G3. Nor does it
+replace orphan resolution: if required support is absent, the affected lineage
+cannot authorize regardless of whether a preventive operation guard ran.
+
+**Rationale:** the order follows the direction of dependence. A supporting
+assignment must not be structurally changed before the child assignments that
+rely on it have been dealt with. Requiring actual assignment removal before
+parent changes prevents a later enable operation from reviving an old binding
+against a silently substituted parent. Existing operation authorization,
+complete-result boundary validation, tenant isolation, and safe concurrency
+checks remain required. No new parent-assignment reference is introduced.
+
+<details>
+<summary>Original Q-101E-2 team-move question — answered by the binding rule above</summary>
+
+Separate operation, hypothetical example:
+
+```text
+Before: Team1 --> TeamY; G2 assigned to TeamY derives from G1 held by Team1
+After:  TeamX --> TeamY; G2's assignment and parent grant reference unchanged
+```
+
+**Question:** may TeamY retain its grant assignments when moved to TeamX if
+each assignment's required parent authority is validly supported at TeamX and
+all resulting boundaries pass validation? Or must the relevant assignments be
+removed before changing the team parent, as a structural rule regardless of
+compatibility? This question is not answered or approved by the grant-parent
+change decision above.
+
+**Rationale:** grant parentage and team parentage are distinct relationships;
+the remaining contract must specify how a team move preserves their alignment.
+
+</details>
+
+</details>
+
+Existing explicitly human-dependent agent/service rules remain separate; these
+clarifications do not introduce independent proxy authority. Exact wire fields
+and frozen-handbook reconciliation are not completed by this scratch note.
+
+<details>
+<summary>Earlier remaining-limits list — historical; Q-101A–C supersede the resolved items</summary>
+
+1. **Reusable-grant disable granularity:** decide whether explicit disabling is
+   definition-wide or assignment-specific, and how that interacts with G2 reused
+   for TeamY, another team, or a direct human. Do not silently disable unrelated
+   recipients or assume they remain unaffected by a definition-wide disable.
+2. **Deeper chains and concurrent operations:** define affected-dependent
+   enumeration and safe mutation ordering. The parent-removal check must not be
+   invalidated by concurrent enable/assignment changes before the write.
+3. **Other loss of support:** removal is the settled controlled operation here.
+   Parent disablement, expiry, broader revocation, team reparenting, and unexpected
+   missing support require their own consistent handling. Runtime checks must
+   still refuse unsupported authority; this note does not force automatic
+   persistent-state changes for every such event.
+4. **Parent validity and revisions:** complete global orphan/root rules, multiple
+   holdings with different validity/revisions, and revision/adoption mechanics.
+5. **Existing proxy rules:** this explicit enablement applies to deliberately
+   disabled child grants. It does not repeal Q-070's automatic recovery of a
+   still-valid human delegation or introduce independent service/agent authority.
+
+</details>
+
+No live grant, membership, ownership list, or assignment is changed by this note.

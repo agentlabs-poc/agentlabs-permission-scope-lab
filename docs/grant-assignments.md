@@ -1,5 +1,12 @@
 # Grants and assignments — Q-090
 
+**Later revision rules — Q-102–Q-106:** [grant revisions](grant-revisions.md)
+adds explicit per-assignment adoption and one current assignment per tenant/
+grant/recipient, including disabled assignments. New assignments and explicit
+upgrades select latest published revision; existing assignments may remain.
+The [core JSON representation](grant-revision-format.md) is approved under Q-107;
+the earlier examples below remain the pre-revision-format checkpoint.
+
 **Current refinement — Q-101:** [parent-grant bindings](parent-grant-bindings.md)
 uses `parent_grant_id` plus actual assignments/team context; no additional
 parent-assignment lineage reference is required for the settled cases. Older

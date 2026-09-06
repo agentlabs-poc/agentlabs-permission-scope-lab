@@ -1,0 +1,41 @@
+# Team1's grants
+
+Tenant is an implied boundary and is not included in scope.
+
+```json
+{
+  "version": "1",
+  "id": "G-TEAM1-PAYSLIP-FIN",
+  "recipient": {
+    "type": "group",
+    "id": "team1"
+  },
+  "permissions": [
+    "hrms:payroll:payslip::read",
+    "hrms:payroll:payslip::write"
+  ],
+  "scope": {
+    "dept": "FIN"
+  },
+  "status": "enabled"
+}
+```
+
+```json
+{
+  "version": "1",
+  "id": "G-TEAM1-PAYSLIP-ENG",
+  "recipient": {
+    "type": "group",
+    "id": "team1"
+  },
+  "permissions": [
+    "hrms:payroll:payslip::read",
+    "hrms:payroll:payslip::write"
+  ],
+  "scope": {
+    "dept": "ENG"
+  },
+  "status": "enabled"
+}
+```

@@ -1,0 +1,37 @@
+# Team2's derived grant
+
+Canonical for this scratch model only; not adopted into the handbook.
+Tenant is an implied boundary and is not included in scope.
+
+```json
+{
+  "version": "1",
+  "id": "G-TEAM2-PAYSLIP-FIN",
+  "recipient": {
+    "type": "group",
+    "id": "team-2"
+  },
+  "parent_grant_id": "G-TEAM1-PAYSLIP-FIN",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {},
+  "status": "enabled"
+}
+```
+
+## Canonical meaning
+
+- `parent_grant_id` references exactly one supporting parent grant.
+- `permissions` selects a subset of the parent's permissions.
+- For a derived grant, `scope` contains additional constraints: effective scope
+  is parent scope AND child scope. Here `{}` retains `dept = FIN` without
+  further narrowing; it does not mean tenant-wide effective access.
+- The child remains dependent on the parent; it is not an independent copy.
+- This reference expresses grant dependency, not team hierarchy or membership
+  inheritance.
+
+Rationale: an explicit source preserves permission/scope pairing, while subset
+selection and AND constraints narrow authority. This adds one field and gives
+`scope` additional-constraint semantics when `parent_grant_id` is present.
+
+See [subteam rules and open questions](subteam.md). This approval settles the
+shown format and meaning, not a complete lifecycle or validation specification.

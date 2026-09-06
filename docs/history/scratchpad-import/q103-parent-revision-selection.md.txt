@@ -1,0 +1,138 @@
+# Q-103 — Which parent revision supplies a child grant's ceiling?
+
+**AGREED at governing-rule level.** The user answered “agree” to Q-103A:
+“lineage latest” means the revision currently adopted in the required lineage,
+not simply the latest published revision. Combined with Q-103B, resolution flows
+top-to-bottom through current valid adopted support. Q-102's per-assignment
+adoption and all child boundaries remain in effect. No new wire fields are
+adopted; multiple candidate holdings and direct-human source-selection contracts
+remain to be completed.
+
+Previous status: OPEN / PROPOSED, not approved. Earlier questions and pending
+labels below are preserved as history where the approval above resolves them.
+
+## Q-103B — Resolution flows top-to-bottom: AGREED DIRECTION
+
+The user specified that lineage resolution should flow from top to bottom.
+Establish valid authority at the top of the required lineage, then evaluate
+each child within the already-established effective parent boundary. Permission
+selection and scope-AND constraints accumulate without amplifying authority.
+This is logical evaluation order, not a mandated network-request sequence.
+
+```text
+Valid root/upstream authority
+             |
+             v
+Effective G1 support in the actual route
+             |
+             v
+G2: validate required binding and narrow within G1
+             |
+             v
+G3: validate required binding and narrow within G2
+```
+
+Grant/assignment enablement, tenant, validity, and required supporting team
+relationships remain mandatory at each applicable level. Ineffective or orphaned
+required support cannot produce effective descendant authority. Stored grants
+or assignments need not be automatically deleted or disabled by resolution.
+
+**Core-philosophy check and rationale:** a child's ceiling is derived from
+established parent authority, never independently inferred from a newer grant
+definition elsewhere. This preserves recursive non-expansion. It does not
+reverse Q-101's mutation ordering: affected assignment disable/removal remains
+bottom-up, while resolution is top-down. No universal operation-enable ordering
+or new transport contract is selected here.
+
+Q-103A now confirms adopted, not latest published, revisions. Top-down flow
+does not authorize automatic revision adoption.
+
+## Q-103A — “Lineage latest” means currently adopted: AGREED
+
+The user confirmed the recommended interpretation. The original clarification
+and rationale below remain the explanation of the decision, not an open vote.
+
+The user asked whether using “lineage latest” is the better shape. This is not
+recorded as an approved latest-published fallback: the intended meaning needs
+to be distinguished from the existing explicit-adoption rules.
+
+**Recommendation:** interpret lineage-latest as the current valid, explicitly
+adopted revisions along the actual required supporting lineage, recursively.
+Not the newest published revision irrespective of what the supporting
+assignments adopted. Each child's own adopted permissions and extra scope
+still restrict the resulting authority.
+
+Example: Team1's supporting assignment adopts G1 revision 1 (FIN read), while
+revision 2 (FIN read/write) has been published or adopted only by TeamX. For
+TeamY under Team1, lineage-latest is still Team1's adopted revision 1. After
+Team1 explicitly and validly adopts revision 2, the current parent ceiling for
+that route changes accordingly. This does not auto-upgrade the child's own
+adopted revision or add permissions the child did not select.
+
+**Core-philosophy check:** current adopted lineage preserves actual parent
+support, non-expansion, and explicit adoption. Automatically using the newest
+published revision as authority could bypass adoption and supply authority the
+required parent team does not hold. It could also silently withdraw authority
+when publication narrows the definition. Neither follows from Q-102.
+
+**Original Q-103A clarification, now answered yes:** does “lineage latest” mean the latest revision actually
+adopted along that supporting lineage, rather than simply the latest published
+revision? No new revision schema or latest-published lookup fallback is adopted.
+
+## Concrete example
+
+Tenant is implied. All unrelated validity and authorization conditions hold.
+For this example, Team1 has one valid supporting G1 assignment:
+
+```text
+G1 revision 1: FIN read        -- A1 --> Team1
+G1 revision 2: FIN read/write  -- AX --> TeamX
+
+G2 -- parent_grant_id --> G1
+G2 -- assignment ------> TeamY -- parent team --> Team1
+```
+
+Revision 2 exists and TeamX has adopted it. Team1 has not. The existing team
+ceiling already forbids TeamY obtaining write merely because TeamX has it.
+
+## Recommendation and question
+
+**Recommendation:** resolve G2's parent ceiling from the revision currently
+adopted by its required supporting parent-team assignment: A1's revision 1,
+not the latest published revision and not AX's revision 2. If A1 later explicitly
+adopts revision 2 through valid authorization and boundary checks, that is the
+parent revision used for this route. G2's own adopted permissions and additional
+scope continue to restrict its authority; adoption does not automatically add
+write to a read-only G2.
+
+**Q-103:** should a subteam's child grant follow the revision actually adopted
+by its required parent-team support, without an additional independent parent-
+revision selection by the child?
+
+## Rationale and core-philosophy check
+
+- The parent-team ceiling is based on authority actually held, not merely
+  published or held by an unrelated team.
+- Parent authority stays live: no old independently pinned ceiling can bypass
+  loss or narrowing of the support the child requires.
+- Publishing a revision does nothing by itself. Parent adoption is explicit
+  and authorized, and grant/assignment disablement still applies.
+- G2's own permission selection and additional scope are not rewritten by a
+  parent's adoption. A broader parent permission set alone does not add an
+  unselected permission to G2.
+- This reuses `parent_grant_id` and the real supporting team assignment rather
+  than adding another independent selection that can diverge from parent support.
+
+## Remaining limits
+
+This recommendation is illustrated with one required parent-team holding.
+Multiple candidate holdings of G1 at the same team, direct-human derived grants
+without a parent-team context, and the resulting revision selection must be
+covered before claiming a complete resolver contract. This note does not impose
+a new uniqueness rule or automatically choose any broader candidate.
+
+If parent adoption changes scope, inherited child reach may change even when
+the child's additional scope stays `{}`. Complete resulting authority and
+affected binding validation remain required; the permission-only example does
+not waive that consequence or approve silent propagation. No new JSON field,
+live runtime mutation, or lab promotion is performed by this proposal.

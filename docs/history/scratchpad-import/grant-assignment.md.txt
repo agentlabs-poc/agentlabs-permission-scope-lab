@@ -1,0 +1,60 @@
+# Grant definitions and assignments
+
+Proposed model, not yet canonical. Tenant is implied. Earlier recipient-bearing
+grant examples remain unchanged; this note does not migrate or supersede them.
+
+## Reusable grant definition
+
+```json
+{
+  "version": "1",
+  "id": "G-PAYSLIP-FIN",
+  "permissions": [
+    "hrms:payroll:payslip::read",
+    "hrms:payroll:payslip::write"
+  ],
+  "scope": {
+    "dept": "FIN"
+  }
+}
+```
+
+## Assignment to Team1
+
+```json
+{
+  "version": "1",
+  "id": "A-TEAM1-PAYSLIP-FIN",
+  "grant_id": "G-PAYSLIP-FIN",
+  "recipient": {
+    "type": "group",
+    "id": "team1"
+  },
+  "status": "enabled"
+}
+```
+
+## Meaning and rationale
+
+- The grant defines authority; the assignment identifies who receives it.
+- Multiple assignments can reuse one grant definition.
+- Creating a definition gives nobody access. Assigning it requires separate
+  authorization and boundary validation.
+- Disabling one assignment removes that recipient's route without disabling
+  other assignments.
+- Retrieval follows the human's direct assignments and valid membership-group
+  assignments to their grant definitions. Group-derived authority retains its
+  membership dependency.
+
+## Consequences still to settle
+
+- Shared definition changes must not silently expand existing assignments.
+  Revision/adoption rules and their exact fields remain open; these examples
+  are not a complete update-safe contract.
+- Derived authority must preserve its supporting assignment, not merely the
+  reusable definition. Removing Team1's supporting assignment must remove
+  Team2's authority through that route even if the definition still exists.
+- How this changes the scratch model's `parent_grant_id` relationship, owner
+  grants, lifecycle, and other existing examples remains open.
+
+No handbook changes or canonical migration are approved by this note.

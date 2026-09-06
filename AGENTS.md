@@ -1,5 +1,62 @@
 # Handbook working rules
 
+## Current publication authorization — through Q-112A
+
+The user requested “commit and push, and continue,” then asked for confirmation
+that all scratchpad discussion was captured and correctly reconciled. Publish
+this verified handbook checkpoint on main, including source-history capture and
+the source-to-chapter reconciliation map. Preserve originals and tag `0.0.1`.
+No runtime changes or promotion of historical/tentative contracts is authorized.
+After publication, continue lab-only discussion, deepest dependencies first.
+Earlier no-commit/no-push statements below describe preparation checkpoints.
+
+## Latest recording instruction — lab only, including exploration
+
+The user explicitly instructed: “stop using scratchpad, make everyting is capture
+in labs.” All further discussion, uncertain exploration, proposals, rationale,
+and approved decisions belong in this lab. Do not create or edit more scratchpad
+files. The complete 26-file source snapshot is in docs/history/scratchpad-import;
+originals remain unchanged. Historical proposals are not promoted by capture.
+This supersedes every lab-first/scratch-for-uncertainty direction below. It does
+not authorize commit/push, runtime changes, or new decisions.
+
+Q-112A reaffirms Q-103's **lineage-supported latest**, resolved top-down from
+current valid adopted support, not simply latest published elsewhere. The
+assistant's independent `parent_grant_revision` proposal is withdrawn, not
+canonical. Retain `parent_grant_id` as the explicit lineage link and separately
+track support-discovery/validation/evidence contracts. Do not re-ask the governing
+selection principle or claim every resolver detail is implemented.
+
+## Current recording location — lab by default, scratchpad for high uncertainty
+
+The user instructed: “you should start putting them in lab repo, stop using
+scratch pad, we should use when uncertaininty is high.” Continue ordinary
+handbook discussion, approved decisions, rationale, and clearly labeled bounded
+proposals in this lab. Use the sibling scratchpad only for high-uncertainty
+exploration; preserve its existing files as history. This supersedes the earlier
+scratchpad-default and lab-recording freeze notices below for this work.
+
+Q-102–Q-106 are recorded in docs/grant-revisions.md. Q-107's three core JSON
+shapes and revision-selection fields were subsequently explicitly approved;
+see docs/grant-revision-format.md. Earlier draft status is preserved as history.
+Full schemas remain unfinished. Changing recording location or approving a
+shape does not authorize commit/push, runtime migration, or unrelated promotion.
+
+For every question, provide a reference, recommended answer, rationale, and a
+check against the core philosophy. Name trade-offs and unresolved risks; do not
+claim a recommendation is approved. Record decisions with sufficient explanation
+and examples, preserve superseded reasoning, and ask one question at a time.
+
+## Current prioritization — deepest dependencies first
+
+The user explicitly prioritizes important, deep-impact decisions before shallow
+completion work. Work outward from authority sources and lineage, to safe
+authority mutation, resolution consistency, full contracts/integration, then
+editorial packaging. Do not optimize for easy checklist closures or re-ask settled
+invariants. Q-112 reaffirms group assignment as preferred (not mandatory) and the
+parent's permission/scope ceiling for direct assignments. Q-112A above reaffirms
+lineage-supported latest; implementation contracts are not a new open vote on it.
+
 ## Current publication authorization — Q-101 checkpoint
 
 The user explicitly requested “commit and push, what next” after reviewing the

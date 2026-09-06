@@ -1,0 +1,116 @@
+# Q-102 — Shared-grant revision adoption
+
+**Q-102: AGREED IN PRINCIPLE.** The user answered “yes” to independent revision
+adoption per assignment and proposed an ongoing list of assignments that may
+need an upgrade. This approves the adoption direction, not complete revision
+schemas or parent-revision resolution. Continued core-work discussion follows
+the Q-101 checkpoint published as `08d66e5`. Lab remains unchanged by this note.
+
+Previous status: OPEN / PROPOSED, not approved. The proposal and rationale below
+are preserved; the approval above settles the policy question, not its listed
+contract and dependency risks.
+
+## Q-102A — Upgrade candidates and suggestions
+
+**AGREED at advisory-rule level.** The user said “proceed” after the recommended
+shape and its core-philosophy check. Previous status: USER-PROPOSED; recommended
+shape. Expose assignments using older adopted
+revisions for which newer revisions are available, so administrators can review
+and explicitly adopt appropriate changes. Keep suggestions available as the
+assignment/revision state changes; no automatic adoption or notification
+delivery/cadence is prescribed.
+
+The view can show the assignment and recipient, adopted revision, available
+revision, and the authority differences that need review. This is a conceptual
+view, not approval of new JSON fields, an API, or an external notification system.
+
+**Recommendation:** yes, as an advisory administration view separate from
+effective authorization. “Older revision” means an update candidate, not invalid
+authority and not proof that adopting the newest revision is appropriate.
+Show permission/scope differences, not merely an unconditional upgrade prompt.
+
+**Core-philosophy check and rationale:**
+
+- Visibility helps administrators find adoption work without silently changing
+  recipients' authority. Suggesting does not authorize or perform adoption.
+- Any adoption still requires current administrative permission, valid parent
+  support, and complete boundary validation. Listing a revision does not prove
+  it is adoptable, especially if conditions changed after the list was built.
+- Older adopted revisions remain subject to normal runtime validity and current
+  parent ceilings; a newer publication alone does not invalidate them.
+- Disabled grants/assignments cannot be enabled as a side effect of an upgrade
+  suggestion or adoption. The Q-101 enablement rules remain separate.
+- Auth can provide the authorized revision/assignment information; an admin
+  interface or management layer can present ongoing suggestions. An optional
+  suggestion feature must not become a runtime authorization dependency.
+- A newer revision can narrow, broaden, or otherwise change authority. Newer
+  does not automatically mean safer, required, or suitable for every recipient.
+
+Parent-revision selection for dependent grants remains the next unresolved core
+contract; adding an advisory view does not resolve or bypass it.
+
+Next discussion: [Q-103 — parent revision selection](q103-parent-revision-selection.md).
+
+## Discussion requirement from the user
+
+For every question, provide its reference, a recommended answer, rationale, and
+an assessment against the core philosophy. Distinguish a demonstrated conflict,
+a conditional fit, and unresolved risks. Do not treat a recommendation as user
+approval. Apply this format to subsequent core-work questions as well.
+
+## Existing foundation
+
+Q-089-B already requires immutable published role revisions and explicit,
+authorized grant adoption. Q-090 separates reusable grants from assignments.
+Q-101 settles parent-grant bindings and lifecycle controls, but not complete
+reusable-grant revision/adoption contracts. Do not reopen those settled rules.
+
+## The policy question
+
+G1 is assigned to Team1 and TeamX. Assume valid upstream authority and all
+unrelated conditions. Its current proposed revision 1 supplies FIN read; a new
+proposed revision 2 supplies FIN read/write. The example does not authorize
+publishing or adopting broader authority without the required validation.
+
+**Q-102:** can Team1's assignment explicitly adopt revision 2 while TeamX's
+assignment stays on revision 1, with the adoption authorized and boundary-validated?
+
+| Assignment | Before | Proposed independently adopted state |
+|---|---|---|
+| G1 to Team1 | Revision 1: FIN read | Revision 2: FIN read/write |
+| G1 to TeamX | Revision 1: FIN read | Revision 1: FIN read |
+
+**Proposal:** revision adoption is controlled per assignment. Publishing a new
+grant revision does not silently move existing assignments to it.
+
+**Recommended answer: yes, with the following mandatory safeguards.** This is
+a conditional fit with the existing philosophy, not approval of all revision
+mechanics or evidence of a tested implementation.
+
+| Core principle | Assessment of the recommendation |
+|---|---|
+| No silent authority expansion | Publication alone does not update an assignment; adoption is explicit. |
+| Child authority remains within current parent authority | An old adopted revision must not preserve access that its required live supporting authority no longer permits. Revision pinning is not frozen independent authority. |
+| Administration is separate from use | Adoption requires administrative-operation authorization and validation of complete resulting authority under Q-100. |
+| Assignment, grant enablement, and effectiveness are separate | Revision selection must not bypass grant-wide disable/delete or assignment-specific disablement. |
+| Four-part binding stays valid | Adoption must respect current team/grant support and inherited boundaries; it cannot bypass Q-101 structural guards. |
+| Keep the model simple | Per-assignment adoption adds selection state and validation complexity; this cost must be explicit rather than treated as free. |
+
+**Remaining design risk:** identify the parent revision that supplies a child
+grant's ceiling when different assignments adopt different revisions. Without
+that contract, we cannot claim deterministic, non-expanding lineage resolution
+for every revision combination. This must be settled before finalizing the
+combined revision schema; do not silently select latest or any broader holding.
+
+**Rationale:** authoring reusable authority and changing a recipient's effective
+authority are distinct operations. Independent adoption lets recipients retain
+their explicitly approved version rather than coupling every assignment to a
+single update. The trade-off is multiple coexisting revisions and additional
+revision-selection validation.
+
+This is a policy question, not an approved JSON format. No `grant_revision` or
+other new field is adopted here. If the policy is approved, present exact
+versioned grant/assignment excerpts for review before canonicalizing fields.
+Parent revision selection, dependent-grant effects, identity-wide disable/delete,
+and safe mutation mechanics must remain coherent with Q-101; this proposal does
+not settle them or create an exception to current authority boundaries.

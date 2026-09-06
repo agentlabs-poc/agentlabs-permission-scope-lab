@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1340" viewBox="0 0 1440 1340" role="img" aria-labelledby="title desc">
+  <title id="title">Auth Service: authorize the operation, then validate the authority boundary</title>
+  <desc id="desc">Q-100 scratchpad design. A client requests an assignment or authority change. Inside Auth Service, verified identity and tenant enter the endpoint-owned gate. The handler binds the proposal. Auth's evaluator checks administrative permission and administrative scope; a separate logical authority-boundary validator checks the proposed authority against trusted supporting assignments, lineage, permission subsets, and scope constraints. Both read Auth records. Either check fails into a no-write outcome. Only the validated change is persisted, followed by a response. These are logical responsibilities, not separate deployed services. Runtime dependency and application data-boundary enforcement remain necessary.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#334e68"/></marker>
+    <marker id="read-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#64748b"/></marker>
+    <marker id="stop-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#b42332"/></marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #172b42; }
+      .title { font-size: 29px; font-weight: 700; }
+      .heading { font-size: 22px; font-weight: 700; }
+      .body { font-size: 18px; }
+      .small { font-size: 16px; fill: #4b6075; }
+      .label { font-size: 14px; font-weight: 700; letter-spacing: 1px; }
+      .flow { fill: none; stroke: #334e68; stroke-width: 2.5; marker-end: url(#arrow); }
+      .read { fill: none; stroke: #64748b; stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#read-arrow); }
+      .stop { fill: none; stroke: #b42332; stroke-width: 2; }
+      .stop-label { font-size: 15px; fill: #a41b2a; }
+    </style>
+  </defs>
+
+  <rect width="1440" height="1340" fill="#f5f8fc"/>
+  <text x="45" y="48" class="title">Auth Service: two checks before authority changes</text>
+  <text x="45" y="78" class="small">Q-100 · Scratchpad design · Logical responsibilities, not a deployment diagram · Lab remains frozen</text>
+
+  <rect x="420" y="106" width="600" height="74" rx="12" fill="#fff" stroke="#8fa6bc"/>
+  <text x="444" y="136" class="heading">Client / administrative caller</text>
+  <text x="444" y="163" class="body">Request an assignment or authority change</text>
+
+  <rect x="30" y="214" width="1380" height="1040" rx="22" fill="#fff" stroke="#9bb1c8" stroke-width="2"/>
+  <text x="55" y="249" class="label">AUTH SERVICE</text>
+  <path d="M720 180 V266" class="flow"/>
+  <rect x="420" y="270" width="600" height="76" rx="12" fill="#eef3f9" stroke="#a8b8cc"/>
+  <text x="444" y="301" class="heading">1. Verify identity and trusted tenant</text>
+  <text x="444" y="329" class="body">No caller-selected tenant override or trusted-grant claims</text>
+
+  <rect x="355" y="387" width="700" height="745" rx="18" fill="#f8fafc" stroke="#a6b8cb" stroke-dasharray="7 5"/>
+  <text x="379" y="416" class="label">ONE ENDPOINT-OWNED GATE</text>
+  <text x="790" y="416" class="small">Both checks required</text>
+  <path d="M720 346 V439" class="flow"/>
+  <rect x="395" y="443" width="620" height="82" rx="12" fill="#fff" stroke="#a8b8cc"/>
+  <text x="420" y="475" class="heading">2. Handler binds the proposed operation</text>
+  <text x="420" y="504" class="body">Declared permission + inputs + recipient + source references</text>
+
+  <path d="M720 525 V581" class="flow"/>
+  <rect x="395" y="585" width="620" height="139" rx="12" fill="#edf5ff" stroke="#4f85bd" stroke-width="2"/>
+  <text x="420" y="618" class="heading">3. Auth's authorization evaluator</text>
+  <text x="420" y="652" class="body">May this caller perform this administrative operation?</text>
+  <text x="420" y="682" class="body">Checks administrative permission AND administrative scope.</text>
+  <text x="420" y="707" class="small">Passing this check does not yet authorize the protected write.</text>
+
+  <path d="M720 724 V781" class="flow"/>
+  <text x="740" y="759" class="small">Administrative check passes</text>
+  <rect x="395" y="785" width="620" height="191" rx="12" fill="#fff8e9" stroke="#bb8531" stroke-width="2"/>
+  <text x="420" y="818" class="heading">4. Authority-boundary validator</text>
+  <text x="420" y="850" class="body">Is the proposed authority inside its permitted source?</text>
+  <text x="420" y="884" class="body">Valid supporting assignment + lineage + actor's source access</text>
+  <text x="420" y="914" class="body">Permission subset · parent scope AND child constraints</text>
+  <text x="420" y="946" class="small">Whole proposed authority · applicable parent-team ceiling</text>
+
+  <path d="M720 976 V1030" class="flow"/>
+  <text x="740" y="1012" class="small">Boundary check passes</text>
+  <rect x="395" y="1034" width="620" height="70" rx="12" fill="#edf8f1" stroke="#62977a"/>
+  <text x="420" y="1065" class="heading">5. Persist only the validated change</text>
+  <text x="420" y="1092" class="small">Do not let changed dependencies invalidate the check unnoticed.</text>
+
+  <rect x="65" y="585" width="235" height="361" rx="14" fill="#eef2f7" stroke="#8fa3b9"/>
+  <text x="85" y="619" class="heading" style="font-size:19px">Trusted Auth records</text>
+  <text x="85" y="669" class="body">Grants + assignments</text>
+  <text x="85" y="702" class="body">Human memberships</text>
+  <text x="85" y="735" class="body">Selected revisions</text>
+  <text x="85" y="768" class="body">Parent/team lineage</text>
+  <text x="85" y="801" class="body">Validity + restrictions</text>
+  <text x="85" y="852" class="small">Logical store / data access</text>
+  <text x="85" y="881" class="small">Not a customer app DB</text>
+  <text x="85" y="910" class="small">Tenant isolation applies</text>
+  <path d="M300 654 H391" class="read"/>
+  <text x="316" y="642" class="small">read</text>
+  <path d="M300 855 H391" class="read"/>
+  <text x="316" y="843" class="small">read</text>
+  <path d="M395 1068 H182 V950" class="flow"/>
+  <text x="210" y="1048" class="small">validated write</text>
+
+  <path d="M1015 654 H1100 V880 H1015" class="stop"/>
+  <path d="M1100 770 H1125" class="stop" marker-end="url(#stop-arrow)"/>
+  <text x="1066" y="638" class="stop-label">fails</text>
+  <text x="1066" y="905" class="stop-label">fails</text>
+  <rect x="1130" y="700" width="235" height="170" rx="14" fill="#fff0f1" stroke="#c57880"/>
+  <text x="1151" y="738" class="heading">STOP · no write</text>
+  <text x="1151" y="776" class="body">Deny or error outcome</text>
+  <text x="1151" y="810" class="small">No fallback to allow</text>
+  <text x="1151" y="839" class="small">Do not persist first</text>
+  <text x="1130" y="957" class="small">Identity and input failures</text>
+  <text x="1130" y="981" class="small">also stop the operation.</text>
+
+  <path d="M720 1104 V1171" class="flow"/>
+  <rect x="485" y="1175" width="470" height="58" rx="12" fill="#edf8f1" stroke="#62977a"/>
+  <text x="510" y="1211" class="heading">6. Return successful result to caller</text>
+
+  <text x="45" y="1292" class="body">Issuance safety is not permanent approval: runtime checks must still enforce current dependencies.</text>
+  <text x="45" y="1320" class="small">Application endpoints still enforce their real data boundaries. Exact validator, lineage, and concurrency contracts remain open.</text>
+</svg>

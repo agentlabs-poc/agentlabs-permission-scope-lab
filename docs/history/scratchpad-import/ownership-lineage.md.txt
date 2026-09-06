@@ -1,0 +1,41 @@
+# Owner changes and team-held lineage — Q-099
+
+Discussion explanation, not a performed ownership change. The repository remains
+frozen. SVGs are preferred where they materially clarify relationships or flow.
+
+![Owner-list changes separated from unchanged team-held authority](ownership-lineage.svg)
+
+## Expected behavior under team-held support
+
+An explicit authorized ownership transfer changes who receives the owner/admin
+grant. It does not automatically change the team's business grants, their
+assignments, selected revisions, parent links, or member relationships.
+With those dependencies unchanged, downstream authority remains unchanged.
+
+For the current example, Team1's FIN assignment continues to support Team2's
+FIN-read authority, and Nutan continues to receive that authority through her
+Team2 membership. The diagram illustrates a potential owner-list change; Om,
+Maya, Suma, and Nutan's stored scratchpad records have not been changed.
+
+## Necessary distinctions
+
+- This assumes the continuing source is team-held. A route that explicitly
+  depends on a departing owner's personal assignment or membership cannot
+  silently be treated as team-held. Q-096's refinement of Q-093 still requires
+  a clear dependency contract; no automatic rebinding is implied.
+- Removing an owner removes that owner-list route, not every other grant the
+  person holds. Maya's older direct administrative grants still exist in the
+  scratchpad and are not revoked by an owner-list edit.
+- Changing owners must not import their personal scopes or permissions into
+  the team's authority. Changing the actual authority is a separate authorized
+  operation, subject to the agreed parent and complete-result bounds.
+- If the actual supporting team assignment is removed, expires, or otherwise
+  becomes unusable, its dependent route still stops. Ownership continuity does
+  not override missing or invalid authority support.
+- Current owner grants contain `auth:group::write`, not grant-assignment or a
+  finalized ownership-transfer permission. This illustration does not establish
+  which actor is authorized to perform a transfer.
+
+Rationale: keep administrative continuity separate from the source of recipients'
+authority. Stable team-held support avoids making unrelated owner rotation an
+implicit rewrite of the authority lineage.

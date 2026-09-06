@@ -1,5 +1,14 @@
 # Authorization Explanation Bench
 
+**Current revision rules:** [Q-102–Q-106](docs/grant-revisions.md) are recorded
+with rationale and examples. [Q-107 JSON](docs/grant-revision-format.md) is approved
+at core-shape level; full schemas remain open. All recording and exploration now
+belong in the lab. [Scratchpad sources](docs/history/scratchpad-import/README.md)
+are preserved as history; no new commit/push is implied.
+
+[Q-112A](docs/direct-human-parent-context.md) reaffirms lineage-supported latest.
+The independent parent-revision-field proposal is withdrawn, not canonical.
+
 **Latest pinned discussion: [Q-101 — parent-grant bindings](docs/parent-grant-bindings.md).**
 Includes the four-part binding, direct/shared route comparisons, bottom-up
 structural changes, current-state enablement, rationale, and 31 review cases.

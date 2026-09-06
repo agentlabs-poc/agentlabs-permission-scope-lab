@@ -1,5 +1,35 @@
 # Authorization handbook — agreed roadmap
 
+## Current revision decisions — Q-102 through Q-111
+
+[Milestone progress through Q-111](milestone-progress.md) reports remaining
+percentages from the fixed closure checklist, with partial advances and remaining
+deliverables separated. It is not an effort estimate or final v1 acceptance.
+
+All recording, including high-uncertainty exploration, now belongs in this lab.
+[Scratchpad sources](history/scratchpad-import/README.md) are preserved history.
+[Grant revisions](grant-revisions.md) records the approved rules,
+rationale, core-philosophy checks, trade-offs, and examples. This recording-location
+change does not authorize commit/push. Q-107's core JSON was subsequently
+approved separately after explicit review; full schemas remain unfinished.
+
+| Reference | Status | Decision and rationale |
+|---|---|---|
+| Q-102 | AGREED IN PRINCIPLE | Independent explicit grant-revision adoption per assignment; publication does not silently change recipients. Current source boundaries still apply. |
+| Q-102A | AGREED advisory rule | Expose update candidates and meaningful authority differences to authorized administrators; suggestions never adopt or enable authority. No notification cadence specified. |
+| Q-103A/B | AGREED | Resolve top-to-bottom using current adopted revisions in actual required lineage, not latest published elsewhere. Child authority remains within current support. |
+| Q-104 | AGREED | One current assignment per tenant/grant/recipient, including disabled assignments. Deterministic support lookup without duplicate-revision or disablement bypass. |
+| Q-104A | AGREED | New assignments must adopt latest published grant revision and pass current authorization/boundary checks. No fallback to older content. |
+| Q-105 | AGREED | Explicit upgrades also select latest, not intermediate versions. Existing assignments may stay; rejected upgrades leave them unchanged. The reduced flexibility is deliberate. |
+| Q-106 | AGREED | Published grant authority content is immutable; enable/disable remains separate live control. No edits beneath adoption or disabled-revision adoption requirement. |
+| Q-107 | APPROVED CORE SHAPE | [Core JSON](grant-revision-format.md) separates grant control, immutable revision, and revision-adopting assignment. User answered “Approve” after reviewing all blocks and `revision` / `grant_revision` fields. Earlier draft status is preserved; full schemas remain open. |
+| Q-108 | APPROVED AS REVISED — DEFERRED IN V1 | [Assignment validity](assignment-validity.md) retains optional grant validity and defers recipient-specific assignment windows. Fewer lifecycle controls; no independently scheduled expiry per recipient of a shared grant. Earlier proposal retained as history. |
+| Q-109 | APPROVED | [Grant validity placement](grant-validity.md) puts optional validity in immutable grant revisions; changes/removal require explicit adoption. User approved the exact JSON and trade-off: a newly published shorter window does not shorten older adopted revisions. Grant-wide status remains live. |
+| Q-110 | AGREED | [Auth write consistency](auth-write-consistency.md) preserves validated revision and supporting-authority state through the protected Auth write; conflicting changes stop the attempt, with no stale write, partial assignment update, or silent revision substitution. User answered “agree”; concurrent administration can cause a request that initially passed to fail. Persistence mechanics and error format remain open. |
+| Q-111 | AGREED AT RULE LEVEL | [Lineage cycles](lineage-cycles.md) rejects self-parenting and ancestor loops in grant and team lineage, including relevant disabled bindings. Disabled is not permission to store circular support; inactive restructuring must also remain acyclic. User answered “agree”; revision-aware graph selection and exact validation contracts remain open. |
+| Q-112 | USER CLARIFICATION RECORDED | [Direct-human parent context](direct-human-parent-context.md): prefer group assignments, but direct assignments remain supported and bounded by the parent's permissions and scope. Q-112A below reaffirms the existing selection principle; no new source-link field. |
+| Q-112A | LINEAGE RULE REAFFIRMED; FIELD PROPOSAL WITHDRAWN | Use lineage-supported latest under Q-103, not an independently pinned parent revision or unrelated latest publication. The assistant's `parent_grant_revision` proposal is retained only in history. Governing selection is not reopened; support-discovery, evidence, validation, and conformance contracts remain open. All exploration is now lab-only. |
+
 ## Current decisions — Q-101 pinned through Q-101E-3
 
 The user requested promoting this discussion from scratchpad to lab with diagrams

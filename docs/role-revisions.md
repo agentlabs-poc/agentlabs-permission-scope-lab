@@ -1,5 +1,12 @@
 # Role revisions and explicit grant adoption — Q-089-B / ROLE-003
 
+**Related grant-revision decisions:** [Q-102–Q-106](grant-revisions.md) extends
+explicit adoption to reusable grant revisions selected by assignments, with
+latest-only creation/upgrades and separate live controls. The role-revision
+rules below remain; they are complemented by the approved
+[Q-107 core grant JSON](grant-revision-format.md). Remaining schema/operation
+mechanics are not closed merely by recording these approved principles.
+
 Post-0.0.1 update: [Q-090](grant-assignments.md) moves recipients into separate
 assignments. Recipient-bearing grant excerpts below are deprecated layouts;
 immutable role revisions, explicit selection, and boundary-validated adoption

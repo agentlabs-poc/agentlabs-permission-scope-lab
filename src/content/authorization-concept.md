@@ -1,5 +1,37 @@
 # Authorization: the agreed foundation
 
+## Current revision decisions — Q-102–Q-106
+
+[Grant revisions and adoption](../../docs/grant-revisions.md) records approved
+independent adoption, update suggestions, current-adopted top-down lineage,
+one assignment per grant/recipient, latest-only creation/upgrades, and immutable
+authority content with separate live controls. Existing assignments do not
+automatically upgrade. All current parent boundaries remain mandatory.
+
+[Q-107 core JSON](../../docs/grant-revision-format.md) is **approved at core-shape
+level**; full schemas remain open. All discussion and exploration now belong in
+the lab; [scratchpad sources](../../docs/history/scratchpad-import/README.md) are history.
+
+[Q-112A](../../docs/direct-human-parent-context.md) reaffirms lineage-supported
+latest. The extra `parent_grant_revision` proposal is withdrawn; eligible-support
+discovery and validation/evidence contracts remain separate unfinished work.
+
+[Q-108](../../docs/assignment-validity.md) defers assignment-specific validity in v1.
+[Q-109](../../docs/grant-validity.md) puts optional grant validity in immutable
+revision content. Changing the window requires explicit adoption; publication
+alone neither extends nor shortens an existing assignment's adopted window.
+Current upstream validity and live grant-wide disablement still constrain access.
+
+[Q-110](../../docs/auth-write-consistency.md) preserves the checked revision and
+authority through Auth's assignment write. A conflicting change stops that
+attempt, without saving stale approval or silently substituting another revision.
+Persistence mechanics and conflict-result formatting remain open.
+
+[Q-111](../../docs/lineage-cycles.md) rejects grant/team self-parenting and ancestor
+loops, including disabled records/bindings. Revision-aware validation details
+remain open. [Milestone progress](../../docs/milestone-progress.md) separates
+remaining checkpoint percentages from recent partial advances and effort estimates.
+
 ## Latest pinned discussion — Q-101
 
 [Parent-grant bindings](../../docs/parent-grant-bindings.md) records the current

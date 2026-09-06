@@ -1,0 +1,96 @@
+# Q-107 — Core JSON for a grant, its revision, and its assignment
+
+**OPEN / PROPOSED, not approved.** Q-102–Q-106 settle revision adoption and
+immutable content separately from live controls. These are proposed core
+excerpts, not complete schemas, new authority entity types, or a database design.
+Tenant remains implied. Lab and live records remain unchanged.
+
+## Recommendation: separate the three responsibilities in the contract
+
+### Grant identity and live control
+
+```json
+{
+  "version": "1",
+  "id": "G1",
+  "status": "enabled"
+}
+```
+
+The live status applies to G1 across every revision and assignment. This is the
+same grant identity, not a new independent administrative grant. A control-only
+excerpt supplies no permissions by itself.
+
+### Immutable published revision of G1
+
+```json
+{
+  "version": "1",
+  "grant_id": "G1",
+  "revision": 2,
+  "parent_grant_id": "G0",
+  "permissions": ["hrms:payroll:payslip::read", "hrms:payroll:payslip::write"],
+  "scope": {"dept": "FIN"}
+}
+```
+
+Assume G0 is valid required upstream authority and the proposed G1 content is
+within its ceiling; this is not a complete root/bootstrapping example. The
+`(grant_id, revision)` pair identifies this grant's content revision. No recipient
+or live administrative status belongs in this immutable excerpt.
+
+### Assignment adopting revision 2
+
+```json
+{
+  "version": "1",
+  "id": "A1",
+  "grant_id": "G1",
+  "grant_revision": 2,
+  "recipient": {"type": "group", "id": "Team1"},
+  "status": "enabled"
+}
+```
+
+The assignment adopts a concrete revision. `grant_revision` is a proposed new
+field for that selection; it is not the top-level contract `version`. G1 revision
+2 is assumed latest at this example's creation/adoption. Publication of revision
+3 later would not automatically change A1. Enablement does not imply an allow.
+
+## Why the added revision fields are necessary
+
+| Proposed representation | Responsibility |
+|---|---|
+| `revision` on grant content | Distinguishes immutable published content versions of the same grant. |
+| `grant_revision` on an assignment | Records which content that recipient explicitly adopted; `grant_id` alone cannot express independent adoption. |
+| Grant identity `status` | Grant-wide mutable enable/disable, without editing immutable content. |
+| Assignment `status` | Separate recipient-route control, already part of Q-090. |
+| `version` | Existing required contract-format version, not authority content revision. |
+
+This keeps grant identity, authority content, and recipient attachment distinct.
+It does not require three database tables or prescribe endpoint response
+envelopes. A revision is a version of a grant, not another kind of grant.
+
+## Core-philosophy check
+
+- Immutable revisions prevent silent replacement of adopted permissions/scope.
+- Explicit assignment selection preserves per-recipient adoption and latest-only
+  creation/upgrade rules. The server validates latest selection at the operation.
+- Grant-wide and assignment-specific disablement cannot be bypassed through a
+  revision change. Disabled records are not automatically enabled by adoption.
+- Required parent links and scope accumulation remain. No independent source
+  authority or parent-assignment lineage field is introduced.
+- The cost is a separate immutable revision representation and an explicit
+  revision selector, justified by the previously approved adoption behavior.
+
+**Q-107:** approve these three core excerpts and the added `revision` /
+`grant_revision` selection fields as the representation of the agreed separation?
+
+## Explicit limits
+
+Validity/conditions placement, root representation, permission-versus-role
+variants, complete field validation, latest selection under concurrent writes,
+and full API payloads remain to be completed. Q-103's direct-human parent-revision
+selection gap remains visible; this format proposal does not claim to resolve it.
+No draft state, revision-specific disable/delete, rollback, new assignment
+uniqueness exception, or automatic parent adoption is introduced.

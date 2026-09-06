@@ -1,0 +1,54 @@
+# Subteam — dependent grant inheritance
+
+The derived-grant format and rules below are canonical within this scratch model
+only. They are not adopted into the handbook. Tenant remains an implied boundary.
+“Subteam” names the team relationship; “dependent grant inheritance” names the
+authority mechanism. The existing no-nested-groups rule is not changed here.
+
+Canonical example: [Team2's derived grant](team2-grant.md).
+
+Previous status (superseded locally): experimental discussion model, not canonical.
+
+## Scratch-canonical rules
+
+- Each derived grant received by Team2 depends on one selected Team1 grant.
+- Child permissions must be a subset of that parent grant's permissions.
+- Effective child scope is the parent scope AND the child's additional constraints.
+- Parent constraints cannot be removed or replaced. Additional scope `{}` adds
+  no restriction; it does not discard the parent boundary.
+- Conflicting constraints, such as `dept = FIN` and `dept = ENG`, cannot authorize
+  an operation. They do not override each other.
+- Constraints must apply to the same operation's data, using supported scope keys.
+- Disabling or deleting the supporting parent grant removes authority through
+  that dependent route; the child is not an independent copy.
+- Membership is not inherited. Team2 members do not automatically become Team1
+  members or receive all Team1 grants.
+
+## Example
+
+| | Team1 parent grant | Team2 derived grant |
+|---|---|---|
+| Permissions | Payslip read, write | Payslip read |
+| Scope | `dept = FIN` | `dept = FIN AND cert = C17` |
+
+The additional `cert` constraint is illustrative and requires a supported scope
+meaning and endpoint enforcement. Team2 would need another derived grant to
+receive authority from Team1's separate ENG grant.
+
+## Rationale
+
+Selecting fewer permissions and adding scope constraints constructs narrower
+authority without allowing permission/scope mixing across unrelated grants.
+The dependency preserves the source boundary instead of creating detached access.
+
+## Still open
+
+- The team-to-team hierarchy contract; `parent_grant_id` now defines the
+  grant-to-grant reference, not that hierarchy.
+- Full derived-grant validation beyond the approved example and rules.
+- Maya's authority to create subteams and issue their dependent grants; her
+  membership-management grant alone does not provide it.
+- Parent changes, revision adoption, reactivation, and freshness semantics.
+- Validation rules for conflicting constraints and deeper inheritance chains.
+
+No automatic adoption of broader parent authority is settled by this experiment.

@@ -1,0 +1,49 @@
+# Q-105 — Explicit upgrades must select the latest revision
+
+**AGREED.** The user answered “I agree with you recomendation” after the latest-
+only upgrade rule and its flexibility trade-off were explained. This is scratch
+recording only; no lab change, commit, push, or live authority change is implied.
+
+## Rule
+
+An explicit upgrade of an existing grant assignment must select the latest
+published revision, just as creation of a new assignment must under Q-104A.
+Existing assignments may remain on their adopted revisions. Publishing a newer
+revision does not itself upgrade an assignment or invalidate its authority.
+
+The upgrade must pass current administrative authorization and complete
+boundary/dependency validation. It must not implicitly enable a disabled grant
+or assignment, bypass parent ceilings, or select an older revision as fallback.
+Concurrent latest-selection/validation/write mechanics remain a contract task.
+
+## Example and deliberately accepted trade-off
+
+```text
+G1 revision 1: read                  <-- Team1 currently adopts this
+G1 revision 2: read + write
+G1 revision 3: read + write + delete  <-- latest published
+```
+
+Team1 may stay on revision 1. If it chooses to upgrade, it must select revision
+3, not intermediate revision 2. If current permitted authority cannot support
+revision 3, the upgrade is rejected and the existing assignment remains on its
+previous revision, subject to its normal current validity checks. The existence
+of revision 2 does not create a permitted intermediate-upgrade exception.
+
+## Rationale and core-philosophy check
+
+- Keeps creation and upgrade selection consistent: latest at the explicit
+  change, not a catalogue of intermediate revision choices.
+- Preserves explicit adoption: unchanged assignments are not automatically
+  advanced or disabled by publication.
+- Preserves non-expansion and separate administration: latest is not proof of
+  entitlement; the complete proposed authority must remain within valid bounds.
+- Deliberately trades intermediate-version flexibility for a simpler operation.
+  Newer does not mean safer or valid for every recipient. A failed latest-only
+  upgrade must not silently change the assignment to an alternative version.
+- Distinguishes upgrade from re-enablement: enabling an existing disabled
+  assignment does not itself change the adopted revision.
+
+Independent assignments can still adopt different revisions because their
+authorized adoption occurred at different times. This does not approve a
+separate rollback operation or settle revision deletion/retention contracts.

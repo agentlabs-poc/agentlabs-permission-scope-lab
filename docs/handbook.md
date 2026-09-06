@@ -1,6 +1,41 @@
 # Authorization Handbook — working edition
 
-## Current position — Q-101 dependent bindings and lifecycle
+## Current position — decisions through Q-111
+
+[Milestone progress](milestone-progress.md) gives checklist-based remaining
+percentages, recent advances, and outstanding deliverables for all eleven stages.
+
+[Q-102–Q-106: grant revisions](grant-revisions.md) records independent adoption,
+advisory upgrade candidates, top-down current-adopted lineage, assignment
+uniqueness, latest-only creation/upgrades, and immutable content with live
+enablement controls. These are approved rules with rationale and examples.
+
+[Q-107: core JSON](grant-revision-format.md) is **approved**, including the grant
+control, immutable revision, and adopting assignment. Eligible-support discovery
+and full contract mechanics remain open. All recording and exploration now happen
+in this lab; [scratchpad sources](history/scratchpad-import/README.md) are preserved
+as history. No new commit/push is implied.
+
+[Q-112A](direct-human-parent-context.md) reaffirms lineage-supported latest under
+Q-103. The independent `parent_grant_revision` proposal is withdrawn, not added
+to the canonical grant format. Support-discovery/evidence work does not reopen
+that governing selection rule.
+
+[Q-108](assignment-validity.md) defers assignment-specific validity in v1.
+[Q-109](grant-validity.md) approves optional validity in immutable grant revisions:
+lifetime changes require explicit adoption, while live grant-wide disablement
+remains separate. Publishing a shorter window does not shorten older adoptions.
+
+[Q-110](auth-write-consistency.md) requires the Auth assignment write to preserve
+its checked revision and relevant authority state through persistence. Conflicting
+changes stop the attempt; no stale approval or silent revision substitution.
+The guarantee is agreed; database and error contracts remain open.
+
+[Q-111](lineage-cycles.md) rejects self-parenting and ancestor loops in grant
+and team lineage, including disabled records/bindings. Exact revision-aware
+validation contracts remain open; disablement does not legitimize circular support.
+
+## Binding foundation — Q-101 dependent bindings and lifecycle
 
 [Q-101: parent-grant bindings](parent-grant-bindings.md) pins the agreed model
 through Q-101E-3, with versioned excerpts, rationale, and 31 review cases.

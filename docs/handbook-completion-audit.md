@@ -1,5 +1,19 @@
 # Handbook completion audit — MEASURE-001
 
+## Milestone closure update through Q-111
+
+See [milestone progress](milestone-progress.md) for per-stage remaining percentages
+computed from this fixed register, current partial advances, and outstanding
+deliverables. The Q-090–Q-111 changes were checked against affected row criteria;
+they do not close another whole row. Counts remain 35 DONE / 33 OPEN / 1 EXCLUDED,
+or 68 in scope. The evidence below is updated where later rules supersede older
+wording; prior snapshots and original criteria remain preserved.
+
+This is a targeted closure-register update, not final whole-handbook semantic
+acceptance or a newly granular effort model. Full post-model-change contracts and
+conformance remain open. The earlier re-audit notice below describes the prior
+checkpoint; the current report does not claim all of its gaps are resolved.
+
 ## Post-0.0.1 model change — re-audit pending
 
 [Q-090](grant-assignments.md) separates grants from assignments and
@@ -178,12 +192,12 @@ not the whole surrounding topic.
 | HC-05-05 | DONE | Settle the five ordinary-model administrative authorization rules. | ADMIN-004/005 / Q-044; [grant model](grant-model.md). |
 | HC-05-06 | DONE | Settle ordinary grant survival after the issuer loses issuance authority. | ADMIN-006 / Q-046; [grant model](grant-model.md). |
 | HC-05-07 | DONE | Require all service/agent access to depend on a human and stay within that human's authority. | AUTHORITY-002 / DELEGATION-002; [grant model](grant-model.md). |
-| HC-05-08 | OPEN | Encode administrative recipient/permission/scope bounds and define containment validation. | Q-044 explicitly leaves encoding/containment open; [grant model](grant-model.md). |
+| HC-05-08 | OPEN | Encode administrative recipient/permission/scope bounds and define containment validation. | [Q-093](assignment-authority.md), [Q-100](auth-service-authority-gate.md), and [Q-101](parent-grant-bindings.md) clarify separate admin/source checks and parent-dependent narrowing. [Q-103](grant-revisions.md) selects actual adopted support; [Q-112A](direct-human-parent-context.md) reaffirms lineage-supported latest, not an independent parent selector. Complete administrative/boundary-validator contracts and eligible-support discovery/evidence remain open; Q-044's old encoding gap is narrowed, not closed. |
 | HC-05-09 | OPEN | Define bootstrap/seed authority and its governed creation procedure. | [Q-088](bootstrap-authority.md) agrees minimal persistent seed grants and explicit self-assignment within current administrative bounds. Exact seed authority, trusted setup procedure, recovery, and repeat initialization remain open. |
 | HC-05-10 | OPEN | Specify delegation ceilings, chains, expiry, growth, and reactivation semantics. | Q-070 agrees automatic restoration of affected access when human support returns under a still-valid delegation; explicit renewal is not adopted. Rationale in [delegation lifecycle](delegation-lifecycle.md). Ceilings, chains, expiry, growth, and mechanics remain open. |
-| HC-05-11 | OPEN | Complete ordinary grant status/validity and create/change/revoke lifecycle rules. | Q-082 consolidates permanent withdrawal into delete; the original criterion's revoke wording does not require a second operation. Create/enable/disable/delete, Q-081 revised two-state status, and Q-083 optional time validity are agreed in [grant lifecycle](grant-lifecycle.md). Initial defaults, timestamp validation, full transitions, and operation contracts remain open. |
-| HC-05-12 | OPEN | Define group membership change, nesting, and optional-sync lifecycle behavior. | Q-077 settles nested groups as unsupported in [groups and membership](groups-and-membership.md). Membership and sync lifecycle remain open; freshness timing is counted under stage 9. No whole-checkpoint credit for deciding nesting alone. |
-| HC-05-13 | OPEN | Define role revision/change validation and evidence for existing referencing grants. | [Q-089-B / ROLE-003](role-revisions.md) approves immutable revisions, explicit role_revision selection, and authorized boundary-validated adoption. Original Q-089 alternatives are superseded history. Full schemas, revision lifecycle, adoption concurrency, compatibility, migration, and propagation evidence remain open. |
+| HC-05-11 | OPEN | Complete ordinary grant status/validity and create/change/revoke lifecycle rules. | Q-082 consolidates permanent withdrawal into delete; the original revoke wording does not require a second operation. [Q-101](parent-grant-bindings.md) distinguishes global grant controls, route controls, ineffective descendants, and guarded structural changes. [Q-108](assignment-validity.md) defers assignment-specific validity in v1; [Q-109](grant-validity.md) places grant validity in immutable revisions. Initial defaults, timestamp validation, full transitions, and operation contracts remain open. |
+| HC-05-12 | OPEN | Define group membership change, nesting, and optional-sync lifecycle behavior. | [Q-091](subgroups.md) supersedes Q-077's blanket subgroup exclusion: dependent subteams are supported, not inherited human membership. [Q-099](ownership-lineage.md) separates owners from team-held support; [Q-101](parent-grant-bindings.md) guards binding changes and [Q-111](lineage-cycles.md) rejects ancestor loops. Complete membership/ownership/hierarchy and optional-sync lifecycle contracts remain open; freshness timing is counted under stage 9. |
+| HC-05-13 | OPEN | Define role revision/change validation and evidence for existing referencing grants. | [Q-089-B](role-revisions.md) settles immutable role revisions and validated grant adoption. [Q-102–Q-106](grant-revisions.md) adds assignment adoption, suggestions, latest-only creation/upgrades, and live current lineage. [Q-110](auth-write-consistency.md) adds the Auth-write conflict guarantee. Full role-based schemas, lifecycle, compatibility/migration, concurrency mechanisms, and propagation evidence remain open. |
 
 ### 6. Scope and registration
 
@@ -208,7 +222,7 @@ not the whole surrounding topic.
 | HC-07-05 | DONE | Settle the partial endpoint-policy shape and GET/PUT source/name bindings without a relationship block. | CONTRACT-011/012 / Q-050-B/C; [endpoint policy](endpoint-policy-format.md). |
 | HC-07-06 | DONE | Settle required input presence/source binding and application-owned value validation. | INPUT-002/003 / Q-050-E/F; [endpoint policy](endpoint-policy-format.md). |
 | HC-07-07 | OPEN | Complete remaining structural endpoint-policy validation, nested input syntax, and supported-source decisions. | Q-050 remains open in [endpoint policy](endpoint-policy-format.md); no reopening of agreed fields or validation ownership. |
-| HC-07-08 | OPEN | Complete grant and role wire schemas, including the agreed lifecycle representation. | Q-081 revised approves enabled/disabled status in [grant lifecycle](grant-lifecycle.md); Q-083 approves optional time-window meaning, not all timestamp/operation contracts. The original three-state variant stays superseded. [Grant formats](grant-format.md) include a current versioned illustration, not a complete schema; remaining grant/role contracts are unfinished. |
+| HC-07-08 | OPEN | Complete grant and role wire schemas, including the agreed lifecycle representation. | [Q-107](grant-revision-format.md) approves grant control, immutable revision, and assignment core JSON. [Q-109](grant-validity.md) approves validity on revisions; assignment-specific validity is deferred under Q-108. Complete field validation, role variants, root representation, and operation contracts remain open. Earlier combined-recipient and three-state illustrations are history, not current alternative schemas. |
 | HC-07-09 | OPEN | Complete authorization-request, resolved-request, and resolved-grant transport contracts. | Meaning is agreed; concrete contracts remain open in [endpoint authorization](endpoint-authorization.md) and [grant model](grant-model.md). |
 | HC-07-10 | OPEN | Specify the handler/embedded-agent integration contract and failures at its boundaries. | Exact integration APIs remain open in [system overview](system-overview.md); no requirement to implement an SDK for handbook completion. |
 
@@ -231,7 +245,7 @@ not the whole surrounding topic.
 | HC-09-04 | OPEN | Define create/update/move authorization for existing and proposed state. | Q-068 agrees both-boundary move authority in [operation-specific enforcement](operation-enforcement.md). The governing rule and detailed Finance example are recorded; create/update details, grant composition, and transition enforcement remain open. |
 | HC-09-05 | OPEN | Define bulk authorization, partial success, and operation transaction semantics. | Q-073 agrees complete-batch authorization and boundary checks before effects in [bulk enforcement](bulk-enforcement.md). Transaction, concurrency, retry, and representation contracts remain open. |
 | HC-09-06 | OPEN | Define freshness, caching, revocation propagation, and stale membership/dependency behavior. | Q-069 agrees no stale-cache grace period for checks started after confirmed grant revocation; rationale and timing boundary are in [authority freshness](authority-freshness.md). Cache protocol and membership/dependency propagation remain open. |
-| HC-09-07 | OPEN | Define concurrent-change/check-to-use consistency guarantees. | Q-074 agrees preserving evaluated application boundaries through use in [concurrent enforcement](concurrent-enforcement.md). Mechanisms, conflict/retry behavior, and in-flight Auth authority changes remain open. |
+| HC-09-07 | OPEN | Define concurrent-change/check-to-use consistency guarantees. | [Q-074](concurrent-enforcement.md) preserves application boundaries through use; [Q-110](auth-write-consistency.md) stops an Auth assignment write when a conflicting change invalidates checked authority/revision, with no stale write or silent substitution. Persistence mechanisms, exact conflict/retry contracts, and general in-flight authorization/revocation behavior remain open. |
 | HC-09-08 | EXCLUDED | Complete audit event, correlation, retention/storage, versioning, and disclosure rules. | Q-076: user explicitly places audit in another layer, outside this handbook. Prior OPEN criterion and proposal retained in [scope decision and history](authority-change-audit.md). Not completed work, not parked; excluded from the denominator. Authorization-result evidence remains in scope under stage 8. |
 | HC-09-09 | OPEN | Define non-HTTP/background-operation integration requirements or explicitly defer them. | Q-075 agrees execution-time authorization for queued work in [background authorization](background-authorization.md). Adapter schemas, trusted job identity/material binding, permission mapping, retries, and running-job behavior remain open; no independent service authority. |
 

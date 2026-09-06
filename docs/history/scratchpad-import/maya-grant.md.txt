@@ -1,0 +1,43 @@
+# Maya's grants
+
+Proposed examples. Tenant is an implied boundary and is not included in scope.
+
+## Create teams
+
+```json
+{
+  "version": "1",
+  "id": "G-MAYA-CREATE-TEAM",
+  "recipient": {
+    "type": "user",
+    "id": "maya"
+  },
+  "permissions": ["auth:group::create"],
+  "scope": {},
+  "status": "enabled"
+}
+```
+
+## Manage Team1's membership
+
+```json
+{
+  "version": "1",
+  "id": "G-MAYA-TEAM1-OWNER",
+  "recipient": {
+    "type": "user",
+    "id": "maya"
+  },
+  "permissions": [
+    "auth:group:membership::add",
+    "auth:group:membership::remove"
+  ],
+  "scope": {
+    "group": "team1"
+  },
+  "status": "enabled"
+}
+```
+
+Membership management does not grant business access or authority to change team grants.
+Automatic issuance of the owner grant on team creation remains undecided.

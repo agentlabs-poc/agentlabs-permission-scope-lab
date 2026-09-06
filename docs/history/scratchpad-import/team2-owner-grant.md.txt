@@ -1,0 +1,20 @@
+# Team2 owner grant
+
+Working example. Tenant is implied. Uses `write` for team details and human
+membership; the full owner permission bundle remains unsettled.
+
+```json
+{
+  "version": "1",
+  "id": "G-TEAM2-OWNER",
+  "permissions": ["auth:group::write"],
+  "scope": {
+    "group": "team-2"
+  }
+}
+```
+
+Owners with access to this grant are listed in [team2-owner-list.md](team2-owner-list.md).
+This does not grant business access or permission to assign grants, and does not
+automatically include team creation, deletion, or descendant administration.
+No parent link or automatic inheritance from Team1's owner grant is implied.

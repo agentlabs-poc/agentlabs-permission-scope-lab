@@ -1,5 +1,14 @@
 # Parent-grant lineage and dependent bindings — Q-101
 
+**Later approved refinement:** [Q-102–Q-106](grant-revisions.md) now governs
+per-assignment adopted revisions, lineage-latest/top-down resolution, uniqueness,
+latest-only creation/upgrades, and immutable authority content. Earlier broad
+revision gaps in this chapter are narrowed by those approvals. Exact new JSON
+is approved at [Q-107 core-shape level](grant-revision-format.md); complete contracts
+and eligible-support discovery/evidence remain open. [Q-112A](direct-human-parent-context.md)
+reaffirms lineage-supported latest and withdraws the extra parent-revision-field
+proposal; it does not reopen the parent-boundary or assignment-survival rules.
+
 **PINNED / AGREED for the discussed model, through Q-101E-3.** The user requested
 promotion from the scratchpad into the lab, with diagrams and broad case coverage.
 This chapter is the current explanation where older selected-assignment or

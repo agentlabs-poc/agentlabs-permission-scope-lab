@@ -1,0 +1,138 @@
+# Q-101 — Direct-human assignment: dependency graph
+
+**Current direction:** see [pinned Q-101 rules](q101-parent-grant-rules.md).
+Nutan's direct assignment is not implicitly dependent on A1. For the distinct
+subteam case, G2 must be explicitly disabled before required parent support is
+removed and explicitly enabled after support is restored and revalidated.
+The original alternatives and SVG below are retained as discussion history,
+not two currently approved interpretations. Remaining lifecycle limits are in
+the pinned note. No earlier example records are migrated.
+
+<details>
+<summary>Earlier Q-101 exploration and diagram — superseded where clarified above</summary>
+
+**Status: discussion illustration, not an approved new lineage rule.** The user
+requested an SVG in the scratchpad and explicitly required keeping membership
+and ownership grants separate. The lab remains frozen and unchanged.
+
+[Open the dependency graph](q101-direct-human-dependency.svg).
+
+![Separate grant lineage, assignments, and human memberships; removal of Team1's G1 assignment leaves the other illustrated relationships unchanged](q101-direct-human-dependency.svg)
+
+## Three different relationships
+
+- **Grant lineage:** G2 points to G1 through the proposed `parent_grant_id`.
+  This supplies permission-subset and scope-AND constraints.
+- **Assignment:** a grant is bound to a recipient. A1 binds G1 to Team1; AX
+  binds G1 to TeamX. Separate assignments bind G-ASSIGN to Maya and G2 to Nutan.
+- **Membership:** Maya is a human member of Team1 and TeamX. These relationships
+  make their valid assigned authority available to her. They are not ownership.
+
+**No ownership grant or ownership relationship is involved in this example.**
+Membership does not authorize grant assignment; the separate G-ASSIGN grant
+supplies that administrative permission. No team-parent relationship is assumed
+between Team1 and TeamX. Nutan receives G2 directly, not through team membership.
+
+## The grant definitions
+
+All examples are hypothetical, not changes to existing scratch records. Tenant
+is the mandatory implied boundary. These are versioned grant definitions, not
+complete assignment, membership, lifecycle, or revision contracts.
+
+G-ASSIGN, assigned to Maya, authorizes assignment creation tenant-wide:
+
+```json
+{
+  "version": "1",
+  "id": "G-ASSIGN",
+  "permissions": ["auth:assignment::create"],
+  "scope": {}
+}
+```
+
+G1 is the same reusable definition assigned to both Team1 and TeamX:
+
+```json
+{
+  "version": "1",
+  "id": "G1",
+  "permissions": [
+    "hrms:payroll:payslip::read",
+    "hrms:payroll:payslip::write"
+  ],
+  "scope": {"dept": "FIN"}
+}
+```
+
+G2 is assigned directly to Nutan. Its parent reference is the shape under
+discussion, not a newly approved complete dependent-grant contract:
+
+```json
+{
+  "version": "1",
+  "id": "G2",
+  "parent_grant_id": "G1",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {}
+}
+```
+
+G2 selects read from G1. Its additional scope `{}` retains G1's FIN boundary:
+effective scope is FIN AND no additional restriction, not tenant-wide access.
+
+## Before and after
+
+Assume all illustrated remaining records, revisions, tenant constraints, and
+required upstream support are valid. At issuance Maya has administrative
+authority from G-ASSIGN and source authority from G1 through her memberships.
+These are separate checks under Q-100, not authority obtained by being an owner.
+
+The hypothetical change removes **A1, the G1 assignment to Team1**, and nothing
+else. It does not delete G1 or remove Maya's membership in either team.
+
+| Relationship | Before | After |
+|---|---|---|
+| G-ASSIGN assigned to Maya | Present | Unchanged |
+| A1: G1 assigned to Team1 | Present | Removed |
+| AX: G1 assigned to TeamX | Present | Unchanged |
+| Maya is a member of Team1 | Present | Unchanged; no G1 access through A1 now |
+| Maya is a member of TeamX | Present | Unchanged; still supplies G1 |
+| G2's parent grant is G1 | Present | Unchanged |
+| G2 assigned directly to Nutan | Present | Unchanged stored assignment |
+
+## What the graph does and does not decide
+
+The graph establishes that G1 still has a valid assignment to TeamX, Maya still
+has G1 through that membership, and G2's definition remains a permission/scope
+subset of G1. None of those facts alone chooses the continuing support policy
+for Nutan's direct assignment.
+
+- **Grant-parent-only interpretation:** if G1 remains valid under the chosen
+  rule and no dependency on A1 is required, removal of A1 alone does not break
+  G2's declared parent link. Nutan's route can remain usable, subject to every
+  other required check. This is the interpretation currently being considered.
+- **Specific-assignment interpretation:** if Nutan's route was explicitly
+  required to depend on A1, its loss stops that route. The pictured
+  `parent_grant_id: G1` does not encode that extra dependency.
+
+These are alternative meanings to settle, not two simultaneously adopted rules.
+The SVG intentionally does not draw a G2-to-A1 dependency that the proposed
+records do not declare. It also does not draw Maya as Nutan's owner, proxy
+principal, or automatic continuing dependency merely because she issued G2.
+
+## Rationale
+
+Separating edge types prevents confusing membership with ownership, assignment
+with grant lineage, or issuance-time authority with continuing support. The
+example exposes the actual decision: whether losing one assignment of the
+parent grant must stop the child, even while the parent grant remains valid
+elsewhere. We should settle that meaning before deciding whether another stored
+reference is necessary.
+
+This illustration does not decide how a grant becomes globally valid/orphaned,
+whether support may automatically switch, or whether deletion and recreation
+restore a dependent route. Existing handbook rules about selected support are
+not deprecated by drawing the alternative. No live access, earlier scratch
+grant, ownership list, membership record, or lab file is modified.
+
+</details>

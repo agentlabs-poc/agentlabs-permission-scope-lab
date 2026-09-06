@@ -1,0 +1,17 @@
+# Team2 membership
+
+Tentative membership format, separate from grants. Tenant is implied.
+
+```json
+{
+  "version": "1",
+  "group_id": "team-2",
+  "user_id": "nutan"
+}
+```
+
+Auth stores this relationship. Nutan derives Team2's valid grants with their
+parent dependencies; no independent grants are copied onto Nutan.
+
+Maya needs authority to add members to Team2. Her Team1 membership-management
+grant does not automatically cover Team2.

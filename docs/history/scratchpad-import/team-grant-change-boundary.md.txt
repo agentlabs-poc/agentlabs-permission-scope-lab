@@ -1,0 +1,52 @@
+# Team grant changes — Q-097
+
+Agreed for this discussion; recorded in the scratchpad only. The handbook
+repository remains frozen. Tenant is implied.
+
+## Rule
+
+Validate the whole proposed resulting authority against the acting administrator's
+current valid supporting authority, not just the permissions or scope being added.
+Separate authorization to perform the grant/assignment change is also required.
+Parent-team and parent-grant ceilings and other mandatory restrictions still apply.
+
+## Om and Maya example
+
+This is a hypothetical change scenario, not an update to the existing Team1
+grant files. Assume both administrators have the required change authority.
+
+| State or action | Outcome |
+|---|---|
+| Maya's supporting authority allows FIN read | Her assignment ceiling is FIN read. |
+| Om validly expands Team1 to FIN read/write | Team1 may have more authority than Maya; this alone is not a breach of her boundary. |
+| Maya proposes a change retaining write | Rejected: the whole resulting authority exceeds her ceiling. |
+| Maya proposes replacing it with FIN read | May pass, provided she is authorized to make that change and all other constraints hold. |
+
+The rule also applies to scope expansion: Maya cannot retain a wider boundary
+that her valid supporting authority does not cover.
+
+## Rationale and consequences
+
+- This makes each administrator responsible for the complete authority they
+  establish, not merely their edit's added permissions or constraints.
+- Maya can propose one complete valid result. She need not first narrow and then
+  add through separate operations; this does not finalize transaction mechanics.
+- Narrowing may withdraw legitimate access Om supplied to other users. It must
+  be an explicit authorized change, not automatic cleanup. Being able to propose
+  less authority does not itself grant permission to replace or delete records.
+- The trade-off is deliberate: Maya cannot preserve authority outside her ceiling
+  while making an otherwise small change to that same grant.
+- If Maya receives Team1's expanded business authority through valid membership,
+  her effective ceiling may expand too. Ownership alone does not grant that access.
+- Om must independently have valid source authority and administrative authority
+  for his expansion; being an owner is not an exception to either requirement.
+- Changes must follow explicit revision/adoption rules. No silent widening of
+  shared definitions, other assignments, or dependent child authority is approved.
+
+## Current scratchpad limits
+
+The existing owner grants in [team1-owner-grant.md](team1-owner-grant.md) and
+[team2-owner-grant.md](team2-owner-grant.md) contain only `auth:group::write`.
+They do not authorize grant-assignment changes. The required separate change
+grants and concrete revision/adoption, concurrency, and update contracts remain
+to be specified; this note does not issue those grants or change team access.

@@ -1,5 +1,42 @@
 # Authorization handbook — discussion tree
 
+## Current revision branch — decisions through Q-111
+
+[Milestone remaining percentages](milestone-progress.md) use the fixed checklist;
+recent partial advances are shown separately, without guessed fractional credit.
+
+```text
+Reusable-grant revisions
+├── Per-assignment explicit adoption [Q-102 AGREED IN PRINCIPLE]
+│   └── Advisory update list, never automatic adoption [Q-102A AGREED]
+├── Resolve current adopted lineage top-to-bottom [Q-103 AGREED]
+│   └── Not latest published elsewhere; child ceilings remain live
+├── One current assignment per grant/recipient in tenant [Q-104 AGREED]
+│   └── Disabled retained assignments count; no duplicate bypass
+├── Latest published revision for creation and explicit upgrades [Q-104A / Q-105]
+│   └── Existing assignments can stay; intermediate upgrade choice excluded
+├── Published authority content immutable; enablement remains live [Q-106]
+├── Core grant / revision / assignment JSON [Q-107 APPROVED]
+├── Grant validity retained; assignment validity deferred in v1 [Q-108 APPROVED]
+│   └── Grant window in immutable revision; explicit adoption [Q-109 APPROVED]
+├── Preserve validated state through Auth write [Q-110 AGREED]
+├── Hierarchy integrity: reject grant/team ancestor loops [Q-111 AGREED]
+├── Direct assignment: parent defines maximum permissions/scope [Q-112 clarified]
+│   └── Lineage-supported latest reaffirmed; extra revision field withdrawn [Q-112A]
+└── OPEN: support-discovery/evidence contracts, complete schemas,
+    timestamp/clock contracts, concurrency, and revision lifecycle mechanics
+```
+
+[Rules, rationale, and cases](grant-revisions.md) · [approved core JSON](grant-revision-format.md).
+Recording and exploration are now lab-only; scratchpad sources are preserved
+in [lab history](history/scratchpad-import/README.md), not used for new work.
+The older open revision labels below are narrowed by these approvals, not full
+schema completion or a newly measured percentage.
+
+[Q-112/Q-112A clarification and remaining implementation contracts](direct-human-parent-context.md).
+Current prioritization is deepest authority dependencies first, then safe changes,
+resolution consistency, full contracts, and editorial publication—not easy scores.
+
 ## Current position — Q-101 framing pinned through Q-101E-3
 
 ```text

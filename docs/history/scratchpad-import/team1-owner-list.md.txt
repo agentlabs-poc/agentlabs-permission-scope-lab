@@ -1,0 +1,13 @@
+# Team1 owners
+
+Tenant is implied. `owners` lists human IDs with access to the referenced owner grant.
+
+```json
+{
+  "version": "1",
+  "grant_id": "G-TEAM1-OWNER",
+  "owners": ["om", "maya"]
+}
+```
+
+Grant definition: [team1-owner-grant.md](team1-owner-grant.md).

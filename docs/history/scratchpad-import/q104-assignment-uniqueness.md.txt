@@ -1,0 +1,90 @@
+# Q-104 — One assignment per grant and recipient?
+
+**Q-104: AGREED.** The user answered “i agree” to one current assignment per
+grant/recipient pair, including retained disabled assignments, and added that
+new assignments must use the latest revision. Tenant is implied; uniqueness
+includes trusted tenant, grant identity, and recipient type/identity. This note
+does not change the lab or existing records.
+
+Previous status: OPEN / PROPOSED, not approved. The recommendation and original
+question below are retained as the rationale and decision trail.
+
+## Q-104A — New assignments must select the latest revision: AGREED RULE
+
+The user's addition is mandatory, not merely a UI default: new assignments
+must select the latest published revision of the grant. The revision selected
+at creation becomes that assignment's explicitly adopted revision. Subsequent
+publication does not automatically move the existing assignment to a newer
+revision; Q-102's explicit adoption rule continues to apply.
+
+| Operation | Revision rule |
+|---|---|
+| Create a new assignment | Select the grant's latest published revision. Do not create it on an older revision. |
+| Publish a newer revision after assignment creation | Existing assignment keeps its adopted revision; show an update suggestion under Q-102A. |
+| Upgrade an existing assignment | Explicit authorized adoption with current boundary validation. |
+| Re-enable an existing disabled assignment | Not a new assignment or implicit upgrade; retain its adopted revision and validate current reality under Q-101. |
+
+**Core-philosophy check and rationale:** latest-on-creation avoids knowingly
+creating new bindings on superseded definitions, while explicit later adoption
+preserves existing recipients' approved revisions. It cannot bypass current
+parent authority, grant/assignment lifecycle controls, tenant isolation, or
+administrative authorization. Latest published is not necessarily allowable
+for a particular recipient or supporting lineage.
+
+**Derived consequence / recommendation:** if the latest revision cannot pass
+required assignment creation and boundary checks, reject that creation rather
+than silently select an older revision or upgrade its parent support. For
+example, if a new G2 assignment would select a write-bearing latest revision
+but TeamY's parent Team1 only holds the required read authority, the latest
+selection does not authorize write or bypass the parent ceiling.
+
+Exact revision fields, publication eligibility, and the atomic selection/check/
+write contract when a newer revision is published concurrently remain to be
+specified. This does not add an older-version override, automatically repair
+orphaned support, or remove the uniqueness rule by creating a duplicate.
+
+## The issue
+
+If Team1 has two assignments of G1, one adopting revision 1 and another adopting
+revision 2, a child looking up G1 at its required parent Team1 encounters two
+candidate adopted revisions. Q-103's governing rule alone does not select one.
+
+| Assignment | Grant | Recipient | Adopted revision | Proposed treatment |
+|---|---|---|---|---|
+| A1 | G1 | Team1 | 1 | One ordinary assignment. |
+| A9 | G1 | Team1 | 2 | Reject a second assignment for the same grant/recipient pair. |
+| AX | G1 | TeamX | 2 | Allowed as a different recipient, subject to all normal checks. |
+
+## Recommendation
+
+**Yes: allow at most one current assignment of a given grant to a given
+recipient within the tenant, including retained disabled assignments.** Adopt a
+different revision through that assignment's authorized adoption operation, not
+by creating a duplicate assignment. Separate legitimate grants remain possible
+when distinct authority definitions or independent grant identities are needed.
+
+Historical/deleted-record retention is not part of the current-assignment set.
+This proposal does not authorize recreating removed support to bypass Q-101's
+explicit enablement or structural-change checks.
+
+**Q-104:** should we enforce that one-assignment-per-grant-per-recipient rule?
+
+## Rationale and core-philosophy check
+
+- Simplicity: one assignment supplies one adopted revision and one assignment
+  enablement state for that grant/recipient pair.
+- Deterministic subteam support lookup: parent grant plus required parent team
+  identifies the current holding without choosing a broader revision or adding
+  a specific parent-assignment reference to the child grant.
+- Explicit adoption: a duplicate cannot become an alternative way to upgrade
+  or bypass a disabled assignment.
+- Reuse remains: G1 can be assigned to many different recipients, which may
+  independently adopt different revisions under Q-102.
+- The deliberate trade-off is excluding multiple concurrent assignments of the
+  same grant to the same recipient. This is a proposed constraint, not an
+  already approved feature exclusion or database schema.
+
+This does not resolve a direct-human derived grant's parent-revision selection
+when its supporting grant has different adopted revisions across other recipients.
+That remains distinct from duplicate assignments within one known parent team.
+No new JSON fields, uniqueness index, migration, or runtime change is adopted.

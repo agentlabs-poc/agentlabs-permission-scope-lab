@@ -1,0 +1,59 @@
+# Q-106 — Immutable authority content versus live enablement
+
+**AGREED.** The user answered “yes” to immutable published authority content
+with separate live grant-wide enable/disable controls. Permission selection,
+scope, and parent reference changes require a new revision; existing adopted
+revision content is not rewritten. This records the semantic rule, not new
+JSON fields or a change to the lab. Previous status: OPEN / PROPOSED.
+
+The original recommendation and question below are retained as the decision
+trail. Current parent support and structural binding safeguards remain required;
+immutability of declared content does not make effective authority independent.
+
+## Recommendation and question
+
+Recommend that a published grant revision freeze its authority-defining content:
+permission selection (or adopted role reference/revision), additional scope,
+and parent grant reference where applicable. Altering that content requires a
+new published revision; it must not rewrite a revision already adopted by an
+assignment. Validity/condition field allocation is not settled by this list.
+
+Keep grant-wide enable/disable as a separate live administrative control over
+that grant identity and all its revisions. Assignment enable/disable remains
+separate per assignment. Toggling those controls does not publish a new authority
+revision or implicitly change any adopted revision.
+
+**Q-106:** should published grant authority content be immutable, with enable/
+disable remaining a separate live control rather than a revision-content edit?
+
+## Example
+
+```text
+G1 revision 1: FIN read             -- stays unchanged
+G1 revision 2: FIN read + write     -- requires explicit adoption
+
+Disable G1 --> no assignment of either revision supplies G1 authority
+```
+
+## Rationale and core-philosophy check
+
+- Revision adoption is meaningful only if the adopted content cannot be
+  silently rewritten afterward. Otherwise publishing/editing could bypass the
+  explicit recipient-authority change required by Q-102/Q-105.
+- Preserves Q-101's grant-wide suspension without requiring a new revision
+  just to stop authority or implicitly updating assignments to a disabled copy.
+- Parent references are authority-defining: changing FIN-parent G1 to ENG-parent
+  H1 can change inherited scope despite unchanged child additional scope `{}`.
+- A new revision is not a loophole around four-part bindings. Any effective
+  parent-link change must still satisfy the structural guards and current-state
+  boundary validation. Publication alone cannot rewrite existing assignments.
+- Immutability of the child's declared content does not freeze independent
+  effective authority: current required parent support, scope accumulation,
+  memberships, and enablement still govern runtime access.
+
+## Limits
+
+This does not select wire fields, storage tables, a revision-specific disable
+operation, rollback, or full validity/condition placement. Parent revision
+selection for direct-human derived grants remains an explicitly open core case;
+the current subgroup resolution rule must not be presented as settling it.

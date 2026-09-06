@@ -1,5 +1,138 @@
 # Handbook reconciliation register
 
+## Publication authorization — Q-102 through Q-112A checkpoint
+
+The user explicitly requested commit/push and continuation, with a follow-up
+capture/reconciliation check before completion. This publication includes the
+recorded revision/lifecycle/cycle decisions, Q-112A's correction, measured milestone
+report, all 26 source snapshots, and their coverage map. It excludes runtime
+migration and canonical promotion of archived drafts. Tag `0.0.1` and sibling
+originals remain unchanged. Verification and push confirmation follow the
+working rules; this paragraph records authorization, not a preemptive success claim.
+
+## Scratchpad capture confirmation before publication
+
+Fresh byte comparisons confirm all 26 sibling scratchpad files match their lab
+text snapshots exactly. The [source reconciliation map](history/scratchpad-import/README.md)
+accounts for every file, links governing chapters, and distinguishes superseded
+formats, tentative ownership/membership examples, and the withdrawn Q-112A field.
+Two stale progress/evidence entries have been aligned with Q-112A: the remaining
+work is eligible-support discovery and validation/evidence, not another vote on
+lineage-supported latest. No completed-checkpoint count changes.
+
+Capture and source-to-chapter reconciliation are verified; full ownership,
+membership, support-discovery, and other unfinished API contracts remain open.
+Import is not canonical promotion of every historical example and does not
+constitute final whole-handbook semantic or implementation acceptance.
+
+## Q-112A — Lab-only recording and lineage-supported latest reaffirmed
+
+The user stopped all scratchpad use and reaffirmed the earlier lineage-supported
+latest rule. All 26 scratchpad sources, including diagrams and the Q-112A
+experiment/proposal, are captured as text snapshots in
+[lab history](history/scratchpad-import/README.md); sibling originals remain
+unchanged. Capture preserves earlier discussion, not approval of every proposal.
+AGENTS and current reader/navigation instructions now require lab-only recording,
+including high-uncertainty exploration. Older recording policies remain history.
+
+The assistant withdraws the independent `parent_grant_revision` proposal. Current
+Q-112/Q-112A prose restores Q-103's governing meaning: current valid adopted
+support in the required lineage, resolved top-down, not merely latest published
+elsewhere. Grant parent context still supplies the maximum boundary. Prior notes
+that treated the governing choice as undecided are superseded; eligible-support
+discovery, validation/evidence, and conformance contracts remain open. The small
+candidate comparison did not establish actual support and does not prove the
+need for another field. No complete-resolver, checkpoint-closure, runtime-change,
+commit, or push claim follows from this reconciliation.
+
+## Q-112 — Parent ceiling clarified, selection not silently finalized
+
+The user reaffirmed group assignment as preferred, while direct assignments
+remain within their parent's permission/scope context. The new
+[clarification](direct-human-parent-context.md) records rationale, examples, and
+the distinction between a grant's identity and the supporting adopted revision.
+The roadmap/tree keep selection open; no new parent link or selection rule is
+approved by implication. AGENTS records the user's deepest-impact-first priority.
+No checkpoint closure, commit, push, or runtime changes are claimed.
+
+## Q-111 agreed; milestone closure percentages requested
+
+The user agreed to rejecting grant/team ancestor loops, including disabled
+records/bindings, then requested remaining percentages per milestone. The cycle
+chapter records approval and preserves its original proposal status and rationale.
+The handbook, roadmap, tree, and reader reflect the agreement.
+
+[Milestone progress](milestone-progress.md) calculates per-stage percentages from
+the same 69-row closure register, with HC-09-08 excluded: 35 DONE / 33 OPEN / 68
+in scope. Recent decisions advance open rows without closing their full criteria.
+The affected evidence is reconciled for Q-090–Q-111, including replacing obsolete
+blanket subgroup exclusion wording. No fractional credit, changed denominator,
+new final semantic audit, effort estimate, or implementation-readiness claim is
+implied. The coarse rubric's limits and recommended next priorities are explicit.
+No further authorization proposal, commit, push, or runtime edits are included.
+
+## Q-110 — Auth write consistency agreed
+
+The user answered “agree” to stopping an Auth assignment-write attempt when a
+conflicting publication or authority change invalidates its checks before the
+write. The chapter retains the concrete race, subset/explicit-adoption rationale,
+accepted concurrent-failure trade-off, ordering clarification, and earlier
+proposal status. The roadmap, tree, revision chapter, handbook, and reader now
+reflect approval. Database mechanics, error format, and global runtime freshness
+remain open; this is not a claim that production enforcement exists.
+Q-111 moves horizontally to hierarchy-cycle integrity and remains proposed.
+No commit, push, runtime edits, or scratchpad changes are included.
+
+## Q-109 — Grant validity in immutable revision content approved
+
+The user answered “yes, approved” after reviewing the grant-revision JSON and
+the explicit-adoption rationale. Optional validity belongs in immutable grant
+content, not assignment or live grant control. Changing/removing its bounds
+requires new content and explicit adoption. A newer shorter window does not
+shorten older adopted revisions; live grant-wide disable remains separate.
+Q-109's earlier proposal status is preserved as history. Current grant chapters,
+tree, roadmap, handbook, and reader now reflect approval. Timestamp/clock and
+full lifecycle contracts remain open. Q-110 is a separate, unapproved Auth-write
+consistency proposal. No runtime changes, commit, or push are included.
+
+## Q-108 — Assignment validity deferred; grant validity retained
+
+The user approved the revised recommendation to retain Q-083 grant validity and
+defer assignment-specific windows in v1. The original optional-assignment-window
+proposal and JSON remain explicitly superseded history in assignment-validity.md.
+The roadmap, tree, core-format remainder, and lifecycle chapter reflect the
+decision and its rationale: simplicity without weakening upstream constraints,
+at the cost of independently scheduled expiry for recipients sharing a grant.
+Q-109 separately proposes immutable-revision placement of the grant window;
+it is not approved. No runtime changes, commit, or push are included.
+
+## Q-107 — Core JSON explicitly approved
+
+After the draft was shown in full, the user answered “Approve.” This adopts
+the three core representations and `revision` / `grant_revision` fields, not
+every remaining schema or API rule. Current navigation now labels the shapes
+approved; the original draft-stage record below is preserved as history.
+No new commit/push or runtime migration is authorized by schema-shape approval.
+
+## Earlier recording checkpoint — Q-102–Q-106 rules, Q-107 then unreviewed
+
+The user instructed that ordinary recording belong in the lab and scratchpad
+be reserved for high uncertainty. AGENTS now records that direction and the
+required question format: reference, recommendation, rationale, core-philosophy
+check, and explicit risks. Earlier scratchpad-default gates are history.
+
+[Grant revision rules](grant-revisions.md) promotes the approved Q-102–Q-106
+discussion with examples and accepted trade-offs. [Q-107 JSON](grant-revision-format.md)
+is preserved separately as DRAFT / NOT REVIEWED / NOT APPROVED. Its creation in
+the lab does not make it canonical. The handbook, tree, roadmap, relevant grant
+chapters, and reader link both with their distinct status.
+
+Scratch originals are retained unchanged, not deleted or silently migrated.
+The main unresolved direct-human parent-revision-selection case remains visible;
+Q-104 resolves duplicate holdings at a known parent recipient but not that
+separate case. No new runtime behavior, completion score, commit, or push is
+authorized by this recording-location change.
+
 ## Publication authorization after Q-101
 
 The user explicitly requested committing and pushing the pinned Q-101 checkpoint.

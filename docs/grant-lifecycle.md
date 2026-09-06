@@ -1,5 +1,22 @@
 # Grant lifecycle — canonical discussion
 
+**Q-108 — approved clarification:** optional grant validity under Q-083 remains;
+assignment-specific validity is deferred in v1. An assignment cannot outlive the
+authority supplied by its grant and required support. The accepted simplicity
+trade-off and superseded proposal are in [assignment validity](assignment-validity.md).
+[Q-109, approved](grant-validity.md), subsequently places that window in immutable
+grant revision content. Window changes require new content and explicit adoption;
+publishing an earlier expiry does not shorten older adopted revisions. Live
+grant-wide disablement remains separate. Full timestamp and lifecycle contracts
+are not implied by approval of placement.
+
+**Later revision rules:** [Q-102–Q-106](grant-revisions.md) separates explicit
+revision adoption from grant/assignment enablement. Creation/upgrades select
+latest published grant revision; re-enablement is not an implicit upgrade.
+Grant-wide disablement covers all immutable content revisions. Exact new
+core record layouts are [approved under Q-107](grant-revision-format.md); full
+validity and lifecycle schemas remain open.
+
 **Current clarification — Q-101A–E-3:** see [binding lifecycle](parent-grant-bindings.md).
 Grant enablement is grant-wide; assignment enablement controls its own route;
 effective authority requires valid support. Still-enabled descendants can resume

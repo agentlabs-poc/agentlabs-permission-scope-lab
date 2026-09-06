@@ -1,0 +1,120 @@
+# Q-112 — Parent-context counterexample check
+
+**EXPLORATORY / NOT APPROVED.** High-uncertainty investigation belongs in the
+scratchpad under the current lab working rules. No lab rule or existing scratch
+grant/assignment is changed. This is a diagnostic check of representation and
+local narrowing, not a production evaluator, full authority test, or proof that
+either candidate route is authorized.
+
+## What was already settled
+
+The parent defines the maximum permission/scope context. Direct assignments
+remain supported but group-based access is preferred. Q-101 does not tie Nutan's
+direct G2 assignment to Team1's A1 or original issuer Maya merely by implication.
+Q-103 chooses actual adopted parent-team support for the subteam case. Q-102
+permits different recipients to adopt different grant revisions; Q-107 places
+that selection on the assignment. These are distinct decisions, not missing
+scratchpad transfers.
+
+## Smallest divergent example
+
+Assume the parent revisions are individually valid within trusted tenant and
+upstream support. All status/time checks hold. The following are content
+excerpts, not root or complete API schemas. No ownership or inferred membership
+participates in the test.
+
+```json
+{
+  "version": "1",
+  "grant_id": "G1",
+  "revision": 1,
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {"dept": "FIN"}
+}
+```
+
+```json
+{
+  "version": "1",
+  "grant_id": "G1",
+  "revision": 2,
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {"dept": "ENG"}
+}
+```
+
+```json
+{
+  "version": "1",
+  "grant_id": "G2",
+  "revision": 7,
+  "parent_grant_id": "G1",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {}
+}
+```
+
+Team1 holds G1 revision 1; TeamX holds G1 revision 2. Nutan's direct assignment
+adopts G2 revision 7. Seven is deliberately different: a child's own content
+revision is not an implied revision number for its parent.
+
+| Parent supplied to the diagnostic comparison | Child's local narrowing result |
+|---|---|
+| G1 revision 1 | FIN read |
+| G1 revision 2 | ENG read |
+
+Both local calculations obey permission subset and scope AND. They yield
+different boundaries. This shows that those algebraic rules do not themselves
+choose the parent revision. It does not establish that Team1 or TeamX is eligible
+as Nutan's actual continuing support, or permit a union of the two contexts.
+
+## Checks performed
+
+An in-memory Node assertion check explicitly supplied each candidate parent and
+verified the permission subset, distinct resulting scope clauses, equal local
+results when the same parent revision is supplied twice, and absence of a parent
+revision selector in the approved child excerpt. For the separately established
+subteam/Team1 context, Team1's assignment selects revision 1. The comparison
+does not implement lookup, eligibility, recursive support, or real allow/deny.
+
+**Finding:** no ambiguity in the maximum-boundary rule itself. The current
+representation needs a selection rule/context for this multi-revision direct
+case; the experiment does not prove that a new field is the only solution.
+
+## Q-112A — Design direction for discussion, not approval
+
+One candidate is explicit parent-revision adoption in the child grant's own
+immutable content. It would give G2 a grant-owned declared parent context instead
+of inferring that context from unrelated recipients' choices. A potential new
+field, shown only as an exploratory extended content excerpt, is:
+
+```json
+{
+  "version": "1",
+  "grant_id": "G2",
+  "revision": 7,
+  "parent_grant_id": "G1",
+  "parent_grant_revision": 1,
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {}
+}
+```
+
+`parent_grant_revision` would be new, not an existing canonical field. It selects
+authority content, not a parent's assignment ID, issuer, or owner. It is proposed
+because `parent_grant_id` identifies only the reusable identity after Q-107.
+
+**Philosophy/risk check:** explicit selection could prevent accidental boundary
+changes from unrelated recipient adoptions, but a pinned historical revision
+cannot replace current required support, bypass orphan/status/validity checks,
+or preserve authority a parent no longer permits. Selecting content alone does
+not prove support. How the declared context and current supporting ceiling are
+combined must be settled before this could be called a complete solution.
+This would refine the parent-ID-only representation and could affect Q-103's
+existing subteam behavior; it must not be silently imposed as a universal rule.
+
+Alternative: retain parent-ID-only and derive the content from an explicitly
+defined supporting context. That avoids this field, but the direct-human context
+must actually be defined; choosing arbitrary/latest/broadest holdings is not
+justified by the current rules. No automatic selection, new rejection contract,
+blanket direct-assignment ban, or schema promotion is adopted here.

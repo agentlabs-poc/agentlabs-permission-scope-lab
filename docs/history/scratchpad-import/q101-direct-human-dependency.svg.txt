@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1250" viewBox="0 0 1400 1250" role="img" aria-labelledby="title desc">
+  <title id="title">Q-101: grant lineage, assignments, and membership are separate relationships</title>
+  <desc id="desc">Hypothetical direct-human assignment. G-ASSIGN is assigned to Maya and permits assignment creation. The reusable FIN-read/write grant G1 is assigned to Team1 by A1 and TeamX by AX. Maya is a member of both teams, not an owner in this graph. G2 has parent grant G1, selects read, adds empty scope, and is assigned directly to Nutan. The change removes only A1; the graph marks that edge with a red cross. AX, both memberships, the G2 to G1 parent link, and the G2 assignment to Nutan remain. Whether Nutan's route stops depends on the unresolved choice of grant-parent-only support versus an explicit dependency on A1. No ownership grants or actual record changes are involved.</desc>
+  <defs>
+    <marker id="assignment-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#2563a6"/></marker>
+    <marker id="membership-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#17816b"/></marker>
+    <marker id="parent-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#a26812"/></marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #18304a; }
+      .title { font-size: 28px; font-weight: 700; }
+      .heading { font-size: 22px; font-weight: 700; }
+      .body { font-size: 18px; }
+      .small { font-size: 16px; fill: #4c637a; }
+      .label { font-size: 14px; font-weight: 700; letter-spacing: .6px; }
+      .assignment { fill: none; stroke: #2563a6; stroke-width: 2.7; marker-end: url(#assignment-arrow); }
+      .membership { fill: none; stroke: #17816b; stroke-width: 2.7; stroke-dasharray: 7 5; marker-end: url(#membership-arrow); }
+      .parent { fill: none; stroke: #a26812; stroke-width: 3.2; marker-end: url(#parent-arrow); }
+      .red { fill: #ad2638; }
+      .green { fill: #14725f; }
+      .amber { fill: #85520b; }
+    </style>
+  </defs>
+  <rect width="1400" height="1250" fill="#f5f8fc"/>
+  <text x="40" y="46" class="title">Q-101 · Which relationship does Nutan's grant depend on?</text>
+  <text x="40" y="77" class="small">Scratchpad illustration · Tenant implied · No ownership grants · No actual records changed</text>
+
+  <rect x="35" y="104" width="1330" height="76" rx="12" fill="#fff" stroke="#ccd7e3"/>
+  <path d="M58 130 H113" class="assignment"/>
+  <text x="130" y="136" class="body">Grant → recipient: assignment</text>
+  <path d="M490 130 H545" class="membership"/>
+  <text x="560" y="136" class="body">Human → team: membership</text>
+  <path d="M935 130 H990" class="parent"/>
+  <text x="1005" y="136" class="body">Child grant → parent grant</text>
+  <text x="58" y="164" class="small">Red × marks the one removed assignment. Every other pictured relationship stays unchanged.</text>
+
+  <rect x="35" y="204" width="1330" height="626" rx="18" fill="#fff" stroke="#c8d5e3"/>
+  <text x="60" y="228" class="label">DEPENDENCY GRAPH · BEFORE, WITH THE REMOVED EDGE MARKED</text>
+
+  <rect x="60" y="255" width="310" height="105" rx="12" fill="#edf5ff" stroke="#80a7d0"/>
+  <text x="82" y="287" class="heading">G-ASSIGN</text>
+  <text x="82" y="320" class="body">auth:assignment::create</text>
+  <text x="82" y="345" class="small">Scope {} · administrative authority</text>
+  <path d="M195 360 V601" class="assignment"/>
+  <text x="212" y="462" class="small">Assigned</text>
+  <text x="212" y="486" class="small">to Maya</text>
+
+  <rect x="650" y="255" width="400" height="105" rx="12" fill="#fff7e8" stroke="#be984f"/>
+  <text x="674" y="287" class="heading">G1 · reusable business grant</text>
+  <text x="674" y="320" class="body">Payslip read + write</text>
+  <text x="674" y="345" class="small">Scope {"dept":"FIN"}</text>
+  <path d="M710 360 V390 H550 V446" class="assignment"/>
+  <text x="410" y="421" class="small red">A1 · assignment removed</text>
+  <path d="M538 379 L562 403 M562 379 L538 403" stroke="#bd293c" stroke-width="4" fill="none"/>
+  <path d="M995 360 V446" class="assignment"/>
+  <text x="1010" y="411" class="small">AX · retained</text>
+
+  <rect x="430" y="450" width="240" height="85" rx="12" fill="#eef4fa" stroke="#98b0c9"/>
+  <text x="452" y="484" class="heading">Team1</text>
+  <text x="452" y="513" class="small">No G1 via A1 after removal</text>
+  <rect x="880" y="450" width="240" height="85" rx="12" fill="#eef4fa" stroke="#98b0c9"/>
+  <text x="902" y="484" class="heading">TeamX</text>
+  <text x="902" y="513" class="small">Still holds G1 through AX</text>
+
+  <rect x="60" y="605" width="270" height="130" rx="12" fill="#edfaf5" stroke="#78b39f"/>
+  <text x="82" y="639" class="heading">Maya · human</text>
+  <text x="82" y="672" class="small">Member of both teams</text>
+  <text x="82" y="700" class="small">G-ASSIGN permits assignment</text>
+  <text x="82" y="723" class="small">Membership supplies G1</text>
+  <path d="M330 635 H375 V490 H426" class="membership"/>
+  <path d="M330 690 H400 V580 H1000 V539" class="membership"/>
+  <text x="548" y="568" class="small green">Both memberships stay; Maya still has G1 through TeamX.</text>
+
+  <rect x="650" y="650" width="400" height="150" rx="12" fill="#fff7e8" stroke="#be984f"/>
+  <text x="674" y="683" class="heading">G2 · child business grant</text>
+  <text x="674" y="716" class="body">Payslip read</text>
+  <text x="674" y="746" class="small">parent_grant_id: G1 · additional scope {}</text>
+  <text x="674" y="776" class="body">Effective scope remains FIN</text>
+  <path d="M1050 682 H1140 V305 H1054" class="parent"/>
+  <text x="1160" y="396" class="body amber">G2 depends on G1</text>
+  <text x="1160" y="425" class="small">Permission subset</text>
+  <text x="1160" y="451" class="small">Scope AND</text>
+  <text x="1160" y="489" class="small">This link is unchanged.</text>
+
+  <path d="M1050 755 H1166" class="assignment"/>
+  <text x="1073" y="787" class="small">Assigned</text>
+  <rect x="1170" y="710" width="175" height="90" rx="12" fill="#edfaf5" stroke="#78b39f"/>
+  <text x="1189" y="745" class="heading">Nutan</text>
+  <text x="1189" y="776" class="small">Direct recipient</text>
+  <text x="62" y="793" class="small">No Maya → Nutan ownership or delegation dependency is declared.</text>
+
+  <rect x="35" y="851" width="1330" height="124" rx="14" fill="#edf3fa" stroke="#b1c5db"/>
+  <text x="60" y="884" class="heading">Before → after: only A1 is removed</text>
+  <text x="60" y="919" class="body">G1 exists · TeamX still holds G1 · Maya remains a member of both teams · G2 still points to G1</text>
+  <text x="60" y="950" class="body">G2's assignment to Nutan remains stored. Stored assignment ≠ unconditional authorization.</text>
+
+  <rect x="35" y="997" width="645" height="164" rx="14" fill="#f1faf5" stroke="#9bbda9"/>
+  <text x="60" y="1030" class="heading">Interpretation A · grant-parent-only</text>
+  <text x="60" y="1067" class="body">If G1 remains valid and no A1-specific support is required,</text>
+  <text x="60" y="1097" class="body">removing A1 alone does not break G2's parent link.</text>
+  <text x="60" y="1134" class="small">Nutan's route may continue, subject to all other checks.</text>
+
+  <rect x="700" y="997" width="665" height="164" rx="14" fill="#fff3f3" stroke="#d2a4aa"/>
+  <text x="725" y="1030" class="heading">Interpretation B · specifically dependent on A1</text>
+  <text x="725" y="1067" class="body">If A1 was required supporting authority, its removal</text>
+  <text x="725" y="1097" class="body">stops that route. G2 → G1 does not encode this extra link.</text>
+  <text x="725" y="1134" class="small">No extra dependency edge is silently added to the graph.</text>
+
+  <text x="40" y="1200" class="heading">Q-101 remains open: decide the dependency meaning before adding fields.</text>
+  <text x="40" y="1230" class="small">Membership ≠ ownership · Issuing a grant ≠ becoming its permanent source · Hypothetical example, not a runtime trace</text>
+</svg>

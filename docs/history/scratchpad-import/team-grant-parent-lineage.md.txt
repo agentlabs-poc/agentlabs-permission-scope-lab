@@ -1,0 +1,66 @@
+# Team grant parent lineage — Q-098
+
+**Later scratch refinement — Q-101:** [parent-grant rules](q101-parent-grant-rules.md)
+retain parent-team support checks but do not require the child to store a
+specific parent-assignment ID. Controlled removal requires explicit child
+disablement first; restoring support requires explicit child enablement after
+validation. Older specific-assignment wording below is superseded for this
+direction and retained as history. The frozen lab has not been changed.
+
+Agreed for this discussion; recorded in the scratchpad only. The handbook
+repository remains frozen. Tenant is implied.
+
+## Rule
+
+A grant assigned to a child team must derive from one selected grant validly
+assigned to that team's parent. This connects team hierarchy to authority lineage.
+
+- Child permissions must be a subset of the parent's effective permissions.
+- Effective child scope is parent scope AND additional child constraints.
+- Preserve the specific supporting parent assignment, not only the reusable
+  parent grant definition's ID.
+- Loss of the parent's supporting assignment stops that dependent route and
+  descendants requiring it, even if grant definitions remain stored.
+- An owner's broader personal authority cannot substitute for the required
+  parent-team source or bypass the child team's ceiling.
+
+Legitimate root authority is a separately defined starting point. This rule for
+child teams does not invent a parent for root authority or authorize arbitrary
+parentless grants as a way around the hierarchy.
+
+## Example
+
+Related diagram: [ownership changes versus stable team-held lineage](ownership-lineage.md).
+
+```text
+Team1 holds G1: read/write, dept = FIN
+  └── Team2 holds G2: read, dept = FIN AND cert = C17
+        └── G2 depends on G1 through Team1's assignment
+```
+
+This is illustrative: scope keys must be supported for the same operation and
+enforced on its actual data. A child with additional scope `{}` instead retains
+the parent's FIN boundary without further narrowing.
+
+## Rationale and consequences
+
+Team hierarchy alone does not prove where assigned authority came from. Requiring
+the grant source to be held by the parent team makes the authority ceiling follow
+that hierarchy. The grant-to-grant relationship carries permission/scope narrowing;
+the supporting assignment proves that the parent team holds the source authority.
+
+The parent definition's existence, an assignment to another team, or an owner's
+personal grant is not sufficient support. Another assignment of the same definition
+must not silently replace a lost selected parent assignment. Separate administrative
+authorization and the assigner's applicable source checks remain required.
+
+This further constrains [Q-097's complete-result validation](team-grant-change-boundary.md):
+for a child team, a changed grant must also remain supported by its parent team.
+It does not change the existing Team1/Team2 grant files or establish their missing
+team-parent and assignment-reference records.
+
+## Still open
+
+Exact team-parent and parent-assignment fields; revisions/adoption, authorized
+rebinding, root bootstrap details, and lifecycle/freshness mechanics. No new wire
+field, automatic transfer, or runtime migration is approved by this note.
