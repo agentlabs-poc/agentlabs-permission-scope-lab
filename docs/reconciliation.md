@@ -1,5 +1,49 @@
 # Handbook reconciliation register
 
+## Publication authorization — registration-first bootstrap checkpoint
+
+The user explicitly requested commit/push and continuation after reviewing the
+corrected setup flow. Publish the Q-113 trusted-establishment clarification,
+Q-114 maximum initial authority with mandatory prior registration, setup SVG,
+and affected chapter/reader updates after fresh checks. Historical proposals
+remain labeled; no runtime migration, scratchpad edits, new schema, or next
+proposal approval is implied. This entry records publication authorization,
+not a preemptive claim that verification or pushing has succeeded.
+
+## Q-114 — Maximum starting authority agreed; omitted registration restored
+
+The user approved maximum intended initial permissions and scope, then corrected
+the missing registration step in the assistant's explanation. The bootstrap
+chapter now leads with registration-first setup, including Auth administration
+and relevant application contracts, maximum intended tenant authority, explicit
+initial administrator assignment, and bounded group/membership distribution.
+The earlier limited FIN-read seed proposal is superseded history; normal
+lifecycle, tenant isolation, and no-personal-bypass principles survive.
+
+The registration chapter, handbook, reader, tree, and roadmap are reconciled and
+the setup SVG includes the missing dependency. This reaffirms Q-039–Q-042, not a
+new optional check. Exact initial registry/seed trust, root representation,
+recipient/membership arrangement, transactions, and recovery remain unfinished.
+No group-held bootstrap proposal was presented or approved in this turn, and
+no Q-115 is introduced. No scratchpad edits, runtime changes, commit, push, or
+completion-score change are included.
+
+## Q-113 — Approval, existing-boundary clarification, and core-rule review
+
+The user agreed to trusted root establishment and corrected the framing: ordinary
+grant operations already cannot escape their source bounds by omitting a parent.
+The bootstrap chapter preserves earlier proposal status and records that Q-113
+is not a new parent-omission rule. Its consistency matrix checks the core tenant,
+non-amplification, lineage/team, scope, identity, lifecycle/revision, registration,
+endpoint, and checked-state boundaries, with explicit counterexamples and limits.
+
+The review finds the rule consistent with those constraints, not a complete or
+implemented bootstrap trust design. Initial establishment cannot authorize itself
+using the grant it creates; its external trust basis must still be specified.
+Q-114 separately proposes explicit seed selection and remains unapproved.
+No scratchpad use, runtime changes, completion-score change, commit, or push is
+included. The prior Q-112A publication is the completed checkpoint at 16c20f8.
+
 ## Publication authorization — Q-102 through Q-112A checkpoint
 
 The user explicitly requested commit/push and continuation, with a follow-up

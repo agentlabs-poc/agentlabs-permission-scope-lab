@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1000" viewBox="0 0 1100 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Registration-first bootstrap and bounded authority distribution</title>
+  <desc id="desc">Trusted setup establishes tenant context. Auth and application permission and scope contracts are registered before initial grants are validated. Maximum intended tenant authority is explicitly assigned to the initial human administrator, who then administers users, groups, dependent grants, and membership under ordinary authorization rules.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
+    <style>text{font-family:Arial,Helvetica,sans-serif;fill:#14243b}.heading{font-size:23px;font-weight:700}.body{font-size:18px}.small{font-size:16px}.edge{stroke:#475569;stroke-width:3;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1100" height="1000" rx="18" fill="#f5f7fb"/>
+  <text x="550" y="46" text-anchor="middle" class="heading">Bootstrap: register first, then establish authority</text>
+  <text x="550" y="77" text-anchor="middle" class="body">Q-039–Q-042 registration · Q-113 trusted setup · Q-114 maximum starting authority</text>
+  <rect x="95" y="108" width="910" height="105" rx="12" fill="#e8edf5" stroke="#64748b"/>
+  <text x="550" y="142" text-anchor="middle" class="heading">1. Trusted setup + tenant context</text>
+  <text x="550" y="174" text-anchor="middle" class="body">Establish the setup trust; no grant may authorize its own creation.</text>
+  <text x="550" y="198" text-anchor="middle" class="small">Exact trust procedure and root-establishment evidence remain to be specified.</text>
+  <line x1="550" y1="213" x2="550" y2="249" class="edge"/>
+  <rect x="95" y="258" width="910" height="135" rx="12" fill="#e2efff" stroke="#3978b8"/>
+  <text x="550" y="293" text-anchor="middle" class="heading">2. Register supported permission and scope contracts</text>
+  <text x="550" y="326" text-anchor="middle" class="body">Include Auth's administrative contracts and the relevant application contracts.</text>
+  <text x="550" y="355" text-anchor="middle" class="body">Declare the compatibility-validation mode; enabled means every grant is checked.</text>
+  <text x="550" y="380" text-anchor="middle" class="small">Registration defines valid contracts. It does not itself give anyone access.</text>
+  <line x1="550" y1="393" x2="550" y2="429" class="edge"/>
+  <rect x="95" y="438" width="910" height="115" rx="12" fill="#e3f4eb" stroke="#328362"/>
+  <text x="550" y="474" text-anchor="middle" class="heading">3. Validate and establish maximum intended initial authority</text>
+  <text x="550" y="507" text-anchor="middle" class="body">Registered permissions + maximum scope {} inside the trusted tenant.</text>
+  <text x="550" y="536" text-anchor="middle" class="small">No wildcard syntax, cross-tenant access, or bootstrap exemption from contract validation.</text>
+  <line x1="550" y1="553" x2="550" y2="589" class="edge"/>
+  <rect x="95" y="598" width="910" height="110" rx="12" fill="#edf0ff" stroke="#6470b5"/>
+  <text x="550" y="635" text-anchor="middle" class="heading">4. Explicitly make the initial human administrator a recipient</text>
+  <text x="550" y="668" text-anchor="middle" class="body">Valid assignment(s), with explicit membership if a group-held route is used.</text>
+  <text x="550" y="692" text-anchor="middle" class="small">A stored grant definition alone supplies no access; the initial recipient format remains open.</text>
+  <line x1="550" y1="708" x2="550" y2="744" class="edge"/>
+  <rect x="95" y="753" width="910" height="125" rx="12" fill="#fff4df" stroke="#b5842e"/>
+  <text x="550" y="790" text-anchor="middle" class="heading">5. Ordinary authorized administration</text>
+  <text x="550" y="823" text-anchor="middle" class="body">Create users/groups · assign equal or narrower grants · manage membership.</text>
+  <text x="550" y="852" text-anchor="middle" class="body">Members receive valid group authority, preserving its supporting lineage.</text>
+  <text x="550" y="922" text-anchor="middle" class="body">Always: tenant isolation · administrative + source checks · parent/team ceilings</text>
+  <text x="550" y="951" text-anchor="middle" class="small">Scope AND · status/validity · explicit adoption · human-dependent automation</text>
+  <text x="550" y="979" text-anchor="middle" class="small">Logical dependency flow, not a prescribed API sequence or a completed bootstrap implementation.</text>
+</svg>

@@ -1,5 +1,14 @@
 # Handbook working rules
 
+## Current publication authorization — Q-113 / Q-114 bootstrap checkpoint
+
+The user explicitly requested “keep going. commit and push” after the
+registration-first correction. Publish the verified Q-113/Q-114 documentation,
+setup SVG, and reader reconciliation on main. Preserve prior history, scratchpad
+originals, and tag `0.0.1`. No runtime changes or implicit approval of the next
+bootstrap proposal is included. Continue lab-only, deepest-impact-first discussion
+after the checkpoint; earlier publication instructions describe prior checkpoints.
+
 ## Current publication authorization — through Q-112A
 
 The user requested “commit and push, and continue,” then asked for confirmation
@@ -49,6 +58,14 @@ and examples, preserve superseded reasoning, and ask one question at a time.
 
 ## Current prioritization — deepest dependencies first
 
+Q-114 now agrees maximum intended initial authority inside the tenant, followed
+by equal/narrower ordinary distribution. Registration of relevant permissions
+and scope contracts, including Auth administration, is a mandatory prerequisite
+to initial grant acceptance under Q-039–Q-042. Do not omit this dependency or
+reintroduce the FIN-read-only seed recommendation. Full seed/root and initial
+recipient contracts remain open; no particular administrators-group bootstrap
+arrangement has yet been approved.
+
 The user explicitly prioritizes important, deep-impact decisions before shallow
 completion work. Work outward from authority sources and lineage, to safe
 authority mutation, resolution consistency, full contracts/integration, then
@@ -56,6 +73,13 @@ editorial packaging. Do not optimize for easy checklist closures or re-ask settl
 invariants. Q-112 reaffirms group assignment as preferred (not mandatory) and the
 parent's permission/scope ceiling for direct assignments. Q-112A above reaffirms
 lineage-supported latest; implementation contracts are not a new open vote on it.
+
+For each substantive recommendation, check existing philosophy, rules, and bounds
+before presenting it; name any tension and the remaining proof/contract gap.
+Do not present a consequence of an already-approved boundary as a newly discovered
+loophole or repeatedly seek approval for it. Q-113's user correction is the example:
+ordinary grant operations are already bounded. Its trusted-root establishment
+rule is agreed, while the actual trust procedure remains unfinished.
 
 ## Current publication authorization — Q-101 checkpoint
 

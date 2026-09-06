@@ -1,5 +1,13 @@
 # Application registration and Auth validation
 
+**Bootstrap integration — Q-114 clarification:** registration is required before
+the relevant initial grants can be validated and accepted. [The setup flow](bootstrap-authority.md)
+registers Auth's administrative permission/scope contracts and relevant application
+contracts, applies the explicit compatibility mode, then establishes maximum
+intended tenant authority through trusted setup and explicit assignments.
+This reuses Q-039–Q-042; bootstrap does not bypass registration, and registration
+alone does not grant access. Exact initialization and registration APIs remain open.
+
 Q-042 now agrees REGISTRATION-004: all existing grants must pass before
 relationship validation is enabled. Otherwise reject activation, report the
 incompatible grants, and preserve the previous configuration pending explicit

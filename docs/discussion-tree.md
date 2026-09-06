@@ -37,6 +37,16 @@ schema completion or a newly measured percentage.
 Current prioritization is deepest authority dependencies first, then safe changes,
 resolution consistency, full contracts, and editorial publication—not easy scores.
 
+**Q-113 agreed with clarification:** [legitimate root establishment](bootstrap-authority.md)
+requires trusted setup; ordinary operations are already bounded. A cross-rule
+review is recorded, not a new parent-omission policy or completed trust procedure.
+**Q-114 agreed as corrected:** registration of relevant permission/scope contracts
+precedes seed acceptance; trusted setup establishes maximum intended tenant
+authority and explicit administrator assignment. Ordinary administration then
+distributes equal/narrower authority through users, groups, and membership.
+The FIN-read-only bootstrap framing is superseded. [Setup flow SVG](assets/bootstrap-registration-flow.svg).
+Trust implementation, exact root/initial-recipient records, and recovery remain open.
+
 ## Current position — Q-101 framing pinned through Q-101E-3
 
 ```text

@@ -1,5 +1,14 @@
 # Authorization: the agreed foundation
 
+**Q-114 — registration-first bootstrap:** register the relevant permission and
+scope contracts, including Auth's own administration, before initial grant
+acceptance. Trusted setup establishes maximum intended tenant authority and
+explicitly makes it available to the initial human administrator. Normal
+administration then creates users/groups, distributes equal/narrower grants,
+and manages membership. Earlier FIN-read-only seed framing is superseded.
+
+[Bootstrap rationale](../../docs/bootstrap-authority.md) · [Open setup flow SVG](../../docs/assets/bootstrap-registration-flow.svg).
+
 ## Current revision decisions — Q-102–Q-106
 
 [Grant revisions and adoption](../../docs/grant-revisions.md) records approved

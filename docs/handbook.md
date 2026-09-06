@@ -1,5 +1,14 @@
 # Authorization Handbook — working edition
 
+**Q-114 — registration-first bootstrap:** register the applicable permission and
+scope contracts, including Auth's own administration, before validating and
+establishing maximum intended initial authority inside the tenant. Explicit
+assignments make it available to the initial administrator, who creates users/
+groups and distributes equal or narrower authority. See [rationale and setup
+flow](bootstrap-authority.md). Earlier minimal/FIN-read-only seed framing is
+superseded where it limits the intended starting ceiling; full setup contracts
+remain unfinished.
+
 ## Current position — decisions through Q-111
 
 [Milestone progress](milestone-progress.md) gives checklist-based remaining
@@ -386,7 +395,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Proxy attribution — Q-085 agreed](proxy-attribution.md) | Trusted binding between the verified proxy and its human authority anchor; canonical representation across carriers required. |
 | [Identity context — Q-086 agreed](identity-context.md) | Approved shared versioned actor/human identity block; enclosing contracts remain open. |
 | [JWT identity mapping — Q-087 agreed](jwt-identity-mapping.md) | Human-subject compatibility with enforced proxy limits; unchanged canonical identity block, with deliberate sub/human_id duplication and rationale. Full token profile remains open. |
-| [Bootstrap authority — Q-088 agreed](bootstrap-authority.md) | Minimal seed grants may remain; explicit self-assignment stays within current administrative bounds. Rationale and examples recorded. |
+| [Bootstrap authority — Q-088 / Q-113 / Q-114](bootstrap-authority.md) | Register permission/scope contracts before accepting maximum intended initial tenant authority. Explicit administrator assignments support ordinary user/group creation and equal/narrower grant distribution. Normal lifecycle remains; original restricted seed framing is preserved as history. |
 | [Role revisions and adoption — Q-089-B agreed](role-revisions.md) | Immutable revisions, explicit grant adoption, boundary validation, and removal caveat; Auth's own APIs follow the framework. |
 | [Original Q-089 — superseded discussion](role-change-authority.md) | The original question and undecided alternatives remain as history; Q-089-B replaces their automatic live-update premise. |
 | [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
