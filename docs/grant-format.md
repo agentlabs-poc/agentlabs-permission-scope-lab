@@ -48,8 +48,9 @@ all those branches or application migrations are complete.
 
 This partial illustration uses the agreed version, scope, and status conventions;
 it is not a complete grant schema. Missing-field defaults and validity/conditions
-are not settled by their omission here. Q-083 in the lifecycle chapter proposes
-the time-window contract separately.
+are not settled by their omission here. Q-083 in the lifecycle chapter now approves
+optional start-inclusive, expiry-exclusive time validity separately; timestamp
+validation and complete lifecycle contracts remain open.
 
 ```json
 {

@@ -172,7 +172,7 @@ working handbook's checkpoint practice for the review checklist.
 | GRANT-006 | AGREED — USER ADDITION, REFINED BY Q-082 | Support authorized grant creation and deletion alongside enable and disable; there is no additional revoke operation after Q-082. | Q-080 added create/delete; Q-082 consolidates permanent withdrawal into delete. Create establishes a new binding and delete removes usable authority. Physical erase and retention are not prescribed; neither operation bypasses administration. See grant-lifecycle.md. |
 | GRANT-007 | AGREED AS REVISED | Use one administrative status field with enabled or disabled; delete removes the grant, effective validity remains derived. | User answered revised Q-081 “approved.” Enabled is evaluation eligibility, not allow; disabled supplies no authority. Original three-value Q-081 was never approved and remains superseded. Rationale and history retained in grant-lifecycle.md. Required-field/default behavior and the complete schema remain open. |
 | GRANT-008 | AGREED | Delete is the single canonical permanent-removal operation; the supported operations are create, enable, disable, and delete. | User challenged revoke/delete redundancy and agreed to Q-082. Their authorization effects were the same; distinguishing retained records from removed records is an implementation concern. Deleted grants cannot be enabled again; restoration requires a new authorized grant. Storage/retention and audit remain outside this decision. See grant-lifecycle.md. |
-| GRANT-009 | PROPOSED | Support optional not-before/expiry bounds independently of administrative status; evaluate a start-inclusive, expiry-exclusive window, which enable does not reset. | Q-083 makes the existing validity concept concrete. An enabled grant may be time-ineligible without changing stored status; no expiry job or manual deletion is needed to enforce time eligibility. Missing bounds mean no bound on that side, not unconditional access; invalid bounds do not become absent. Timestamp validation and in-flight timing remain open. See grant-lifecycle.md. |
+| GRANT-009 | AGREED | Support optional not-before/expiry bounds independently of administrative status; evaluate a start-inclusive, expiry-exclusive window, which enable does not reset. | User answered Q-083 “yes.” An enabled grant may be time-ineligible without changing stored status; no expiry job or manual deletion is needed to enforce time eligibility. Missing bounds mean no bound on that side, not unconditional access; invalid bounds do not become absent. Timestamp validation and in-flight timing remain open. See grant-lifecycle.md for rationale and the retained proposal. |
 | DECISION-003 | AGREED | Completed authorization decisions are allow/deny; inability to complete evaluation is a separate error, not a third authorization decision. Deny and error both prevent protected execution. | User approved Q-051, requested a concrete Auth-service timeout example, and confirmed it. Required authority loading times out with no sufficient valid authority already available: this proves inability to evaluate, not absence of permission. No prepared handoff, error transport, JSON schema, HTTP mapping, or cache policy adopted. See decision-results.md for rationale, alternatives, and consequences. |
 | DECISION-004 | AGREED | Every completed deny must include an internal machine-readable reason for the calling endpoint and diagnostics. | User approved Q-052: “yes deny should include reason, very important” and reaffirmed recording rationale. A bare deny loses known cause information, forces callers to guess or reconstruct evaluation, and weakens diagnosis/audit. Reasons must reflect established conclusions, not mislabel timeouts or individual candidate failures. Exact codes/fields, precedence, and client disclosure remain open. See decision-results.md for rationale, alternatives, examples, and consequences. |
 | SVG-001 | APPROVED PRESENTATION | Show one client request through authentication middleware, endpoint handler, embedded Auth Agent, Auth authority loading, constrained application database access, and the response. Keep middleware, handler, and agent inside the application boundary and retain the one endpoint-owned authorization gate. | User found the responsibility-first SVG difficult to follow, preferred the earlier flow style, and approved the proposed client-to-handler layout. Short numbered arrows show execution order; detailed principles stay in the overview. The Finance certificate example does not revive prepared results, mandatory resolvers, fixed remote calls, or a new decision schema. Previous SVG/overview are archived; see system-overview.md. This is a presentation decision, not a new authorization rule. |
@@ -350,11 +350,38 @@ groups are not supported; membership is direct human-to-group.
 Q-078's terminal withdrawal remains, while its separate revoke operation is
 superseded. Q-079's enable/disable and Q-080's create/delete yield four operations.
 **Q-081 revised / GRANT-007 is agreed:** status enabled/disabled only;
-the original three-state variant was never approved. Next is **Q-083 / GRANT-009,
-proposed**: optional not-before/expiry time validity, independent of status.
+the original three-state variant was never approved. **Q-083 / GRANT-009 is
+agreed**: optional not-before/expiry time validity, independent of status;
+enabling cannot reset or bypass the window.
 Effective validity, scope satisfaction, and dependent access are not equated
 with enabled status.
 Membership/sync mechanics and the complete lifecycle representation remain open.
+**Q-084 is DISAPPROVED.** Rationale: preserve the authorization boundary; do not
+expand Layer 2 or the canonical grant discussion into business-rule design.
+Application-specific authorization material and boundary enforcement remain in
+scope. The assistant's revised question is withdrawn, not pending. The rejection
+does not approve a condition engine or removal of existing grant restrictions.
+See [decision and preserved proposals](grant-conditions.md).
+**Q-085 is agreed:** establish trusted attribution between the verified proxy
+caller and the human whose authority bounds it. The user additionally requires
+canonical representation across JWT and other requester contexts. This closes
+neither the full identity contract nor tenant mapping and adds no authentication
+protocol. See [decision and rationale](proxy-attribution.md).
+**Q-086 is agreed:** a shared versioned `actor` plus
+`human_id` identity block. Exact transport/JWT mappings remain open; grant
+recipients and minimal decision results are not replaced or expanded. See
+[identity representation](identity-context.md).
+**Q-087-A is agreed:** preserve the human subject and require evaluator coverage
+of protected proxy-token operations, including legacy paths. Rationale: format
+compatibility alone cannot preserve delegation limits. This is a requirement,
+not proof of existing deployment coverage. **Q-087-B is agreed:** the exact
+versioned JWT identity mapping retains the Q-086 block unchanged, with no duplicate
+`agent_id`. The user accepted `sub`/`human_id` duplication to keep that block
+self-contained outside JWT; omitting the inner field and reconstructing it in an
+adapter was considered but not selected. See [JWT mapping](jwt-identity-mapping.md).
+The user also
+requires exact contract blocks in proposal messages so format and meaning can
+be approved together. Legacy-token normalization and the full profile remain open.
 MEASURE-001 now has 35 DONE / 33 OPEN / 1 EXCLUDED: 35/68 in-scope closure (51.5%).
 The earlier 35/69 (50.7%) is retained as history; no new DONE credit was earned.
 

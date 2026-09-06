@@ -274,7 +274,11 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
 | [Authority freshness](authority-freshness.md) | Impact-first revocation timing discussion, stale-cache trade-offs, and in-flight-operation questions kept distinct. |
 | [Delegation lifecycle](delegation-lifecycle.md) | Agreed automatic restoration of affected access when human support returns; explicit-renewal proposal preserved as not adopted. |
-| [Grant lifecycle](grant-lifecycle.md) | Agreed create, enable, disable, permanent delete, and enabled/disabled status; optional time-window contract proposed. |
+| [Grant lifecycle](grant-lifecycle.md) | Agreed create, enable, disable, permanent delete, enabled/disabled status, and optional start-inclusive/expiry-exclusive time validity. |
+| [Q-084 — disapproved](grant-conditions.md) | Rejected to prevent business-logic scope creep. Layer 2 remains authorization integration; the revised question is withdrawn. Rationale and earlier proposals are preserved. |
+| [Proxy attribution — Q-085 agreed](proxy-attribution.md) | Trusted binding between the verified proxy and its human authority anchor; canonical representation across carriers required. |
+| [Identity context — Q-086 agreed](identity-context.md) | Approved shared versioned actor/human identity block; enclosing contracts remain open. |
+| [JWT identity mapping — Q-087 agreed](jwt-identity-mapping.md) | Human-subject compatibility with enforced proxy limits; unchanged canonical identity block, with deliberate sub/human_id duplication and rationale. Full token profile remains open. |
 | [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
 | [Bulk enforcement](bulk-enforcement.md) | Agreed complete-batch authorization before effects; transaction and concurrency guarantees remain separate. |
 | [Concurrent enforcement](concurrent-enforcement.md) | Agreed preservation of evaluated boundaries through use when application records change concurrently; mechanisms remain open. |
@@ -331,7 +335,8 @@ unsupported. Q-082 consolidates permanent removal into delete, preserving Q-078'
 terminal withdrawal meaning but superseding the separate revoke operation.
 Create, enable, disable, and delete are agreed. Q-081 revised approves only
 enabled/disabled status; the original three-state variant is superseded, not approved.
-Q-083 proposes optional time validity independent of administrative status.
+Q-083 approves optional time validity independent of administrative status;
+enable cannot reset or bypass its bounds.
 Being enabled does not itself authorize a request. Older grant revocation wording
 describes permanent withdrawal, not an additional canonical operation.
 The chapter preserves rationale and distinguishes available evidence from

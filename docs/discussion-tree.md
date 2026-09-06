@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-081 revised approved; Q-083 proposed; audit layer excluded
+## Current position — Q-087-B approved; audit and business logic outside scope
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -8,7 +8,10 @@ Read the [handbook](handbook.md) for chapters and the
 [decision log](handbook-roadmap.md) for individual references and rationale.
 
 **Commit/push gate: reopened by the user.** The verified reconciliation checkpoint
-is authorized for commit/push; continue the handbook discussion. Previous freeze
+is authorized for commit/push; continue the handbook discussion. The user's
+latest cadence is immediate local recording, with commit/push roughly every ten
+questions, or on explicit request. The user requested a checkpoint through Q-087-B;
+Q-083 was the first approval since checkpoint `01d68a5`. Previous freeze
 notices below are historical.
 
 Counts are closed/total checkpoints from MEASURE-001, not effort estimates.
@@ -20,7 +23,11 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 ├── 2. Principles [4/5]
 │   └── Core boundaries/subset/auth-first agreed; consolidation OPEN
 ├── 3. Vocabulary and identity [3/5]
-│   └── Core terms and human groups agreed; identity/proxy attribution OPEN
+│   ├── Core terms and human groups agreed
+│   ├── Trusted proxy/human attribution and canonical reuse agreed [Q-085]
+│   ├── Shared actor/human identity shape agreed [Q-086]
+│   ├── Human-subject compatibility with enforced proxy limits agreed [Q-087-A]
+│   └── JWT identity mapping and deliberate sub/human_id duplication agreed [Q-087-B]
 ├── 4. Permissions [3/4]
 │   ├── Naming and one permission per endpoint agreed
 │   ├── No implicit inheritance, wildcards, or aliases [Q-057/058/059]
@@ -31,7 +38,7 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 │   ├── Direct human membership only; nested groups unsupported [Q-077]
 │   ├── Create, enable, disable, delete agreed; separate revoke superseded [Q-082]
 │   ├── Enabled/disabled status agreed [Q-081 revised]
-│   ├── Optional time validity independent of status PROPOSED [Q-083] <-- NOW
+│   ├── Optional time validity independent of status agreed [Q-083]
 │   └── Admin encoding, bootstrap, lifecycle, chains, group/role changes OPEN
 ├── 6. Scope and registration [5/7]
 │   └── Flat AND boundaries and registration agreed; detailed evolution PARKED
@@ -39,7 +46,9 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 │   └── One gate and partial policy agreed; full schemas/integration OPEN
 ├── 8. Decision semantics [1/4]
 │   ├── Allow/deny/error meanings and minimal shapes agreed [Q-051–067]
-│   └── Conditions, full validation, code catalog, provenance OPEN
+│   ├── Q-084 DISAPPROVED: no business-logic scope creep; revised question withdrawn
+│   ├── Authorization-only condition semantics remain OPEN; Q-084 is not pending
+│   └── Full validation, code catalog, provenance OPEN
 ├── 9. Enforcement and time [2/8 in scope; 1 excluded]
 │   ├── Both-boundary moves agreed [Q-068]
 │   ├── No stale use after confirmed grant deletion [Q-069, terminology Q-082]
@@ -188,7 +197,7 @@ branches while retaining the unfinished details in the audit.
 | 6 — execution-time rule agreed; details open | Queued/background work | Delayed execution must not accidentally preserve removed authority. | HC-09-09 |
 | 7 — excluded by user | Authority-change audit | Another layer's responsibility, not handbook scope. | HC-09-08 EXCLUDED |
 | 8 — nesting unsupported; lifecycle details open | Group membership composition | Determines which group grants become applicable and which dependencies resolution follows. | HC-05-12 |
-| 9 — operations/status agreed; time validity now | Ordinary grant lifecycle | Distinguishes creation, reversible suspension, permanent deletion, and effective authority. | HC-05-11 / HC-07-08 |
+| 9 — operations/status/time validity agreed | Ordinary grant lifecycle | Distinguishes creation, reversible suspension, permanent deletion, and effective authority; complete contracts remain open. | HC-05-11 / HC-07-08 |
 
 **Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
 and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
@@ -224,9 +233,27 @@ canonical operations. The separate revoke operation is superseded; permanent
 withdrawal remains terminal through delete. Q-079's reversible suspension remains.
 **Q-081 revised / GRANT-007 is agreed:** enabled/disabled status only, distinct
 from effective validity. Its original three-state variant was never approved.
-**Q-083 / GRANT-009 is proposed:** optional not-before/expiry bounds independent
+**Q-083 / GRANT-009 is agreed:** optional not-before/expiry bounds independent
 of status; enable does not reset them.
 See [grant lifecycle](grant-lifecycle.md).
+**Q-084 is DISAPPROVED:** the user's intent is to prevent business-logic scope
+creep into the authorization handbook. Layer 2 remains authorization integration.
+The assistant's revised question is withdrawn, not pending. No condition engine
+or removal of existing restrictions is approved by this rejection. See
+[decision, rationale, and preserved proposals](grant-conditions.md).
+**Q-085 is agreed:** retain the verified proxy identity and establish its human
+authority anchor through trusted Auth-governed evidence; a caller-supplied human
+identifier cannot establish that association. See [proxy attribution](proxy-attribution.md).
+The user also requires canonical representation across JWT and other requester
+contexts. **Q-086 is agreed:** a versioned `actor` plus `human_id` block, with
+transport mappings still open. See [identity context](identity-context.md).
+**Q-087-A is agreed:** keep human-subject compatibility while requiring evaluator
+coverage for protected proxy-token operations, including legacy paths. Actual
+deployment compatibility is not yet verified. **Q-087-B is agreed:** the exact JWT
+identity excerpt preserves human `sub` and the unchanged canonical block. Retaining
+`human_id` makes the block self-contained outside JWT; duplication inside JWT is
+intentional and values must agree. No duplicate `agent_id` is adopted. See
+[mapping, trade-off, and alternative](jwt-identity-mapping.md).
 Administration bounds, restoration mechanics, collection details, transaction
 guarantees, and full job integration remain open. Audit-system deliverables are
 excluded, not remaining handbook work; older snapshots are superseded on that point.

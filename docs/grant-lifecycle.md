@@ -86,18 +86,20 @@ the rest of the grant schema are not inferred from approval of these values.
 
 ## Q-083 / GRANT-009 — optional time validity independent of status
 
-Status: **PROPOSED, not approved.** Validity already appears in the conceptual
-grant binding and older illustrations. This proposal makes the time-window
+Status: **AGREED.** The user answered Q-083 “yes.” Validity already appears in the conceptual
+grant binding and older illustrations. This decision makes the time-window
 meaning concrete without changing the approved enabled/disabled statuses.
 
-Recommend an optional grant validity window using the previously illustrated
+Previous status, retained as history: **PROPOSED, not approved** until that answer.
+
+An optional grant validity window uses the previously illustrated
 `not_before` and `expires_at` bounds. At evaluation time, an enabled grant can
 contribute only at or after its start and strictly before its expiry, alongside
 all other permission, scope, and dependency checks. Omitted start means no lower
 time bound; omitted expiry means no upper time bound. No validity window means
 no additional time restriction, not unconditional access.
 
-Versioned illustrative grant; the time fields are proposed, and the example is
+Versioned illustrative grant; the time-window meaning is approved, and the example is
 not a complete finalized grant schema:
 
 ```json
@@ -125,7 +127,7 @@ Rationale: time limits constrain authority independently of an administrative
 pause. Deriving time eligibility avoids an expired status that must be changed
 by a scheduled process and avoids keeping access alive merely because that
 process is late. The alternative of relying only on manual disable/delete puts
-temporary-access expiry outside the evaluator and is not the recommendation.
+temporary-access expiry outside the evaluator and was not selected.
 
 Both bounds, when supplied, must form a nonempty interval; malformed bounds
 must not silently become absent bounds. Canonical timestamp validation, trusted
@@ -135,6 +137,11 @@ language. HC-05-11 remains open pending the full lifecycle contract.
 
 **Q-083:** Should a grant support this optional time window, evaluated independently
 of enabled status, with enabling unable to reset or bypass its time bounds?
+
+**Answer: approved.** Start is inclusive, expiry is exclusive, and omitted bounds
+are unbounded on their respective sides. Enable does not reset validity. This
+approval does not finalize timestamp encoding, update contracts, or in-flight
+operation semantics.
 
 <details>
 <summary>Historical Q-078–Q-081 record — separate revoke and three-state proposal superseded by Q-082</summary>
