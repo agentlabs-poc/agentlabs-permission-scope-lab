@@ -277,7 +277,8 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
 | [Bulk enforcement](bulk-enforcement.md) | Agreed complete-batch authorization before effects; transaction and concurrency guarantees remain separate. |
 | [Concurrent enforcement](concurrent-enforcement.md) | Agreed preservation of evaluated boundaries through use when application records change concurrently; mechanisms remain open. |
-| [Background authorization](background-authorization.md) | Proposed execution-time authorization for queued work, distinct from submission acceptance and already-running job behavior. |
+| [Background authorization](background-authorization.md) | Agreed execution-time authorization for queued work; adapter, retry, and already-running job contracts remain open. |
+| [Authority-change audit](authority-change-audit.md) | Proposed mandatory audit of successful authority-administration changes, separate from selective access-request logging. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -321,8 +322,10 @@ the distinction between explicitly Finance-bounded and all-departments requests.
 Q-073 requires complete-batch authorization and required boundary checks before
 effects, rather than automatically processing an authorized subset. Q-074 requires
 preserving evaluated application boundaries through concurrent changes at use.
-Q-075 proposes execution-time authorization for queued work, not reuse of a
-submission-time allow.
+Q-075 requires execution-time authorization for queued work, not reuse of a
+submission-time allow. Q-076 proposes mandatory audit of successful grant,
+membership, role, and delegation administration changes, without requiring every
+access request to be persistently logged.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 
