@@ -274,6 +274,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
 | [Authority freshness](authority-freshness.md) | Impact-first revocation timing discussion, stale-cache trade-offs, and in-flight-operation questions kept distinct. |
 | [Delegation lifecycle](delegation-lifecycle.md) | Agreed automatic restoration of affected access when human support returns; explicit-renewal proposal preserved as not adopted. |
+| [Grant lifecycle](grant-lifecycle.md) | Proposed terminal explicit revocation for a grant, distinct from temporary loss of human support for a still-valid delegation. |
 | [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
 | [Bulk enforcement](bulk-enforcement.md) | Agreed complete-batch authorization before effects; transaction and concurrency guarantees remain separate. |
 | [Concurrent enforcement](concurrent-enforcement.md) | Agreed preservation of evaluated boundaries through use when application records change concurrently; mechanisms remain open. |
@@ -325,7 +326,9 @@ preserving evaluated application boundaries through concurrent changes at use.
 Q-075 requires execution-time authorization for queued work, not reuse of a
 submission-time allow. Q-076 excludes audit policy and system design as another
 layer's responsibility; the mandatory-audit proposal is not adopted. Authorization
-result evidence remains in scope. Q-077 proposes no nested-group inheritance in v1.
+result evidence remains in scope. Q-077 settles nested authorization groups as
+unsupported. Q-078 proposes terminal explicit revocation for a grant; restoration
+would require a newly authorized grant, not reactivation of the revoked identity.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 

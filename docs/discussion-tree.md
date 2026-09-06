@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-076 excluded audit scope; Q-077 proposed
+## Current position — Q-077 settled; Q-078 proposed; audit layer excluded
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -28,7 +28,8 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 ├── 5. Grants and authority [7/13]
 │   ├── Whole grants, live roles, human-dependent proxies, separate admin agreed
 │   ├── Automatic delegation reactivation agreed [Q-070]
-│   ├── Direct human membership only; no nested groups PROPOSED [Q-077] <-- NOW
+│   ├── Direct human membership only; nested groups unsupported [Q-077]
+│   ├── Terminal explicit grant revocation PROPOSED [Q-078] <-- NOW
 │   └── Admin encoding, bootstrap, lifecycle, chains, group/role changes OPEN
 ├── 6. Scope and registration [5/7]
 │   └── Flat AND boundaries and registration agreed; detailed evolution PARKED
@@ -184,7 +185,8 @@ branches while retaining the unfinished details in the audit.
 | 5 — boundary-at-use rule agreed; details open | Concurrent application changes | A valid earlier check must not lead to an out-of-boundary effect. | HC-09-07 |
 | 6 — execution-time rule agreed; details open | Queued/background work | Delayed execution must not accidentally preserve removed authority. | HC-09-09 |
 | 7 — excluded by user | Authority-change audit | Another layer's responsibility, not handbook scope. | HC-09-08 EXCLUDED |
-| 8 — now | Group membership composition | Determines which group grants become applicable and which dependencies resolution follows. | HC-05-12 |
+| 8 — nesting unsupported; lifecycle details open | Group membership composition | Determines which group grants become applicable and which dependencies resolution follows. | HC-05-12 |
+| 9 — now | Ordinary grant lifecycle | Determines whether revoked grant identity can become usable again. | HC-05-11 |
 
 **Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
 and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
@@ -213,8 +215,10 @@ authorization, not reuse of submission's allow. See
 **Q-076 / AUDIT-001 is outside handbook scope:** the user places audit policy
 and system design in another layer. The proposal is not adopted; see
 [scope decision and retained history](authority-change-audit.md).
-**Q-077 / GROUP-005 is proposed:** no nested-group membership inheritance in v1;
+**Q-077 / GROUP-005 is agreed:** nested authorization groups are not supported;
 use explicit human-to-group links. See [groups and membership](groups-and-membership.md).
+**Q-078 / GRANT-004 is proposed:** explicit grant revocation is terminal for that
+identity; restoration requires a newly authorized grant. See [grant lifecycle](grant-lifecycle.md).
 Administration bounds, restoration mechanics, collection details, transaction
 guarantees, and full job integration remain open. Audit-system deliverables are
 excluded, not remaining handbook work; older snapshots are superseded on that point.
