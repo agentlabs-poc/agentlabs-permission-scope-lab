@@ -1,5 +1,18 @@
 # Working handbook chapter: scope boundaries
 
+## Post-0.0.1 update — Q-090 / Q-091
+
+A [grant definition](grant-assignments.md) now carries permissions and scope
+without a recipient; assignments carry recipients. Older recipient-bearing
+wording below is deprecated as a layout, not as a complete-authority invariant.
+
+For [dependent subgroup authority](subgroups.md), effective scope is parent scope
+AND child additional constraints. Additional `{}` means no further narrowing,
+not removal of the parent boundary. Conflicting same-key restrictions do not
+overwrite each other. This does not add arrays, OR, nested scope objects, or
+new built-in department/group meanings. Ordinary root `{}` still adds no narrower
+restriction inside the implied tenant. The combined derived wire format is open.
+
 Q-050-C / CONTRACT-012 keeps scope as a boundary selector while assigning
 application relationship enforcement to endpoint implementation, without a
 relationship block in policy. Auth may establish authority within supplied

@@ -1,5 +1,13 @@
 # Role revisions and explicit grant adoption — Q-089-B / ROLE-003
 
+Post-0.0.1 update: [Q-090](grant-assignments.md) moves recipients into separate
+assignments. Recipient-bearing grant excerpts below are deprecated layouts;
+immutable role revisions, explicit selection, and boundary-validated adoption
+remain required. Shared grant definitions must not silently propagate expanded
+authority to their assignments. Definition revision/adoption fields and full
+role-based split-record contracts are still open; this chapter's existing role
+revision fields do not settle them.
+
 Status: **AGREED.** The user proposed separating role revisions from grant
 adoption, with boundary validation when a grant adopts a revision, and instructed
 “record this commit and push” after the concrete Q-089-B proposal and examples.

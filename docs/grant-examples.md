@@ -1,5 +1,10 @@
 # Grant examples
 
+**Q-090/Q-091 update:** recipient-bearing grant layouts below are deprecated
+history. Use [recipient-free grants and assignments](grant-assignments.md) and
+[dependent subgroups](subgroups.md). Boundary and complete-authority examples
+remain useful, but are not current wire contracts.
+
 **Q-089-B update:** ROLE-002's automatic live-role changes below are deprecated.
 Role-based grants now explicitly adopt immutable revisions; publishing a new
 revision does not change their permissions. Unpinned historical examples remain

@@ -1,5 +1,99 @@
 # Handbook reconciliation register
 
+## Publication authorization after Q-099
+
+The user explicitly requested commit and push of the pending handbook checkpoint
+after reviewing Q-099. This reopens publication for the agreed recipient-free
+grant/assignment model, dependent team/grant lineage, team administration,
+assignment authority, orphan definition, and Q-099 ownership reconciliation.
+The rationale and deprecated history remain in their chapters. Q-096's remaining
+open choices and scratch Q-097/Q-098 are not promoted. Tag `0.0.1` remains the
+unchanged previous baseline; earlier local-only/frozen notices below are history.
+
+## Q-099 — owner rotation and continuing team-held support
+
+The user approved Q-099, then lifted the lab file-modification freeze to apply
+the proposed reconciliation. Commits and pushes remain frozen. The
+[new chapter](ownership-lineage.md) and [SVG](assets/ownership-lineage.svg) record
+the rule, rationale, example, counterexamples, and exact scope of approval.
+
+Q-093 now separates the acting administrator's current authorization from the
+team assignment supplying ongoing team-held support. Actual selected personal
+dependencies remain required; there is no automatic conversion or parent
+rebinding. Q-096's corresponding dependency distinction is settled, while its
+two-owner recommendation and ownership contracts remain open. Earlier wording
+is retained in explicitly superseded history blocks.
+
+The handbook index, grant model, lineage chapter, tree, decision log, system
+overview, and reader entry are reconciled. The request-flow SVG and endpoint-owned
+gate are not redesigned. Q-097/Q-098 and scratch owner-list JSON are not promoted;
+no scratch ownership records or runtime authorization data are changed. This is
+not full schema publication or a fresh handbook-completion measurement.
+
+Verification: the TypeScript/Vite production build and all ten reader tests pass.
+The new diagram-packaging regression test first failed because the SVG was not
+emitted, then passed after current diagram assets were included in reader URL
+mapping. Read-only checks validated 30 changed/new Markdown files, 434 local
+links, 60 JSON blocks, and balanced history sections. Original grant-format and
+Q-089 bodies and all 17 Q-041–Q-050-F references remain preserved. SVG XML/viewBox
+validation passes; browser visual verification and runtime authorization
+conformance are not claimed. `git diff --check` is clean; HEAD and tag `0.0.1`
+remain at `247e839`. No commit or push was performed.
+
+## Q-093 and Q-095 — supporting authority and parent-dependent relationships
+
+The user explicitly requested recording Q-093, then clarified that both child
+teams and child grants remain within their parents in scope and permissions.
+The user specified that entities remain teams and grants: “sub-” qualifies their
+relationship, not a new entity type. [Assignment authority](assignment-authority.md)
+and [lineage definitions](authority-lineage.md) record the rules, examples,
+rationale, and exact contract gaps. No new parent-link fields are invented.
+
+Current entry points, the tree/log, subgroup chapter, bootstrap notes, and grant
+administration text now link these refinements. ADMIN-002's earlier
+provision-without-possession alternative is marked superseded for dependent
+assignments; its history remains. A separate broad assignment cannot escape a
+child team's parent ceiling. Human access through other independently authorized
+routes is distinct from authority assigned to that child team.
+
+Q-094's detailed orphan lifecycle is not independently approved; existing required
+support remains mandatory under Q-091/Q-093. No runtime migration, new commit/push,
+or fresh completion score is claimed. Earlier verification entries below describe
+their checkpoints, not this later edit.
+
+## Q-090 / Q-091 — recipient-free grants and dependent subgroups
+
+The user tagged the committed baseline `0.0.1` at `247e839`, verified it on local
+and remote main, then explicitly requested both scratch-model directions become
+canonical. This authorizes local recording and reconciliation, not automatic
+commit/push, a runtime migration, or promotion of every scratch proposal.
+
+- [Grants and assignments](grant-assignments.md) records the approved separation,
+  versioned JSON, rationale, dependency consequences, and remaining contract gaps.
+- [Subgroups](subgroups.md) records one supporting parent assignment per route,
+  permission subset, scope AND, direct membership, and explicit administration.
+- Recipient-bearing examples, TERM-004's single-record rule, and the blanket
+  subgroup exclusion are deprecated where conflicting; originals remain in the
+  chapters/log and in `0.0.1`. Earlier owner/membership and combined dependency
+  formats are not silently promoted.
+- Reader navigation, current concept explanation, logical authority loading,
+  shared SVG labels, and the discussion tree reflect the split. The endpoint-owned
+  gate, endpoint policy, and result schema are not redesigned.
+- The baseline score is retained with re-audit pending, not presented as a fresh
+  completion percentage for the changed model.
+
+The combined derived-assignment field, definition revision fields, and team
+hierarchy record still need concrete discussion. No `parent_assignment_id` field,
+scope arrays, universal personal-access ceiling, or implicit ownership authority
+is approved by this reconciliation.
+
+Verification for this local update: TypeScript/Vite build and all nine reader
+tests pass; `git diff --check` is clean. Read-only checks covered 25 changed/new
+Markdown files, 381 local links, and 58 JSON blocks; the original grant-format
+body and Q-089 history remain verbatim, all 17 Q-041–Q-050-F references remain,
+and tag `0.0.1` still points to `247e839`. SVG source labels were checked; this is
+not browser visual verification or runtime authorization conformance evidence.
+
 ## Q-089-B — role-revision reconciliation checkpoint
 
 The user explicitly requested recording, commit, and push after the discussion

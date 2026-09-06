@@ -24,6 +24,16 @@ test('homepage loads the same handbook application as the concept page', async (
   assert.equal(modules.some(id => /\/src\/(main|scenario-pack)\.ts$/.test(id)), false)
 })
 
+// Catch chapter diagrams linked by the reader being absent from production.
+test('production includes the linked ownership-lineage SVG', async () => {
+  const bundle = await build({ logLevel: 'silent', build: { write: false } })
+  const outputs = (Array.isArray(bundle) ? bundle : [bundle]).flatMap(result => result.output)
+  const diagram = outputs.find(output => /^assets\/ownership-lineage-[^/]+\.svg$/.test(output.fileName))
+  assert.ok(diagram, 'The reader-linked ownership diagram must be emitted')
+  assert.ok(outputs.some(output => output.type === 'chunk' && output.code.includes(diagram.fileName)),
+    'The application must reference the emitted diagram URL')
+})
+
 const server = await createServer({
   logLevel: 'silent',
   server: { host: '127.0.0.1', port: 0 },

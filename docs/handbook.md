@@ -1,6 +1,36 @@
 # Authorization Handbook — working edition
 
-## Current position
+## Current position — Q-099 ownership/lineage refinement
+
+The user approved recipient-free reusable grants with separate recipient-bearing
+assignments, and subteams/subgroups with explicit dependent authority. Read
+[grants and assignments](grant-assignments.md) and [subgroups](subgroups.md) for
+canonical examples, rationale, deprecations, and the remaining contract gaps.
+
+Tag `0.0.1` preserves the previous committed decisions. This local update records
+the new direction; it is not a runtime migration, complete schema publication,
+or approval of the remaining owner, revision, or derived-assignment fields.
+Recording these decisions is authorized; no new commit/push is implied.
+
+[Q-092: team administration](team-administration.md) now approves the initial
+create/write/delete grant: create includes subteams, write includes membership,
+and assigning authority remains separately authorized. Empty scope is tenant-wide.
+
+[Q-093](assignment-authority.md) records the parent-authority ceiling: the assigner
+needs both administrative permission and a valid supporting authority route.
+[Q-095](authority-lineage.md) defines “sub-” as a relationship; canonical entities
+remain teams/groups and grants. A child team's total authority and each derived
+grant stay within their respective parents. Exact link fields remain open.
+
+[Q-099: ownership and lineage](ownership-lineage.md) is agreed: explicitly
+changing owners does not automatically change team-held supporting assignments
+or downstream authority. Q-093 still checks the acting administrator; its ongoing
+dependency rule now distinguishes team-held support from explicitly personal
+routes. No automatic rebinding or personal-authority merging occurs. The
+[SVG](assets/ownership-lineage.svg) illustrates this separation. Q-096's two-owner
+recommendation and exact ownership contracts remain open.
+
+## Previous position — preserved reconciliation history
 
 The approved discussion through **Q-050-F** is the source of truth. Reader pages
 and the [shared system diagram](system-overview.md) are locally reconciled to
@@ -23,9 +53,15 @@ rationale, examples, and links. Navigation cleanup must not hide agreed decision
   trusted implicit tenant. No additional canonical “target” entity is required.
 - Scope is a required flat string-value object: AND within one scope, alternatives
   through complete grants, explicit `{}` for no narrower tenant-local restriction.
-  Missing/null scope is invalid. Applications register supported key meanings.
+  A derived route retains its parent scope AND additional child constraints;
+  additional `{}` does not discard the parent boundary. Missing/null scope is
+  invalid. Applications register supported key meanings.
+- Grants define reusable permissions and scope without recipients. Assignments
+  bind them to recipients and retain separate identity and lifecycle eligibility.
 - Auth owns human authorization groups/memberships. Team means group.
   Group grants are preferred, not exclusive; self resolves per authorizing human.
+- Subteam means subgroup: explicitly selected dependent authority, with permission
+  subset and scope AND. No automatic parent membership or all-parent-grant access.
 - Services/agents are human-dependent subsets, never independent group members.
   Resolved grants preserve their source bindings and dependencies.
 - A protected method/route declares exactly one permission and selected inputs
@@ -262,6 +298,12 @@ it is not a new schema or an invitation to seek the same approval again.
 
 | Chapter | Purpose |
 |---|---|
+| [Assignment authority — Q-093](assignment-authority.md) | Administrative permission plus the assigner's supporting source route, possession-ceiling rationale, and pending lineage contract. |
+| [Lineage and the meaning of sub- — Q-095](authority-lineage.md) | Canonical relationship definitions, team/grant ceilings, scope AND, direct membership, and resolution consequences. |
+| [Ownership and team-held lineage — Q-099](ownership-lineage.md) | Owner-rotation rule, Q-093/Q-096 refinement, SVG, rationale, counterexamples, and remaining ownership contracts. |
+| [Team administration — Q-092](team-administration.md) | Initial create/write/delete grant, membership under write, separate assignment authority, and bootstrap limits. |
+| [Grants and assignments — Q-090](grant-assignments.md) | Canonical recipient-free definitions, recipient-bearing assignments, reuse, rationale, and revision/dependency gaps. |
+| [Subteams / subgroups — Q-091](subgroups.md) | Canonical dependent authority, one supporting parent assignment, permission subset, scope AND, and no membership inheritance. |
 | [System overview and SVG](system-overview.md) | Current responsibility layers, single gate, inputs, complete authority, and actual-use enforcement. |
 | [Vocabulary](authorization-vocabulary.md) | Permission/boundary/request-material terms, tenability checks, and the retired vocabulary's rationale. |
 | [Permission](permission-model.md) | Restored detailed operation/reach explanation, namespaced naming examples, rationale, and explicitly open grammar rules. |

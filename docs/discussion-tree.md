@@ -1,6 +1,57 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-089-B role revisions and explicit adoption agreed
+## Current position — Q-099 separates ownership from team-held lineage
+
+```text
+Post-0.0.1 canonical direction
+├── Grant definition: permissions + scope; no recipient [Q-090 AGREED]
+├── Assignment: grant reference + recipient + status [Q-090 AGREED]
+├── Subteam / subgroup: explicit dependent authority [Q-091 AGREED]
+│   ├── One supporting parent assignment per derived route
+│   ├── Permissions subset; parent scope AND child constraints
+│   └── Human memberships remain direct, not inherited
+├── Team administration: create/write/delete; write includes membership [Q-092 AGREED]
+│   └── Creating a subteam does not assign its authority; assignment is separate
+├── Assignment: admin authority + assigner's valid supporting parent route [Q-093 AGREED]
+├── Sub-: parent-dependent relationship, not new team/grant entity types [Q-095 AGREED]
+│   └── Child-team total authority and each child grant remain within their parents
+├── Missing required parent support: orphaned route cannot authorize [Q-094 AGREED]
+├── Owner rotation does not rewrite team-held authority lineage [Q-099 AGREED]
+│   ├── Acting administrator still needs current authorization [Q-093 refined]
+│   ├── Selected team assignment remains continuing support
+│   ├── Explicit personal dependencies remain; no automatic rebinding
+│   └── Q-096: two-owner recommendation and ownership contracts remain OPEN
+└── OPEN: combined dependency/hierarchy format, definition revisions,
+    assignment lifecycle, owner rules, and administrative boundaries
+```
+
+See [grant/assignment rationale and JSON](grant-assignments.md) and
+[subgroup rationale and examples](subgroups.md). Recording these decisions is
+authorized; this is not a commit/push instruction. The `0.0.1` tag preserves the
+baseline. The prior 35/68 score below is a baseline checklist score, not a fresh
+completion measurement for the expanded model; re-audit remains pending.
+
+[Q-092's initial team-admin grant](team-administration.md) is recorded with
+its tenant-wide reach and membership-distribution consequences. [Q-093](assignment-authority.md)
+records the supporting-source and separate administrative checks. [Q-095](authority-lineage.md)
+clarifies team, grant/assignment, scope, and membership relationships. Exact link
+fields remain open. Q-094's orphan definition is now agreed, with explicit rather
+than automatic ownership transfer; full lifecycle remains open.
+[Q-099](ownership-lineage.md) settles the distinction between team-held support
+and the acting administrator, without importing Q-097/Q-098 from the scratchpad.
+The two-owner recommendation and exact ownership contracts remain open.
+
+<details>
+<summary>Earlier Q-096 position — dependency distinction resolved by Q-099</summary>
+
+Q-096 proposes
+team-held authority and two owners, including a pending distinction between
+team-source dependency and the original administrator's membership.
+
+</details>
+
+<details>
+<summary>Previous position — Q-089-B and 0.0.1 baseline score, preserved</summary>
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -70,6 +121,8 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 └── 11. Publish the foundation [0/4]
     └── Reconcile chapters, package contracts, accept v1, implementation roadmap OPEN
 ```
+
+</details>
 
 <details>
 <summary>Historical opening tree — Q-050-F-era snapshot, superseded above</summary>

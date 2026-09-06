@@ -1,5 +1,74 @@
 # Handbook working rules
 
+## Latest publication authorization
+
+The user explicitly instructed “let commit and push” after the Q-099
+reconciliation. Commit and push of the pending agreed handbook checkpoint to
+main are authorized after fresh verification. Preserve tag `0.0.1`; exclude
+external scratchpad files and do not promote Q-097/Q-098 or other open proposals.
+Earlier commit-freeze statements below describe previous checkpoints.
+
+## Current gate and Q-099 update
+
+The user lifted the lab file-modification freeze and authorized the proposed
+Q-099 reconciliation. Local file edits are enabled; commits and pushes remain
+frozen until explicitly authorized. Earlier gate statements below are history
+where they conflict. Preserve existing changes and deprecated explanations.
+
+Q-099 is AGREED: ownership changes do not automatically change team-held business
+authority. The acting administrator needs current authorization; continuing
+support is the selected team assignment and its actual lineage, not the original
+owner's membership merely because they acted. Explicit personal dependencies
+remain required, including upstream dependencies; no automatic migration/rebinding.
+See docs/ownership-lineage.md. Q-096's two-owner recommendation and exact ownership
+contracts remain open. Do not import Q-097/Q-098 or canonize scratch owner-list JSON
+under this scoped approval. No scratch ownership records are changed.
+
+Previous checkpoint, superseded by Q-099 where noted:
+
+Latest: Q-094 orphan definition is agreed; ownership transfer must be explicit,
+not automatic. Q-096 proposes team-based ownership and two owners using team-held
+authority. Do not silently replace Q-093's assigner-membership dependency: the
+proposed distinction between team-held continuing support and the acting owner's
+authorization still needs agreement. No two-person approval workflow is adopted.
+
+Latest update: the user explicitly requested recording Q-093. Assignment now
+requires separate administrative authority and a valid supporting parent route
+available to the assigner directly or through membership. Its combined link fields
+remain open. This supersedes provision-without-possession for dependent assignments.
+Q-095 records the user's clarification: canonical entities remain teams/groups
+and grants; “sub-” is a parent-dependent relationship, not a new entity type.
+All child-team authority and each child grant stay within their respective parents;
+no separate assignment may bypass the team ceiling. Q-094 orphan lifecycle details
+remain open. Keep comments short, record rationale, and do not infer commit/push
+authority. See docs/assignment-authority.md and docs/authority-lineage.md.
+
+Previous checkpoint:
+
+Latest recorded approval: Q-092 adopts the initial `auth:group::create/write/delete`
+bundle (three explicit permission strings), create includes subteams, write includes
+human membership, and grant assignment requires separate authority. Scope `{}` is
+tenant-wide. See docs/team-administration.md. User said “agreed, move next”;
+continue short, one-step discussion and record approvals with rationale. This does
+not reopen commit/push or settle the next assignment permission/bounds proposal.
+
+## Current gate and model — Q-090 / Q-091
+
+Tag `0.0.1` preserves commit `247e8392bb09885a9ff1c8ce94e5205a279e6852` on
+local and remote main. The user then explicitly authorized making subteams/
+subgroups and recipient-free grants canonical. Recording and reconciling these
+two decisions is authorized; do not infer permission to commit/push this new
+checkpoint or to finalize unrelated open questions. Earlier gate text below is
+historical where it conflicts. The user currently requests short answers and
+no unsolicited approval questions.
+
+Q-090 separates reusable grant definitions from recipient-bearing assignments.
+Q-091 permits explicit dependent subgroup authority, not membership inheritance.
+Preserve parent-assignment dependencies; the combined derived-assignment wire
+format, hierarchy record, owner rules, and definition revision fields remain open.
+See docs/grant-assignments.md and docs/subgroups.md. Preserve deprecated text and
+scratch examples; do not migrate runtime state or invent approved fields.
+
 ## Commit gate — reopened by the user
 
 The user explicitly instructed: “lets commit and push, and continue with the

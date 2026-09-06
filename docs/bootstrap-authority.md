@@ -1,5 +1,23 @@
 # Q-088 — minimal bootstrap grants and later self-assignment
 
+Current refinement: [Q-093](assignment-authority.md) requires a supporting parent
+authority route available to the assigner, in addition to assignment permission.
+The old provision-without-possession example below is superseded for dependent
+assignments. Bootstrap must establish the required explicit source authority;
+Q-092's team-administration grant alone cannot distribute unrelated business
+authority. The full seed set and bootstrap trust contract remain open.
+
+Post-0.0.1 update: [Q-090](grant-assignments.md) separates grant definitions from
+recipient-bearing assignments. Bootstrap authority must be established through
+the applicable assignments, not merely by creating definitions. The earlier
+recipient-bearing wording below is preserved history; no bootstrap bypass is added.
+
+[Q-092](team-administration.md) approves the example initial grant assigned to
+Maya: `auth:group::create`, `auth:group::write`, and `auth:group::delete`, with
+empty scope inside the implied tenant. Create includes subteams, write includes
+human membership, and assignment of authority remains separately authorized.
+This replaces the create-only starting proposal, not the remaining bootstrap gaps.
+
 Status: **AGREED.** The user answered the clarified Q-088 “yes, agreed.”
 Previous status, retained as history: **USER DIRECTION RECORDED; clarified rule
 awaiting confirmation** until that answer. This

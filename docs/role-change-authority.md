@@ -1,5 +1,10 @@
 # Q-089 — original live-role question, superseded by Q-089-B
 
+Later update: [Q-090](grant-assignments.md) separates grants and assignments;
+recipient-bearing JSON retained in this historical discussion is not current
+format. Q-089-B's role revision/adoption safety remains, with shared-definition
+revision mechanics still open.
+
 **Current decision: Q-089-B / ROLE-003 is AGREED.** Role definitions use immutable
 published revisions; grants explicitly adopt a revision after authorization and
 boundary validation. No role edit silently updates existing grants. See

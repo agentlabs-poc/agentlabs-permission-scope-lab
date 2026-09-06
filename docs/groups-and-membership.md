@@ -1,5 +1,21 @@
 # Authorization groups and membership
 
+## Current subgroup decision — Q-091
+
+[Subteams/subgroups](subgroups.md) are now canonical as explicit dependent
+authority relationships. This supersedes the blanket exclusion of subgroups,
+but does not introduce transitive membership: humans retain explicit memberships
+and do not automatically acquire membership or all grants of ancestor groups.
+Each derived route selects one supporting parent assignment, takes a permission
+subset, and ANDs scope constraints. The hierarchy record and combined wire
+contract remain open. [Q-090](grant-assignments.md) places recipients on assignments,
+not reusable grant definitions. Earlier layouts below are historical.
+
+[Q-099](ownership-lineage.md) separates owner administration from team-held
+authority. Changing owners does not automatically alter other human memberships
+or business assignments. Removing an owner-derived route does not revoke that
+human's separate grants; actual selected membership dependencies still apply.
+
 Q-045 approves GROUP-001-A and GROUP-003. The user also reaffirmed PROCESS-003:
 recording must capture rationale, not just the approval. This chapter therefore
 preserves the choices, reasons, examples, safety consequences, and open details.
@@ -12,8 +28,11 @@ preserves the choices, reasons, examples, safety consequences, and open details.
 2. **Groups contain humans only.** Service accounts and agents are not
    first-class group members. Their access remains human-dependent and bounded
    by the authority available through that human.
-3. **Nested authorization groups are not supported (Q-077).** Membership is
-   direct human-to-group, with no transitive group-membership inheritance.
+3. **Subgroups use explicit dependent authority (Q-091), not membership
+   inheritance.** Human-to-group memberships remain direct.
+
+Previous rule, deprecated as a blanket subgroup exclusion: **Nested authorization
+groups are not supported (Q-077).** Its direct-membership restriction remains.
 
 Team and group are synonymous (TERM-001). Group-based human grants remain
 preferred, while direct human grants remain supported (GROUP-004). Those
@@ -69,6 +88,11 @@ denial can detect a change the evaluator has not learned about.
 
 ## Lifecycle and authority limits
 
+Q-092 assigns human membership administration to `auth:group::write` in the
+approved coarse [team-administration model](team-administration.md). Create
+includes teams/subteams; grant assignment remains separate. The initial empty
+scope is tenant-wide, not an implicit owner-only scope.
+
 Membership changes require their own administrative authorization. Permission
 to assign a grant to a group does not itself permit joining or editing that
 group. Group ownership also does not make a group's creator implicitly entitled
@@ -80,10 +104,13 @@ These policies do not permit independent service-account authority.
 
 Historical open list after Q-045: nested-group mechanics, membership synchronization
 guarantees, exact lifecycle representation, freshness, and delegation encoding.
-Q-077 now settles nesting as unsupported. The other items remain open; ownership
-and member types alone do not finish them or the whole identity glossary.
+Q-077 settled nesting as unsupported at that checkpoint; Q-091 now supersedes
+the blanket exclusion as described above. Other lifecycle details remain open.
 
 ## Q-077 / GROUP-005 — direct human membership only in v1
+
+Historical decision, partially superseded by Q-091: the original question and
+answer below are retained. They do not override the new subgroup model.
 
 Status: **AGREED — NOT SUPPORTED.** The user answered Q-077: “nested group not
 supported.” This settles the separately open question of transitive membership

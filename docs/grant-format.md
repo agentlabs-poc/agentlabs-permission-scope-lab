@@ -1,5 +1,23 @@
 # Current grant formats — canonical v1 scope
 
+## Current: recipient-free definitions and separate assignments — Q-090
+
+The canonical minimal formats now live in [grants and assignments](grant-assignments.md).
+A grant has no `recipient`; the assignment carries `grant_id`, `recipient`, and
+its enabled/disabled status. [Subgroups](subgroups.md) add explicitly dependent,
+narrower authority; their combined assignment-aware wire format remains open.
+
+Scope descriptors remain flat, string-valued AND selectors. A derived route adds
+constraints to its parent boundary; `{}` cannot discard that parent boundary.
+No stored state is migrated, and no contract-version compatibility rule is implied.
+
+<details>
+<summary>Pre-Q-090 grant layouts — deprecated recipient-bearing representation, preserved</summary>
+
+All “current” layout labels below describe the `0.0.1` baseline. Their scope,
+role-revision, and complete-authority invariants survive unless explicitly
+superseded; their recipient-bearing grant format does not.
+
 Role-reference update — Q-089-B / ROLE-003: role-based grants include an explicit
 `role_revision` alongside `role_id`. Roles publish immutable revisions; grants
 adopt them through authorized boundary validation. Older unpinned role examples
@@ -230,3 +248,5 @@ No stored grants, application code, or external authorization state have been
 migrated. Next settle scope-key definition/governance, return to administrative
 bounds, then finish lifecycle and request/resolved-grant contracts. Full v1
 handbook coverage remains open.
+
+</details>

@@ -1,5 +1,10 @@
 # Operation-specific enforcement — impact-first discussion
 
+Q-090 separates [grants and assignments](grant-assignments.md). Recipient-bearing
+grant examples below are deprecated layouts, retained to explain operation
+boundaries. Their enforcement requirements remain; this chapter does not provide
+the new full assignment or subgroup contract.
+
 ## Q-068 / ENFORCEMENT-004 — moving data across an authorization boundary
 
 Status: **AGREED.** The user requested a fuller Finance-to-Engineering explanation

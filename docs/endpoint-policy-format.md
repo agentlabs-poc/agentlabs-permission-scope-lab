@@ -1,5 +1,11 @@
 # Endpoint policy format — approved partial structure
 
+Q-090 separates [grants and assignments](grant-assignments.md). Recipient-bearing
+grant examples below are deprecated layouts, retained for boundary-enforcement
+rationale. Endpoint policy is not redesigned: one permission, declared inputs,
+and endpoint-owned enforcement remain. [Subgroup dependencies](subgroups.md)
+are resolved as part of complete authority, not a new prepared handoff.
+
 ## Current reading guide — reconciled through Q-050-F
 
 Later refinement: [Q-068 / ENFORCEMENT-004](operation-enforcement.md) now requires

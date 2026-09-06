@@ -2,6 +2,11 @@
 
 ## SVG-001 — follow a request, not a responsibility checklist
 
+For ownership changes rather than request flow, see the separate
+[Q-099 ownership/lineage explanation](ownership-lineage.md) and
+[ownership SVG](assets/ownership-lineage.svg). Owner rotation does not redesign
+this endpoint-owned gate or replace the selected team-held authority source.
+
 The user approved a client-to-handler request-flow layout. The diagram follows
 one certificate read: client, authentication middleware, endpoint handler,
 embedded Auth Agent, authority loading from Auth, constrained application data
@@ -13,7 +18,7 @@ This replaces the less readable responsibility-first layout, not the approved
 authorization rules. Its [previous SVG](assets/history/authorization-system-pre-svg001.svg)
 and [overview text](history/system-overview-pre-svg001.md.txt) remain archived.
 
-**Current through Q-050-F.** This diagram represents the approved discussion,
+**Authority loading updated through Q-090/Q-091.** This diagram represents the approved discussion,
 not the historical lab implementation or a verified deployment topology.
 The [pre-reconciliation overview](history/reconciliation-2026-09-05/docs/system-overview.md.txt)
 and [previous SVG](history/reconciliation-2026-09-05/docs/assets/authorization-system.svg)
@@ -34,12 +39,13 @@ is also retained.
 3. The handler binds and validates required inputs from the server-owned endpoint
    policy, then invokes the embedded Auth Agent with the declared permission and
    relevant material.
-4. Authority loading supplies valid human memberships, direct/group grants,
-   permissions from each grant's adopted role revision, validity/conditions,
-   and dependencies. Shared loading
+4. Authority loading supplies valid human memberships, direct/group assignments,
+   their reusable grant definitions, permissions from adopted role revisions,
+   validity/conditions, and dependencies including supporting parent assignments
+   for subgroup-derived routes. Shared loading
    or valid preloaded material may satisfy this; the arrows do not mandate a
    fresh remote call for every request. The embedded agent resolves and evaluates
-   complete grants using the shared canonical rules.
+   complete assigned authority using the shared canonical rules.
 5. In this example a valid route establishes certificate-read authority within
    Finance. No valid authority means stop. Finance authority does not establish
    that unchecked C-17 belongs to Finance; the result labels are explanatory,
@@ -79,13 +85,19 @@ separate service, fixed number of network calls, or duplicated per-handler clien
 | Responsibility | What it supplies or guarantees |
 |---|---|
 | Authentication/context | Verified actor and authorizing human, and trusted tenant context. Caller path/body values do not become trusted facts merely by extraction. |
-| Auth / Layer 1 authority | Valid human memberships, direct/group grants, permissions from adopted role revisions, validity/conditions, and required dependency evidence. |
+| Auth / Layer 1 authority | Valid human memberships, direct/group assignments, grant definitions, adopted role revisions, validity/conditions, and required parent-assignment/delegation dependency evidence. |
 | Application / Layer 2 | Server-owned endpoint policy, valid request values, registered boundary meanings, facts where needed, and constrained execution. |
 | Embedded evaluator | Complete-grant applicability, one required permission, supported scope meaning, and tenant/human/dependency limits. |
 | Endpoint enforcement | Actual returned data and mutation effects remain within the authorized boundary and relevant request bindings. |
 
 These are responsibilities, not an approved SDK interface or result schema.
 Layer 2 cannot manufacture authority or override canonical limits.
+
+Q-090 separates [grant definitions and assignments](grant-assignments.md).
+Q-091 permits [explicitly dependent subgroups](subgroups.md), without membership
+inheritance. These change authority representation/loading, not the request path
+or the endpoint's single gate. The older direct/group “grant” loading description
+is preserved in baseline `0.0.1`; assignment-aware wire contracts remain incomplete.
 
 ## Declaration and required inputs
 

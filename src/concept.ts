@@ -5,8 +5,8 @@ import hrmsGuide from './content/hrms-tenant-setup.md?raw'
 import projectsGuide from './content/projects-repositories-teams.md?raw'
 import './styles.css'
 
-// Emit local chapter sources and preserved originals for production links too.
-const sourceAssets = import.meta.glob<string>('../docs/**/*.{md,txt}', {
+// Emit chapter sources, preserved originals, and current diagrams for reader links.
+const sourceAssets = import.meta.glob<string>(['../docs/**/*.{md,txt}', '../docs/assets/*.svg'], {
   eager: true, query: '?url', import: 'default',
 })
 const guideAssets = Object.fromEntries(
@@ -19,7 +19,7 @@ const documents = {
   concept: {
     label: 'Concept model',
     title: 'The Authorization Handbook',
-    description: 'Permissions, boundary scopes, complete grants, and one endpoint-owned authorization gate.',
+    description: 'Reusable grants, assignments, dependent subgroups, and one endpoint-owned authorization gate.',
     filename: 'authorization-concept.md',
     markdown: conceptGuide,
   },
@@ -58,7 +58,7 @@ app.innerHTML = `
       <p class="source-note">Rendered directly from <code>${currentDocument.filename}</code>.</p>
     </aside>
     <article class="markdown-body">
-      <p class="reconciliation-notice">Working handbook · Approved decisions through Q-050-F. Linked chapters open their local Markdown source.</p>
+      <p class="reconciliation-notice">Working handbook · Q-090/Q-091: separate assignments and dependent subgroups. Baseline preserved as 0.0.1. Linked chapters open their local Markdown source.</p>
       <figure class="system-diagram">
         <a href="${systemDiagram}" aria-label="Open request-flow diagram at full size"><img src="${systemDiagram}" alt="Client request flows through authentication middleware and the endpoint handler. The embedded Auth Agent loads Auth authority and evaluates grants; the handler enforces a constrained database read and returns the response."></a>
         <figcaption>Request-flow SVG · <a href="${systemDiagram}">Open full size</a></figcaption>

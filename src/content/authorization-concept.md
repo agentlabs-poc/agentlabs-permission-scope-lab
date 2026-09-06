@@ -1,5 +1,19 @@
 # Authorization: the agreed foundation
 
+Current authority model: [Q-090](../../docs/grant-assignments.md) separates
+recipient-free grants from assignments; [Q-091](../../docs/subgroups.md) makes
+explicit dependent subgroups canonical without inherited membership. The
+`0.0.1` tag preserves the preceding model. Full new contracts remain open.
+
+[Q-099: ownership and lineage](../../docs/ownership-lineage.md) separates owner
+rotation from continuing team-held support. The acting administrator must still
+be authorized; actual personal dependencies remain required. No automatic
+parent rebinding or merging of personal grants occurs. See the
+[ownership/lineage SVG](../../docs/assets/ownership-lineage.svg).
+
+<details>
+<summary>Earlier reader checkpoint — preserved history</summary>
+
 This reader summarizes the approved discussion through **Q-050-F**. It is a
 working handbook, not a claim that the historical simulators implement the model.
 Detailed rationale remains in the [decision log](../../docs/handbook-roadmap.md)
@@ -8,6 +22,8 @@ and [current chapters](../../docs/handbook.md). The
 keeps those agreements, rationale, and remaining questions visible. The
 [original concept page](../../docs/history/reconciliation-2026-09-05/src/content/authorization-concept.md.txt)
 is preserved as deprecated history.
+
+</details>
 
 ## 1. Permission answers “what”; scope answers “within which boundaries”
 
@@ -76,6 +92,40 @@ but that does not make the grant a query program.
 
 ## 2. A grant keeps permission and boundary together
 
+The grant defines reusable authority; a separate assignment identifies who
+receives it. These are minimal examples, not complete lifecycle/update schemas.
+
+```json
+{
+  "version": "1",
+  "id": "G-SELF-PAYSLIP-READ",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {"user": "$self"}
+}
+```
+
+```json
+{
+  "version": "1",
+  "id": "A-EMPLOYEES-PAYSLIP-READ",
+  "grant_id": "G-SELF-PAYSLIP-READ",
+  "recipient": {"type": "group", "id": "employees"},
+  "status": "enabled"
+}
+```
+
+For Vinay, self still means Vinay. His valid membership supplies the Employees
+assignment, which references the grant. Creating the definition alone supplies
+no access. Keep both record identities and membership dependencies in resolution.
+Roles provide permissions from explicitly adopted immutable revisions, not live
+updates. Shared definition revision/adoption mechanics remain open.
+
+A Finance-write route and tenant-wide-read route cannot combine into tenant-wide
+write. [Meaning, reuse, and restrictions](../../docs/grant-assignments.md).
+
+<details>
+<summary>Earlier recipient-bearing grant and live-role prose — deprecated, preserved</summary>
+
 This abbreviated working grant gives members of the employee group permission
 to read their own payslips. Lifecycle fields are omitted for focus; this is not
 a complete published grant schema.
@@ -103,12 +153,20 @@ and a tenant-wide-read grant do **not** combine into tenant-wide write. Valid
 positive grants are alternative routes; explicit deny grants are excluded from
 v1. [Grant meaning and rationale](../../docs/grant-model.md).
 
+</details>
+
 ## 3. Human membership and dependent automation
 
 Auth owns authorization groups and memberships; team and group mean the same
 thing. Groups contain humans. Group-based access is preferred, not mandatory:
 direct human grants remain supported. Applications may synchronize business
 groups to Auth or keep them separate.
+
+Subteam and subgroup are synonymous. A subgroup receives only explicitly selected
+dependent authority: one supporting parent assignment per route, a permission
+subset, and parent scope AND child constraints. Child scope `{}` adds no further
+restriction; it never discards the parent boundary. Membership is not inherited.
+See [Team1, Team2, and Nutan](../../docs/subgroups.md).
 
 Services and agents always depend on a human's authority and remain a subset of
 it. They are not first-class group members. Losing a required membership or
@@ -131,10 +189,10 @@ Layer 2 supplies application meanings, selected inputs, valid values, facts
 where needed, additional restrictions, and enforcement. The application-embedded
 auth agent works across both layers using shared rules.
 
-For Vinay, authority loading logically obtains valid memberships and then direct
-grants plus grants for those groups. Role expansion and dependency resolution
-retain provenance and restrictions. A resolved grant is an evaluation-ready,
-dependent view—not an allow decision.
+For Vinay, authority loading obtains valid memberships, direct/group assignments,
+their grant definitions, and supporting assignment/delegation dependencies.
+Adopted role expansion and dependency resolution retain provenance and restrictions.
+A resolved grant is an evaluation-ready dependent view—not an allow decision.
 
 Pre-handler middleware may authenticate and load context or authority. Business
 authorization has **one endpoint-owned gate**, with no middleware allow/prepared

@@ -1,5 +1,85 @@
 # Authorization handbook — agreed roadmap
 
+## Current decisions after baseline 0.0.1 — including Q-099
+
+The user instructed: “now lets make the sub-team/sub-group canonical and grant
+without recipient canonical.” The following approvals supersede conflicting
+baseline rows below. Tag `0.0.1` at `247e839` preserves the earlier state.
+Recording and local reconciliation of these decisions are authorized; no new
+commit/push or unrelated policy approval is inferred.
+
+| Reference | Status | Decision and rationale |
+|---|---|---|
+| Q-090 | AGREED | Grants are reusable recipient-free authority definitions. Separate assignments carry the grant reference, recipient, and enabled/disabled status. Creation of a definition grants no access; assignment is separately authorized. Reuse and recipient retrieval become explicit without detaching restrictions. See [canonical JSON and rationale](grant-assignments.md). TERM-004 and the recipient-bearing parts of GRANT-001/002 and ROLE-001 are deprecated; complete-authority association survives. |
+| Q-091 | AGREED | Subteam = subgroup, with explicitly dependent authority from one supporting parent assignment per route. Child permissions are a subset; effective scope is parent AND additional child constraints. Membership is not inherited. The blanket subgroup exclusion in GROUP-005 is superseded, not its prohibition on implicit transitive membership. See [examples and rationale](subgroups.md). |
+
+**Q-092 — AGREED:** the initial team-administration grant bundles
+`auth:group::create`, `auth:group::write`, and `auth:group::delete`. Create includes
+subteams, write includes human membership, and assignment of grants requires
+separate authority. Empty scope makes the initial grant tenant-wide. Membership
+management intentionally distributes existing team access but cannot change its
+assigned authority. [Exact grant, rationale, and remaining boundaries](team-administration.md).
+
+**Q-093 — AGREED AT RULE LEVEL:** assignment requires administrative authority
+for the operation/recipient and a valid supporting parent grant route available
+to the assigner directly or through membership. Child permissions are a subset;
+scope adds AND restrictions. Supporting assignment and any required membership
+remain dependencies. This supersedes ADMIN-002's provision-without-possession
+alternative for the new dependent model, not the separation of administration
+from use. [JSON illustration, rationale, consequences, and contract gaps](assignment-authority.md).
+
+**Q-095 — AGREED:** the entities remain teams/groups and grants. “Sub-” qualifies
+a parent-dependent relationship, not another entity type. Child-team total
+authority stays within its parent team's authority; each child grant stays
+within its parent grant. No separate assignment may bypass the team ceiling.
+Subset includes equality and does not imply membership inheritance.
+[Canonical definitions, lineage map, and rationale](authority-lineage.md).
+
+**Q-094 — DEFINITION AGREED; lifecycle open.** The user approved the definition
+of orphan grant in the [lineage chapter](authority-lineage.md#orphan-grant--q-094-agreed-definition):
+a grant whose required parent support is missing in the affected lineage.
+An unassigned definition or legitimate parentless root is not automatically orphaned.
+Existing Q-091/Q-093 rules stop unsupported dependent authority. The user also
+requires explicit ownership transfer, not automatic transfer. Cleanup, wire
+status, and concrete transfer/rebinding contracts remain open. Previous status:
+definition proposed.
+
+**Q-099 — AGREED AT RULE LEVEL:** explicit owner changes do not automatically
+change team-held business grants, supporting assignments, selected revisions,
+parent links, or other memberships. Q-093 still requires current acting-admin
+authorization, but continuing team-held support is the selected team assignment
+and its actual lineage, not the original owner's membership merely because they
+acted. Explicit personal dependencies remain; no automatic rebinding or import
+of an owner's broader personal authority occurs. Rationale: administrative
+continuity must not silently rewrite recipients' authority.
+[Example, SVG, consequences, and open contracts](ownership-lineage.md).
+
+**Q-096 — PARTLY RESOLVED BY Q-099:** team-held support versus acting-owner
+authorization is settled. The two-owner recommendation, ownership-transfer
+permissions, and exact ownership/link contracts remain open. Q-097/Q-098 and
+scratch owner-list JSON are not promoted by this update.
+
+<details>
+<summary>Earlier Q-096 status — dependency distinction now settled by Q-099</summary>
+
+**Q-096 — PROPOSED:** recommend team-based ownership with two human administrators
+using team-held authority, without merging their personal authority into child
+routes. [Rationale and the pending Q-093 dependency refinement](authority-lineage.md#team-based-ownership--q-096-proposed-refinement)
+are recorded; exact ownership contracts and the recommendation remain under discussion.
+
+</details>
+
+The combined derived-assignment wire format, team hierarchy record, definition
+revision/adoption contract, owner permissions/automatic issuance, administrative
+containment validation details, and lifecycle mechanics remain open. Scope arrays
+and implicit owner bypass are not adopted. Earlier statements that no source
+possession ceiling is adopted describe the checkpoint before Q-093.
+
+## Baseline roadmap and historical reconciliation notes
+
+Earlier “current” snapshots and gate statements below are historical where the
+decisions above supersede them. They remain for rationale and decision traceability.
+
 ## Current reconciliation and process override
 
 The user's approved discussion takes precedence over older `src/content` prose,

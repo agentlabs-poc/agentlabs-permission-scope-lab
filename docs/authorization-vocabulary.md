@@ -1,5 +1,12 @@
 # Authorization vocabulary and request material
 
+Q-090 now distinguishes a reusable recipient-free **grant definition** from its
+recipient-bearing **assignment**. A **subteam/subgroup** under Q-091 receives
+explicit dependent authority, not transitive membership. See
+[grant/assignment meanings](grant-assignments.md) and [subgroups](subgroups.md).
+This supersedes TERM-004's previous treatment of grant and assignment as one
+logical record, without introducing another request-boundary entity.
+
 TERM-005 / Q-043 is agreed. The user asked to remove an unnecessary term from
 the vocabulary, then requested a tenability check before editing. After the
 check, the user agreed to describe authorization through permissions, scope

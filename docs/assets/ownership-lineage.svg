@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="800" viewBox="0 0 1120 800" role="img" aria-labelledby="title desc">
+  <title id="title">Ownership changes; team-held authority lineage stays intact</title>
+  <desc id="desc">Agreed Q-099 rule illustrated with scratch examples; ownership contracts remain open. The left column shows an explicitly authorized change from the current Team1 owners Om and Maya to a replacement owner list, with access to the same Team1-scoped owner grant. The right column remains unchanged: the team's existing Finance grant assignment supports Team2's Finance-read authority, which Nutan receives through Team2 membership. This assumes the authority source is team-held rather than dependent on the departing owner's personal membership. No actual owner records are changed. Separate personal grants are not automatically revoked.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#587087"/></marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #203348; }
+      .title { font-size: 26px; font-weight: 700; }
+      .heading { font-size: 19px; font-weight: 700; }
+      .body { font-size: 17px; }
+      .small { font-size: 14px; fill: #526579; }
+      .line { fill: none; stroke: #587087; stroke-width: 2; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1120" height="800" fill="#f7f9fc"/>
+  <text x="40" y="48" class="title">Owner change ≠ authority-lineage change</text>
+  <text x="40" y="78" class="small">Q-099 agreed · Illustrative records · Tenant implied · No actual ownership transfer performed</text>
+
+  <rect x="35" y="106" width="475" height="539" rx="16" fill="#fffaf0" stroke="#dfc58c"/>
+  <rect x="550" y="106" width="535" height="539" rx="16" fill="#f0faf5" stroke="#a6ccb7"/>
+  <text x="58" y="140" class="heading">CHANGES: who administers Team1</text>
+  <text x="575" y="140" class="heading">UNCHANGED: team-held authority</text>
+
+  <rect x="65" y="164" width="415" height="79" rx="10" fill="white" stroke="#ceb47d"/>
+  <text x="86" y="193" class="heading">Current owner list</text>
+  <text x="86" y="223" class="body">Om + Maya</text>
+  <path d="M272 243 V305" class="line"/>
+  <text x="288" y="272" class="small">Explicit, authorized transfer</text>
+  <text x="288" y="291" class="small">No automatic replacement</text>
+
+  <rect x="65" y="308" width="415" height="79" rx="10" fill="white" stroke="#ceb47d"/>
+  <text x="86" y="337" class="heading">Updated owner list</text>
+  <text x="86" y="367" class="body">New authorized owner(s)</text>
+  <path d="M272 387 V445" class="line"/>
+  <text x="288" y="420" class="small">Same owner-grant access</text>
+
+  <rect x="65" y="448" width="415" height="104" rx="10" fill="white" stroke="#ceb47d"/>
+  <text x="86" y="478" class="heading">G-TEAM1-OWNER</text>
+  <text x="86" y="507" class="body">auth:group::write · group = team1</text>
+  <text x="86" y="533" class="small">Team details / membership; not grant assignment</text>
+  <text x="65" y="589" class="small">Owner access changes; business grants are not copied.</text>
+  <text x="65" y="613" class="small">Separate grants held by former owners remain separate.</text>
+
+  <rect x="580" y="164" width="475" height="110" rx="10" fill="white" stroke="#8ab89e"/>
+  <text x="602" y="194" class="heading">Team1's existing supporting assignment</text>
+  <text x="602" y="224" class="body">FIN grant: payslip read / write</text>
+  <text x="602" y="251" class="small">Assignment, selected revision, scope, and source stay fixed</text>
+  <path d="M817 274 V335" class="line"/>
+  <text x="839" y="309" class="small">Same selected parent support</text>
+
+  <rect x="580" y="338" width="475" height="110" rx="10" fill="white" stroke="#8ab89e"/>
+  <text x="602" y="368" class="heading">Team2's dependent assigned authority</text>
+  <text x="602" y="398" class="body">Payslip read · inherited dept = FIN</text>
+  <text x="602" y="425" class="small">Permission subset · parent scope AND additional scope</text>
+  <path d="M817 448 V510" class="line"/>
+  <text x="839" y="483" class="small">Same human membership</text>
+
+  <rect x="580" y="513" width="475" height="78" rx="10" fill="white" stroke="#8ab89e"/>
+  <text x="602" y="543" class="heading">Nutan</text>
+  <text x="602" y="573" class="body">Receives Team2's valid FIN-read authority</text>
+  <text x="580" y="621" class="small">FIN branch shown; Team1's separate ENG grant is unchanged too.</text>
+
+  <rect x="35" y="669" width="1050" height="102" rx="12" fill="#e9eef6"/>
+  <text x="57" y="699" class="heading">Condition: continuing support belongs to the team, not the departing owner.</text>
+  <text x="57" y="727" class="body">If a required parent assignment or other dependency disappears, the affected route still stops.</text>
+  <text x="57" y="752" class="small">No automatic parent rewiring, personal-authority merging, or widening. Exact ownership/link contracts remain open.</text>
+</svg>

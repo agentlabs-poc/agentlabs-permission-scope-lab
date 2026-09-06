@@ -1,5 +1,20 @@
 # Grant lifecycle — canonical discussion
 
+## Post-0.0.1 representation update — Q-090
+
+[Grants and assignments](grant-assignments.md) are separate. The current assignment
+example carries `status: enabled`; disabling one assignment removes only its route,
+not other assignments of the reusable definition. Creating a definition alone
+does not establish access. [Subgroup routes](subgroups.md) retain a live dependency
+on their supporting parent assignment.
+
+The recipient-bearing lifecycle examples below are retained baseline history.
+No new allocation of time validity/conditions, shared-definition deletion policy,
+revision update contract, or bulk cascade mechanism is approved here. Existing
+withdrawal and subset invariants remain; full lifecycle schemas for the split
+records are open. Do not interpret reusable definitions as perpetual authority
+after the applicable assignment has been withdrawn.
+
 ## Q-082 / GRANT-008 — delete is the single permanent-removal operation
 
 Status: **AGREED.** The user questioned whether revoke was technically delete,

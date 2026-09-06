@@ -1,5 +1,11 @@
 # Projects and repositories: the same boundary model
 
+Post-`0.0.1`: [Q-090](../../docs/grant-assignments.md) separates recipient-free
+grant definitions from assignments. Recipient-bearing examples below are
+deprecated layouts, preserved for their boundary/enforcement explanations.
+[Subgroups](../../docs/subgroups.md) now support explicit dependent authority,
+not inherited membership or application project hierarchy.
+
 This example reuses the agreed authorization model in a fictional Git-hosting
 application. It does not introduce built-in project types, automatic hierarchy,
 or a second grant format. The

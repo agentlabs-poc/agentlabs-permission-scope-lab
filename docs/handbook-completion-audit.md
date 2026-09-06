@@ -1,5 +1,20 @@
 # Handbook completion audit — MEASURE-001
 
+## Post-0.0.1 model change — re-audit pending
+
+[Q-090](grant-assignments.md) separates grants from assignments and
+[Q-091](subgroups.md) adopts explicitly dependent subgroups. The counts below
+remain the preserved baseline rubric, not a newly verified completion score for
+this expanded model. No new closure credit is claimed. Full schemas, definition
+revision/adoption, assignment dependencies/lifecycle, and hierarchy/administration
+need review against the checklist before reporting a current percentage.
+
+HC-05-01's complete-authority invariant remains across grant plus assignment.
+HC-05-12 is still open: Q-091 replaces the blanket subgroup exclusion, not the
+remaining lifecycle work. HC-05-13's full revision mechanics remain open too.
+
+## Preserved baseline audit
+
 Publication follow-up: the user has now authorized commit/push and continued
 discussion. The frozen-gate statements in this audit describe its original
 snapshot. Publishing the audit does not change its 34/69 score or imply approval

@@ -10,6 +10,12 @@ one permission and selected input sources, then keeps actual execution within
 the authorized boundaries. There is no prepared handoff or canonical relationship
 block in endpoint policy.
 
+Post-`0.0.1`, [grants and assignments](docs/grant-assignments.md) are separate:
+grant definitions have no recipient; assignments bind them to recipients.
+[Subteams/subgroups](docs/subgroups.md) use explicit dependent authority with
+permission subsets and scope AND, not inherited membership. The tag preserves
+the previous committed model; full new contracts and migration remain open.
+
 ## Review locally
 
 ```bash
@@ -43,6 +49,6 @@ git diff --check
 ```
 
 The handbook remains a working edition; full schemas and several high-impact
-behavioral contracts are unfinished. The user has explicitly reopened the
-commit/push gate for the verified checkpoint and continued handbook work.
-Earlier freeze notices in historical snapshots describe the review period.
+behavioral contracts are unfinished. Q-090/Q-091 recording and local reconciliation
+are authorized; this update does not itself authorize a new commit/push.
+Earlier gate statements in historical snapshots describe their own checkpoints.

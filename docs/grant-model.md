@@ -1,5 +1,46 @@
 # Working handbook chapter: grants, assignments, and roles
 
+## Current assignment boundary — Q-093 / Q-095
+
+[Q-093](assignment-authority.md) requires both administrative assignment authority
+and a valid supporting parent authority route available to the assigner directly
+or through group membership. Permission subset and scope AND preserve the live
+dependency. This supersedes ADMIN-002's provision-without-possession alternative
+for the new dependent-assignment model; older contrary wording below is history.
+Administrative permission alone still does not confer business access.
+
+[Q-095](authority-lineage.md) defines “sub-” as a parent-dependent relationship,
+not another entity type. Entities remain teams/groups and grants. All child-team
+authority stays within its parent team's authority; each derived grant stays
+within its parent grant. Separate assignments cannot bypass the team ceiling.
+
+[Q-099](ownership-lineage.md) refines continuing support: team-held routes depend
+on their selected team assignment and actual lineage, not the original owner's
+membership merely because they acted. Administrative authorization is still
+required at creation/change; explicitly personal dependencies are not removed.
+Owner rotation does not merge personal grants or rebind the authority source.
+
+## Current model override — Q-090 / Q-091
+
+[Grants and assignments](grant-assignments.md) are now distinct: the reusable
+grant defines permissions and scope without a recipient; the assignment binds
+it to a recipient. TERM-004's identity of the two concepts and the recipient-bearing
+layouts below are deprecated and preserved as `0.0.1` history. Whole-authority
+association and validation remain across both records.
+
+Resolution retrieves direct/group assignments, then their grant definitions,
+retaining assignment and membership provenance. [Subgroup authority](subgroups.md)
+is explicitly dependent on its selected parent assignment: permissions are a
+subset, scope is parent AND additional constraints, membership is not inherited.
+The combined derived-assignment schema is still open. Ordinary issuer history
+is not this explicit dependency; ADMIN-006 is not replaced by universal cascading
+revocation, and ADMIN-002's separation of provisioning and use remains.
+
+Older sections below retain their original questions, rationale, and examples;
+read recipient-bearing “grant” bindings as the historical model, not a competing
+current contract. Lifecycle allocation and revision mechanics need reconciliation
+before full schemas can be published.
+
 Role update — Q-089-B / ROLE-003: grants select an immutable published role
 revision explicitly. Publication does not change existing grants; adoption is an
 authorized, boundary-validated grant change. This supersedes ROLE-002's live-role
@@ -35,11 +76,11 @@ grants for Vinay and the teams of which he is a member:
 
 1. Establish Vinay's verified identity and enclosing tenant context.
 2. Obtain his valid authorization-group memberships from Auth-owned authority.
-3. Retrieve direct grants assigned to Vinay and group grants assigned to those
-   groups. Direct grants remain supported, though group grants are preferred.
-4. Establish evaluation views for Vinay, retaining each source grant and the
-   membership supporting each group-derived route. Resolve relevant role
-   references and human-relative scope meanings without widening authority.
+3. Retrieve assignments directly to Vinay and to those groups, then their grant
+   definitions. Direct assignments remain supported; group assignment is preferred.
+4. Establish evaluation views retaining each assignment, source grant, supporting
+   membership, and any selected parent-assignment dependencies. Resolve relevant
+   adopted role revisions and human-relative scope meanings without widening authority.
 5. Evaluate the relevant complete grants against the request material, with
    validity, conditions, tenant, and any delegation constraints enforced.
 
@@ -486,6 +527,11 @@ The human-subset and affected-authority-only rules remain; lifecycle mechanics
 are still open.
 
 ## Administration without business access — ADMIN-002, ADMIN-003 / Q-022
+
+**Historical provision-without-possession alternative: superseded by Q-093 for
+dependent assignments.** The original explanation below is preserved. Its
+administration/use distinction and explicit authorization requirements survive;
+its lack of a source-possession requirement does not override Q-093.
 
 ADMIN-001 separates using a capability from administering its assignment.
 ADMIN-002 establishes the reverse separation too: authorization to assign

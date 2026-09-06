@@ -1,5 +1,11 @@
 # HRMS: grants, declared inputs, and bounded execution
 
+Post-`0.0.1`: [Q-090](../../docs/grant-assignments.md) separates recipient-free
+grant definitions from assignments. Recipient-bearing examples below are
+deprecated layouts, preserved for their boundary/enforcement explanations.
+[Subgroups](../../docs/subgroups.md) now support explicit dependent authority,
+not inherited membership. Read the current formats before implementing.
+
 This is a worked explanation of the agreed model, not a deployable HRMS policy
 or a claim about another repository. Permission identifiers and boundary
 relationships below are illustrative application registrations. The

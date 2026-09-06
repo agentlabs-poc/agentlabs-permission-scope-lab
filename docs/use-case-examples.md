@@ -1,5 +1,11 @@
 # Worked use cases — Git hosting, ticketing, HRMS, and accounting
 
+**Q-090/Q-091 update:** recipient-bearing examples below are deprecated layouts,
+preserved for their scenarios and enforcement rationale. Use the current
+[grant/assignment split](grant-assignments.md) and [subgroup model](subgroups.md).
+The old “current working layout” wording describes the `0.0.1` baseline, not a
+second canonical contract. Scenario migration and final conformance remain open.
+
 These 16 fictional scenario groups exercise already agreed concepts. They are
 not claims about GitHub or any other product's implementation, and do not adopt
 new permissions, scope-key catalogs, or application policies for AgentLabs.

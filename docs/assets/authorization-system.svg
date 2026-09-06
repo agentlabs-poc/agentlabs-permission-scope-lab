@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1520" viewBox="0 0 1440 1520" role="img" aria-labelledby="diagram-title diagram-description">
   <title id="diagram-title">Client to handler: how a certificate-read request is authorized</title>
-  <desc id="diagram-description">A client sends GET /api/v1/acme/FIN/C-17 with a token. Application authentication middleware establishes verified identity and tenant context. The endpoint handler binds the inputs and permission from its policy and invokes the embedded Auth Agent. The agent obtains memberships, direct and group grants, role permissions, and dependencies from Auth and evaluates complete authority. Denial stops the request. Finance-read authority proceeds to a handler-owned database read constrained by trusted tenant, Finance department, and certificate C-17. Only matching authorized data can be returned through the handler to the client. Middleware, handler, and embedded agent are inside the application; evaluation and enforcement form one endpoint-owned gate. Arrows explain logical request flow, not fixed network calls or SDK contracts.</desc>
+  <desc id="diagram-description">A client sends GET /api/v1/acme/FIN/C-17 with a token. Application authentication middleware establishes verified identity and tenant context. The endpoint handler binds the inputs and permission from its policy and invokes the embedded Auth Agent. The agent obtains human memberships, direct and group assignments, recipient-free grant definitions, adopted role revisions, validity, and dependencies from Auth. Subgroup authority retains its supporting parent assignment, permission subset, and scope AND constraints without membership inheritance. The agent evaluates complete assigned authority. Denial stops the request. Finance-read authority proceeds to a handler-owned database read constrained by trusted tenant, Finance department, and certificate C-17. Only matching authorized data can be returned through the handler to the client. Middleware, handler, and embedded agent are inside the application; evaluation and enforcement form one endpoint-owned gate. Arrows explain logical request flow, not fixed network calls or SDK contracts.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#647b96"/></marker>
     <marker id="green-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#258264"/></marker>
@@ -87,7 +87,7 @@
   <g id="embedded-agent">
     <rect x="450" y="745" width="470" height="135" rx="15" fill="#f4f0fc" stroke="#b9a9d8" stroke-width="1.5"/>
     <text x="685" y="781" text-anchor="middle" class="title">Embedded Auth Agent</text>
-    <text x="685" y="812" text-anchor="middle" class="body">Resolve grants and evaluate complete authority</text>
+    <text x="685" y="812" text-anchor="middle" class="body">Resolve and evaluate complete assigned authority</text>
     <text x="685" y="841" text-anchor="middle" class="body">Required permission + scope + mandatory limits</text>
     <text x="685" y="865" text-anchor="middle" class="small">Evaluation happens here, not in pre-handler middleware.</text>
   </g>
@@ -96,8 +96,8 @@
     <rect x="1100" y="725" width="285" height="180" rx="15" fill="#eff6ff" stroke="#a9c5e8" stroke-width="1.5"/>
     <text x="1120" y="758" class="title">Auth service</text>
     <text x="1120" y="790" class="body">Human memberships</text>
-    <text x="1120" y="816" class="body">Grants + adopted role revisions</text>
-    <text x="1120" y="842" class="body">Validity and dependencies</text>
+    <text x="1120" y="816" class="body">Grants + assignments</text>
+    <text x="1120" y="842" class="body">Revisions, validity, dependencies</text>
     <text x="1120" y="881" class="small">Example authority: certificate read in FIN</text>
   </g>
 
