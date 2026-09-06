@@ -1,5 +1,15 @@
 # Grant lifecycle — canonical discussion
 
+**Current clarification — Q-101A–E-3:** see [binding lifecycle](parent-grant-bindings.md).
+Grant enablement is grant-wide; assignment enablement controls its own route;
+effective authority requires valid support. Still-enabled descendants can resume
+when an ancestor becomes valid again; explicitly disabled records cannot.
+Structural assignment changes proceed bottom-up. Bindings may be disabled OR
+removed before parent changes; explicit re-enablement checks current reality.
+These lifecycle principles are settled; exact combined schemas remain open.
+Q-082's single permanent operation, delete, is unchanged. Earlier broad open
+labels below do not reopen the principles now settled by Q-101.
+
 ## Post-0.0.1 representation update — Q-090
 
 [Grants and assignments](grant-assignments.md) are separate. The current assignment

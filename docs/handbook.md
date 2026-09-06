@@ -1,6 +1,26 @@
 # Authorization Handbook — working edition
 
-## Current position — Q-100 Auth Service's internal authority gate
+## Current position — Q-101 dependent bindings and lifecycle
+
+[Q-101: parent-grant bindings](parent-grant-bindings.md) pins the agreed model
+through Q-101E-3, with versioned excerpts, rationale, and 31 review cases.
+`parent_grant_id` identifies grant lineage; actual assignments and team hierarchy
+establish required support. No additional parent-assignment lineage field is
+required for the settled cases. Earlier conflicting checkpoint wording is history.
+
+- [Four-part binding SVG](assets/parent-grant-bindings.svg): grant/team parentage
+  connected by assignments, repeated down the hierarchy.
+- [Direct and shared routes SVG](assets/parent-grant-routes.svg): Nutan's direct
+  route is not the same case as a subgroup's required parent-team support.
+- [Change and enablement SVG](assets/binding-change-lifecycle.svg): affected
+  bindings are disabled/removed bottom-up; retained assignments require explicit
+  enablement validated against current reality. Removal alone is not mandatory.
+
+Assignment, grant enablement, and effective authority remain distinct; orphaned
+lineage cannot authorize. No runtime implementation or fresh completion score
+is claimed. This scoped lab update does not authorize commit/push.
+
+## Earlier checkpoint — Q-100 Auth Service's internal authority gate
 
 [Q-100: Auth Service's internal gate](auth-service-authority-gate.md) records two
 necessary responsibilities: evaluate the caller's administrative permission and

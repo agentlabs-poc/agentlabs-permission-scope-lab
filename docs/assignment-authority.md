@@ -1,5 +1,13 @@
 # Assignment authority and supporting lineage — Q-093
 
+**Current lineage refinement — Q-101:** [parent-grant bindings](parent-grant-bindings.md)
+replaces older specific-parent-assignment-ID wording with `parent_grant_id`
+and actual supporting assignments/team context. It does not weaken Q-093's
+separate administration and source-boundary checks, or invent a permanent
+issuer-membership dependency for Nutan's direct grant. Parent changes and
+assignment enablement must validate the resulting current binding. Earlier
+conflicting lineage-reference wording below is retained as superseded history.
+
 Status: **AGREED AT RULE LEVEL; combined contract pending.** The user clarified
 that the parent grant must be assigned to Maya or a group she belongs to, then
 instructed: “lets record Q-093 and proceed with otherthings.” The distinction

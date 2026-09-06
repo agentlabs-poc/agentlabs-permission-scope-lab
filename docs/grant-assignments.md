@@ -1,5 +1,14 @@
 # Grants and assignments — Q-090
 
+**Current refinement — Q-101:** [parent-grant bindings](parent-grant-bindings.md)
+uses `parent_grant_id` plus actual assignments/team context; no additional
+parent-assignment lineage reference is required for the settled cases. Older
+wording below requiring one specific assignment identity as the child's source
+is superseded, not the need for real assignment records or required parent-team
+support. Assignment disablement and grant-wide disablement are separate controls.
+Relevant bindings may be removed OR disabled before parent changes; re-enabling
+a retained assignment must validate the changed reality.
+
 Later refinements: [Q-093](assignment-authority.md) requires administrative
 assignment authority plus a supporting parent route available to the assigner.
 [Q-095](authority-lineage.md) defines “sub-” as a relationship, not a new entity:

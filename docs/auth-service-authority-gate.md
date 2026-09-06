@@ -1,5 +1,12 @@
 # Auth Service's internal authority-validation gate — Q-100
 
+**Q-101 supplies the binding rules:** [parent-grant bindings](parent-grant-bindings.md)
+adds the grant/team/assignment graph, bottom-up structural guards, and explicit
+enablement against current reality. The authority validator must inspect these
+dependencies in addition to administrative-operation authorization. The internal
+flow below remains valid; its open lineage-reference questions are narrowed by
+Q-101, without prescribing a new validator API or runtime implementation.
+
 Status: **AGREED AT ARCHITECTURAL RULE LEVEL; detailed contracts open.** The user
 requested adding the Q-100 scratchpad write-up and SVG to the lab. This records
 the two responsibilities within Auth's endpoint-owned gate, not a deployed

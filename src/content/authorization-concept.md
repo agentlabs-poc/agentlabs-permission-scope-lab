@@ -1,5 +1,25 @@
 # Authorization: the agreed foundation
 
+## Latest pinned discussion — Q-101
+
+[Parent-grant bindings](../../docs/parent-grant-bindings.md) records the current
+framing, rationale, and 31 review cases. A child grant uses `parent_grant_id`;
+actual assignments and parent-team context establish required support. No
+additional parent-assignment lineage reference is required for the settled cases.
+
+[Open the four-part grant/team binding SVG](../../docs/assets/parent-grant-bindings.svg).
+
+Assignment, grant enablement, and effective authority are different controls.
+Affected assignment changes proceed bottom-up. Relevant bindings may be removed
+OR disabled before parent changes; retained assignments require explicit
+re-enablement validated against current reality.
+
+- [Direct/shared-route comparison SVG](../../docs/assets/parent-grant-routes.svg)
+- [Structural-change and re-enablement SVG](../../docs/assets/binding-change-lifecycle.svg)
+
+Earlier specific-supporting-assignment wording is superseded where it conflicts;
+real parent-team support, narrowing, and the endpoint-owned gate remain required.
+
 Current authority model: [Q-090](../../docs/grant-assignments.md) separates
 recipient-free grants from assignments; [Q-091](../../docs/subgroups.md) makes
 explicit dependent subgroups canonical without inherited membership. The
@@ -170,7 +190,7 @@ direct human grants remain supported. Applications may synchronize business
 groups to Auth or keep them separate.
 
 Subteam and subgroup are synonymous. A subgroup receives only explicitly selected
-dependent authority: one supporting parent assignment per route, a permission
+dependent authority: a parent grant supported in its parent-team context, a permission
 subset, and parent scope AND child constraints. Child scope `{}` adds no further
 restriction; it never discards the parent boundary. Membership is not inherited.
 See [Team1, Team2, and Nutan](../../docs/subgroups.md).

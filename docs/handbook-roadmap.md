@@ -1,5 +1,25 @@
 # Authorization handbook — agreed roadmap
 
+## Current decisions — Q-101 pinned through Q-101E-3
+
+The user requested promoting this discussion from scratchpad to lab with diagrams
+and broad case coverage. [Current chapter](parent-grant-bindings.md) records the
+examples, rationale, superseded alternatives, and remaining contracts. Local
+recording is authorized; commit/push and runtime migration are not.
+
+| Reference | Status | Decision and rationale |
+|---|---|---|
+| Q-101 | AGREED for settled cases | `parent_grant_id` is the explicit grant-lineage link; real assignments/team context establish required support. No additional `parent_assignment_id`. Keep the lineage small without treating definition existence as authority. |
+| Q-101A/B | AGREED | Grant disablement/enablement is grant-wide; assignments are separate controls. A shared grant cannot be partially enabled while required validation fails. Assignment does not override disablement. |
+| Q-101C | AGREED | Disabled ancestors make descendants ineffective, not persistently disabled. Still-enabled descendants can resume when valid support returns; explicitly disabled records need explicit enablement. |
+| Q-101D | ALREADY SETTLED by Q-094, clarified | Orphaned lineage and required descendants cannot authorize. Higher-layer warnings/prevention are separate from deterministic runtime resolution. Do not reopen the existing orphan consequence. |
+| Q-101E-1/E-2 | AGREED AS CORRECTED by E-3 | Grant/team parent changes respect four-part bindings. Assignment disablement/removal starts at the bottom-most affected child, inspecting all affected branches. |
+| Q-101E-3 | AGREED, supersedes removal-only restriction | Removed OR disabled bindings permit structural parent changes. Retained assignments stay disabled; explicit enablement checks current relationships and boundaries. No forced deletion/recreation or automatic repair. |
+
+Earlier selected-assignment-ID wording and removal-only discussion are retained
+as history where superseded. Exact definition-revision, complete wire contracts,
+recovery mechanics, and production safeguards are not approved by implication.
+
 ## Current decisions after baseline 0.0.1 — including Q-100
 
 **Q-100 — AGREED AT ARCHITECTURAL RULE LEVEL:** Auth Service's endpoint-owned

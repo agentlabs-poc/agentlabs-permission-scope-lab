@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Q-101E-3: change bindings safely, then validate re-enablement</title>
+  <desc id="desc">Identify all affected bindings. Disable or remove assignments bottom-up. An authorized parent change may proceed. Retained assignments stay disabled. Explicit enablement validates current relationships and authority. Failure leaves the assignment disabled; success permits enablement with continuing runtime checks. This differs from temporary ancestor-grant disablement.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#475569"/></marker>
+    <style>text{font-family:Arial,sans-serif;fill:#172033}.title{font-size:29px;font-weight:700}.head{font-size:21px;font-weight:700}.body{font-size:19px}.small{font-size:17px;fill:#475569}.card{fill:#fff;stroke:#94a3b8;stroke-width:2}.line{fill:none;stroke:#475569;stroke-width:3;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1200" height="1120" fill="#f8fafc"/>
+  <text x="45" y="50" class="title">Q-101E-3 · Structural change and explicit re-enablement</text>
+  <text x="45" y="82" class="small">Current rule: disabled bindings qualify; deletion is not mandatory.</text>
+  <rect x="230" y="115" width="740" height="90" rx="12" class="card"/>
+  <text x="255" y="150" class="head">1 · Discover all affected bindings and dependencies</text>
+  <text x="255" y="181" class="body">Include branches, shared grants, actual parent teams and assignments.</text>
+  <path d="M600 205 V240" class="line"/>
+  <rect x="230" y="250" width="740" height="90" rx="12" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="255" y="285" class="head">2 · Disable OR remove affected assignments bottom-up</text>
+  <text x="255" y="316" class="body">Handle the lowest dependent child first; stop where the change stops.</text>
+  <path d="M600 340 V375" class="line"/>
+  <rect x="230" y="385" width="740" height="90" rx="12" class="card"/>
+  <text x="255" y="420" class="head">3 · Authorize and validate the structural parent change</text>
+  <text x="255" y="451" class="body">Do not rewrite a parent beneath a remaining enabled binding.</text>
+  <path d="M600 475 V510" class="line"/>
+  <rect x="230" y="520" width="740" height="90" rx="12" class="card"/>
+  <text x="255" y="555" class="head">4 · Retained assignments remain disabled</text>
+  <text x="255" y="586" class="body">No automatic enablement, parent replacement, or authority copying.</text>
+  <path d="M600 610 V645" class="line"/>
+  <rect x="230" y="655" width="740" height="105" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="255" y="690" class="head">5 · Explicit enable request: validate the CURRENT reality</text>
+  <text x="255" y="721" class="body">Relationships · supporting assignments · grant validity · boundaries</text>
+  <text x="255" y="746" class="small">Administrative authorization remains required; old support is not proof.</text>
+  <path d="M410 760 V810 H310 V840" class="line"/>
+  <path d="M790 760 V810 H890 V840" class="line"/>
+  <text x="335" y="802" class="small">Invalid</text><text x="822" y="802" class="small">Valid</text>
+  <rect x="70" y="850" width="480" height="95" rx="12" fill="#fee2e2" stroke="#b91c1c" stroke-width="2"/>
+  <text x="95" y="888" class="head">Reject; assignment remains disabled</text><text x="95" y="921" class="small">Unsupported lineage cannot authorize.</text>
+  <rect x="650" y="850" width="480" height="95" rx="12" fill="#ecfdf5" stroke="#047857" stroke-width="2"/>
+  <text x="675" y="888" class="head">Assignment may be enabled</text><text x="675" y="921" class="small">Runtime permission/scope/support checks continue.</text>
+  <rect x="45" y="985" width="1110" height="105" rx="12" fill="#e2e8f0"/>
+  <text x="70" y="1018" class="head">Separate case: temporary GRANT disablement is not structural rewiring.</text>
+  <text x="70" y="1048" class="body">Disable G2 → still-enabled G3 is ineffective. Validly enable G2 → G3 can resume.</text>
+  <text x="70" y="1075" class="small">Explicitly disabled grants/assignments stay disabled. Orphaned authority remains ineffective.</text>
+</svg>

@@ -1,5 +1,11 @@
 # Ownership changes and team-held authority — Q-099
 
+**Q-101 refinement:** [parent-grant bindings](parent-grant-bindings.md) specifies
+current grant/team support lookup and structural-change rules. Q-099's separation
+of owner administration from team-held business authority remains unchanged;
+the earlier ownership diagram is not a complete Q-101 binding/lifecycle diagram.
+Specific-assignment identity language below is historical where Q-101 supersedes it.
+
 Status: **AGREED AT RULE LEVEL.** The user approved Q-099 and authorized adding
 it to the handbook. This settles Q-096's separation of team-held continuing
 support from the acting administrator, and refines Q-093 accordingly. It does

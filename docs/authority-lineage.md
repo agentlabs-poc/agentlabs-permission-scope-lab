@@ -1,5 +1,14 @@
 # Team lineage, authority lineage, and scope narrowing
 
+**Current refinement — Q-101:** [parent-grant bindings](parent-grant-bindings.md)
+supersedes the specific-supporting-assignment identity requirement below. A
+child declares `parent_grant_id`; Auth validates actual assignments in its
+recipient's parent-team context. The four-part binding and bottom-up structural
+changes remain support-aware without a `parent_assignment_id`. Disabled bindings
+also permit parent changes; explicit enablement validates current reality.
+Earlier conflicting wording below is preserved as history, not a second current
+model. Q-094's orphan definition and permission/scope ceilings remain agreed.
+
 This chapter explains Q-090/Q-091/Q-093 together and records Q-095's canonical
 meaning of “sub-,” at the user's request to make parent/child relationships clear.
 It does not finalize new wire fields or a separate stored scope entity. Tenant

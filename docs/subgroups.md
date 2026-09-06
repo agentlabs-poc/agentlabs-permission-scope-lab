@@ -1,5 +1,14 @@
 # Subteams / subgroups — Q-091
 
+**Current refinement — Q-101:** [four-part bindings](parent-grant-bindings.md)
+join grant lineage, team parentage, and assignments. `parent_grant_id` plus
+actual parent-team holdings replaces the older specific-parent-assignment-ID
+dependency wording below. Support cannot be borrowed from an unrelated team.
+Affected assignment changes proceed bottom-up. Removed OR disabled bindings
+permit parent changes; explicit assignment enablement validates current support
+and boundaries. Earlier conflicting wording is preserved as superseded history;
+permission/scope ceilings and direct human membership remain unchanged.
+
 Status: **AGREED.** Subteam and subgroup mean the same thing, following team =
 group. The user approved making the scratch model canonical after preserving
 the preceding handbook as tag `0.0.1`.

@@ -1,5 +1,10 @@
 # Authorization Explanation Bench
 
+**Latest pinned discussion: [Q-101 — parent-grant bindings](docs/parent-grant-bindings.md).**
+Includes the four-part binding, direct/shared route comparisons, bottom-up
+structural changes, current-state enablement, rationale, and 31 review cases.
+The local documentation update is authorized; no new commit/push is implied.
+
 Read the [working Authorization Handbook](docs/handbook.md) or open the local
 reader at `/` or `/concept.html?doc=concept`. The approved discussion—not the historical
 lab prose or simulations—is the source of truth.

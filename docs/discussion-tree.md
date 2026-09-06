@@ -1,6 +1,35 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-100 makes Auth's internal authority gate explicit
+## Current position — Q-101 framing pinned through Q-101E-3
+
+```text
+Dependent authority: current binding branch
+├── Grant lineage: parent_grant_id [Q-101 AGREED]
+│   ├── Actual assignments + parent-team context remain required
+│   └── No additional parent_assignment_id for the settled cases
+├── Four-part binding: G1 / Team1 / G2 / TeamY
+│   ├── Permission subset; effective scope AND; child-team ceiling
+│   └── Repeats across descendants and affected shared assignments
+├── Assignment eligibility ≠ grant enablement ≠ effective authority
+│   ├── Disabled grant supplies no authority anywhere [Q-101A/B]
+│   ├── Disabled assignment stops its route
+│   └── Still-enabled descendants recover with valid support [Q-101C]
+├── Missing required support: orphaned lineage ineffective [Q-094 / Q-101D]
+│   └── Higher-layer warning/prevention is separate from resolution
+├── Structural changes: bottom-up assignment handling [Q-101E-1/E-2]
+│   ├── Relevant bindings removed OR disabled [Q-101E-3 CORRECTION]
+│   └── Explicit enablement validates current relationships and boundaries
+├── Covered: direct/shared routes, subgroup support, branches, parent changes
+└── OPEN CONTRACTS: reusable-grant revisions, complete lifecycle/hierarchy
+    schemas, detailed recovery/rebinding, concurrency/freshness and runtime tests
+```
+
+Read the [pinned chapter, diagrams, rationale, and case matrix](parent-grant-bindings.md).
+The remaining handbook branches and historical scores below are preserved; this
+does not close their deliverables or recalculate completion. Q-101 supersedes
+older specific-assignment-ID and removal-only wording, not actual support checks.
+
+## Earlier checkpoint — Q-100 makes Auth's internal authority gate explicit
 
 ```text
 Post-0.0.1 canonical direction

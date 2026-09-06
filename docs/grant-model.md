@@ -1,5 +1,13 @@
 # Working handbook chapter: grants, assignments, and roles
 
+**Latest refinement — Q-101:** [parent-grant bindings](parent-grant-bindings.md)
+is current for grant/team lineage, shared-grant enablement, bottom-up binding
+changes, and explicit validated assignment re-enablement. `parent_grant_id`
+plus actual assignment/team support replaces older specific-parent-assignment
+identity requirements below. Historical excerpts remain preserved; grant/scope
+ceilings, implied tenant, role revision adoption, and human-dependent proxies
+are not removed or weakened.
+
 ## Current assignment boundary — Q-093 / Q-095
 
 [Q-093](assignment-authority.md) requires both administrative assignment authority

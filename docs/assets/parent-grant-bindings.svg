@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="950" viewBox="0 0 1200 950" role="img" aria-labelledby="title desc">
+  <title id="title">Q-101: four-part bindings repeat down the hierarchy</title>
+  <desc id="desc">G1 is assigned to Team1 by A1. G2 derives from G1 and is assigned by A2 to TeamY, whose parent is Team1. G3 derives from G2 and is assigned by A3 to TeamZ, whose parent is TeamY. Assignments connect grant and team parent relationships. Affected assignment changes proceed bottom-up. Parent changes require relevant bindings removed or disabled.</desc>
+  <defs>
+    <marker id="blue" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2563eb"/></marker>
+    <marker id="amber" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#b45309"/></marker>
+    <marker id="green" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#047857"/></marker>
+    <style>text{font-family:Arial,sans-serif;fill:#172033}.title{font-size:30px;font-weight:700}.sub{font-size:19px;fill:#475569}.head{font-size:21px;font-weight:700}.label{font-size:19px}.small{font-size:17px;fill:#475569}.grant{fill:#fff7ed;stroke:#b45309;stroke-width:2}.team{fill:#ecfdf5;stroke:#047857;stroke-width:2}.assignment{stroke:#2563eb;stroke-width:3;fill:none;marker-end:url(#blue)}.gp{stroke:#b45309;stroke-width:3;fill:none;marker-end:url(#amber)}.tp{stroke:#047857;stroke-width:3;fill:none;marker-end:url(#green)}</style>
+  </defs>
+  <rect width="1200" height="950" fill="#f8fafc"/>
+  <text x="50" y="52" class="title">Q-101 · The complete dependent binding</text>
+  <text x="50" y="85" class="sub">Trusted tenant implied · parent arrows point upward · assignments point right</text>
+  <text x="110" y="137" class="head">GRANT LINEAGE</text><text x="780" y="137" class="head">TEAM HIERARCHY</text>
+  <rect x="100" y="165" width="330" height="120" rx="14" class="grant"/>
+  <text x="125" y="201" class="head">G1 · Parent grant</text><text x="125" y="231" class="label">Read / write · dept = FIN</text><text x="125" y="261" class="small">Upstream / root detail omitted</text>
+  <rect x="770" y="165" width="330" height="120" rx="14" class="team"/>
+  <text x="795" y="205" class="head">Team1</text><text x="795" y="242" class="label">Holds required G1 support</text>
+  <path d="M430 225 H764" class="assignment"/><text x="495" y="210" class="label">A1 · assignment</text>
+  <rect x="100" y="415" width="330" height="120" rx="14" class="grant"/>
+  <text x="125" y="451" class="head">G2 · Child grant</text><text x="125" y="481" class="label">Read · additional scope {}</text><text x="125" y="511" class="small">Effective scope remains FIN</text>
+  <rect x="770" y="415" width="330" height="120" rx="14" class="team"/>
+  <text x="795" y="455" class="head">TeamY</text><text x="795" y="492" class="label">Child of Team1</text>
+  <path d="M430 475 H764" class="assignment"/><text x="495" y="460" class="label">A2 · assignment</text>
+  <path d="M265 415 V291" class="gp"/><text x="105" y="344" class="small">parent_grant_id</text><text x="105" y="367" class="small">G2 → G1</text>
+  <path d="M935 415 V291" class="tp"/><text x="958" y="344" class="small">Parent team</text><text x="958" y="367" class="small">TeamY → Team1</text>
+  <text x="470" y="344" class="head">Four relationships</text><text x="470" y="373" class="small">must remain aligned</text>
+  <rect x="100" y="665" width="330" height="120" rx="14" class="grant"/>
+  <text x="125" y="701" class="head">G3 · Further child grant</text><text x="125" y="731" class="label">Permissions subset of G2</text><text x="125" y="761" class="small">Parent scope AND extra limits</text>
+  <rect x="770" y="665" width="330" height="120" rx="14" class="team"/>
+  <text x="795" y="705" class="head">TeamZ</text><text x="795" y="742" class="label">Child of TeamY</text>
+  <path d="M430 725 H764" class="assignment"/><text x="495" y="710" class="label">A3 · assignment</text>
+  <path d="M265 665 V541" class="gp"/><text x="105" y="594" class="small">parent_grant_id</text><text x="105" y="617" class="small">G3 → G2</text>
+  <path d="M935 665 V541" class="tp"/><text x="958" y="594" class="small">Parent team</text><text x="958" y="617" class="small">TeamZ → TeamY</text>
+  <text x="470" y="594" class="head">A2 also supports</text><text x="470" y="623" class="small">the lower binding</text>
+  <rect x="50" y="825" width="1100" height="95" rx="12" fill="#e2e8f0"/>
+  <text x="75" y="855" class="head">Affected assignment changes: A3 → A2 → A1, only as far as needed.</text>
+  <text x="75" y="885" class="label">Remove OR disable relevant bindings before parent changes; validate before re-enabling.</text>
+  <text x="75" y="909" class="small">Inspect other branches and shared assignments too. Membership and ownership are separate.</text>
+</svg>

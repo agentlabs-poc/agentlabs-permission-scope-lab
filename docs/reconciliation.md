@@ -1,5 +1,44 @@
 # Handbook reconciliation register
 
+## Publication authorization after Q-101
+
+The user explicitly requested committing and pushing the pinned Q-101 checkpoint.
+This authorizes publication of the chapter, three SVGs, case matrix, and related
+handbook/reader reconciliation after verification. It does not promote open
+revision contracts, change runtime authority, or modify tag `0.0.1`. Scratchpad
+files remain outside the lab commit. Earlier local-only gate notices are
+preserved as the preparation-stage history.
+
+## Q-101 — Scoped lab pinning with diagrams and case coverage
+
+The user requested pinning the approved discussion in the lab. This scoped
+documentation update promotes Q-101 through Q-101E-3, not unrelated scratch
+owner records or runtime behavior. No commit/push is authorized by this request.
+
+[Parent-grant bindings](parent-grant-bindings.md) owns the current framing,
+versioned excerpts, rationale, three diagrams, and 31 analytical review cases.
+The final correction permits disabled bindings during structural changes;
+retained assignments require explicit enablement against the changed reality.
+Earlier removal-only and specific-parent-assignment-reference wording is marked
+superseded. Assignment IDs and required parent-team support remain necessary.
+
+The handbook/tree/log, relevant chapters, README, AGENTS gate, and reader concept
+link the current chapter. Existing application request-flow and Auth internal-gate
+diagrams are not replaced: Q-101 adds dependency and lifecycle views to them.
+Scratch originals and baseline tag remain preserved. No fresh completion score
+or implemented-authorization conformance claim is made.
+
+Verification: all ten existing reader tests and the TypeScript/Vite production
+build pass. The three new SVGs have valid XML/accessibility labels and were
+rendered in Chrome and visually inspected. The reader uses packaged full-size
+SVG links; its existing Markdown renderer does not rewrite inline image paths.
+Asset checks confirm all three diagrams are emitted and referenced by the
+reader. JSON examples, local links, balanced history blocks, and the 31 unique
+case references were checked. `git diff --check` is clean, and tag `0.0.1` still
+resolves to `247e8392bb09885a9ff1c8ce94e5205a279e6852`. No runtime conformance,
+commit, or push is claimed. Older verification paragraphs describe their
+historical checkpoints only.
+
 ## Publication authorization after Q-100
 
 The user explicitly requested committing and pushing the Q-100 integration.

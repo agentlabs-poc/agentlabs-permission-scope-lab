@@ -1,5 +1,12 @@
 # Authorization system — canonical logical overview
 
+**Complementary Q-101 views:** [parent-grant bindings](parent-grant-bindings.md)
+adds the four-part dependency graph, direct/shared route comparison, and
+structural-change lifecycle. These explain the relationships Auth validates;
+they do not replace this client-to-handler request flow or Q-100's internal
+authority gate. Older specific-parent-assignment identity wording below is
+superseded by the Q-101 grant link plus actual assignment/team-context checks.
+
 ## Q-100 — inside Auth Service
 
 The [Auth Service internal gate](auth-service-authority-gate.md) and its

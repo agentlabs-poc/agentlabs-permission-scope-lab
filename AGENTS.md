@@ -1,5 +1,31 @@
 # Handbook working rules
 
+## Current publication authorization — Q-101 checkpoint
+
+The user explicitly requested “commit and push, what next” after reviewing the
+Q-101 lab pinning. Commit and push this verified documentation checkpoint to
+the existing main branch. Preserve scratch originals and tag `0.0.1`; no runtime
+migration, new policy approval, or unrelated publication is implied. Earlier
+no-commit/no-push notices below describe the local preparation stage. Continued
+discussion stays in the active scratchpad unless lab integration is requested.
+
+## Current scoped authorization — pin Q-101 in the lab
+
+The user requested pinning the approved scratchpad discussion in the lab with
+diagrams and broad case coverage. Local documentation/reader reconciliation is
+authorized for Q-101 through Q-101E-3. No commit, push, runtime migration, or
+unrelated scratch-proposal promotion is authorized. Scratch originals and tag
+`0.0.1` remain preserved; earlier freeze/publication notices below are history
+for this scoped update.
+
+Current source: docs/parent-grant-bindings.md. Parent-grant lineage uses
+`parent_grant_id` plus actual assignments/team context, not an additional
+`parent_assignment_id`. Grant enablement, assignment enablement, and effective
+lineage validity remain distinct. Affected assignment changes proceed bottom-up.
+Q-101E-3 permits relevant bindings to be removed OR disabled before parent
+changes; explicit re-enablement validates current reality. Removal-only wording
+is superseded. Preserve the older reasoning with clear history labels.
+
 ## Q-100 publication authorization
 
 The user explicitly requested “lets commit and push” after the Q-100 integration.
