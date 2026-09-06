@@ -476,6 +476,13 @@ Business access alone remains insufficient to administer grants.
 
 ### Explicit self-assignment and audit
 
+Scope clarification after Q-076: the explicit authorization and separation of
+administration from business access below remain in scope. Audit mentions retain
+the earlier integration intent; event design, evidence storage, retention, and
+audit-failure behavior belong to another layer and are not handbook deliverables.
+Historical references below to open audit-design work are superseded on scope,
+not a reason to reopen or weaken administrative authorization.
+
 ADMIN-003 does not categorically prohibit Maya from assigning herself access.
 It requires an explicit, authorized, audited operation. Before that operation,
 administration alone does not permit reading payroll. If Maya is an eligible

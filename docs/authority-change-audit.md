@@ -2,6 +2,31 @@
 
 ## Q-076 / AUDIT-001 — mandatory records for authority administration changes
 
+### Current conclusion — outside handbook scope
+
+The user answered: “This itself is different layer question. handbook as no scope
+for this.” The mandatory audit proposal is **NOT ADOPTED**. Audit policy and
+system design belong to another layer, not to this canonical authorization
+handbook. This is a scope exclusion, not a deferred handbook decision or a
+completed audit contract.
+
+Rationale: defining who may perform an operation and how authority is evaluated
+is distinct from selecting audit events and specifying their capture, storage,
+delivery, retention, and disclosure. The earlier proposal crossed that boundary.
+Those questions must not be used as outstanding requirements for finishing this
+handbook. HC-09-08 is retained as EXCLUDED, not marked DONE.
+
+This does not remove the agreed result evidence such as supporting grant IDs,
+or the requirement to authorize grant/membership/role/delegation changes. Earlier
+explicit-self-assignment audit references remain historical/integration context;
+they do not expand this handbook into an audit-system specification. No claim
+that auditing is unnecessary, optional in every system, or forbidden is made.
+
+The whole original proposal follows as history; its recommendations and open
+questions are not current handbook requirements.
+
+### Original proposal — not adopted, retained as history
+
 Status: **PROPOSED, not approved.** Explicit authorized self-assignment already
 requires audit under ADMIN-003. Q-060 does not require every access request to
 be persistently logged. This proposal distinguishes authority administration

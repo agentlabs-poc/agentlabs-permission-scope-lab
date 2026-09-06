@@ -30,3 +30,12 @@ Prioritize unresolved authority and enforcement decisions across branches before
 extended field-by-field validation. Keep lower-level gaps visible for a later
 contract-completion pass; parking them does not approve or exclude them. Do not
 mark a whole branch complete after settling only its governing principle.
+
+## Handbook scope — audit belongs to another layer
+
+Q-076 explicitly excludes audit-system policy and design from this handbook.
+Do not treat event selection, audit schemas, delivery/failure guarantees, storage,
+retention, or disclosure as remaining handbook deliverables. Preserve the rejected
+proposal as history. Authorization-result evidence and explicit authorization of
+administrative changes remain in scope; earlier audit references are integration
+context, not authority to design the external audit layer here.

@@ -60,6 +60,7 @@ despite approval of this governing timing rule; adapter integration is unfinishe
 reusing the allow obtained when the job was submitted?
 
 **Answer: agreed.** The example, rationale, alternative, and trade-off above are
-part of the record. Move horizontally to Q-076 in
-[authority-change audit](authority-change-audit.md); running-job and retry details
+part of the record. The subsequent Q-076 [audit detour](authority-change-audit.md)
+was excluded by the user as another layer's responsibility. Return to Q-077 in
+[groups and membership](groups-and-membership.md). Running-job and retry details
 remain tracked rather than implicitly approved.

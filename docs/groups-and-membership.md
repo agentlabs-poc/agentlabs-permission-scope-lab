@@ -79,3 +79,29 @@ These policies do not permit independent service-account authority.
 Nested-group mechanics, membership synchronization guarantees, exact lifecycle
 representation, freshness, and delegation encoding remain open. Q-045 settles
 ownership and member types, not these mechanisms or the whole identity glossary.
+
+## Q-077 / GROUP-005 — direct human membership only in v1
+
+Status: **PROPOSED, not approved.** Human-only authorization membership is already
+agreed. This settles the separately open question of transitive membership through
+group nesting, not whether agents may join groups.
+
+Recommend no nested authorization groups in v1: only explicit human-to-group
+membership links participate in grant resolution. Vinay may belong to several
+groups, but putting Finance inside Employees must not automatically make him an
+authorization member of Employees. To use Employees' grants, establish his own
+authorized membership there. An application may manage this through deliberate
+sync, as already allowed; no implicit business-hierarchy inheritance is introduced.
+
+Rationale: direct membership keeps applicable group grants and their dependencies
+explicit, without recursive traversal, cycle rules, or additional transitive
+revocation paths. The alternative is nested groups with transitive human access,
+which reduces membership administration but needs those additional semantics.
+The trade-off of exclusion is maintaining multiple explicit memberships.
+
+No new membership wire format, implicit grant, independent proxy authority, or
+restriction to only one group is proposed. Membership lifecycle, authorized sync,
+and freshness remain open; HC-05-12 is not closed by this decision alone.
+
+**Q-077:** Should v1 use only direct human-to-group memberships, with no nested
+group membership inheritance?

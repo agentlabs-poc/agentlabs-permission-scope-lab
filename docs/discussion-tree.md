@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — decisions through Q-075; Q-076 proposed
+## Current position — Q-076 excluded audit scope; Q-077 proposed
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -14,7 +14,7 @@ notices below are historical.
 Counts are closed/total checkpoints from MEASURE-001, not effort estimates.
 
 ```text
-Authorization Handbook — working edition; 35/69 closed (50.7%)
+Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not completed
 ├── 1. Purpose and architecture [2/4]
 │   └── Layers/agent agreed; audience and governance OPEN
 ├── 2. Principles [4/5]
@@ -28,6 +28,7 @@ Authorization Handbook — working edition; 35/69 closed (50.7%)
 ├── 5. Grants and authority [7/13]
 │   ├── Whole grants, live roles, human-dependent proxies, separate admin agreed
 │   ├── Automatic delegation reactivation agreed [Q-070]
+│   ├── Direct human membership only; no nested groups PROPOSED [Q-077] <-- NOW
 │   └── Admin encoding, bootstrap, lifecycle, chains, group/role changes OPEN
 ├── 6. Scope and registration [5/7]
 │   └── Flat AND boundaries and registration agreed; detailed evolution PARKED
@@ -36,7 +37,7 @@ Authorization Handbook — working edition; 35/69 closed (50.7%)
 ├── 8. Decision semantics [1/4]
 │   ├── Allow/deny/error meanings and minimal shapes agreed [Q-051–067]
 │   └── Conditions, full validation, code catalog, provenance OPEN
-├── 9. Enforcement and time [2/9] <-- CURRENT BRANCH
+├── 9. Enforcement and time [2/8 in scope; 1 excluded]
 │   ├── Both-boundary moves agreed [Q-068]
 │   ├── No revoked-grant use by new checks after confirmation [Q-069]
 │   ├── Deny instead of automatic collection filtering [Q-071]
@@ -44,8 +45,8 @@ Authorization Handbook — working edition; 35/69 closed (50.7%)
 │   ├── Complete-batch authorization before effects agreed [Q-073]
 │   ├── Preserve application boundaries through concurrent changes agreed [Q-074]
 │   ├── Execution-time authorization for queued work agreed [Q-075]
-│   ├── Mandatory authority-administration change audit PROPOSED [Q-076]
-│   └── Counts/export, transactions, freshness, concurrency, audit, jobs OPEN
+│   ├── Audit policy/system design OUTSIDE HANDBOOK SCOPE [Q-076]
+│   └── Counts/export, transactions, freshness, concurrency, jobs OPEN
 ├── 10. Challenge and verify [2/4]
 │   └── Examples available; adversarial and final scenario review OPEN
 └── 11. Publish the foundation [0/4]
@@ -182,7 +183,8 @@ branches while retaining the unfinished details in the audit.
 | 4 — governing list/bulk rules agreed; details open | Collections, exports, and bulk operations | A single operation can expose or change many records. | HC-09-03/05 |
 | 5 — boundary-at-use rule agreed; details open | Concurrent application changes | A valid earlier check must not lead to an out-of-boundary effect. | HC-09-07 |
 | 6 — execution-time rule agreed; details open | Queued/background work | Delayed execution must not accidentally preserve removed authority. | HC-09-09 |
-| 7 — now | Authority-change audit | Grant edits alone do not explain membership/role/delegation-driven access changes. | HC-09-08 |
+| 7 — excluded by user | Authority-change audit | Another layer's responsibility, not handbook scope. | HC-09-08 EXCLUDED |
+| 8 — now | Group membership composition | Determines which group grants become applicable and which dependencies resolution follows. | HC-05-12 |
 
 **Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
 and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
@@ -208,11 +210,14 @@ through use despite concurrent changes. See [concurrent enforcement](concurrent-
 **Q-075 / ENFORCEMENT-009 is agreed:** queued work needs execution-time
 authorization, not reuse of submission's allow. See
 [background authorization](background-authorization.md).
-**Q-076 / AUDIT-001 is proposed:** successful authority-administration changes
-require audit, distinct from selective access-request logging. See
-[authority-change audit](authority-change-audit.md). Administration bounds,
-restoration mechanics, collection details, transaction guarantees, full job
-integration, and audit delivery/retention contracts remain open.
+**Q-076 / AUDIT-001 is outside handbook scope:** the user places audit policy
+and system design in another layer. The proposal is not adopted; see
+[scope decision and retained history](authority-change-audit.md).
+**Q-077 / GROUP-005 is proposed:** no nested-group membership inheritance in v1;
+use explicit human-to-group links. See [groups and membership](groups-and-membership.md).
+Administration bounds, restoration mechanics, collection details, transaction
+guarantees, and full job integration remain open. Audit-system deliverables are
+excluded, not remaining handbook work; older snapshots are superseded on that point.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**
@@ -222,10 +227,11 @@ return to the parked registration-detail rabbit hole without a reason.
 
 Earlier reconciliation note, now qualified: a completion percentage had no
 explicit measurement baseline. [MEASURE-001](handbook-completion-audit.md)
-now counts 35 completed and 34 open checkpoints out of 69 (50.7% closure). This is a
-proposed checkpoint rubric, not an effort estimate or release-readiness score.
-The earlier count was 34/69; Q-059 completes HC-04-04. Decision-result checkpoints
-remain open despite their partial agreements.
+now counts 35 completed, 33 open, and 1 excluded row: 35/68 in-scope closure
+(51.5%). Q-076 removes audit-system design from the denominator, not adds a
+completed checkpoint. Historical counts were 34/69 then 35/69 (50.7%) after
+Q-059. This is a checkpoint rubric, not effort or release readiness.
+Decision-result checkpoints remain open despite their partial agreements.
 
 ## Return points and non-reopened decisions
 

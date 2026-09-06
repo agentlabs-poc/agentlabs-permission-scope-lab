@@ -278,7 +278,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Bulk enforcement](bulk-enforcement.md) | Agreed complete-batch authorization before effects; transaction and concurrency guarantees remain separate. |
 | [Concurrent enforcement](concurrent-enforcement.md) | Agreed preservation of evaluated boundaries through use when application records change concurrently; mechanisms remain open. |
 | [Background authorization](background-authorization.md) | Agreed execution-time authorization for queued work; adapter, retry, and already-running job contracts remain open. |
-| [Authority-change audit](authority-change-audit.md) | Proposed mandatory audit of successful authority-administration changes, separate from selective access-request logging. |
+| [Audit scope decision and history](authority-change-audit.md) | Q-076 excludes audit policy/system design from the handbook; original proposal retained, not adopted. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -323,9 +323,9 @@ Q-073 requires complete-batch authorization and required boundary checks before
 effects, rather than automatically processing an authorized subset. Q-074 requires
 preserving evaluated application boundaries through concurrent changes at use.
 Q-075 requires execution-time authorization for queued work, not reuse of a
-submission-time allow. Q-076 proposes mandatory audit of successful grant,
-membership, role, and delegation administration changes, without requiring every
-access request to be persistently logged.
+submission-time allow. Q-076 excludes audit policy and system design as another
+layer's responsibility; the mandatory-audit proposal is not adopted. Authorization
+result evidence remains in scope. Q-077 proposes no nested-group inheritance in v1.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 
@@ -339,12 +339,13 @@ or freshness/dependency behavior—not another approval of the settled endpoint
 policy shape. The exact priority order is still a proposal, not an adopted rule.
 
 Full contracts, update/move/list/bulk behavior, administrative scope encoding,
-delegation mechanics, revocation/concurrency, audit, conformance testing, and
+delegation mechanics, revocation/concurrency, conformance testing, and
 publication/governance remain unfinished. The subsequent
-[MEASURE-001 audit](handbook-completion-audit.md) now counts 35 of 69 checkpoints
-closed (50.7%), up from 34/69 after Q-059 closes HC-04-04; this supersedes the
-earlier absence of a measured baseline, not
-the distinction between documented agreement and implementation readiness.
+[MEASURE-001 audit](handbook-completion-audit.md) now counts 35 DONE / 33 OPEN /
+1 EXCLUDED: 35 of 68 in-scope checkpoints closed (51.5%). Q-076 excludes HC-09-08;
+this is a scope reduction, not newly completed work. Historical scores were
+34/69 initially and 35/69 (50.7%) after Q-059. Neither score measures implementation
+readiness. Earlier audit-system deliverables are superseded by Q-076's exclusion.
 
 ## Preservation and implementation status
 

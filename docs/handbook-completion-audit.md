@@ -17,6 +17,14 @@ The user requested a measured score rather than the previous approximate 60%.
 
 ## Result
 
+Current scope update after Q-076 (2026-09-06): the user excludes audit policy and
+system design as another layer's responsibility. HC-09-08 is **EXCLUDED**, not
+DONE. Keep its row and original criterion for traceability. The baseline still
+contains 69 defined rows, but the in-scope denominator is now 68: **35 DONE,
+33 OPEN, 1 EXCLUDED**. Closure is **51.5%**, remaining is **48.5%**. No completed
+work was added; the percentage change is solely the approved scope reduction.
+Historical references to audit contracts as handbook deliverables are superseded.
+
 Update after Q-059 (2026-09-06): HC-04-04 is now DONE. Q-057 settles no automatic
 parent/child inheritance; Q-058 and Q-059 exclude wildcard permission names and
 aliases from v1. [Permission](permission-model.md) records rationale and examples.
@@ -26,14 +34,17 @@ as a deferred deliverable. Naming governance and full result contracts stay open
 
 Original snapshot, retained as history: 34 DONE / 35 OPEN / 69 total (49.3%
 closure, 50.7% remaining); stage 4 was 2 DONE / 4 total / 2 remaining; HC-04-04
-was OPEN. Current counts below incorporate its closure only.
+was OPEN. The subsequent pre-Q-076 snapshot was 35 DONE / 34 OPEN / 69 in scope
+(50.7% closure, 49.3% remaining), with no excluded rows; stage 9 was 2/9 closed.
+Current counts below incorporate the Q-076 scope exclusion as well.
 
 - Defined checkpoints: **69**.
+- In-scope checkpoints: **68**.
 - Completed checkpoints: **35**.
-- Open checkpoints: **34**.
-- Closure score: **35 / 69 × 100 = 50.7%**.
-- Remaining-checkpoint score: **34 / 69 × 100 = 49.3%**.
-- Checkpoint rows excluded from the denominator: **0**.
+- Open checkpoints: **33**.
+- Closure score: **35 / 68 × 100 = 51.5%**.
+- Remaining-checkpoint score: **33 / 68 × 100 = 48.5%**.
+- Checkpoint rows excluded from the denominator: **1**, HC-09-08 under Q-076.
 - Feature exclusions resolving HC-04-04: wildcard permission names and aliases
   outside v1 (Q-058 / Q-059).
 
@@ -55,11 +66,13 @@ Each row is worth one checkpoint, without subjective effort weights:
   deliverable. The evidence column identifies the basis.
 - **OPEN (0):** missing, proposed, partially specified, parked, or not yet verified
   to the required scope. Existing discussion earns no fractional credit.
+- **EXCLUDED:** explicitly outside handbook scope; retain the row but omit it
+  from both completed work and the in-scope denominator.
 - A completed principle does not complete its wire schema, lifecycle, or
   operation-specific contract. Those are separate promised outputs.
 - A diagram, passing reader tests, or archived simulator does not demonstrate
   authorization implementation or complete conformance.
-- Parked work is not excluded work. Only an explicit approved v1 deferral can
+- Parked work is not excluded work. Only an explicit approved scope exclusion or v1 deferral can
   move a row out of the denominator; record that separately, not as completion.
 - No new authorization behavior is selected here. Where a feature is open,
   deciding and documenting its exclusion can resolve the question; the audit
@@ -87,10 +100,13 @@ contract may cost more work than several completed conceptual checkpoints.
 | 6. Scope and registration | 5 | 7 | 2 |
 | 7. Requests and resolution | 6 | 10 | 4 |
 | 8. Decision semantics | 1 | 4 | 3 |
-| 9. Enforcement and time | 2 | 9 | 7 |
+| 9. Enforcement and time | 2 | 8 | 6 |
 | 10. Challenge and verify | 2 | 4 | 2 |
 | 11. Publish the foundation | 0 | 4 | 4 |
-| **Total** | **35** | **69** | **34** |
+| **Total in scope** | **35** | **68** | **33** |
+
+HC-09-08 is the one excluded row. The historical 69-row baseline is preserved;
+the table above counts only the current handbook scope.
 
 ## Detailed closure register
 
@@ -151,7 +167,7 @@ not the whole surrounding topic.
 | HC-05-09 | OPEN | Define bootstrap/seed authority and its governed creation procedure. | Bootstrap remains a gap in [grant model](grant-model.md) and [use cases](use-case-examples.md). |
 | HC-05-10 | OPEN | Specify delegation ceilings, chains, expiry, growth, and reactivation semantics. | Q-070 agrees automatic restoration of affected access when human support returns under a still-valid delegation; explicit renewal is not adopted. Rationale in [delegation lifecycle](delegation-lifecycle.md). Ceilings, chains, expiry, growth, and mechanics remain open. |
 | HC-05-11 | OPEN | Complete ordinary grant status/validity and create/change/revoke lifecycle rules. | [Grant model](grant-model.md) still labels lifecycle details open; issuer-loss behavior alone does not close them. |
-| HC-05-12 | OPEN | Define group membership change, nesting, and optional-sync lifecycle behavior. | [Groups and membership](groups-and-membership.md) and [grant model](grant-model.md); freshness timing is counted under stage 9. |
+| HC-05-12 | OPEN | Define group membership change, nesting, and optional-sync lifecycle behavior. | Q-077 proposes no nested group inheritance in v1 in [groups and membership](groups-and-membership.md), not yet approved. Membership and sync lifecycle remain open; freshness timing is counted under stage 9. |
 | HC-05-13 | OPEN | Define role revision/change validation and evidence for existing referencing grants. | Live role semantics are agreed, revision and compatibility-change mechanics remain open in [grant model](grant-model.md). |
 
 ### 6. Scope and registration
@@ -188,7 +204,7 @@ not the whole surrounding topic.
 | HC-08-01 | DONE | Settle alternative complete positive grants, no cross-grant field mixing, and no explicit deny grants in v1. | DECISION-001/002 / GRANT-001; [grant model](grant-model.md). |
 | HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-067 settle core meanings, minimal shapes, mixed/unknown-field rejection, and grant-ID cardinality in [decision results](decision-results.md). Full value validation, code catalogue/compatibility, and remaining failure cases are unfinished. Further details are parked under PROCESS-007, not excluded. No fractional credit. |
 | HC-08-03 | OPEN | Specify conditions and their evaluation when evidence is missing, invalid, or unsupported. | Stage 8 [roadmap](handbook-roadmap.md) and open decision branches in [grant model](grant-model.md). |
-| HC-08-04 | OPEN | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Decision result/audit explanation is open in [tree](discussion-tree.md); event storage is separately counted under stage 9. |
+| HC-08-04 | OPEN | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Authorization-result evidence remains in scope in [tree](discussion-tree.md); supporting grant IDs are agreed, full dependency/provenance contracts remain open. External audit event storage is excluded by Q-076, not counted under this row. |
 
 ### 9. Enforcement and time
 
@@ -201,7 +217,7 @@ not the whole surrounding topic.
 | HC-09-05 | OPEN | Define bulk authorization, partial success, and operation transaction semantics. | Q-073 agrees complete-batch authorization and boundary checks before effects in [bulk enforcement](bulk-enforcement.md). Transaction, concurrency, retry, and representation contracts remain open. |
 | HC-09-06 | OPEN | Define freshness, caching, revocation propagation, and stale membership/dependency behavior. | Q-069 agrees no stale-cache grace period for checks started after confirmed grant revocation; rationale and timing boundary are in [authority freshness](authority-freshness.md). Cache protocol and membership/dependency propagation remain open. |
 | HC-09-07 | OPEN | Define concurrent-change/check-to-use consistency guarantees. | Q-074 agrees preserving evaluated application boundaries through use in [concurrent enforcement](concurrent-enforcement.md). Mechanisms, conflict/retry behavior, and in-flight Auth authority changes remain open. |
-| HC-09-08 | OPEN | Complete audit event, correlation, retention/storage, versioning, and disclosure rules. | Q-076 proposes mandatory audit of successful authority-administration changes in [authority-change audit](authority-change-audit.md), not yet approved. Event contracts, capture/failure guarantees, retention, integrity, and disclosure remain open. |
+| HC-09-08 | EXCLUDED | Complete audit event, correlation, retention/storage, versioning, and disclosure rules. | Q-076: user explicitly places audit in another layer, outside this handbook. Prior OPEN criterion and proposal retained in [scope decision and history](authority-change-audit.md). Not completed work, not parked; excluded from the denominator. Authorization-result evidence remains in scope under stage 8. |
 | HC-09-09 | OPEN | Define non-HTTP/background-operation integration requirements or explicitly defer them. | Q-075 agrees execution-time authorization for queued work in [background authorization](background-authorization.md). Adapter schemas, trusted job identity/material binding, permission mapping, retries, and running-job behavior remain open; no independent service authority. |
 
 ### 10. Challenge and verify
@@ -230,8 +246,9 @@ not the whole surrounding topic.
   all three.
 - Group/role change semantics belong to stage 5; the cross-system freshness and
   concurrent-change guarantees belong to stage 9.
-- Stage 8 defines the evaluator's decision/result evidence. Stage 9 defines
-  the audit event lifecycle and storage/disclosure obligations.
+- Stage 8 defines the evaluator's decision/result evidence. Historical stage 9
+  audit event/storage/disclosure deliverables are excluded by Q-076, not deferred
+  work required to finish this handbook.
 - Stage 10's case authoring and final scenario review are different from building
   a production authorization engine. This score does not require completing
   an engine to finish the handbook, but implementation claims need evidence
