@@ -1,5 +1,17 @@
 # Handbook reconciliation register
 
+## Lab freeze and scratchpad reopening
+
+After checkpoint `3bdd130` was committed and pushed to main, the user requested
+freezing the lab, committing the freeze, and reopening the sibling scratchpad.
+This gate-only checkpoint introduces no authorization-model changes. Further
+lab edits and commits require explicit reopening; no push is authorized by
+this request. Scratchpad discussion and requested recording may resume.
+
+Rationale: preserve the agreed handbook while further experiments remain
+separate. Reopening the scratchpad neither changes its existing records nor
+promotes proposals into the handbook. Earlier gate notices remain as history.
+
 ## Publication authorization after Q-099
 
 The user explicitly requested commit and push of the pending handbook checkpoint

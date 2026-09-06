@@ -1,5 +1,20 @@
 # Handbook working rules
 
+## Latest gate — lab frozen; scratchpad active
+
+The user instructed: “freeze agentlabs-permission-scope-lab and commit and
+unfreeze scratchpad.” Record and commit this gate checkpoint, then make no
+further lab file edits or commits until explicitly reopened. This instruction
+does not authorize a push. Read-only inspection remains permitted.
+
+The sibling `../auth-scratch pad` is unfrozen for continued discussion and
+explicitly requested recording. Its prior freeze is lifted. Scratch proposals
+must not be promoted into the frozen handbook automatically. No scratch grant,
+membership, or ownership record changes are implied by reopening the workspace.
+
+Rationale: hold the agreed lab baseline stable while exploring the next model
+changes separately. Earlier gate statements below are preserved as history.
+
 ## Latest publication authorization
 
 The user explicitly instructed “let commit and push” after the Q-099
