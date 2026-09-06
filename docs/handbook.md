@@ -274,7 +274,8 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
 | [Authority freshness](authority-freshness.md) | Impact-first revocation timing discussion, stale-cache trade-offs, and in-flight-operation questions kept distinct. |
 | [Delegation lifecycle](delegation-lifecycle.md) | Agreed automatic restoration of affected access when human support returns; explicit-renewal proposal preserved as not adopted. |
-| [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering; explicit request-boundary clarification proposed, with counts/pagination/export and bulk-write gaps separate. |
+| [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
+| [Bulk enforcement](bulk-enforcement.md) | Proposed complete-batch authorization before effects; partial execution, transaction, and concurrency concerns kept distinct. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -313,8 +314,10 @@ grant revocation; in-flight operations and mechanisms remain open. Q-070 selects
 automatic restoration: affected delegated access is inactive while human support
 is absent and works again when it returns, within a still-valid delegation.
 Q-071 rejects automatic subset filtering: deny the partially authorized collection
-request to avoid grant-derived query intelligence in the endpoint. Q-072 proposes
+request to avoid grant-derived query intelligence in the endpoint. Q-072 settles
 the distinction between explicitly Finance-bounded and all-departments requests.
+Q-073 proposes complete-batch authorization and required boundary checks before
+effects, rather than automatically processing an authorized subset.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 

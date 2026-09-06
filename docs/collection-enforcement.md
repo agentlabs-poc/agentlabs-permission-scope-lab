@@ -26,21 +26,23 @@ query translation in the endpoint. This does not remove the endpoint's existing
 responsibility to bind its data query to the evaluated material. It does not
 introduce a second authorization gate, returned scope fields, or a query language.
 
-Q-072 below checks how this applies to a request explicitly limited to Finance;
-that distinction is proposed separately, not silently recorded as approved.
+Q-072 below now records the approved distinction for an explicitly Finance-limited
+request. It was proposed separately and subsequently approved by the user.
 Bulk writes, counts, pagination, exports, and schema details remain open.
 HC-09-03 remains open; this governing decision does not close the full checkpoint.
 
 ## Q-072 / ENFORCEMENT-006 — explicit collection boundaries
 
-Status: **PROPOSED, not approved.** Recommend that the request itself establishes
-the collection boundary through endpoint-declared inputs, without inferring a
-narrower boundary from grants.
+Status: **AGREED.** The user answered “yes” to the Finance-only grant and two-request
+explanation. The request itself establishes the collection boundary through
+endpoint-declared inputs, without inferring a narrower boundary from grants.
+
+Previous status, retained as history: **PROPOSED, not approved** until that answer.
 
 For a caller with the endpoint's required permission scoped to Finance, within
 the same trusted tenant:
 
-| Requested collection | Proposed result |
+| Requested collection | Agreed result |
 |---|---|
 | `GET /api/v1/{tenant}/departments/FIN/certificates`, explicitly requesting Finance | Allow if the remaining required checks succeed; the handler queries only the evaluated tenant and Finance department. |
 | `GET /api/v1/{tenant}/certificates`, defined here as requesting all tenant certificates | Deny with Finance-only authority; do not rewrite it into a Finance request. |
@@ -61,6 +63,14 @@ departments request.
 
 **Q-072:** Is this the intended distinction: an explicitly Finance-bounded list
 can be allowed, while an all-departments list is denied for Finance-only authority?
+
+**Answer: yes.** The endpoint declares department material from the path, supplies
+it to the evaluator, and after allow constrains its query to the same evaluated
+tenant and department. It does not inspect grants to discover accessible
+departments. This settles request-bound collection behavior, not general query
+generation, transport schemas, or the remaining collection checkpoint.
+
+Continue horizontally with Q-073 in [bulk enforcement](bulk-enforcement.md).
 
 ## Original Q-071 authorized-subset proposal — not adopted, retained as history
 

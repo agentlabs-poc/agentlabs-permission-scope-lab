@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — reconciled through Q-050-F
+## Current position — decisions through Q-072; Q-073 proposed
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -10,6 +10,50 @@ Read the [handbook](handbook.md) for chapters and the
 **Commit/push gate: reopened by the user.** The verified reconciliation checkpoint
 is authorized for commit/push; continue the handbook discussion. Previous freeze
 notices below are historical.
+
+Counts are closed/total checkpoints from MEASURE-001, not effort estimates.
+
+```text
+Authorization Handbook — working edition; 35/69 closed (50.7%)
+├── 1. Purpose and architecture [2/4]
+│   └── Layers/agent agreed; audience and governance OPEN
+├── 2. Principles [4/5]
+│   └── Core boundaries/subset/auth-first agreed; consolidation OPEN
+├── 3. Vocabulary and identity [3/5]
+│   └── Core terms and human groups agreed; identity/proxy attribution OPEN
+├── 4. Permissions [3/4]
+│   ├── Naming and one permission per endpoint agreed
+│   ├── No implicit inheritance, wildcards, or aliases [Q-057/058/059]
+│   └── Catalog governance/evolution OPEN
+├── 5. Grants and authority [7/13]
+│   ├── Whole grants, live roles, human-dependent proxies, separate admin agreed
+│   ├── Automatic delegation reactivation agreed [Q-070]
+│   └── Admin encoding, bootstrap, lifecycle, chains, group/role changes OPEN
+├── 6. Scope and registration [5/7]
+│   └── Flat AND boundaries and registration agreed; detailed evolution PARKED
+├── 7. Requests and resolution [6/10]
+│   └── One gate and partial policy agreed; full schemas/integration OPEN
+├── 8. Decision semantics [1/4]
+│   ├── Allow/deny/error meanings and minimal shapes agreed [Q-051–067]
+│   └── Conditions, full validation, code catalog, provenance OPEN
+├── 9. Enforcement and time [2/9] <-- CURRENT BRANCH
+│   ├── Both-boundary moves agreed [Q-068]
+│   ├── No revoked-grant use by new checks after confirmation [Q-069]
+│   ├── Deny instead of automatic collection filtering [Q-071]
+│   ├── Explicit Finance request vs tenant-wide request agreed [Q-072]
+│   ├── Complete-batch authorization before effects PROPOSED [Q-073]
+│   └── Counts/export, transactions, freshness, concurrency, audit, jobs OPEN
+├── 10. Challenge and verify [2/4]
+│   └── Examples available; adversarial and final scenario review OPEN
+└── 11. Publish the foundation [0/4]
+    └── Reconcile chapters, package contracts, accept v1, implementation roadmap OPEN
+```
+
+<details>
+<summary>Historical opening tree — Q-050-F-era snapshot, superseded above</summary>
+
+The original opening snapshot is retained unchanged below. Its open labels do
+not override subsequent approvals, including Q-057–Q-072.
 
 ```text
 Authorization Handbook — working edition, not published v1
@@ -74,7 +118,9 @@ Authorization Handbook — working edition, not published v1
     └── Close or explicitly defer gaps; implementation roadmap and governance
 ```
 
-## Next discussion selection
+</details>
+
+## Discussion progression and current selection
 
 Q-051 / DECISION-003 is **agreed**, including the Auth-service timeout example:
 completed decisions are allow/deny; evaluation errors are separate and supply
@@ -145,10 +191,13 @@ delegation. Explicit renewal is not adopted. See
 **Q-071 / ENFORCEMENT-005 is agreed as corrected:** deny the partially authorized
 collection request; do not derive and return an authorized subset. The user
 rejected grant-derived filtering as too much authorization intelligence in the
-endpoint. **Q-072 / ENFORCEMENT-006 is proposed:** distinguish an explicitly
-Finance-bounded request from an all-departments request for Finance-only authority.
-See [collection enforcement](collection-enforcement.md). Administration bounds,
-restoration mechanics, and collection details remain open.
+endpoint. **Q-072 / ENFORCEMENT-006 is agreed:** Finance-only authority can cover
+an explicitly Finance-bounded request, not an all-departments request. See
+[collection enforcement](collection-enforcement.md).
+**Q-073 / ENFORCEMENT-007 is proposed:** complete-batch authorization and required
+boundary checks before effects, without automatic partial execution. See
+[bulk enforcement](bulk-enforcement.md). Administration bounds, restoration
+mechanics, collection details, and transaction guarantees remain open.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**
