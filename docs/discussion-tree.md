@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — decisions through Q-073; Q-074 proposed
+## Current position — decisions through Q-074; Q-075 proposed
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -42,7 +42,8 @@ Authorization Handbook — working edition; 35/69 closed (50.7%)
 │   ├── Deny instead of automatic collection filtering [Q-071]
 │   ├── Explicit Finance request vs tenant-wide request agreed [Q-072]
 │   ├── Complete-batch authorization before effects agreed [Q-073]
-│   ├── Preserve application boundaries through concurrent changes PROPOSED [Q-074]
+│   ├── Preserve application boundaries through concurrent changes agreed [Q-074]
+│   ├── Execution-time authorization for queued work PROPOSED [Q-075]
 │   └── Counts/export, transactions, freshness, concurrency, audit, jobs OPEN
 ├── 10. Challenge and verify [2/4]
 │   └── Examples available; adversarial and final scenario review OPEN
@@ -178,7 +179,8 @@ branches while retaining the unfinished details in the audit.
 | 2 — new-check revocation rule agreed; details open | Revocation, freshness, and in-flight changes | Determines when removed authority stops being usable. | HC-09-06/07 |
 | 3 — restoration rule agreed; administration and details open | Administrative bounds and delegation lifecycle | Controls creation and persistence of authority. | HC-05-08/10 |
 | 4 — governing list/bulk rules agreed; details open | Collections, exports, and bulk operations | A single operation can expose or change many records. | HC-09-03/05 |
-| 5 — now | Concurrent application changes | A valid earlier check must not lead to an out-of-boundary effect. | HC-09-07 |
+| 5 — boundary-at-use rule agreed; details open | Concurrent application changes | A valid earlier check must not lead to an out-of-boundary effect. | HC-09-07 |
+| 6 — now | Queued/background work | Delayed execution must not accidentally preserve removed authority. | HC-09-09 |
 
 **Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
 and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
@@ -199,10 +201,13 @@ an explicitly Finance-bounded request, not an all-departments request. See
 **Q-073 / ENFORCEMENT-007 is agreed:** complete-batch authorization and required
 boundary checks before effects, without automatic partial execution. See
 [bulk enforcement](bulk-enforcement.md).
-**Q-074 / ENFORCEMENT-008 is proposed:** preserve evaluated application boundaries
+**Q-074 / ENFORCEMENT-008 is agreed:** preserve evaluated application boundaries
 through use despite concurrent changes. See [concurrent enforcement](concurrent-enforcement.md).
-Administration bounds, restoration mechanics, collection details, and transaction
-guarantees remain open.
+**Q-075 / ENFORCEMENT-009 is proposed:** queued work needs execution-time
+authorization, not reuse of submission's allow. See
+[background authorization](background-authorization.md). Administration bounds,
+restoration mechanics, collection details, transaction guarantees, and full job
+integration remain open.
 
 Decision results, cross-boundary mutation rules, and freshness/dependency behavior
 are high-impact candidates. Their precise order and answers are **not adopted**

@@ -2,11 +2,15 @@
 
 ## Q-074 / ENFORCEMENT-008 — preserve evaluated boundaries at use
 
-Status: **PROPOSED, not approved.** This addresses an application record changing
-between an authorization check and the protected operation. It does not settle
-in-flight grant revocation, which is distinct from a record changing departments.
+Status: **AGREED.** The user answered Q-074 “Agree” after the Finance-to-Engineering
+concurrent-move example and the recommendation to stop the original update.
+This addresses an application record changing between an authorization check
+and the protected operation. It does not settle in-flight grant revocation,
+which is distinct from a record changing departments.
 
-### Example and recommendation
+Previous status, retained as history: **PROPOSED, not approved** until that answer.
+
+### Agreed example and outcome
 
 Vinay has the required update permission scoped to Finance. Within the trusted
 tenant, his request asks to update C-17 through the Finance endpoint:
@@ -17,7 +21,7 @@ tenant, his request asks to update C-17 through the Finance endpoint:
    takes effect.
 3. Vinay's original operation attempts to perform its update.
 
-Recommend that step 3 **must not update C-17 under the earlier Finance-bound
+Step 3 **must not update C-17 under the earlier Finance-bound
 allow**. The protected data operation must preserve the evaluated tenant,
 department, and requested-record binding. If those constraints no longer hold,
 stop that attempt; do not fall back to an ID-only write or silently substitute ENG.
@@ -40,7 +44,7 @@ guarantees. The handbook needs the boundary guarantee without embedding one
 database's concurrency model in the canonical authorization contract.
 
 No second canonical gate, new result fields, relationship block, or retry loop
-is adopted. This proposal does not require another Auth-service call immediately
+is adopted. This decision does not require another Auth-service call immediately
 before every write. Any future retry or changed request must obtain authority
 appropriate to its own material; the original allow cannot be transplanted.
 
@@ -55,3 +59,9 @@ record's new department. HC-09-07 remains open pending the full consistency cont
 **Q-074:** If a concurrent change invalidates an operation's evaluated application
 boundary before its effect, must that attempt stop rather than use the earlier
 allow to perform an out-of-boundary operation?
+
+**Answer: agreed.** Application-side enforcement must preserve the evaluated
+boundary through execution; the earlier allow cannot authorize a changed reach.
+The rationale, alternative, and implementation-neutral guarantee above are part
+of the decision. Continue horizontally to Q-075 in
+[background authorization](background-authorization.md).

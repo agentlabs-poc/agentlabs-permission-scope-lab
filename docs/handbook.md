@@ -276,7 +276,8 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Delegation lifecycle](delegation-lifecycle.md) | Agreed automatic restoration of affected access when human support returns; explicit-renewal proposal preserved as not adopted. |
 | [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
 | [Bulk enforcement](bulk-enforcement.md) | Agreed complete-batch authorization before effects; transaction and concurrency guarantees remain separate. |
-| [Concurrent enforcement](concurrent-enforcement.md) | Proposed preservation of evaluated boundaries through use when application records change concurrently. |
+| [Concurrent enforcement](concurrent-enforcement.md) | Agreed preservation of evaluated boundaries through use when application records change concurrently; mechanisms remain open. |
+| [Background authorization](background-authorization.md) | Proposed execution-time authorization for queued work, distinct from submission acceptance and already-running job behavior. |
 | [Contract publication](contract-publication.md) | Version convention, rejection behavior, and still-open schema publication work. |
 | [Cross-domain use cases](use-case-examples.md) | Sixteen scenario groups across Git, ticketing, HRMS, and accounting; illustrative, not runtime tests. |
 | [Explanation audit](explanation-audit.md) | Coverage evidence and explanation gaps. |
@@ -318,8 +319,10 @@ Q-071 rejects automatic subset filtering: deny the partially authorized collecti
 request to avoid grant-derived query intelligence in the endpoint. Q-072 settles
 the distinction between explicitly Finance-bounded and all-departments requests.
 Q-073 requires complete-batch authorization and required boundary checks before
-effects, rather than automatically processing an authorized subset. Q-074 proposes
+effects, rather than automatically processing an authorized subset. Q-074 requires
 preserving evaluated application boundaries through concurrent changes at use.
+Q-075 proposes execution-time authorization for queued work, not reuse of a
+submission-time allow.
 The chapter preserves rationale and distinguishes available evidence from
 persistent audit.
 
