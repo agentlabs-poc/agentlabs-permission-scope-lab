@@ -1,5 +1,11 @@
 # Q-119 — Root grant-revision representation
 
+**Q-122 approved refinement:** [root permissions are computed](root-permission-evolution.md)
+from the applicable registered catalog. Q-119's trusted-root parent omission
+remains agreed, but the explicit-list example below is not a complete encoding
+of computed coverage. Root source representation still needs review; no wildcard
+or new field is adopted. Earlier mechanism-open wording is superseded by Q-122.
+
 ## Agreed representation
 
 **AGREED.** The user answered “agree” and then separately raised future

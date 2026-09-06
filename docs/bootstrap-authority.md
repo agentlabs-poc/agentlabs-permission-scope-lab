@@ -1,5 +1,15 @@
 # Bootstrap authority — registration, maximum starting authority, bounded distribution
 
+**Q-124 approved:** [authorized interrupted-setup continuation](bootstrap-initial-assignment.md)
+is allowed only for the same validated intent. Silent administrator/authority
+replacement and merging conflicting attempts are not continuation. Earlier
+generic retry-policy gaps below are narrowed; exact evidence/recovery remains open.
+
+**Q-117 approved:** [initial authority stays unavailable during incomplete setup](bootstrap-initial-assignment.md).
+The complete intended arrangement must be validated and durably established
+before bootstrap access becomes usable. Partial records can remain without
+authority; completed replay stays non-mutating under Q-116. Recovery remains open.
+
 **Later root evolution — Q-120A:** legitimate application capability upgrades
 should expand applicable root permission coverage automatically, without a
 separate manual root-update approval. [Rationale and open mechanism](root-permission-evolution.md)

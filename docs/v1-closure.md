@@ -1,5 +1,20 @@
 # V1 closure checklist — CLOSURE-001
 
+**Subsequent Q-127 approval:** [proxy-to-proxy delegation chains are not supported in v1](delegation-lifecycle.md).
+Direct human-to-proxy lifecycle/evidence remains in scope. Earlier chain-completion
+requirements below are superseded by this explicit scope decision; HC-05-10
+remains open for its other contract obligations, not excluded wholesale.
+
+**Subsequent Q-124 approval:** [interrupted bootstrap may resume for the same validated intent](bootstrap-initial-assignment.md).
+Authorization/revalidation, no silent administrator/authority replacement, and
+no conflicting-attempt merge are required. Exact setup evidence and governed
+recovery remain unfinished; earlier retry-policy gaps below are narrowed.
+
+**Subsequent Q-117 approval:** [incomplete bootstrap authority stays unavailable](bootstrap-initial-assignment.md)
+until the full intended arrangement is validated and durably established.
+Earlier parked/unapproved statements below describe the closure-pass snapshot.
+Continuation, concurrent attempts, and recovery remain open; HC-05-09 is not closed.
+
 **Current discussion assessment:** [ASSESS-001](discussion-assessment.md) maps
 all 30 currently open criteria to **13 design topics, five contract reviews,
 and final acceptance**, with eight assistant-owned work packages. These are

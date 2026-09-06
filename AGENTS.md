@@ -1,5 +1,100 @@
 # Handbook working rules
 
+## Q-130 approved — multiple complete routes across batch items
+
+Different complete valid grant routes may authorize different items in one batch.
+Every item requires the endpoint's same declared permission and complete scope/
+lineage support; do not mix permission from one grant with scope from another.
+One uncovered item denies the whole batch before effects; evaluation failure
+remains error. No endpoint grant inspection or automatic subset filtering.
+See docs/bulk-enforcement.md. Move-state composition and exact transports remain open.
+
+## Q-129 approved — bounded completion after prior allow
+
+An ordinary synchronous application operation already allowed before later
+authority withdrawal may finish within its evaluated boundaries. No allow reuse
+for new data/retries/operations. Preserve Q-074 changed-data-boundary protection
+and Q-110's stronger Auth-write consistency. Queued/streamed/long-running and
+not-yet-allowed evaluations are not covered. See docs/concurrent-enforcement.md.
+
+## Q-128 approved — freshness for all confirmed authority reductions
+
+New checks after Auth confirms a reduction cannot use withdrawn authority from
+stale evidence. Covers membership, grant/assignment controls, delegation, and
+adopted narrowing, not merely grant deletion. Other complete valid routes may
+allow; inability to establish freshness is not proof of policy denial. No cache
+protocol or per-request network call is prescribed. Already-in-flight work remains
+open; Q-110 Auth writes and Q-074 application-boundary preservation stay unchanged.
+
+## Q-127 approved — no proxy-to-proxy delegation chains in v1
+
+Support direct human-to-agent/service-account delegation only. Multiple proxies
+can have their own human-linked bounded delegations; collaboration transfers no
+authority implicitly. Team/grant hierarchies remain supported. Do not flatten an
+unsupported proxy chain into a claimed direct delegation. See docs/delegation-lifecycle.md.
+Earlier chain-design gaps are not v1 requirements after this explicit decision.
+
+## Q-126 approved — permission identifiers retain authorization meaning
+
+Do not repurpose an existing permission identifier for a materially different
+operation, even after retirement. Use a new identifier; cosmetic labels may
+change without semantic change. Auth preserves/validates registration identity,
+not business semantics. See docs/permission-lifecycle.md for rationale and limits.
+
+## Q-125 approved — permission retirement may retain grant references
+
+Authorized retirement need not wait for every referencing grant to be edited.
+Once effective, the computed root no longer supplies that permission and stored
+references cannot authorize it. Grants/assignments remain unchanged; no silent
+rewrite/delete/disable. See docs/permission-lifecycle.md. Exact retirement API,
+visibility, reuse, and mixed-grant consequences remain open, not assumed.
+
+## Q-124 approved — bounded bootstrap continuation
+
+Authorized retries may resume only the same intended interrupted setup after
+revalidation. No silent administrator/authority replacement, conflicting-attempt
+merge, or usable partial bootstrap authority. Completed replay remains Q-116;
+incomplete visibility remains Q-117. Exact intent/evidence/recovery contracts
+remain open. See docs/bootstrap-initial-assignment.md; do not re-ask retry policy.
+
+## Q-117 approved — incomplete bootstrap grants no initial authority
+
+The user has now approved the previously parked Q-117. New bootstrap authority
+becomes usable only after the complete intended arrangement is validated and
+durably established. Partial records may persist without supplying access.
+Completed setup with a lost response follows Q-116's non-mutating replay rule.
+No new status or transaction design is adopted; continuation/recovery remain open.
+Earlier parked/unapproved notices below are historical, not the current gate.
+
+## Q-123 corrected — one application version for everyone
+
+The user explicitly rules out selective tenant application updates. Each
+application has one shared current version/catalog; its existing roots compute
+coverage from that catalog. Do not reintroduce per-tenant release pins or catalog
+adoption. Tenant isolation and ordinary grant/role revision adoption remain.
+See docs/root-permission-evolution.md; earlier version-binding proposals are
+superseded, not requirements. Publication visibility and source encoding remain.
+
+## Q-122 approved — computed root permission coverage
+
+Root effective permission coverage is computed from applicable registered
+application capabilities. Do not re-ask computed versus materialized revisions
+or require automatic root assignment adoption for catalog additions. Scope,
+normal enablement/validity, and ordinary explicit child/role adoption remain.
+No root wire encoding/wildcard is approved. Exact source binding, applicable
+catalog version, removal, and concurrency remain open; preserve earlier rationale.
+
+## Q-121 approved — application platform authority
+
+Use the existing application platform administrator for application permission/
+scope publication, outside tenant business authority but within their actual
+platform-management bounds. See docs/application-platform-authority.md. Do not
+adopt the earlier invented publisher-grant example or require tenant payslip
+access to define a payslip permission. Q-120A feeds applicable root growth;
+mechanism, precise bindings, and platform-context contracts remain open.
+Record approved decisions with rationale in the lab; the last commit/push was
+the completed Q-120A/ASSESS-001 checkpoint, not approval of future proposals.
+
 ## Publication checkpoint — decisions through Q-120A and ASSESS-001
 
 The user explicitly requested committing and pushing the current work. Publish

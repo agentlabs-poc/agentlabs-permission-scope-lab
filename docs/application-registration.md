@@ -1,5 +1,30 @@
 # Application registration and Auth validation
 
+**Q-126 approved:** [do not repurpose a permission identifier](permission-lifecycle.md)
+for a different authorization meaning, even after retirement. New operations
+need new identifiers; cosmetic definition corrections remain possible. Auth does
+not interpret business semantics. Earlier rename/reuse gaps below are narrowed.
+
+**Q-125 approved:** [permission retirement does not require editing all grant references first](permission-lifecycle.md).
+Once effective, the root no longer supplies the retired permission. Stored
+grants/assignments remain unchanged and cannot authorize it. This narrows earlier
+removal-impact gaps; scope-definition changes and exact lifecycle contracts remain open.
+
+**Q-123 correction:** [one application version/catalog serves everyone](root-permission-evolution.md).
+No per-tenant release selection, selective update, or catalog adoption is required.
+Earlier installation/catalog-version selection gaps below are superseded;
+tenant/application isolation and authoritative publication checks remain.
+
+**Q-122 approved:** [computed root permission coverage](root-permission-evolution.md)
+uses the applicable registered application capabilities. Root catalog additions
+do not require root revision publication/adoption; ordinary child adoption stays
+explicit. Exact application/installation/catalog-version binding remains open.
+
+**Q-121 approved:** the [existing application platform administrator](application-platform-authority.md)
+authorizes publication of application permissions and scopes using platform
+application-management authority, not tenant business grants. No new administrator
+type or permission spelling is adopted. Exact publication/root bindings remain open.
+
 **Root-evolution qualification — Q-120A:** the trusted application capability-
 update flow is intended to expand applicable root permission coverage automatically,
 without another manual root approval. [Behavior and open mechanism](root-permission-evolution.md)

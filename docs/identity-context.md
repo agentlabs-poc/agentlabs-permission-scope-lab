@@ -1,5 +1,9 @@
 # Q-086 — shared request-identity representation
 
+**Q-127 approved:** [v1 supports direct human-to-proxy delegation, not proxy chains](delegation-lifecycle.md).
+This narrows the eligible supporting relationship without changing the identity
+block below. Matching actor/human IDs still require trusted delegation evidence.
+
 Status: **AGREED.** The user answered Q-086 “approve.”
 Previous status, retained as history: **PROPOSED, not approved** until that answer.
 Q-085 approves trusted proxy/human attribution;

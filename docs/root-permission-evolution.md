@@ -1,5 +1,136 @@
 # Q-120 — New application permissions and root authority
 
+**Q-125 approved:** [authorized retirement withdraws permission coverage](permission-lifecycle.md)
+even if existing grants still reference the permission. The computed root no
+longer supplies it once retirement is effective; references do not preserve access.
+No automatic grant/assignment edit occurs. Earlier removal gaps below are narrowed.
+
+**Bootstrap follow-up:** the previously parked [Q-117 is now approved](bootstrap-initial-assignment.md).
+Incomplete setup provides no initial administrator authority. Earlier Q-117
+pending notices below are historical; this does not change root computation.
+
+## Q-123 — One application version for everyone, user correction accepted
+
+**AGREED AS CORRECTED.** The user clarified that the application has one version
+for everyone. Selective tenant updates do not exist and are not required.
+The proposed per-tenant installed-release catalog selection is not adopted.
+
+For each application, its roots use the same current authoritative registered
+capability catalog. When the shared application update introduces delete, all
+otherwise valid roots for that application reflect that catalog addition through
+Q-122 computation. There is no tenant-specific release pin, catalog adoption,
+or separate root-update approval in this model.
+
+```text
+HRMS shared catalog: read, write
+Tenant A HRMS root:  read, write
+Tenant B HRMS root:  read, write
+
+HRMS shared update adds delete
+Tenant A HRMS root:  read, write, delete
+Tenant B HRMS root:  read, write, delete
+Existing child selecting read: still read
+```
+
+**Rationale:** the earlier question introduced a deployment/versioning feature
+the product neither provides nor needs. The shared version removes that catalog
+selection branch rather than requiring new installation-version binding records.
+This is a per-application rule: HRMS and an unrelated application still have
+separate catalogs and management boundaries.
+
+**Core-philosophy check:** a shared capability catalog is not shared tenant
+authority. Each root remains in its own tenant/application boundary with its own
+assignments, enablement, validity, and membership. A catalog addition does not
+install an application, create a root, grant a publisher tenant data access, or
+select new permissions for ordinary children. Independent ordinary grant/role
+revision adoption remains supported; that is not selective application versioning.
+
+No per-tenant release/catalog field is introduced. Canonical root-source encoding,
+authoritative publication visibility, failure handling, and definition removal
+remain to be finalized. These must not reintroduce tenant release selection by
+another name. One shared logical version does not alone prove distributed
+updates become visible atomically; that is a consistency contract, not a rollout
+feature adopted here.
+
+**History — Q-123 recommendation not adopted:** the assistant proposed Tenant A
+remaining on HRMS v1/read-write and Tenant B using v2/read-write-delete, with each
+root following its installation's release. The intent was to preserve definition
+versus installation boundaries. The user corrected the unnecessary assumption
+of selective upgrades. That proposal and earlier release-selection gaps below
+are superseded by the single-version rule, not parked v1 requirements.
+
+## Q-122 — Computed root permission coverage, approved
+
+**APPROVED.** The user agreed with computing a legitimate root's effective
+permission coverage from its applicable registered application capabilities.
+Automatic publication of new root grant revisions and adoption by root
+assignments is not the chosen mechanism for capability growth.
+
+```text
+Applicable registered HRMS catalog: read, write
+Effective root permissions:         read, write
+Ordinary child selects:             read
+
+Applicable catalog gains delete
+Effective root permissions:         read, write, delete
+Ordinary child still selects:       read
+```
+
+The registered source must belong to the root's trusted application binding.
+It is not every permission registered anywhere in Auth. A caller cannot make
+an ordinary grant into a computed root by omitting its parent, selecting a
+different catalog, or claiming platform administrator status.
+
+**Rationale:** roots represent the application's maximum source ceiling.
+Computing that permission coverage avoids generating root revisions and changing
+root assignments merely to reflect legitimate application capability additions.
+It directly satisfies Q-120A's automatic-growth requirement without a separate
+manual root update or adoption gate. Q-121 supplies the responsible publishing
+authority; it does not give publishers tenant business access.
+
+**Core-philosophy check:** dynamic permission coverage is explicit root behavior,
+not permission to rewrite immutable grant content. Ordinary grants and roles
+retain explicit permission selection and revision adoption. Parent/team ceilings,
+scope AND composition, membership, assignment and grant enablement, validity,
+and human/proxy restrictions still apply. Catalog growth does not enlarge scope
+or reactivate an otherwise ineffective route.
+
+**Trade-off and dependency:** effective root permissions depend on authoritative
+registration state. Required catalog/binding evidence must be established; a
+lookup failure cannot produce allow. This follows the existing fail-closed
+evaluation rule, not a new error code or cache policy. The catalog version,
+freshness, and exact publication-to-installation/root binding remain open.
+
+### Representation and remaining boundaries
+
+This approval selects the computation mechanism, not a wire format. No stored
+`*`, new permission-source field, root flag, or implicit omitted-field behavior
+is approved. Q-119 parent omission for trusted roots remains agreed; its explicit
+permission-list example does not alone encode a computed catalog source.
+The complete root record and resolved representation still need review against
+Q-118's existing direct/role variants. Do not silently reinterpret an ordinary
+stored `permissions` list as a dynamic catalog reference.
+
+Capability removal/retirement, changing scope definitions, which release is
+applicable to each installation, and concurrent visibility are not settled by
+the additive-growth example. Existing assignment/validity rules are not waived.
+The content/revision mechanism for changes other than catalog permission growth
+is not specified by this decision.
+
+### Earlier positions retained below
+
+The following Q-120A/Q-121 snapshots predate Q-122. Their statements that the
+computed-versus-materialized mechanism is undecided are superseded by the
+approval above; their rationale and unresolved trust/encoding questions remain.
+The initial Q-120 manual-update recommendation remains superseded as previously
+marked. The alternatives are retained for explanation, not reopened decisions.
+
+**Q-121 approved refinement:** [application platform authority](application-platform-authority.md)
+authorizes capability publication outside tenant business scope. The actor is
+bounded by existing application-management authority, not required to hold the
+new tenant business permission. Earlier unspecified-updater wording below is
+narrowed by this decision; precise bindings and root-growth mechanism remain open.
+
 ## Q-120A — Automatic root growth requirement, agreed direction
 
 **USER DIRECTION ACCEPTED; MECHANISM OPEN.** The user clarified: “the point is

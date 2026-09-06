@@ -1,5 +1,53 @@
 # Authorization Handbook — working edition
 
+**Q-130 approved:** [different complete grants may cover different batch items](bulk-enforcement.md).
+Every item needs full authority for the same endpoint permission; no cross-grant
+permission/scope fragment mixing. Any uncovered item denies the batch before effects.
+
+**Q-129 approved:** [a previously allowed bounded synchronous application operation may finish](concurrent-enforcement.md)
+after later authority withdrawal. New checks/retries cannot reuse its allow;
+Q-074 application boundaries and Q-110 Auth-write guarantees remain mandatory.
+
+**Q-128 approved:** [all confirmed authority reductions apply to newly started checks without stale-cache grace](authority-freshness.md).
+Membership, assignment/grant disablement, delegation withdrawal, and adopted
+narrowing receive the same guarantee as grant deletion. In-flight work remains separate.
+
+**Q-127 approved:** [no proxy-to-proxy authority delegation in v1](delegation-lifecycle.md).
+Each proxy needs its own direct human-linked bounded delegation. Collaboration
+does not transfer authority; existing team/grant hierarchies remain supported.
+
+**Q-126 approved:** [permission identifiers cannot silently acquire new authorization meanings](permission-lifecycle.md).
+A materially different operation requires a new identifier, even after retirement.
+Existing grants and adopted role revisions must retain their intended meaning.
+
+**Q-125 approved:** [retire application permissions without rewriting referencing grants](permission-lifecycle.md).
+Effective retirement removes that permission from root coverage; existing stored
+references cannot authorize it. Administrative authorization remains mandatory.
+
+**Q-124 approved:** [resume interrupted bootstrap only for the same validated intent](bootstrap-initial-assignment.md).
+The retry needs authorization and revalidation; no silent administrator or
+authority changes, conflicting-attempt merge, or access before complete setup.
+
+**Q-117 now approved:** [incomplete bootstrap supplies no initial administrator authority](bootstrap-initial-assignment.md).
+Access becomes usable only after the full intended arrangement is validated and
+durably established. Earlier parked/unapproved notices below are history;
+continuation, concurrency, and recovery remain open.
+
+**Q-123 corrected:** [one shared application version/catalog](root-permission-evolution.md)
+serves all tenants. No selective tenant upgrades or catalog-adoption step is
+required. Earlier version-selection gaps below are superseded; each tenant's
+authority remains isolated and ordinary grant revisions remain independently adopted.
+
+**Q-122 approved:** [root permission coverage is computed](root-permission-evolution.md)
+from applicable registered capabilities. Earlier mechanism-open notices below
+are superseded, not ordinary revision/adoption rules. Root source encoding and
+catalog-version binding remain unfinished; no stored wildcard is approved.
+
+**Q-121 approved:** [application platform authority](application-platform-authority.md)
+governs capability publication outside tenant business scope, while retaining
+its own administrative bounds. No tenant data access follows from publication.
+Root-growth mechanism and precise publication-to-root binding remain open.
+
 [Remaining discussions and assistant-owned work — ASSESS-001](discussion-assessment.md)
 counts 13 design topics, five contract reviews, and final acceptance, with eight
 supporting execution packages. It maps all 30 open criteria without changing

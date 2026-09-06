@@ -1,5 +1,15 @@
 # Initial bootstrap assignment — Q-115 agreed
 
+**Q-124 approved:** an authorized retry may resume the same intended interrupted
+setup after revalidation. It must not silently change the selected administrator
+or authority, merge conflicting attempts, or expose access before Q-117 completion.
+The full rule and rationale are recorded below; exact recovery contracts remain open.
+
+**Q-117 now approved:** the complete intended bootstrap arrangement must be
+validated and durably established before its initial administrator authority
+becomes usable. Earlier partial-setup visibility gaps are narrowed by this
+decision; trusted continuation, concurrency, and recovery contracts remain open.
+
 **AGREED AT ARRANGEMENT LEVEL.** The user specified: “we should create a user,
 create a adminstrator group, user can be any ligitimate user.” Trusted setup
 creates the selected legitimate human user and an Auth administrators group,
@@ -180,7 +190,37 @@ initialized without changing grants or administrator membership?
 
 </details>
 
-## Q-117 — Authority visibility during incomplete setup (proposed, not approved)
+## Q-117 — Authority visibility during incomplete setup (approved)
+
+**APPROVED.** On returning to this previously parked question, the user answered
+“agree.” Initial administrator authority becomes usable only after the complete
+intended bootstrap arrangement is validated and durably established. Persisted
+partial records may remain, but must not provide a partial bootstrap access route.
+Completion and authority visibility must agree from authorization consumers'
+perspective; this is an outcome requirement, not a prescribed transaction design.
+
+For example, storing a root, group, or even some of their links does not make an
+unfinished arrangement usable. A failure before coherent completion leaves the
+new bootstrap authority unavailable. If establishment completed but the response
+was lost, Q-116 governs the retry: report already initialized without changing
+authority. This rule does not withdraw unrelated pre-existing access of the human.
+
+**Rationale:** fail-closed setup prevents partially established high privilege
+from becoming usable while setup is still considered incomplete. Registration,
+explicit assignments/membership, tenant boundaries, and validated-state integrity
+remain required. No new grant status, evaluator bypass, business-rule condition,
+or wire field is introduced. The implementation cost is reliable completion
+evidence and coordinated visibility; no cross-service transaction is mandated.
+
+Exact continuation, concurrent-attempt handling, recovery authority, and storage
+mechanics remain open. Approval does not authorize deleting incomplete records,
+changing the selected administrator on retry, or bypassing normal grant controls.
+
+<details>
+<summary>History — Q-117 proposal, previously parked and subsequently approved above</summary>
+
+**Original status: proposed, not approved.** The proposal and rationale below
+are retained; the approval above supersedes its earlier pending status.
 
 **Context:** Q-116 settles repeating completed setup, not a crash during setup.
 Q-110 preserves checked authority through an ordinary Auth write. Bootstrap
@@ -216,3 +256,45 @@ concerns new bootstrap authority, not unrelated existing access of the human.
 
 **Q-117:** should initial administrator authority become usable only after the
 complete bootstrap arrangement is validated and durably established?
+
+</details>
+
+## Q-124 — Resume the same validated setup intent (approved)
+
+**APPROVED.** The user agreed that an authorized retry may resume an interrupted
+bootstrap only for the same intended setup, after revalidating existing records
+and the remaining work. The stored partial state is not permission to skip
+current authorization or validity checks.
+
+| Situation | Required behavior |
+|---|---|
+| Setup selected Maya, persisted some records, then crashed | An authorized retry may continue that same intended setup after revalidation. |
+| Retry silently substitutes Nutan or changes intended authority | Do not treat it as continuation of Maya's setup. No silent rebinding or expansion. |
+| Concurrent attempts carry conflicting intentions | Do not combine their records into one setup or expose combined authority. |
+| Intended setup remains incomplete | Q-117: initial bootstrap authority stays unavailable. |
+| Setup completed but its response was lost | Q-116: report already initialized without changing authority. |
+
+**Rationale:** recoverability should not depend on discarding all partial records,
+but retries must not become an alternate way to appoint administrators or expand
+authority. Binding continuation to the original validated intent preserves the
+explicit human, group, assignment, and authority relationships selected by trusted
+setup. It also separates continuing incomplete work from replaying completed work.
+
+**Core-philosophy check:** continuation is authorized and fail-closed. Existing
+registration, parent/source boundaries, explicit membership and assignments,
+enablement/validity rules, and checked-state integrity still apply. Partial setup
+has no special evaluator bypass. Conflicting attempts cannot combine into broader
+authority than the intended setup.
+
+**Trade-off:** implementation must reliably identify the original intent and
+distinguish incomplete from completed establishment. No setup ID, request hash,
+status enum, transaction design, or error payload is introduced by this approval.
+Do not assume that using the same HTTP request or the same claimed administrator
+alone establishes legitimate continuation.
+
+This does not mandate automatic background retries, deleting partial records,
+repairing arbitrary conflicting records, or accepting changes to the intended
+administrator. Deliberate replacement/abandonment requires a separately governed
+recovery contract; exact recovery authority, concurrency coordination, persistence,
+and API formats remain open. The rule defines what a retry may do, not a new
+unrestricted recovery endpoint.

@@ -1,5 +1,64 @@
 # Delegation lifecycle — impact-first discussion
 
+**Q-128 approved:** [confirmed reductions cannot survive in stale evidence for new checks](authority-freshness.md).
+Delegation withdrawal or loss of required human support is covered by the same
+freshness guarantee as grant deletion. Restoration still follows Q-070 when its
+requirements are met; exact evidence/propagation mechanisms remain open.
+
+## Q-127 — Direct human-to-proxy delegation only in v1 (approved)
+
+**APPROVED.** The user approved excluding proxy-to-proxy authority delegation
+chains from v1. Each supported delegation connects its human authority anchor
+directly to the acting agent or service account, without another proxy as an
+intermediate delegator.
+
+```text
+Supported in v1
+Vinay → Agent A
+Vinay → Agent B
+Vinay → Service account S
+
+Not supported in v1
+Vinay → Agent A → Agent B
+        B's authority depends on A's delegation as an intermediate source
+```
+
+Multiple proxies can use the same human anchor through their own separately
+authorized, bounded delegations. B needs its own valid human-linked delegation;
+it cannot acquire authority merely because A calls it, supplies a token/context,
+or asks it to perform work. Do not flatten a prohibited chain by discarding the
+intermediate actor's identity or restrictions and claiming direct human authority.
+
+Agent collaboration is not prohibited. It simply does not implicitly transfer
+authority: each protected operation still needs the actual caller's established
+delegation, human support, and all required boundaries. This rule applies equally
+to agent and service-account combinations.
+
+**Rationale:** intermediate proxy dependencies add withdrawal, restoration,
+expiry, and attribution cases. Direct human-linked delegation keeps v1's authority
+model smaller while preserving multiple independently bounded proxies per human.
+The alternative of supporting chains would require every intermediate delegation
+and its restrictions to remain valid; that feature is explicitly not supported
+in v1, not an unfinished v1 implementation requirement.
+
+**Core-philosophy check:** proxies remain human-dependent subsets, never independent
+authority or first-class group members. Q-070's restoration behavior remains for
+still-valid direct delegations. Team/grant hierarchy and parent-supported narrowing
+remain supported; those are not intermediate proxy delegators. A human's source
+authority can still come through a valid group/grant lineage.
+
+**Trade-off and remaining scope:** B requires an authorized human-linked delegation
+instead of inheriting A's delegation. No new JSON field, chain identity block,
+creation permission, or automatic delegation grant is introduced. Whether a proxy
+may perform an administrative creation operation is not decided by calling it
+collaboration; it requires its own authorized operation and boundary contract.
+This decision also does not settle account-level multiple-human associations or
+ownership transfer. Exact direct-delegation lifecycle/evidence remains open.
+
+Earlier redelegation-chain gaps below are retained as history but are no longer
+v1 requirements. Do not reintroduce chains through a transport adapter or implicit
+human impersonation.
+
 ## Existing foundation
 
 AUTHORITY-002 makes every service account and agent dependent on a human, with

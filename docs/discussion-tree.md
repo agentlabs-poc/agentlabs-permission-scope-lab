@@ -1,5 +1,59 @@
 # Authorization handbook — discussion tree
 
+**Q-130 approved — D09 finite-batch composition resolved:** [different complete routes may cover different items](bulk-enforcement.md).
+Full batch preflight and no cross-grant fragment mixing remain required. Move
+source/destination composition and exact batch transports remain separate gaps.
+
+**Q-129 approved — D08 already-allowed synchronous case resolved:** [the same bounded operation may finish](concurrent-enforcement.md).
+Q-074 and Q-110 remain stronger obligations; queued/streamed/long-running and
+not-yet-allowed cases remain distinct. Next impact-first branch: complete-route
+coverage of multi-item operations (D09), without grant-fragment mixing.
+
+**Q-128 approved — D08 reduction coverage resolved:** [all confirmed authority reductions govern new checks](authority-freshness.md).
+No stale grace from membership, assignment/grant controls, delegation, or adopted
+narrowing. Remaining: already-in-flight/allowed operations and exact confirmation,
+ordering, and evidence contracts. No full consistency checkpoint is closed yet.
+
+**Q-127 approved — D05 chain scope resolved:** [proxy-to-proxy delegation is not supported in v1](delegation-lifecycle.md).
+Direct human-to-proxy delegation remains supported. Chain implementation is no
+longer an open v1 requirement; exact direct-delegation lifecycle still needs closure.
+Next impact-first branch: authority-change visibility (D08).
+
+**Q-126 approved — D04 semantic reuse rule resolved:** [existing permission identifiers cannot be repurposed](permission-lifecycle.md).
+Materially different operations require new names, including after retirement.
+Scope-definition evolution and exact lifecycle/restoration contracts remain.
+Continue impact-first coverage with delegation chains (D05).
+
+**Q-125 approved — D04 retirement policy resolved:** [retirement may proceed despite grant references](permission-lifecycle.md).
+Effective retirement removes the permission from root support without altering
+stored grants/assignments. Identifier evolution, scope changes, and exact lifecycle
+contracts remain; do not re-ask whether all references must be migrated first.
+
+**Q-124 approved — D03 continuation rule resolved:** [same-intent, authorized, revalidated retry](bootstrap-initial-assignment.md).
+No silent authority replacement or conflicting-attempt merge. Exact setup
+evidence, concurrency coordination, and deliberate recovery remain contract gaps.
+Continue horizontal coverage with registered-definition lifecycle (D04).
+
+**Q-117 approved — D03 visibility rule resolved:** [bootstrap authority becomes usable only after complete validated establishment](bootstrap-initial-assignment.md).
+Earlier parked/unapproved entries below are history. Partial/concurrent attempt
+handling and governed recovery remain open; the entire bootstrap branch is not closed.
+
+**Q-123 resolved by user correction:** [one shared catalog per application](root-permission-evolution.md),
+not per-tenant release selection. This removes the proposed selective-upgrade
+branch. D01/D04 still require source encoding, publication consistency, and
+definition lifecycle work; do not count tenant version selection as pending.
+
+**Q-122 approved — D02 mechanism selected:** [computed root permission coverage](root-permission-evolution.md),
+not automatic root revision publication/adoption for catalog growth. Exact
+encoding and applicable catalog/version binding remain open. The Q-121 next-step
+notice below is historical; it no longer asks which mechanism to select.
+
+**Q-121 approved — D01 partially resolved:** [application platform authority](application-platform-authority.md)
+is responsible for capability publication; tenant business permission is not
+required to define the capability. Existing authority is reused, not a new
+publisher grant. D01's exact setup/binding contracts remain open; D02 is the
+next root-growth mechanism discussion. No whole-checkpoint closure is claimed.
+
 **Remaining agenda — [ASSESS-001](discussion-assessment.md):** 13 design topics
 + five contract reviews + final acceptance. Eight assistant-owned drafting,
 scenario, reconciliation, and verification packages support that same agenda;

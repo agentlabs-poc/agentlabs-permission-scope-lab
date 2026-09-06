@@ -1,5 +1,15 @@
 # Permission — definition and retained naming explanation
 
+**Q-126 approved:** [permission identifiers retain their authorization meaning](permission-lifecycle.md).
+A materially different operation needs a new identifier, including after the
+old permission is retired. Cosmetic labels may change. This is an application
+definition obligation, not a business-semantics interpreter inside Auth.
+
+**Q-125 approved:** [authorized permission retirement](permission-lifecycle.md)
+may proceed despite existing grant references. Effective retirement withdraws
+that permission from computed root coverage; stored grants cannot preserve it.
+Grants and assignments remain unchanged. Exact lifecycle contracts remain open.
+
 ## Reading status
 
 The user asked to retain the earlier Markdown's canonical permission explanation.

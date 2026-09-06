@@ -1,5 +1,68 @@
 # Authority freshness and revocation — impact-first discussion
 
+**Q-129 approved:** [an already-allowed ordinary synchronous application operation may finish](concurrent-enforcement.md)
+within its evaluated boundaries despite a later authority withdrawal. This is
+not stale authority for new checks or retries. Q-074 and Q-110 remain required;
+queued, streamed, long-running, and not-yet-allowed cases are not covered by it.
+
+## Q-128 — All confirmed authority reductions (approved)
+
+**APPROVED.** The user agreed to extend Q-069's no-stale-authority guarantee
+beyond grant deletion to all confirmed authority reductions. Authorization
+checks started after Auth confirms the reduction must not rely on the withdrawn
+authority from an older cached or resolved representation.
+
+Examples include membership removal, grant/assignment disablement, withdrawal of
+a delegation, and adoption of a narrower boundary. Effective permission retirement
+under Q-125 likewise cannot be bypassed by a cached older source. Publishing an
+ordinary narrower role/grant revision without adoption is not itself withdrawal
+of an assignment's current authority; existing explicit-adoption rules still apply.
+
+```text
+Auth confirms Vinay's Finance membership removal
+                         ↓
+A new endpoint authorization check starts
+                         ↓
+Cached Finance membership cannot supply that access
+```
+
+A different complete valid authority route may still allow the operation. The
+rule removes the withdrawn support, not every other grant the human holds.
+If sufficient freshness cannot be established, old evidence alone cannot justify
+allow. Failure to establish evidence remains an evaluation failure, distinct from
+a policy denial based on established facts.
+
+**Rationale:** membership withdrawal, assignment disablement, or delegation
+withdrawal must not have weaker effects than deleting a grant. The live dependency
+and subset rules must hold across cached and resolved representations, not only
+inside Auth's current database state.
+
+**Core-philosophy check:** no cached copy becomes independent authority, and no
+old membership or parent boundary can silently survive a confirmed reduction for
+new checks. Ordinary valid alternatives remain available, while fail-closed
+handling prevents uncertain evidence from being promoted into allow.
+
+**Operational cost:** implementations need coordination sufficient to establish
+freshness. They may need to delay confirmation or refuse evaluation when they
+cannot establish it. A local TTL does not create a grace period after confirmed
+reduction. Confirmation here is that the change took effect under this guarantee,
+not merely that a request was received or queued.
+
+No Auth call per request, invalidation transport, cache protocol, confirmation
+field, new error code, or distributed transaction is prescribed. These mechanisms
+must satisfy the guarantee; the documentation is not runtime verification.
+Automatic validity expiry remains governed by the existing time-bound rules and
+does not require an administrative confirmation to become effective.
+
+Checks already in flight, previously allowed work, and exact acknowledgment/
+ordering/evidence contracts remain separate. This approval does not cancel or
+roll back business operations, and does not relax Q-110's stronger checked-write
+guarantee for Auth's own authority mutations or Q-074's application-boundary rule.
+
+Earlier membership/delegation propagation-policy gaps below are narrowed by
+Q-128. The original Q-069 rationale and cache alternatives are retained as history;
+the old grace-window alternative is not reopened for these additional reductions.
+
 Terminology update after Q-082: the canonical permanent-removal operation is
 **delete**, not a separate revoke operation. The historical revocation wording
 below means permanent grant withdrawal. Its agreed timing guarantee still holds:

@@ -1,5 +1,157 @@
 # Handbook reconciliation register
 
+## Q-130 — Batch composition approved after expanded grant explanation
+
+Recorded [Q-130](bulk-enforcement.md) with both full existing-format grant-revision
+examples, actual certificate/department mapping, the conjunctive item-coverage
+flow, and the read-versus-delete fragment-mixing counterexample. Every batch item
+requires a complete valid route, but different items may use different grants.
+One uncovered item rejects the whole batch before effects; evaluation failure
+remains error. All earlier Q-073/Q-074 protections are preserved.
+
+Reconciled the related operation chapter, handbook/reader, tree, and assessment.
+No broader synthetic grant, scope array, new transport, endpoint grant inspection,
+automatic subset filtering, or execution rollback guarantee is introduced.
+D09's batch-composition choice is resolved; move composition and full contracts
+remain open. No whole-checkpoint closure, commit/push, runtime, or scratchpad work.
+
+## Q-129 — Already-authorized synchronous completion approved
+
+Recorded [Q-129](concurrent-enforcement.md) with the allow/removal/completion
+timeline, rationale, explicit after-withdrawal effect trade-off, and boundaries.
+The same ordinary synchronous application operation may finish within its prior
+evaluated boundaries. New checks/retries cannot reuse that allow. Q-074's actual
+data-boundary preservation and Q-110's Auth-write consistency remain intact.
+
+Reconciled freshness, handbook/reader, tree, and assessment entry points. Queued,
+streamed, long-running, and not-yet-allowed cases are not silently included. No
+new transport, runtime cancellation/rollback policy, complete-checkpoint closure,
+commit/push, or scratchpad change is claimed by this recording.
+
+## Q-128 — Uniform freshness for confirmed authority reductions approved
+
+Recorded [Q-128](authority-freshness.md) with the membership-removal timeline,
+additional reduction cases, rationale, operational cost, fail-closed distinction,
+and separation from ordinary revision publication and in-flight work. No stale
+copy may supply withdrawn authority to a check started after Auth confirms the
+reduction. Unrelated complete valid routes can still authorize.
+
+Reconciled concurrency/delegation/permission references, handbook/reader, tree,
+and assessment. Exact confirmation/cache mechanisms remain open; no per-request
+Auth call, new protocol field, rollback policy, or runtime guarantee is claimed.
+Q-110 and Q-074 remain intact. No full checkpoint closure, commit/push, or scratchpad work.
+
+## Q-127 — Direct delegation; proxy chains excluded from v1
+
+Recorded the explicit [Q-127 approval](delegation-lifecycle.md), supported versus
+unsupported examples, rationale, trade-off, and separation of collaboration from
+authority transfer. Each proxy needs its own trusted human-linked delegation;
+no intermediate proxy delegator or identity-flattening bypass is supported.
+Existing team/grant hierarchies and Q-070 restoration remain unchanged.
+
+Reconciled attribution/identity, handbook/reader, tree, assessment, and closure
+entry points. This is a user-approved v1 feature limit, not an assistant-inferred
+deferral. HC-05-10 remains open for direct-delegation contracts; no whole criterion
+is excluded or closed. No new fields, runtime change, commit/push, or scratchpad work.
+
+## Q-126 — Stable permission meaning approved
+
+Recorded [Q-126](permission-lifecycle.md), including the payroll approval versus
+payment-execution example, rationale for protecting existing grants and adopted
+role revisions, cosmetic-change allowance, and the application/Auth responsibility
+boundary. Retired identifiers cannot be repurposed for different authorization
+meaning. No semantic engine, new field, alias, or migration is introduced.
+
+Reconciled permission/registration, handbook/reader, tree, and assessment entries.
+D04's semantic-reuse rule is resolved; scope-definition changes and same-meaning
+restoration remain separate. No whole-checkpoint closure, runtime work, commit/push,
+or scratchpad change is included.
+
+## Q-125 — Permission retirement with retained references approved
+
+Recorded [Q-125](permission-lifecycle.md) with an existing-format grant example,
+before/after root-support flow, rationale, operational trade-off, and boundaries.
+Authorized retirement can proceed without migrating all references first; once
+effective, the retired permission cannot authorize operations. Stored grants and
+assignments are preserved without silent status or content changes.
+
+Reconciled permission, registration, root evolution, handbook/reader, tree, and
+assessment entry points. D04's retirement-policy choice is resolved, not the
+entire definition lifecycle. Exact visibility, identifier reuse, and mixed-grant
+consequences remain unclaimed. No runtime change, new wire field, whole-checkpoint
+closure, commit/push, or scratchpad mutation is included.
+
+## Q-124 — Same-intent bootstrap retry approved
+
+Recorded [Q-124](bootstrap-initial-assignment.md) with the Maya/Nutan retry case,
+conflicting versus matching intent, completed-response-loss behavior, rationale,
+and implementation-independent limits. An authorized retry may continue incomplete
+setup after revalidation, not silently appoint another administrator or expand
+authority. Q-117 and Q-116 remain the visibility and completed-replay rules.
+
+Reconciled bootstrap, handbook/reader, tree, assessment, and closure entry points.
+No new recovery identity, wire field, deletion, runtime implementation, full
+checkpoint closure, scratchpad mutation, or commit/push is included. D03's retry
+policy is resolved; exact evidence and deliberate recovery remain open.
+
+## Q-117 — Previously parked bootstrap-visibility rule now approved
+
+Recorded the explicit approval in [initial bootstrap assignment](bootstrap-initial-assignment.md),
+with the incomplete versus completed-but-response-lost cases, rationale,
+visibility guarantee, costs, and remaining recovery/continuation boundaries.
+Preserved the original proposal inside a labeled history block. New bootstrap
+authority must not be usable before full validated durable establishment;
+unrelated existing access is unaffected and partial records need not be deleted.
+
+Reconciled handbook/reader, bootstrap, root/platform references, tree, assessment,
+and closure entry points so earlier parked labels are explicitly historical.
+D03's visibility decision is resolved, not its whole recovery contract. No new
+grant status, business rule, runtime change, whole-checkpoint closure, commit/push,
+or scratchpad mutation is included.
+
+## Q-123 — Single application version; selective-upgrade proposal not adopted
+
+Recorded the user's [single-version correction](root-permission-evolution.md)
+with shared-catalog examples, rationale, and boundary checks. The earlier
+per-tenant installed-release proposal added an unsupported and unwanted product
+feature. It is explicitly superseded, not a parked requirement. No per-tenant
+release pin/catalog-adoption field is introduced. Tenant authority remains
+isolated, and ordinary grant/role revision adoption remains independent.
+
+Reconciled the registration, platform authority, handbook/reader, tree, and
+assessment entry points. Older snapshots are qualified as history. Root-source
+encoding and publication consistency remain open; no whole-checkpoint closure,
+runtime work, commit/push, or scratchpad change is claimed.
+
+## Q-122 — Computed root permission coverage approved
+
+Recorded [Q-122](root-permission-evolution.md) with the before/after catalog
+example, rationale, alternative mechanism, dependency trade-off, and core-rule
+checks. Dynamic root permissions reflect applicable registered capabilities;
+ordinary child permissions stay selected and adopted explicitly. No immutable
+record rewrite, scope growth, wildcard field, or lifecycle bypass is approved.
+
+Added current qualifications to the root format, revision, registration,
+application-platform authority, handbook/reader, tree, and assessment sources.
+Earlier mechanism-open snapshots remain as marked history. Q-119's explicit-list
+example is not falsely presented as a finished computed-source encoding. D02's
+mechanism choice is resolved; exact contracts and catalog binding remain open.
+No whole criterion is closed by this recording; no commit/push or runtime work.
+
+## Q-121 — Application platform authority approved
+
+Recorded the user's correction and approval in
+[application platform authority](application-platform-authority.md), including
+the publication example, rationale, boundary checks, existing-service evidence,
+and the earlier unadopted grant proposal. Platform management is outside tenant
+business scope, not outside authorization. Publication does not confer tenant
+data access; child selection and lineage remain bounded.
+
+Reconciled registration, root evolution, handbook navigation, the discussion
+tree, and ASSESS-001. D01 is partially resolved; mechanism and exact bindings
+remain open. No complete criterion, new JSON field, runtime change, scratchpad
+change, or additional commit/push is included in this recording pass.
+
 ## ASSESS-001 — Remaining discussions versus autonomous work
 
 Recorded the requested [assessment](discussion-assessment.md): 13 substantive

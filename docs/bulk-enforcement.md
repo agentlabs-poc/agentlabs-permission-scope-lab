@@ -1,5 +1,107 @@
 # Bulk enforcement — impact-first discussion
 
+## Q-130 — Complete grant routes may cover different batch items (approved)
+
+**APPROVED after the expanded two-grant explanation.** Every item in a batch
+must have complete valid authority for the endpoint's one required permission.
+Different items may rely on different complete grant routes; a single grant
+covering the whole batch is not required.
+
+### Exact grant examples
+
+Vinay has these two grant revisions available through valid assignments and
+membership, with current valid parent support and all other restrictions met.
+Tenant is implied; G-ROOT supports both permissions/boundaries shown.
+These are existing-format grant revisions, not a new batch or assignment schema.
+
+G-FIN supplies Finance certificate-delete authority:
+
+```json
+{
+  "version": "1",
+  "grant_id": "G-FIN",
+  "revision": 1,
+  "parent_grant_id": "G-ROOT",
+  "permissions": ["hrms:employee:certificate::delete"],
+  "scope": {"dept": "FIN"}
+}
+```
+
+G-ENG supplies Engineering certificate-delete authority:
+
+```json
+{
+  "version": "1",
+  "grant_id": "G-ENG",
+  "revision": 1,
+  "parent_grant_id": "G-ROOT",
+  "permissions": ["hrms:employee:certificate::delete"],
+  "scope": {"dept": "ENG"}
+}
+```
+
+The request is one batch deleting C-17 and C-18. The application establishes
+their actual department facts, not merely caller-claimed department labels.
+
+| Item | Actual department | Complete supporting route |
+|---|---|---|
+| C-17 | FIN | G-FIN and its required lineage/assignment/membership support |
+| C-18 | ENG | G-ENG and its required lineage/assignment/membership support |
+
+```text
+C-17 has complete delete authority through G-FIN
+                       AND
+C-18 has complete delete authority through G-ENG
+                        ↓
+One authorization outcome for the complete batch
+```
+
+Both items must be covered and all mandatory checks must succeed before any
+protected effects. Including C-19 in HR, without a complete route covering its
+deletion, denies the whole batch. Do not delete C-17/C-18 or silently omit C-19.
+Inability to complete evaluation is an error, not a fabricated completed deny;
+it also prevents execution.
+
+### No permission/scope fragment mixing
+
+If G-ENG supplies only read, it cannot authorize deleting C-18. The evaluator
+must not borrow delete from G-FIN and combine it with Engineering scope from
+G-ENG. Each item needs a complete permission-and-scope route with all applicable
+lineage, validity, membership, assignment, and delegation restrictions.
+
+AND between required item checks does not change AND within each grant's scope.
+The evaluator is not merging FIN and ENG into a broader synthetic grant or
+inventing an OR/array scope operator. Different complete routes provide different
+items' authority while retaining their own complete boundaries.
+
+### Rationale, ownership, and trade-offs
+
+Vinay could already delete either certificate in a separate authorized request.
+Batching those operations should not require a broader grant merely to package
+them together. Requiring one grant for the entire batch would create that extra
+authority-distribution burden; the user approved per-item complete-route coverage.
+
+The evaluator performs coverage resolution. The endpoint still declares one
+permission, supplies trusted material for the requested items, and enforces the
+same boundaries during execution. It does not inspect grants, derive a different
+query, or return an automatically filtered successful subset. There is one final
+authorization decision, not per-item partial execution permission.
+
+The cost is complete batch preflight and preservation of each item's evaluated
+boundary through use. Q-073's distinction between authorization failure and later
+execution failure remains: this does not promise database rollback after every
+possible execution error. Q-074 concurrent application-boundary protection remains.
+
+### Remaining boundaries
+
+Exact batch material/policy/request and provenance contracts remain open; no new
+JSON transport or endpoint source syntax is adopted here. This finite requested-
+item rule does not authorize an unbounded collection merely because all currently
+visible rows happen to be covered (Q-072). It does not yet settle using different
+grants for the source and destination states of one move (Q-068).
+Existing historical batch-contract gaps below are narrowed by this approval,
+not evidence that every bulk implementation requirement is complete.
+
 ## Q-073 / ENFORCEMENT-007 — authorize the complete batch before effects
 
 Status: **AGREED.** The user answered Q-073 “Agree” after the three-certificate

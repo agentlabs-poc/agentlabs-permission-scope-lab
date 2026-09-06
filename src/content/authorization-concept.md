@@ -1,5 +1,53 @@
 # Authorization: the agreed foundation
 
+**Q-130 approved:** [batch coverage can use different complete grant routes per item](../../docs/bulk-enforcement.md).
+There is still one permission and one final decision. All items must be covered
+before effects; no fragment mixing, endpoint grant inspection, or successful subset filtering.
+
+**Q-129 approved:** [already-authorized synchronous completion](../../docs/concurrent-enforcement.md)
+may proceed within the same evaluated boundaries after later authority withdrawal.
+This does not cover new requests, retries, queues, streams, or long-running work;
+changed application boundaries and conflicting Auth writes still stop under Q-074/Q-110.
+
+**Q-128 approved:** [no stale authority for new checks after a confirmed reduction](../../docs/authority-freshness.md).
+This includes membership, assignment/grant controls, delegation, and adopted
+narrowing. Another complete valid route may allow; uncertain freshness cannot.
+Already-in-flight work and exact cache/confirmation protocols remain separate.
+
+**Q-127 approved:** [direct human-to-proxy delegation only](../../docs/delegation-lifecycle.md).
+V1 excludes proxy-to-proxy authority chains, not agent collaboration or team/grant
+hierarchy. Each proxy's own delegation and current human support remain required.
+
+**Q-126 approved:** [stable permission meaning](../../docs/permission-lifecycle.md).
+Do not reuse an existing or retired identifier for a different operation. New
+operations need new identifiers; cosmetic labels can change without changing authority.
+
+**Q-125 approved:** [effective permission retirement withdraws its authority](../../docs/permission-lifecycle.md).
+An authorized retirement may proceed while grants still reference the permission;
+those references cannot preserve access. Stored grants and assignments are not rewritten.
+
+**Q-124 approved:** [authorized bootstrap retries preserve the original setup intent](../../docs/bootstrap-initial-assignment.md).
+Revalidate existing records and remaining work; do not silently replace the
+administrator/authority or merge conflicts. Q-117 withholds access until completion;
+Q-116 prevents authority changes on completed replay.
+
+**Q-117 now approved:** [initial bootstrap authority requires complete validated setup](../../docs/bootstrap-initial-assignment.md).
+Partial records may remain without supplying administrator access. Earlier
+parked/unapproved notices below are superseded; recovery and continuation remain open.
+
+**Q-123 corrected:** [one application version/catalog for everyone](../../docs/root-permission-evolution.md).
+Roots for that application compute permissions from the shared current catalog;
+no selective tenant upgrade or catalog-adoption mechanism is required. This
+supersedes the per-installation version-selection gaps below, not tenant isolation
+or ordinary grant/role revision adoption.
+
+**Q-121/Q-122 approved:** the [application platform administrator](../../docs/application-platform-authority.md)
+publishes capabilities using platform-management authority, not tenant business
+grants. [Legitimate root permission coverage is computed](../../docs/root-permission-evolution.md)
+from the applicable registered capabilities; ordinary child selection/adoption
+remains explicit. This settles the mechanism-open wording below. No new root
+JSON encoding is approved; catalog/installation-version binding remains open.
+
 **Q-120A — automatic root growth:** legitimate application capability upgrades
 should expand applicable root coverage without a separate manual root approval.
 Ordinary child permissions remain explicitly selected and bounded. [Behavior

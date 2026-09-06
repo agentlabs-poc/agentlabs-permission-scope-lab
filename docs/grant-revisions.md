@@ -1,5 +1,11 @@
 # Shared-grant revisions, adoption, and current lineage — Q-102–Q-106
 
+**Q-122 approved refinement:** [computed root permission coverage](root-permission-evolution.md)
+is selected for legitimate roots; catalog additions do not require automatic
+root revision publication/adoption. This supersedes the mechanism-open wording
+below, not ordinary explicit grant/role adoption or immutable-content rules.
+Root encoding and applicable catalog/version binding remain open.
+
 **Root-evolution qualification — Q-120A:** [automatic root growth](root-permission-evolution.md)
 is now intended for legitimate application capability upgrades, without a
 separate manual root-update/adoption gate. Live versus materialized revision

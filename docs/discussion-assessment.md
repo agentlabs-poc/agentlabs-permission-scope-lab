@@ -1,5 +1,74 @@
 # Remaining discussions and autonomous work — ASSESS-001
 
+## Progress after the assessment
+
+Q-130 approves [different complete grant routes covering different batch items](bulk-enforcement.md).
+D09's finite-batch composition choice is resolved; no single whole-batch grant
+is required. All items need complete support before effects, with no fragment
+mixing or subset filtering. Move-state composition and exact contracts remain open.
+
+Q-129 approves [completion of an already-allowed bounded synchronous application operation](concurrent-enforcement.md)
+despite later authority withdrawal. This resolves that D08 case, not all in-flight
+or long-running work. Q-074 and Q-110 remain required; exact ordering/evidence and
+queued/streaming contracts remain separate. No old allow may authorize new operations.
+
+Q-128 approves [freshness for all confirmed authority reductions](authority-freshness.md).
+D08's grant-deletion versus other dependency-change coverage choice is resolved.
+New checks cannot use stale withdrawn support; already-in-flight work and exact
+confirmation/evidence contracts remain open. This does not reopen ordinary
+revision-publication-versus-adoption rules or close all of HC-09-06/HC-09-07.
+
+Q-127 explicitly [excludes proxy-to-proxy delegation chains from v1](delegation-lifecycle.md).
+D05's chain/redelegation-scope choice is resolved, not silently deferred: v1
+supports direct human-linked proxy delegations. The original chain-design gap
+below is historical. Remaining direct-delegation contracts keep HC-05-10 open;
+the criterion is not dropped or its entire scope excluded.
+
+Q-126 approves [stable permission authorization meaning](permission-lifecycle.md).
+D04's identifier-repurposing choice is resolved: materially different operations
+need new identifiers, including after retirement. Cosmetic labels may change.
+Auth remains domain-agnostic; scope evolution and exact lifecycle/restoration
+contracts are not silently closed by this rule.
+
+Q-125 approves [retirement despite existing grant references](permission-lifecycle.md).
+D04's permission-retirement prerequisite is resolved: authorized retirement may
+proceed without prior reference cleanup, and the retired permission becomes
+unusable through the computed root. Exact lifecycle, identifier evolution, and
+scope-definition contracts remain; stored grants/assignments are not rewritten.
+
+Q-124 approves [same-intent bootstrap continuation](bootstrap-initial-assignment.md).
+D03's ordinary interrupted-retry policy and non-merging conflict rule are resolved.
+Trusted intent evidence, concurrent-attempt coordination, and deliberate recovery
+contracts remain; do not re-ask whether an authorized unchanged retry may resume.
+These are partial closures within the original topic, not new agenda topics.
+
+Q-117 is now explicitly [approved](bootstrap-initial-assignment.md), resolving
+D03's incomplete-setup authority-visibility choice. Partial records cannot supply
+initial administrator access before complete validated, durable establishment.
+The original parked status below is historical. Continuation, concurrency, and
+recovery still require closure; no full criterion is closed by this answer alone.
+
+Q-123 resolves catalog selection through the user's
+[single-version correction](root-permission-evolution.md): one shared current
+application version/catalog, no selective tenant updates. Earlier installation-
+version selection references in D01/D04 progress below are superseded, not new
+contract requirements. Publication consistency and source/application binding
+remain; ordinary grant/role revision adoption is unaffected.
+
+Q-122 approved [computed root permission coverage](root-permission-evolution.md).
+D02's computed-versus-materialized choice is resolved. Its remaining canonical
+representation work belongs with C02/C04; applicable catalog/version binding
+remains a D01/D04 dependency. Do not re-ask the mechanism or mark full contracts
+complete. The original D02 row below remains an assessment snapshot, not a
+current claim that both mechanisms are undecided.
+
+Q-121 approved [application platform authority](application-platform-authority.md)
+for capability publication, outside tenant business scope and bounded by the
+actor's existing application-management authority. This resolves the responsible
+authority part of D01; initial trust and exact root/installation binding remain.
+D02's mechanism remains open. The original assessment below is preserved;
+one answered question does not close an entire multi-part topic or criterion.
+
 Assessment date: 2026-09-06. Scope: the existing handbook closure criteria,
 current approved decisions through Q-120A, and their source chapters. The user
 asked how many discussions remain and what the assistant can run, resolve, and

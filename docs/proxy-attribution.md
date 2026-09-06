@@ -1,5 +1,10 @@
 # Q-085 — trusted human attribution for proxy requests
 
+**Q-127 approved:** [direct human-to-proxy delegation only in v1](delegation-lifecycle.md).
+The actual caller needs a trusted direct human-linked delegation; another proxy
+cannot act as its intermediate delegator. Collaboration does not transfer authority
+or permit identity flattening. Existing actor/human fields remain unchanged.
+
 Status: **AGREED.** The user answered “i agree” and additionally required canonical
 representation across JWT and other places carrying this identity context.
 Previous status, retained as history: **PROPOSED, not approved** until that answer.

@@ -1,5 +1,9 @@
 # Operation-specific enforcement — impact-first discussion
 
+**Q-130 related approval:** [different batch items may use different complete grant routes](bulk-enforcement.md).
+That does not yet settle Q-068's distinct open question of separate grants for
+the source and destination of one move. Both move boundaries remain mandatory.
+
 Q-090 separates [grants and assignments](grant-assignments.md). Recipient-bearing
 grant examples below are deprecated layouts, retained to explain operation
 boundaries. Their enforcement requirements remain; this chapter does not provide
