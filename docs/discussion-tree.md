@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-082 settled; Q-081 revised proposed; audit layer excluded
+## Current position — Q-081 revised approved; Q-083 proposed; audit layer excluded
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -30,7 +30,8 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 │   ├── Automatic delegation reactivation agreed [Q-070]
 │   ├── Direct human membership only; nested groups unsupported [Q-077]
 │   ├── Create, enable, disable, delete agreed; separate revoke superseded [Q-082]
-│   ├── Enabled/disabled status representation PROPOSED [Q-081 revised] <-- NOW
+│   ├── Enabled/disabled status agreed [Q-081 revised]
+│   ├── Optional time validity independent of status PROPOSED [Q-083] <-- NOW
 │   └── Admin encoding, bootstrap, lifecycle, chains, group/role changes OPEN
 ├── 6. Scope and registration [5/7]
 │   └── Flat AND boundaries and registration agreed; detailed evolution PARKED
@@ -187,7 +188,7 @@ branches while retaining the unfinished details in the audit.
 | 6 — execution-time rule agreed; details open | Queued/background work | Delayed execution must not accidentally preserve removed authority. | HC-09-09 |
 | 7 — excluded by user | Authority-change audit | Another layer's responsibility, not handbook scope. | HC-09-08 EXCLUDED |
 | 8 — nesting unsupported; lifecycle details open | Group membership composition | Determines which group grants become applicable and which dependencies resolution follows. | HC-05-12 |
-| 9 — four operations agreed; representation now | Ordinary grant lifecycle | Distinguishes creation, reversible suspension, permanent deletion, and effective authority. | HC-05-11 / HC-07-08 |
+| 9 — operations/status agreed; time validity now | Ordinary grant lifecycle | Distinguishes creation, reversible suspension, permanent deletion, and effective authority. | HC-05-11 / HC-07-08 |
 
 **Q-068 / ENFORCEMENT-004 is agreed:** a move requires authority over both current
 and proposed boundaries. See [operation-specific enforcement](operation-enforcement.md).
@@ -221,8 +222,10 @@ use explicit human-to-group links. See [groups and membership](groups-and-member
 **Q-082 / GRANT-008 is agreed:** create, enable, disable, and delete are the four
 canonical operations. The separate revoke operation is superseded; permanent
 withdrawal remains terminal through delete. Q-079's reversible suspension remains.
-**Q-081 revised / GRANT-007 is proposed:** enabled/disabled status only, distinct
+**Q-081 revised / GRANT-007 is agreed:** enabled/disabled status only, distinct
 from effective validity. Its original three-state variant was never approved.
+**Q-083 / GRANT-009 is proposed:** optional not-before/expiry bounds independent
+of status; enable does not reset them.
 See [grant lifecycle](grant-lifecycle.md).
 Administration bounds, restoration mechanics, collection details, transaction
 guarantees, and full job integration remain open. Audit-system deliverables are

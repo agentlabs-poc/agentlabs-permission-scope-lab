@@ -27,8 +27,8 @@ Their agreed binding, role, and dependency semantics are not deprecated.
 
 Lifecycle update: Q-082 consolidates permanent removal into delete, superseding
 the separate revoke operation. Create, enable, disable, and delete are agreed.
-Q-081 revised proposes `status: enabled/disabled` in
-[grant lifecycle](grant-lifecycle.md), not yet approved. The former three-value
+Q-081 revised approves `status: enabled/disabled` in
+[grant lifecycle](grant-lifecycle.md). The former three-value
 proposal is preserved there as superseded, not a canonical enum.
 The older `active` spelling below remains illustrative, not a competing canonical
 enum; no historical grant examples are removed.
@@ -39,10 +39,31 @@ The current examples consistently use the already illustrated permissions
 array for explicit permissions and role_id for a role reference. They do not
 introduce an administrator-specific format or revive independent service grants.
 
-Scope syntax is canonical. Final lifecycle/status/condition schemas, role
+Scope syntax and the enabled/disabled status values are canonical. Full lifecycle/condition schemas, role
 revision encoding, and resolved-grant transport contracts remain open. The
 surrounding JSON below is the current working grant layout, not a claim that
 all those branches or application migrations are complete.
+
+## Current versioned illustration — approved status values
+
+This partial illustration uses the agreed version, scope, and status conventions;
+it is not a complete grant schema. Missing-field defaults and validity/conditions
+are not settled by their omission here. Q-083 in the lifecycle chapter proposes
+the time-window contract separately.
+
+```json
+{
+  "version": "1",
+  "id": "G-17",
+  "recipient": {"type": "group", "id": "finance-readers"},
+  "permissions": ["hrms:employee:certificate::read"],
+  "scope": {"dept": "FIN"},
+  "status": "enabled"
+}
+```
+
+The unversioned `active` illustrations below are preserved historical layouts,
+not current canonical status or complete publishable contracts.
 
 ## Scope-format correspondence
 

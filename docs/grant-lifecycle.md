@@ -37,8 +37,8 @@ restoring a deleted one.
 
 Q-078's permanence rule is retained under delete; Q-079's reversible suspension
 and Q-080's creation/removal remain agreed. Q-081's original three-value status
-proposal is **SUPERSEDED, never approved**. The revised representation below
-remains proposed; Q-082 answers the operation question, not the complete schema.
+proposal is **SUPERSEDED, never approved**. The revised two-value representation
+below is now approved separately. Neither approval finishes the complete schema.
 
 Earlier uses of grant “revocation” in Q-069/Q-075 describe authority withdrawal;
 the canonical permanent-removal operation is now delete. Their no-stale-use and
@@ -48,10 +48,14 @@ names and are not renamed by this grant-lifecycle decision.
 
 ## Q-081 revised / GRANT-007 — enabled or disabled administrative status
 
-Status: **PROPOSED, not approved.** Reuse the illustrated `status` field with only
+Status: **AGREED.** The user answered the revised Q-081 “approved.” Use `status` with only
 `enabled` and `disabled`. No canonical `revoked` or `deleted` status is required:
 delete removes the grant from usable authority; implementation bookkeeping is
 outside this grant representation. No physical deletion requirement is implied.
+
+Previous status, retained as history: the two-value revision was proposed until
+this approval. The original three-value proposal remains superseded and was
+never approved; its history below is not revived.
 
 Versioned grant illustration; not the complete grant schema. Validity and
 condition details are omitted for focus, not removed from the model:
@@ -75,6 +79,62 @@ administrative operation contracts remain open; HC-05-11 and HC-07-08 stay open.
 
 **Q-081 revised:** Should `status` use only `enabled` and `disabled`, while delete
 removes the grant and effective authorization remains evaluated?
+
+**Answer: approved.** `enabled` means eligible for evaluation and `disabled`
+means this grant cannot supply authority. Required-field/default behavior and
+the rest of the grant schema are not inferred from approval of these values.
+
+## Q-083 / GRANT-009 — optional time validity independent of status
+
+Status: **PROPOSED, not approved.** Validity already appears in the conceptual
+grant binding and older illustrations. This proposal makes the time-window
+meaning concrete without changing the approved enabled/disabled statuses.
+
+Recommend an optional grant validity window using the previously illustrated
+`not_before` and `expires_at` bounds. At evaluation time, an enabled grant can
+contribute only at or after its start and strictly before its expiry, alongside
+all other permission, scope, and dependency checks. Omitted start means no lower
+time bound; omitted expiry means no upper time bound. No validity window means
+no additional time restriction, not unconditional access.
+
+Versioned illustrative grant; the time fields are proposed, and the example is
+not a complete finalized grant schema:
+
+```json
+{
+  "version": "1",
+  "id": "G-17",
+  "recipient": {"type": "group", "id": "finance-readers"},
+  "permissions": ["hrms:employee:certificate::read"],
+  "scope": {"dept": "FIN"},
+  "status": "enabled",
+  "validity": {
+    "not_before": "2026-09-07T00:00:00Z",
+    "expires_at": "2026-09-08T00:00:00Z"
+  }
+}
+```
+
+This grant is time-eligible during September 7 UTC, not before its start or at
+or after September 8 UTC. It can remain stored as enabled after expiry while
+supplying no authority. Disabling and enabling it does not move or reset its
+validity window. Extending validity would be a separately authorized change,
+not a side effect of enable; exact update/renewal contracts remain open.
+
+Rationale: time limits constrain authority independently of an administrative
+pause. Deriving time eligibility avoids an expired status that must be changed
+by a scheduled process and avoids keeping access alive merely because that
+process is late. The alternative of relying only on manual disable/delete puts
+temporary-access expiry outside the evaluator and is not the recommendation.
+
+Both bounds, when supplied, must form a nonempty interval; malformed bounds
+must not silently become absent bounds. Canonical timestamp validation, trusted
+clock/freshness integration, and already-running operation timing remain open.
+This is a finite window, not recurring office hours or a general scheduling
+language. HC-05-11 remains open pending the full lifecycle contract.
+
+**Q-083:** Should a grant support this optional time window, evaluated independently
+of enabled status, with enabling unable to reset or bypass its time bounds?
 
 <details>
 <summary>Historical Q-078–Q-081 record — separate revoke and three-state proposal superseded by Q-082</summary>

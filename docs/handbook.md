@@ -274,7 +274,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Operation-specific enforcement](operation-enforcement.md) | Impact-first discussion of boundary-changing writes, with source/destination examples and open concurrency/composition details. |
 | [Authority freshness](authority-freshness.md) | Impact-first revocation timing discussion, stale-cache trade-offs, and in-flight-operation questions kept distinct. |
 | [Delegation lifecycle](delegation-lifecycle.md) | Agreed automatic restoration of affected access when human support returns; explicit-renewal proposal preserved as not adopted. |
-| [Grant lifecycle](grant-lifecycle.md) | Agreed create, enable, disable, and permanent delete; separate revoke superseded, revised two-state representation proposed. |
+| [Grant lifecycle](grant-lifecycle.md) | Agreed create, enable, disable, permanent delete, and enabled/disabled status; optional time-window contract proposed. |
 | [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
 | [Bulk enforcement](bulk-enforcement.md) | Agreed complete-batch authorization before effects; transaction and concurrency guarantees remain separate. |
 | [Concurrent enforcement](concurrent-enforcement.md) | Agreed preservation of evaluated boundaries through use when application records change concurrently; mechanisms remain open. |
@@ -329,8 +329,9 @@ layer's responsibility; the mandatory-audit proposal is not adopted. Authorizati
 result evidence remains in scope. Q-077 settles nested authorization groups as
 unsupported. Q-082 consolidates permanent removal into delete, preserving Q-078's
 terminal withdrawal meaning but superseding the separate revoke operation.
-Create, enable, disable, and delete are agreed. Q-081 revised proposes only
+Create, enable, disable, and delete are agreed. Q-081 revised approves only
 enabled/disabled status; the original three-state variant is superseded, not approved.
+Q-083 proposes optional time validity independent of administrative status.
 Being enabled does not itself authorize a request. Older grant revocation wording
 describes permanent withdrawal, not an additional canonical operation.
 The chapter preserves rationale and distinguishes available evidence from
