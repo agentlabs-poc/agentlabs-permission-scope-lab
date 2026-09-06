@@ -54,7 +54,45 @@ Sources: [revisions](grant-revisions.md), [bindings](parent-grant-bindings.md),
 [lifecycle](grant-lifecycle.md), [write consistency](auth-write-consistency.md),
 [lineage](authority-lineage.md).
 
-## Genuine completion blockers
+## Current drafting and contract-review gaps — through Q-130
+
+**C01-D1 progress:** [combined boundary-validation behavior](authority-boundary-validation.md)
+is now written with deterministic parent-team lookup, operation coverage and
+28 sourced cases. The support-discovery item below is narrowed to direct-human
+routes, recipient-relative source binding and exact interface/evidence contracts;
+the governing parent/subset rule is not an unanswered question.
+
+These are unfinished deliverables, not all blockers requiring new user decisions.
+Draft from approved fields and rules; present coherent versioned examples for
+genuinely new choices instead of one question for each unresolved detail.
+
+1. **Computed-root encoding and trusted establishment evidence.** Q-119 parent
+   omission, Q-121 platform publication authority, Q-122 computation, Q-123 shared
+   catalog, and Q-117/Q-124 coherent/same-intent bootstrap are settled. Specify the
+   exact trusted source representation and recovery/intent evidence without a
+   wildcard, tenant release pin, new root flag, or revision churn by implication.
+2. **Actual support discovery and evidence.** Reuse parent ID, actual assignments,
+   team context, top-down adopted lineage and complete-route validation. Finish
+   evidence/input/output representation; do not re-ask the selection principle.
+3. **Complete validation and operation records.** Ordinary direct/role variants
+   are approved under Q-118. Consolidate defaults/IDs/timestamps/lifecycle/adoption
+   requirements and identify only unsupported format choices for review. Q-128
+   supplies reduction freshness; Q-110 still protects Auth writes.
+4. **Human relationship and direct-delegation records.** Complete membership,
+   team/ownership and direct human-proxy evidence. Q-127 explicitly excludes proxy
+   chains; they are not a v1 schema requirement. Q-070 restoration remains agreed.
+5. **Residual authorization-only restrictions.** Inventory existing references
+   before asking whether any new mechanism is needed. Do not revive Q-084's
+   rejected business-rule proposal or silently drop restrictions.
+
+Q-125/Q-126 settle permission retirement and stable meaning; Q-130 settles finite
+batch per-item complete-route composition. Their exact evidence/operation formats
+still belong to contract drafting, not repeated votes on the approved behavior.
+
+<details>
+<summary>Previous closure-gap inventory — retained history, not a current blocker list</summary>
+
+## Genuine completion blockers — historical label
 
 These are gaps, not approved answers or a mandate to ask one question per cell.
 The assistant should draft a coherent contract from existing rules, marking only
@@ -86,6 +124,8 @@ the unsupported choices for review with exact versioned JSON where applicable.
    justify either silently ignoring restrictions or inventing a condition engine.
    Inventory any actual authorization-only requirement before raising a bounded
    decision; do not re-ask the rejected business-workflow question.
+
+</details>
 
 ## Acceptance checks for the finished package
 

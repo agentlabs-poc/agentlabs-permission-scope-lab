@@ -1,5 +1,45 @@
 # Milestone progress — CLOSURE-001
 
+## Drafting delivered — C01-D1
+
+[Boundary-validation behavior](authority-boundary-validation.md) is now a combined
+deliverable: input responsibilities, parent-team support lookup, constructive
+containment, seven core JSON records, twelve operation categories and 28 sourced
+review cases. This advances HC-05-08 and contributes cases toward HC-10-03 without
+pretending either entire criterion is closed. The cases are documentary, not
+executed Auth-engine tests.
+
+Remaining C01 work is direct-human discovery, recipient-relative source binding
+and exact interface/evidence representation. This narrows an existing package;
+it adds neither a new milestone nor a mandatory question quota. The binary table
+below cannot show this within-criterion delivery, so this evidence records it
+explicitly. No percentage or effort estimate is invented.
+
+## Post-Q-130 reconciliation — RECON-002
+
+[Eleven approved decisions](current-status.md) have been reconciled into the
+[detailed evidence register](handbook-completion-audit.md). Current arithmetic is
+still **38/68 full criteria complete, 30 open, one excluded**. None of these
+eleven answers finishes the remaining complete contracts/scenario deliverables
+in its affected row. The original criterion texts and statuses are unchanged.
+
+This is a full-deliverable metric, not the proportion of conceptual decisions
+remaining. It must not be used to claim eleven decisions produced no progress,
+or that every OPEN row is blocked on the user. The current agenda has twelve
+design review areas and five contract packages; many residual tasks are drafting,
+validation, and evidence work. Do not infer remaining hours or mandatory questions.
+
+| Recent settled portion | Rows advanced | Residual deliverable |
+|---|---|---|
+| Platform publication, computed/shared catalog, coherent/same-intent bootstrap | HC-05-09, HC-06-06, HC-07-08 | Complete source/trust/registry encoding and recovery contracts. |
+| Permission retirement and stable meaning | HC-04-03, HC-06-06 | Full governance/validation, restoration and scope-definition evolution. |
+| No proxy chains in v1 | HC-05-10, HC-03-05 | Direct-delegation and trusted mapping/lifecycle records. |
+| Uniform confirmed-reduction freshness and prior-allowed synchronous completion | HC-09-06, HC-09-07 | Exact confirmation/ordering/evidence and uncovered operation contracts. |
+| Multi-grant complete-route coverage per batch item | HC-09-05, HC-07-09, HC-08-04 | Full batch material/transport/provenance and failure integration. |
+
+The CLOSURE-001 report below records the previous three full documentary closures;
+its numerical table remains valid. Historical measurements remain preserved.
+
 The original criterion set is unchanged. This pass completes three documentary
 deliverables from approved decisions: HC-02-05 principle catalog, HC-03-04 identity
 glossary, and HC-11-04 separate implementation roadmap. It does not close full

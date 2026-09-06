@@ -1,5 +1,32 @@
 # Authorization: the agreed foundation
 
+## Current handbook state — through Q-130
+
+[Reconciled status](../../docs/current-status.md) ·
+[execution tree](../../docs/discussion-tree.md) ·
+[remaining decisions](../../docs/discussion-assessment.md)
+
+Eleven recent approvals cover platform publication authority, computed roots and
+one shared catalog, coherent/same-intent bootstrap, permission retirement/stable
+meaning, direct-only delegation, uniform freshness, bounded prior-allowed
+completion, and multi-grant batch coverage. The status page links full rationale.
+
+**New drafting deliverable — C01-D1:** [Auth's boundary-validation working contract](../../docs/authority-boundary-validation.md)
+joins both internal gates, actual parent-team lookup, seven core-record examples,
+operation checks and 28 sourced review cases. This is usable consolidation of
+approved behavior, not 28 new questions or runtime conformance certification.
+
+**12 design topics + five contract reviews + final acceptance remain.** The fixed
+checklist remains **38/68 complete**; see [current evidence](../../docs/handbook-completion-audit.md).
+These are not runtime-security or completion-time claims. No wildcard/computed-root
+wire field is approved; ordinary grant/role adoption remains explicit.
+
+Canonical explanations below remain available. Earlier chronological status
+notes are preserved separately; their superseded pending labels are not current.
+
+<details>
+<summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>
+
 **Q-130 approved:** [batch coverage can use different complete grant routes per item](../../docs/bulk-enforcement.md).
 There is still one permission and one final decision. All items must be covered
 before effects; no fragment mixing, endpoint grant inspection, or successful subset filtering.
@@ -165,6 +192,8 @@ keeps those agreements, rationale, and remaining questions visible. The
 is preserved as deprecated history.
 
 </details>
+
+ </details>
 
 ## 1. Permission answers “what”; scope answers “within which boundaries”
 
@@ -418,9 +447,21 @@ All published JSON/YAML contracts require a top-level string `version`, initiall
 `"1"`; missing, malformed, or unsupported versions are rejected. Adding a version
 does not finish the rest of a schema.
 
+Current work is in the [reconciled agenda](../../docs/discussion-assessment.md):
+complete source/grant/relationship and endpoint/result contracts, remaining scope
+and operation choices, freshness/ordering evidence, and final scenarios. Most
+drafting can proceed from existing approval; unfinished does not mean blocked
+on a new user question. Proxy chains and selective tenant versions are not v1
+requirements. External audit design and business-rule design remain outside scope.
+
+<details>
+<summary>Earlier unfinished-work summary — audit-format and blanket policy gaps are not current requirements</summary>
+
 Decision-result contracts, full schema publication, update/move and bulk/list
 semantics, freshness/revocation/concurrency, delegation mechanics, audit formats,
 and comprehensive conformance tests remain open. The historical explorers are
 not conformance tests. Follow the [discussion tree](../../docs/discussion-tree.md)
 for the whole-handbook map and [cross-domain cases](../../docs/use-case-examples.md)
 for Git, ticketing, HRMS, and accounting examples.
+
+</details>

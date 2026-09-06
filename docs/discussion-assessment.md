@@ -1,5 +1,97 @@
 # Remaining discussions and autonomous work — ASSESS-001
 
+## Current agenda after Q-130 — RECON-002
+
+**C01-D1 delivered since reconciliation:** the
+[boundary-validation working contract](authority-boundary-validation.md) supplies
+the combined behavioral flow, parent-team support discovery, core JSON example,
+operation obligations and 28 expected-outcome cases. C01's remaining scope is
+direct-human discovery, recipient-relative binding and exact interface/evidence
+representation. This advances A01/A06; it is not a newly approved design or an
+executed Auth-engine test suite. Existing topic/criterion counts are unchanged.
+
+**Classification correction:** these are review areas, not twelve demonstrated
+blockers or a mandatory question script. The user correctly noted that many
+recent answers were straightforward confirmations. Draft/consolidate first and
+ask only about materially different outcomes or genuinely new contract choices.
+Do not convert each unfinished field or documented consequence into a new question.
+
+**12 design topics + five contract reviews + final acceptance.** Eleven decisions
+were answered since the previous checkpoint. D02's computed-root mechanism is
+settled; its exact encoding is C02/C04 work. [Reconciled state](current-status.md).
+
+| Ref | Remaining design choices; approved parts are not reopened |
+|---|---|
+| D01 | Trusted initial authority establishment and precise platform-management/application/root binding. Q-121 identifies the publisher; Q-122/123 settle computation and one shared catalog. |
+| D03 | Deliberate recovery/abandonment and conflicts beyond ordinary same-intent continuation. Q-117/124 settle visibility and permitted retry behavior; exact intent/evidence is contract work. |
+| D04 | Scope-definition evolution/reference semantics, same-meaning permission restoration and mixed-grant effects. Retirement despite references and no semantic repurposing are settled by Q-125/126. |
+| D05 | Direct-delegation lifetime/growth/administration and unresolved account associations. Q-127 excludes proxy chains; Q-070 restoration is settled. |
+| D06 | Residual Q-096 ownership guidance, explicit transfer/absence handling, optional membership-sync authority/lifecycle. Q-099 owner/support separation remains. |
+| D07 | Trusted identity/tenant or platform-context integration and legacy normalization. Actor/human/JWT blocks are approved; no proxy bypass. |
+| D08 | Still-evaluating request ordering, conflict/retry and confirmation/evidence semantics. Q-128 covers all reductions for new checks; Q-129 settles prior-allowed synchronous completion, preserving Q-074/Q-110. |
+| D09 | Source/destination grant composition for moves; remaining create/update and collection/count/export coverage. Q-130 settles finite-batch multi-route coverage; no subset filtering. |
+| D10 | Background retries, recurring/running jobs, streaming authorization, or explicit handling limits. Q-075 execution-time checking remains; Q-129 does not cover long-running work. |
+| D11 | Inventory actual residual authorization-only restrictions before deciding v1 treatment. Do not revive Q-084's business-rule proposal or invent a condition engine. |
+| D12 | Handbook applicability and mandatory consumer scope. |
+| D13 | Canonical rule-change ownership/governance and explicit exception treatment without bypass. |
+
+**D02: design choice resolved by Q-122.** No wildcard or root source field is
+approved. Q-123 removes tenant catalog-version selection, not tenant isolation.
+
+| Ref | Contract package to draft and review |
+|---|---|
+| C01 | Administrative/source-boundary validator, actual-support discovery, lineage evidence and validation. No extra parent selector. |
+| C02 | Grant/role/revision/assignment validation/lifecycle and computed-root encoding. Ordinary direct/role variants and trusted-root parent omission are already agreed. |
+| C03 | Human membership, hierarchy, ownership and direct-delegation records/APIs. No proxy-chain schema or automatic owner grant. |
+| C04 | Identity/platform/tenant trust adapters and shared application registration/root binding. No selective tenant versioning. |
+| C05 | Endpoint/request/resolved/result/agent interfaces, batch evidence and failure contracts. One permission, no prepared mode or returned-scope requirement. |
+
+The same eight execution packages support this agenda: A01–A05 draft C01–C05;
+A06 scenarios; A07 editorial/diagram reconciliation; A08 packaging and verification.
+Unsupported choices remain proposals. F01 is user final acceptance. These tasks
+are not additional discussions. Package counts are not guaranteed single questions.
+
+**Measurement:** 38/68 criteria complete, 30 open, one excluded. The current
+[detailed register](handbook-completion-audit.md) supplies remaining evidence gaps.
+
+## Current coverage of all 30 open criteria
+
+| Checkpoint | Discussion/review dependencies | Execution |
+|---|---|---|
+| HC-01-03 | D12 | A07 |
+| HC-01-04 | D13 | A07 |
+| HC-03-05 | D07, C04 | A04, A06 |
+| HC-04-03 | D01, D04, C04 | A04, A07 |
+| HC-05-08 | C01 | A01, A06 |
+| HC-05-09 | D01, D03, C02 | A02, A06 |
+| HC-05-10 | D05, C01, C03 | A01, A03, A06 |
+| HC-05-11 | C02 | A02, A06 |
+| HC-05-12 | D06, C01, C03 | A01, A03, A06 |
+| HC-05-13 | C01, C02 | A01, A02, A06 |
+| HC-06-06 | D01, D04, C04 | A04, A06 |
+| HC-06-07 | D04, C01, C04, C05 | A01, A04, A05, A06 |
+| HC-07-07 | C05 | A05, A06 |
+| HC-07-08 | D11, C02 | A02, A06 |
+| HC-07-09 | C01, C04, C05 | A01, A04, A05 |
+| HC-07-10 | C05 | A05, A06 |
+| HC-08-02 | C05 | A05, A06 |
+| HC-08-03 | D11, C02, C05 | A02, A05, A06 |
+| HC-08-04 | C01, C05 | A01, A05 |
+| HC-09-03 | D09, C05 | A05, A06 |
+| HC-09-04 | D09, C05 | A05, A06 |
+| HC-09-05 | D08, D09, C05 | A05, A06 |
+| HC-09-06 | D08, C01, C03, C04 | A01, A03, A04, A06 |
+| HC-09-07 | D08, C01, C02, C05 | A01, A02, A05, A06 |
+| HC-09-09 | D10, C04, C05 | A04, A05, A06 |
+| HC-10-03 | Finalized relevant D/C topics | A06 |
+| HC-10-04 | Finalized relevant D/C topics | A06 |
+| HC-11-01 | Finalized relevant D/C topics | A07 |
+| HC-11-02 | Accepted C01–C05 | A08 |
+| HC-11-03 | F01 | User final acceptance after A06–A08 |
+
+<details>
+<summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>
+
 ## Progress after the assessment
 
 Q-130 approves [different complete grant routes covering different batch items](bulk-enforcement.md).
@@ -254,3 +346,5 @@ The handbook measurement remains **38/68 closed, 30 open, one excluded**.
 No pending topic is approved, deferred, excluded, or implemented by assessment.
 Historical source content and tag `0.0.2` remain unchanged. New recording stays
 in the lab; no commit, push, or scratchpad mutation is included.
+
+</details>

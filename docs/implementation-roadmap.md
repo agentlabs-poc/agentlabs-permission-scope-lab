@@ -38,6 +38,24 @@ them during earlier design.
 
 ## Work packages and exit evidence
 
+### Current post-Q-130 inputs
+
+The dependency order remains I-01–I-07. These updates narrow the historical table
+below without prescribing new code or adding runtime work to handbook completion.
+
+| Phase | Current approved additions | Remaining implementation/contract evidence |
+|---|---|---|
+| I-01 | Q-118/119 core variants; Q-122 computed-root behavior is not a wire schema. | Finish and approve full canonical contracts before treating excerpts as schemas. |
+| I-02 | Q-121 application-platform publication; Q-122/123 computed roots/shared catalog; Q-117/124 coherent setup and same-intent continuation; Q-125/126 retirement/stable meaning. | Trusted context/source encoding, publication consistency, registry lifecycle and governed setup/recovery evidence. No tenant release pins. |
+| I-03 | Q-127 direct-only delegation; Q-128 confirmed dependency reductions must affect new checks. | Direct-delegation/relationship lifecycle and actual-support fixtures, not a proxy-chain implementation. |
+| I-04 | Q-110 remains stronger for Auth writes; Q-129 does not relax it. | Verify administrative and source boundaries plus checked-state persistence. |
+| I-05 | Q-130 allows different complete grant routes per batch item. | Exact material/transport/provenance and no partial effects on failed authorization; no fragment mixing. |
+| I-06 | Q-128 covers all confirmed reductions; Q-129 permits only the prior-allowed bounded synchronous case. | Confirmation/ordering/freshness contracts and remaining job/stream cases, not blanket cancellation or blanket stale allow. |
+| I-07 | Eleven new decisions require corresponding final scenario evidence. | Review approved outcomes versus unfinalized cases; reader tests do not prove Auth correctness. |
+
+<details>
+<summary>Original implementation package table — historical unresolved inputs, qualified above</summary>
+
 | Phase | Work and dependency | Governing sources / unresolved inputs | Required evidence before completion |
 |---|---|---|---|
 | I-01 | Freeze the approved v1 contract package and distinguish historical examples. | HC-07-07/08/09/10, HC-08-02/03/04, HC-11-02/03; [contract inventory](grant-contract-closure.md). | Versioned schemas/excerpts accurately labeled; unknown field/default/variant choices approved; final acceptance register names every exclusion/deferral. |
@@ -47,6 +65,8 @@ them during earlier design.
 | I-05 | Integrate the shared agent at one endpoint-owned gate with one permission, declared material, and constrained application execution. | Q-033 / Q-049 / Q-050-B–F; complete policy/request/result/adapter contracts remain open. | GET and PUT boundary mismatch cases; missing/source-invalid inputs; no prepared fallback; explicit deny/error handling; actual output/effects constrained by the authorized request. |
 | I-06 | Establish and test freshness, mutation-to-consumer visibility, check-to-use consistency, and execution-time background attribution. | Q-069 / Q-074 / Q-075 / Q-110; cache protocol, membership propagation, in-flight behavior, and background adapter contracts remain open. | Confirmed deletion cannot authorize a later-started check from stale cache; races tested against the agreed ordering; timeout is not absence proof; queued work reauthorizes at execution with current human support. No unsupported TTL grace or deployment claim. |
 | I-07 | Reconcile migration/compatibility and run final cross-domain and adversarial deployment review. Depends on the relevant preceding packages. | HC-10-03/04, Q-087-A, [reconciliation](reconciliation.md), [use cases](use-case-examples.md). | HRMS and repository end-to-end evidence, proxy coverage of every intended protected legacy path, preserved/adopted revision behavior, failure injection, reviewed outstanding-risk register, explicit deployment acceptance. |
+
+</details>
 
 ## Coverage and ownership boundaries
 

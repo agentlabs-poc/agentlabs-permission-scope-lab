@@ -4,7 +4,12 @@
 is selected for legitimate roots; catalog additions do not require automatic
 root revision publication/adoption. This supersedes the mechanism-open wording
 below, not ordinary explicit grant/role adoption or immutable-content rules.
-Root encoding and applicable catalog/version binding remain open.
+Root encoding and authoritative application/source binding remain open; Q-123
+rules out per-tenant catalog-version selection. Earlier wording retained:
+~~Root encoding and applicable catalog/version binding remain open.~~
+
+<details>
+<summary>Earlier Q-120A qualification — mechanism choice superseded by Q-122</summary>
 
 **Root-evolution qualification — Q-120A:** [automatic root growth](root-permission-evolution.md)
 is now intended for legitimate application capability upgrades, without a
@@ -12,6 +17,8 @@ separate manual root-update/adoption gate. Live versus materialized revision
 mechanics remain open. Do not infer in-place mutation of published content or
 automatic selection/adoption for ordinary dependent grants. The earlier blanket
 root-growth assumption is qualified; original decisions/rationale remain below.
+
+</details>
 
 **AGREED at the rule level described below.** The user approved these decisions
 and requested recording in the lab by default. Earlier scratch notes are retained

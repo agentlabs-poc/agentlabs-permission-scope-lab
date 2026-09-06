@@ -1,5 +1,20 @@
 # Authorization handbook — agreed roadmap
 
+## Current roadmap position — RECON-002, through Q-130
+
+[Current status](current-status.md), [execution tree](discussion-tree.md), and
+[assessment](discussion-assessment.md) reconcile eleven recent approvals. Q-117
+is approved; computed root coverage and one shared app catalog are settled;
+proxy chains are excluded from v1. Do not reopen those choices from older labels.
+
+The fixed [criterion register](handbook-completion-audit.md) remains 38/68 complete,
+30 open, one excluded. Twelve design review areas and five contract packages are
+not a mandatory question sequence: derive settled consequences and draft first,
+then ask only about material unresolved choices. Final acceptance remains separate.
+
+<details>
+<summary>Earlier chronological status through Q-120A — retained as history</summary>
+
 ## Current closure work — CLOSURE-001
 
 [Closure checklist](v1-closure.md) maps all 33 previously open criteria to actual
@@ -163,6 +178,8 @@ and implicit owner bypass are not adopted. Earlier statements that no source
 possession ceiling is adopted describe the checkpoint before Q-093.
 
 ## Baseline roadmap and historical reconciliation notes
+
+</details>
 
 Earlier “current” snapshots and gate statements below are historical where the
 decisions above supersede them. They remain for rationale and decision traceability.

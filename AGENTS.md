@@ -1,5 +1,54 @@
 # Handbook working rules
 
+## Publication checkpoint — reconciliation and C01-D1/D2
+
+The user explicitly requested committing and pushing the pending lab changes.
+Publish the verified RECON-002 reconciliation, C01-D1 behavioral draft and C01-D2
+direct-human trace to main. Earlier local/uncommitted and no-push statements
+below describe preparation before this authorization. Preserve tags and history.
+This approves publication, not a direct-human support-selection policy, C01-D3's
+suggested supporting-context approach, new fields or whole-handbook completion.
+Future edits are not automatically included in this checkpoint authorization.
+
+## Current continuation — C01-D1 contract drafting
+
+The user said to keep going after the C01 recommendation. Continue local handbook
+drafting from approved rules, without micro-approval questions. The combined
+behavioral contract is docs/authority-boundary-validation.md; its final section
+names remaining direct-human discovery, recipient-relative binding and exact
+interface/evidence gaps. No new canonical policy/field is adopted and no whole
+criterion is closed by drafting alone. Prior reconciliation remains uncommitted;
+this continuation does not authorize commit/push or scratchpad/runtime changes.
+This continuation supersedes earlier next-question scheduling, not approved rules.
+
+## Current task — post-push reconciliation through Q-130
+
+The user corrected the use of “blocker”: most recent questions were obvious
+policy confirmations, not blockers to drafting. Review-area counts are not a
+question quota. Resolve consequences of approval directly, draft coherent full
+contract examples, and ask only for materially different unresolved behavior or
+new canonical choices. Do not stall assistant-owned work behind micro-approvals.
+
+The user requested "commit push and then reconcile". Checkpoint b661b39 is pushed
+to main. Reconciliation is a separate local change set, left uncommitted for review.
+Preserve existing tags and scratch/history originals.
+
+Use docs/current-status.md and the current docs/discussion-assessment.md section,
+not sequential snapshots. Eleven decisions are approved: Q-117 and Q-121–Q-130.
+Q-131 is not approved. Twelve design topics retain choices, plus five contract
+reviews and final acceptance. Full criteria remain 38/68 pending full deliverables.
+
+Approved: computed roots (encoding open); one shared application catalog;
+platform-management versus tenant business authority; coherent/same-intent setup;
+retirement/stable permission meaning; no proxy chains; no stale reductions for
+new checks; bounded prior-allow completion preserving Q-074/Q-110; complete batch
+item routes. No new policy, field, deferral, runtime work, or further commit/push
+is approved by reconciliation. Continue one referenced question at a time when
+requested, with recommendation, rationale, and core-philosophy checks.
+
+<details>
+<summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>
+
 ## Q-130 approved — multiple complete routes across batch items
 
 Different complete valid grant routes may authorize different items in one batch.
@@ -379,6 +428,8 @@ later discussion from this scoped reopening; await further user direction.
 Previous gate state, retained as history: the user had frozen commits and pushes
 while reviewing local reconciliation. Freeze notices in archived snapshots and
 completed plans describe that earlier state, not the current instruction.
+
+ </details>
 
 ## Source of truth and preservation
 

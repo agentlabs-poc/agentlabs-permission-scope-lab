@@ -1,5 +1,32 @@
 # Authorization principles — consolidated approved rules
 
+## Current qualifications and additions — RECON-002
+
+These entries consolidate Q-117 and Q-121–Q-130 without adding new policy.
+PC-01 applies to tenant operations; Q-121 distinguishes platform-management
+authority outside tenant business scope. PC-14/20/26 remain subject to computed
+root coverage, not blanket root revision/adoption for catalog additions. PC-22's
+timing is refined by Q-128/Q-129; PC-24/25 include Q-130's complete per-item routes.
+
+| Ref | Requirement and reason | Compliant example | Counterexample | Approved source |
+|---|---|---|---|---|
+| PC-29 | Authorize capability publication through application platform-management authority, separate from tenant business access. | Authorized HRMS publisher introduces a permission without tenant payslip access. | Tenant payslip-delete alone authorizes catalog publication, or publication grants tenant data access. | [Q-121](application-platform-authority.md) |
+| PC-30 | Compute legitimate root permissions from one shared current application catalog; keep tenant lifecycle isolated. | New HRMS delete capability reaches valid roots; ordinary read-only children remain read-only. | Auto-rewrite child grants, broaden scope, or introduce tenant release pins. | [Q-122/123](root-permission-evolution.md) |
+| PC-31 | Expose initial authority only after coherent setup; authorized retries retain validated intent. | Resume Maya's incomplete setup, then expose access only after full establishment. | Replace Maya with Nutan silently or expose partial root access. | [Q-117/124](bootstrap-initial-assignment.md) |
+| PC-32 | Authorized retirement withdraws the permission despite retained grant references. | Root no longer supplies retired delete; the old grant remains stored without usable delete. | An enabled old assignment keeps supplying retired delete. | [Q-125](permission-lifecycle.md) |
+| PC-33 | Preserve permission identifier meaning, including after retirement. | Use a new pay identifier for payment execution. | Redefine approve to also transfer money under existing grants. | [Q-126](permission-lifecycle.md) |
+| PC-34 | V1 delegation is directly human-to-proxy, not proxy-to-proxy. | A and B each have authorized human-linked delegations. | A supplies authority to B through a hidden intermediate delegation. | [Q-127](delegation-lifecycle.md) |
+| PC-35 | All confirmed reductions govern new checks without stale-authority grace. | New checks cannot use removed Finance membership. | Cached membership survives confirmation because its TTL has time left. | [Q-128](authority-freshness.md) |
+| PC-36 | Prior-allowed bounded synchronous application work may finish, preserving Q-074/Q-110 limits. | The same previously allowed read completes without changing its evaluated reach. | Reuse the allow for a retry, a changed boundary, or a conflicting Auth authority write. | [Q-129](concurrent-enforcement.md) |
+| PC-37 | Every batch item needs a complete valid route; different items may use different routes. | FIN-delete and ENG-delete separately cover their items before effects. | Borrow FIN-delete permission and ENG-read scope to delete in ENG. | [Q-130](bulk-enforcement.md) |
+
+There are 37 required catalog entries and one approved preference. This expansion
+records later approvals, not additional checkpoint credit or implementation proof.
+The earlier root-growth qualification is preserved immediately below as history.
+
+<details>
+<summary>Previous Q-120A qualification — computation is now selected under Q-122</summary>
+
 **Later qualification — Q-120A:** [root coverage grows automatically](root-permission-evolution.md)
 on legitimate application capability upgrades without a separate manual root
 update/adoption gate. This qualifies PC-14/20/26's blanket root/catalog-growth
@@ -7,6 +34,8 @@ reading, not ordinary child permission selection, tenant/application boundaries,
 status, or immutable-record integrity. The root representation/revision mechanism
 is open; no live wildcard syntax is adopted. Earlier principle entries are
 preserved below with this explicitly linked root-specific qualification.
+
+</details>
 
 This is the numbered catalog required by HC-02-05. It consolidates existing
 approvals; it does not adopt new behavior or finish the associated wire schemas.

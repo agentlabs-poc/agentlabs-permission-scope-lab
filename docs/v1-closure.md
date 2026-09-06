@@ -1,5 +1,31 @@
 # V1 closure checklist — CLOSURE-001
 
+## Current closure work — RECON-002
+
+[Current assessment](discussion-assessment.md): **12 design topics, five contract
+reviews, and final acceptance**, with the same eight assistant execution packages.
+[Eleven approved decisions](current-status.md) narrow the original gaps; Q-117
+is approved and D02 is resolved. The old checklist below is preserved history.
+
+The [detailed register](handbook-completion-audit.md) is the current criterion-level
+checklist: **38 DONE / 30 OPEN / one EXCLUDED**, 68 in scope. Its evidence names
+approved portions and incomplete deliverables. No criterion is added or removed.
+
+1. Settle remaining authority/operation decisions one at a time; do not reopen
+   computed/shared catalogs, bootstrap visibility/retry, no proxy chains,
+   retirement/meaning, confirmed-reduction coverage, or batch composition.
+2. Draft C01–C05 from existing approval; review only new semantics/fields.
+3. Finish A06 scenarios and A07 cross-chapter/diagram consistency against final
+   contracts. This reconciliation is not final editorial acceptance.
+4. Package and verify with A08, then obtain explicit F01 user acceptance.
+
+Q-127's chain exclusion and Q-123's single application version are explicit.
+External audit and business-rule design remain outside scope. No production
+engine is required merely to complete this handbook.
+
+<details>
+<summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>
+
 **Subsequent Q-127 approval:** [proxy-to-proxy delegation chains are not supported in v1](delegation-lifecycle.md).
 Direct human-to-proxy lifecycle/evidence remains in scope. Earlier chain-completion
 requirements below are superseded by this explicit scope decision; HC-05-10
@@ -183,3 +209,5 @@ manual root expansion/adoption gate for legitimate application capability update
 The earlier purely-unapproved status above is historical for that requirement.
 Wildcard syntax and the root revision/update mechanism remain open. Ordinary
 child permission selection/adoption is unchanged; no extra checkpoint closure.
+
+</details>

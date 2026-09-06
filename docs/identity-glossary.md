@@ -1,5 +1,19 @@
 # Identity and authority glossary — consolidated meanings
 
+## Q-121/Q-127 context clarification
+
+Application platform administration governs application definitions/capability
+publication; tenant application administration governs the tenant installation;
+business access follows valid tenant grants. These are distinct authority
+responsibilities, not new identity types. A platform operation must not be forced
+into a fictitious tenant business context, and a platform administrator's role
+does not imply tenant data access. [Q-121](application-platform-authority.md).
+
+The trusted actor/human representation remains unchanged. V1 supports only direct
+human-to-proxy delegations under [Q-127](delegation-lifecycle.md); collaboration
+does not implicitly transfer authority. Full platform/tenant trust adapters remain
+contract work, not another glossary entity or implied independent service identity.
+
 This completes the documentary glossary requested by HC-03-04 using approved
 Q-043, Q-085–Q-087, and Q-090 onward. It adds no identity entity, JSON field,
 membership API, authentication protocol, or new authority rule. Where older

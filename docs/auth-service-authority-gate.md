@@ -1,5 +1,12 @@
 # Auth Service's internal authority-validation gate — Q-100
 
+**C01-D1 continuation:** the [combined boundary-validation working contract](authority-boundary-validation.md)
+now supplies the input responsibilities, parent-team discovery procedure,
+operation matrix, current core-record example and 28 sourced review cases.
+It consolidates later approvals without replacing this architectural rationale.
+Old broad contract-open notices below are narrowed by that work; direct-human
+discovery, recipient-relative binding and exact interface representation remain.
+
 **Q-101 supplies the binding rules:** [parent-grant bindings](parent-grant-bindings.md)
 adds the grant/team/assignment graph, bottom-up structural guards, and explicit
 enablement against current reality. The authority validator must inspect these

@@ -1,5 +1,31 @@
 # Authorization Handbook — working edition
 
+## Current reading guide — RECON-002, through Q-130
+
+Start with [the reconciled current state](current-status.md), then use the
+[current execution tree](discussion-tree.md) and [remaining agenda](discussion-assessment.md).
+Eleven recent decisions have rationale. **12 design topics and five contract
+reviews remain, followed by final acceptance.** Full criteria remain 38/68
+closed; the [register](handbook-completion-audit.md) explains residual gaps.
+
+- [Platform application authority](application-platform-authority.md),
+  [computed roots/shared catalog](root-permission-evolution.md), and
+  [bootstrap visibility/continuation](bootstrap-initial-assignment.md).
+- [Permission lifecycle](permission-lifecycle.md) and [direct delegation](delegation-lifecycle.md).
+- [Freshness](authority-freshness.md), [prior-allowed completion](concurrent-enforcement.md),
+  and [complete-route batch coverage](bulk-enforcement.md).
+- [Approved grant records](grant-record-reference.md),
+  [remaining contracts](grant-contract-closure.md), and [principles](principle-catalog.md).
+- [Auth boundary-validation working contract — C01-D1](authority-boundary-validation.md):
+  combined flow, actual parent-team support, worked records, operation obligations
+  and 28 sourced review cases. This is drafting progress, not a new policy vote.
+
+The earlier status notices below are history, not additional open questions.
+Q-041–Q-050-F's decision trail and the chapter index remain intact.
+
+<details>
+<summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>
+
 **Q-130 approved:** [different complete grants may cover different batch items](bulk-enforcement.md).
 Every item needs full authority for the same endpoint permission; no cross-grant
 permission/scope fragment mixing. Any uncovered item denies the batch before effects.
@@ -129,6 +155,8 @@ The guarantee is agreed; database and error contracts remain open.
 [Q-111](lineage-cycles.md) rejects self-parenting and ancestor loops in grant
 and team lineage, including disabled records/bindings. Exact revision-aware
 validation contracts remain open; disablement does not legitimize circular support.
+
+ </details>
 
 ## Binding foundation — Q-101 dependent bindings and lifecycle
 

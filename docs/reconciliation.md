@@ -1,5 +1,120 @@
 # Handbook reconciliation register
 
+## Publication checkpoint — RECON-002 / C01-D1 / C01-D2
+
+The user explicitly requested committing and pushing the pending lab changes
+after reviewing their status. This checkpoint packages the post-Q-130
+reconciliation, combined boundary-validation draft, direct-human lookup trace
+and linked reader/status updates. Earlier no-commit/local-only notes below
+record preparation history, not the current publication gate.
+
+Preserve all decisions and rationale, existing tags and archived sources. The
+direct-human eligibility and recipient-relative binding gaps remain open;
+publication does not approve C01-D3's suggested approach or a new wire contract.
+Build, reader tests, document/example integrity and preservation are checked
+before commit. No Auth runtime changes or scratchpad mutations are included.
+
+## C01-D2 — Direct-human record and source-history trace
+
+The user approved investigating existing fields and evidence. Added the
+[step-by-step trace](direct-human-parent-context.md) with three versioned content
+excerpts, assignment facts, dependency flow, the deterministic subteam comparison
+and rationale. Checked the preserved Q-101, Q-103 and Q-112 scratch imports
+read-only: the original direct case used identical parent content; the later
+case introduced independently adopted FIN/ENG revisions. The earlier diagnostic
+was already captured, not missing from reconciliation.
+
+Both local subset/AND calculations work when a parent is explicitly supplied;
+that does not establish which source is eligible for the direct recipient.
+No arbitrary/latest/all-holdings selection, permanent issuer dependency, new
+parent field, direct-assignment ban or automatic disablement is adopted. Q-101
+survival and Q-112A's actual-lineage rule remain authoritative. The lookup trace
+is delivered; source eligibility and exact contracts remain unresolved. No
+whole-criterion closure, runtime implementation, commit/push or scratch edit.
+
+Eight in-memory diagnostic assertions passed against the shown record excerpts
+and holding facts. They check supplied-parent calculations, revision distinction,
+the stated subteam lookup and same-content comparison; they do not choose or
+implement direct-human support eligibility. The precise evidence is in C01-D2.
+
+## C01-D1 — Deliver boundary-validation behavior from existing approval
+
+The user requested continued work and challenged the apparent mountain of open
+work. Wrote [the combined C01 behavioral contract](authority-boundary-validation.md)
+instead of asking for further confirmations of settled consequences. It includes
+Auth's two internal responsibilities, trusted input ownership, actual parent-team
+support discovery, constructive containment, seven core-record JSON examples,
+twelve operation categories, write/failure obligations and 28 sourced review cases.
+The existing Q-100 SVG is reused; a concrete dependency flow separates Maya's
+administration/source membership from Nutan's team-derived access.
+
+Rationale: approved rules distributed across many chapters are not yet a usable
+combined contract. Completing that draft is assistant-owned work. Preserve scope
+AND rather than merge duplicate keys, actual adopted support rather than unrelated
+latest revisions, and Q-110's Auth-write guarantee rather than Q-129's application
+completion exception. No new parent field, ownership/membership conflation,
+root bypass, application business logic or external audit design is introduced.
+
+Remaining C01 items are direct-human support discovery, recipient-relative source
+binding and exact interface/evidence representation. These were already recorded
+gaps, not new scope. HC-05-08 remains open until its full criterion is satisfied.
+The 28 cases are documentary expectations, not runtime conformance evidence.
+Earlier decisions, rationale, scratch/history and tags remain unchanged. No
+commit or push is included in this continuation.
+
+Verification: production build and all ten reader tests passed. The chapter and
+its linked Auth-flow SVG are emitted as production assets. Static checks parsed
+20 JSON blocks across 21 changed/new Markdown files, resolved 784 relative links,
+checked history-section balance and preserved prior text/criterion evidence.
+The seven new example records have consistent assignment-to-revision references
+and the shown child selects a subset of the parent's permissions. All 28 case
+references are unique. These checks do not execute the authorization scenarios.
+
+## RECON-002 — Post-push consolidation through Q-130
+
+The user requested committing/pushing first, then reconciling. Decision checkpoint
+`b661b39` was pushed to main, preserving tags `0.0.1` and `0.0.2`. The subsequent
+reconciliation remains a separate local change set, not included in that push.
+
+[Current state](current-status.md) consolidates eleven approved decisions:
+Q-117 and Q-121–Q-130. The tree, assessment, handbook/reader, working rules, and
+closure checklist now separate current summaries from chronological snapshots.
+Prior text is retained inside labeled history sections. Q-041–Q-050-F's decision
+trail and original scratch/archive files remain unchanged.
+
+Updated affected criterion evidence without changing any original criterion text
+or status. Prior evidence is preserved inside the register. The full-deliverable
+score remains 38/68, with 30 open and one excluded; eleven policy answers are not
+eleven full contract deliverables. D02's mechanism is settled, leaving twelve
+design review areas and five contract packages plus final acceptance. No new
+review area is added to offset progress.
+
+The user correctly challenged “blocker” terminology. Most recent questions were
+straightforward confirmations; they did not prevent assistant-owned drafting.
+Remaining review areas are not a question quota or proof of user-blocking work.
+Current guidance requires deriving settled consequences, drafting coherent
+contracts, and asking only about materially different unresolved outcomes.
+
+Reconciled grant/root record references, the contract-gap inventory, principle
+catalog, identity glossary, implementation roadmap and permission/delegation/time
+evidence. Added a [shared application catalog / isolated tenant-root SVG](assets/shared-root-catalog-flow.svg)
+from approved rules; no new source field or lifecycle behavior is implied.
+The reader's older audit-format gap is now explicitly historical under Q-076.
+
+This pass does not close final whole-handbook editorial review, approve remaining
+contracts, implement an Auth engine, or mark Q-131 approved. Full scenario and
+contract verification remain tracked. No scratchpad or existing archive mutation,
+new policy, silent deferral, or further commit/push is included.
+
+Verification for this local reconciliation: production build and all ten reader
+tests passed. Checks covered 19 changed/new Markdown files, ten JSON blocks and
+743 relative links; all 69 criterion texts/statuses and prior evidence were
+preserved. All 30 open criteria have agenda coverage. Prior nonblank lines in
+other changed Markdown files remain in order, and history files are untouched.
+The new SVG parses as XML and is emitted with the current-status chapter in the
+production build; this is not a visual or authorization-runtime certification.
+`git diff --check` passed; HEAD and origin/main remain at `b661b39`.
+
 ## Q-130 — Batch composition approved after expanded grant explanation
 
 Recorded [Q-130](bulk-enforcement.md) with both full existing-format grant-revision

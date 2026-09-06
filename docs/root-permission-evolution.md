@@ -1,5 +1,11 @@
 # Q-120 — New application permissions and root authority
 
+**Current consolidated view:** [RECON-002](current-status.md) records all later
+approvals and exact remaining contract gaps. The [shared-catalog SVG](assets/shared-root-catalog-flow.svg)
+shows application-platform publication feeding computed roots without combining
+tenant authority. Older mechanism/version/retirement pending labels in the
+chronological sections below are superseded by Q-122/Q-123/Q-125 respectively.
+
 **Q-125 approved:** [authorized retirement withdraws permission coverage](permission-lifecycle.md)
 even if existing grants still reference the permission. The computed root no
 longer supplies it once retirement is effective; references do not preserve access.

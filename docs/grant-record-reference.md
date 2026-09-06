@@ -133,6 +133,24 @@ operation/error payloads, and unresolved authorization-condition treatment.
 Do not invent defaults or publish a complete machine schema from partial examples.
 The [closure inventory](grant-contract-closure.md) remains the gap checklist.
 
+## Current root qualification — Q-119 and Q-121–Q-123
+
+Q-119 approves parent omission only for trusted roots. Q-121 uses the existing
+application platform administrator for capability publication; Q-122 computes
+root permissions from the registered catalog; Q-123 requires one shared version/
+catalog per application. Ordinary child revisions and assignment adoption remain
+explicit. There is no per-tenant catalog pin or new root revision/adoption cycle
+merely for catalog additions.
+
+The root source wire representation is still a review item: no wildcard, source
+field, or implicit reinterpretation of an ordinary explicit permission list is
+approved. That is an encoding gap, not an undecided computation mechanism.
+Q-117/Q-124 settle coherent bootstrap and same-intent continuation; trusted
+setup evidence and deliberate recovery remain unfinished. [Current state](current-status.md).
+
+<details>
+<summary>Previous root status — mechanism-open wording superseded by Q-122/Q-123</summary>
+
 [Q-119](root-grant-format.md) now approves omitting `parent_grant_id` for
 legitimately established root content; derived content retains its parent link.
 The original representation gap is narrowed, not a completed root trust/update
@@ -140,3 +158,5 @@ procedure. [Q-120](root-permission-evolution.md) discusses future permissions an
 a root-only wildcard proposal. Q-120A accepts automatic root growth as intended
 behavior, while wildcard versus revision mechanism remains open. Current v1
 no-wildcard syntax and ordinary dependent-grant selection/adoption remain unchanged.
+
+</details>

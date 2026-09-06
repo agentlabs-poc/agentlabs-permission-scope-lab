@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1020" height="930" viewBox="0 0 1020 930" role="img" aria-labelledby="title desc">
+  <title id="title">Shared application catalog and tenant-isolated root authority</title>
+  <desc id="desc">Application platform management authorizes capability publication. One shared current application catalog supplies computed permissions to existing legitimate roots in separate tenants. Ordinary child grants retain explicit permission selection and adoption. Catalog changes do not create roots or bypass tenant lifecycle and scope controls.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#465b73"/></marker>
+    <style>text{font-family:Arial,Helvetica,sans-serif;fill:#14243b}.title{font-size:25px;font-weight:700}.head{font-size:20px;font-weight:700}.body{font-size:17px}.note{font-size:16px}.edge{fill:none;stroke:#465b73;stroke-width:2.5;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1020" height="930" fill="#fff"/>
+  <text x="510" y="40" text-anchor="middle" class="title">One application catalog; separate tenant authority</text>
+  <text x="510" y="68" text-anchor="middle" class="note">Q-121–Q-123, Q-125 — approved behavior, not a root wire format</text>
+  <rect x="70" y="90" width="880" height="370" rx="16" fill="#f2f6fc" stroke="#b7c5d8"/>
+  <rect x="125" y="112" width="770" height="74" rx="10" fill="#e0eafa" stroke="#7595bd"/>
+  <text x="510" y="141" text-anchor="middle" class="head">Application platform administrator</text>
+  <text x="510" y="168" text-anchor="middle" class="body">Platform-management authority, not tenant HRMS business access</text>
+  <path d="M510 186 V220" class="edge"/>
+  <rect x="125" y="225" width="770" height="78" rx="10" fill="#e5f2eb" stroke="#70a18c"/>
+  <text x="510" y="254" text-anchor="middle" class="head">Auth validates authorized application capability publication</text>
+  <text x="510" y="281" text-anchor="middle" class="body">Preserve management and application binding; no tenant-data access implied</text>
+  <path d="M510 303 V337" class="edge"/>
+  <rect x="125" y="342" width="770" height="91" rx="10" fill="#fff3d9" stroke="#bda269"/>
+  <text x="510" y="371" text-anchor="middle" class="head">One current HRMS permission/scope catalog</text>
+  <text x="510" y="398" text-anchor="middle" class="body">All tenants share the application version — no selective upgrades</text>
+  <text x="510" y="420" text-anchor="middle" class="note">Roots compute permissions; existing scope and lifecycle controls remain</text>
+  <path d="M510 433 V485 H265 V514" class="edge"/>
+  <path d="M510 485 H755 V514" class="edge"/>
+  <rect x="40" y="520" width="450" height="282" rx="14" fill="#f3f8f5" stroke="#87a894"/>
+  <rect x="530" y="520" width="450" height="282" rx="14" fill="#f5f4fa" stroke="#a194bd"/>
+  <text x="265" y="547" text-anchor="middle" class="head">Tenant A — isolated authority</text>
+  <text x="755" y="547" text-anchor="middle" class="head">Tenant B — isolated authority</text>
+  <rect x="70" y="575" width="390" height="72" rx="10" fill="#fff" stroke="#87a894"/>
+  <rect x="560" y="575" width="390" height="72" rx="10" fill="#fff" stroke="#a194bd"/>
+  <text x="265" y="603" text-anchor="middle" class="head">Existing legitimate HRMS root</text>
+  <text x="265" y="630" text-anchor="middle" class="body">Computed catalog permission coverage</text>
+  <text x="755" y="603" text-anchor="middle" class="head">Existing legitimate HRMS root</text>
+  <text x="755" y="630" text-anchor="middle" class="body">Computed catalog permission coverage</text>
+  <path d="M265 647 V682" class="edge"/>
+  <path d="M755 647 V682" class="edge"/>
+  <rect x="70" y="690" width="390" height="76" rx="10" fill="#fff" stroke="#87a894"/>
+  <rect x="560" y="690" width="390" height="76" rx="10" fill="#fff" stroke="#a194bd"/>
+  <text x="265" y="720" text-anchor="middle" class="head">Bounded ordinary grants / assignments</text>
+  <text x="265" y="747" text-anchor="middle" class="body">Explicit selection and revision adoption</text>
+  <text x="755" y="720" text-anchor="middle" class="head">Bounded ordinary grants / assignments</text>
+  <text x="755" y="747" text-anchor="middle" class="body">Explicit selection and revision adoption</text>
+  <text x="510" y="840" text-anchor="middle" class="body">Adding delete expands root permission coverage, not a read-only child's selection.</text>
+  <text x="510" y="868" text-anchor="middle" class="body">Effective retirement removes permission support; stored grants are not rewritten.</text>
+  <text x="510" y="898" text-anchor="middle" class="note">No root creation, scope expansion, membership change, or reactivation follows from catalog growth.</text>
+</svg>

@@ -1,5 +1,47 @@
 # Authorization handbook — discussion tree
 
+## Current execution tree — through Q-130
+
+[Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
+[checkpoint evidence](handbook-completion-audit.md)
+
+**C01-D1 drafting delivered:** [boundary-validation working contract](authority-boundary-validation.md)
+now joins the agreed rules into an input/validation/operation contract, seven
+core JSON records and 28 review cases. Remaining C01 work is specifically direct-
+human discovery, recipient-relative binding and interface/evidence representation.
+The broad C01–C05 OPEN label below does not mean their approved content is unwritten.
+This execution pass supersedes the earlier next-question scheduling below; Q-131
+is still not approved. No new policy or completed whole-criterion claim is implied.
+
+```text
+Handbook closure [38/68 full criteria; 30 OPEN]
+├── Source authority and bootstrap
+│   ├── Application platform publication authority [Q-121 APPROVED]
+│   ├── Computed roots; one shared app catalog [Q-122/123 APPROVED]
+│   ├── No incomplete access; same-intent retry [Q-117/124 APPROVED]
+│   └── OPEN: exact root/trust contracts; deliberate recovery
+├── Definition and delegation lifecycle
+│   ├── Retirement despite references; stable meaning [Q-125/126 APPROVED]
+│   ├── Direct human-to-proxy only; no proxy chains [Q-127 APPROVED]
+│   └── OPEN: scope evolution, direct-delegation and ownership/sync contracts
+├── Evaluation and operation coverage
+│   ├── All confirmed reductions govern new checks [Q-128 APPROVED]
+│   ├── Prior bounded synchronous allow may finish [Q-129 APPROVED]
+│   ├── Different complete grants across batch items [Q-130 APPROVED]
+│   └── OPEN: move composition, timing/background/collection cases
+├── Complete contracts [C01–C05 OPEN]
+├── Applicability and rule governance [D12/D13 OPEN]
+└── Final scenarios, reconciliation, package and acceptance [OPEN]
+```
+
+Twelve design topics contain remaining choices, plus five contract reviews and
+final acceptance. D02's mechanism is resolved; no new topics offset the eleven
+answers. Q-131 is not approved. Next discussion: move source/destination grant
+composition, distinct from Q-130's finite-batch case.
+
+<details>
+<summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>
+
 **Q-130 approved — D09 finite-batch composition resolved:** [different complete routes may cover different items](bulk-enforcement.md).
 Full batch preflight and no cross-grant fragment mixing remain required. Move
 source/destination composition and exact batch transports remain separate gaps.
@@ -1043,5 +1085,7 @@ The log retains these for traceability; they are not current options:
 
 Scope selector syntax, example JSON, and application-specific policies remain
 illustrative until their respective branches close.
+
+</details>
 
 </details>

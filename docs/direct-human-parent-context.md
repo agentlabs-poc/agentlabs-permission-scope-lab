@@ -1,5 +1,144 @@
 # Direct-human parent context — Q-112
 
+## C01-D2 — Trace of the existing records
+
+**Diagnostic completed; no new selection policy approved.** The user agreed to
+trace the actual lookup and evidence using existing fields. That approval does
+not choose FIN, ENG, all parent holdings, a new parent field, or a new permanent
+dependency. This section supplies the concrete trace requested after C01-D1.
+
+### What changed between the original cases
+
+The [original Q-101 example](history/scratchpad-import/q101-direct-human-dependency.md.txt)
+used one G1 definition, with FIN read/write, at both Team1 and TeamX. Removing
+A1 did not imply losing that unchanged authority where the stated valid support
+remained. It did not test competing adopted content revisions.
+
+[Q-102](grant-revisions.md) later permitted different assignments to adopt
+different revisions. The [earlier Q-112 diagnostic](history/scratchpad-import/q112-parent-context-check.md.txt)
+already exposed the FIN/ENG comparison. It was captured in the lab, not lost in
+the scratchpad. Q-112A subsequently reaffirmed actual lineage-supported latest
+and withdrew the proposed independent parent-revision field. It did not specify
+the direct-human eligibility lookup. Do not present this as a newly discovered
+subset-rule defect or repeat the withdrawn proposal.
+
+### Records supplied to the trace
+
+These are versioned content excerpts using approved fields, not complete API or
+bootstrap contracts. Assume valid G0 upstream support, trusted common tenant,
+registration, enabled controls and applicable time validity. G1 revision 1 was
+adopted at Team1 before revision 2 existed; retaining it is valid under Q-102.
+
+```json
+{
+  "version": "1",
+  "grant_id": "G1",
+  "revision": 1,
+  "parent_grant_id": "G0",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {"dept": "FIN"}
+}
+```
+
+```json
+{
+  "version": "1",
+  "grant_id": "G1",
+  "revision": 2,
+  "parent_grant_id": "G0",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {"dept": "ENG"}
+}
+```
+
+```json
+{
+  "version": "1",
+  "grant_id": "G2",
+  "revision": 7,
+  "parent_grant_id": "G1",
+  "permissions": ["hrms:payroll:payslip::read"],
+  "scope": {}
+}
+```
+
+The relevant assignment facts, stated without inventing a new relationship format:
+
+| Assignment | Recipient | Adopted content | State |
+|---|---|---|---|
+| A1 | Team1 | G1 revision 1 | Enabled and otherwise valid |
+| AX | TeamX | G1 revision 2 | Enabled and otherwise valid |
+| AN | Nutan, directly | G2 revision 7 | Enabled; its parent context is being investigated |
+
+Maya's valid source memberships and separate administrative authority explain
+issuance permission. They are not an implicit permanent Nutan-to-Maya or
+Nutan-to-A1 relationship. No ownership record participates. The example does
+not establish a parent-team relationship for Nutan or a membership requirement
+for her direct assignment.
+
+```text
+Nutan ← AN → G2 revision 7
+                 │ parent_grant_id = G1
+                 ▼
+          Reusable identity G1
+          ├── A1 → Team1 adopts revision 1 → FIN read
+          └── AX → TeamX adopts revision 2 → ENG read
+
+Established: both holdings exist and adopt different content.
+Not established: which holding is eligible support for Nutan's direct route.
+```
+
+### Lookup trace and limits
+
+| Step | What the existing records establish | What they do not establish |
+|---|---|---|
+| Read AN | Nutan adopts G2 revision 7. | A parent revision numbered 7. |
+| Read G2 revision 7 | Parent identity is G1; select read; add no local scope constraint. | A particular G1 holder or eligible set of holders. |
+| Inspect G1 holdings | A1 adopts revision 1; AX adopts revision 2. | That either is Nutan's actual supporting lineage merely because it exists. |
+| Validate both candidate holdings | Each is individually valid under the stated premises. | Recipient-route eligibility; source validity and eligibility are different tests. |
+| Supply A1 to the local narrowing calculation | FIN read AND no additional constraint gives FIN read. | Proof that supplying A1 was authorized for Nutan's route. |
+| Supply AX to that calculation | ENG read AND no additional constraint gives ENG read. | Proof that supplying AX was authorized for Nutan's route. |
+
+In the separate **subteam** case, Team2's parent Team1 supplies the missing
+context: the required G1 holding is at Team1, uniquely selected by Q-104. A1's
+adopted revision 1 then establishes the ceiling. Nutan's direct case does not
+contain that team relationship, so the subteam lookup cannot simply be copied.
+
+### Findings and core-philosophy check
+
+- `parent_grant_id` locates the parent identity. Actual assignments select
+  adopted content, but discovering an assignment is not itself proof that it is
+  eligible for this recipient route.
+- Both supplied-parent calculations obey permission subset and scope AND, yet
+  produce different boundaries. Narrowing does not select supporting context.
+- Picking the numerically largest revision, the first database row, the issuer's
+  historical membership or every tenant-wide holding would add a selection rule.
+  Treating multiple complete parent routes as alternatives would also require
+  establishing their eligibility; it is not approved merely because no fields
+  are mixed inside an individual route.
+- Removing A1 from this fixture leaves AX as the only found holding. That removes
+  multiplicity, not the obligation to establish AX's eligibility. This does not
+  overturn Q-101's original example, which explicitly assumes valid remaining
+  support; it prevents extending its conclusion to unstated support semantics.
+- Missing proof must not become an allow, stored disablement, automatic rebinding
+  or an assertion of orphanhood. Whether support is absent or evaluation cannot
+  establish it still matters. Exact failure representation is not decided here.
+
+**Result:** the lookup trace is complete for the supplied records, but the direct-
+human support-selection contract is not. The remaining question is what makes a
+holding eligible as continuing support for a direct-human child—not whether the
+child must stay within its parent. More lookups of the same facts cannot settle
+that meaning. No schema change is proved necessary by this diagnostic.
+
+Verification: eight in-memory diagnostic assertions passed using the three
+excerpts above and the stated holding facts. Checks covered versions/no extra
+selector, FIN and ENG calculations, distinct outcomes, child versus parent
+revision numbers, unique Team1 lookup, the remaining holding after A1 removal,
+and equal results in the original same-content comparison. These test supplied-
+parent calculations and the separately established subteam lookup, not an
+implemented direct-human eligibility rule. C01-D1's other supported behavior
+remains usable.
+
 ## Q-112A — Lineage-supported latest reaffirmed; new field withdrawn
 
 The user corrected the proposed independent parent-revision adoption: “for

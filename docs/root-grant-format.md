@@ -20,10 +20,19 @@ proposal are preserved below. Grant controls, recipient-bearing assignments,
 maximum intended registered initial authority, and normal root lifecycle remain
 unchanged. Full establishment evidence and governed root updates remain open.
 
+Current: Q-122 selects computed root coverage; Q-123 selects one shared catalog
+per application. Exact root-source encoding remains open, not the mechanism.
+Q-117/Q-124 settle incomplete setup visibility and same-intent continuation.
+
+<details>
+<summary>Earlier root-evolution status — superseded by Q-122/Q-123</summary>
+
 The [Q-120/Q-120A discussion](root-permission-evolution.md) now accepts automatic
 root growth as the user's behavioral requirement; its mechanism is open. Q-119
 does not adopt `*` or supersede Q-058's stored-format rule. The wildcard suggestion
 remains exploration, not a selected encoding.
+
+</details>
 
 <details>
 <summary>History — exact Q-119 proposal, approved above</summary>
