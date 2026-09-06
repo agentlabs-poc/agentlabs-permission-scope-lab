@@ -16,6 +16,12 @@ The user explicitly requested a checkpoint after approving Q-087-B, including
 its rationale for deliberate `sub`/`human_id` duplication. This request is within
 the explicit-checkpoint exception; roughly ten questions remains the default.
 
+Latest gate instruction: after Q-089 was left undecided, the user froze recording
+and commits. The subsequent “record this commit and push” explicitly authorizes
+recording Q-089-B's revision/adoption decision, reconciling affected current docs,
+and committing/pushing this checkpoint. Do not infer unrestricted recording of
+later discussion from this scoped reopening; await further user direction.
+
 Previous gate state, retained as history: the user had frozen commits and pushes
 while reviewing local reconciliation. Freeze notices in archived snapshots and
 completed plans describe that earlier state, not the current instruction.
@@ -70,3 +76,12 @@ scope creep, not merely a wording correction. The assistant's revised question
 is withdrawn, not pending. Do not infer approval either to remove generic
 authorization conditions or to introduce a condition engine. Preserve rejected
 proposals and rationale without automatically re-proposing them in narrower form.
+
+## Role references — Q-089-B supersedes live updates
+
+Published role revisions are immutable. Role-based grants explicitly select
+`role_revision` alongside `role_id`; publication does not silently update grants.
+Adoption is an authorized grant change with boundary validation. Resolve the
+adopted revision, not latest. Preserve ROLE-002/live-role text as deprecated history.
+Auth's own protected APIs must follow the same authorization framework. Publishing
+a narrower revision does not withdraw permissions from older adopted revisions.

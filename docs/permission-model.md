@@ -170,7 +170,8 @@ Rationale: a wildcard needs additional rules about matching depth and whether it
 includes permissions registered later. Explicit lists keep intended operations
 visible and avoid adding those rules to the foundational v1 contract. Roles can
 still bundle a set of permissions; this decision does not freeze role membership
-or change the agreed live-role model.
+or change the then-agreed live-role model. **Update: Q-089-B now supersedes that
+live-role behavior with [immutable revisions and explicit grant adoption](role-revisions.md).**
 
 The alternative, illustrated in the earlier Markdown, is a one-segment wildcard.
 It makes broad assignments shorter but still needs an explicit future-permission

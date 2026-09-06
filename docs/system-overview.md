@@ -35,7 +35,8 @@ is also retained.
    policy, then invokes the embedded Auth Agent with the declared permission and
    relevant material.
 4. Authority loading supplies valid human memberships, direct/group grants,
-   current role permissions, validity/conditions, and dependencies. Shared loading
+   permissions from each grant's adopted role revision, validity/conditions,
+   and dependencies. Shared loading
    or valid preloaded material may satisfy this; the arrows do not mandate a
    fresh remote call for every request. The embedded agent resolves and evaluates
    complete grants using the shared canonical rules.
@@ -78,7 +79,7 @@ separate service, fixed number of network calls, or duplicated per-handler clien
 | Responsibility | What it supplies or guarantees |
 |---|---|
 | Authentication/context | Verified actor and authorizing human, and trusted tenant context. Caller path/body values do not become trusted facts merely by extraction. |
-| Auth / Layer 1 authority | Valid human memberships, direct/group grants, current role permissions, validity/conditions, and required dependency evidence. |
+| Auth / Layer 1 authority | Valid human memberships, direct/group grants, permissions from adopted role revisions, validity/conditions, and required dependency evidence. |
 | Application / Layer 2 | Server-owned endpoint policy, valid request values, registered boundary meanings, facts where needed, and constrained execution. |
 | Embedded evaluator | Complete-grant applicability, one required permission, supported scope meaning, and tenant/human/dependency limits. |
 | Endpoint enforcement | Actual returned data and mutation effects remain within the authorized boundary and relevant request bindings. |
@@ -122,9 +123,16 @@ facts from proposed body values.
 ## Authority resolution is not an independent assignment or an allow
 
 Under RESOLUTION-006 / Q-048, logically obtain Vinay's valid memberships, then
-grants for Vinay directly and for those groups. Expand current role permissions
+grants for Vinay directly and for those groups. Expand adopted role-revision permissions
 as needed while preserving each grant's scope, conditions, validity, provenance,
 and dependencies.
+
+Q-089-B supersedes the earlier “current role permissions” wording: publication of
+a new revision does not update a grant. An authorized, boundary-validated grant
+adoption changes the selected revision. Auth's own administrative APIs, including
+publication and adoption, are protected by the same framework. The request flow
+above is unchanged; its role-permission source is now revision-pinned. See
+[role revisions](role-revisions.md).
 
 Resolved grants are dependent evaluation views. Do not pool the permission of
 one grant with the scope of another, or turn group-derived access into an

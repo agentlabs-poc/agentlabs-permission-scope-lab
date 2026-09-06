@@ -1,5 +1,19 @@
 # Handbook reconciliation register
 
+## Q-089-B — role-revision reconciliation checkpoint
+
+The user explicitly requested recording, commit, and push after the discussion
+freeze. [ROLE-003](role-revisions.md) supersedes automatic live-role updates with
+immutable revisions and explicit authorized grant adoption. The current grant
+chapter/formats, resolution source descriptions, request-flow SVG label, worked
+role-change case, handbook index, decision log, and discussion tree are reconciled.
+Earlier live-role passages below are historical and do not override ROLE-003.
+The original Q-089 undecided alternatives remain preserved, not retroactively
+approved. No old role/grant examples are silently migrated or deleted.
+
+The gate reopening covers this decision and checkpoint. It does not authorize
+recording unrelated future discussion while the user's recording pause remains.
+
 ## Publication checkpoint — commit/push gate reopened
 
 The user explicitly instructed “lets commit and push, and continue with the

@@ -151,8 +151,9 @@ while retaining source identity, associated permissions/scope/conditions/validit
 and membership/delegation dependencies.
 
 **Rationale:** flattening to a permission list loses restrictions; copying a group
-grant into an independent direct grant loses its membership dependency. Live role
-expansion and self anchoring do not produce a new assignment or an allow.
+grant into an independent direct grant loses its membership dependency. Expansion
+of the adopted role revision (Q-089-B, superseding the earlier live-role source)
+and self anchoring do not produce a new assignment or an allow.
 Transport, cache/freshness, and concrete resolved-view schemas remain open; this
 is a logical dependency flow, not a required API-call count.
 [Resolved-grant example and counterexamples](grant-model.md#resolved-grants-and-membership-based-retrieval--resolution-006--q-048-agreed).
@@ -265,7 +266,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Vocabulary](authorization-vocabulary.md) | Permission/boundary/request-material terms, tenability checks, and the retired vocabulary's rationale. |
 | [Permission](permission-model.md) | Restored detailed operation/reach explanation, namespaced naming examples, rationale, and explicitly open grammar rules. |
 | [Scope boundaries](scope-model.md) | Canonical scope semantics/format, self, AND/alternatives, empty/invalid cases, and earlier proposals. |
-| [Grants and roles](grant-model.md) | Complete bindings, groups, live roles, dependent resolution, administration, and lifecycle distinctions. |
+| [Grants and roles](grant-model.md) | Complete bindings, groups, revision-pinned roles, dependent resolution, administration, and lifecycle distinctions. |
 | [Grant formats](grant-format.md) | Working current-scope examples and deprecated layout correspondence; complete schemas remain open. |
 | [Groups and membership](groups-and-membership.md) | Auth ownership, human-only membership, optional application sync, and preferred group access. |
 | [Application registration](application-registration.md) | Abstract validation, application meanings, optional support checks, and activation rules. |
@@ -279,6 +280,9 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Proxy attribution — Q-085 agreed](proxy-attribution.md) | Trusted binding between the verified proxy and its human authority anchor; canonical representation across carriers required. |
 | [Identity context — Q-086 agreed](identity-context.md) | Approved shared versioned actor/human identity block; enclosing contracts remain open. |
 | [JWT identity mapping — Q-087 agreed](jwt-identity-mapping.md) | Human-subject compatibility with enforced proxy limits; unchanged canonical identity block, with deliberate sub/human_id duplication and rationale. Full token profile remains open. |
+| [Bootstrap authority — Q-088 agreed](bootstrap-authority.md) | Minimal seed grants may remain; explicit self-assignment stays within current administrative bounds. Rationale and examples recorded. |
+| [Role revisions and adoption — Q-089-B agreed](role-revisions.md) | Immutable revisions, explicit grant adoption, boundary validation, and removal caveat; Auth's own APIs follow the framework. |
+| [Original Q-089 — superseded discussion](role-change-authority.md) | The original question and undecided alternatives remain as history; Q-089-B replaces their automatic live-update premise. |
 | [Collection enforcement](collection-enforcement.md) | Agreed denial instead of automatic subset filtering and explicit request-boundary semantics; counts/pagination/export details remain open. |
 | [Bulk enforcement](bulk-enforcement.md) | Agreed complete-batch authorization before effects; transaction and concurrency guarantees remain separate. |
 | [Concurrent enforcement](concurrent-enforcement.md) | Agreed preservation of evaluated boundaries through use when application records change concurrently; mechanisms remain open. |

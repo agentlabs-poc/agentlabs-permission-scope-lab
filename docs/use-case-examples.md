@@ -6,6 +6,12 @@ new permissions, scope-key catalogs, or application policies for AgentLabs.
 Scope uses canonical SCOPE-007 syntax; surrounding grant examples retain the
 current working layout. See [current grant formats](grant-format.md).
 
+**Role update — Q-089-B:** role-based grants now adopt explicit immutable
+revisions. Older role JSON without `role_revision` is historical/incomplete, not
+a latest-revision default. The original live-update outcome of UC-ACCOUNT-004 is
+deprecated below and replaced with publication-versus-adoption cases. See
+[role revisions](role-revisions.md).
+
 ## Common assumptions and reading rules
 
 - Each case is independent. Only the grants named in that case apply; necessary
@@ -195,18 +201,45 @@ adopted merely because this is an accounting example.
 |---|---|---|---|
 | GET /accounting/invoices/{invoice} | accounting:invoice::read | Path invoice. | Actual invoice tenant and department. |
 | POST /accounting/invoices/{invoice}/approve | accounting:invoice::approve | Path invoice; no authorization-relevant body fields in this example. | Actual invoice tenant and department; required business validation remains separate. |
-| GET /accounting/ledgers/{ledger} | accounting:ledger::read | Path ledger. | Actual tenant and current applicable role definition. |
+| GET /accounting/ledgers/{ledger} | accounting:ledger::read | Path ledger. | Actual tenant and the grant's explicitly adopted role revision. |
 
 | Case | Applicable authority and request | Expected result and reason |
 |---|---|---|
 | UC-ACCOUNT-001 | G1: read a Finance invoice, then approve it. | ALLOW read; DENY approve. Being inside the boundary does not supply another operation. |
 | UC-ACCOUNT-002 | G2: approve a Finance invoice, then an Engineering invoice. Repeat when the required department fact cannot be established. | ALLOW Finance; DENY Engineering. Missing required material stops execution as a failure, not as an allow or prepared result. |
 | UC-ACCOUNT-003 | G3: read a ledger in T-1, then a ledger in T-2. | ALLOW within T-1; DENY cross-tenant. Tenant-wide {} does not override the enclosing tenant. |
-| UC-ACCOUNT-004 | G3 remains, but an authorized role edit replaces ledger-read with ledger-export. No other read grant applies. Request ledger-read again. | DENY read: the grant uses the current role permissions. Its recipient and scope remain unchanged. Possession of this business role does not itself authorize editing it. |
+| UC-ACCOUNT-004 — DEPRECATED by Q-089-B | Historical: G3 remains, but an authorized role edit replaces ledger-read with ledger-export. No other read grant applies. Request ledger-read again. | Historical, no longer canonical: DENY read because the grant used current role permissions. The replacement below requires explicit revision adoption; publishing alone does not withdraw read. |
 
-Role-update propagation timing remains open. UC-ACCOUNT-004 assumes evaluation
-has obtained the current authoritative role version; it does not assume a
-particular cache-consistency guarantee.
+Historical explanation, superseded by Q-089-B: UC-ACCOUNT-004 assumed evaluation
+had obtained the current authoritative role version. Propagation timing remains
+open, but a newer published revision is no longer the grant's permission source
+unless the grant explicitly adopts it.
+
+### UC-ACCOUNT-004 replacement — publishing is not adopting
+
+Current versioned grant excerpt:
+
+```json
+{
+  "version": "1",
+  "id": "UC-ACCOUNT-G3",
+  "recipient": {"type": "group", "id": "ledger-auditors"},
+  "role_id": "ledger-reader",
+  "role_revision": 1,
+  "scope": {},
+  "status": "enabled"
+}
+```
+
+Revision 1 contains ledger-read. Revision 2 contains ledger-export instead of
+ledger-read. Other grants do not supply either permission in these cases.
+
+| Variant | Change | Expected result under Q-089-B, assuming all other checks succeed |
+|---|---|---|
+| Publication | Publish revision 2; G3 stays on revision 1. | Read remains allowed; export is not supplied. Publication neither adds nor removes permissions from G3. |
+| Adoption | An authorized, boundary-validated change makes G3 adopt revision 2. | Read is no longer supplied; export is supplied within G3's unchanged tenant scope. Failed adoption leaves revision 1 selected. |
+
+These are authorization semantics examples, not runtime or propagation tests.
 
 ## Coverage and deliberate gaps
 
@@ -218,7 +251,7 @@ particular cache-consistency guarantee.
 | Implicit tenant and explicit {} | UC-GIT-003, UC-ACCOUNT-003. |
 | Human-relative self and group dependency | UC-HRMS-001/004, UC-TICKET-002. |
 | Human-dependent agent subset | UC-GIT-004. |
-| Current role expansion | UC-GIT-003, UC-ACCOUNT-004. |
+| Adopted role-revision expansion | UC-GIT-003's role example needs explicit revision selection; UC-ACCOUNT-004 now distinguishes publication and adoption. |
 | Declared inputs versus actual resource facts | UC-GIT-001, UC-TICKET-004. |
 | Required-material failure prevents execution | UC-ACCOUNT-002. |
 

@@ -1,5 +1,11 @@
 # Current grant formats — canonical v1 scope
 
+Role-reference update — Q-089-B / ROLE-003: role-based grants include an explicit
+`role_revision` alongside `role_id`. Roles publish immutable revisions; grants
+adopt them through authorized boundary validation. Older unpinned role examples
+and automatic live-role wording are deprecated, not a latest-revision default.
+See [role revisions](role-revisions.md) for the approved excerpts and rationale.
+
 Q-050-A / CONTRACT-010 now settles the shared top-level version field and string
 value, initially `"1"`, plus missing/malformed/unsupported-version rejection.
 The complete grant schema remains open. Unversioned working examples below are
@@ -21,7 +27,8 @@ expanded example below is not silently promoted to a complete resolved format.
 This chapter updates the working grant examples to use SCOPE-007's canonical
 scope format. The earlier [grant examples](grant-examples.md), GRANT-EX-001
 through GRANT-EX-006, remain intact and explicitly deprecated as layouts.
-Their agreed binding, role, and dependency semantics are not deprecated.
+Their complete-binding and dependency semantics remain; the live-role update
+meaning is now superseded by ROLE-003.
 
 ## What changes and what stays
 
@@ -39,8 +46,9 @@ The current examples consistently use the already illustrated permissions
 array for explicit permissions and role_id for a role reference. They do not
 introduce an administrator-specific format or revive independent service grants.
 
-Scope syntax and the enabled/disabled status values are canonical. Full lifecycle/condition schemas, role
-revision encoding, and resolved-grant transport contracts remain open. The
+Scope syntax, enabled/disabled status values, and explicit `role_revision` selection
+are canonical. Full lifecycle/condition schemas, remaining role revision validation,
+and resolved-grant transport contracts remain open. The
 surrounding JSON below is the current working grant layout, not a claim that
 all those branches or application migrations are complete.
 
@@ -135,6 +143,29 @@ permitted recipient kind. The group's creator is not implicitly authorized.
 
 ## Role-referencing grant
 
+**Current — Q-089-B:** the role supplies permissions from the immutable revision
+the grant explicitly adopts. Publication alone does not change the grant.
+
+```json
+{
+  "version": "1",
+  "id": "G-17",
+  "recipient": {"type": "group", "id": "finance-readers"},
+  "role_id": "R-17",
+  "role_revision": 1,
+  "scope": {"dept": "FIN"},
+  "status": "enabled"
+}
+```
+
+This is the approved role-reference excerpt, not the full grant schema. Resolving
+it preserves the source grant and adopted revision; it does not select latest or
+create independent authority. The [revision chapter](role-revisions.md) gives the
+corresponding role definitions and adoption checks.
+
+<details>
+<summary>Earlier unpinned role grant and expanded view — deprecated by Q-089-B; retained unchanged</summary>
+
 G-6 binds the current Certificate Reader role to Maya within Finance. The role
 definition supplies its read/download permission bundle, not scope.
 
@@ -174,6 +205,8 @@ resolved-grant schema is still open.
 
 Preserve any original validity, conditions, and additional dependency evidence
 in a real evaluation view even though this abbreviated example omits them.
+
+</details>
 
 ## Self and AND-boundary examples
 

@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-087-B approved; audit and business logic outside scope
+## Current position — Q-089-B role revisions and explicit adoption agreed
 
 The user has asked to move horizontally to high-impact decisions. This is the
 current map; the older traversal snapshots are collapsed below as history.
@@ -10,7 +10,10 @@ Read the [handbook](handbook.md) for chapters and the
 **Commit/push gate: reopened by the user.** The verified reconciliation checkpoint
 is authorized for commit/push; continue the handbook discussion. The user's
 latest cadence is immediate local recording, with commit/push roughly every ten
-questions, or on explicit request. The user requested a checkpoint through Q-087-B;
+questions, or on explicit request. After freezing recording during Q-089 discussion,
+the user explicitly requested recording, commit, and push of Q-089-B. This reopens
+recording for that decision and its reconciliation checkpoint, not unrelated future
+discussion. The prior checkpoint was through Q-087-B;
 Q-083 was the first approval since checkpoint `01d68a5`. Previous freeze
 notices below are historical.
 
@@ -33,13 +36,16 @@ Authorization Handbook — 35/68 in-scope closed (51.5%); 1 excluded, not comple
 │   ├── No implicit inheritance, wildcards, or aliases [Q-057/058/059]
 │   └── Catalog governance/evolution OPEN
 ├── 5. Grants and authority [7/13]
-│   ├── Whole grants, live roles, human-dependent proxies, separate admin agreed
+│   ├── Whole grants, human-dependent proxies, separate administration agreed
+│   ├── Immutable role revisions + explicit validated grant adoption agreed [Q-089-B]
 │   ├── Automatic delegation reactivation agreed [Q-070]
 │   ├── Direct human membership only; nested groups unsupported [Q-077]
 │   ├── Create, enable, disable, delete agreed; separate revoke superseded [Q-082]
 │   ├── Enabled/disabled status agreed [Q-081 revised]
 │   ├── Optional time validity independent of status agreed [Q-083]
-│   └── Admin encoding, bootstrap, lifecycle, chains, group/role changes OPEN
+│   ├── Minimal persistent bootstrap grants and bounded self-assignment agreed [Q-088]
+│   ├── Original live-role expansion question superseded; undecided history retained [Q-089]
+│   └── Admin encoding, full bootstrap procedure, lifecycle, chains, group/role changes OPEN
 ├── 6. Scope and registration [5/7]
 │   └── Flat AND boundaries and registration agreed; detailed evolution PARKED
 ├── 7. Requests and resolution [6/10]
@@ -254,6 +260,18 @@ identity excerpt preserves human `sub` and the unchanged canonical block. Retain
 `human_id` makes the block self-contained outside JWT; duplication inside JWT is
 intentional and values must agree. No duplicate `agent_id` is adopted. See
 [mapping, trade-off, and alternative](jwt-identity-mapping.md).
+**Q-088 is agreed:** minimal bootstrap-created grants may remain;
+the bootstrapped human can explicitly assign himself more grants when each
+assignment fits his current administrative authority;
+seed origin gives no special exemption from grant evaluation. See
+[bootstrap example and rationale](bootstrap-authority.md).
+**Q-089-B / ROLE-003 is agreed:** roles publish immutable revisions; each grant
+explicitly adopts one revision, with authorization and boundary validation when
+changing that selection. Publication does not update existing grants. Auth's own
+APIs follow the same framework. The original Q-089 alternatives remain undecided
+history, not selected policies; their live-update premise is superseded. See
+[approved formats and rationale](role-revisions.md) and
+[preserved original discussion](role-change-authority.md).
 Administration bounds, restoration mechanics, collection details, transaction
 guarantees, and full job integration remain open. Audit-system deliverables are
 excluded, not remaining handbook work; older snapshots are superseded on that point.

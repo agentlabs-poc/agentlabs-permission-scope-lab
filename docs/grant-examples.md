@@ -1,5 +1,11 @@
 # Grant examples
 
+**Q-089-B update:** ROLE-002's automatic live-role changes below are deprecated.
+Role-based grants now explicitly adopt immutable revisions; publishing a new
+revision does not change their permissions. Unpinned historical examples remain
+for explanation, not as current wire contracts. See
+[role revisions and adoption](role-revisions.md) and [current formats](grant-format.md).
+
 Current scope syntax is canonical under SCOPE-007 / Q-034. GRANT-EX-007 below
 uses that syntax. GRANT-EX-001 through GRANT-EX-006 are preserved historical
 illustrations: their typed scope shapes are deprecated, not canonical v1.

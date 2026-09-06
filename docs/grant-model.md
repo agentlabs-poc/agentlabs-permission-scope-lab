@@ -1,5 +1,12 @@
 # Working handbook chapter: grants, assignments, and roles
 
+Role update — Q-089-B / ROLE-003: grants select an immutable published role
+revision explicitly. Publication does not change existing grants; adoption is an
+authorized, boundary-validated grant change. This supersedes ROLE-002's live-role
+behavior and the “current/latest role” interpretation in older examples below.
+RESOLUTION-003 still produces a dependent view of the same grant, now using its
+adopted revision. See [role revisions](role-revisions.md) for formats and rationale.
+
 Lifecycle terminology after Q-082: the canonical grant operations are create,
 enable, disable, and delete. A separate revoke operation is superseded; older
 references to permanent grant revocation mean deletion from usable authority.
@@ -62,8 +69,9 @@ For Vinay requesting C-17, the view remains G-17 with group recipient Employees.
 Valid membership establishes why this authority is available through Vinay.
 `$self` means Vinay's self relationship, not the group collectively. Finance and
 self remain AND-bound restrictions on this grant's certificate-read permission.
-For a role-referencing grant, its current permissions and role provenance are
-established under RESOLUTION-003; scope and other constraints remain associated.
+For a role-referencing grant, permissions and role provenance are established
+from its adopted revision under RESOLUTION-003 as updated by ROLE-003;
+scope and other constraints remain associated.
 
 Resolution has clarified the authority source, recipient relationship, capability
 references, and human-relative boundary meaning. It has not established merely
@@ -254,7 +262,7 @@ Example:
 
 1. An authorized administrator assigns Certificate Reader to Maya within Finance.
 2. The resulting binding is grant G-6.
-3. Evaluation expands G-6's role to find its current permissions.
+3. Evaluation expands G-6's explicitly adopted role revision to find its permissions.
 4. That computed view still represents G-6; it is not another assignment.
 
 The reason for this terminology is to make identity and lifecycle unambiguous.
@@ -417,6 +425,15 @@ In GRANT-EX-004, Certificate Reader contains read and download:
 The role is reusable because the same capabilities can be assigned at different
 scopes to different recipients.
 
+**Current rule — ROLE-003 / Q-089-B:** a grant adopts a particular immutable role
+revision. Adding or removing permissions in a new revision does not change that
+grant until an authorized adoption passes boundary validation. The role/recipient/
+scope distinction above survives; older unpinned examples are not complete current
+contracts. See [revision and adoption examples](role-revisions.md).
+
+<details>
+<summary>ROLE-002 live-role behavior — deprecated by Q-089-B, retained as history</summary>
+
 Existing referencing grants use the current role definition. Removing download
 withdraws that capability through both G-6 and G-7. Adding revoke supplies revoke
 within Finance through G-6 and throughout the tenant through G-7. Grant scopes
@@ -427,12 +444,19 @@ it. Role-edit permissions, scope compatibility, revision evidence, cache
 invalidation, and propagation guarantees remain to be specified. Live references
 do not mean those questions are already solved.
 
+</details>
+
 ## Expanded view of the same grant — RESOLUTION-003
 
-Role expansion looks up the current permission set and exposes it in the same
+Role expansion looks up the adopted revision's permission set and exposes it in the same
 permission-set form that evaluation uses for explicitly listed permissions.
 The original grant identity and restrictions remain intact, and its role source
 remains available for explanation.
+
+Historical wording, superseded by Q-089-B: “looks up the current permission set”
+meant the live role definition. The computed-view principle remains; latest-role
+substitution does not. Preserve the adopted revision in the resolution evidence;
+the exact resolved-view transport schema remains open.
 
 GRANT-EX-005 shows G-6 with explicit read/download permissions and Finance scope.
 The view is computed; it is not another stored grant created by assigning access.

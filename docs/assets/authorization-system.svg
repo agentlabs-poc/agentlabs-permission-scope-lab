@@ -96,7 +96,7 @@
     <rect x="1100" y="725" width="285" height="180" rx="15" fill="#eff6ff" stroke="#a9c5e8" stroke-width="1.5"/>
     <text x="1120" y="758" class="title">Auth service</text>
     <text x="1120" y="790" class="body">Human memberships</text>
-    <text x="1120" y="816" class="body">Direct + group grants, roles</text>
+    <text x="1120" y="816" class="body">Grants + adopted role revisions</text>
     <text x="1120" y="842" class="body">Validity and dependencies</text>
     <text x="1120" y="881" class="small">Example authority: certificate read in FIN</text>
   </g>
