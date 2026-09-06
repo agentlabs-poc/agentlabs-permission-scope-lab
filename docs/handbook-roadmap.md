@@ -1,5 +1,18 @@
 # Authorization handbook — agreed roadmap
 
+## Current closure work — CLOSURE-001
+
+[Closure checklist](v1-closure.md) maps all 33 previously open criteria to actual
+writing, decisions, verification, and acceptance. Three documentary deliverables
+now meet their criteria: [principles](principle-catalog.md) (HC-02-05),
+[identity glossary](identity-glossary.md) (HC-03-04), and
+[implementation roadmap](implementation-roadmap.md) (HC-11-04).
+Current count: **38 DONE / 30 OPEN / 1 EXCLUDED**, 55.9% of 68 in-scope criteria
+closed. Prior percentage reports below are history, not current measurements.
+The [grant-contract inventory](grant-contract-closure.md) remains deliberately
+partial; its actual unresolved choices are not silently approved. Q-117 is
+unapproved and parked. All agreed decisions and rationale remain preserved.
+
 ## Current revision decisions — Q-102 through Q-111
 
 [Milestone progress through Q-111](milestone-progress.md) reports remaining
@@ -31,6 +44,13 @@ approved separately after explicit review; full schemas remain unfinished.
 | Q-112A | LINEAGE RULE REAFFIRMED; FIELD PROPOSAL WITHDRAWN | Use lineage-supported latest under Q-103, not an independently pinned parent revision or unrelated latest publication. The assistant's `parent_grant_revision` proposal is retained only in history. Governing selection is not reopened; support-discovery, evidence, validation, and conformance contracts remain open. All exploration is now lab-only. |
 | Q-113 | AGREED WITH CLARIFICATION | [Root establishment](bootstrap-authority.md) requires explicit trusted setup. User corrected that ordinary grant operations are already bounded; parent omission is not a new loophole or separate mechanism. The chapter checks tenant, source/admin, lineage, scope, lifecycle, registration, identity, and enforcement consistency. Exact trust procedure and proof, seed bounds, representation, and recovery remain open. |
 | Q-114 | AGREED AS CORRECTED; REGISTRATION PREREQUISITE REAFFIRMED | [Bootstrap flow](bootstrap-authority.md): register relevant permissions and scope contracts first, including Auth administration; validate and establish maximum intended tenant authority; explicitly make it available to the initial administrator; distribute equal/narrower grants through users/groups/membership. FIN-read-only seed and conflicting minimal-capability framing are superseded. Registration mode, tenant bounds, ordinary lifecycle, and explicit adoption remain mandatory; full setup/root/recipient contracts remain open. |
+| Q-115 | AGREED AT ARRANGEMENT LEVEL | [Initial assignment](bootstrap-initial-assignment.md): trusted setup creates a selected legitimate human and administrators group, explicitly assigns root authority to the group, and adds the human as a member. No special identity; full trust/user/membership contracts remain open. Original proposal preserved. |
+| Q-116 | AGREED | [Repeated completed bootstrap](bootstrap-initial-assignment.md): report already initialized without authority mutation. Cannot reset grants, re-enable records, or restore/add administrator membership. Normal administration remains available; partial setup, completion evidence, concurrency, and recovery remain open. |
+| Q-117 | PROPOSED / NOT APPROVED | [Incomplete bootstrap](bootstrap-initial-assignment.md): recommend no usable initial authority until the complete arrangement is validated and durably established. Partial records may remain; persistence, visibility, continuation, and concurrency contracts remain open. |
+| Q-118 | AGREED WITH CLARIFICATION | [Role-based grant revision](role-grant-contract.md): immutable content has either explicit `permissions` or the complete `role_id`/`role_revision` pair. Direct permissions exclude both role fields, including a stray `role_revision`. No merge/precedence rule; parent bounds and explicit adoption remain. Full schemas stay open. |
+| Q-119 | AGREED | [Root content representation](root-grant-format.md): same grant-revision record with omitted `parent_grant_id`, not null, synthetic parent, or root flag. Omission does not prove trusted establishment. Full seed trust/evidence remains open; maximum intended initial authority unchanged. Original proposal preserved. |
+| Q-120 | DISCUSSION / NOT APPROVED | [Root permission evolution](root-permission-evolution.md): user suggests root-only `*` for later application permissions. Recommend explicit registered root revisions and deliberate adoption; live wildcard expansion would require an explicit exception to current rules. Who may expand root authority remains an unresolved trust contract. |
+| Q-120A | USER DIRECTION ACCEPTED; MECHANISM OPEN | [Automatic root growth](root-permission-evolution.md): legitimate application capability upgrades expand applicable root permission coverage without a separate manual root update/adoption gate. Supersedes that part of Q-120's recommendation, not ordinary child subset/adoption. Live `*` is not approved; root representation, revision mechanics, and trusted update boundary remain open. |
 
 ## Current decisions — Q-101 pinned through Q-101E-3
 

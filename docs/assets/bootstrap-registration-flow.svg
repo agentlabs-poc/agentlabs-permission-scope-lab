@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1000" viewBox="0 0 1100 1000" role="img" aria-labelledby="title desc">
   <title id="title">Registration-first bootstrap and bounded authority distribution</title>
-  <desc id="desc">Trusted setup establishes tenant context. Auth and application permission and scope contracts are registered before initial grants are validated. Maximum intended tenant authority is explicitly assigned to the initial human administrator, who then administers users, groups, dependent grants, and membership under ordinary authorization rules.</desc>
+  <desc id="desc">Trusted setup establishes tenant context. Auth and application permission and scope contracts are registered before initial grants are validated. Setup creates a selected legitimate human user and administrators group, assigns maximum intended tenant authority to that group, and explicitly adds the human as a member. The administrator then manages users, groups, dependent grants, and membership under ordinary authorization rules.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
     <style>text{font-family:Arial,Helvetica,sans-serif;fill:#14243b}.heading{font-size:23px;font-weight:700}.body{font-size:18px}.small{font-size:16px}.edge{stroke:#475569;stroke-width:3;marker-end:url(#arrow)}</style>
@@ -25,9 +25,9 @@
   <text x="550" y="536" text-anchor="middle" class="small">No wildcard syntax, cross-tenant access, or bootstrap exemption from contract validation.</text>
   <line x1="550" y1="553" x2="550" y2="589" class="edge"/>
   <rect x="95" y="598" width="910" height="110" rx="12" fill="#edf0ff" stroke="#6470b5"/>
-  <text x="550" y="635" text-anchor="middle" class="heading">4. Explicitly make the initial human administrator a recipient</text>
-  <text x="550" y="668" text-anchor="middle" class="body">Valid assignment(s), with explicit membership if a group-held route is used.</text>
-  <text x="550" y="692" text-anchor="middle" class="small">A stored grant definition alone supplies no access; the initial recipient format remains open.</text>
+  <text x="550" y="635" text-anchor="middle" class="heading">4. Create the initial human user and administrators group — Q-115</text>
+  <text x="550" y="668" text-anchor="middle" class="body">Assign root grants to the group; explicitly add the selected legitimate human.</text>
+  <text x="550" y="692" text-anchor="middle" class="small">No special username. Membership supplies valid group authority; full setup contracts remain open.</text>
   <line x1="550" y1="708" x2="550" y2="744" class="edge"/>
   <rect x="95" y="753" width="910" height="125" rx="12" fill="#fff4df" stroke="#b5842e"/>
   <text x="550" y="790" text-anchor="middle" class="heading">5. Ordinary authorized administration</text>

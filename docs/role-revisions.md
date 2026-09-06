@@ -1,5 +1,12 @@
 # Role revisions and explicit grant adoption — Q-089-B / ROLE-003
 
+**Contract-completion update:** [Q-118](role-grant-contract.md) now approves the
+existing role reference in Q-107's immutable grant revision and exclusive
+permission sources. Direct permissions exclude `role_id` and `role_revision`;
+role-based content requires both. Original proposed status is preserved in that
+chapter. The role decisions and historical excerpts below remain preserved,
+subject to their existing later recipient/revision refinements.
+
 **Related grant-revision decisions:** [Q-102–Q-106](grant-revisions.md) extends
 explicit adoption to reusable grant revisions selected by assignments, with
 latest-only creation/upgrades and separate live controls. The role-revision

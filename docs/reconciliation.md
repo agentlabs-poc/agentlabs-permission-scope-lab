@@ -1,5 +1,106 @@
 # Handbook reconciliation register
 
+## ASSESS-001 — Remaining discussions versus autonomous work
+
+Recorded the requested [assessment](discussion-assessment.md): 13 substantive
+design topics, five assistant-drafted contract reviews, and final acceptance;
+eight execution packages support the same agenda. Every one of the 30 OPEN
+criteria is mapped. Counts represent topics/packages, not guaranteed single
+questions, and are not added together as independent work.
+
+Rationale: the earlier active/parked question count covered only the current
+branch, while stale open labels risked re-asking approved decisions. The
+assessment separates settled consequences that can be documented directly from
+new behavior, fields, trust assumptions, and deferrals that require approval.
+Q-117 and residual ownership/condition questions remain visible. No scope cut,
+new canonical contract, checkpoint closure, runtime change, scratchpad mutation,
+commit, push, or tag change is included.
+
+## Q-120A — Automatic root growth accepted, mechanism separated
+
+The user clarified that root expansion must not require a separate deliberate
+manual step, and wildcard choice is a different question. Recorded that behavior
+as accepted direction, preserving the earlier Q-120 recommendation as superseded
+history where it imposes a manual root gate. Qualified current bootstrap,
+registration, revision, principle, and record references without rewriting their
+original rationale. Ordinary child selections/adoptions and validity controls
+remain; no wildcard, immutable-record mutation, new trust identity, or boundary
+escape is adopted. Exact root update authority, tenant/application binding, and
+representation/revision mechanics remain unfinished. Score unchanged; no runtime
+change, commit, push, or movement of tag `0.0.2`.
+
+## Q-119 agreed; Q-120 root evolution remains exploratory
+
+Recorded explicit Q-119 approval of parent omission for legitimate root content,
+with the original proposal and rationale retained. Reconciled current references.
+The user separately suggested root-only `*` when later application releases add
+permissions. Recorded Q-120 as discussion, not approval: registration versus
+authority, explicit root revision/adoption versus live wildcard expansion, and
+the still-unresolved authority to expand the root source. No v1 wildcard exception,
+automatic adoption, bootstrap replay, or root-update trust mechanism is adopted.
+No additional full checkpoint closure, runtime mutation, commit, push, or tag change.
+
+## Q-118 — Permission-source variants agreed with field-purpose clarification
+
+Recorded explicit approval and the user's rationale: `role_revision` has no
+meaning when permissions are supplied directly. Direct-permission content
+excludes both role fields; role-based content requires both and omits direct
+permissions. The original proposal, examples, alternatives, and rationale remain
+in a history block. Current references/tree/roadmap now reflect approval.
+This settles one contract variant, not full-schema validation or a whole measured
+checkpoint. No runtime change, scratchpad mutation, commit, push, or tag movement.
+
+## Grant-record consolidation and Q-118 role-variant proposal
+
+Added a sourced current-record reference using approved Q-107 fields and later
+lineage/lifecycle decisions. Added Q-118 separately as an unapproved assembled
+role-based revision and exclusive permission-source proposal, with exact JSON,
+rationale, alternatives, and boundary review. Existing decision text remains;
+source chapters gain companion links only. No full-schema closure, new field
+approval, runtime change, commit, push, or tag movement is included. Tag `0.0.2`
+continues to identify committed `5193e88`, not this uncommitted work.
+
+## CLOSURE-001 — Documentary completions, no new authority decisions
+
+The user approved a closure pass and explicitly required preserving agreed
+decisions unless superseded. Added separate sourced principle and identity
+consolidations, a grant-contract closure inventory, an implementation roadmap,
+and a disposition checklist covering all 33 previously open criteria. Existing
+decision/rationale text remains; navigation and measured-status updates do not
+select new policy. Q-117 is unapproved and parked.
+
+HC-02-05, HC-03-04, and HC-11-04 now have their specified documentary deliverables.
+The fixed denominator stays 68; count is 38 DONE / 30 OPEN / 1 EXCLUDED (55.9%
+closure). No full grant schema, bootstrap procedure, support resolver, or runtime
+criterion is closed by an index or glossary. Prior measurements are retained as
+history. Verification evidence is recorded in the closure checklist after checks;
+no scratchpad mutation, commit, push, or final v1 acceptance is included.
+
+## Q-116 — Repeated completed bootstrap agreed
+
+The user explicitly approved Q-116. Recorded the no-authority-mutation outcome
+with rationale and consequences: repeated completed setup cannot reset grants,
+re-enable records, or restore/add administrator membership. Ordinary authorized
+administration and later application registration remain available. Preserved
+the original proposal as history and reconciled current roadmap, tree, handbook,
+reader, and working rules. Q-117 is a separately labeled unapproved proposal
+about authority visibility during incomplete setup. No runtime implementation,
+new schema, scratchpad change, full-checkpoint closure, commit, or push is implied.
+
+## Q-115 — Initial human and administrators group agreed
+
+Recorded the user's explicit setup arrangement with rationale: create a selected
+legitimate human user and administrators group, assign root authority to the
+group, and establish explicit human membership. No hard-coded identity or
+automatic entitlement for every legitimate user is implied. The original
+proposal remains as history; existing Q-107 assignment fields are reused.
+Bootstrap prose/SVG, reader, handbook, roadmap, tree, and working rules reflect
+the approval. Full trust/user/membership contracts remain unfinished. Q-116 is
+recorded as a separate unapproved proposal about repeating completed bootstrap.
+No runtime creation, scratchpad changes, completion-score change, commit, or
+push is included in this local recording checkpoint. Earlier entries below
+describe their historical checkpoints, not the current Q-115 status.
+
 ## Publication authorization — registration-first bootstrap checkpoint
 
 The user explicitly requested commit/push and continuation after reviewing the

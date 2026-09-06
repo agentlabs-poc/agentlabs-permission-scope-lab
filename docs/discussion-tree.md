@@ -1,5 +1,52 @@
 # Authorization handbook — discussion tree
 
+**Remaining agenda — [ASSESS-001](discussion-assessment.md):** 13 design topics
++ five contract reviews + final acceptance. Eight assistant-owned drafting,
+scenario, reconciliation, and verification packages support that same agenda;
+they are not eight additional discussions. Every currently open criterion is
+mapped in the assessment. No new policy approval or checkpoint closure is implied.
+
+## Current execution tree — closure, not new feature exploration
+
+```text
+V1 closure [CLOSURE-001: 38/68 criteria DONE; 30 OPEN]
+├── Documentary consolidation
+│   ├── Numbered principles + compliance examples [DONE: HC-02-05]
+│   ├── Identity/authority glossary [DONE: HC-03-04]
+│   └── Separate implementation roadmap [DONE: HC-11-04]
+├── Authority contract package [OPEN]
+│   ├── Source-support evidence and boundary validation
+│   ├── Root/derived, direct/role, lifecycle record completion
+│   └── Membership/hierarchy, delegation, identity/registration dependencies
+├── Evaluation and enforcement contracts [OPEN]
+│   ├── Request/resolved/result and handler-agent interfaces
+│   └── Freshness, concurrent use, operation/background cases
+├── Audience and change governance [OPEN: user choice required]
+└── Final scenarios, reconciliation, package, acceptance [OPEN]
+```
+
+[All 33 prior open criteria and their disposition](v1-closure.md) ·
+[grant contract inventory](grant-contract-closure.md) ·
+[current measured progress](milestone-progress.md).
+No approved rules are changed by this tree. Q-117 remains unapproved and parked;
+the earlier active-proposal position below is historical for this closure pass.
+
+**Q-118 agreed — bounded contract completion:** [role-based immutable revision](role-grant-contract.md)
+and exclusive permission-source validation. Direct permissions exclude both role
+fields; role-based content requires the pair. The [record reference](grant-record-reference.md)
+reflects this approval; original proposed status remains in chapter history.
+No additional full checkpoint is closed by settling this variant alone.
+
+**Q-119 agreed:** [root grant-revision representation](root-grant-format.md)
+omits the parent field, without a root flag or a changed initial authority ceiling.
+Trusted establishment is still required; full evidence/procedure remains open.
+
+**Active Q-120:** [new application permissions and root authority](root-permission-evolution.md).
+**Q-120A direction accepted:** root coverage grows automatically for legitimate
+application capability upgrades, without a separate manual root-expansion step.
+Wildcard versus materialized-revision mechanism remains open; no `*` is approved.
+Ordinary child selection/adoption and tenant/application boundaries remain.
+
 ## Current revision branch — decisions through Q-111
 
 [Milestone remaining percentages](milestone-progress.md) use the fixed checklist;
@@ -46,6 +93,19 @@ authority and explicit administrator assignment. Ordinary administration then
 distributes equal/narrower authority through users, groups, and membership.
 The FIN-read-only bootstrap framing is superseded. [Setup flow SVG](assets/bootstrap-registration-flow.svg).
 Trust implementation, exact root/initial-recipient records, and recovery remain open.
+
+**Q-115 agreed:** [initial user and administrators group](bootstrap-initial-assignment.md).
+Trusted setup creates a selected legitimate human user and administrators group,
+assigns root authority to the group, and explicitly adds the human as a member.
+No special identity; full trust/user/membership contracts remain open.
+
+**Q-116 agreed:** repeated completed bootstrap reports already initialized without
+authority changes. Normal administration remains available; bootstrap cannot
+reset grants, re-enable records, or restore/add administrator membership.
+
+**Active Q-117, proposed:** no usable initial authority until the complete setup
+arrangement is validated and durably established. Partial records may remain;
+completion evidence, visibility, continuation, concurrency, and recovery remain open.
 
 ## Current position — Q-101 framing pinned through Q-101E-3
 

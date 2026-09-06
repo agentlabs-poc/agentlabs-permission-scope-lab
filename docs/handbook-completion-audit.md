@@ -1,5 +1,24 @@
 # Handbook completion audit — MEASURE-001
 
+## Current documentary closure update — CLOSURE-001
+
+The user approved completing documentation from existing decisions while
+preserving approved content and rationale. Three precise documentary criteria
+are now satisfied, with no change to the measurement denominator:
+
+| Checkpoint | Earlier status | Current status | Completion evidence |
+|---|---|---|---|
+| HC-02-05 | OPEN | DONE | [Numbered principle catalog](principle-catalog.md): required versus guidance, approved references, rationale, compliance/counterexamples. |
+| HC-03-04 | OPEN | DONE | [Identity/authority glossary](identity-glossary.md): actor/principal wording/subject/human/membership distinctions and a relationship example; full trust mapping stays open separately. |
+| HC-11-04 | OPEN | DONE | [Separate implementation roadmap](implementation-roadmap.md): dependency phases, approved/open inputs, verified/unverified evidence, and exit checks. No runtime implementation required or claimed. |
+
+**Current: 38 DONE / 30 OPEN / 1 EXCLUDED; 68 in scope; 55.9% closed, 44.1%
+remaining.** [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
+The detailed register below incorporates these three updates; older numerical
+summaries retain their historical values. No other row is newly closed or
+excluded, and this is not a full re-audit of previously DONE model semantics.
+Q-113–Q-116 advance bootstrap but do not finish its governed setup contract.
+
 ## Milestone closure update through Q-111
 
 See [milestone progress](milestone-progress.md) for per-stage remaining percentages
@@ -44,7 +63,7 @@ v1 scope. This initial checkpoint grouping is proposed as the tracking baseline;
 the arithmetic is reproducible, but choosing the granularity is a judgment.
 The user requested a measured score rather than the previous approximate 60%.
 
-## Result
+## Result — historical measurement before CLOSURE-001
 
 Current scope update after Q-076 (2026-09-06): the user excludes audit policy and
 system design as another layer's responsibility. HC-09-08 is **EXCLUDED**, not
@@ -117,7 +136,7 @@ The counts measure **closure of this checklist**, not the percentage of hours,
 pages, risk, or engineering effort remaining. A small-looking open concurrency
 contract may cost more work than several completed conceptual checkpoints.
 
-## Score by roadmap stage
+## Score by roadmap stage — historical before CLOSURE-001
 
 | Stage | Done | Total | Remaining |
 |---|---:|---:|---:|
@@ -160,7 +179,7 @@ not the whole surrounding topic.
 | HC-02-02 | DONE | Establish that resolution and delegated authority cannot amplify access. | RESOLUTION-001 / AUTHORITY-002 / DELEGATION-002; [grant model](grant-model.md). |
 | HC-02-03 | DONE | Require prevention of protected execution when necessary authority or enforcement fails. | PRINCIPLE-001 / ENFORCEMENT-002; [endpoint authorization](endpoint-authorization.md). |
 | HC-02-04 | DONE | Require auth-first endpoint design and a server-owned declaration. | PRINCIPLE-002 / CONTRACT-004/007; [endpoint authorization](endpoint-authorization.md). |
-| HC-02-05 | OPEN | Complete the numbered principle catalog with required-versus-guidance wording and compliance/counterexamples. | Stage 2 finished result in [roadmap](handbook-roadmap.md); individual principles exist, final consolidation remains open. |
+| HC-02-05 | DONE | Complete the numbered principle catalog with required-versus-guidance wording and compliance/counterexamples. | CLOSURE-001: [catalog](principle-catalog.md) supplies the full documentary deliverable from approved sources. Earlier OPEN rationale retained: Stage 2 finished result in [roadmap](handbook-roadmap.md); individual principles existed and final consolidation remained open. Other schema/implementation criteria are not closed. |
 
 ### 3. Vocabulary and identity
 
@@ -169,7 +188,7 @@ not the whole surrounding topic.
 | HC-03-01 | DONE | Settle team/group synonymy, Auth ownership, and human-only authorization membership. | TERM-001 / Q-045; [groups and membership](groups-and-membership.md). |
 | HC-03-02 | DONE | Distinguish grant/assignment, role, and group without independent expanded assignments. | TERM-004 / ROLE-001 / RESOLUTION-003; [grant model](grant-model.md). |
 | HC-03-03 | DONE | Settle permission/boundary/request-material vocabulary without a canonical target wrapper. | TERM-005 / Q-043; [vocabulary](authorization-vocabulary.md). |
-| HC-03-04 | OPEN | Complete the actor/principal/subject/user/membership identity glossary. | Stage 3 [tree](discussion-tree.md); current vocabulary chapter intentionally covers only part of the glossary. |
+| HC-03-04 | DONE | Complete the actor/principal/subject/user/membership identity glossary. | CLOSURE-001: [glossary](identity-glossary.md) consolidates approved identity and authority distinctions with sources and an example. Earlier OPEN rationale retained: Stage 3 [tree](discussion-tree.md); the vocabulary chapter covered only part of the glossary. Full trust/mapping contracts remain HC-03-05. |
 | HC-03-05 | OPEN | Specify trusted identity/tenant mappings and human/proxy attribution rules. | [Q-085](proxy-attribution.md) agrees trusted attribution; [Q-086](identity-context.md) approves the shared shape. [Q-087-A/B](jwt-identity-mapping.md) agree compatibility enforcement and exact identity mapping, retaining deliberate sub/human_id duplication for portability. Full contracts, legacy normalization, tenant mapping, and deployment verification remain open. |
 
 ### 4. Permissions
@@ -193,7 +212,7 @@ not the whole surrounding topic.
 | HC-05-06 | DONE | Settle ordinary grant survival after the issuer loses issuance authority. | ADMIN-006 / Q-046; [grant model](grant-model.md). |
 | HC-05-07 | DONE | Require all service/agent access to depend on a human and stay within that human's authority. | AUTHORITY-002 / DELEGATION-002; [grant model](grant-model.md). |
 | HC-05-08 | OPEN | Encode administrative recipient/permission/scope bounds and define containment validation. | [Q-093](assignment-authority.md), [Q-100](auth-service-authority-gate.md), and [Q-101](parent-grant-bindings.md) clarify separate admin/source checks and parent-dependent narrowing. [Q-103](grant-revisions.md) selects actual adopted support; [Q-112A](direct-human-parent-context.md) reaffirms lineage-supported latest, not an independent parent selector. Complete administrative/boundary-validator contracts and eligible-support discovery/evidence remain open; Q-044's old encoding gap is narrowed, not closed. |
-| HC-05-09 | OPEN | Define bootstrap/seed authority and its governed creation procedure. | [Q-088](bootstrap-authority.md) agrees minimal persistent seed grants and explicit self-assignment within current administrative bounds. Exact seed authority, trusted setup procedure, recovery, and repeat initialization remain open. |
+| HC-05-09 | OPEN | Define bootstrap/seed authority and its governed creation procedure. | Current Q-113–Q-116: [registration-first maximum intended tenant authority](bootstrap-authority.md), [explicit initial user/group and no-mutation completed replay](bootstrap-initial-assignment.md). Root representation, trusted establishment/evidence, partial/concurrent setup, and recovery remain open. Earlier evidence retained as history: Q-088 minimal persistent seed and self-assignment framing; exact seed/replay rules were then open. The artificially restricted initial ceiling is superseded by Q-114, not a current requirement. |
 | HC-05-10 | OPEN | Specify delegation ceilings, chains, expiry, growth, and reactivation semantics. | Q-070 agrees automatic restoration of affected access when human support returns under a still-valid delegation; explicit renewal is not adopted. Rationale in [delegation lifecycle](delegation-lifecycle.md). Ceilings, chains, expiry, growth, and mechanics remain open. |
 | HC-05-11 | OPEN | Complete ordinary grant status/validity and create/change/revoke lifecycle rules. | Q-082 consolidates permanent withdrawal into delete; the original revoke wording does not require a second operation. [Q-101](parent-grant-bindings.md) distinguishes global grant controls, route controls, ineffective descendants, and guarded structural changes. [Q-108](assignment-validity.md) defers assignment-specific validity in v1; [Q-109](grant-validity.md) places grant validity in immutable revisions. Initial defaults, timestamp validation, full transitions, and operation contracts remain open. |
 | HC-05-12 | OPEN | Define group membership change, nesting, and optional-sync lifecycle behavior. | [Q-091](subgroups.md) supersedes Q-077's blanket subgroup exclusion: dependent subteams are supported, not inherited human membership. [Q-099](ownership-lineage.md) separates owners from team-held support; [Q-101](parent-grant-bindings.md) guards binding changes and [Q-111](lineage-cycles.md) rejects ancestor loops. Complete membership/ownership/hierarchy and optional-sync lifecycle contracts remain open; freshness timing is counted under stage 9. |
@@ -265,7 +284,7 @@ not the whole surrounding topic.
 | HC-11-01 | OPEN | Finish whole-handbook terminology and cross-chapter consistency review. | Stage 11 [roadmap](handbook-roadmap.md); local reconciliations are checkpoints, not final editorial acceptance. |
 | HC-11-02 | OPEN | Package the complete versioned contract definitions and consistent examples for v1. | [Contract publication](contract-publication.md) and [tree](discussion-tree.md); separate from authoring individual schemas in stage 7. |
 | HC-11-03 | OPEN | Obtain v1 acceptance with every gap settled or explicitly approved for exclusion/deferment. | [Roadmap](handbook-roadmap.md) closure criterion; parked/unanswered items are not presumed deferred. |
-| HC-11-04 | OPEN | Publish a separate implementation roadmap tied to remaining verified/unverified gaps. | Stage 11 [roadmap](handbook-roadmap.md); this does not require implementing production authorization. |
+| HC-11-04 | DONE | Publish a separate implementation roadmap tied to remaining verified/unverified gaps. | CLOSURE-001: [separate roadmap](implementation-roadmap.md) is available in the handbook reader's linked documents, with dependency phases, source rules, open contracts, and exit evidence. Earlier OPEN rationale retained: Stage 11 [roadmap](handbook-roadmap.md); this does not require implementing production authorization. Git publication and runtime implementation are not claimed. |
 
 ## Overlap and scope controls
 

@@ -1,5 +1,13 @@
 # Bootstrap authority — registration, maximum starting authority, bounded distribution
 
+**Later root evolution — Q-120A:** legitimate application capability upgrades
+should expand applicable root permission coverage automatically, without a
+separate manual root-update approval. [Rationale and open mechanism](root-permission-evolution.md)
+distinguish this from live wildcard syntax, which is not approved. Initial trust/
+registration, maximum intended tenant authority, normal enablement, and bounded
+child selection remain. Earlier separate-manual-expansion framing is qualified;
+bootstrap replay and arbitrary cross-application expansion are not authorized.
+
 ## Q-114 — Maximum starting authority: agreed, with registration prerequisite
 
 **AGREED AS CORRECTED.** The user clarified that the initial administrator must
@@ -29,10 +37,11 @@ From that source, ordinary administration distributes equal or narrower authorit
 3. Validate and establish the initial grants supplying maximum intended
    permissions and scope inside the tenant. Unsupported definitions do not become
    acceptable merely because a grant is created during bootstrap.
-4. Establish the assignment(s) that make the initial authority available to the
-   initial human administrator, plus explicit membership if a group-held route
-   is used. A grant definition alone gives nobody access. The specific initial
-   direct/group arrangement and membership schema are not decided by this flow.
+4. Under [Q-115](bootstrap-initial-assignment.md), create a legitimate human user
+   selected through trusted setup and an Auth administrators group. Explicitly
+   assign initial authority to the group and add the human as a member. No
+   special username is required; a grant definition alone gives nobody access.
+   The arrangement is agreed; full user/group/membership schemas remain open.
 5. The administrator creates users/groups, assigns equal or narrower dependent
    grants, and manages membership through normal authorized operations. Users
    receive their groups' valid authority; no independent grant copies are created.
@@ -59,6 +68,11 @@ Maximum permissions means the full intended initial permission set, not a new
 wildcard or `all` operator. The exact seed catalog, root-identification format,
 user-management permission names, and number of seed records remain to be specified.
 The example does not implicitly establish team parentage or ownership permissions.
+
+**Q-115 refinement:** the original Q-114 flow left initial direct/group placement
+undecided. The explicit user, administrators group, assignment, and membership
+arrangement above now settles that choice. Direct assignments remain supported
+generally; full setup contracts remain open.
 
 **Rationale:** the initial administrator needs a complete starting source for
 legitimate administration, not an artificially FIN-read-only ceiling. Registration

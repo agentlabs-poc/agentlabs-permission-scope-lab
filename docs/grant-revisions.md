@@ -1,5 +1,12 @@
 # Shared-grant revisions, adoption, and current lineage — Q-102–Q-106
 
+**Root-evolution qualification — Q-120A:** [automatic root growth](root-permission-evolution.md)
+is now intended for legitimate application capability upgrades, without a
+separate manual root-update/adoption gate. Live versus materialized revision
+mechanics remain open. Do not infer in-place mutation of published content or
+automatic selection/adoption for ordinary dependent grants. The earlier blanket
+root-growth assumption is qualified; original decisions/rationale remain below.
+
 **AGREED at the rule level described below.** The user approved these decisions
 and requested recording in the lab by default. Earlier scratch notes are retained
 as discussion history. This chapter is current for the approved revision rules;

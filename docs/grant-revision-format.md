@@ -1,5 +1,11 @@
 # Grant, revision, and assignment JSON — Q-107
 
+**Consolidated companion:** [current approved record reference](grant-record-reference.md)
+puts these records and later approved lifecycle rules together. The
+[Q-118 role variant](role-grant-contract.md) is now approved: use explicit
+permissions or the complete role pair; direct permissions exclude both role
+fields. The earlier pending label is superseded; Q-107 and its rationale remain.
+
 **APPROVED CORE SHAPE.** The user answered “Approve” after reviewing all three
 JSON blocks, the new `revision` / `grant_revision` fields, rationale, and
 core-philosophy check. This adopts the core separation and shown fields, not
@@ -96,7 +102,9 @@ while retaining Q-083 grant validity. No validity field is added to assignments.
 content**, with its exact extended JSON excerpt. Changing/removing a bound requires
 new content and explicit adoption; live enablement does not reset the window.
 
-Complete field/type validation; permissions-versus-role variants; timestamp
+Q-118 above now settles the direct/role permission-source variants and exclusive
+field presence. The earlier variant-open item is narrowed, not full schema closure.
+Remaining: complete field/type validation; timestamp
 validation and condition placement; root shape; latest selection under concurrency; full API
 payloads; and eligible-support discovery/evidence for direct-human routes.
 [Q-112A](direct-human-parent-context.md) reaffirms lineage-supported latest and

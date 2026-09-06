@@ -1,4 +1,38 @@
-# Milestone progress — through Q-111
+# Milestone progress — CLOSURE-001
+
+The original criterion set is unchanged. This pass completes three documentary
+deliverables from approved decisions: HC-02-05 principle catalog, HC-03-04 identity
+glossary, and HC-11-04 separate implementation roadmap. It does not close full
+contracts or re-audit every previously DONE authorization rule.
+
+| Milestone | Closed / in scope | Open | Remaining |
+|---|---:|---:|---:|
+| 1. Purpose and architecture | 2 / 4 | 2 | 50.0% |
+| 2. Principles | 5 / 5 | 0 | 0.0% |
+| 3. Vocabulary and identity | 4 / 5 | 1 | 20.0% |
+| 4. Permissions | 3 / 4 | 1 | 25.0% |
+| 5. Grants and authority | 7 / 13 | 6 | 46.2% |
+| 6. Scope and registration | 5 / 7 | 2 | 28.6% |
+| 7. Requests and resolution | 6 / 10 | 4 | 40.0% |
+| 8. Decision semantics | 1 / 4 | 3 | 75.0% |
+| 9. Enforcement and time | 2 / 8 | 6 | 75.0% |
+| 10. Challenge and verify | 2 / 4 | 2 | 50.0% |
+| 11. Publish the foundation | 1 / 4 | 3 | 75.0% |
+| **Total** | **38 / 68** | **30** | **44.1%** |
+
+Overall closure: **55.9%**, up from 51.5% through three completed deliverables,
+not extra question counts or scope exclusions. HC-09-08 remains the one excluded
+external-audit row. These percentages measure criteria, not hours or security
+readiness; 0% open in the principles stage does not mean every implementing
+contract is finished. [Evidence and original register](handbook-completion-audit.md).
+
+[Closure checklist](v1-closure.md) accounts for all 33 previously open criteria,
+their three closures, and remaining drafting/decision/verification work.
+[Grant contract inventory](grant-contract-closure.md) identifies the next deep
+contract gaps without reopening agreed parent-boundary or adoption principles.
+
+<details>
+<summary>Preserved previous report — Milestone progress through Q-111 (35/68)</summary>
 
 ## What these percentages measure
 
@@ -75,3 +109,5 @@ denominator; any new breakdown should be labeled as a new measurement series.
 No next authorization question is introduced during this status response.
 Discussion remains one referenced proposal at a time when resumed. No completion
 score here authorizes implementation, commit, push, or release.
+
+</details>

@@ -1,5 +1,30 @@
 # Authorization: the agreed foundation
 
+**Q-120A — automatic root growth:** legitimate application capability upgrades
+should expand applicable root coverage without a separate manual root approval.
+Ordinary child permissions remain explicitly selected and bounded. [Behavior
+versus mechanism](../../docs/root-permission-evolution.md): no live `*` is yet
+approved; root trust/binding and revision mechanics remain unfinished.
+
+## Current closure pass — CLOSURE-001
+
+[Closure checklist](../../docs/v1-closure.md): **38/68 criteria closed (55.9%),
+30 open** after three documentary completions. This is not implementation or
+final v1 acceptance. Approved decisions remain intact; Q-117 stays unapproved.
+
+- [Principles and compliance examples](../../docs/principle-catalog.md).
+- [Identity and authority glossary](../../docs/identity-glossary.md).
+- [Grant/assignment contract closure inventory](../../docs/grant-contract-closure.md).
+- [Separate implementation roadmap](../../docs/implementation-roadmap.md).
+
+**Q-115 agreed:** trusted setup creates a selected legitimate human user and
+administrators group, explicitly assigns initial root authority to the group,
+and explicitly adds the human as a member. No special identity is required.
+[Arrangement, JSON, and rationale](../../docs/bootstrap-initial-assignment.md).
+**Q-116 agreed:** repeating completed bootstrap reports already initialized
+without changing authority. Q-117 separately proposes withholding initial
+authority until complete setup is durably established; it is not yet approved.
+
 **Q-114 — registration-first bootstrap:** register the relevant permission and
 scope contracts, including Auth's own administration, before initial grant
 acceptance. Trusted setup establishes maximum intended tenant authority and

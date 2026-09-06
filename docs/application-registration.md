@@ -1,5 +1,13 @@
 # Application registration and Auth validation
 
+**Root-evolution qualification — Q-120A:** the trusted application capability-
+update flow is intended to expand applicable root permission coverage automatically,
+without another manual root approval. [Behavior and open mechanism](root-permission-evolution.md)
+qualify the earlier registration-is-only-catalog explanation for this root path.
+Ordinary grants are not automatically enlarged, and generic registration access
+is not itself a specified root-updater trust contract. Tenant/application binding,
+capability ownership, and update evidence remain to be defined; no `*` is approved.
+
 **Bootstrap integration — Q-114 clarification:** registration is required before
 the relevant initial grants can be validated and accepted. [The setup flow](bootstrap-authority.md)
 registers Auth's administrative permission/scope contracts and relevant application

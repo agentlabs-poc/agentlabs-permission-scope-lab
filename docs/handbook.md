@@ -1,5 +1,43 @@
 # Authorization Handbook — working edition
 
+[Remaining discussions and assistant-owned work — ASSESS-001](discussion-assessment.md)
+counts 13 design topics, five contract reviews, and final acceptance, with eight
+supporting execution packages. It maps all 30 open criteria without changing
+approved decisions or the completion score.
+
+**Q-120A — automatic root growth:** legitimate application capability upgrades
+should expand applicable root permission coverage without a separate manual
+root-update approval. Ordinary child selections remain explicit and bounded.
+[Rationale and open mechanism](root-permission-evolution.md): live `*` is not
+approved; root update trust, tenant/application binding, and revision mechanics
+remain open. This qualifies earlier blanket root no-growth statements, not
+permission for untrusted registration or in-place revision mutation.
+
+## Current closure pass — CLOSURE-001
+
+[Closure checklist](v1-closure.md) accounts for every previously open criterion,
+separating writing, real decisions, verification, and acceptance. Current
+documentary closures: principle catalog, identity glossary, and the separate
+implementation roadmap. **38/68 criteria closed (55.9%); 30 remain open.** This
+is not a full-contract, runtime, or final v1 acceptance claim.
+
+- [Numbered principles, rationale, and compliance examples](principle-catalog.md).
+- [Identity and authority glossary](identity-glossary.md).
+- [Grant/assignment contract: approved material versus genuine gaps](grant-contract-closure.md).
+- [Separate implementation roadmap and required evidence](implementation-roadmap.md).
+
+Agreed decisions and rationale remain authoritative; these are consolidations,
+not replacement policies. Q-117 is parked and unapproved. Earlier checkpoint
+positions below remain history where a later approved decision supersedes them.
+
+**Q-115 agreed:** trusted setup creates a selected legitimate human user and
+administrators group, explicitly assigns initial root authority to the group,
+and explicitly adds the human as a member. No special identity is required.
+[Arrangement, JSON, and rationale](bootstrap-initial-assignment.md).
+**Q-116 agreed:** repeating completed bootstrap reports already initialized
+without changing authority. Q-117 separately proposes withholding initial
+authority until complete setup is durably established; it is not yet approved.
+
 **Q-114 — registration-first bootstrap:** register the applicable permission and
 scope contracts, including Auth's own administration, before validating and
 establishing maximum intended initial authority inside the tenant. Explicit

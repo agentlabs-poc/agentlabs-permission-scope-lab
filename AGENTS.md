@@ -1,5 +1,45 @@
 # Handbook working rules
 
+## Publication checkpoint — decisions through Q-120A and ASSESS-001
+
+The user explicitly requested committing and pushing the current work. Publish
+the verified handbook/reader changes and closure assessment on main, preserving
+approved decisions, rationale, and clearly marked open proposals. This does not
+approve Q-117, the root-growth mechanism, or any other pending contract choice.
+Preserve both existing tags; `0.0.2` stays at `5193e88` and is not included in
+this branch-only push. Earlier no-commit/no-push statements below describe the
+preparation stage. No runtime work or scratchpad changes are authorized here.
+
+## Current contract decision — Q-118 agreed
+
+Q-118 approves role-based immutable grant content and exclusive permission-source
+fields. Direct `permissions` excludes both `role_id` and `role_revision`; the
+user explicitly notes role revision has no meaning with direct permissions.
+Role-based content requires both role fields and no direct permissions. Preserve
+the original proposal/rationale as history. Q-119 now approves root-content
+parent omission, independently validated trusted establishment still required.
+Q-120A accepts automatic root permission growth on legitimate application
+capability upgrades, without a separate manual root update/adoption gate. The
+original Q-120 deliberate-update recommendation is superseded in that respect.
+Live wildcard versus automated materialized revisions remains open; Q-058's
+stored-format rule is not superseded by implication. Ordinary child selection/
+adoption stays fixed. Root trust, tenant/app binding, and revision mechanics remain open.
+Local tag `0.0.2` remains at committed `5193e88`, excluding all uncommitted work.
+
+## Current task — closure pass with decision preservation
+
+The user approved consolidating approved decisions, writing documentary gaps,
+asking only genuine blockers, and preparing v1 acceptance. They explicitly
+reaffirmed: preserve agreed/decided content unless superseded. New consolidation
+must cite its existing approvals; meaning changes require explicit user approval.
+Preserve older decisions, rationale, and measurement snapshots with clear history
+labels. Do not silently exclude criteria to meet today's hoped-for finish.
+
+Current work tracker: docs/v1-closure.md. Q-117 is unapproved and parked, not
+adopted or excluded. Grant contract gaps are in docs/grant-contract-closure.md;
+do not reopen settled lineage or add withdrawn fields. This documentation pass
+does not authorize runtime work, scratchpad mutation, commit, or push.
+
 ## Current publication authorization — Q-113 / Q-114 bootstrap checkpoint
 
 The user explicitly requested “keep going. commit and push” after the
@@ -63,8 +103,14 @@ by equal/narrower ordinary distribution. Registration of relevant permissions
 and scope contracts, including Auth administration, is a mandatory prerequisite
 to initial grant acceptance under Q-039–Q-042. Do not omit this dependency or
 reintroduce the FIN-read-only seed recommendation. Full seed/root and initial
-recipient contracts remain open; no particular administrators-group bootstrap
-arrangement has yet been approved.
+recipient contracts remain open. Q-115 now approves trusted setup creating a
+selected legitimate human user and administrators group, explicit root assignment
+to the group, and explicit human membership. No special username or evaluator
+bypass. Earlier pending-arrangement wording is superseded. Q-116 now agrees
+repeated completed bootstrap reports already initialized with no authority
+mutation; ordinary authorized administration remains available. Q-117 incomplete
+setup authority visibility is proposed only, not approved. No new bootstrap
+status field, wire error code, or recovery contract is implied.
 
 The user explicitly prioritizes important, deep-impact decisions before shallow
 completion work. Work outward from authority sources and lineage, to safe

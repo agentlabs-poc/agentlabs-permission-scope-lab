@@ -1,5 +1,11 @@
 # Authorization vocabulary and request material
 
+**Consolidated companion:** [identity and authority glossary](identity-glossary.md)
+collects actor, human, subject, recipient, membership, ownership, and lineage
+distinctions from the approved decisions. It introduces no new identity fields.
+This chapter's request/boundary rationale remains in force; historical combined
+grant/recipient wording is superseded only as already specified by Q-090 below.
+
 Q-090 now distinguishes a reusable recipient-free **grant definition** from its
 recipient-bearing **assignment**. A **subteam/subgroup** under Q-091 receives
 explicit dependent authority, not transitive membership. See
