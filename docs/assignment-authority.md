@@ -8,6 +8,13 @@ between team lineage and scope/authority lineage is explained in
 
 ## Two separate checks
 
+[Q-100](auth-service-authority-gate.md) now shows these checks inside Auth Service:
+the administrative evaluator checks operation/recipient authority; the
+authority-boundary validator checks the proposed authority's supporting source
+and ceilings. Both are mandatory within one endpoint-owned gate before writing.
+The [SVG](assets/auth-service-authority-gate.svg) illustrates the flow; exact
+validator and dependency contracts remain open.
+
 1. Maya must have administrative authority for the assignment operation and its
    intended recipient.
 2. The authority she assigns must derive from a valid supporting parent route

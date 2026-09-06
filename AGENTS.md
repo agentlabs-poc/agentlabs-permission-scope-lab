@@ -1,5 +1,27 @@
 # Handbook working rules
 
+## Q-100 publication authorization
+
+The user explicitly requested “lets commit and push” after the Q-100 integration.
+Commit and push this verified checkpoint to main, including the earlier local
+freeze-record commit `51f1a6c`. This does not reopen unrelated lab changes or
+authorize future publication automatically. Scratchpad remains active; preserve
+its files and tag `0.0.1`. Earlier no-commit/no-push notices below are history
+for this checkpoint; the lab freeze otherwise remains in effect.
+
+## Scoped exception — Q-100 integration
+
+The user requested adding the Q-100 scratchpad write-up and SVG to the lab.
+Local edits for this integration and its handbook/reader reconciliation are
+authorized. The freeze remains for unrelated lab changes and further commits;
+no push is authorized. Scratchpad remains active and its originals are preserved.
+
+Q-100 records distinct administrative-operation evaluation and authority-boundary
+validation inside one Auth endpoint-owned gate. Neither check substitutes for
+the other or for runtime dependency/application enforcement. Exact contracts
+remain open; Q-097/Q-098 are contextual scratch discussions, not independently
+promoted decisions. See docs/auth-service-authority-gate.md.
+
 ## Latest gate — lab frozen; scratchpad active
 
 The user instructed: “freeze agentlabs-permission-scope-lab and commit and

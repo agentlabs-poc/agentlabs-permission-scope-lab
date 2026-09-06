@@ -1,5 +1,31 @@
 # Handbook reconciliation register
 
+## Publication authorization after Q-100
+
+The user explicitly requested committing and pushing the Q-100 integration.
+This publishes the Auth Service internal-gate chapter, SVG, and reconciled
+handbook/reader navigation, together with the earlier local freeze record
+`51f1a6c`. It does not adopt open contracts or promote other scratch proposals.
+The scratch originals and tag `0.0.1` remain unchanged. The lab freeze continues
+outside this checkpoint; earlier no-push notices describe previous gate states.
+
+## Q-100 — Auth Service internal authority-change gate
+
+The user requested adding the scratchpad write-up and SVG to the lab. This is a
+scoped exception to the file freeze, not permission to commit/push or change
+unrelated decisions. The [chapter](auth-service-authority-gate.md) retains the
+flow, rationale, versioned hypothetical grant examples, consequences, and open
+contracts. The [SVG](assets/auth-service-authority-gate.svg) is separate from the
+existing application request-flow and ownership diagrams, which remain unchanged.
+
+The handbook, decision log/tree, assignment-authority chapter, system overview,
+and reader link the new explanation. Both administrative authorization and
+authority-boundary validation are required before the protected write; neither
+supersedes runtime dependencies or application data-boundary enforcement.
+Q-097/Q-098 remain identified as related scratch context rather than independently
+promoted decisions. The original scratch files remain intact; no owner, grant,
+membership, or runtime state is changed. No new completion percentage is claimed.
+
 ## Lab freeze and scratchpad reopening
 
 After checkpoint `3bdd130` was committed and pushed to main, the user requested

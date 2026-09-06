@@ -1,5 +1,15 @@
 # Authorization system — canonical logical overview
 
+## Q-100 — inside Auth Service
+
+The [Auth Service internal gate](auth-service-authority-gate.md) and its
+[SVG](assets/auth-service-authority-gate.svg) follow an administrative request
+through identity, input binding, administrative authorization, authority-boundary
+validation, and persistence. Both checks are inside Auth's own endpoint-owned
+gate. This complements—not replaces—the application certificate-read flow below.
+Neither a separate deployed engine nor access to a customer application's
+database is required by this logical diagram.
+
 ## SVG-001 — follow a request, not a responsibility checklist
 
 For ownership changes rather than request flow, see the separate

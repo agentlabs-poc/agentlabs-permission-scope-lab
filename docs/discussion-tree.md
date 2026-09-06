@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current position — Q-099 separates ownership from team-held lineage
+## Current position — Q-100 makes Auth's internal authority gate explicit
 
 ```text
 Post-0.0.1 canonical direction
@@ -21,6 +21,11 @@ Post-0.0.1 canonical direction
 │   ├── Selected team assignment remains continuing support
 │   ├── Explicit personal dependencies remain; no automatic rebinding
 │   └── Q-096: two-owner recommendation and ownership contracts remain OPEN
+├── Auth Service's endpoint-owned authority-change gate [Q-100 AGREED architecture]
+│   ├── Administrative evaluator: caller's operation + administrative scope
+│   ├── Authority validator: complete proposal + supporting lineage + ceilings
+│   ├── Both must pass before the validated change is persisted
+│   └── Runtime dependency and application enforcement remain mandatory
 └── OPEN: combined dependency/hierarchy format, definition revisions,
     assignment lifecycle, owner rules, and administrative boundaries
 ```
@@ -30,6 +35,11 @@ See [grant/assignment rationale and JSON](grant-assignments.md) and
 authorized; this is not a commit/push instruction. The `0.0.1` tag preserves the
 baseline. The prior 35/68 score below is a baseline checklist score, not a fresh
 completion measurement for the expanded model; re-audit remains pending.
+
+[Q-100's internal-flow SVG and rationale](auth-service-authority-gate.md) explain
+the two Auth Service responsibilities without replacing the application diagram.
+Validator API, operation coverage, and concurrency/source-binding contracts are
+still open. This addition does not claim a complete security implementation.
 
 [Q-092's initial team-admin grant](team-administration.md) is recorded with
 its tenant-wide reach and membership-distribution consequences. [Q-093](assignment-authority.md)

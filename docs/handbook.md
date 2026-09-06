@@ -1,6 +1,14 @@
 # Authorization Handbook — working edition
 
-## Current position — Q-099 ownership/lineage refinement
+## Current position — Q-100 Auth Service's internal authority gate
+
+[Q-100: Auth Service's internal gate](auth-service-authority-gate.md) records two
+necessary responsibilities: evaluate the caller's administrative permission and
+scope, then validate the proposed authority against its valid source and parent
+ceilings before persistence. The [internal-flow SVG](assets/auth-service-authority-gate.svg)
+complements the application request-flow diagram. Rationale: permission to assign
+does not permit arbitrary authority, and possessing authority does not permit
+administration. Detailed validator/lineage contracts remain open.
 
 The user approved recipient-free reusable grants with separate recipient-bearing
 assignments, and subteams/subgroups with explicit dependent authority. Read
@@ -301,6 +309,7 @@ it is not a new schema or an invitation to seek the same approval again.
 | [Assignment authority — Q-093](assignment-authority.md) | Administrative permission plus the assigner's supporting source route, possession-ceiling rationale, and pending lineage contract. |
 | [Lineage and the meaning of sub- — Q-095](authority-lineage.md) | Canonical relationship definitions, team/grant ceilings, scope AND, direct membership, and resolution consequences. |
 | [Ownership and team-held lineage — Q-099](ownership-lineage.md) | Owner-rotation rule, Q-093/Q-096 refinement, SVG, rationale, counterexamples, and remaining ownership contracts. |
+| [Auth Service's authority-change gate — Q-100](auth-service-authority-gate.md) | Internal SVG, administrative evaluator versus authority-boundary validator, grant examples, no-write failures, rationale, and open contracts. |
 | [Team administration — Q-092](team-administration.md) | Initial create/write/delete grant, membership under write, separate assignment authority, and bootstrap limits. |
 | [Grants and assignments — Q-090](grant-assignments.md) | Canonical recipient-free definitions, recipient-bearing assignments, reuse, rationale, and revision/dependency gaps. |
 | [Subteams / subgroups — Q-091](subgroups.md) | Canonical dependent authority, one supporting parent assignment, permission subset, scope AND, and no membership inheritance. |

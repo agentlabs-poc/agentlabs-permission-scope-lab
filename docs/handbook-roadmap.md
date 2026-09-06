@@ -1,6 +1,21 @@
 # Authorization handbook — agreed roadmap
 
-## Current decisions after baseline 0.0.1 — including Q-099
+## Current decisions after baseline 0.0.1 — including Q-100
+
+**Q-100 — AGREED AT ARCHITECTURAL RULE LEVEL:** Auth Service's endpoint-owned
+gate requires both administrative-operation authorization and validation of the
+complete proposed authority against its permitted supporting lineage. The
+evaluator checks administrative permission AND scope; that does not prove the
+authority being assigned is within its source boundary. Either required check
+failing prevents the protected write. Shared implementation primitives are
+permitted; a separate deployment or validator API is not prescribed.
+
+Rationale: prevent administrative permission from authorizing arbitrary grants,
+and prevent business access from implying administration. Runtime dependency
+checks and application boundary enforcement remain necessary. The user requested
+the scratchpad design be added to the lab; this authorizes scoped local integration,
+not commit/push or independent promotion of Q-097/Q-098. See the
+[write-up, JSON examples, SVG, and open contracts](auth-service-authority-gate.md).
 
 The user instructed: “now lets make the sub-team/sub-group canonical and grant
 without recipient canonical.” The following approvals supersede conflicting

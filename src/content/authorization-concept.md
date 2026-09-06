@@ -11,6 +11,13 @@ be authorized; actual personal dependencies remain required. No automatic
 parent rebinding or merging of personal grants occurs. See the
 [ownership/lineage SVG](../../docs/assets/ownership-lineage.svg).
 
+[Q-100: inside Auth Service](../../docs/auth-service-authority-gate.md) explains
+why permission to administer an assignment is not permission to distribute
+arbitrary authority. Auth's administrative evaluator and authority-boundary
+validator must both pass before the protected write. See the
+[Auth Service internal-flow SVG](../../docs/assets/auth-service-authority-gate.svg)
+for shared records, failure paths, and persistence. Exact contracts remain open.
+
 <details>
 <summary>Earlier reader checkpoint — preserved history</summary>
 
