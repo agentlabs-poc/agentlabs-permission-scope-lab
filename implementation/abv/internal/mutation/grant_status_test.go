@@ -271,6 +271,45 @@ func TestSetGrantStatusBoundaryValidationAndTypedNil(t *testing.T) {
 	}
 }
 
+func TestSetGrantStatusSnapshotLimitDoesNotWrite(t *testing.T) {
+	area, _ := domain.NewArea("tenant-fin", "hrms")
+	fixture := lab.TeamFINC17(area)
+	path := t.TempDir() + "/authority.db"
+	seeded, err := lab.CreateSQLite(t.Context(), path, []storage.Snapshot{fixture.Snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = seeded.Close(); err != nil {
+		t.Fatal(err)
+	}
+	limited, err := sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, _ := mutation.New(limited, grantAdministration{}, &fixedClock{now: time.Now()})
+	proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed)
+	if !errors.Is(err, storage.ErrSnapshotLimit) || !errors.Is(err, domain.ErrUnavailable) || got != (domain.GrantControl{}) {
+		t.Fatalf("limited snapshot = %#v, %v", got, err)
+	}
+	if err = limited.Close(); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := sqlite.Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	if err = reopened.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
+		if snapshot.Controls["G2"].Status != "enabled" {
+			t.Fatalf("status after limited attempt = %q", snapshot.Controls["G2"].Status)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestSetGrantStatusPreservesDescendantStateAndEffectiveness(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	for _, descendantStatus := range []string{"disabled", "enabled"} {
