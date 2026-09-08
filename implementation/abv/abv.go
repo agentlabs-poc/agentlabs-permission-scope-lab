@@ -33,6 +33,10 @@ type GrantStatusAdministration interface {
 	CheckGrantStatus(context.Context, Evidence, domain.Identity, domain.GrantControl, time.Time) error
 }
 
+type AssignmentStatusAdministration interface {
+	CheckAssignmentStatus(context.Context, Evidence, domain.Identity, domain.Assignment, time.Time) error
+}
+
 type Clock interface{ Now() time.Time }
 
 func New(provider storage.Provider, administration Administration, clock Clock) (*Facade, error) {
@@ -64,6 +68,10 @@ func (f *Facade) CreateAssignment(ctx context.Context, area domain.Area, identit
 
 func (f *Facade) SetGrantStatus(ctx context.Context, area domain.Area, identity domain.Identity, proposed domain.GrantControl) (domain.GrantControl, error) {
 	return f.service.SetGrantStatus(ctx, area, identity, proposed)
+}
+
+func (f *Facade) SetAssignmentStatus(ctx context.Context, area domain.Area, identity domain.Identity, assignmentID, status string) (domain.Assignment, error) {
+	return f.service.SetAssignmentStatus(ctx, area, identity, assignmentID, status)
 }
 
 func (f *Facade) CheckAssignment(ctx context.Context, area domain.Area, raw []byte) (domain.Diagnostic, error) {

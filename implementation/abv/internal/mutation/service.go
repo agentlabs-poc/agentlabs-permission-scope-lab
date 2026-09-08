@@ -19,6 +19,10 @@ type GrantStatusAdministration interface {
 	CheckGrantStatus(context.Context, storage.Snapshot, domain.Identity, domain.GrantControl, time.Time) error
 }
 
+type AssignmentStatusAdministration interface {
+	CheckAssignmentStatus(context.Context, storage.Snapshot, domain.Identity, domain.Assignment, time.Time) error
+}
+
 type Clock interface{ Now() time.Time }
 
 type Service struct {

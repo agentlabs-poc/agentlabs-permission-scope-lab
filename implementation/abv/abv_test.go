@@ -57,6 +57,20 @@ func TestOldAdministrationCannotAuthorizeGrantStatus(t *testing.T) {
 	}
 }
 
+func TestOldAdministrationCannotAuthorizeAssignmentStatus(t *testing.T) {
+	area, _ := domain.NewArea("tenant-fin", "hrms")
+	fixture := lab.TeamFINC17(area)
+	p := &memoryProvider{snapshot: fixture.Snapshot}
+	facade, err := abv.New(p, externalAdministration{area: area}, clock{now: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := facade.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A1", "disabled")
+	if !errors.Is(err, domain.ErrUnsupported) || got != (domain.Assignment{}) {
+		t.Fatalf("old adapter gained assignment control: %#v, %v", got, err)
+	}
+}
+
 func TestFacadeInspectsCanonicalRecordsAndDiagnosesWithoutWriting(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
