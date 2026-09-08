@@ -1,8 +1,9 @@
-package lineage
+package lineage_test
 
 import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/lab"
+	"agentlabs.local/abv/internal/lineage"
 	"errors"
 	"testing"
 	"time"
@@ -29,12 +30,12 @@ func TestHasSourceRequiresActingHumanMembershipInActualHolder(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			parent, err := ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
 			tc.edit(&fixture)
-			if err = HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, tc.want) {
+			if err = lineage.HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, tc.want) {
 				t.Fatalf("got %v; want %v", err, tc.want)
 			}
 		})
@@ -71,13 +72,13 @@ func TestHasSourceRevalidatesRouteAndIdentity(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			parent, err := ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
 			identity := fixture.Issuer
 			tc.edit(&fixture, &parent, &identity)
-			if err = HasSource(fixture.Snapshot, identity, parent, time.Time{}); !errors.Is(err, tc.want) {
+			if err = lineage.HasSource(fixture.Snapshot, identity, parent, time.Time{}); !errors.Is(err, tc.want) {
 				t.Fatalf("got %v; want %v", err, tc.want)
 			}
 		})
@@ -96,7 +97,7 @@ func TestHasSourceRejectsDuplicateFinalSourceBinding(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			parent, err := ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -106,7 +107,7 @@ func TestHasSourceRejectsDuplicateFinalSourceBinding(t *testing.T) {
 			if tc.selectCopy {
 				parent.AssignmentIDs[len(parent.AssignmentIDs)-1] = copy.ID
 			}
-			if err = HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrRejected) {
+			if err = lineage.HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrRejected) {
 				t.Fatalf("duplicate final source binding passed: %v", err)
 			}
 		})
@@ -120,11 +121,11 @@ func TestHasSourceRechecksExactExpiry(t *testing.T) {
 	g1 := fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
 	g1.Validity = &domain.Validity{ExpiresAt: &expiry}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g1
-	parent, err := ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", expiry.Add(-time.Nanosecond))
+	parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", expiry.Add(-time.Nanosecond))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = HasSource(fixture.Snapshot, fixture.Issuer, parent, expiry); !errors.Is(err, domain.ErrRejected) {
+	if err = lineage.HasSource(fixture.Snapshot, fixture.Issuer, parent, expiry); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("exact-expiry source evidence remained eligible: %v", err)
 	}
 }
@@ -132,7 +133,7 @@ func TestHasSourceRechecksExactExpiry(t *testing.T) {
 func TestHasSourceLeavesDirectHumanAndSelfBindingExplicitlyUnsupported(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	parent, err := ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+	parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,19 +148,19 @@ func TestHasSourceLeavesDirectHumanAndSelfBindingExplicitlyUnsupported(t *testin
 	parent.AssignmentIDs[len(parent.AssignmentIDs)-1] = direct.ID
 	parent.Permissions = []string{lab.PayslipRead}
 	parent.Predicates = []domain.Predicate{{Key: "dept", Value: "ENG", SourceGrantID: "G1"}}
-	if err := HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
+	if err := lineage.HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
 		t.Fatalf("direct-human differing support was guessed: %v", err)
 	}
 
 	fixture = lab.TeamFINC17(area)
-	parent, err = ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+	parent, err = lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	g1 := fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
 	g1.Scope = map[string]string{"user": "$self"}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g1
-	if err := HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
+	if err := lineage.HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
 		t.Fatalf("recipient-relative source was treated as literal equality: %v", err)
 	}
 }

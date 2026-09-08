@@ -1,21 +1,20 @@
 // Package cli provides a reusable command runner without process exits or SQL.
-// CP1 supports help and validates command/context syntax; all data operations
-// are explicitly unsupported until their protected application adapters exist.
 package cli
 
 import (
 	"agentlabs.local/abv/application"
 	"agentlabs.local/abv/domain"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 )
 
 func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
-	api application.API, scenarios application.ScenarioRunner) int {
+	connect application.Connect, scenarios application.ScenarioRunner) int {
 	if len(args) == 1 && (args[0] == "help" || args[0] == "--help" || args[0] == "-h") {
-		if _, err := fmt.Fprintln(out, "ABV local testing CLI (CP1: help only)\nCommands: inspect, check, assign, scenario\nEvery data operation requires --tenant ID --app ID. No default context."); err != nil {
+		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, scenario\nEvery data operation requires --tenant ID --app ID. No default context."); err != nil {
 			return 4
 		}
 		return 0
@@ -62,7 +61,8 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		flags[name] = value
 	}
-	if _, err := domain.NewArea(flags["--tenant"], flags["--app"]); err != nil {
+	area, err := domain.NewArea(flags["--tenant"], flags["--app"])
+	if err != nil {
 		return fail(2, "explicit tenant and application required; wildcards are unsupported")
 	}
 	switch command {
@@ -89,18 +89,79 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			return fail(2, "scenario run requires case")
 		}
 	}
-	return fail(5, "command is not implemented in CP1; no authority was read or written")
+	if command == "scenario" {
+		if scenarios == nil {
+			return fail(5, "scenario support is unavailable")
+		}
+		var err error
+		if positional[0] == "seed" {
+			err = scenarios.Seed(ctx, area, positional[1], flags["--db"])
+		} else {
+			err = scenarios.Run(ctx, area, positional[1], flags["--case"], flags["--db"])
+		}
+		if err != nil {
+			return report(diag, err)
+		}
+		if positional[0] == "run" {
+			return output(out, diag, "observed expected rejection; assignment was not created\n")
+		}
+		if _, err := fmt.Fprintln(diag, "LAB ONLY: fixed fixture identity; not authenticated administration"); err != nil {
+			return 4
+		}
+		return output(out, diag, "scenario seeded\n")
+	}
+	if connect == nil {
+		return fail(5, "database connector is unavailable")
+	}
+	api, closeConnection, err := connect(ctx, area, flags["--db"])
+	if err != nil {
+		return report(diag, err)
+	}
+	if api == nil || closeConnection == nil {
+		return fail(4, "database connection unavailable")
+	}
+	code := dispatch(ctx, command, positional, flags, in, out, diag, api, area)
+	if err := closeConnection(); err != nil && code == 0 {
+		return fail(4, "database close failed")
+	}
+	return code
 }
 
 func empty(value string) bool { return strings.TrimSpace(value) == "" }
 
 func inspectKind(kind string) bool {
 	switch kind {
-	case "grant", "assignment":
+	case "permission", "scope", "role", "grant", "assignment", "team", "membership":
 		return true
 	default:
 		return false
 	}
+}
+
+func output(out, diag io.Writer, value string) int {
+	if _, err := io.WriteString(out, value); err != nil {
+		_, _ = fmt.Fprintln(diag, "output failed")
+		return 4
+	}
+	return 0
+}
+
+func report(diag io.Writer, err error) int {
+	code, message := 4, "operation unavailable"
+	switch {
+	case errors.Is(err, domain.ErrMalformed):
+		code, message = 2, "malformed input"
+	case errors.Is(err, domain.ErrRejected), errors.Is(err, domain.ErrNotFound):
+		code, message = 3, "operation rejected or record not found"
+	case errors.Is(err, domain.ErrUnsupported):
+		code, message = 5, "unsupported operation"
+	case errors.Is(err, domain.ErrConflict):
+		message = "operation conflict"
+	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+		message = "command cancelled"
+	}
+	_, _ = fmt.Fprintln(diag, message)
+	return code
 }
 
 func only(flags map[string]string, allowed ...string) bool {

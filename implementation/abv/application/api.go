@@ -12,6 +12,8 @@ type API interface {
 	CheckAssignment(context.Context, domain.Area, []byte) (domain.Diagnostic, error)
 	Assign(context.Context, domain.Area, domain.FixtureContext, []byte) (domain.Receipt, error)
 }
+type Connect func(context.Context, domain.Area, string) (API, func() error, error)
+
 type ScenarioRunner interface {
 	Seed(context.Context, domain.Area, string, string) error
 	Run(context.Context, domain.Area, string, string, string) error
