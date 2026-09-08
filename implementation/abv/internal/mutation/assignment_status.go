@@ -7,11 +7,12 @@ import (
 	"agentlabs.local/abv/internal/validation"
 	"context"
 	"strings"
+	"unicode/utf8"
 )
 
 func (s *Service) SetAssignmentStatus(ctx context.Context, area domain.Area, identity domain.Identity, assignmentID, status string) (domain.Assignment, error) {
 	fail := func(err error) (domain.Assignment, error) { return domain.Assignment{}, err }
-	if ctx == nil || strings.TrimSpace(assignmentID) == "" || strings.Contains(assignmentID, "*") || (status != "enabled" && status != "disabled") {
+	if ctx == nil || strings.TrimSpace(assignmentID) == "" || strings.Contains(assignmentID, "*") || !utf8.ValidString(assignmentID) || (status != "enabled" && status != "disabled") {
 		return fail(domain.ErrMalformed)
 	}
 	if err := ctx.Err(); err != nil {

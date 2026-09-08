@@ -118,12 +118,14 @@ func TestSetAssignmentStatusSQLiteInspectsEveryForkAndDisabledBridge(t *testing.
 	if got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A1", "disabled"); err != nil || got.Status != "disabled" {
 		t.Fatalf("unrelated reuse blocked A1: %#v, %v", got, err)
 	}
-	_ = provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
+	if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
 		if snapshot.Assignments["A2"].Status != "disabled" || snapshot.Assignments["A5"].Status != "enabled" {
 			t.Fatal("status cascade")
 		}
 		return nil
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestSetAssignmentStatusRestoreUsesAdoptedRevisionAndCurrentHolding(t *testing.T) {
@@ -167,7 +169,7 @@ func TestSetAssignmentStatusRestoreUsesAdoptedRevisionAndCurrentHolding(t *testi
 			if !errors.Is(err, test.want) || test.want != nil && got != (domain.Assignment{}) {
 				t.Fatalf("restore = %#v, %v; want %v", got, err, test.want)
 			}
-			_ = provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
+			if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
 				want := "enabled"
 				if test.want != nil {
 					want = "disabled"
@@ -176,7 +178,9 @@ func TestSetAssignmentStatusRestoreUsesAdoptedRevisionAndCurrentHolding(t *testi
 					t.Fatalf("state = %#v", snapshot.Assignments)
 				}
 				return nil
-			})
+			}); err != nil {
+				t.Fatal(err)
+			}
 		})
 	}
 }
@@ -224,6 +228,17 @@ func TestSetAssignmentStatusGateCancellationConflictAndBoundaries(t *testing.T) 
 	}
 }
 
+func TestSetAssignmentStatusRejectsInvalidUTF8IDBeforeUpdate(t *testing.T) {
+	area, _ := domain.NewArea("tenant-fin", "hrms")
+	fixture := lab.TeamFINC17(area)
+	provider := &failingCommitProvider{snapshot: fixture.Snapshot}
+	service, _ := mutation.New(provider, assignmentStatusAdministration{}, &fixedClock{now: time.Now()})
+	got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, string([]byte{'A', 0xff}), "disabled")
+	if !errors.Is(err, domain.ErrMalformed) || got != (domain.Assignment{}) || provider.callbacks != 0 {
+		t.Fatalf("invalid UTF-8 reached update: got=%#v callbacks=%d err=%v", got, provider.callbacks, err)
+	}
+}
+
 func TestSetAssignmentStatusIsolatesAdministrativeEvidence(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
@@ -238,7 +253,7 @@ func TestSetAssignmentStatusIsolatesAdministrativeEvidence(t *testing.T) {
 	if _, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A1", "disabled"); err != nil {
 		t.Fatal(err)
 	}
-	_ = provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
+	if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
 		if _, ok := snapshot.Assignments["A0"]; !ok {
 			t.Fatal("administrator mutated evidence")
 		}
@@ -246,7 +261,9 @@ func TestSetAssignmentStatusIsolatesAdministrativeEvidence(t *testing.T) {
 			t.Fatal("administrator mutated controls")
 		}
 		return nil
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestSetAssignmentStatusRestoreRechecksParentAndChildExpiry(t *testing.T) {
@@ -268,12 +285,14 @@ func TestSetAssignmentStatusRestoreRechecksParentAndChildExpiry(t *testing.T) {
 			if got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A2", "enabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
 				t.Fatalf("expiry crossing = %#v, %v", got, err)
 			}
-			_ = provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
+			if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
 				if snapshot.Assignments["A2"].Status != "disabled" {
 					t.Fatal("expiry crossing wrote")
 				}
 				return nil
-			})
+			}); err != nil {
+				t.Fatal(err)
+			}
 		})
 	}
 }
@@ -307,10 +326,12 @@ func TestSetAssignmentStatusRejectsDepthAndSnapshotOverflowWithoutWrite(t *testi
 	_ = limited.Close()
 	reopened, _ := sqlite.Open(t.Context(), path)
 	defer reopened.Close()
-	_ = reopened.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
+	if err := reopened.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
 		if snapshot.Assignments["A1"].Status != "enabled" {
 			t.Fatal("overflow wrote")
 		}
 		return nil
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 }
