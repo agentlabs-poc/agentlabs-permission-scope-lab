@@ -1,6 +1,6 @@
 # ABV implementation progress
 
-## CP1 — foundations: implemented, independent review pending
+## CP1 — foundations: complete and independently reviewed
 
 Started after the user approved the six-checkpoint plan. Baseline handbook,
 presentation and plans were committed and pushed as `64b0831`. Isolated worktree
@@ -9,7 +9,7 @@ The user subsequently requested sol-medium coding subagents.
 
 | Checkpoint | Current state | Exit evidence |
 |---|---|---|
-| CP1: records, decoder, pure checks | Review found role-expansion binding issue; fix and re-review in progress | [CP1 evidence](../abv/docs/acceptance.md) |
+| CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Not started | Isolation, rollback, persistence and concurrency conformance required. |
 | CP3: resolver and working CLI | Not started | Actual team support, both gates, atomic assignment, restart demo required. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
@@ -35,3 +35,8 @@ The user subsequently requested sol-medium coding subagents.
   This is an internal API correction, not a canonical model change.
 
 No whole-handbook criterion or production Auth integration is closed by CP1.
+
+CP1 delivery: `5751b62` implemented the foundation; `6a192f4` fixed the reviewed
+role-source binding issue. Independent review then approved spec compliance,
+code quality and integration. All 25 named tests plus fuzz seeds, race checks,
+vet and package build pass. Next checkpoint: CP2 SQLite provider and conformance.

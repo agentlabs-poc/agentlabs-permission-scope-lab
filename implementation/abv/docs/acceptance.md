@@ -1,6 +1,6 @@
 # CP1 acceptance evidence
 
-**Current state: implementation and hardening verified; independent review pending.**
+**Current state: CP1 implemented, verified and independently reviewed.**
 No SQLite or production ABV tests exist yet.
 
 ## Scope
@@ -22,7 +22,7 @@ role selection, permission subsets and accumulated scope/validity restrictions.
   literal rather than a duplicate. Corrected the test input after observing the
   exact decoded value; the real escaped duplicate is rejected.
 - Initial full `go test ./... -count=1`, race suite and vet passed before the
-  subagent hardening pass. Final evidence will be recorded after that review.
+  subagent hardening pass. The post-review evidence is recorded below.
 
 ## Hardening and verification — 8 September 2026
 
@@ -62,11 +62,17 @@ The correction removes that expansion parameter. Both helpers derive direct or
 exact-role-revision permissions through a shared implementation, and narrowing
 must retain the complete selected set or reject it. It cannot substitute a
 different parent permission or silently trim a role. Regression tests and a
-scoped independent re-review are required before CP1 completion.
+scoped independent re-review were completed before CP1 completion.
 
 The reviewer also requested an explicit cancellation-category choice. Standard
 `context.Canceled` and `context.DeadlineExceeded` are retained for classification
 with `errors.Is`, rather than inventing a canonical public error code.
+
+**Re-review result at `6a192f4`:** both findings addressed; no new CP1 regression;
+spec compliant, code quality approved and ready to merge. The coordinator also
+reran full tests (25 named tests plus fuzz seeds), race detection, vet and package
+build on the corrected code, all passing. The initial 22-test result above is
+retained as evidence of the earlier checkpoint, not the final test count.
 
 ## Limits and source-case coverage
 

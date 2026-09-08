@@ -265,10 +265,10 @@ preserve causes internally without leaking raw database details to CLI output.
 **Produces:** context validation, typed record/error definitions and a testable
 CLI entry function. No database or generic mutation command yet.
 
-- [ ] Create the isolated module only after design review and implementation
+- [x] Create the isolated module only after design review and implementation
   authorization. Use `module agentlabs.local/abv`, `go 1.25.0`; no parent workspace
   `go.work` or website package change.
-- [ ] Write this failing boundary test before implementing the constructor:
+- [x] Write this failing boundary test before implementing the constructor:
 
 ```go
 func TestAreaRequiresBothBoundaries(t *testing.T) {
@@ -285,17 +285,17 @@ func TestAreaRequiresBothBoundaries(t *testing.T) {
 }
 ```
 
-- [ ] Run `go test ./domain -run TestAreaRequiresBothBoundaries -count=1`; confirm
+- [x] Run `go test ./domain -run TestAreaRequiresBothBoundaries -count=1`; confirm
   the missing implementation fails, then implement constructor/accessors/validation.
   Reject empty/all-whitespace context and wildcard `*`; do not silently trim IDs.
-- [ ] Add table tests for exact same tenant/different app and same app/different
+- [x] Add table tests for exact same tenant/different app and same app/different
   tenant equality distinctions. Implement canonical JSON tags using the source
   blocks, not Go default field names.
-- [ ] Add CLI tests: missing `--tenant`, missing `--app`, unknown command and
+- [x] Add CLI tests: missing `--tenant`, missing `--app`, unknown command and
   malformed flags return 2 without calling a spy API. Implement only help,
   boundary parsing and dispatch seams; unsupported commands return 5, not success.
-- [ ] Run `go test ./domain ./cli -count=1` and `go vet ./...`.
-- [ ] Review diff and record CP1 progress; do not commit without authorization.
+- [x] Run `go test ./domain ./cli -count=1` and `go vet ./...`.
+- [x] Review diff and record CP1 progress; do not commit without authorization.
 
 ## Task 2 — exact JSON and pure authority checks [CP1]
 
@@ -307,17 +307,17 @@ func TestAreaRequiresBothBoundaries(t *testing.T) {
 `codec.DecodeAssignment([]byte) (domain.Assignment, error)`,
 `codec.DecodeContent([]byte) (domain.GrantContent, error)`, `CheckContent`, `Narrow`.
 
-- [ ] Copy G1/G2/A1/A2 from the Foundations reference as exact versioned fixtures,
+- [x] Copy G1/G2/A1/A2 from the Foundations reference as exact versioned fixtures,
   preserving revision fields. Include valid upstream premises in test setup.
-- [ ] Add failing tests for duplicate JSON keys, missing version, null/missing
+- [x] Add failing tests for duplicate JSON keys, missing version, null/missing
   scope, scope arrays, empty values, recipient on content, missing role half,
   mixed role/direct fields and trailing JSON values. Decode token-by-token to
   detect duplicates before ordinary unmarshalling; never repair malformed input.
-- [ ] Run `go test ./internal/codec -count=1`; implement strict core decoding.
+- [x] Run `go test ./internal/codec -count=1`; implement strict core decoding.
   Extra unresolved extensions return unsupported/malformed without being discarded;
   document this as the prototype's supported input contract, not a newly complete
   canonical schema. Version must be the supported string `"1"`.
-- [ ] Add the non-amplification tests before implementing `Narrow`:
+- [x] Add the non-amplification tests before implementing `Narrow`:
 
 ```go
 func TestNarrowPreservesConflictingPredicates(t *testing.T) {
@@ -342,13 +342,13 @@ func TestNarrowPreservesConflictingPredicates(t *testing.T) {
 `read`/`write`/`delete` here are internal algebra test atoms, not registered public
 permission identifiers. Registration tests use the full handbook strings.
 
-- [ ] Implement permission subset by set membership; build a fresh predicate
+- [x] Implement permission subset by set membership; build a fresh predicate
   slice from parent predicates plus sorted child keys. Preserve provenance and
   all parent validities. Do not use last-write-wins maps for effective scope.
-- [ ] Test unknown permission/key/token, role expansion, explicitly disabled
+- [x] Test unknown permission/key/token, role expansion, explicitly disabled
   compatibility mode versus enabled unsupported combinations, and supported empty
   child scope. Publication of contradictory scopes is not decided by `Narrow`.
-- [ ] Run `go test ./internal/codec ./internal/validation -count=1`; review
+- [x] Run `go test ./internal/codec ./internal/validation -count=1`; review
   unsupported-case classifications and checkpoint the evidence without committing.
 
 ## Task 3 — SQLite provider and reusable conformance tests [CP2]
