@@ -10,6 +10,10 @@ import (
 )
 
 type bindingKey struct{ grantID, teamID string }
+type recipientBindingKey struct {
+	grantID   string
+	recipient domain.Recipient
+}
 
 type dependentNode struct {
 	assignment domain.Assignment
@@ -36,7 +40,7 @@ func DependentTeamAssignments(ctx context.Context, s storage.Snapshot, assignmen
 	holdings := make(map[bindingKey]dependentNode, len(s.Assignments))
 	children := make(map[bindingKey][]dependentNode, len(s.Assignments))
 	nonGroupParents := make(map[string]bool)
-	bindings := make(map[string]bool, len(s.Assignments))
+	bindings := make(map[recipientBindingKey]bool, len(s.Assignments))
 	for id, assignment := range s.Assignments {
 		if err := ctx.Err(); err != nil {
 			return fail(err)
@@ -51,7 +55,7 @@ func DependentTeamAssignments(ctx context.Context, s storage.Snapshot, assignmen
 		if err = validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil {
 			return fail(err)
 		}
-		binding := assignment.Recipient.Type + "\x00" + assignment.GrantID + "\x00" + assignment.Recipient.ID
+		binding := recipientBindingKey{assignment.GrantID, assignment.Recipient}
 		if bindings[binding] {
 			return fail(domain.ErrRejected)
 		}

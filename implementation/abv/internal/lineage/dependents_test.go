@@ -7,7 +7,7 @@ import (
 	"agentlabs.local/abv/internal/storage"
 	"context"
 	"errors"
-	"reflect"
+	"fmt"
 	"slices"
 	"strconv"
 	"testing"
@@ -24,6 +24,21 @@ func TestDependentTeamAssignmentsFindsDirectChild(t *testing.T) {
 	if err != nil || len(got) != 1 || got[0] != fixture.Proposed {
 		t.Fatalf("dependents = %#v, %v", got, err)
 	}
+}
+
+func TestDependentTeamAssignmentsUsesUnambiguousBindingKeys(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	fixture := lab.TeamFINC17(area)
+	fixture.Snapshot.Teams["T"] = domain.Team{ID: "T"}
+	fixture.Snapshot.Teams["X\x00T"] = domain.Team{ID: "X\x00T"}
+	addBinding(&fixture.Snapshot, "AX", "G\x00X", "", "T", "enabled")
+	addBinding(&fixture.Snapshot, "AY", "G", "", "X\x00T", "enabled")
+	before := snapshotEvidence(fixture.Snapshot)
+	got, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "A1")
+	if err != nil || len(got) != 0 {
+		t.Fatalf("dependents = %#v, %v", got, err)
+	}
+	assertSnapshotUnchanged(t, fixture.Snapshot, before)
 }
 
 func TestDependentTeamAssignmentsStructuralMatrix(t *testing.T) {
@@ -96,7 +111,7 @@ func TestDependentTeamAssignmentsStructuralMatrix(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
 			test.edit(&fixture.Snapshot)
-			before := cloneSnapshot(fixture.Snapshot)
+			before := snapshotEvidence(fixture.Snapshot)
 			got, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "A1")
 			if test.bad {
 				if err == nil || len(got) != 0 {
@@ -111,9 +126,7 @@ func TestDependentTeamAssignmentsStructuralMatrix(t *testing.T) {
 					t.Fatalf("dependents = %v, %v; want %v", ids, err, test.want)
 				}
 			}
-			if !reflect.DeepEqual(fixture.Snapshot, before) {
-				t.Fatal("snapshot mutated")
-			}
+			assertSnapshotUnchanged(t, fixture.Snapshot, before)
 		})
 	}
 }
@@ -133,10 +146,12 @@ func TestDependentTeamAssignmentsRejectsIncompleteOuterEvidence(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
 			test.edit(&fixture.Snapshot)
+			before := snapshotEvidence(fixture.Snapshot)
 			got, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, test.id)
 			if err == nil || len(got) != 0 {
 				t.Fatalf("dependents = %#v, %v", got, err)
 			}
+			assertSnapshotUnchanged(t, fixture.Snapshot, before)
 		})
 	}
 }
@@ -146,10 +161,12 @@ func TestDependentTeamAssignmentsRejectsCancellationAndOverflow(t *testing.T) {
 	fixture := lab.TeamFINC17(area)
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
+	before := snapshotEvidence(fixture.Snapshot)
 	got, err := lineage.DependentTeamAssignments(ctx, fixture.Snapshot, "A1")
 	if !errors.Is(err, context.Canceled) || len(got) != 0 {
 		t.Fatalf("cancelled = %#v, %v", got, err)
 	}
+	assertSnapshotUnchanged(t, fixture.Snapshot, before)
 
 	parentGrant, parentTeam := "G1", "Team1"
 	for i := 2; i <= 255; i++ {
@@ -158,16 +175,20 @@ func TestDependentTeamAssignmentsRejectsCancellationAndOverflow(t *testing.T) {
 		addBinding(&fixture.Snapshot, assignment, grant, parentGrant, team, "enabled")
 		parentGrant, parentTeam = grant, team
 	}
+	before = snapshotEvidence(fixture.Snapshot)
 	got, err = lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "A1")
 	if err != nil || len(got) != 254 {
 		t.Fatalf("bounded lineage = %d records, %v", len(got), err)
 	}
+	assertSnapshotUnchanged(t, fixture.Snapshot, before)
 	fixture.Snapshot.Teams["Team256"] = domain.Team{ID: "Team256", ParentID: parentTeam}
 	addBinding(&fixture.Snapshot, "A256", "G256", parentGrant, "Team256", "enabled")
+	before = snapshotEvidence(fixture.Snapshot)
 	got, err = lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "A1")
 	if err == nil || len(got) != 0 {
 		t.Fatalf("overflow = %d records, %v", len(got), err)
 	}
+	assertSnapshotUnchanged(t, fixture.Snapshot, before)
 }
 
 func addBinding(s *storage.Snapshot, assignmentID, grantID, parentGrantID, teamID, status string) {
@@ -179,19 +200,11 @@ func content(id, parent string) domain.GrantContent {
 	return domain.GrantContent{Version: "1", GrantID: id, Revision: 1, ParentGrantID: parent, Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 }
 
-func cloneSnapshot(s storage.Snapshot) storage.Snapshot {
-	c := s
-	c.Assignments = make(map[string]domain.Assignment, len(s.Assignments))
-	for k, v := range s.Assignments {
-		c.Assignments[k] = v
+func snapshotEvidence(s storage.Snapshot) string { return fmt.Sprintf("%#v", s) }
+
+func assertSnapshotUnchanged(t *testing.T, got storage.Snapshot, before string) {
+	t.Helper()
+	if snapshotEvidence(got) != before {
+		t.Fatal("snapshot mutated")
 	}
-	c.Contents = make(map[domain.GrantKey]domain.GrantContent, len(s.Contents))
-	for k, v := range s.Contents {
-		c.Contents[k] = v
-	}
-	c.Teams = make(map[string]domain.Team, len(s.Teams))
-	for k, v := range s.Teams {
-		c.Teams[k] = v
-	}
-	return c
 }
