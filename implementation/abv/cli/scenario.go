@@ -36,19 +36,18 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 	return report(diag, domain.ErrUnsupported)
 }
 
-func readInput(path string, in io.Reader) ([]byte, error) {
+func readInput(path string, in io.Reader) (raw []byte, err error) {
 	reader := in
 	var file *os.File
 	if path != "-" {
-		var err error
 		file, err = os.Open(path)
 		if err != nil {
 			return nil, errors.Join(domain.ErrUnavailable, err)
 		}
-		defer file.Close()
+		defer func() { err = errors.Join(err, file.Close()) }()
 		reader = file
 	}
-	raw, err := io.ReadAll(io.LimitReader(reader, maxAssignmentBytes+1))
+	raw, err = io.ReadAll(io.LimitReader(reader, maxAssignmentBytes+1))
 	if err != nil {
 		return nil, errors.Join(domain.ErrUnavailable, err)
 	}

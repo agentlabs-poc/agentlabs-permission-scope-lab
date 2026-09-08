@@ -7,6 +7,7 @@ import (
 	"agentlabs.local/abv/internal/storage"
 	"context"
 	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -187,57 +188,74 @@ func TestLabAdministrationRejectsAnyChangedTrustedPremise(t *testing.T) {
 	}
 }
 
-func TestAdministrativeSnapshotMutationCannotManufactureBusinessAuthority(t *testing.T) {
+func TestAdministrativeSnapshotMutationCannotAlterBusinessEvidence(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	control := fixture.Snapshot.Controls["G1"]
-	control.Status = "disabled"
-	fixture.Snapshot.Controls["G1"] = control
+	expires := time.Now().Add(time.Hour)
+	key := domain.GrantKey{ID: "G1", Revision: 1}
+	content := fixture.Snapshot.Contents[key]
+	content.Validity = &domain.Validity{ExpiresAt: &expires}
+	fixture.Snapshot.Contents[key] = content
 	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer provider.Close()
+	var want, working storage.Snapshot
+	if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error { want = snapshot; return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error { working = snapshot; return nil }); err != nil {
+		t.Fatal(err)
+	}
+	provider.Close()
 	admin := mutatingAdministration{check: func(snapshot storage.Snapshot) error {
 		changed := snapshot.Controls["G1"]
-		changed.Status = "enabled"
+		changed.Status = "disabled"
 		snapshot.Controls["G1"] = changed
-		snapshot.Memberships = append(snapshot.Memberships, domain.Membership{TeamID: "Team1", HumanID: "maya"})
-		snapshot.TrustedRoots["G1"] = true
-		content := snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
+		snapshot.Memberships[0].HumanID = "forged"
+		delete(snapshot.TrustedRoots, "G0")
+		content := snapshot.Contents[key]
 		content.Permissions[0] = lab.PayslipDelete
+		*content.Validity.ExpiresAt = time.Time{}
 		return nil
 	}}
-	service, _ := mutation.New(provider, admin, &fixedClock{now: time.Now()})
+	memory := &writeProvider{snapshot: working}
+	service, _ := mutation.New(memory, admin, &fixedClock{now: time.Now()})
 	receipt, err := service.CreateAssignment(t.Context(), area, fixture.Issuer, fixture.Proposed)
-	if !errors.Is(err, domain.ErrRejected) || receipt != (domain.Receipt{}) {
-		t.Fatalf("mutated adapter evidence yielded receipt=%#v err=%v", receipt, err)
+	if err != nil || receipt.AssignmentID != fixture.Proposed.ID {
+		t.Fatalf("isolated adapter mutation receipt=%#v err=%v", receipt, err)
 	}
-	assertAssignmentCount(t, provider, area, 2)
+	delete(memory.snapshot.Assignments, fixture.Proposed.ID)
+	if !reflect.DeepEqual(memory.snapshot, want) {
+		t.Fatalf("administrative adapter altered provider evidence\n got: %#v\nwant: %#v", memory.snapshot, want)
+	}
 }
 
 func TestCreateAssignmentRechecksEligibilityImmediatelyBeforeWriteSet(t *testing.T) {
-	area, _ := domain.NewArea("tenant-fin", "hrms")
-	fixture := lab.TeamFINC17(area)
-	start := time.Date(2025, 1, 2, 3, 4, 5, 0, time.UTC)
-	expires := start.Add(time.Second)
-	key := domain.GrantKey{ID: "G2", Revision: 1}
-	content := fixture.Snapshot.Contents[key]
-	content.Validity = &domain.Validity{ExpiresAt: &expires}
-	fixture.Snapshot.Contents[key], fixture.Child = content, content
-	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
-	if err != nil {
-		t.Fatal(err)
+	for _, grantID := range []string{"G2", "G1"} {
+		t.Run(grantID, func(t *testing.T) {
+			area, _ := domain.NewArea("tenant-fin", "hrms")
+			fixture := lab.TeamFINC17(area)
+			start := time.Date(2025, 1, 2, 3, 4, 5, 0, time.UTC)
+			expires := start.Add(time.Second)
+			key := domain.GrantKey{ID: grantID, Revision: 1}
+			content := fixture.Snapshot.Contents[key]
+			content.Validity = &domain.Validity{ExpiresAt: &expires}
+			fixture.Snapshot.Contents[key] = content
+			provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer provider.Close()
+			admin, _ := lab.NewAdministration(area, fixture.Administration)
+			service, _ := mutation.New(provider, admin, &sequenceClock{times: []time.Time{start, expires}})
+			receipt, err := service.CreateAssignment(t.Context(), area, fixture.Issuer, fixture.Proposed)
+			if !errors.Is(err, domain.ErrRejected) || receipt != (domain.Receipt{}) {
+				t.Fatalf("%s expiry crossing yielded receipt=%#v err=%v", grantID, receipt, err)
+			}
+			assertAssignmentCount(t, provider, area, 2)
+		})
 	}
-	defer provider.Close()
-	admin, _ := lab.NewAdministration(area, fixture.Administration)
-	clock := &sequenceClock{times: []time.Time{start, expires}}
-	service, _ := mutation.New(provider, admin, clock)
-	receipt, err := service.CreateAssignment(t.Context(), area, fixture.Issuer, fixture.Proposed)
-	if !errors.Is(err, domain.ErrRejected) || receipt != (domain.Receipt{}) {
-		t.Fatalf("expiry crossing yielded receipt=%#v err=%v", receipt, err)
-	}
-	assertAssignmentCount(t, provider, area, 2)
 }
 
 func TestProviderFailureReturnsNoReceiptAndCallbackIsNotReplayed(t *testing.T) {
@@ -255,6 +273,13 @@ func TestProviderFailureReturnsNoReceiptAndCallbackIsNotReplayed(t *testing.T) {
 	}
 	if len(provider.returned.NewAssignments) != 1 || provider.returned.NewAssignments[0] != fixture.Proposed {
 		t.Fatalf("coordinator write set = %#v", provider.returned)
+	}
+	ctx, cancel := context.WithDeadline(t.Context(), time.Now().Add(-time.Second))
+	defer cancel()
+	provider.callbacks = 0
+	receipt, err = service.CreateAssignment(ctx, area, fixture.Issuer, fixture.Proposed)
+	if !errors.Is(err, context.DeadlineExceeded) || receipt != (domain.Receipt{}) || provider.callbacks != 0 {
+		t.Fatalf("expired deadline yielded receipt=%#v callbacks=%d err=%v", receipt, provider.callbacks, err)
 	}
 }
 
@@ -335,6 +360,23 @@ func (p *failingCommitProvider) Update(_ context.Context, _ domain.Area, callbac
 	return domain.ErrConflict
 }
 func (p *failingCommitProvider) Close() error { return nil }
+
+type writeProvider struct{ snapshot storage.Snapshot }
+
+func (p *writeProvider) Read(_ context.Context, _ domain.Area, callback func(storage.Snapshot) error) error {
+	return callback(p.snapshot)
+}
+func (p *writeProvider) Update(_ context.Context, _ domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	writes, err := callback(p.snapshot)
+	if err != nil {
+		return err
+	}
+	for _, assignment := range writes.NewAssignments {
+		p.snapshot.Assignments[assignment.ID] = assignment
+	}
+	return nil
+}
+func (p *writeProvider) Close() error { return nil }
 
 func assertAssignmentCount(t *testing.T, provider storage.Provider, area domain.Area, want int) {
 	t.Helper()
