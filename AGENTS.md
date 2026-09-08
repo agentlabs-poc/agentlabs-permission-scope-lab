@@ -15,7 +15,7 @@ requirements, or claim completion, merely to meet a time budget.
 Rationale: the user explicitly requires finite, progress-driven activity;
 persistence must not become indefinite task, retry or review loops.
 
-## Current implementation execution — CP1–CP3 complete
+## Current implementation execution — CP1–CP3 and CP4-A complete
 
 CP1 was implemented, independently reviewed and pushed through `ccb426d`.
 Task 3 / CP2 SQLite provider and conformance are implemented and independently
@@ -39,9 +39,12 @@ The exact CP4-A plan is implementation/plan/abv-cp4a-implementation-plan.md,
 with design beside it. Task 1's internal provider control update is independently
 approved at `f4a781c`; Task 2's protected coordinator/facade is independently
 approved through `7ea2aba`, including direct operation-specific matrix tests.
-Next is Task 3's CLI/lab wiring and final integration review. No CLI grant-status
-command or complete CP4 lifecycle is delivered yet. Do not redispatch Tasks 1–2
-or reopen settled model principles.
+Task 3's CLI/lab wiring is implemented at `ccf7eef`; `ed8f227` fixes the final
+review's typed-nil capability guard. Task 3 spec/quality and whole CP4-A integration
+are independently approved, with final full Go/race/vet/build verification passing.
+Do not redispatch CP4-A Tasks 1–3. This slice delivers grant-wide enable/disable,
+not complete CP4. Next: a bounded plan for the next lifecycle operation, preserving
+assignment controls, bottom-up binding guards and explicit current-state validation.
 CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.

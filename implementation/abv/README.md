@@ -4,7 +4,8 @@ An isolated Go module for the authorization model developed in this repository.
 CP1 foundations, CP2 storage and CP3 parent/team lineage, protected assignment
 writes and working CLI are implemented and independently reviewed. First-slice
 acceptance and final CP3 integration are approved at `5b81b84`.
-CP4-A adds bounded lab grant enable/disable and control inspection. Other
+CP4-A grant enable/disable and control inspection are independently approved
+through `ed8f227`. Other
 lifecycle operations, real Auth integration and PostgreSQL remain CP4–CP6.
 This is a local test harness, not a production Auth service.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
@@ -21,9 +22,9 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
 - `internal/lineage`: actual parent-team adoption and independently revalidated
   source-membership checks. See [Task 4 evidence](docs/lineage-resolution.md).
 - `internal/mutation`: separate administration and ABV checks, immutable evidence
-  isolation and exact transactional assignment writes. See [Task 5 evidence](docs/assignment-creation.md).
+  isolation and exact transactional assignment/control writes. See [acceptance](docs/acceptance.md).
 - `abv`: reusable facade for inspection, read-only diagnosis and protected
-  assignment creation; no raw provider writes exposed.
+  assignment creation and grant enable/disable; no raw provider writes exposed.
 - `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
   implementation and reusable provider conformance suite are delivered in CP2.
 - `internal/lab`: controlled fixtures for new disposable SQLite databases only,

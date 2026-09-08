@@ -20,7 +20,42 @@ refusals do not write. This evidence does not mark full CP4 complete.
 - [CP3 protected assignment evidence](assignment-creation.md)
 - [Verified CLI walkthrough](local-testing.md)
 
-## CP3 source-case map — independently reviewed
+## CP4-A — protected grant enable/disable
+
+**Complete and independently approved through `ed8f227`.** Task 1 provider and
+Task 2 coordinator passed separate spec/quality reviews. Task 3 and whole-slice
+integration passed final review after one typed-nil CLI guard correction.
+
+| Required behavior | Executed evidence |
+|---|---|
+| Exact area-bound control change, no other record rewrite | Provider `RunGrantStatus` conformance and `TestSetGrantStatusPersistsOnlyControlAndUsesAdoptedRevision`. |
+| Every enabled shared binding must validate; explicitly disabled binding stays disabled | `TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes`; includes duplicate/integrity checks. |
+| Authorized withdrawal is possible despite broken support | `TestSetGrantStatusWithdrawalIgnoresBrokenSupportButStillUsesAdministrativeGate`. |
+| Parent/child validity, cancellation, conflict and bounded evidence | Direct SetGrantStatus expiry, cancellation/competing-writer, depth and snapshot-limit tests. |
+| Ancestor restoration preserves descendant administrative state | `TestSetGrantStatusPreservesDescendantStateAndEffectiveness`. |
+| Separate administration; old adapters do not acquire a new capability | `TestOldAdministrationCannotAuthorizeGrantStatus`, lab refusal and CLI absent/typed-nil tests. |
+| Commands persist across processes and preserve A2 | Compiled binary seed/assign/disable/inspect/check/enable/reopen test. |
+
+Tests live in [provider conformance](../internal/storage/contracttest/grant_status.go),
+[coordinator tests](../internal/mutation/grant_status_test.go),
+[CLI tests](../cli/run_test.go) and [binary acceptance](../cmd/abv/main_test.go).
+Final full Go suite, full race suite, vet and binary build pass on `ed8f227`.
+The site build and all 10 site tests pass; import inspection confirms the CLI
+does not call storage or either validation gate directly.
+
+Rationale: grant state and assignment state remain independent. Re-enablement
+uses actual adopted content and required current parent-team support, not latest
+publication or the original actor's personal membership. Administrative authority
+does not replace ABV. One failed required route prevents the global change;
+explicitly disabled records are not silently restored. The lab identity premise
+is still not real authentication, and unsupported recipient/root operations fail
+explicitly. No new permission, wire schema, migration or dependency was added.
+
+The CP3 map below preserves its original checkpoint classification. CP4-A now
+supplies the grant-toggle and descendant-restoration evidence previously absent
+from its T13, T15 and T16 rows; remaining operation gaps are not thereby closed.
+
+## CP3 source-case map — independently reviewed historical checkpoint
 
 This maps every case in the [source contract, section 8](../../../docs/authority-boundary-validation.md#8-review-cases-and-rationale).
 It is an evidence inventory, not a claim of 28 implemented operations. A

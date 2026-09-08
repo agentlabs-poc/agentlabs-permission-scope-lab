@@ -1,6 +1,6 @@
 # ABV implementation progress
 
-## Current delivery — CP1–CP3 complete and independently reviewed
+## Current delivery — CP1–CP3 and CP4-A complete and independently reviewed
 
 Started after the user approved the six-checkpoint plan. Baseline handbook,
 presentation and plans were committed and pushed as `64b0831`. Isolated worktree
@@ -13,7 +13,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A Tasks 1–2 independently approved; Task 3 CLI/lab implementation and evidence ready for controller review | [Bounded execution plan](abv-cp4a-implementation-plan.md); full CP4 remains open. |
+| CP4: lifecycle | CP4-A grant enable/disable complete and independently approved through `ed8f227` | [Acceptance evidence](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable); other CP4 lifecycle operations remain open. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
@@ -35,19 +35,41 @@ ABV implementation
 │   ├── Task 5: administration + ABV, atomic assignment  COMPLETE
 │   ├── Task 6: inspect/check/assign commands + restart demo COMPLETE
 │   └── Task 7: adversarial and end-to-end acceptance    COMPLETE
-├── CP4 lifecycle                                       FIRST SLICE IN PROGRESS
-│   ├── CP4-A grant enable/disable scope                 APPROVED
+├── CP4 lifecycle                                       FIRST SLICE COMPLETE
+│   ├── CP4-A grant enable/disable                       COMPLETE / REVIEWED
 │   ├── CP4-P03 disabled binding clarification           RECONCILED
 │   ├── Conditional provider control update             COMPLETE / REVIEWED
 │   ├── Two-gate coordinator/facade                     COMPLETE / REVIEWED
-│   └── CLI and integration tests                       NEXT
+│   ├── CLI and integration tests                       COMPLETE / REVIEWED
+│   └── Other lifecycle operations                      PENDING
 ├── CP5 registration + real Auth integration             PENDING
 └── CP6 PostgreSQL                                      PENDING
 ```
 
 Three of six checkpoints are delivered for the local prototype. Checkpoints
-differ in size; this is not a percentage-of-effort estimate. CP4–CP6 still need exact operation plans before
-implementation, as stated in the approved execution plan.
+differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
+delivers grant-wide enable/disable. Remaining CP4 operations and CP5–CP6 still
+need bounded operation plans before implementation.
+
+### CP4-A delivery and rationale
+
+`f4a781c` adds conditional provider control updates; `b5a486b`, `2b9b4b2`
+and `7ea2aba` add the two-gate coordinator and direct operation-specific matrix.
+`ccf7eef` connects the reusable CLI and bounded lab adapter. The final review
+found one incomplete typed-nil capability guard; `ed8f227` covers all nil-capable
+kinds with a regression that first reproduced an unintended method call.
+Scoped re-review approved the fix, Task 3 spec/quality and whole-slice integration.
+
+All coding used Sol-medium; Astra-medium supplied the final integration review.
+Each coding task finished within its 12/15/12-minute cap; one focused final fix
+finished within its eight-minute cap. No coding escalation or policy reopening
+was needed. Final full Go tests/race/vet/build and the site build/10 tests pass;
+import boundaries remain intact. The existing provider, record and CLI paths
+were reused without a dependency, migration or new canonical format.
+
+This completion excludes assignment activation, deletion, parent changes,
+publication/upgrades, root management, direct-human/proxy source discovery and
+real Auth integration. It is a tested local prototype slice, not full ABV.
 
 ### Engineering choices and rationale
 
