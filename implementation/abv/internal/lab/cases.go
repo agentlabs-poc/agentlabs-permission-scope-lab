@@ -6,15 +6,17 @@ import (
 )
 
 const (
-	PayslipRead   = "hrms:payroll:payslip::read"
-	PayslipWrite  = "hrms:payroll:payslip::write"
-	PayslipDelete = "hrms:payroll:payslip::delete"
+	PayslipRead      = "hrms:payroll:payslip::read"
+	PayslipWrite     = "hrms:payroll:payslip::write"
+	PayslipDelete    = "hrms:payroll:payslip::delete"
+	AssignmentCreate = "auth:assignment::create"
 )
 
 // AdministrationPremise is trusted test-only fixture context. It deliberately
 // does not model an Auth catalog lookup inside the HRMS business snapshot.
 type AdministrationPremise struct {
 	HumanID         string
+	PermissionID    string
 	RecipientTeamID string
 }
 
@@ -69,6 +71,6 @@ func TeamFINC17(area domain.Area) TeamFINC17Case {
 		Child:          domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{PayslipRead}, Scope: map[string]string{"cert": "C17"}},
 		Proposed:       domain.Assignment{Version: "1", ID: "A2", GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team2"}, Status: "enabled"},
 		Issuer:         domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"},
-		Administration: AdministrationPremise{HumanID: "maya", RecipientTeamID: "Team2"},
+		Administration: AdministrationPremise{HumanID: "maya", PermissionID: AssignmentCreate, RecipientTeamID: "Team2"},
 	}
 }

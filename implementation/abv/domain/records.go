@@ -89,6 +89,7 @@ type Diagnostic struct {
 	Route   *Route
 }
 type Record struct {
+	Area          Area
 	Kind, ID      string
 	CanonicalJSON []byte
 	Rows          [][]string
