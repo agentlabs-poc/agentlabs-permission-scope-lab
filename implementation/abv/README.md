@@ -1,7 +1,8 @@
 # ABV — authority-boundary validation
 
 An isolated Go module for the authorization model developed in this repository.
-This is the CP1 foundation, not a production Auth service or working database CLI.
+CP1 is delivered; CP2 storage is being implemented and reviewed. This is not a
+production Auth service or working database CLI.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
 
@@ -13,6 +14,10 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
   does not make a record authorized, trusted or safe to persist.
 - `internal/validation`: registered definition checks and non-expanding permission/
   scope composition. Child scope is appended as AND predicates, never map-overwritten.
+- `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
+  implementation and reusable provider conformance suite are under CP2 review.
+- `internal/lab`: controlled fixtures for new disposable SQLite databases only,
+  not a seed-into-live-database or ordinary bootstrap API.
 - `application`: interface between reusable CLI and later in-process facade.
 - `cli`: testable command shell with injected streams, no SQL or process exit.
   Help is available; data operations explicitly return unsupported at CP1.
@@ -27,15 +32,17 @@ go test -race ./... -count=1
 go vet ./...
 ```
 
-There are no external dependencies at CP1. SQLite, provider integration, actual
-lineage resolution, the executable and successful CLI mutation commands are next.
+CP1 introduced no external dependencies. CP2 adds pinned `modernc.org/sqlite`
+and its dependencies; see [provider checkpoint evidence](docs/sqlite-provider.md).
+Actual lineage resolution, the executable and successful protected CLI mutation
+commands remain CP3 work.
 
 ## Input and authority boundaries
 
 Grant content has no recipient or tenant/application scope fields. The context
 is passed separately to authority checks, and retained on internal routes. Exact
 IDs are preserved; there is no default tenant, case normalization or wildcard
-context. The provider must later establish the installation before catalog use.
+context. The provider must establish the installation before catalog use.
 
 Only supported string version `"1"` core records are decoded. Unsupported
 extensions are rejected, not discarded. Null values, duplicate JSON keys,

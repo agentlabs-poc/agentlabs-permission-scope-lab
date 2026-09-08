@@ -1,6 +1,13 @@
 # Handbook working rules
 
-## Current implementation execution — CP1
+## Current implementation execution — CP2
+
+CP1 was implemented, independently reviewed and pushed through `ccb426d`. The
+user said to keep going: continue Task 3 / CP2 SQLite provider and conformance,
+using the existing isolated worktree with branch `implementation/abv-cp2`.
+The reusable working CLI and administrative/lineage integration remain CP3.
+Never present internal provider writes or controlled fixture creation as a
+production authorization gate; both required authority checks arrive in CP3.
 
 The user approved starting the ABV implementation and explicitly requested
 subagents using `gpt-5.6-sol` at medium reasoning for coding. Continue checkpointed

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1020" viewBox="0 0 1080 1020" role="img" aria-labelledby="title desc">
+  <title id="title">SQLite provider transaction flow</title>
+  <desc id="desc">Every data operation validates tenant and application. A write pins a connection, begins an immediate transaction, verifies installation and loads a consistent snapshot. The callback runs once. An explicit write set is checked and committed, or the attempt rolls back. Database connection settings and evidence remain protected across the operation.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#334155"/></marker>
+    <marker id="red-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#9f1239"/></marker>
+    <style>
+      text { font-family: sans-serif; fill: #172b45; }
+      .h { font-size: 22px; font-weight: 700; }
+      .t { font-size: 18px; }
+      .s { font-size: 16px; }
+      .box { fill: white; stroke: #64748b; stroke-width: 1.5; rx: 10; }
+      .flow { fill: none; stroke: #334155; stroke-width: 2; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1080" height="1020" fill="white"/>
+  <text x="36" y="42" class="h">CP2 provider: consistent evidence through commit</text>
+  <text x="36" y="71" class="t">Internal storage contract · authority gates are integrated in CP3</text>
+  <rect x="28" y="94" width="1024" height="886" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="52" y="127" class="h">Mandatory tenant + application boundary</text>
+  <rect x="96" y="151" width="565" height="62" class="box"/>
+  <text x="378" y="178" text-anchor="middle" class="t">Validate Area; acquire a pinned connection</text>
+  <text x="378" y="200" text-anchor="middle" class="s">No default context; connection settings verified</text>
+  <path d="M378 213V241" class="flow"/>
+  <rect x="96" y="243" width="565" height="58" class="box"/>
+  <text x="378" y="278" text-anchor="middle" class="h">BEGIN IMMEDIATE</text>
+  <path d="M378 301V329" class="flow"/>
+  <rect x="66" y="331" width="625" height="495" rx="14" fill="#f0fdfa" stroke="#0f766e" stroke-width="2"/>
+  <text x="88" y="362" class="h">Write protection held until commit or rollback</text>
+  <rect x="96" y="383" width="565" height="73" class="box"/>
+  <text x="378" y="412" text-anchor="middle" class="t">Establish installation; load consistent snapshot</text>
+  <text x="378" y="438" text-anchor="middle" class="s">Shared app catalog + this area's records; no truncation</text>
+  <path d="M378 456V483" class="flow"/>
+  <rect x="96" y="485" width="565" height="89" class="box"/>
+  <text x="378" y="515" text-anchor="middle" class="h">Invoke callback exactly once</text>
+  <text x="378" y="540" text-anchor="middle" class="t">Return an explicit write set, or an error</text>
+  <text x="378" y="562" text-anchor="middle" class="s">No automatic replay; snapshot edits alone do not persist</text>
+  <path d="M378 574V603" class="flow"/>
+  <rect x="96" y="605" width="565" height="76" class="box"/>
+  <text x="378" y="635" text-anchor="middle" class="t">Check proposed writes against actual stored rows</text>
+  <text x="378" y="660" text-anchor="middle" class="s">Area-bound references, payload agreement and uniqueness</text>
+  <path d="M378 681V710" class="flow"/>
+  <rect x="96" y="712" width="565" height="83" class="box"/>
+  <text x="378" y="745" text-anchor="middle" class="h">Persist supported writes → COMMIT</text>
+  <text x="378" y="774" text-anchor="middle" class="t">All writes succeed together</text>
+  <path d="M378 795V856" class="flow"/>
+  <rect x="96" y="858" width="565" height="62" class="box"/>
+  <text x="378" y="895" text-anchor="middle" class="h">Release connection; return success</text>
+  <rect x="740" y="384" width="278" height="278" rx="12" fill="#fff1f2" stroke="#9f1239" stroke-width="2"/>
+  <text x="879" y="420" text-anchor="middle" class="h">Failed attempt</text>
+  <text x="879" y="457" text-anchor="middle" class="t">Error, panic, cancellation</text>
+  <text x="879" y="484" text-anchor="middle" class="t">or persistence conflict</text>
+  <text x="879" y="526" text-anchor="middle" class="h">ROLLBACK</text>
+  <text x="879" y="566" text-anchor="middle" class="t">Clean up connection</text>
+  <text x="879" y="593" text-anchor="middle" class="t">Return failure / re-panic</text>
+  <text x="879" y="631" text-anchor="middle" class="s">No partial write or retry</text>
+  <path d="M691 530H734" fill="none" stroke="#9f1239" stroke-width="2" marker-end="url(#red-arrow)"/>
+  <text x="752" y="733" class="s">Read-only operation:</text>
+  <text x="752" y="759" class="s">BEGIN → snapshot → callback</text>
+  <text x="752" y="785" class="s">→ end transaction.</text>
+  <text x="752" y="828" class="s">WAL readers may continue</text>
+  <text x="752" y="852" class="s">on their prior snapshot.</text>
+  <text x="54" y="954" class="s">A storage success is not an authorization decision. Both authority checks belong in the coordinator.</text>
+  <text x="36" y="1005" class="s">Checkpoint design · fixtures create new disposable databases only · PostgreSQL requires its own provider.</text>
+</svg>

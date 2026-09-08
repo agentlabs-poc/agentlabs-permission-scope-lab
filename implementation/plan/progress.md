@@ -10,7 +10,7 @@ The user subsequently requested sol-medium coding subagents.
 | Checkpoint | Current state | Exit evidence |
 |---|---|---|
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
-| CP2: SQLite provider | Not started | Isolation, rollback, persistence and concurrency conformance required. |
+| CP2: SQLite provider | In progress on `implementation/abv-cp2` | [Provider checkpoint](../abv/docs/sqlite-provider.md): isolation, rollback, persistence and concurrency conformance required. |
 | CP3: resolver and working CLI | Not started | Actual team support, both gates, atomic assignment, restart demo required. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
