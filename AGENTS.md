@@ -12,6 +12,10 @@ extend the same loop. Resume with a revised bounded plan; ask the user when a
 new decision or authority is required. Never weaken security or verification
 requirements, or claim completion, merely to meet a time budget.
 
+The user permits regrouping work items when their current grouping is unsuitable.
+Record the revised grouping and rationale; retain explicit bounds, acceptance
+coverage and independent review. Regrouping does not broaden canonical scope.
+
 Rationale: the user explicitly requires finite, progress-driven activity;
 persistence must not become indefinite task, retry or review loops.
 
@@ -49,7 +53,10 @@ They propose team-held controls with bottom-up discovery, preserving adopted
 records and both gates. The user approved CP4-B01 with “proceed”; execute its
 bounded four-task plan with independent review, without reopening Q-101 principles.
 Task 1 conditional assignment persistence is independently approved at `3a5d30b`.
-Do not redispatch it; Tasks 2–4 remain pending until their tests and reviews pass.
+Task 2 pure reverse-binding discovery is independently approved through `6414d80`,
+including its exact-key collision fix. Do not redispatch Tasks 1–2; Tasks 3–4 remain
+pending. Retain the minor future validity-pointer test-helper limitation for final
+review, as recorded in implementation/plan/progress.md.
 CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.

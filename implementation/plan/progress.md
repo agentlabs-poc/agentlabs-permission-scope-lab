@@ -13,7 +13,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B Task 1 independently approved at `3a5d30b` | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); remaining CP4-B tasks pending. |
+| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B Tasks 1–2 independently approved through `6414d80` | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); protected operation and CLI remain. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
@@ -43,7 +43,7 @@ ABV implementation
 │   ├── CLI and integration tests                       COMPLETE / REVIEWED
 │   ├── CP4-B assignment enable/disable                  IN PROGRESS
 │   │   ├── Conditional assignment persistence          COMPLETE / REVIEWED
-│   │   ├── Reverse team-binding discovery              PENDING
+│   │   ├── Reverse team-binding discovery              COMPLETE / REVIEWED
 │   │   ├── Protected coordinator/facade                PENDING
 │   │   └── CLI/lab/acceptance + final review            PENDING
 │   └── Other lifecycle operations                      PENDING
@@ -68,6 +68,21 @@ their 12/five-minute caps, with no findings. Provider focused/race and full Go
 tests passed; controller full Go/vet and site build/10 tests also passed.
 This is internal persistence only: protected assignment controls still require
 reverse binding discovery, both authority gates and CLI acceptance in Tasks 2–4.
+
+### CP4-B Task 2 — reverse team-binding discovery
+
+`5e9b4c0` adds pure, indexed discovery using actual grant and team parents,
+exact adopted revisions and complete disabled-binding inventory. Missing upstream
+holdings remain distinct from malformed evidence; ambiguous enabled human routes
+return unsupported. Scope/permission eligibility is not used to erase bindings.
+
+Independent review found a delimiter-based uniqueness collision for legal IDs.
+`6414d80` uses an exact comparable tuple, with a reproduced RED/GREEN regression.
+The same bounded fix strengthens unchanged-input assertions. Scoped review approves
+specification and quality; focused/race and controller full Go/vet tests pass.
+A minor future-test limitation remains for final review: the snapshot fingerprint
+does not inspect pointees of non-nil validity fields; current graph fixtures use
+none. No runtime mutation or authorization bypass was found.
 
 ### CP4-A delivery and rationale
 
