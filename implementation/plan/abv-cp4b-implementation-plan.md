@@ -8,7 +8,7 @@
 **Architecture:** Extend the existing typed write set and two-gate facade; add
 one pure reverse-binding lookup, then connect the reusable CLI. No generic CRUD.
 **Tech Stack:** Existing Go module, standard library and pinned SQLite provider.
-**Spec:** [CP4-B01 design](abv-cp4b-design.md). Status: execution draft, not started.
+**Spec:** [CP4-B01 design](abv-cp4b-design.md). Status: approved; execution in progress.
 
 ## Global constraints
 
@@ -270,5 +270,5 @@ The lab demonstrates bottom-up order with existing A1/A2, so no fixture migratio
 or unrelated source-selection subsystem is needed. The branch/failure matrix is
 spread across pure discovery, protected operations and real CLI persistence.
 
-Review CP4-B01's scope/interfaces before execution. This draft does not authorize
+CP4-B01's scope/interfaces are approved for execution. Approval does not authorize
 changing canonical rules or claiming assignment lifecycle is already implemented.

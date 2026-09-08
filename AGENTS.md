@@ -46,8 +46,10 @@ Do not redispatch CP4-A Tasks 1–3. This slice delivers grant-wide enable/disab
 not complete CP4. CP4-B01's assignment enable/disable design and execution draft
 are in implementation/plan/abv-cp4b-design.md and abv-cp4b-implementation-plan.md.
 They propose team-held controls with bottom-up discovery, preserving adopted
-records and both gates. Runtime CP4-B has not started; review this bounded
-scope/interface proposal before execution, without reopening Q-101 principles.
+records and both gates. The user approved CP4-B01 with “proceed”; execute its
+bounded four-task plan with independent review, without reopening Q-101 principles.
+Task 1 conditional assignment persistence is independently approved at `3a5d30b`.
+Do not redispatch it; Tasks 2–4 remain pending until their tests and reviews pass.
 CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.

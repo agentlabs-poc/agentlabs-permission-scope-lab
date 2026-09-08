@@ -1,6 +1,7 @@
 # CP4-B01 — assignment enable/disable design
 
-Status: implementation proposal for review; no CP4-B runtime work. The governing
+Status: CP4-B01 approved for bounded implementation by the user's “proceed”.
+Runtime work is in progress, not yet delivered. The governing
 model is already approved. This document chooses a bounded implementation scope
 and interfaces, not a new canonical assignment format or new authorization policy.
 
@@ -108,6 +109,6 @@ zero Assignment; success returns the exact committed record, only after commit.
 - Unsupported discovery fails explicitly; no new canonical restrictions are asserted.
 
 The [execution draft](abv-cp4b-implementation-plan.md) separates persistence,
-reverse-binding discovery, the protected operation and CLI acceptance. Review
-CP4-B01's scope/interfaces before runtime implementation. Existing decisions and
-CP4-A source remain unchanged.
+reverse-binding discovery, the protected operation and CLI acceptance. CP4-B01's
+scope/interfaces are approved; each implementation task still requires tests and
+independent review. Existing canonical decisions remain unchanged.

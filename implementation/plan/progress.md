@@ -13,7 +13,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B assignment controls drafted for review | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution draft](abv-cp4b-implementation-plan.md); CP4-B runtime not started. |
+| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B Task 1 independently approved at `3a5d30b` | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); remaining CP4-B tasks pending. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
@@ -41,7 +41,11 @@ ABV implementation
 │   ├── Conditional provider control update             COMPLETE / REVIEWED
 │   ├── Two-gate coordinator/facade                     COMPLETE / REVIEWED
 │   ├── CLI and integration tests                       COMPLETE / REVIEWED
-│   ├── CP4-B assignment enable/disable                  DRAFT FOR REVIEW
+│   ├── CP4-B assignment enable/disable                  IN PROGRESS
+│   │   ├── Conditional assignment persistence          COMPLETE / REVIEWED
+│   │   ├── Reverse team-binding discovery              PENDING
+│   │   ├── Protected coordinator/facade                PENDING
+│   │   └── CLI/lab/acceptance + final review            PENDING
 │   └── Other lifecycle operations                      PENDING
 ├── CP5 registration + real Auth integration             PENDING
 └── CP6 PostgreSQL                                      PENDING
@@ -51,6 +55,19 @@ Three of six checkpoints are delivered for the local prototype. Checkpoints
 differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
 delivers grant-wide enable/disable. Remaining CP4 operations and CP5–CP6 still
 need bounded operation plans before implementation.
+
+### CP4-B Task 1 — conditional assignment persistence
+
+`3a5d30b` adds one conditional Before/After assignment-status write. Only status
+may change; the provider reads the persisted Before inside the transaction, so
+mutating the callback snapshot cannot forge a match. Exact tenant/application
+scoping, strict records, mixed-write refusal and rollback preserve all other data.
+
+Sol-medium implementation and independent spec/quality review completed within
+their 12/five-minute caps, with no findings. Provider focused/race and full Go
+tests passed; controller full Go/vet and site build/10 tests also passed.
+This is internal persistence only: protected assignment controls still require
+reverse binding discovery, both authority gates and CLI acceptance in Tasks 2–4.
 
 ### CP4-A delivery and rationale
 
