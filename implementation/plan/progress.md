@@ -2,6 +2,11 @@
 
 ## Current delivery — CP1–CP3 and CP4-A complete and independently reviewed
 
+**Scope correction — 9 September 2026:** production Auth-service integration is
+outside this ABV build, not remaining required work. CP5 previously mixed ABV
+definition management with a production adapter; only the former remains here.
+Historical integration-gap statements below are context, not completion blockers.
+
 Started after the user approved the six-checkpoint plan. Baseline handbook,
 presentation and plans were committed and pushed as `64b0831`. Isolated worktree
 setup is `bac62de`; CP1 originally ran on `implementation/abv-cp1`. The retained
@@ -14,7 +19,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
 | CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B Tasks 1–3 independently approved through `34319e4` | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); CLI and final acceptance remain. |
-| CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
+| CP5: ABV definition management | Not started | Permission/scope/role operations and dependency checks; production Auth integration excluded. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
 ### Execution tree
@@ -47,14 +52,15 @@ ABV implementation
 │   │   ├── Protected coordinator/facade                COMPLETE / REVIEWED
 │   │   └── CLI/lab/acceptance + final review            PENDING
 │   └── Other lifecycle operations                      PENDING
-├── CP5 registration + real Auth integration             PENDING
-└── CP6 PostgreSQL                                      PENDING
+├── CP5 ABV definition management                       PENDING
+└── CP6 PostgreSQL provider                             LATER
 ```
 
-Three of six checkpoints are delivered for the local prototype. Checkpoints
+Three numbered checkpoints are delivered for the local prototype. Checkpoints
 differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
 delivers grant-wide enable/disable. Remaining CP4 operations and CP5–CP6 still
-need bounded operation plans before implementation.
+need bounded operation plans before implementation. Real Auth-service integration
+is not part of the remaining workload or this build's completion denominator.
 
 ### CP4-B Task 1 — conditional assignment persistence
 

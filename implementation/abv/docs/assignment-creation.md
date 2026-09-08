@@ -70,7 +70,9 @@ and current test prerequisites. It is not an always-allow evaluator.
 The Auth administrative permission is not registered into the HRMS business
 catalog to make the fixture convenient. The adapter does not claim to have
 resolved a real authenticated Auth namespace. Production identity, administrative
-grant resolution and their transactional integration remain CP5 work.
+grant resolution and external transactional integration are outside this ABV
+build. The earlier “remain CP5 work” requirement is superseded by the user's
+9 September 2026 scope correction; CP5 covers ABV definition operations only.
 
 Maya's Team1 source membership remains a separate check. Nutan's membership,
 team ownership, arbitrary actor IDs or a remembered successful diagnostic cannot

@@ -7,6 +7,12 @@ and verified commit/push checkpoints. Track actual delivery in
 [checkpoint progress](progress.md). Planning-only statements below preserve the
 original stage; they do not override that subsequent authorization.
 
+**Scope correction — 9 September 2026:** the user excludes production Auth-service
+integration from this build. CP5 is ABV definition management only. Prior real
+adapter/integration requirements are superseded; retain a replaceable administrative
+port and honest lab limitations without making an external service a completion
+dependency. SQLite-first ABV and in-process CLI remain the requested deliverables.
+
 The user approved planning an isolated reusable Go component for the
 Authority-Boundary Validator (ABV), with SQLite storage and a provider boundary
 allowing PostgreSQL later. The detailed internal contracts below are engineering
@@ -275,8 +281,9 @@ does not establish the required multi-read/write guarantee.
 
 Run the provider contract and ABV scenario suites unchanged against PostgreSQL,
 including shared-catalog writes versus tenant writes. PostgreSQL migrations,
-database privileges, import/export verification and actual Auth integration are
-separate delivery work; provider replaceability is not data migration.
+database privileges and import/export verification are later provider work;
+provider replaceability is not data migration. Actual Auth integration is outside
+this build's scope.
 
 ## 8. Operation sequence and results
 
@@ -366,7 +373,7 @@ those interfaces. Test both injected command execution and the compiled binary.
 | CP2 | SQLite store + provider tests | Consistent isolated storage/retrieval, rollback and persistence. |
 | CP3 | Team-lineage resolver + safe assignment creation | The approved team case works through both gates without stale/partial writes. |
 | CP4 | Explicit lifecycle/structural operations | Enablement, validity, dependency guards and affected-branch checks are implemented, not just documented. |
-| CP5 | Definition management + real Auth adapter | Registered meanings and authority writes are integrated under real authenticated administration. |
+| CP5 | ABV definition management | Permission/scope/role operations obey registration and dependency/boundary rules through the component's protected path. External Auth integration is excluded. |
 | CP6 | PostgreSQL provider + migration rehearsal | The same behavior is verified on both databases, with a tested transfer path. |
 
 CP1–CP3 are the detailed first implementation slice. CP4–CP6 have defined entry
@@ -391,8 +398,8 @@ management are visible work, not “minor checks” silently skipped.
 - Database timeout: failure, not “orphan proven”; no write.
 - Conflicting update before the protected attempt's ordering point: no stale
   authorization; no automatic content substitution.
-- A test double permitting administration does not prove the real evaluator
-  works; that stays a CP5 requirement.
+- A test double permitting administration does not prove a real evaluator works.
+  Such external integration is out of scope, not a CP5 acceptance requirement.
 
 Sources: [ABV working contract](../../docs/authority-boundary-validation.md),
 [Q-100](../../docs/auth-service-authority-gate.md),

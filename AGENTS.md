@@ -21,6 +21,15 @@ persistence must not become indefinite task, retry or review loops.
 
 ## Current implementation execution — CP1–CP3 and CP4-A complete
 
+Scope correction from the user (9 September 2026 local time): production Auth
+service/evaluator integration is OUT OF SCOPE for this ABV build. Do not list it
+as a pending checkpoint, completion blocker, or required production adapter.
+Keep ABV permission/scope/role management separate from external Auth integration.
+Current deliverables remain reusable ABV, SQLite/provider boundary and in-process
+testing CLI. Separate administrative and boundary checks remain intact in the
+component; controlled lab adapters do not prove real authentication. Earlier
+CP5 integration requirements below/in plans are superseded, not silently erased.
+
 CP1 was implemented, independently reviewed and pushed through `ccb426d`.
 Task 3 / CP2 SQLite provider and conformance are implemented and independently
 approved at `8ac7593`, including all review fixes. Do not redispatch CP1/CP2.
@@ -59,7 +68,8 @@ independently approved through `34319e4`, including UTF8 and test-read fixes.
 Do not redispatch Tasks 1–3; Task 4 CLI/acceptance remains pending.
 Retain the minor future validity-pointer test-helper limitation for final
 review, as recorded in implementation/plan/progress.md.
-CP5 real Auth/registration and CP6 PostgreSQL remain later work.
+CP5 covers ABV definition management only; external Auth integration is excluded.
+CP6 PostgreSQL is a later provider direction, not already delivered.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.
 Never present internal provider writes or controlled fixture creation as a

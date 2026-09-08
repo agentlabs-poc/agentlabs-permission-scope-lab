@@ -72,6 +72,13 @@ especially the first-slice limits, transaction guarantees and source contracts.
 
 ## Scope and ordering
 
+**User scope correction — 9 September 2026:** production Auth service/evaluator
+integration is excluded from the ABV build. CP5 retains component-local definition
+operations only. Keep separate administrative and boundary validation interfaces;
+do not implement external authentication, migrate the Auth service, or count that
+work as required for completion. The original CP5 integration text is preserved
+below as superseded history.
+
 This is a detailed execution plan for **CP1–CP3**, producing a usable local
 testing slice. CP4–CP6 are bounded follow-on milestones with entry requirements;
 they must receive their own exact operation/interface plans before execution.
@@ -86,7 +93,7 @@ T1 context + types + CLI seam
     → T5 transactional assignment mutation
     → T6 reusable CLI commands + controlled lab scenarios
     → T7 adversarial / race / end-to-end acceptance
-    → CP4 lifecycle → CP5 real Auth / catalog management → CP6 PostgreSQL
+    → CP4 lifecycle → CP5 ABV definition management → CP6 PostgreSQL (later)
 ```
 
 The first visible demo is not an HTTP server. It is:
@@ -628,7 +635,24 @@ ordinary re-enable preserving adoption remain mandatory.
 with new CLI commands calling the same coordinator. No auto-repair, cascade
 deletion or issuer-ownership authority import is introduced.
 
-### CP5 — definition management and real Auth integration
+### CP5 — ABV definition management
+
+Implement permission/scope/role operations within ABV and its provider/CLI, using
+reviewed exact contracts and existing protected mutation boundaries. Registration
+before use, bounded role selections, compatibility validation and permission
+retirement/dependency effects remain component concerns. Unsettled canonical
+contracts still require review; the lab fixture does not settle them.
+
+**Exit:** supported definition operations persist through ABV and SQLite, with
+dependency/boundary and no-write failure tests plus reusable CLI coverage.
+Production identity adapters, Auth-service wiring and Auth migration are not
+required deliverables. No external service or context-free platform bypass is added.
+
+<details>
+<summary>Superseded CP5 proposal — definition management combined with real Auth integration</summary>
+
+The user explicitly excluded the external integration below. This original
+proposal is retained as history, not authorization or a completion requirement.
 
 Add permission/scope/role operations with reviewed exact contracts and dependency
 effects. Required cases: registration before use; role expansion stays bounded
@@ -649,6 +673,8 @@ The CLI can reuse its parsing/application interface with authenticated compositi
 
 **Exit:** no fixture identity on a production path; both real gates and storage
 consistency pass; existing Auth behavior has an explicit migration/rollback plan.
+
+</details>
 
 ### CP6 — PostgreSQL provider and data portability
 

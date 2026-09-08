@@ -21,8 +21,10 @@ checks happened to succeed. No automatic upgrades, parent replacement or repair.
 
 This is the first CP4 slice, not the entire lifecycle checkpoint. Assignment
 enable/disable, deletion, reparenting, publication and explicit upgrades remain
-separate required slices. Real Auth integration remains CP5; the lab adapter is
-still an explicitly bounded testing premise, not authentication.
+separate required slices. The lab adapter is an explicitly bounded testing
+premise, not authentication. Scope correction (9 September 2026): the previous
+“Real Auth integration remains CP5” requirement is superseded; external Auth
+integration is outside this ABV build.
 
 ## 2. Existing implementation to reuse
 
