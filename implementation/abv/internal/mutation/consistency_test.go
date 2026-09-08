@@ -121,15 +121,27 @@ func TestParentDisablementAfterAssignmentCommitIsNotRetroactive(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	committed := make(chan domain.Receipt, 1)
+	type assignmentResult struct {
+		receipt domain.Receipt
+		err     error
+	}
+	assigned := make(chan assignmentResult, 1)
+	allowDisable := make(chan struct{})
 	disabled := make(chan error, 1)
+	t.Cleanup(func() {
+		select {
+		case <-allowDisable:
+		default:
+			close(allowDisable)
+		}
+	})
 	go func() {
 		receipt, err := service.CreateAssignment(t.Context(), area, fixture.Issuer, fixture.Proposed)
+		assigned <- assignmentResult{receipt: receipt, err: err}
 		if err != nil {
-			disabled <- err
 			return
 		}
-		committed <- receipt
+		<-allowDisable
 		control := fixture.Snapshot.Controls["G1"]
 		control.Status = "disabled"
 		raw, _ := json.Marshal(control)
@@ -140,15 +152,14 @@ func TestParentDisablementAfterAssignmentCommitIsNotRetroactive(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 	select {
-	case receipt := <-committed:
-		if receipt.AssignmentID != fixture.Proposed.ID {
-			t.Fatalf("receipt=%#v", receipt)
+	case result := <-assigned:
+		if result.err != nil || result.receipt.AssignmentID != fixture.Proposed.ID {
+			t.Fatalf("assignment result receipt=%#v err=%v", result.receipt, result.err)
 		}
-	case err := <-disabled:
-		t.Fatalf("assignment did not commit before disablement: %v", err)
 	case <-ctx.Done():
 		t.Fatal(ctx.Err())
 	}
+	close(allowDisable)
 	select {
 	case err := <-disabled:
 		if err != nil {
