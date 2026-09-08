@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="390" viewBox="0 0 840 390" role="img" aria-labelledby="title desc">
+  <title id="title">CP4-P03: does a disabled broken binding block grant enablement?</title>
+  <desc id="desc">Shared grant G2 is disabled. Its enabled assignment A2 to Team2 has valid parent support at Team1. Its disabled assignment A3 to Team3 lacks required parent support at TeamX. Enabling G2 must not enable A3. The unresolved question is whether A3 blocks enabling G2 at all.</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526174"/></marker></defs>
+  <rect width="840" height="390" rx="12" fill="#f8fafc"/>
+  <g font-family="sans-serif" text-anchor="middle" fill="#172033">
+    <rect x="220" y="22" width="400" height="64" rx="8" fill="#e2e8f0" stroke="#526174"/>
+    <text x="420" y="47" font-size="19" font-weight="bold">G2 — grant status: disabled</text>
+    <text x="420" y="70" font-size="14">Requested operation: enable G2 globally</text>
+    <g stroke="#526174" stroke-width="2" fill="none" marker-end="url(#arrow)">
+      <path d="M330 86L220 135"/><path d="M510 86L620 135"/>
+      <path d="M220 207V252"/><path d="M620 207V252"/>
+    </g>
+    <rect x="40" y="137" width="360" height="70" rx="8" fill="#e0f2fe" stroke="#0369a1"/>
+    <text x="220" y="164" font-size="18" font-weight="bold">A2 → Team2: enabled</text>
+    <text x="220" y="188" font-size="14">Adopts G2 revision 1</text>
+    <rect x="440" y="137" width="360" height="70" rx="8" fill="#e2e8f0" stroke="#526174"/>
+    <text x="620" y="164" font-size="18" font-weight="bold">A3 → Team3: disabled</text>
+    <text x="620" y="188" font-size="14">Adopts G2 revision 1 — stays disabled</text>
+    <text x="220" y="234" font-size="13">required parent-team support</text>
+    <text x="620" y="234" font-size="13">required parent-team support</text>
+    <rect x="40" y="254" width="360" height="62" rx="8" fill="#dcfce7" stroke="#15803d"/>
+    <text x="220" y="279" font-size="17" font-weight="bold">Team1 holds G1: valid</text>
+    <text x="220" y="302" font-size="14">A2 can resume if G2 enablement passes</text>
+    <rect x="440" y="254" width="360" height="62" rx="8" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="620" y="279" font-size="17" font-weight="bold">TeamX's G1 assignment: removed</text>
+    <text x="620" y="302" font-size="14">A3 cannot currently pass its own enablement</text>
+    <text x="420" y="354" font-size="16" font-weight="bold">P03: must disabled A3 block G2's global enablement?</text>
+    <text x="420" y="378" font-size="13">Decision pending. No assignment state or adopted revision changes in this operation.</text>
+  </g>
+</svg>
