@@ -70,14 +70,86 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if err = ctx.Err(); err != nil {
 			return err
 		}
-		if writes.GrantStatusChange != nil && len(writes.NewAssignments) != 0 {
+		categories := 0
+		if len(writes.NewAssignments) != 0 {
+			categories++
+		}
+		if writes.GrantStatusChange != nil {
+			categories++
+		}
+		if writes.AssignmentStatusChange != nil {
+			categories++
+		}
+		if categories > 1 {
 			return domain.ErrMalformed
 		}
 		if writes.GrantStatusChange != nil {
 			return p.writeGrantStatus(ctx, conn, area, s, *writes.GrantStatusChange)
 		}
+		if writes.AssignmentStatusChange != nil {
+			return p.writeAssignmentStatus(ctx, conn, area, *writes.AssignmentStatusChange)
+		}
 		return p.writeAssignments(ctx, conn, area, writes.NewAssignments)
 	})
+}
+
+func (p *provider) writeAssignmentStatus(ctx context.Context, conn *sql.Conn, area domain.Area, change storage.AssignmentStatusChange) error {
+	encode := func(a domain.Assignment) ([]byte, error) {
+		raw, err := json.Marshal(a)
+		if err != nil {
+			return nil, domain.ErrMalformed
+		}
+		decoded, err := codec.DecodeAssignment(raw)
+		if err != nil {
+			return nil, err
+		}
+		if decoded != a {
+			return nil, domain.ErrMalformed
+		}
+		return raw, nil
+	}
+	if _, err := encode(change.Before); err != nil {
+		return err
+	}
+	afterRaw, err := encode(change.After)
+	if err != nil {
+		return err
+	}
+	before, after := change.Before, change.After
+	before.Status = after.Status
+	if before != after {
+		return domain.ErrMalformed
+	}
+	var currentRaw []byte
+	err = conn.QueryRowContext(ctx, `SELECT canonical_json FROM assignments WHERE tenant_id=? AND application_id=? AND assignment_id=?`, area.TenantID(), area.ApplicationID(), change.Before.ID).Scan(&currentRaw)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrNotFound
+	}
+	if err != nil {
+		return classify(err)
+	}
+	current, err := codec.DecodeAssignment(currentRaw)
+	if err != nil {
+		return err
+	}
+	if current != change.Before {
+		return domain.ErrConflict
+	}
+	result, err := conn.ExecContext(ctx, `UPDATE assignments SET status=?, canonical_json=?
+WHERE tenant_id=? AND application_id=? AND assignment_id=?
+  AND grant_id=? AND grant_revision=? AND recipient_type=? AND recipient_id=?
+  AND status=?`, change.After.Status, afterRaw, area.TenantID(), area.ApplicationID(), change.Before.ID, change.Before.GrantID, change.Before.GrantRevision, change.Before.Recipient.Type, change.Before.Recipient.ID, change.Before.Status)
+	if err != nil {
+		return classify(err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return classify(err)
+	}
+	if rows != 1 {
+		return domain.ErrConflict
+	}
+	return nil
 }
 
 func (p *provider) writeGrantStatus(ctx context.Context, conn *sql.Conn, area domain.Area, snapshot storage.Snapshot, change storage.GrantStatusChange) error {

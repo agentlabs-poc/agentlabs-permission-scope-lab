@@ -23,9 +23,15 @@ type GrantStatusChange struct {
 	After  domain.GrantControl
 }
 
+type AssignmentStatusChange struct {
+	Before domain.Assignment
+	After  domain.Assignment
+}
+
 type WriteSet struct {
-	NewAssignments    []domain.Assignment
-	GrantStatusChange *GrantStatusChange
+	NewAssignments         []domain.Assignment
+	GrantStatusChange      *GrantStatusChange
+	AssignmentStatusChange *AssignmentStatusChange
 }
 
 type Provider interface {

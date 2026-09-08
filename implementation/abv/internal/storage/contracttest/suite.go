@@ -21,6 +21,7 @@ type Factory struct {
 func Run(t *testing.T, factory Factory) {
 	t.Helper()
 	RunGrantStatus(t, factory)
+	RunAssignmentStatus(t, factory)
 	t.Run("round trips every family and persists", func(t *testing.T) {
 		path := t.TempDir() + "/authority.db"
 		want := fixtures(t)
