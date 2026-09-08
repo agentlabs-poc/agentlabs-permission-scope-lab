@@ -36,8 +36,10 @@ an explicitly disabled assignment stays disabled; its missing support alone
 does not block grant enablement. A broken enabled assignment still blocks the
 whole operation. See docs/parent-grant-bindings.md and handbook chapter 8.
 The exact CP4-A plan is implementation/plan/abv-cp4a-implementation-plan.md,
-with design beside it. No runtime CP4 work is delivered yet. Next is Task 1
-of that plan, not another broad research/approval loop over settled principles.
+with design beside it. Task 1's internal provider control update is independently
+approved at `f4a781c`; it is not yet a public authorized enable/disable operation.
+Next is Task 2's two-gate coordinator/facade, not another broad research/approval
+loop over settled principles.
 CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.
@@ -46,7 +48,10 @@ production authorization gate. CP3's facade runs both checks, but its static lab
 administration premise is not a production authenticated adapter.
 
 The user approved starting the ABV implementation and explicitly requested
-subagents using `gpt-5.6-sol` at medium reasoning for coding. Continue checkpointed
+subagents using `gpt-5.6-sol` at medium reasoning for coding. If Sol-medium
+cannot solve a bounded task, the user explicitly authorizes escalation to
+`gpt-6-astra` at medium reasoning; preserve the task scope and report what
+blocked the first attempt. Continue checkpointed
 implementation under `implementation/abv/`, plans under `implementation/plan/`.
 Use test-first development and independent review. Commit and push verified
 task-scoped checkpoints to main under the current publication authorization.

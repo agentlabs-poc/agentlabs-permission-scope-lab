@@ -1,5 +1,22 @@
 # CP2 — SQLite provider
 
+**CP4-A Task 1 extension — `f4a781c`, independently approved:** the internal
+write set now also supports one conditional existing grant-control status update,
+separate from assignment creation. Exact stored `Before` must match; only the
+status and its canonical JSON are updated inside the existing area-bound
+transaction. Mixed assignment/control writes fail before effects. No migration,
+revision adoption or authority-content rewrite. This is persistence plumbing,
+not a public authorized enable/disable operation; that requires the next two-gate
+coordinator task. The CP2-only coverage statements below describe the earlier
+checkpoint and are preserved as history.
+
+The new provider-neutral cases cover success/failure after reopen, both isolation
+dimensions, stale/missing/malformed controls, mixed writes, cancellation and
+competing writers with zero callbacks. Focused tests, provider race tests and
+the full Go suite pass; coordinator verification also passed full tests and vet.
+Rationale: reuse the established transaction and record instead of introducing
+a second storage path or a new lifecycle schema.
+
 **Complete and independently approved at `8ac7593` on 8 September 2026.**
 This checkpoint adds persistence, not production Auth integration. The source
 requirements are [Task 3](../../plan/abv-implementation-plan.md) and the
