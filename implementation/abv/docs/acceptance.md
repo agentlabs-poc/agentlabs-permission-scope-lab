@@ -1,7 +1,10 @@
 # CP1 acceptance evidence
 
 **Current state: CP1 implemented, verified and independently reviewed.**
-No SQLite or production ABV tests exist yet.
+This page preserves CP1's evidence and limits at delivery, when no SQLite or
+production ABV tests existed. SQLite persistence is now independently verified
+in [CP2 evidence](sqlite-provider.md); production authorization and actual lineage
+remain later work. Statements below about missing persistence describe CP1.
 
 ## Scope
 

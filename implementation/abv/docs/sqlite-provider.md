@@ -1,6 +1,6 @@
 # CP2 — SQLite provider
 
-**Implemented and review fixes tested; independent re-review pending.**
+**Complete and independently approved at `8ac7593` on 8 September 2026.**
 This checkpoint adds persistence, not production Auth integration. The source
 requirements are [Task 3](../../plan/abv-implementation-plan.md) and the
 [provider design](../../plan/abv-design.md).
@@ -106,10 +106,10 @@ keep their version and adopted revision fields.
 | Configured snapshot bound errors rather than truncating proof | Pass: aggregate limit, no callback |
 | Provider-neutral conformance separate from SQLite-specific tests | Pass: SQL-free conformance factory |
 | Full tests, race detector, vet and build | Pass |
-| Independent review | Four fixes implemented and tested; re-review pending |
+| Independent review | Pass: all findings resolved; final spec/quality/merge approval at `8ac7593` |
 
 Initial verification at implementation commit `e43be35`, repeated successfully
-after the review-fix wave:
+after review fixes through `8ac7593`:
 
 ```text
 go test ./internal/storage/... -v -count=1  PASS
@@ -154,8 +154,22 @@ The fix wave registers cleanup before attempting `BEGIN`, uses the same protecte
 transaction runner for migration, preserves marker-query operational failures,
 validates catalog flags/token lists on load and fixture ingress, and adds a
 deterministic cross-query read test. Focused regressions and the full/race/vet/build
-checks pass; independent re-review remains the next gate. Provider-specific test
-coverage after the fixes is 72.3%; this is not a completion or security score.
+checks pass. A subsequent scoped review found a double-classification regression
+in migration: an already-classified conflict became unavailable at `Open`.
+Commit `8ac7593` preserves existing typed categories and joined errors; its
+regression holds a real SQLite writer lock through the migration opening path.
+Independent re-review approved all fixes, with no findings remaining.
+Provider-specific test coverage after the final correction is 72.6%; this is
+not a completion or security score.
+
+Delivery commits: `e43be35` (provider and conformance), `badb2fd` (four review
+corrections), `8ac7593` (migration error classification). The transaction SVG was
+rendered and visually checked; its XML and this document's local links validate.
+
+Engineering choices retained: the existing isolated worktree was reused on a
+new checkpoint branch to preserve prior evidence; no user files were removed.
+Fixtures remain restricted to new disposable database paths to avoid a live-data
+seed bypass. PostgreSQL will need its own fixture adapter and conformance run.
 
 PostgreSQL, real
 Auth administration, actual lineage resolution, lifecycle mutation and working

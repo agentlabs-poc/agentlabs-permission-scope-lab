@@ -363,17 +363,17 @@ permission identifiers. Registration tests use the full handbook strings.
 `contracttest.Run(t, factory)` where `factory` opens providers against a supplied
 temporary file. Provider callbacks are invoked exactly once and never auto-retried.
 
-- [ ] Add dependency with `go get modernc.org/sqlite@v1.58.0`; retain checksums
+- [x] Add dependency with `go get modernc.org/sqlite@v1.58.0`; retain checksums
   and matching transitive versions. Do not upgrade unrelated modules.
-- [ ] Write provider tests for rollback, close/reopen persistence, consistent
+- [x] Write provider tests for rollback, close/reopen persistence, consistent
   snapshot reads, missing-area rejection, per-connection foreign-key enforcement
   and both dimensions of isolation. Expect failure before tables/provider exist.
-- [ ] Create provider migrations for the logical tables in the design. Use
+- [x] Create provider migrations for the logical tables in the design. Use
   composite tenant/application keys for every ordinary authority relation and
   explicit installation membership before shared catalog lookup. Add the
   grant/recipient uniqueness constraint including disabled assignments.
   No destructive cascade, public revision default, or unqualified ID lookup.
-- [ ] Implement pinned-connection transactions in this order:
+- [x] Implement pinned-connection transactions in this order:
 
 ```text
 validate Area → acquire connection → BEGIN IMMEDIATE
@@ -383,21 +383,25 @@ validate Area → acquire connection → BEGIN IMMEDIATE
 on any error/panic/cancellation → ROLLBACK → release connection
 ```
 
-- [ ] Test a write set of two assignments where the second violates uniqueness:
+- [x] Test a write set of two assignments where the second violates uniqueness:
   neither may appear afterward. Repeat after closing/reopening the file.
   Mutating the callback's snapshot must not mutate persisted records unless an
   explicit permitted write set is committed.
-- [ ] For each kind, round-trip full values (including roles, scope, validity,
+- [x] For each kind, round-trip full values (including roles, scope, validity,
   Unicode IDs and disabled assignments) with controlled fixtures. Catalogs must
   not become per-tenant copies. Deliberately reuse G1/Team1/A1 IDs in a different
   tenant and a different application; prove isolation for reads and writes.
-- [ ] Open the same file using two provider instances. Hold one mutation with
+- [x] Open the same file using two provider instances. Hold one mutation with
   channels, issue a competing update and verify consistent ordering or explicit
   lock/conflict failure—never partial visibility or callback replay. Use context
   deadlines, not sleep-dependent timing.
-- [ ] Run `go test ./internal/storage/... -count=1` and
+- [x] Run `go test ./internal/storage/... -count=1` and
   `go test -race ./internal/storage/... -count=1`. Fix connection leaks and
   rollback failures before proceeding. Record SQLite-only coverage honestly.
+
+Task 3 completion: independently approved at `8ac7593` after review corrections.
+See [CP2 evidence](../abv/docs/sqlite-provider.md), including uncertainty-safe
+transaction start/migration, corruption/error handling and cross-query read tests.
 
 ## Task 4 — deterministic parent-team lineage [CP3]
 

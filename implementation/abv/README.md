@@ -1,8 +1,8 @@
 # ABV — authority-boundary validation
 
 An isolated Go module for the authorization model developed in this repository.
-CP1 is delivered; CP2 storage is being implemented and reviewed. This is not a
-production Auth service or working database CLI.
+CP1 foundations and CP2 storage are implemented and independently reviewed.
+This is not a production Auth service or working database CLI.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
 
@@ -15,7 +15,7 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
 - `internal/validation`: registered definition checks and non-expanding permission/
   scope composition. Child scope is appended as AND predicates, never map-overwritten.
 - `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
-  implementation and reusable provider conformance suite are under CP2 review.
+  implementation and reusable provider conformance suite are delivered in CP2.
 - `internal/lab`: controlled fixtures for new disposable SQLite databases only,
   not a seed-into-live-database or ordinary bootstrap API.
 - `application`: interface between reusable CLI and later in-process facade.
