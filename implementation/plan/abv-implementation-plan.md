@@ -1,5 +1,19 @@
 # ABV, reusable CLI and SQLite Provider Implementation Plan
 
+## Current execution note — 8 September 2026
+
+The user approved execution, starting with CP1, and authorized verified commits
+and pushes. Coding now uses `gpt-5.6-sol` subagents with medium reasoning at the
+user's request. Earlier planning-only/publication gates below describe the plan
+before that approval; preserve them as history, not current blockers.
+See [checkpoint progress](progress.md) for delivered work and evidence.
+
+Internal-interface refinement: `Route` carries an `Area`; `CheckContent` and
+`Narrow` take an explicit `Area` and reject mismatched context. This implements
+the mandatory outer-boundary requirement; it adds no tenant/application fields
+to canonical grant JSON. Syntax-only decoding does not resolve authority and
+cannot authorize a write.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > or superpowers:executing-plans to implement this plan task-by-task. The default
 > handoff is inline execution; do not infer approval to spawn agents, commit,
@@ -143,6 +157,7 @@ type GrantKey struct { ID string; Revision int64 }
 type RoleKey struct { ID string; Revision int64 }
 type Predicate struct { Key, Value, SourceGrantID string }
 type Route struct {
+    Area Area
     GrantID string
     Permissions []string
     Predicates []Predicate
@@ -192,9 +207,9 @@ derived from parent omission or an ordinary JSON input.
 
 ```go
 // internal/validation, internal/lineage
-func CheckContent(domain.Catalog, domain.GrantContent,
+func CheckContent(domain.Area, domain.Catalog, domain.GrantContent,
     map[domain.RoleKey]domain.RoleContent) error
-func Narrow(domain.Route, domain.GrantContent, []string) (domain.Route, error)
+func Narrow(domain.Area, domain.Route, domain.GrantContent, []string) (domain.Route, error)
 func ResolveParentTeam(storage.Snapshot, string, string, time.Time) (domain.Route, error)
 func HasSource(storage.Snapshot, domain.Identity, domain.Route, time.Time) error
 
@@ -298,15 +313,19 @@ func TestAreaRequiresBothBoundaries(t *testing.T) {
 
 ```go
 func TestNarrowPreservesConflictingPredicates(t *testing.T) {
-    parent := domain.Route{Permissions: []string{"read", "write"},
+    area, err := domain.NewArea("acme", "hrms")
+    if err != nil { t.Fatal(err) }
+    parent := domain.Route{Area: area, GrantID: "G1", Permissions: []string{"read", "write"},
         Predicates: []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}}}
-    child := domain.GrantContent{GrantID: "G2", Scope: map[string]string{"dept": "ENG"}}
-    got, err := Narrow(parent, child, []string{"read"})
+    child := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1,
+        ParentGrantID: "G1", Permissions: []string{"read"}, Scope: map[string]string{"dept": "ENG"}}
+    got, err := Narrow(area, parent, child, []string{"read"})
     if err != nil { t.Fatal(err) }
     if len(got.Predicates) != 2 || got.Predicates[0].Value != "FIN" {
         t.Fatalf("lost parent restriction: %#v", got)
     }
-    if _, err := Narrow(parent, child, []string{"delete"}); err == nil {
+    child.Permissions = []string{"delete"}
+    if _, err := Narrow(area, parent, child, []string{"delete"}); err == nil {
         t.Fatal("accepted permission expansion")
     }
 }
@@ -435,9 +454,9 @@ CreateAssignment(ctx, area, identity, proposed)
     validate identity and operation's supported shape
     administration.CheckAssignment(ctx, snapshot, identity, proposed, now)
     require selected grant content exists and is latest for this creation
-    CheckContent(snapshot.Catalog, selectedContent, snapshot.Roles)
+    CheckContent(area, snapshot.Catalog, selectedContent, snapshot.Roles)
     establish proposed recipient team, parent route and assigner source
-    Narrow(parentRoute, selectedContent, expandedPermissions)
+    Narrow(area, parentRoute, selectedContent, expandedPermissions)
     check complete recipient/team boundary and relevant live controls
     reject existing current grant/recipient pair even if disabled
     recheck time eligibility before returning exact NewAssignments write set

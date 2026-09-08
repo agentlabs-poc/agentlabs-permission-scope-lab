@@ -1,0 +1,1 @@
+{"version":"1","grant_id":"G1","revision":2,"parent_grant_id":"G0","permissions":["hrms:employee:certificate::read","hrms:employee:certificate::write"],"scope":{"dept":"FIN"}}

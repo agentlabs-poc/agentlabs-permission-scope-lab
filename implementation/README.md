@@ -8,6 +8,8 @@ All implementation plans live in `plan/`:
 - [ABV architecture and rationale](plan/abv-design.md)
 - [ABV, reusable CLI and SQLite implementation plan](plan/abv-implementation-plan.md)
 
-Planned source: `abv/`, an isolated Go module. No runtime implementation exists
-here yet. Tenant/application is the mandatory outer boundary; the first CLI
-calls ABV in process, with SQLite behind a replaceable storage provider.
+Source: [abv/](abv/README.md), an isolated Go module. CP1 implementation is in
+progress; see [checkpoint progress](plan/progress.md). Tenant/application is the
+mandatory outer boundary. The planned working CLI calls ABV in process, with
+SQLite behind a replaceable storage provider. Persistence and mutation commands
+are not supplied by the initial CP1 command shell.

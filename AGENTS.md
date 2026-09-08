@@ -1,5 +1,15 @@
 # Handbook working rules
 
+## Current implementation execution — CP1
+
+The user approved starting the ABV implementation and explicitly requested
+subagents using `gpt-5.6-sol` at medium reasoning for coding. Continue checkpointed
+implementation under `implementation/abv/`, plans under `implementation/plan/`.
+Use test-first development and independent review. Commit and push verified
+task-scoped checkpoints to main under the current publication authorization.
+The existing Auth service and canonical handbook decisions remain unchanged.
+This supersedes planning-only gates below for the approved implementation work.
+
 ## Current publication authorization
 
 The user said to keep committing and pushing. Publish the current handbook,

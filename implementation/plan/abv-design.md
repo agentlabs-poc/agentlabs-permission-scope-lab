@@ -2,6 +2,11 @@
 
 **ABV-PLAN-001/002 · 8 September 2026 · Design for implementation review**
 
+**Execution update:** the user has approved implementation, starting with CP1,
+and verified commit/push checkpoints. Track actual delivery in
+[checkpoint progress](progress.md). Planning-only statements below preserve the
+original stage; they do not override that subsequent authorization.
+
 The user approved planning an isolated reusable Go component for the
 Authority-Boundary Validator (ABV), with SQLite storage and a provider boundary
 allowing PostgreSQL later. The detailed internal contracts below are engineering
