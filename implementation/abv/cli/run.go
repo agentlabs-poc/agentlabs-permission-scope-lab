@@ -117,7 +117,11 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	if err != nil {
 		return report(diag, err)
 	}
-	if api == nil || closeConnection == nil {
+	if closeConnection == nil {
+		return fail(4, "database connection unavailable")
+	}
+	if api == nil {
+		_ = closeConnection()
 		return fail(4, "database connection unavailable")
 	}
 	code := dispatch(ctx, command, positional, flags, in, out, diag, api, area)

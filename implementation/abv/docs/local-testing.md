@@ -1,8 +1,8 @@
 # Local ABV testing
 
-**Task 6 walkthrough draft. Commands require the working CLI; verification is
-pending.** This page documents the intended first-slice demo, not production
-Auth administration or completion of all ABV checkpoints.
+**Task 6 implemented and verified at `fb836ba`; independent review pending.**
+This page documents the working first-slice demo, not production Auth
+administration or completion of all ABV checkpoints.
 
 ## What the example proves
 
@@ -82,6 +82,25 @@ CLI parsing is reusable through the application adapter. The reusable library
 does not import CLI or lab code. Real authenticated administration remains CP5;
 PostgreSQL remains CP6. Neither requires moving SQL into the CLI or interpreting
 application business facts inside ABV.
+
+## Verification record
+
+The compiled binary completed seed, inspect, check, assignment and independent
+reopen inspection against a new SQLite file. The final stored record was:
+
+```json
+{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}
+```
+
+The negative scenario reported `observed expected rejection; assignment was not
+created`. A new inspection process then returned exit 3 with A2 absent. These
+checks ran independently of the implementer's automated binary tests.
+
+Full Go tests, race checks, vet and build pass on `fb836ba`. Tests additionally
+cover unmarked databases, wrong marker format/context, unknown fixture identity,
+both isolation dimensions, existing seed paths, malformed JSON, missing files,
+input bounds, output failures and once-only connection cleanup. Source-case
+acceptance and bounded-graph benchmarks remain Task 7, not implied by this demo.
 
 ## Exit status and output
 

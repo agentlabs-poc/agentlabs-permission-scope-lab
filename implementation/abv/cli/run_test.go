@@ -125,6 +125,15 @@ func TestConnectorAndCloseFailuresAreUnavailable(t *testing.T) {
 	}
 }
 
+func TestNilAPIFromSuccessfulConnectorStillClosesExactlyOnce(t *testing.T) {
+	connector := &connectorSpy{}
+	var out, diag bytes.Buffer
+	got := Run(context.Background(), []string{"inspect", "team", "Team1", "--db", "x", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), &out, &diag, connector.connect, nil)
+	if got != 4 || connector.calls != 1 || connector.closes != 1 {
+		t.Fatalf("exit=%d calls=%d closes=%d", got, connector.calls, connector.closes)
+	}
+}
+
 func TestRecordOutputFailureIsUnavailableAndStillCloses(t *testing.T) {
 	connector := &connectorSpy{api: &apiSpy{}}
 	var diag bytes.Buffer
