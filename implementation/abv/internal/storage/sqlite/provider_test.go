@@ -116,6 +116,34 @@ func TestMigrationCancelledBeginThatExecutedLeavesConnectionAndSchemaClean(t *te
 	}
 }
 
+func TestOpenPreservesMigrationBeginConflictClassification(t *testing.T) {
+	path := t.TempDir() + "/migration-conflict.db"
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	locker, err := db.Conn(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer locker.Close()
+	if _, err := locker.ExecContext(t.Context(), "BEGIN IMMEDIATE"); err != nil {
+		t.Fatal(err)
+	}
+	defer locker.ExecContext(context.Background(), "ROLLBACK")
+
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+	_, err = open(ctx, path, Options{}, true)
+	if !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("migration lock lost conflict classification: %v", err)
+	}
+	if errors.Is(err, domain.ErrUnavailable) {
+		t.Fatalf("migration lock was reclassified as unavailable: %v", err)
+	}
+}
+
 func TestOpenRejectsUnknownExistingDatabaseWithoutMigration(t *testing.T) {
 	path := t.TempDir() + "/unknown.db"
 	db, err := sql.Open("sqlite", path)

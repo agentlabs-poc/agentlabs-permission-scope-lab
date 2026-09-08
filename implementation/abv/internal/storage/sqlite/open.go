@@ -139,6 +139,18 @@ func classify(err error) error {
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return err
 	}
+	for _, category := range []error{
+		domain.ErrMalformed,
+		domain.ErrRejected,
+		domain.ErrUnsupported,
+		domain.ErrNotFound,
+		domain.ErrConflict,
+		domain.ErrUnavailable,
+	} {
+		if errors.Is(err, category) {
+			return err
+		}
+	}
 	var se *modernsqlite.Error
 	if errors.As(err, &se) {
 		switch se.Code() & 0xff {
