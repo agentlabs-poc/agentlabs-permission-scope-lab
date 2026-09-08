@@ -37,6 +37,11 @@ is exposed. An inner scope never replaces or widens the pair.
 
 ## 1. Outcome and component boundary
 
+**Current-build reduction — 9 September 2026:** CP6 PostgreSQL, deletion and
+parent-change operations are deferred by the user. Preserve the future design
+and existing lineage rules; these operations no longer block current completion.
+Publication/adoption and ABV definition management remain separately pending.
+
 Build a Go library that validates proposed authority changes against registered
 definitions, eligible parent support, permissions, scope and applicable team
 ceilings. Surround the validator with a mutation coordinator and persistence
@@ -374,7 +379,7 @@ those interfaces. Test both injected command execution and the compiled binary.
 | CP3 | Team-lineage resolver + safe assignment creation | The approved team case works through both gates without stale/partial writes. |
 | CP4 | Explicit lifecycle/structural operations | Enablement, validity, dependency guards and affected-branch checks are implemented, not just documented. |
 | CP5 | ABV definition management | Permission/scope/role operations obey registration and dependency/boundary rules through the component's protected path. External Auth integration is excluded. |
-| CP6 | PostgreSQL provider + migration rehearsal | The same behavior is verified on both databases, with a tested transfer path. |
+| CP6 (deferred; not required now) | Future PostgreSQL provider + migration rehearsal | Later backend-equivalence proof; not a current-build exit gate. |
 
 CP1–CP3 are the detailed first implementation slice. CP4–CP6 have defined entry
 conditions and outcome matrices in the task plan, but are not falsely presented

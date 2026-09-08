@@ -21,6 +21,13 @@ persistence must not become indefinite task, retry or review loops.
 
 ## Current implementation execution — CP1–CP3 and CP4-A complete
 
+Current-build reduction (9 September 2026): the user defers CP6 PostgreSQL,
+deletion operations and parent-change/reparenting operations. Do not implement
+or count them as required remaining work for this build. Preserve their plans
+and canonical rules for later; deferral is not completion or permission to
+weaken existing lineage checks. Publication/adoption and CP5 definition
+management were not deferred by this instruction.
+
 Scope correction from the user (9 September 2026 local time): production Auth
 service/evaluator integration is OUT OF SCOPE for this ABV build. Do not list it
 as a pending checkpoint, completion blocker, or required production adapter.

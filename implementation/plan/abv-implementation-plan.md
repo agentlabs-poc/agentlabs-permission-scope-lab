@@ -620,6 +620,12 @@ not a claim that the entire handbook or PostgreSQL is implemented.
 
 ### CP4 — lifecycle and structural writes
 
+**Current-build deferral — 9 September 2026:** the user omits deletion and
+parent-change/reparenting operations for now. Their original requirements below
+are retained for later, not current acceptance blockers. Existing parent-lineage
+validation and enable/disable safeguards remain required and implemented.
+Publication and explicit adoption are not deferred by this instruction.
+
 Add typed operations for grant/assignment enable-disable, authorized deletion,
 parent changes, publication and explicit upgrades. Entry: CP3 passing and exact
 internal operation payloads reviewed. Extend provider writes without public raw CRUD.
@@ -677,6 +683,10 @@ consistency pass; existing Auth behavior has an explicit migration/rollback plan
 </details>
 
 ### CP6 — PostgreSQL provider and data portability
+
+**Deferred by the user — not required for the current build.** Preserve the
+provider boundary and the future plan below; do not implement PostgreSQL or
+count migration/backend equivalence as current completion requirements.
 
 Implement PostgreSQL-specific migrations, queries, transaction/lock protocol and
 error translation beneath the unchanged provider port. Run all contract and ABV

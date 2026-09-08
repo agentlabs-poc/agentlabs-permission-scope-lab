@@ -7,6 +7,12 @@ outside this ABV build, not remaining required work. CP5 previously mixed ABV
 definition management with a production adapter; only the former remains here.
 Historical integration-gap statements below are context, not completion blockers.
 
+**Further user deferral:** CP6 PostgreSQL, deletion and parent changes are not
+required for the current build. Their plans and canonical rules remain preserved
+for later. Publication/adoption and CP5 definition management are not omitted.
+Rationale: finish the bounded SQLite ABV/CLI build without backend migration or
+destructive/structural editing operations.
+
 Started after the user approved the six-checkpoint plan. Baseline handbook,
 presentation and plans were committed and pushed as `64b0831`. Isolated worktree
 setup is `bac62de`; CP1 originally ran on `implementation/abv-cp1`. The retained
@@ -20,7 +26,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
 | CP4: lifecycle | CP4-A and CP4-B complete; full assignment-control slice approved through `2681550` | [Acceptance](../abv/docs/acceptance.md#cp4-b--protected-assignment-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); other lifecycle operations remain. |
 | CP5: ABV definition management | Not started | Permission/scope/role operations and dependency checks; production Auth integration excluded. |
-| CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
+| CP6: PostgreSQL | Deferred by user; not required now | Provider boundary retained; backend implementation/transfer rehearsal are later work. |
 
 ### Execution tree
 
@@ -51,17 +57,19 @@ ABV implementation
 │   │   ├── Reverse team-binding discovery              COMPLETE / REVIEWED
 │   │   ├── Protected coordinator/facade                COMPLETE / REVIEWED
 │   │   └── CLI/lab/acceptance + final review            COMPLETE / REVIEWED
-│   └── Other lifecycle operations                      PENDING
+│   ├── Publication / explicit adoption                 PENDING
+│   └── Deletion / parent changes                       DEFERRED BY USER
 ├── CP5 ABV definition management                       PENDING
-└── CP6 PostgreSQL provider                             LATER
+└── CP6 PostgreSQL provider                             DEFERRED BY USER
 ```
 
 Three numbered checkpoints are delivered for the local prototype. Checkpoints
 differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
 delivers grant-wide enable/disable; CP4-B delivers protected team-assignment
-enable/disable. Remaining CP4 operations and CP5–CP6 still
-need bounded operation plans before implementation. Real Auth-service integration
-is not part of the remaining workload or this build's completion denominator.
+enable/disable. Remaining current-build work is publication/adoption and CP5
+definition management, each requiring a bounded operation plan. PostgreSQL,
+deletion and parent changes are deferred, not completed. Real Auth-service
+integration is excluded, not part of this build's completion denominator.
 
 ### CP4-B final delivery and rationale
 
