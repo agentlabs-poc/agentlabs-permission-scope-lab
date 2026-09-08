@@ -12,6 +12,9 @@ type API interface {
 	CheckAssignment(context.Context, domain.Area, []byte) (domain.Diagnostic, error)
 	Assign(context.Context, domain.Area, domain.FixtureContext, []byte) (domain.Receipt, error)
 }
+type GrantStatusAPI interface {
+	SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
+}
 type Connect func(context.Context, domain.Area, string) (API, func() error, error)
 
 type ScenarioRunner interface {

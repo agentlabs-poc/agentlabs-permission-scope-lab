@@ -55,6 +55,22 @@ func TestCompiledBinarySeedInspectCheckAssignAndReopen(t *testing.T) {
 	if after != strings.TrimSpace(string(want))+"\n" {
 		t.Fatalf("reopened A2 = %q", after)
 	}
+	run(0, "grant", "disable", "G2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	control, _ := run(0, "inspect", "grant-control", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if control != `{"version":"1","id":"G2","status":"disabled"}`+"\n" {
+		t.Fatalf("disabled control = %q", control)
+	}
+	run(3, "check", "assignment", "--file", a2, "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(0, "grant", "enable", "G2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	control, _ = run(0, "inspect", "grant-control", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if control != `{"version":"1","id":"G2","status":"enabled"}`+"\n" {
+		t.Fatalf("enabled control = %q", control)
+	}
+	run(0, "check", "assignment", "--file", a2, "--db", database, "--tenant", "acme", "--app", "hrms")
+	reopened, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if reopened != after {
+		t.Fatalf("grant status changed assignment: before=%q after=%q", after, reopened)
+	}
 	testCompiledBinaryNegativeCases(t, binary, root)
 }
 

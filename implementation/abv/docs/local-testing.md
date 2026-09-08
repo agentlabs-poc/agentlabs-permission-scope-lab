@@ -38,11 +38,16 @@ the seed command succeed.
 ./bin/abv check assignment --file testdata/a2.json --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv assign --file testdata/a2.json --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv inspect assignment A2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv grant disable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv inspect grant-control G2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv grant enable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ```
 
 Each invocation opens the selected database independently. The final inspection
 therefore checks persistence across process restarts, not an in-memory result.
-Grant/assignment inspection prints approved core JSON. Permission, scope, role,
+Grant/assignment/control inspection prints approved core JSON. `inspect grant`
+still means immutable grant content; `inspect grant-control` reads its separate
+enable/disable record. Permission, scope, role,
 team and membership inspection uses labeled internal tables; those are not new
 canonical JSON contracts. Tenant/application is explicit command context, not
 an added inner grant scope.
@@ -66,7 +71,9 @@ this does not mean the assignment succeeded.
 
 ## Lab identity is not authentication
 
-Only the known `maya-team1` fixture context is supported. A distinct internal
+Only the known `maya-team1` fixture context is supported. Grant status is further
+limited to G2 and Maya's current direct membership in `AssignmentAdmins`; this
+separate lab capability does not follow from assignment administration. A distinct internal
 scenario marker binds the lab database to its scenario and tenant/application.
 The generic ABV database marker alone is insufficient. Ordinary opening never
 creates or repairs the lab marker, and a failed seed is not usable as a successful

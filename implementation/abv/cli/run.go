@@ -14,7 +14,7 @@ import (
 func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	connect application.Connect, scenarios application.ScenarioRunner) int {
 	if len(args) == 1 && (args[0] == "help" || args[0] == "--help" || args[0] == "-h") {
-		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, scenario\nEvery data operation requires --tenant ID --app ID. No default context."); err != nil {
+		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, grant, scenario\nEvery data operation requires --tenant ID --app ID. No default context."); err != nil {
 			return 4
 		}
 		return 0
@@ -28,7 +28,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "scenario":
+	case "inspect", "check", "assign", "grant", "scenario":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -77,6 +77,10 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	case "assign":
 		if len(positional) != 0 || !only(flags, "--tenant", "--app", "--db", "--file", "--fixture-context") || flags["--db"] == "" || flags["--file"] == "" || flags["--fixture-context"] == "" {
 			return fail(2, "assign accepts flags only")
+		}
+	case "grant":
+		if len(positional) != 2 || (positional[0] != "enable" && positional[0] != "disable") || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "grant requires enable/disable and ID")
 		}
 	case "scenario":
 		if len(positional) != 2 || empty(positional[1]) || (positional[0] != "seed" && positional[0] != "run") || flags["--db"] == "" {
@@ -135,7 +139,7 @@ func empty(value string) bool { return strings.TrimSpace(value) == "" }
 
 func inspectKind(kind string) bool {
 	switch kind {
-	case "permission", "scope", "role", "grant", "assignment", "team", "membership":
+	case "permission", "scope", "role", "grant", "grant-control", "assignment", "team", "membership":
 		return true
 	default:
 		return false

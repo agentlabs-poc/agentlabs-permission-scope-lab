@@ -3,6 +3,7 @@ package lab
 import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/storage"
+	"context"
 	"database/sql"
 	"errors"
 	"os"
@@ -41,6 +42,12 @@ func TestGenericABVDatabaseCannotUseFixtureIdentity(t *testing.T) {
 	defer closeConnection()
 	if _, err = api.Assign(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, []byte(a2JSON)); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("unmarked database assignment error = %v", err)
+	}
+	statusAPI := api.(interface {
+		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
+	})
+	if _, err = statusAPI.SetGrantStatus(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("unmarked database grant-status error = %v", err)
 	}
 }
 
@@ -97,5 +104,31 @@ func TestUnsupportedMarkerFormatCannotUseFixtureIdentity(t *testing.T) {
 	}
 	if !errors.Is(assignErr, domain.ErrUnsupported) {
 		t.Fatalf("assignment error = %v", assignErr)
+	}
+}
+
+func TestGrantStatusRequiresMarkerFixtureAndExactG2(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	path := filepath.Join(t.TempDir(), "lab.db")
+	if err := (Scenarios{}).Seed(t.Context(), area, "team-fin-c17", path); err != nil {
+		t.Fatal(err)
+	}
+	api, closeConnection, err := Connect(t.Context(), area, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeConnection()
+	statusAPI := api.(interface {
+		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
+	})
+	for _, tc := range []struct{ fixture, id string }{{"wrong", "G2"}, {"maya-team1", "G1"}} {
+		_, err = statusAPI.SetGrantStatus(t.Context(), area, domain.FixtureContext{Name: tc.fixture}, domain.GrantControl{Version: "1", ID: tc.id, Status: "disabled"})
+		if !errors.Is(err, domain.ErrRejected) {
+			t.Fatalf("%+v error = %v", tc, err)
+		}
+	}
+	record, err := api.Inspect(t.Context(), area, "grant-control", "G1")
+	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"G1","status":"enabled"}` {
+		t.Fatalf("G1 changed: %s %v", record.CanonicalJSON, err)
 	}
 }

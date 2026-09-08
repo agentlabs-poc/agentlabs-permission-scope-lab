@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"strings"
 	"testing"
 	"time"
@@ -16,6 +17,16 @@ type apiSpy struct {
 	kind, id string
 	raw      []byte
 	fixture  domain.FixtureContext
+}
+
+type grantAPI struct {
+	apiSpy
+	control domain.GrantControl
+}
+
+func (s *grantAPI) SetGrantStatus(_ context.Context, area domain.Area, fixture domain.FixtureContext, control domain.GrantControl) (domain.GrantControl, error) {
+	s.area, s.fixture, s.control = area, fixture, control
+	return control, nil
 }
 
 func (s *apiSpy) Inspect(_ context.Context, area domain.Area, kind, id string) (domain.Record, error) {
@@ -73,6 +84,10 @@ func TestInvalidCommandNeverDispatches(t *testing.T) {
 		{"scenario", "run", "team-fin-c17", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"scenario", "seed", "team-fin-c17", "--case", "bad", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"inspect", "grant", "G1", "--db", "x", "--db", "y", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "pause", "G2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "disable", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "disable", "G2", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "disable", "G2", "--recipient", "Team2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 	}
 	for _, args := range cases {
 		var out, diag bytes.Buffer
@@ -81,6 +96,40 @@ func TestInvalidCommandNeverDispatches(t *testing.T) {
 		}
 		if out.Len() != 0 || diag.Len() == 0 {
 			t.Fatalf("wrong output streams for %q", args)
+		}
+	}
+}
+
+func TestGrantStatusForwardsExactControlAndClosesOnce(t *testing.T) {
+	for _, tc := range []struct{ verb, status string }{{"disable", "disabled"}, {"enable", "enabled"}} {
+		api := &grantAPI{}
+		connector := &connectorSpy{api: api}
+		var out, diag bytes.Buffer
+		args := []string{"grant", tc.verb, "G2", "--db", "relative.db", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+		if got := Run(context.Background(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 0 {
+			t.Fatalf("%s: exit %d: %s", tc.verb, got, diag.String())
+		}
+		want := domain.GrantControl{Version: "1", ID: "G2", Status: tc.status}
+		if api.control != want || api.fixture.Name != "maya-team1" || api.area.TenantID() != "acme" || api.area.ApplicationID() != "hrms" || connector.path != "relative.db" || connector.closes != 1 {
+			t.Fatalf("wrong forwarding: api=%+v connector=%+v", api, connector)
+		}
+		if out.String() != `{"version":"1","id":"G2","status":"`+tc.status+`"}`+"\n" {
+			t.Fatalf("output = %q", out.String())
+		}
+	}
+}
+
+func TestGrantStatusRequiresOptionalCapabilityAndReportsOutputFailure(t *testing.T) {
+	args := []string{"grant", "disable", "G2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+	for _, tc := range []struct {
+		api  application.API
+		out  io.Writer
+		code int
+	}{{&apiSpy{}, &bytes.Buffer{}, 5}, {(*grantAPI)(nil), &bytes.Buffer{}, 5}, {&grantAPI{}, failingWriter{}, 4}} {
+		connector := &connectorSpy{api: tc.api}
+		var diag bytes.Buffer
+		if got := Run(context.Background(), args, strings.NewReader(""), tc.out, &diag, connector.connect, nil); got != tc.code || connector.closes != 1 {
+			t.Fatalf("exit=%d closes=%d stderr=%q", got, connector.closes, diag.String())
 		}
 	}
 }

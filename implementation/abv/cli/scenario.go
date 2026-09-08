@@ -32,6 +32,11 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			return report(diag, err)
 		}
 		return 0
+	case "grant":
+		if err := grantStatus(ctx, api, area, flags["--fixture-context"], positional[0], positional[1], out); err != nil {
+			return report(diag, err)
+		}
+		return 0
 	}
 	return report(diag, domain.ErrUnsupported)
 }

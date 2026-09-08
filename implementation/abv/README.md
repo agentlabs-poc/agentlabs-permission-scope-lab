@@ -4,7 +4,8 @@ An isolated Go module for the authorization model developed in this repository.
 CP1 foundations, CP2 storage and CP3 parent/team lineage, protected assignment
 writes and working CLI are implemented and independently reviewed. First-slice
 acceptance and final CP3 integration are approved at `5b81b84`.
-Lifecycle operations, real Auth integration and PostgreSQL remain CP4–CP6.
+CP4-A adds bounded lab grant enable/disable and control inspection. Other
+lifecycle operations, real Auth integration and PostgreSQL remain CP4–CP6.
 This is a local test harness, not a production Auth service.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
@@ -29,7 +30,7 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
   not a seed-into-live-database or ordinary bootstrap API.
 - `application`: interface between reusable CLI and its in-process adapter.
 - `cli`: testable command shell with injected streams, no SQL or process exit.
-  Explicit context/database binding; inspect, check, assign and controlled
+  Explicit context/database binding; inspect, check, assign, grant status and controlled
   scenarios use the in-process adapter. See [local testing](docs/local-testing.md).
 
 ## Run the checks

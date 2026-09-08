@@ -8,6 +8,13 @@ independent approval at `5b81b84`, with no findings. Lifecycle operations, real
 Auth/registration integration and PostgreSQL remain CP4–CP6; this is not full
 ABV or production Auth completion.
 
+CP4-A Task 3 provides the optional reusable `GrantStatusAPI`, bounded lab G2
+enable/disable commands, and separate canonical `grant-control` inspection.
+Binary acceptance assigns A2, disables G2, observes dependent diagnosis fail,
+reenables G2, observes diagnosis recover, and proves A2 is byte-for-byte unchanged.
+Missing optional adapters return status 5; marker, context, fixture and operation
+refusals do not write. This evidence does not mark full CP4 complete.
+
 - [CP2 provider evidence](sqlite-provider.md)
 - [CP3 lineage evidence](lineage-resolution.md)
 - [CP3 protected assignment evidence](assignment-creation.md)

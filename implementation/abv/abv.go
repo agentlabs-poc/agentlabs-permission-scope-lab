@@ -129,6 +129,19 @@ func inspectSnapshot(snapshot storage.Snapshot, record *domain.Record) error {
 			return domain.ErrMalformed
 		}
 		record.CanonicalJSON = raw
+	case "grant-control":
+		value, ok := snapshot.Controls[record.ID]
+		if !ok {
+			return domain.ErrNotFound
+		}
+		if value.ID != record.ID || value.Version != "1" || (value.Status != "enabled" && value.Status != "disabled") {
+			return domain.ErrMalformed
+		}
+		raw, err := json.Marshal(value)
+		if err != nil {
+			return domain.ErrMalformed
+		}
+		record.CanonicalJSON = raw
 	case "permission":
 		value, ok := snapshot.Catalog.Permissions[record.ID]
 		if !ok || value.ID != record.ID {
