@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#087E8B"/></marker></defs><rect width="1920" height="1080" fill="#F5F7FA"/>
+<rect x="0" y="0" width="16.8" height="1080" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="84" y="70.11666666666667" font-family="Liberation Sans" font-size="21.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">LIFECYCLE</text>
+<text x="80.4" y="161.96666666666667" font-family="Liberation Sans" font-size="56.666666666666664" font-weight="700" fill="#14263D" text-anchor="start" xml:space="preserve">Validity limits when authority applies</text>
+<text x="84" y="240.65" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">An expiry is a time boundary—not a new permission or scope key.</text>
+<rect x="78" y="980.4" width="1764" height="61.2" rx="7.199999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="102" y="1017.8666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Re-enabling does not reset expiry. Assignment-specific windows are deferred.</text>
+<text x="84" y="1066.05" font-family="Liberation Sans" font-size="15" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS</text>
+<text x="1802.4" y="1059.2333333333333" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="400" fill="#52657A" text-anchor="middle" xml:space="preserve">20</text>
+<text x="86.39999999999999" y="348.96666666666664" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">expires_at</text>
+<text x="86.39999999999999" y="409.6666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">The exclusive end of the</text>
+<text x="86.39999999999999" y="454.76666666666665" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">validity window.</text>
+<text x="86.39999999999999" y="547.8666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">not_before</text>
+<text x="86.39999999999999" y="608.5666666666666" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">An optional inclusive start.</text>
+<text x="86.39999999999999" y="701.6666666666666" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Parent limits</text>
+<text x="86.39999999999999" y="762.3666666666666" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">A local window cannot outlive</text>
+<text x="86.39999999999999" y="807.4666666666666" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">required support.</text>
+<rect x="762" y="300" width="1080" height="660" rx="14.399999999999999" fill="#14263D" stroke="#14263D"/>
+<text x="795.6" y="340.68333333333334" font-family="Liberation Sans" font-size="18.333333333333332" font-weight="700" fill="#83D4D6" text-anchor="start" xml:space="preserve">APPROVED GRANT VALIDITY PLACEMENT</text>
+<text x="795.6" y="406.1833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">{</text>
+<text x="795.6" y="440.98333333333335" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;version&quot;: &quot;1&quot;,</text>
+<text x="795.6" y="475.7833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;grant_id&quot;: &quot;G-TEMP-READER&quot;,</text>
+<text x="795.6" y="510.58333333333337" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#A3B2C3" text-anchor="start" xml:space="preserve">  &quot;revision&quot;: 1,</text>
+<text x="795.6" y="545.3833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;parent_grant_id&quot;: &quot;G1&quot;,</text>
+<text x="795.6" y="580.1833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;permissions&quot;: [</text>
+<text x="795.6" y="614.9833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">    &quot;hrms:employee:certificate::read&quot;</text>
+<text x="795.6" y="649.7833333333332" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  ],</text>
+<text x="795.6" y="684.5833333333334" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;scope&quot;: {&quot;cert&quot;: &quot;C17&quot;},</text>
+<text x="795.6" y="719.3833333333332" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;validity&quot;: {&quot;expires_at&quot;: &quot;2026-09-30T00:00:00Z&quot;}</text>
+<text x="795.6" y="754.1833333333334" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">}</text>
+</svg>

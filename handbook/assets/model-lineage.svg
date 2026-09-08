@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="890" viewBox="0 0 1000 890" role="img" aria-labelledby="title desc">
+  <title id="title">The chosen model: grant lineage and team lineage connected by assignments</title>
+  <desc id="desc">G1 revision 2 supplies Finance certificate read and write to Team1 through A1. G2 revision 1 derives read and adds certificate C17, and is assigned to child Team2 through A2. Nutan's explicit membership supplies Team2's valid authority. Maya needs separate administration authority and source access. No ownership or inherited human membership is implied.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
+    <style>
+      text { font-family: DejaVu Sans, sans-serif; fill: #172554; }
+      .title { font-size: 26px; font-weight: 700; }
+      .heading { font-size: 20px; font-weight: 700; }
+      .body { font-size: 17px; }
+      .note { font-size: 15px; fill: #475569; }
+      .flow { fill: none; stroke: #475569; stroke-width: 2; marker-end: url(#arrow); }
+      .dependency { fill: none; stroke: #7c3aed; stroke-width: 2; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1000" height="890" rx="16" fill="#f8fafc"/>
+  <text x="40" y="48" class="title">Two hierarchies, connected by explicit assignments</text>
+  <text x="40" y="80" class="note">Chosen framework example • valid upstream G0 support is a prerequisite</text>
+  <text x="65" y="126" class="heading">Grant authority</text>
+  <text x="670" y="126" class="heading">Team relationships</text>
+  <rect x="50" y="150" width="370" height="130" rx="12" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="72" y="185" class="heading">G1 · revision 2</text>
+  <text x="72" y="216" class="body">Certificate read + write</text>
+  <text x="72" y="247" class="body">Boundary: dept = FIN</text>
+  <rect x="650" y="150" width="300" height="130" rx="12" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="672" y="185" class="heading">Team1</text>
+  <text x="672" y="216" class="body">Holds G1 through A1</text>
+  <text x="672" y="247" class="body">A1 adopts revision 2</text>
+  <path d="M420 215 H644" class="flow"/>
+  <text x="535" y="195" text-anchor="middle" class="body">A1: assignment</text>
+  <path d="M235 280 V383" class="dependency"/>
+  <text x="255" y="321" class="note">Parent grant ceiling</text>
+  <text x="255" y="346" class="note">G2 declares parent G1</text>
+  <path d="M800 280 V383" class="flow"/>
+  <text x="620" y="321" class="note">Parent team ceiling</text>
+  <text x="550" y="346" class="note">No membership inheritance</text>
+  <rect x="50" y="390" width="370" height="155" rx="12" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="72" y="425" class="heading">G2 · revision 1</text>
+  <text x="72" y="456" class="body">Select certificate read</text>
+  <text x="72" y="487" class="body">Add cert = C17</text>
+  <text x="72" y="518" class="body">Effective: FIN AND C17 read</text>
+  <rect x="650" y="390" width="300" height="155" rx="12" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="672" y="425" class="heading">Team2</text>
+  <text x="672" y="456" class="body">Explicit child of Team1</text>
+  <text x="672" y="487" class="body">Holds G2 through A2</text>
+  <text x="672" y="518" class="body">A2 adopts revision 1</text>
+  <path d="M420 466 H644" class="flow"/>
+  <text x="535" y="446" text-anchor="middle" class="body">A2: assignment</text>
+  <path d="M800 545 V619" class="flow"/>
+  <text x="550" y="587" class="note">Explicit human membership</text>
+  <rect x="650" y="625" width="300" height="108" rx="12" fill="#dcfce7" stroke="#15803d"/>
+  <text x="672" y="661" class="heading">Nutan</text>
+  <text x="672" y="691" class="body">Receives the valid Team2 route</text>
+  <text x="672" y="715" class="note">Endpoint still enforces actual data.</text>
+  <rect x="50" y="625" width="480" height="108" rx="12" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="72" y="661" class="heading">Maya's administration is separate</text>
+  <text x="72" y="691" class="body">Needs assignment authority AND source access.</text>
+  <text x="72" y="715" class="note">Issuance does not invent a permanent Maya dependency.</text>
+  <rect x="50" y="774" width="900" height="74" rx="10" fill="#fff" stroke="#94a3b8"/>
+  <text x="72" y="804" class="body">Validate all four links: parent grant, parent team, supporting assignment and child assignment.</text>
+  <text x="72" y="830" class="note">Teams are not departments. Membership is not ownership. Enabled records still require valid support.</text>
+  <text x="40" y="874" class="note">Handbook of Authorization • A model-specific illustration, not a universal authorization topology.</text>
+</svg>

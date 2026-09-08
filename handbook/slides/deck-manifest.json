@@ -1,0 +1,5563 @@
+{
+  "version": "1",
+  "artifact": "editorial slide manifest, not an Auth contract",
+  "slide_count": 30,
+  "examples": [
+    {
+      "slide": 3,
+      "label": "APPROVED CORE JSON · DIRECT HUMAN",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "actor": {
+          "type": "user",
+          "id": "U-17"
+        },
+        "human_id": "U-17"
+      }
+    },
+    {
+      "slide": 4,
+      "label": "AGENT · APPROVED IDENTITY SHAPE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "actor": {
+          "type": "agent",
+          "id": "A-17"
+        },
+        "human_id": "U-17"
+      }
+    },
+    {
+      "slide": 4,
+      "label": "SERVICE ACCOUNT · SAME SHAPE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "actor": {
+          "type": "service_account",
+          "id": "SA-17"
+        },
+        "human_id": "U-17"
+      }
+    },
+    {
+      "slide": 5,
+      "label": "JWT PAYLOAD EXCERPT · NOT A COMPLETE TOKEN",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "sub": "U-17",
+        "identity": {
+          "version": "1",
+          "actor": {
+            "type": "agent",
+            "id": "A-17"
+          },
+          "human_id": "U-17"
+        }
+      }
+    },
+    {
+      "slide": 7,
+      "label": "NESTED permissions ARRAY · NOT A GRANT",
+      "fragment": true,
+      "value": [
+        "hrms:employee:certificate::read",
+        "hrms:employee:certificate::write"
+      ]
+    },
+    {
+      "slide": 8,
+      "label": "NESTED scope VALUE · NOT A STANDALONE RECORD",
+      "fragment": true,
+      "value": {
+        "dept": "FIN",
+        "cert": "C17"
+      }
+    },
+    {
+      "slide": 9,
+      "label": "NESTED scope VALUE · REGISTERED SELF RELATIONSHIP",
+      "fragment": true,
+      "value": {
+        "user": "$self"
+      }
+    },
+    {
+      "slide": 11,
+      "label": "APPROVED GRANT-CONTENT SHAPE · REVISION FIELDS MUTED",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "grant_id": "G1",
+        "revision": 2,
+        "parent_grant_id": "G0",
+        "permissions": [
+          "hrms:employee:certificate::read",
+          "hrms:employee:certificate::write"
+        ],
+        "scope": {
+          "dept": "FIN"
+        }
+      }
+    },
+    {
+      "slide": 12,
+      "label": "APPROVED ROLE-REFERENCE GRANT SHAPE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "grant_id": "G-ROLE-READER",
+        "revision": 1,
+        "parent_grant_id": "G0",
+        "role_id": "R-CERTIFICATE-READER",
+        "role_revision": 1,
+        "scope": {
+          "dept": "FIN"
+        }
+      }
+    },
+    {
+      "slide": 13,
+      "label": "APPROVED ASSIGNMENT SHAPE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "id": "A1",
+        "grant_id": "G1",
+        "grant_revision": 2,
+        "recipient": {
+          "type": "group",
+          "id": "Team1"
+        },
+        "status": "enabled"
+      }
+    },
+    {
+      "slide": 16,
+      "label": "APPROVED CHILD GRANT-CONTENT SHAPE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "grant_id": "G2",
+        "revision": 1,
+        "parent_grant_id": "G1",
+        "permissions": [
+          "hrms:employee:certificate::read"
+        ],
+        "scope": {
+          "cert": "C17"
+        }
+      }
+    },
+    {
+      "slide": 19,
+      "label": "APPROVED GRANT-WIDE CONTROL",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "id": "G2",
+        "status": "disabled"
+      }
+    },
+    {
+      "slide": 20,
+      "label": "APPROVED GRANT VALIDITY PLACEMENT",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "grant_id": "G-TEMP-READER",
+        "revision": 1,
+        "parent_grant_id": "G1",
+        "permissions": [
+          "hrms:employee:certificate::read"
+        ],
+        "scope": {
+          "cert": "C17"
+        },
+        "validity": {
+          "expires_at": "2026-09-30T00:00:00Z"
+        }
+      }
+    },
+    {
+      "slide": 23,
+      "label": "APPROVED GET POLICY CORE SHAPE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "method": "GET",
+        "path": "/api/v1/{tenant}/{dept}/{cert}",
+        "permission": "hrms:employee:certificate::read",
+        "inputs": {
+          "tenant": {
+            "source": "path",
+            "name": "tenant"
+          },
+          "dept": {
+            "source": "path",
+            "name": "dept"
+          },
+          "cert": {
+            "source": "path",
+            "name": "cert"
+          }
+        }
+      }
+    },
+    {
+      "slide": 24,
+      "label": "APPROVED PUT POLICY CORE SHAPE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "method": "PUT",
+        "path": "/api/v1/{tenant}/certificates/{cert}",
+        "permission": "hrms:employee:certificate::write",
+        "inputs": {
+          "tenant": {
+            "source": "path",
+            "name": "tenant"
+          },
+          "cert": {
+            "source": "path",
+            "name": "cert"
+          },
+          "proposed_dept": {
+            "source": "body",
+            "name": "department_id"
+          }
+        }
+      }
+    },
+    {
+      "slide": 27,
+      "label": "APPROVED MINIMUM ALLOW RESULT",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "decision": "allow",
+        "grant_ids": [
+          "G2"
+        ]
+      }
+    },
+    {
+      "slide": 28,
+      "label": "APPROVED CORE SHAPE · ILLUSTRATIVE CODE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "decision": "deny",
+        "error_code": "NO_AUTHORIZING_GRANT",
+        "error_message": "You do not have access.",
+        "error_message_reason": "No complete route permits this read."
+      }
+    },
+    {
+      "slide": 28,
+      "label": "APPROVED CORE SHAPE · ILLUSTRATIVE CODE",
+      "fragment": false,
+      "value": {
+        "version": "1",
+        "error_code": "AUTH_SERVICE_TIMEOUT",
+        "error_message": "We could not check your access.",
+        "error_message_reason": "Required authority could not be loaded."
+      }
+    }
+  ],
+  "text_boxes": [
+    {
+      "slide": 1,
+      "text": "FOUNDATIONS / VOCABULARY / CANONICAL JSON",
+      "x": 1.12,
+      "y": 1,
+      "w": 13,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 1,
+      "text": "Handbook of\nAuthorization",
+      "x": 1.12,
+      "y": 2,
+      "w": 13.7,
+      "h": 1.9933333333333332,
+      "size": 56,
+      "mono": false
+    },
+    {
+      "slide": 1,
+      "text": "Core concepts & JSON",
+      "x": 1.15,
+      "y": 4.4,
+      "w": 12.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 1,
+      "text": "Definitions • field meanings • connected examples",
+      "x": 1.15,
+      "y": 5.3,
+      "w": 13,
+      "h": 0.49,
+      "size": 24,
+      "mono": false
+    },
+    {
+      "slide": 1,
+      "text": "Revision mechanics are intentionally outside this deck.\nRequired fields remain in the JSON; no contracts are changed.",
+      "x": 1.15,
+      "y": 6.5,
+      "w": 12.8,
+      "h": 0.7633333333333333,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 1,
+      "text": "Based on the Handbook of Authorization · Working model",
+      "x": 1.15,
+      "y": 8.05,
+      "w": 12.8,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "THE VOCABULARY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Six questions make the model readable",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Each term answers a different question.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "A grant defines authority. An assignment connects it to a recipient.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "02",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Identity",
+      "x": 0.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Who is acting, and whose human authority supports the request?",
+      "x": 0.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.2075,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Permission",
+      "x": 5.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "What operation can be performed?",
+      "x": 5.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Scope",
+      "x": 10.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Within which boundary?",
+      "x": 10.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Grant",
+      "x": 0.97,
+      "y": 5.43,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Which bounded authority is defined?",
+      "x": 0.97,
+      "y": 5.9375,
+      "w": 4.22,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Assignment",
+      "x": 5.97,
+      "y": 5.43,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Who receives that grant?",
+      "x": 5.97,
+      "y": 5.9375,
+      "w": 4.22,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Evaluation",
+      "x": 10.97,
+      "y": 5.43,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 2,
+      "text": "Does valid authority cover this request?",
+      "x": 10.97,
+      "y": 5.9375,
+      "w": 4.22,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "IDENTITY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "Human, actor and principal",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "The actual caller and the authority anchor are distinct roles.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "For a direct human: actor.id equals human_id.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "03",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "Human / user",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "The human identity; actor type is user.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "Actor / caller",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "The person or program making this request.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "Principal",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "An umbrella term—not another record or field.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "APPROVED CORE JSON · DIRECT HUMAN",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 3,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 3,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 3,
+      "text": "  \"actor\": {\"type\": \"user\", \"id\": \"U-17\"},",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 3,
+      "text": "  \"human_id\": \"U-17\"",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 3,
+      "text": "}",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "IDENTITY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "Agent and service account are proxies",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "In our model, neither supplies independent authority.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "Automated actors are not first-class members of authorization teams.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "04",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "Actor",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "The actual automated caller.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "human_id",
+      "x": 0.72,
+      "y": 3.9116666666666666,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "The human whose authority bounds the request.",
+      "x": 0.72,
+      "y": 4.4175,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "Trust required",
+      "x": 0.72,
+      "y": 5.569166666666667,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "The association and delegation must be established.",
+      "x": 0.72,
+      "y": 6.075,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "AGENT · APPROVED IDENTITY SHAPE",
+      "x": 6.63,
+      "y": 2.5500000000000003,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.02,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.31,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "  \"actor\": {\"type\": \"agent\", \"id\": \"A-17\"},",
+      "x": 6.63,
+      "y": 3.6,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "  \"human_id\": \"U-17\"",
+      "x": 6.63,
+      "y": 3.8899999999999997,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "}",
+      "x": 6.63,
+      "y": 4.18,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "SERVICE ACCOUNT · SAME SHAPE",
+      "x": 6.63,
+      "y": 5.260000000000001,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 4,
+      "text": "{",
+      "x": 6.63,
+      "y": 5.73,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 6.0200000000000005,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "  \"actor\": {\"type\": \"service_account\", \"id\": \"SA-17\"},",
+      "x": 6.63,
+      "y": 6.3100000000000005,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "  \"human_id\": \"U-17\"",
+      "x": 6.63,
+      "y": 6.6000000000000005,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 4,
+      "text": "}",
+      "x": 6.63,
+      "y": 6.890000000000001,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "IDENTITY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "JWT subject stays human",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "Subject identifies the human; actor identifies the caller.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "Keeping sub compatible does not bypass proxy restrictions.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "05",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "sub",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "The human subject in our JWT profile.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "identity.actor",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "The actual caller, here A-17.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "Same identity block",
+      "x": 0.72,
+      "y": 5.569166666666666,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "Reusable beyond the JWT transport.",
+      "x": 0.72,
+      "y": 6.074999999999999,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "JWT PAYLOAD EXCERPT · NOT A COMPLETE TOKEN",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 5,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "  \"sub\": \"U-17\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "  \"identity\": {",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "    \"version\": \"1\",",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "    \"actor\": {\"type\": \"agent\", \"id\": \"A-17\"},",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "    \"human_id\": \"U-17\"",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "  }",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 5,
+      "text": "}",
+      "x": 6.63,
+      "y": 5.49,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 6,
+      "text": "CONTEXT",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "Tenant is the enclosing boundary",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "A path claim is not trusted tenant context.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "Tenant is implied in grant scope—not a removable scope key.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "06",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "Tenant context",
+      "x": 0.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "Established outer isolation for ordinary tenant authority.",
+      "x": 0.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.36125,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "Scope",
+      "x": 5.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "A narrower selection inside the enclosing boundary.",
+      "x": 5.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.36125,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "Application",
+      "x": 10.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 6,
+      "text": "Owns the meanings of its operations and boundary keys.",
+      "x": 10.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.36125,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "AUTHORITY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "Permission names the operation",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "What can be done—not who can do it or how far it reaches.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "One endpoint requires one permission. One grant may contain many.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "07",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "Namespace",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "Application, domain and optional deeper nouns.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "Verb",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "The operation after the double colon.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "No inference",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "No prefix inheritance, alias or wildcard access.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "NESTED permissions ARRAY · NOT A GRANT",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 7,
+      "text": "[",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 7,
+      "text": "  \"hrms:employee:certificate::read\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 7,
+      "text": "  \"hrms:employee:certificate::write\"",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 7,
+      "text": "]",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 8,
+      "text": "AUTHORITY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "Scope selects the boundary",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "The operation must stay inside every applicable constraint.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "This means Finance AND C17—not Finance OR C17.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "08",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "Keys",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "Application-registered boundary dimensions.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "Values",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "Non-empty strings with application-defined meaning.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "Combination",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "Entries within a scope combine with AND.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "NESTED scope VALUE · NOT A STANDALONE RECORD",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 8,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 8,
+      "text": "  \"dept\": \"FIN\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 8,
+      "text": "  \"cert\": \"C17\"",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 8,
+      "text": "}",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 9,
+      "text": "AUTHORITY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "$self means the authorizing human",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "A group can receive self-scoped authority without becoming “self”.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "Runtime self is settled; cross-recipient issuance needs separate validation.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "09",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "Group recipient",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "Employees receives the grant through an assignment.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "Vinay’s request",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "Self means Vinay, not Employees or its owner.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "Vinay’s agent",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "Self remains Vinay, with delegation limits.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "NESTED scope VALUE · REGISTERED SELF RELATIONSHIP",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 9,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 9,
+      "text": "  \"user\": \"$self\"",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 9,
+      "text": "}",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 10,
+      "text": "ROLE · GRANT · ASSIGNMENT",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "Three concepts—not three names for access",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "Keep the permission bundle, bounded authority and recipient separate.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "Roles are optional. A grant may list permissions directly.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "10",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "ROLE",
+      "x": 0.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "A reusable bundle of permissions.\nExample: certificate read + write.",
+      "x": 0.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.7883333333333333,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "GRANT",
+      "x": 5.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "Permissions, scope and required support.\nExample: editor authority within Finance.",
+      "x": 5.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.2154166666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "ASSIGNMENT",
+      "x": 10.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 10,
+      "text": "Connects a grant to a recipient.\nExample: Team1 receives G1.",
+      "x": 10.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.7883333333333333,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "GRANT",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "A grant defines bounded authority",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "Finance certificate read/write, dependent on valid G0 support.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "No recipient belongs on the reusable grant.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "11",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "permissions",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "The operations selected from supported authority.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "scope",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "The local Finance boundary.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "parent_grant_id",
+      "x": 0.72,
+      "y": 5.569166666666666,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "The required upstream grant—not proof of support.",
+      "x": 0.72,
+      "y": 6.074999999999999,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "APPROVED GRANT-CONTENT SHAPE · REVISION FIELDS MUTED",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 11,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "  \"grant_id\": \"G1\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "  \"revision\": 2,",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "  \"parent_grant_id\": \"G0\",",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "  \"permissions\": [",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "    \"hrms:employee:certificate::read\",",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "    \"hrms:employee:certificate::write\"",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "  ],",
+      "x": 6.63,
+      "y": 5.49,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "  \"scope\": {\"dept\": \"FIN\"}",
+      "x": 6.63,
+      "y": 5.779999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 11,
+      "text": "}",
+      "x": 6.63,
+      "y": 6.07,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "ROLE",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "A grant can use a role instead",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "The role supplies the permission bundle; the grant supplies its boundary.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "A role is not a team, an assignment or an unrestricted grant.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "12",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "role_id",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "The reusable bundle, here Certificate Reader.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "scope",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "Finance remains a grant boundary.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "Exclusive forms",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "Use permissions OR the complete role reference.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "APPROVED ROLE-REFERENCE GRANT SHAPE",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 12,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "  \"grant_id\": \"G-ROLE-READER\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "  \"revision\": 1,",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "  \"parent_grant_id\": \"G0\",",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "  \"role_id\": \"R-CERTIFICATE-READER\",",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "  \"role_revision\": 1,",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "  \"scope\": {\"dept\": \"FIN\"}",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 12,
+      "text": "}",
+      "x": 6.63,
+      "y": 5.49,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "ASSIGNMENT",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "An assignment names the recipient",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "Grant G1 is supplied to Team1 through A1.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "Creating a grant is not assigning it. Assigning it is not membership.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "13",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "id",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.3855555555555556,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "The assignment identity, not the grant ID.",
+      "x": 0.72,
+      "y": 3.0655555555555556,
+      "w": 5.12,
+      "h": 0.6911111111111111,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "grant_id",
+      "x": 0.72,
+      "y": 3.9066666666666667,
+      "w": 5.12,
+      "h": 0.3855555555555556,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "Which reusable grant is assigned.",
+      "x": 0.72,
+      "y": 4.342222222222222,
+      "w": 5.12,
+      "h": 0.3855555555555556,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "recipient",
+      "x": 0.72,
+      "y": 4.877777777777778,
+      "w": 5.12,
+      "h": 0.3855555555555556,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "Who receives it: a human or group.",
+      "x": 0.72,
+      "y": 5.3133333333333335,
+      "w": 5.12,
+      "h": 0.3855555555555556,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "status",
+      "x": 0.72,
+      "y": 5.848888888888889,
+      "w": 5.12,
+      "h": 0.3855555555555556,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "This assignment’s own live control.",
+      "x": 0.72,
+      "y": 6.2844444444444445,
+      "w": 5.12,
+      "h": 0.3855555555555556,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "APPROVED ASSIGNMENT SHAPE",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 13,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "  \"id\": \"A1\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "  \"grant_id\": \"G1\",",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "  \"grant_revision\": 2,",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "  \"recipient\": {\"type\": \"group\", \"id\": \"Team1\"},",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "  \"status\": \"enabled\"",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 13,
+      "text": "}",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 14,
+      "text": "TEAMS & PEOPLE",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "Membership is not ownership",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "Team and group mean the same thing in our model.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "Team2 membership does not automatically create Team1 membership.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "14",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "MEMBERSHIP",
+      "x": 0.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "Nutan is a Team2 member.\nShe can use its effective assigned authority.",
+      "x": 0.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.2154166666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "ASSIGNMENT",
+      "x": 5.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "A2 supplies G2 to Team2.\nIt does not add Nutan as a member.",
+      "x": 5.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.7883333333333333,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "OWNERSHIP / ADMIN",
+      "x": 10.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 14,
+      "text": "Maya can perform explicitly authorized management.\nThat does not imply business access.",
+      "x": 10.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.2154166666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "ADMINISTRATION",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "Can assign? And may assign this authority?",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "Both checks happen inside Auth Service for an authority-changing request.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "Administrative permission alone is not proof that a proposed grant fits.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "15",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "REQUEST",
+      "x": 1.05,
+      "y": 3.55,
+      "w": 2.65,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "Maya proposes an assignment",
+      "x": 1.05,
+      "y": 4.0575,
+      "w": 2.65,
+      "h": 0.9341666666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "AUTH ENDPOINT CHECK",
+      "x": 4.73,
+      "y": 3.25,
+      "w": 4.15,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "May Maya perform this assignment operation for this recipient?",
+      "x": 4.73,
+      "y": 3.7575000000000003,
+      "w": 4.15,
+      "h": 1.31,
+      "size": 24,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "AUTH BOUNDARY CHECK",
+      "x": 9.95,
+      "y": 3.25,
+      "w": 4.85,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "Does the proposed authority fit valid sources and team ceilings?",
+      "x": 9.95,
+      "y": 3.7575000000000003,
+      "w": 4.85,
+      "h": 1.31,
+      "size": 24,
+      "mono": false
+    },
+    {
+      "slide": 15,
+      "text": "Only a request passing both checks may be persisted.",
+      "x": 2,
+      "y": 7,
+      "w": 12,
+      "h": 0.5241666666666667,
+      "size": 26,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "DEPENDENT AUTHORITY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "A child grant can only narrow",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "G2 selects read and adds C17 to G1’s Finance boundary.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "Child {} retains the parent boundary. It never becomes an escape hatch.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "16",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "Permission subset",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "Read is selected from parent read/write.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "Scope AND",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "Effective scope is Finance AND C17.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "Live dependency",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "The parent definition alone is not support.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "APPROVED CHILD GRANT-CONTENT SHAPE",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 16,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "  \"grant_id\": \"G2\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "  \"revision\": 1,",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "  \"parent_grant_id\": \"G1\",",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "  \"permissions\": [",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "    \"hrms:employee:certificate::read\"",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "  ],",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "  \"scope\": {\"cert\": \"C17\"}",
+      "x": 6.63,
+      "y": 5.49,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 16,
+      "text": "}",
+      "x": 6.63,
+      "y": 5.779999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 17,
+      "text": "DEPENDENCY GRAPH",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Two lineages, joined by assignments",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Team relationships and grant relationships must both be established.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Team lineage is not grant lineage; neither implies human membership.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "17",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "G1 · PARENT GRANT",
+      "x": 1.1,
+      "y": 3,
+      "w": 5.4,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Read + write\nFinance boundary",
+      "x": 1.1,
+      "y": 3.5075000000000003,
+      "w": 5.4,
+      "h": 0.7633333333333333,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "TEAM1",
+      "x": 9.25,
+      "y": 3,
+      "w": 5.4,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Holds G1 through A1",
+      "x": 9.25,
+      "y": 3.5075000000000003,
+      "w": 5.4,
+      "h": 0.47291666666666665,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "A1 assignment",
+      "x": 6.97,
+      "y": 3.12,
+      "w": 1.88,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "G2 · CHILD GRANT",
+      "x": 1.1,
+      "y": 5.77,
+      "w": 5.4,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Read only\nFinance AND C17",
+      "x": 1.1,
+      "y": 6.2775,
+      "w": 5.4,
+      "h": 0.7633333333333333,
+      "size": 20,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "TEAM2",
+      "x": 9.25,
+      "y": 5.77,
+      "w": 5.4,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Holds G2 through A2",
+      "x": 9.25,
+      "y": 6.2775,
+      "w": 5.4,
+      "h": 0.47291666666666665,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "A2 assignment",
+      "x": 6.97,
+      "y": 5.87,
+      "w": 1.88,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Parent grant ceiling",
+      "x": 0.93,
+      "y": 4.76,
+      "w": 2.65,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Parent team ceiling",
+      "x": 12.25,
+      "y": 4.76,
+      "w": 2.65,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 17,
+      "text": "Nutan → explicit Team2 membership → valid G2 authority",
+      "x": 2,
+      "y": 7.56,
+      "w": 12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "DELEGATION",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "Proxy authority stays within the human",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "Identity names the participants; delegation establishes the dependent authority.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "Direct human-to-proxy delegation only; no proxy-to-proxy chains in v1.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "18",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "HUMAN CEILING",
+      "x": 0.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "Vinay currently has read + write.",
+      "x": 0.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 0.9341666666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "DELEGATION LIMIT",
+      "x": 5.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "A-17 is permitted read only.",
+      "x": 5.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 0.9341666666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "EFFECTIVE PROXY",
+      "x": 10.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 18,
+      "text": "A-17 can read, not write.\nLosing Vinay’s read support removes that route.",
+      "x": 10.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.2154166666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "LIFECYCLE",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Enabled does not mean effective",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Assignment and grant controls answer different questions.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "An enabled assignment cannot override a disabled grant.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "19",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Grant control",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Disabling G2 withdraws all routes through G2.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Assignment control",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Disabling A2 affects that recipient binding.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Effective authority",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "Controls, support and constraints must all pass.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "APPROVED GRANT-WIDE CONTROL",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 19,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 19,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 19,
+      "text": "  \"id\": \"G2\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 19,
+      "text": "  \"status\": \"disabled\"",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 19,
+      "text": "}",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "LIFECYCLE",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "Validity limits when authority applies",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "An expiry is a time boundary—not a new permission or scope key.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "Re-enabling does not reset expiry. Assignment-specific windows are deferred.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "20",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "expires_at",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "The exclusive end of the validity window.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "not_before",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "An optional inclusive start.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "Parent limits",
+      "x": 0.72,
+      "y": 5.569166666666666,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "A local window cannot outlive required support.",
+      "x": 0.72,
+      "y": 6.074999999999999,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "APPROVED GRANT VALIDITY PLACEMENT",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 20,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  \"grant_id\": \"G-TEMP-READER\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  \"revision\": 1,",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  \"parent_grant_id\": \"G1\",",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  \"permissions\": [",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "    \"hrms:employee:certificate::read\"",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  ],",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  \"scope\": {\"cert\": \"C17\"},",
+      "x": 6.63,
+      "y": 5.49,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "  \"validity\": {\"expires_at\": \"2026-09-30T00:00:00Z\"}",
+      "x": 6.63,
+      "y": 5.779999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 20,
+      "text": "}",
+      "x": 6.63,
+      "y": 6.07,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 21,
+      "text": "LIFECYCLE",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "An orphan has lost required support",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "Orphaning describes an affected route—not an invented status field.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "No automatic deletion, new parent, or authority repair.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "21",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "ORPHAN",
+      "x": 0.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "Required parent support no longer exists.\nThat lineage and dependent descendants are ineffective.",
+      "x": 0.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.2154166666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "NOT AN ORPHAN",
+      "x": 5.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "A legitimate root; an unassigned definition; merely disabled or expired support.",
+      "x": 5.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.7883333333333333,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "NOT PROVEN",
+      "x": 10.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 21,
+      "text": "An Auth timeout means evidence is unavailable.\nIt does not prove that support was deleted.",
+      "x": 10.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.2154166666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "REGISTRATION & ROOTS",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "Register meanings, then establish authority",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "A catalog is not a grant, and registration is not business access.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "Ordinary grants cannot become roots by simply omitting their parent.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "22",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "REGISTER",
+      "x": 0.97,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "Application permissions + scope definitions",
+      "x": 0.97,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.25875,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "VALIDATE",
+      "x": 4.76,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "Syntax, declared compatibility and authority bounds",
+      "x": 4.76,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.25875,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "BOOTSTRAP",
+      "x": 8.55,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "Trusted root + administrator group + human membership",
+      "x": 8.55,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.6516666666666666,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "DISTRIBUTE",
+      "x": 12.340000000000002,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "Explicit bounded grants and assignments",
+      "x": 12.340000000000002,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.25875,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 22,
+      "text": "Relationships and boundaries must remain connected throughout.",
+      "x": 1,
+      "y": 7.15,
+      "w": 14,
+      "h": 0.47291666666666665,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "ENDPOINT POLICY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "Declare the required operation and inputs",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "A server-owned policy connects method + path to one permission.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "A path claim about Finance does not prove C17 belongs to Finance.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "23",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "permission",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "One registered operation for this endpoint.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "inputs",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "Selected local names—not the whole request.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "source + name",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "Exactly where each required value comes from.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "APPROVED GET POLICY CORE SHAPE",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 23,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "  \"method\": \"GET\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "  \"path\": \"/api/v1/{tenant}/{dept}/{cert}\",",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "  \"permission\": \"hrms:employee:certificate::read\",",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "  \"inputs\": {",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "    \"tenant\": {\"source\": \"path\", \"name\": \"tenant\"},",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "    \"dept\": {\"source\": \"path\", \"name\": \"dept\"},",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "    \"cert\": {\"source\": \"path\", \"name\": \"cert\"}",
+      "x": 6.63,
+      "y": 5.49,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "  }",
+      "x": 6.63,
+      "y": 5.779999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 23,
+      "text": "}",
+      "x": 6.63,
+      "y": 6.07,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "ENDPOINT POLICY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "Body field and local input can differ",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "PUT binds proposed_dept to the body’s department_id.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "No silent default or query fallback for a missing declared body input.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "24",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "Local name",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "proposed_dept is used by this endpoint.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "Declared source",
+      "x": 0.72,
+      "y": 4.2875,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "Read department_id from the body.",
+      "x": 0.72,
+      "y": 4.793333333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "Proposal ≠ fact",
+      "x": 0.72,
+      "y": 5.944999999999999,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "The new department does not prove the current one.",
+      "x": 0.72,
+      "y": 6.450833333333333,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "APPROVED PUT POLICY CORE SHAPE",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 24,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "  \"method\": \"PUT\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "  \"path\": \"/api/v1/{tenant}/certificates/{cert}\",",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "  \"permission\": \"hrms:employee:certificate::write\",",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "  \"inputs\": {",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "    \"tenant\": {\"source\": \"path\", \"name\": \"tenant\"},",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "    \"cert\": {\"source\": \"path\", \"name\": \"cert\"},",
+      "x": 6.63,
+      "y": 5.199999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "    \"proposed_dept\":",
+      "x": 6.63,
+      "y": 5.49,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "      {\"source\": \"body\", \"name\": \"department_id\"}",
+      "x": 6.63,
+      "y": 5.779999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "  }",
+      "x": 6.63,
+      "y": 6.07,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 24,
+      "text": "}",
+      "x": 6.63,
+      "y": 6.359999999999999,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 25,
+      "text": "REQUEST VOCABULARY",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "Request → material → resolved request",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "Becoming evaluation-ready does not mean becoming authorized.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "Complete request/resolved-request JSON is pending; these are conceptual views.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "25",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "REQUEST",
+      "x": 0.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "Nutan asks to read C17 in Finance.\nGET /api/v1/acme/FIN/C17",
+      "x": 0.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 1.7883333333333333,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "MATERIAL",
+      "x": 5.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "Declared inputs + verified identity/tenant + trusted facts or enforceable constraints.",
+      "x": 5.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.6425,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "RESOLVED REQUEST",
+      "x": 10.97,
+      "y": 2.95,
+      "w": 4.22,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 25,
+      "text": "The operation and required meaning/material are established for evaluation.",
+      "x": 10.97,
+      "y": 3.4575000000000005,
+      "w": 4.22,
+      "h": 2.2154166666666666,
+      "size": 25,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "RESOLUTION",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "A resolved grant is a dependent view",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "It preserves the complete route—not an independent copy of permissions.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Resolution cannot amplify authority or mix fragments from unrelated grants.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "26",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Recipient route",
+      "x": 1,
+      "y": 2.85,
+      "w": 3.35,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Nutan → Team2 membership → A2 → G2",
+      "x": 4.65,
+      "y": 2.85,
+      "w": 10.2,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Required support",
+      "x": 1,
+      "y": 3.7600000000000002,
+      "w": 3.35,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Team2 → Team1; A1 → G1 → valid G0 support",
+      "x": 4.65,
+      "y": 3.7600000000000002,
+      "w": 10.2,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Permission",
+      "x": 1,
+      "y": 4.67,
+      "w": 3.35,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Certificate read only",
+      "x": 4.65,
+      "y": 4.67,
+      "w": 10.2,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Effective boundary",
+      "x": 1,
+      "y": 5.58,
+      "w": 3.35,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Finance AND C17, plus all inherited restrictions",
+      "x": 4.65,
+      "y": 5.58,
+      "w": 10.2,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Continuing limits",
+      "x": 1,
+      "y": 6.49,
+      "w": 3.35,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "Live controls, validity and any delegation limits",
+      "x": 4.65,
+      "y": 6.49,
+      "w": 10.2,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 26,
+      "text": "EXPLANATORY VIEW · RESOLVED-GRANT JSON IS STILL PENDING",
+      "x": 0.95,
+      "y": 7.56,
+      "w": 14,
+      "h": 0.33625,
+      "size": 15,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "DECISIONS",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "Allow identifies supporting authority",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "The result is about this evaluated operation—not future unrestricted access.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "Supporting references do not replace actual boundary enforcement.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "27",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "decision",
+      "x": 0.72,
+      "y": 2.63,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "A completed allow.",
+      "x": 0.72,
+      "y": 3.1358333333333333,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "grant_ids",
+      "x": 0.72,
+      "y": 3.9116666666666666,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "Non-empty supporting references.",
+      "x": 0.72,
+      "y": 4.4175,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "Evidence",
+      "x": 0.72,
+      "y": 5.193333333333333,
+      "w": 5.12,
+      "h": 0.4558333333333333,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "Not all held grants and not a new assignment.",
+      "x": 0.72,
+      "y": 5.699166666666667,
+      "w": 5.12,
+      "h": 0.8316666666666666,
+      "size": 22,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "APPROVED MINIMUM ALLOW RESULT",
+      "x": 6.63,
+      "y": 2.7,
+      "w": 8.44,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 27,
+      "text": "{",
+      "x": 6.63,
+      "y": 3.17,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 27,
+      "text": "  \"version\": \"1\",",
+      "x": 6.63,
+      "y": 3.46,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 27,
+      "text": "  \"decision\": \"allow\",",
+      "x": 6.63,
+      "y": 3.75,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 27,
+      "text": "  \"grant_ids\": [",
+      "x": 6.63,
+      "y": 4.04,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 27,
+      "text": "    \"G2\"",
+      "x": 6.63,
+      "y": 4.33,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 27,
+      "text": "  ]",
+      "x": 6.63,
+      "y": 4.62,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 27,
+      "text": "}",
+      "x": 6.63,
+      "y": 4.91,
+      "w": 8.44,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "DECISIONS",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "Deny is not an evaluation error",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "Both stop the protected operation—but they explain different outcomes.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "Both message fields reach the UI; the reason is not a private diagnostic channel.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "28",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "DENY · evaluation completed",
+      "x": 0.85,
+      "y": 2.45,
+      "w": 7.05,
+      "h": 0.47291666666666665,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "ERROR · evaluation could not finish",
+      "x": 8.2,
+      "y": 2.45,
+      "w": 7,
+      "h": 0.47291666666666665,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "APPROVED CORE SHAPE · ILLUSTRATIVE CODE",
+      "x": 1.03,
+      "y": 3.25,
+      "w": 6.539999999999999,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "{",
+      "x": 1.03,
+      "y": 3.7199999999999998,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"version\": \"1\",",
+      "x": 1.03,
+      "y": 4.01,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"decision\": \"deny\",",
+      "x": 1.03,
+      "y": 4.3,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"error_code\": \"NO_AUTHORIZING_GRANT\",",
+      "x": 1.03,
+      "y": 4.59,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"error_message\": \"You do not have access.\",",
+      "x": 1.03,
+      "y": 4.88,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"error_message_reason\":",
+      "x": 1.03,
+      "y": 5.17,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "    \"No complete route permits this read.\"",
+      "x": 1.03,
+      "y": 5.459999999999999,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "}",
+      "x": 1.03,
+      "y": 5.75,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "APPROVED CORE SHAPE · ILLUSTRATIVE CODE",
+      "x": 8.43,
+      "y": 3.25,
+      "w": 6.539999999999999,
+      "h": 0.26791666666666664,
+      "size": 11,
+      "mono": false
+    },
+    {
+      "slide": 28,
+      "text": "{",
+      "x": 8.43,
+      "y": 3.7199999999999998,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"version\": \"1\",",
+      "x": 8.43,
+      "y": 4.01,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"error_code\": \"AUTH_SERVICE_TIMEOUT\",",
+      "x": 8.43,
+      "y": 4.3,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"error_message\":",
+      "x": 8.43,
+      "y": 4.59,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "    \"We could not check your access.\",",
+      "x": 8.43,
+      "y": 4.88,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "  \"error_message_reason\":",
+      "x": 8.43,
+      "y": 5.17,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "    \"Required authority could not be loaded.\"",
+      "x": 8.43,
+      "y": 5.459999999999999,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 28,
+      "text": "}",
+      "x": 8.43,
+      "y": 5.75,
+      "w": 6.539999999999999,
+      "h": 0.3161111111111111,
+      "size": 17,
+      "mono": true
+    },
+    {
+      "slide": 29,
+      "text": "ONE CONNECTED REQUEST",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "From Nutan’s request to a constrained read",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "Auth supplies authority. The application keeps the operation inside it.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "Allow for Finance/C17 must never become an unchecked certificate-ID lookup.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "29",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "ESTABLISH",
+      "x": 0.97,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "Nutan’s identity + tenant + declared inputs",
+      "x": 0.97,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.25875,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "RESOLVE",
+      "x": 4.76,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "Team2 membership → A2 → G2, supported by Team1 / G1",
+      "x": 4.76,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.6516666666666666,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "EVALUATE",
+      "x": 8.55,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "Certificate read inside Finance AND C17",
+      "x": 8.55,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.25875,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "ENFORCE",
+      "x": 12.340000000000002,
+      "y": 3.4,
+      "w": 2.92,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "Return only data matching the trusted tenant + FIN + C17",
+      "x": 12.340000000000002,
+      "y": 3.9075,
+      "w": 2.92,
+      "h": 1.6516666666666666,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 29,
+      "text": "Relationships and boundaries must remain connected throughout.",
+      "x": 1,
+      "y": 7.15,
+      "w": 14,
+      "h": 0.47291666666666665,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "KEEP THE DISTINCTIONS",
+      "x": 0.7,
+      "y": 0.42,
+      "w": 13.5,
+      "h": 0.3020833333333333,
+      "size": 13,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "The vocabulary in one sentence",
+      "x": 0.67,
+      "y": 0.92,
+      "w": 14.6,
+      "h": 0.6608333333333333,
+      "size": 34,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "An identified actor requests an operation; valid assigned authority must cover its boundary.",
+      "x": 0.7,
+      "y": 1.74,
+      "w": 14.5,
+      "h": 0.43875,
+      "size": 21,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "Definitions first. Approved JSON beside them. Pending formats remain pending.",
+      "x": 0.85,
+      "y": 8.28,
+      "w": 14.2,
+      "h": 0.35333333333333333,
+      "size": 16,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS",
+      "x": 0.7,
+      "y": 8.77,
+      "w": 13.8,
+      "h": 0.23375,
+      "size": 9,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "30",
+      "x": 14.72,
+      "y": 8.65,
+      "w": 0.6,
+      "h": 0.31916666666666665,
+      "size": 14,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "KEEP SEPARATE",
+      "x": 1.05,
+      "y": 2.95,
+      "w": 6.5,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "Role ≠ grant ≠ assignment\nMembership ≠ ownership\nEnabled ≠ effective\nResolved ≠ allowed",
+      "x": 1.05,
+      "y": 3.4575000000000005,
+      "w": 6.5,
+      "h": 1.925,
+      "size": 27,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "FORMATS STILL PENDING",
+      "x": 8.4,
+      "y": 2.95,
+      "w": 6.5,
+      "h": 0.3875,
+      "size": 18,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "Team / membership / ownership\nStandalone role and registration\nRoot and delegation evidence\nRequest / resolved-view envelopes",
+      "x": 8.4,
+      "y": 3.4575000000000005,
+      "w": 6.5,
+      "h": 1.6516666666666666,
+      "size": 23,
+      "mono": false
+    },
+    {
+      "slide": 30,
+      "text": "Core record shapes are explained—not promoted into complete schemas.",
+      "x": 1,
+      "y": 7.5,
+      "w": 14,
+      "h": 0.47291666666666665,
+      "size": 23,
+      "mono": false
+    }
+  ]
+}

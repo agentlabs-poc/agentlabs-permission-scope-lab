@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="1080" viewBox="0 0 1060 1080" role="img" aria-labelledby="title desc">
+  <title id="title">In-process ABV architecture within the tenant and application boundary</title>
+  <desc id="desc">A reusable CLI calls an application interface and in-process facade. A coordinator obtains consistent provider evidence and runs administrative authorization and authority-boundary validation before committing. SQLite implements the provider now; PostgreSQL is planned later. All operations require the tenant and application pair. Failure produces no write.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#334155"/></marker>
+    <style>
+      text { font-family: sans-serif; fill: #172b45; }
+      .h { font-size: 23px; font-weight: 700; }
+      .t { font-size: 18px; }
+      .small { font-size: 16px; }
+      .box { fill: white; stroke: #64748b; stroke-width: 1.5; rx: 12; }
+      .flow { fill: none; stroke: #334155; stroke-width: 2; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1060" height="1080" fill="#fff"/>
+  <text x="40" y="44" class="h">ABV: local request flow and storage boundary</text>
+  <text x="40" y="73" class="t">Proposed implementation · in process · no HTTP or RPC</text>
+  <rect x="28" y="97" width="1004" height="937" rx="18" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="52" y="130" class="h">Mandatory outer context: tenant + application</text>
+  <text x="52" y="159" class="t">Every entry and provider access checks the pair. Inner scope cannot widen it.</text>
+
+  <rect x="270" y="184" width="520" height="71" class="box"/>
+  <text x="530" y="214" text-anchor="middle" class="h">Reusable CLI command layer</text>
+  <text x="530" y="240" text-anchor="middle" class="t">Parse input · present output · no rules or SQL</text>
+  <path d="M530 255V279" class="flow"/>
+  <rect x="270" y="281" width="520" height="72" class="box"/>
+  <text x="530" y="311" text-anchor="middle" class="h">Application interface → in-process facade</text>
+  <text x="530" y="338" text-anchor="middle" class="t">ABV library remains independent of CLI</text>
+  <path d="M530 353V380" class="flow"/>
+
+  <rect x="66" y="382" width="928" height="419" rx="14" fill="#fff" stroke="#0f766e" stroke-width="2"/>
+  <text x="90" y="416" class="h">Mutation coordinator: consistent validation + save</text>
+  <rect x="226" y="436" width="608" height="57" class="box"/>
+  <text x="530" y="460" text-anchor="middle" class="t">Acquire provider transaction protection; load evidence</text>
+  <text x="530" y="483" text-anchor="middle" class="small">Registered definitions via installation + this area's authority graph</text>
+  <path d="M530 493V517H302V539" class="flow"/>
+  <path d="M530 517H755V539" class="flow"/>
+  <rect x="94" y="541" width="415" height="99" rx="12" fill="#f0fdfa" stroke="#0f766e"/>
+  <text x="302" y="572" text-anchor="middle" class="h">Authorization evaluator adapter</text>
+  <text x="302" y="601" text-anchor="middle" class="t">May this caller perform this write</text>
+  <text x="302" y="625" text-anchor="middle" class="t">within its administrative scope?</text>
+  <rect x="548" y="541" width="414" height="99" rx="12" fill="#f0fdfa" stroke="#0f766e"/>
+  <text x="755" y="572" text-anchor="middle" class="h">Authority-boundary validator</text>
+  <text x="755" y="601" text-anchor="middle" class="t">Does proposed authority stay within</text>
+  <text x="755" y="625" text-anchor="middle" class="t">valid definitions, sources and lineage?</text>
+  <path d="M302 640V665H530V685" class="flow"/>
+  <path d="M755 640V665H530" fill="none" stroke="#334155" stroke-width="2"/>
+  <rect x="242" y="687" width="576" height="60" class="box"/>
+  <text x="530" y="712" text-anchor="middle" class="t">Both pass → persist exact proposal → commit → receipt</text>
+  <text x="530" y="737" text-anchor="middle" class="small">Rejection, error or conflict → no committed mutation</text>
+  <text x="90" y="780" class="small">No reusable “validation ticket”; provider protection spans evidence reads through commit.</text>
+  <path d="M530 801V825" class="flow"/>
+  <rect x="265" y="827" width="530" height="53" class="box"/>
+  <text x="530" y="860" text-anchor="middle" class="h">Transaction-aware storage provider interface</text>
+  <path d="M530 880V901H302V919" class="flow"/>
+  <path d="M530 901H755V919" class="flow"/>
+  <rect x="130" y="921" width="345" height="58" class="box"/>
+  <text x="302" y="957" text-anchor="middle" class="h">SQLite · first implementation</text>
+  <rect x="582" y="921" width="345" height="58" class="box" stroke-dasharray="6 4"/>
+  <text x="755" y="957" text-anchor="middle" class="h">PostgreSQL · later provider</text>
+  <text x="530" y="1011" text-anchor="middle" class="small">Shared application catalogs are accessed through validated context, not cloned per tenant.</text>
+  <text x="40" y="1063" class="small">Local testing uses explicit disposable fixtures. Production administrative authorization is a later integration.</text>
+</svg>

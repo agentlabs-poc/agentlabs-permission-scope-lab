@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#087E8B"/></marker></defs><rect width="1920" height="1080" fill="#F5F7FA"/>
+<rect x="0" y="0" width="16.8" height="1080" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="84" y="70.11666666666667" font-family="Liberation Sans" font-size="21.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">RESOLUTION</text>
+<text x="80.4" y="161.96666666666667" font-family="Liberation Sans" font-size="56.666666666666664" font-weight="700" fill="#14263D" text-anchor="start" xml:space="preserve">A resolved grant is a dependent view</text>
+<text x="84" y="240.65" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">It preserves the complete route—not an independent copy of permissions.</text>
+<rect x="78" y="980.4" width="1764" height="61.2" rx="7.199999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="102" y="1017.8666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Resolution cannot amplify authority or mix fragments from unrelated grants.</text>
+<text x="84" y="1066.05" font-family="Liberation Sans" font-size="15" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS</text>
+<text x="1802.4" y="1059.2333333333333" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="400" fill="#52657A" text-anchor="middle" xml:space="preserve">26</text>
+<rect x="90" y="318" width="1740" height="94.80000000000001" rx="14.399999999999999" fill="#FFFFFF" stroke="#FFFFFF"/>
+<text x="120" y="373.85" font-family="Liberation Sans" font-size="35" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Recipient route</text>
+<text x="558" y="373.85" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Nutan → Team2 membership → A2 → G2</text>
+<rect x="90" y="427.2" width="1740" height="94.80000000000001" rx="14.399999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="120" y="483.05000000000007" font-family="Liberation Sans" font-size="35" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Required support</text>
+<text x="558" y="483.05000000000007" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Team2 → Team1; A1 → G1 → valid G0 support</text>
+<rect x="90" y="536.4" width="1740" height="94.80000000000001" rx="14.399999999999999" fill="#FFFFFF" stroke="#FFFFFF"/>
+<text x="120" y="592.25" font-family="Liberation Sans" font-size="35" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Permission</text>
+<text x="558" y="592.25" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Certificate read only</text>
+<rect x="90" y="645.6" width="1740" height="94.80000000000001" rx="14.399999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="120" y="701.45" font-family="Liberation Sans" font-size="35" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Effective boundary</text>
+<text x="558" y="701.45" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Finance AND C17, plus all inherited restrictions</text>
+<rect x="90" y="754.8" width="1740" height="94.80000000000001" rx="14.399999999999999" fill="#FFFFFF" stroke="#FFFFFF"/>
+<text x="120" y="810.6500000000001" font-family="Liberation Sans" font-size="35" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Continuing limits</text>
+<text x="558" y="810.6500000000001" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Live controls, validity and any delegation limits</text>
+<text x="114" y="929.9499999999999" font-family="Liberation Sans" font-size="25" font-weight="700" fill="#9A5A06" text-anchor="start" xml:space="preserve">EXPLANATORY VIEW · RESOLVED-GRANT JSON IS STILL PENDING</text>
+</svg>

@@ -1,5 +1,52 @@
 # Handbook working rules
 
+## Current publication authorization
+
+The user said to keep committing and pushing. Publish the current handbook,
+presentation and ABV planning checkpoint, then continue verified, task-scoped
+checkpoints as work progresses. This supersedes earlier no-publication notes
+for this work, not the recorded policy decisions or implementation review gates.
+Exclude editor locks, credentials, local databases and unrelated changes.
+
+## ABV implementation planning — location and outer boundary
+
+The user requested implementation work under `implementation/`, with all its
+plans under `implementation/plan/`, not `handbook/`. The ABV design and task
+plan live there; proposed reusable Go source lives under `implementation/abv/`.
+Keep the handbook as the authorization guide and preserve existing decisions.
+Both CLI and ABV must be reusable; initially CLI calls ABV in process. SQLite
+is the first storage provider, with a replaceable provider boundary for PostgreSQL.
+Tenant/application is mandatory outer context for all operations and provider
+reads/writes: no absent-context fallback or cross-boundary lookup. Inner scope
+only narrows this context. This prevents matching IDs or broad scopes from
+escaping application/tenant isolation. Planning does not authorize commit/push.
+
+## WRITING-002 — Foundations covers concepts and canonical representations
+
+The user approved expanding Foundations beyond an introduction. Explain every
+core canonical term with meaning, purpose/rationale, relationships, rules,
+approved JSON and field explanations where available, and examples/counterexamples.
+handbook/theory/canonical-terms.md is the foundational reference alongside the
+four narrative chapters. JSON belongs beside the concept, not only in Part II.
+Keep general reasoning distinct from this framework's representations. Identify
+nested values and concepts without standalone records; mark unsettled formats
+pending instead of inventing schemas. Implementation explains how services,
+endpoints and evaluators use these concepts. Preserve approved source/history
+documents. This editorial approval does not authorize commit/push or new policy.
+
+## Current writing direction — Handbook of Authorization
+
+The user requested a substantial manuscript at repository-root handbook/, not
+under docs/. Title it "Handbook of Authorization". Separate general theory from
+the framework-specific implementation guide so it is useful beyond this model.
+Do not present human-only teams, human-dependent service accounts, one permission
+per endpoint or particular JSON shapes as universal authorization requirements.
+Use an intentional reading order, rationale, examples/counterexamples and
+appropriate SVGs. Preserve the discussion sources and keep all remaining choices
+pending; parking them for writing is not exclusion from v1 or implicit approval.
+The plan and source map are in handbook/. This request does not authorize a site
+replacement, runtime changes, new policy, or commit/push of the manuscript.
+
 ## Publication checkpoint — reconciliation and C01-D1/D2
 
 The user explicitly requested committing and pushing the pending lab changes.

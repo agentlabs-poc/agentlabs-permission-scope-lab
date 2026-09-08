@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#087E8B"/></marker></defs><rect width="1920" height="1080" fill="#F5F7FA"/>
+<rect x="0" y="0" width="16.8" height="1080" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="84" y="70.11666666666667" font-family="Liberation Sans" font-size="21.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">DEPENDENCY GRAPH</text>
+<text x="80.4" y="161.96666666666667" font-family="Liberation Sans" font-size="56.666666666666664" font-weight="700" fill="#14263D" text-anchor="start" xml:space="preserve">Two lineages, joined by assignments</text>
+<text x="84" y="240.65" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">Team relationships and grant relationships must both be established.</text>
+<rect x="78" y="980.4" width="1764" height="61.2" rx="7.199999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="102" y="1017.8666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Team lineage is not grant lineage; neither implies human membership.</text>
+<text x="84" y="1066.05" font-family="Liberation Sans" font-size="15" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS</text>
+<text x="1802.4" y="1059.2333333333333" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="400" fill="#52657A" text-anchor="middle" xml:space="preserve">17</text>
+<rect x="102" y="330" width="708" height="207.6" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="102" y="330" width="6.6" height="207.6" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="132" y="387.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">G1 · PARENT GRANT</text>
+<text x="132" y="451.23333333333335" font-family="Liberation Sans" font-size="33.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Read + write</text>
+<text x="132" y="492.23333333333335" font-family="Liberation Sans" font-size="33.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Finance boundary</text>
+<rect x="1080" y="330" width="708" height="207.6" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="1080" y="330" width="6.6" height="207.6" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="1110" y="387.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">TEAM1</text>
+<text x="1110" y="455.78333333333336" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Holds G1 through A1</text>
+<path d="M822,436.8 L1066.8000000000002,436.8" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="949.2" y="395.6333333333334" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="700" fill="#087E8B" text-anchor="middle" xml:space="preserve">A1 assignment</text>
+<rect x="102" y="662.4" width="708" height="207.6" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="102" y="662.4" width="6.6" height="207.6" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="132" y="719.6999999999999" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">G2 · CHILD GRANT</text>
+<text x="132" y="783.6333333333333" font-family="Liberation Sans" font-size="33.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Read only</text>
+<text x="132" y="824.6333333333333" font-family="Liberation Sans" font-size="33.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Finance AND C17</text>
+<rect x="1080" y="662.4" width="708" height="207.6" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="1080" y="662.4" width="6.6" height="207.6" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="1110" y="719.6999999999999" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">TEAM2</text>
+<text x="1110" y="788.1833333333333" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Holds G2 through A2</text>
+<path d="M822,763.2 L1066.8000000000002,763.2" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="949.2" y="725.6333333333333" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="700" fill="#087E8B" text-anchor="middle" xml:space="preserve">A2 assignment</text>
+<path d="M456,546 L456,649.2" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="111.60000000000001" y="595.4666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="400" fill="#087E8B" text-anchor="start" xml:space="preserve">Parent grant ceiling</text>
+<path d="M1440,546 L1440,649.2" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="1470" y="595.4666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="400" fill="#087E8B" text-anchor="start" xml:space="preserve">Parent team ceiling</text>
+<text x="960" y="940.5666666666666" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="700" fill="#087E8B" text-anchor="middle" xml:space="preserve">Nutan → explicit Team2 membership → valid G2 authority</text>
+</svg>

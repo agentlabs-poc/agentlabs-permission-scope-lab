@@ -1,5 +1,14 @@
 # Authorization Explanation Bench
 
+Read the new **[Handbook of Authorization](handbook/README.md)** manuscript:
+foundations explain general concepts and their labeled canonical JSON, followed
+by this framework's implementation guide.
+It preserves pending decisions and links back to the existing discussion sources.
+The manuscript does not replace the current website or the historical records.
+
+[Software implementation](implementation/README.md) is separate from the handbook;
+all implementation plans live under `implementation/plan/`.
+
 **Current revision rules:** [Q-102–Q-106](docs/grant-revisions.md) are recorded
 with rationale and examples. [Q-107 JSON](docs/grant-revision-format.md) is approved
 at core-shape level; full schemas remain open. All recording and exploration now

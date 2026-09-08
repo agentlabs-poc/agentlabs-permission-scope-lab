@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#087E8B"/></marker></defs><rect width="1920" height="1080" fill="#F5F7FA"/>
+<rect x="0" y="0" width="16.8" height="1080" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="84" y="70.11666666666667" font-family="Liberation Sans" font-size="21.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">IDENTITY</text>
+<text x="80.4" y="161.96666666666667" font-family="Liberation Sans" font-size="56.666666666666664" font-weight="700" fill="#14263D" text-anchor="start" xml:space="preserve">Agent and service account are proxies</text>
+<text x="84" y="240.65" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">In our model, neither supplies independent authority.</text>
+<rect x="78" y="980.4" width="1764" height="61.2" rx="7.199999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="102" y="1017.8666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Automated actors are not first-class members of authorization teams.</text>
+<text x="84" y="1066.05" font-family="Liberation Sans" font-size="15" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS</text>
+<text x="1802.4" y="1059.2333333333333" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="400" fill="#52657A" text-anchor="middle" xml:space="preserve">04</text>
+<text x="86.39999999999999" y="348.96666666666664" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Actor</text>
+<text x="86.39999999999999" y="409.6666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">The actual automated caller.</text>
+<text x="86.39999999999999" y="502.76666666666665" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">human_id</text>
+<text x="86.39999999999999" y="563.4666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">The human whose authority bounds</text>
+<text x="86.39999999999999" y="608.5666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">the request.</text>
+<text x="86.39999999999999" y="701.6666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Trust required</text>
+<text x="86.39999999999999" y="762.3666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">The association and delegation</text>
+<text x="86.39999999999999" y="807.4666666666667" font-family="Liberation Sans" font-size="36.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">must be established.</text>
+<rect x="762" y="282" width="1080" height="306" rx="14.399999999999999" fill="#14263D" stroke="#14263D"/>
+<text x="795.6" y="322.6833333333334" font-family="Liberation Sans" font-size="18.333333333333332" font-weight="700" fill="#83D4D6" text-anchor="start" xml:space="preserve">AGENT · APPROVED IDENTITY SHAPE</text>
+<text x="795.6" y="388.1833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">{</text>
+<text x="795.6" y="422.98333333333335" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;version&quot;: &quot;1&quot;,</text>
+<text x="795.6" y="457.7833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;actor&quot;: {&quot;type&quot;: &quot;agent&quot;, &quot;id&quot;: &quot;A-17&quot;},</text>
+<text x="795.6" y="492.58333333333326" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;human_id&quot;: &quot;U-17&quot;</text>
+<text x="795.6" y="527.3833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">}</text>
+<rect x="762" y="607.2" width="1080" height="340.79999999999995" rx="14.399999999999999" fill="#14263D" stroke="#14263D"/>
+<text x="795.6" y="647.8833333333333" font-family="Liberation Sans" font-size="18.333333333333332" font-weight="700" fill="#83D4D6" text-anchor="start" xml:space="preserve">SERVICE ACCOUNT · SAME SHAPE</text>
+<text x="795.6" y="713.3833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">{</text>
+<text x="795.6" y="748.1833333333334" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;version&quot;: &quot;1&quot;,</text>
+<text x="795.6" y="782.9833333333333" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;actor&quot;: {&quot;type&quot;: &quot;service_account&quot;, &quot;id&quot;: &quot;SA-17&quot;},</text>
+<text x="795.6" y="817.7833333333334" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">  &quot;human_id&quot;: &quot;U-17&quot;</text>
+<text x="795.6" y="852.5833333333334" font-family="Liberation Mono" font-size="28.333333333333332" font-weight="400" fill="#ECF3FA" text-anchor="start" xml:space="preserve">}</text>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#087E8B"/></marker></defs><rect width="1920" height="1080" fill="#F5F7FA"/>
+<rect x="0" y="0" width="16.8" height="1080" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="84" y="70.11666666666667" font-family="Liberation Sans" font-size="21.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">ONE CONNECTED REQUEST</text>
+<text x="80.4" y="161.96666666666667" font-family="Liberation Sans" font-size="56.666666666666664" font-weight="700" fill="#14263D" text-anchor="start" xml:space="preserve">From Nutan’s request to a constrained read</text>
+<text x="84" y="240.65" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">Auth supplies authority. The application keeps the operation inside it.</text>
+<rect x="78" y="980.4" width="1764" height="61.2" rx="7.199999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="102" y="1017.8666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Allow for Finance/C17 must never become an unchecked certificate-ID lookup.</text>
+<text x="84" y="1066.05" font-family="Liberation Sans" font-size="15" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS</text>
+<text x="1802.4" y="1059.2333333333333" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="400" fill="#52657A" text-anchor="middle" xml:space="preserve">29</text>
+<rect x="86.39999999999999" y="378" width="410.4" height="398.4" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="86.39999999999999" y="378" width="6.6" height="398.4" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="116.39999999999999" y="435.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">ESTABLISH</text>
+<text x="116.39999999999999" y="503.78333333333336" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Nutan’s identity</text>
+<text x="116.39999999999999" y="550.9333333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">+ tenant +</text>
+<text x="116.39999999999999" y="598.0833333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">declared inputs</text>
+<path d="M504,576 L531.5999999999999,576" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="541.1999999999999" y="378" width="410.4" height="398.4" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="541.1999999999999" y="378" width="6.6" height="398.4" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="571.1999999999999" y="435.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">RESOLVE</text>
+<text x="571.1999999999999" y="503.78333333333336" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Team2 membership</text>
+<text x="571.1999999999999" y="550.9333333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">→ A2 → G2,</text>
+<text x="571.1999999999999" y="598.0833333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">supported by</text>
+<text x="571.1999999999999" y="645.2333333333332" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Team1 / G1</text>
+<path d="M958.8000000000001,576 L986.3999999999999,576" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="996.0000000000001" y="378" width="410.4" height="398.4" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="996.0000000000001" y="378" width="6.6" height="398.4" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="1026" y="435.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">EVALUATE</text>
+<text x="1026" y="503.78333333333336" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Certificate read</text>
+<text x="1026" y="550.9333333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">inside Finance</text>
+<text x="1026" y="598.0833333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">AND C17</text>
+<path d="M1413.6000000000001,576 L1441.2,576" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="1450.8000000000002" y="378" width="410.4" height="398.4" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="1450.8000000000002" y="378" width="6.6" height="398.4" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="1480.8000000000002" y="435.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">ENFORCE</text>
+<text x="1480.8000000000002" y="503.78333333333336" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Return only data</text>
+<text x="1480.8000000000002" y="550.9333333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">matching the</text>
+<text x="1480.8000000000002" y="598.0833333333334" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">trusted tenant +</text>
+<text x="1480.8000000000002" y="645.2333333333332" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">FIN + C17</text>
+<text x="960" y="892.8833333333333" font-family="Liberation Sans" font-size="38.333333333333336" font-weight="400" fill="#52657A" text-anchor="middle" xml:space="preserve">Relationships and boundaries must remain connected throughout.</text>
+</svg>

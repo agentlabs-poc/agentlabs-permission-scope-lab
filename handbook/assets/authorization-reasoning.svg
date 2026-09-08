@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="830" viewBox="0 0 1000 830" role="img" aria-labelledby="title desc">
+  <title id="title">Authorization reasoning: from an intended operation to a bounded effect</title>
+  <desc id="desc">Established identity and context, the intended operation, applicable authority, and application evidence or constraints feed evaluation. When authority is established, execution must remain within the checked boundary. Otherwise the protected effect stops. This is a logical flow, not a deployment diagram.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
+    <style>
+      text { font-family: DejaVu Sans, sans-serif; fill: #172554; }
+      .title { font-size: 26px; font-weight: 700; }
+      .heading { font-size: 18px; font-weight: 700; }
+      .body { font-size: 16px; }
+      .note { font-size: 15px; fill: #475569; }
+      .flow { fill: none; stroke: #475569; stroke-width: 2; marker-end: url(#arrow); }
+      .join { fill: none; stroke: #475569; stroke-width: 2; }
+    </style>
+  </defs>
+  <rect width="1000" height="830" rx="16" fill="#f8fafc"/>
+  <text x="40" y="48" class="title">From a request to a justified effect</text>
+  <text x="40" y="79" class="note">General reasoning • components may be combined or distributed</text>
+  <g>
+    <rect x="40" y="115" width="215" height="115" rx="10" fill="#e0f2fe" stroke="#0284c7"/>
+    <text x="58" y="148" class="heading">Identity</text>
+    <text x="58" y="178" class="body">Verified actor and</text>
+    <text x="58" y="202" class="body">trusted context</text>
+    <rect x="275" y="115" width="215" height="115" rx="10" fill="#e0f2fe" stroke="#0284c7"/>
+    <text x="293" y="148" class="heading">Request</text>
+    <text x="293" y="178" class="body">Intended operation</text>
+    <text x="293" y="202" class="body">and supplied inputs</text>
+    <rect x="510" y="115" width="215" height="115" rx="10" fill="#ede9fe" stroke="#7c3aed"/>
+    <text x="528" y="148" class="heading">Authority</text>
+    <text x="528" y="178" class="body">Permissions, limits</text>
+    <text x="528" y="202" class="body">and required support</text>
+    <rect x="745" y="115" width="215" height="115" rx="10" fill="#ede9fe" stroke="#7c3aed"/>
+    <text x="763" y="148" class="heading">Domain material</text>
+    <text x="763" y="178" class="body">Facts or constraints</text>
+    <text x="763" y="202" class="body">enforced during use</text>
+  </g>
+  <path d="M147 230 V274 H852 V230 M382 230 V274 M617 230 V274" class="join"/>
+  <path d="M500 274 V315" class="flow"/>
+  <rect x="220" y="320" width="560" height="116" rx="12" fill="#fff" stroke="#334155" stroke-width="2"/>
+  <text x="500" y="357" text-anchor="middle" class="heading">Resolve meaning and evaluate complete authority</text>
+  <text x="500" y="389" text-anchor="middle" class="body">Does established support cover this operation and its boundary?</text>
+  <text x="500" y="414" text-anchor="middle" class="note">A request claim alone is not proof of a data relationship.</text>
+  <path d="M360 436 V490 H235 V529" class="flow"/>
+  <path d="M640 436 V490 H765 V529" class="flow"/>
+  <text x="80" y="479" class="note">Authority not established</text>
+  <text x="685" y="479" class="note">Authority established</text>
+  <rect x="50" y="535" width="370" height="104" rx="12" fill="#fff1f2" stroke="#be123c"/>
+  <text x="235" y="571" text-anchor="middle" class="heading">Stop the protected operation</text>
+  <text x="235" y="602" text-anchor="middle" class="body">Preserve the reason or evaluation failure.</text>
+  <rect x="580" y="535" width="370" height="104" rx="12" fill="#dcfce7" stroke="#15803d"/>
+  <text x="765" y="571" text-anchor="middle" class="heading">Constrain actual execution</text>
+  <text x="765" y="602" text-anchor="middle" class="body">Use the checked operation and boundary.</text>
+  <path d="M765 639 V683" class="flow"/>
+  <rect x="580" y="689" width="370" height="72" rx="12" fill="#dcfce7" stroke="#15803d"/>
+  <text x="765" y="721" text-anchor="middle" class="heading">Only permitted data and effects</text>
+  <text x="765" y="746" text-anchor="middle" class="note">The result is not a reusable unlimited allow.</text>
+  <text x="50" y="706" class="body">A successful check is only useful when</text>
+  <text x="50" y="732" class="body">the actual operation respects its limits.</text>
+  <text x="40" y="799" class="note">Handbook of Authorization • Part I: theory • No particular API, policy syntax or storage engine is implied.</text>
+</svg>

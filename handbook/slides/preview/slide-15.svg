@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#087E8B"/></marker></defs><rect width="1920" height="1080" fill="#F5F7FA"/>
+<rect x="0" y="0" width="16.8" height="1080" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="84" y="70.11666666666667" font-family="Liberation Sans" font-size="21.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">ADMINISTRATION</text>
+<text x="80.4" y="161.96666666666667" font-family="Liberation Sans" font-size="56.666666666666664" font-weight="700" fill="#14263D" text-anchor="start" xml:space="preserve">Can assign? And may assign this authority?</text>
+<text x="84" y="240.65" font-family="Liberation Sans" font-size="35" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">Both checks happen inside Auth Service for an authority-changing request.</text>
+<rect x="78" y="980.4" width="1764" height="61.2" rx="7.199999999999999" fill="#E3F3F2" stroke="#E3F3F2"/>
+<text x="102" y="1017.8666666666666" font-family="Liberation Sans" font-size="26.666666666666668" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">Administrative permission alone is not proof that a proposed grant fits.</text>
+<text x="84" y="1066.05" font-family="Liberation Sans" font-size="15" font-weight="400" fill="#52657A" text-anchor="start" xml:space="preserve">HANDBOOK OF AUTHORIZATION · OUR MODEL · CORE SHAPES, NOT COMPLETE SCHEMAS</text>
+<text x="1802.4" y="1059.2333333333333" font-family="Liberation Sans" font-size="23.333333333333332" font-weight="400" fill="#52657A" text-anchor="middle" xml:space="preserve">15</text>
+<rect x="96" y="396" width="378" height="306" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="96" y="396" width="6.6" height="306" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="126" y="453.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">REQUEST</text>
+<text x="126" y="524.8166666666667" font-family="Liberation Sans" font-size="41.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Maya proposes</text>
+<text x="126" y="576.0666666666666" font-family="Liberation Sans" font-size="41.666666666666664" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">an assignment</text>
+<rect x="537.6" y="360" width="558" height="378" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="537.6" y="360" width="6.6" height="378" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="567.6" y="417.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">AUTH ENDPOINT CHECK</text>
+<text x="567.6" y="487.3" font-family="Liberation Sans" font-size="40" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">May Maya perform this</text>
+<text x="567.6" y="536.5" font-family="Liberation Sans" font-size="40" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">assignment operation for</text>
+<text x="567.6" y="585.7" font-family="Liberation Sans" font-size="40" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">this recipient?</text>
+<rect x="1164" y="360" width="642" height="378" rx="14.399999999999999" fill="#FFFFFF" stroke="#CCD7E2"/>
+<rect x="1164" y="360" width="6.6" height="378" rx="0" fill="#087E8B" stroke="#087E8B"/>
+<text x="1194" y="417.3" font-family="Liberation Sans" font-size="30" font-weight="700" fill="#087E8B" text-anchor="start" xml:space="preserve">AUTH BOUNDARY CHECK</text>
+<text x="1194" y="487.3" font-family="Liberation Sans" font-size="40" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">Does the proposed authority</text>
+<text x="1194" y="536.5" font-family="Liberation Sans" font-size="40" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">fit valid sources and team</text>
+<text x="1194" y="585.7" font-family="Liberation Sans" font-size="40" font-weight="400" fill="#14263D" text-anchor="start" xml:space="preserve">ceilings?</text>
+<path d="M475.2,548.4000000000001 L528,548.4000000000001" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M1096.8000000000002,548.4000000000001 L1153.1999999999998,548.4000000000001" stroke="#087E8B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<text x="960" y="879.4333333333334" font-family="Liberation Sans" font-size="43.333333333333336" font-weight="700" fill="#087E8B" text-anchor="middle" xml:space="preserve">Only a request passing both checks may be persisted.</text>
+</svg>
