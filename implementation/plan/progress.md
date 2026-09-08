@@ -13,7 +13,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B Tasks 1–2 independently approved through `6414d80` | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); protected operation and CLI remain. |
+| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B Tasks 1–3 independently approved through `34319e4` | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); CLI and final acceptance remain. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
@@ -44,7 +44,7 @@ ABV implementation
 │   ├── CP4-B assignment enable/disable                  IN PROGRESS
 │   │   ├── Conditional assignment persistence          COMPLETE / REVIEWED
 │   │   ├── Reverse team-binding discovery              COMPLETE / REVIEWED
-│   │   ├── Protected coordinator/facade                PENDING
+│   │   ├── Protected coordinator/facade                COMPLETE / REVIEWED
 │   │   └── CLI/lab/acceptance + final review            PENDING
 │   └── Other lifecycle operations                      PENDING
 ├── CP5 registration + real Auth integration             PENDING
@@ -83,6 +83,21 @@ specification and quality; focused/race and controller full Go/vet tests pass.
 A minor future-test limitation remains for final review: the snapshot fingerprint
 does not inspect pointees of non-nil validity fields; current graph fixtures use
 none. No runtime mutation or authorization bypass was found.
+
+### CP4-B Task 3 — protected assignment status
+
+`c2d1d24` connects the operation-specific administrative gate, complete binding
+inventory and boundary validation to the conditional write. Disablement is
+bottom-up; enablement preserves exact adoption and validates current support.
+Neither path changes another record or inherits administration from possession.
+
+Review identified invalid-UTF8 ID handling and five ignored test-read errors.
+`34319e4` corrects both, including a RED/GREEN regression proving malformed IDs
+cannot enter Update. Focused normal/race and controller full Go/vet pass; scoped
+review approves specification and quality with no remaining Task 3 findings.
+SQLite operation tests cover forks, disabled bridges, unrelated shared holdings,
+changed support, expiry, evidence isolation, bounded snapshots and no-write reopen.
+The optional library operation is delivered; CLI/lab acceptance remains Task 4.
 
 ### CP4-A delivery and rationale
 

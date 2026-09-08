@@ -54,8 +54,10 @@ records and both gates. The user approved CP4-B01 with “proceed”; execute it
 bounded four-task plan with independent review, without reopening Q-101 principles.
 Task 1 conditional assignment persistence is independently approved at `3a5d30b`.
 Task 2 pure reverse-binding discovery is independently approved through `6414d80`,
-including its exact-key collision fix. Do not redispatch Tasks 1–2; Tasks 3–4 remain
-pending. Retain the minor future validity-pointer test-helper limitation for final
+including its exact-key collision fix. Task 3 protected assignment status is
+independently approved through `34319e4`, including UTF8 and test-read fixes.
+Do not redispatch Tasks 1–3; Task 4 CLI/acceptance remains pending.
+Retain the minor future validity-pointer test-helper limitation for final
 review, as recorded in implementation/plan/progress.md.
 CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
