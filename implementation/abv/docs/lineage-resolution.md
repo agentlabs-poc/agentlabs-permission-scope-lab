@@ -1,6 +1,6 @@
 # CP3 — actual parent/team lineage
 
-**Task 4 in progress; implementation, tests and independent review pending.**
+**Task 4 implemented; source-binding review fix in progress.**
 This describes the supported team route, not a production authorization result.
 Source: [C01 working contract](../../../docs/authority-boundary-validation.md),
 the [implementation design](../../plan/abv-design.md) and Task 4 of the
@@ -59,7 +59,7 @@ atomic write together. These pure helpers cannot authorize storage by themselves
 | No union of unused historical edges | Obsolete revisions must not create fictitious support or cycles. |
 | No issuer or ownership shortcut | Administrative ownership and business authority remain distinct. |
 
-The traversal bound is an internal safety limit, not a canonical maximum team
+The 256-step traversal bound is an internal safety limit, not a canonical maximum team
 depth. Exhaustion must return an evaluation error, never a truncated route.
 Time is injected: start is inclusive and expiry exclusive. All returned mutable
 route values must be copied so caller edits cannot change authoritative evidence.
@@ -78,10 +78,34 @@ application endpoint; this component does not query HRMS to locate C17.
 
 ## Acceptance record
 
-Pending: positive root-to-Team1 support, unrelated-holder isolation, adoption
-selection, disabled controls/assignments, relevant cycles, exact validity
-boundaries, source-membership separation, explicit unsupported cases, route
-copy isolation, provider-backed tenant/application cases and independent review.
+| Evidence | Current result |
+|---|---|
+| Root → Team1 gives read/write, FIN and `[A0, A1]` | Pass |
+| Unrelated holder cannot substitute; exact adopted revision retained | Pass |
+| Disabled/missing support, relevant cycles and selected-content mismatch | Pass |
+| Trusted root cannot skip a non-root team's ceiling | Pass |
+| Inclusive start, exclusive expiry, inherited validity and copy isolation | Pass |
+| Exact adopted root role, no implicit latest-role expansion | Pass |
+| Source membership, identity and complete reconstructed route checked | Initial tests pass; source-binding uniqueness fix required by review |
+| Direct/proxy/self unsupported cases stay explicit | Pass |
+| SQLite fixture roundtrip and both tenant/application isolation dimensions | Pass |
+| Full tests, race, vet, package build and staged whitespace checks | Pass |
+| Independent review | One source-binding finding to fix; genuine source-expiry regression also requested |
+
+The tests live in [the lineage package](../internal/lineage/resolve_test.go),
+[source checks](../internal/lineage/source_test.go), and
+[provider-backed fixture/isolation checks](../internal/lineage/provider_test.go).
+The root route uses `validation.SelectedPermissions`, a narrow shared helper
+over the existing exact direct/adopted-role logic. This prevents a second loose
+permission-expansion interface from appearing at the root.
+
+Initial review found that `HasSource` reconstructed the named final assignment
+without rechecking uniqueness of that grant/team binding. A duplicate introduced
+after route resolution could therefore pass this helper, even though parent-team
+resolution rejects the same snapshot. The source check must re-establish the
+unique binding, not treat a remembered assignment ID as sufficient evidence.
+This is a consistency correction to the existing assignment rule, not a new
+canonical source-selection policy.
 
 CP3 remains incomplete until Tasks 5–7 integrate both gates, protected CLI
 commands, transaction ordering and the restart/negative-case demonstrations.

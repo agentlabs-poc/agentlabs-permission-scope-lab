@@ -32,6 +32,14 @@ func HasSource(s storage.Snapshot, identity domain.Identity, parent domain.Route
 	if assignment.Recipient.Type != "group" || !validAssignment(assignment) || assignment.GrantID != parent.GrantID {
 		return domain.ErrRejected
 	}
+	unique, err := uniqueAssignment(s, parent.GrantID, assignment.Recipient.ID)
+	if err != nil {
+		return err
+	}
+	if unique.ID != sourceID {
+		return domain.ErrRejected
+	}
+	assignment = unique
 	if err := validateTeamChain(s, assignment.Recipient.ID); err != nil {
 		return err
 	}

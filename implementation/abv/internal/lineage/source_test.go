@@ -51,7 +51,7 @@ func TestHasSourceRevalidatesRouteAndIdentity(t *testing.T) {
 		{"caller-crafted route is not a ticket", func(_ *lab.TeamFINC17Case, route *domain.Route, _ *domain.Identity) {
 			route.Permissions = append(route.Permissions, lab.PayslipDelete)
 		}, domain.ErrRejected},
-		{"expired evidence is rechecked", func(f *lab.TeamFINC17Case, _ *domain.Route, _ *domain.Identity) {
+		{"disabled evidence is rechecked", func(f *lab.TeamFINC17Case, _ *domain.Route, _ *domain.Identity) {
 			a := f.Snapshot.Assignments["A1"]
 			a.Status = "disabled"
 			f.Snapshot.Assignments["A1"] = a
@@ -81,6 +81,51 @@ func TestHasSourceRevalidatesRouteAndIdentity(t *testing.T) {
 				t.Fatalf("got %v; want %v", err, tc.want)
 			}
 		})
+	}
+}
+
+func TestHasSourceRejectsDuplicateFinalSourceBinding(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	for _, tc := range []struct {
+		name       string
+		status     string
+		selectCopy bool
+	}{
+		{"duplicate added after route resolution", "disabled", false},
+		{"caller-crafted route selects duplicate", "enabled", true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture := lab.TeamFINC17(area)
+			parent, err := ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			copy := fixture.Snapshot.Assignments["A1"]
+			copy.ID, copy.Status = "A1-copy", tc.status
+			fixture.Snapshot.Assignments[copy.ID] = copy
+			if tc.selectCopy {
+				parent.AssignmentIDs[len(parent.AssignmentIDs)-1] = copy.ID
+			}
+			if err = HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrRejected) {
+				t.Fatalf("duplicate final source binding passed: %v", err)
+			}
+		})
+	}
+}
+
+func TestHasSourceRechecksExactExpiry(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	fixture := lab.TeamFINC17(area)
+	expiry := time.Date(2026, 9, 8, 1, 0, 0, 0, time.UTC)
+	g1 := fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
+	g1.Validity = &domain.Validity{ExpiresAt: &expiry}
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g1
+	parent, err := ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", expiry.Add(-time.Nanosecond))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = HasSource(fixture.Snapshot, fixture.Issuer, parent, expiry); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("exact-expiry source evidence remained eligible: %v", err)
 	}
 }
 
