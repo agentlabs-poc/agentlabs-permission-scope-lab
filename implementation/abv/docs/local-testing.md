@@ -99,8 +99,10 @@ checks ran independently of the implementer's automated binary tests.
 Full Go tests, race checks, vet and build pass on `5815abf`. Tests additionally
 cover unmarked databases, wrong marker format/context, unknown fixture identity,
 both isolation dimensions, existing seed paths, malformed JSON, missing files,
-input bounds, output failures and once-only connection cleanup. Source-case
-acceptance and bounded-graph benchmarks remain Task 7, not implied by this demo.
+input bounds, output failures and once-only connection cleanup. Subsequent
+Task 7 source-case acceptance and bounded-graph benchmarks are independently
+approved at `5b81b84`; see [acceptance evidence](acceptance.md) for measurements
+and remaining limits, which are not implied by the demo alone.
 
 ## Exit status and output
 

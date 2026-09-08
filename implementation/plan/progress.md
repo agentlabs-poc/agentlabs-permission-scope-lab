@@ -1,17 +1,18 @@
 # ABV implementation progress
 
-## Current delivery — CP1 and CP2 complete and independently reviewed
+## Current delivery — CP1–CP3 complete and independently reviewed
 
 Started after the user approved the six-checkpoint plan. Baseline handbook,
 presentation and plans were committed and pushed as `64b0831`. Isolated worktree
-setup is `bac62de`; coding work runs on `implementation/abv-cp1` before integration.
+setup is `bac62de`; CP1 originally ran on `implementation/abv-cp1`. The retained
+worktree now uses `implementation/abv-cp3` for the completed first slice.
 The user subsequently requested sol-medium coding subagents.
 
 | Checkpoint | Current state | Exit evidence |
 |---|---|---|
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
-| CP3: resolver and working CLI | In progress: Tasks 4–6 reviewed; Task 7 next | [Lineage](../abv/docs/lineage-resolution.md), [protected assignment](../abv/docs/assignment-creation.md) and [CLI/restart demo](../abv/docs/local-testing.md) verified; final acceptance remains. |
+| CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
@@ -29,19 +30,18 @@ ABV implementation
 │   ├── Isolation, persistence and transaction conformance
 │   ├── All independent-review findings resolved
 │   └── Provider rationale, evidence and transaction SVG
-├── CP3 working in-process ABV + CLI                     IN PROGRESS
+├── CP3 working in-process ABV + CLI                     COMPLETE
 │   ├── Task 4: actual parent/team lineage resolution    COMPLETE
 │   ├── Task 5: administration + ABV, atomic assignment  COMPLETE
 │   ├── Task 6: inspect/check/assign commands + restart demo COMPLETE
-│   └── Task 7: adversarial and end-to-end acceptance
+│   └── Task 7: adversarial and end-to-end acceptance    COMPLETE
 ├── CP4 lifecycle                                       PENDING
 ├── CP5 registration + real Auth integration             PENDING
 └── CP6 PostgreSQL                                      PENDING
 ```
 
-Two of six checkpoints are delivered. Checkpoints differ in size; this is not
-a percentage-of-effort estimate. CP2 does not provide runtime authorization or
-working CLI mutation commands. CP4–CP6 still need exact operation plans before
+Three of six checkpoints are delivered for the local prototype. Checkpoints
+differ in size; this is not a percentage-of-effort estimate. CP4–CP6 still need exact operation plans before
 implementation, as stated in the approved execution plan.
 
 ### Engineering choices and rationale
@@ -142,3 +142,27 @@ matrix, isolation evidence and bounded-snapshot benchmarks.
 Execution is now explicitly bounded: each work unit has scope, exit criteria,
 time and retry/review limits. Overrun or stalled progress requires reassessment,
 not another unchanged loop. This preserves security and verification gates.
+
+### CP3 / Task 7 and final first-slice acceptance
+
+`5b81b84` adds empty-child-scope persistence/reopen and snapshot-overflow no-write
+proofs, bounded 100/1,000/10,000-record diagnosis benchmarks, stronger original
+snapshot isolation evidence, parent-only expiry crossing and input-close error
+propagation. All 28 source cases are classified against exact evidence or stated
+limits; this does not mean all 28 operations are implemented.
+
+Independent Task 7 specification, quality and complete CP3 integration verdicts
+are approved with no findings. All three prior review minors are closed; the
+absence of deterministic read-only file Close-failure injection remains documented.
+The parent independently passed full Go tests, race tests, vet, executable build,
+benchmarks, website build and all 10 website tests. No new dependency, canonical
+decision, Auth-service change or duplicate concurrency suite was introduced.
+
+The coding unit completed within its ten-minute budget. One bounded final review
+covered both acceptance and integration with separate verdicts; no repeated
+review loop was needed. Evidence remains available in the acceptance document.
+
+Next: plan CP4's exact lifecycle operations and transaction effects, starting
+with grant/assignment enable-disable and dependent effectiveness. Publication,
+reparenting, affected shared branches and explicit upgrades remain in CP4's
+required scope; they are not silently omitted or already implemented.

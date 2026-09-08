@@ -15,7 +15,7 @@ requirements, or claim completion, merely to meet a time budget.
 Rationale: the user explicitly requires finite, progress-driven activity;
 persistence must not become indefinite task, retry or review loops.
 
-## Current implementation execution — CP3 in progress
+## Current implementation execution — CP1–CP3 complete
 
 CP1 was implemented, independently reviewed and pushed through `ccb426d`.
 Task 3 / CP2 SQLite provider and conformance are implemented and independently
@@ -27,12 +27,16 @@ lineage/source checks are independently approved at `4550860` and pushed through
 `b4d0d17`. Task 5 coordinator/facade is independently approved at `d7fea85`,
 including its deterministic-ordering test correction and pushed at `1786b22`.
 Task 6 working CLI is independently approved through `5815abf`, including its
-cleanup and missing-file regression fixes. Task 7 acceptance is next.
-Do not redispatch Tasks 4–6. No CP3 completion is claimed until acceptance passes.
+cleanup and missing-file regression fixes. Task 7 and the complete CP3 local
+prototype are independently approved at `5b81b84`: full verification, all 28
+source-case classifications and three bounded benchmark sizes are recorded.
+Do not redispatch Tasks 1–7. Next is an exact CP4 lifecycle operation plan before
+implementation; CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.
 Never present internal provider writes or controlled fixture creation as a
-production authorization gate; both required authority checks arrive in CP3.
+production authorization gate. CP3's facade runs both checks, but its static lab
+administration premise is not a production authenticated adapter.
 
 The user approved starting the ABV implementation and explicitly requested
 subagents using `gpt-5.6-sol` at medium reasoning for coding. Continue checkpointed

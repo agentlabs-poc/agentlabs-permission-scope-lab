@@ -588,24 +588,24 @@ not its concurrency acceptance requirements.
 **Consumes:** all first-slice components. **Produces:** reproducible evidence,
 not a claim that the entire handbook or PostgreSQL is implemented.
 
-- [ ] Map source cases C01-T01–T28 to tests, unsupported implementation limits
+- [x] Map source cases C01-T01–T28 to tests, unsupported implementation limits
   or later checkpoints. C01-T27 is application actual-data enforcement, not an
   ABV success claim. C01-T07 publication policy and C01-T28 source binding remain
   visibly unresolved where applicable. No blanket “28/28 pass” from fixtures.
-- [ ] Make same-tenant/different-app and different-tenant/same-app cases mandatory
+- [x] Make same-tenant/different-app and different-tenant/same-app cases mandatory
   for every read/write/resolve test family. Verify catalog access requires a valid
   installation in the explicit Area, with no scope/ID override or fallback.
-- [ ] Run `go test ./... -count=1`, `go test -race ./... -count=1`, `go vet ./...`
+- [x] Run `go test ./... -count=1`, `go test -race ./... -count=1`, `go vet ./...`
   and `go build ./cmd/abv`. Run provider conformance with two independent handles
   and restart the database between persistence assertions.
-- [ ] Add benchmarks for 100, 1,000 and 10,000 authority records in one bounded
+- [x] Add benchmarks for 100, 1,000 and 10,000 authority records in one bounded
   graph; report time and allocation counts without inventing a latency SLA.
   Above the configured snapshot limit must return an explicit error, never a
   partial route or a successful result based on a truncated graph.
-- [ ] Check package imports: CLI only depends on the application interface/domain;
+- [x] Check package imports: CLI only depends on the application interface/domain;
   validation/lineage import no SQL or CLI; the provider imports no CLI; facade
   imports no presentation layer. Changing a CLI flag must not change validator tests.
-- [ ] Record exact command outcomes and remaining gaps in `docs/acceptance.md`.
+- [x] Record exact command outcomes and remaining gaps in `docs/acceptance.md`.
   Review repository diff; no Auth server files or handbook decisions change.
   Stop at the checkpoint for review; commit/push only on explicit authorization.
 

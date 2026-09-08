@@ -1,10 +1,10 @@
 # ABV — authority-boundary validation
 
 An isolated Go module for the authorization model developed in this repository.
-CP1 foundations and CP2 storage are implemented and independently reviewed.
-CP3 Tasks 4–5 parent/team lineage, source checks and protected assignment writes
-are also reviewed. Task 6 provides a working local CLI, verified and independently
-approved through `5815abf`. First-slice acceptance remains Task 7.
+CP1 foundations, CP2 storage and CP3 parent/team lineage, protected assignment
+writes and working CLI are implemented and independently reviewed. First-slice
+acceptance and final CP3 integration are approved at `5b81b84`.
+Lifecycle operations, real Auth integration and PostgreSQL remain CP4–CP6.
 This is a local test harness, not a production Auth service.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).

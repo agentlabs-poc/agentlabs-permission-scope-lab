@@ -2,25 +2,25 @@
 
 ## Current delivery
 
-CP1 and CP2 are delivered. CP3 has reviewed parent-team lineage and protected
-assignment creation, published through `1786b22`. The working CLI is verified
-and independently approved through `5815abf`. Full first-slice source-case and
-benchmark acceptance remain Task 7; this is not full ABV or production Auth
-completion.
+CP1, CP2 and CP3 are complete for the approved local prototype slice. Task 7
+specification compliance, Task 7 quality and final CP3 integration received
+independent approval at `5b81b84`, with no findings. Lifecycle operations, real
+Auth/registration integration and PostgreSQL remain CP4–CP6; this is not full
+ABV or production Auth completion.
 
 - [CP2 provider evidence](sqlite-provider.md)
 - [CP3 lineage evidence](lineage-resolution.md)
 - [CP3 protected assignment evidence](assignment-creation.md)
 - [Verified CLI walkthrough](local-testing.md)
 
-## CP3 source-case map — final review pending
+## CP3 source-case map — independently reviewed
 
 This maps every case in the [source contract, section 8](../../../docs/authority-boundary-validation.md#8-review-cases-and-rationale).
 It is an evidence inventory, not a claim of 28 implemented operations. A
 resolution check proves the effect of supplied state; it does not implement the
 authorized lifecycle operation that creates that state. The laboratory admin
-premise is not production authentication. Task 7 additions are verified locally;
-independent final review is still pending.
+premise is not production authentication. Task 7 additions and this classification
+have passed local verification and independent final review.
 
 Test paths below are relative to `implementation/abv/`. The repeated failure
 table is `TestCreateAssignmentFailuresDoNotWrite` in
@@ -109,6 +109,14 @@ Input-file close errors now propagate through `readInput` instead of being
 discarded. Existing file-input tests pass. There is no deterministic test
 injecting a read-only `os.File.Close` failure: no general filesystem abstraction
 was introduced solely for that test. This limitation remains visible for review.
+
+The final reviewer closed all three prior minor findings: unmasked snapshot
+isolation evidence, parent-only expiry evidence and input-file Close handling.
+The documented deterministic Close-failure injection limitation is retained;
+it was not treated as an unimplemented error-handling branch. The complete CP3
+changed surface was reviewed without rerunning already-recorded suites. Task 7
+and final integration were assessed together in one bounded pass, with separate
+specification, quality and merge-readiness verdicts. No review surface was waived.
 
 ### Bounded snapshot benchmark — 8 September 2026
 
