@@ -5,6 +5,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 )
 
 // Parsing must fail before any adapter call. Nil adapters turn an accidental dispatch into a failure.
@@ -75,5 +76,17 @@ func TestCancelledCommandDoesNotDispatch(t *testing.T) {
 	var out, diag bytes.Buffer
 	if got := Run(ctx, []string{"assign", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), &out, &diag, nil, nil); got != 4 {
 		t.Fatal("cancelled command did not report evaluation failure", got)
+	}
+}
+
+func TestExpiredDeadlineDoesNotDispatch(t *testing.T) {
+	ctx, cancel := context.WithDeadline(context.Background(), time.Unix(0, 0))
+	defer cancel()
+	var out, diag bytes.Buffer
+	if got := Run(ctx, []string{"assign", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), &out, &diag, nil, nil); got != 4 {
+		t.Fatal("expired deadline did not report evaluation failure", got)
+	}
+	if out.Len() != 0 || diag.Len() == 0 {
+		t.Fatal("deadline result used wrong output stream")
 	}
 }

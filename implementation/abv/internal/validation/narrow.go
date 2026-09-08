@@ -8,9 +8,9 @@ import (
 )
 
 // Narrow constructs restrictions from a supported parent and checked child.
-// The caller supplies the exact selected role expansion when role-based.
+// It resolves the complete direct or exactly adopted role permission source.
 // It does not discover lineage or bind recipient-relative tokens like $self.
-func Narrow(area domain.Area, parent domain.Route, child domain.GrantContent, permissions []string) (domain.Route, error) {
+func Narrow(area domain.Area, parent domain.Route, child domain.GrantContent, roles map[domain.RoleKey]domain.RoleContent) (domain.Route, error) {
 	fail := func(err error) (domain.Route, error) { return domain.Route{}, err }
 	if err := area.Validate(); err != nil {
 		return fail(err)
@@ -24,18 +24,9 @@ func Narrow(area domain.Area, parent domain.Route, child domain.GrantContent, pe
 	if err := codec.ValidateContent(child); err != nil {
 		return fail(err)
 	}
-	if err := codec.PermissionList(permissions); err != nil {
+	permissions, err := selectedPermissions(child, roles)
+	if err != nil {
 		return fail(err)
-	}
-	if child.Permissions != nil {
-		if len(permissions) != len(child.Permissions) {
-			return fail(domain.ErrRejected)
-		}
-		for _, p := range permissions {
-			if !slices.Contains(child.Permissions, p) {
-				return fail(domain.ErrRejected)
-			}
-		}
 	}
 	for _, p := range permissions {
 		if !slices.Contains(parent.Permissions, p) {

@@ -50,7 +50,25 @@ The checkpoint has no external Go dependencies, SQLite driver, server or raw
 write method. CLI currently admits grant/assignment inspection syntax; wider
 inspection kinds from Task 6 will be implemented with their adapters at CP3.
 
-## What these checks do not prove
+## Independent review — correction before integration
+
+The reviewer examined checkpoint `5751b62` and found an important role-path gap:
+`CheckContent` could validate a child selecting a read-only role, while the old
+`Narrow` interface accepted a separately supplied write permission from a broader
+parent. A comment requiring correct expansion was not a sufficient API invariant.
+The code has not been deployed or integrated with any persistence path.
+
+The correction removes that expansion parameter. Both helpers derive direct or
+exact-role-revision permissions through a shared implementation, and narrowing
+must retain the complete selected set or reject it. It cannot substitute a
+different parent permission or silently trim a role. Regression tests and a
+scoped independent re-review are required before CP1 completion.
+
+The reviewer also requested an explicit cancellation-category choice. Standard
+`context.Canceled` and `context.DeadlineExceeded` are retained for classification
+with `errors.Is`, rather than inventing a canonical public error code.
+
+## Limits and source-case coverage
 
 Source-case coverage is deliberately limited:
 

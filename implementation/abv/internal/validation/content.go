@@ -21,16 +21,9 @@ func CheckContent(area domain.Area, catalog domain.Catalog, g domain.GrantConten
 	if err := codec.ValidateContent(g); err != nil {
 		return err
 	}
-	permissions := g.Permissions
-	if permissions == nil {
-		role, ok := roles[domain.RoleKey{ID: g.RoleID, Revision: g.RoleRevision}]
-		if !ok || role.ID != g.RoleID || role.Revision != g.RoleRevision {
-			return domain.ErrRejected
-		}
-		permissions = role.Permissions
-		if err := codec.PermissionList(permissions); err != nil {
-			return err
-		}
+	permissions, err := selectedPermissions(g, roles)
+	if err != nil {
+		return err
 	}
 	for _, permission := range permissions {
 		registered, ok := catalog.Permissions[permission]
@@ -59,6 +52,22 @@ func CheckContent(area domain.Area, catalog domain.Catalog, g domain.GrantConten
 		}
 	}
 	return nil
+}
+
+// selectedPermissions resolves the content's complete, exact permission source.
+// Callers must validate the content shape before calling it.
+func selectedPermissions(g domain.GrantContent, roles map[domain.RoleKey]domain.RoleContent) ([]string, error) {
+	if g.Permissions != nil {
+		return g.Permissions, nil
+	}
+	role, ok := roles[domain.RoleKey{ID: g.RoleID, Revision: g.RoleRevision}]
+	if !ok || role.ID != g.RoleID || role.Revision != g.RoleRevision {
+		return nil, domain.ErrRejected
+	}
+	if err := codec.PermissionList(role.Permissions); err != nil {
+		return nil, err
+	}
+	return role.Permissions, nil
 }
 
 func selectedTokens(tokens []string) error {

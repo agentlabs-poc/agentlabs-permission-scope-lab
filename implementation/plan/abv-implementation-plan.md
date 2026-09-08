@@ -14,6 +14,13 @@ the mandatory outer-boundary requirement; it adds no tenant/application fields
 to canonical grant JSON. Syntax-only decoding does not resolve authority and
 cannot authorize a write.
 
+**CP1 review correction:** `Narrow` receives the area's role-revision records,
+not a free-standing caller-supplied permission expansion. It derives the entire
+selected permission list from direct content or the exact role revision through
+the same helper as definition validation. This prevents substituting another
+parent permission or silently trimming the selected role bundle. The earlier
+loose expansion parameter is superseded; canonical grant JSON is unchanged.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > or superpowers:executing-plans to implement this plan task-by-task. The default
 > handoff is inline execution; do not infer approval to spawn agents, commit,
@@ -209,7 +216,8 @@ derived from parent omission or an ordinary JSON input.
 // internal/validation, internal/lineage
 func CheckContent(domain.Area, domain.Catalog, domain.GrantContent,
     map[domain.RoleKey]domain.RoleContent) error
-func Narrow(domain.Area, domain.Route, domain.GrantContent, []string) (domain.Route, error)
+func Narrow(domain.Area, domain.Route, domain.GrantContent,
+    map[domain.RoleKey]domain.RoleContent) (domain.Route, error)
 func ResolveParentTeam(storage.Snapshot, string, string, time.Time) (domain.Route, error)
 func HasSource(storage.Snapshot, domain.Identity, domain.Route, time.Time) error
 
@@ -319,13 +327,13 @@ func TestNarrowPreservesConflictingPredicates(t *testing.T) {
         Predicates: []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}}}
     child := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1,
         ParentGrantID: "G1", Permissions: []string{"read"}, Scope: map[string]string{"dept": "ENG"}}
-    got, err := Narrow(area, parent, child, []string{"read"})
+    got, err := Narrow(area, parent, child, nil)
     if err != nil { t.Fatal(err) }
     if len(got.Predicates) != 2 || got.Predicates[0].Value != "FIN" {
         t.Fatalf("lost parent restriction: %#v", got)
     }
     child.Permissions = []string{"delete"}
-    if _, err := Narrow(area, parent, child, []string{"delete"}); err == nil {
+    if _, err := Narrow(area, parent, child, nil); err == nil {
         t.Fatal("accepted permission expansion")
     }
 }
@@ -456,7 +464,7 @@ CreateAssignment(ctx, area, identity, proposed)
     require selected grant content exists and is latest for this creation
     CheckContent(area, snapshot.Catalog, selectedContent, snapshot.Roles)
     establish proposed recipient team, parent route and assigner source
-    Narrow(area, parentRoute, selectedContent, expandedPermissions)
+    Narrow(area, parentRoute, selectedContent, snapshot.Roles)
     check complete recipient/team boundary and relevant live controls
     reject existing current grant/recipient pair even if disabled
     recheck time eligibility before returning exact NewAssignments write set

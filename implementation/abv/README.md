@@ -52,7 +52,9 @@ Validity instants are parsed and preserved; current time eligibility is later
 resolver/mutation work. The application owns domain values and `$self` meaning.
 
 `CheckContent` assumes a provider-established area's catalog and role snapshot.
-`Narrow` assumes a valid supported parent and checked child/role expansion. Neither
+`Narrow` assumes a valid supported parent and checked child. It derives the full
+selected permission list from direct content or the exact role-revision record;
+callers cannot substitute or trim a separate expansion. Neither
 is an authorization result or validation ticket. Do not expose these helpers as
 an unprotected write API. Cross-recipient `$self` containment remains unresolved;
 copying token strings is not proof of authority to distribute them.

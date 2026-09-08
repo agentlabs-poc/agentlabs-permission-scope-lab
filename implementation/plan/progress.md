@@ -9,7 +9,7 @@ The user subsequently requested sol-medium coding subagents.
 
 | Checkpoint | Current state | Exit evidence |
 |---|---|---|
-| CP1: records, decoder, pure checks | Implementation and hardening verified; independent review pending | [CP1 evidence](../abv/docs/acceptance.md) |
+| CP1: records, decoder, pure checks | Review found role-expansion binding issue; fix and re-review in progress | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Not started | Isolation, rollback, persistence and concurrency conformance required. |
 | CP3: resolver and working CLI | Not started | Actual team support, both gates, atomic assignment, restart demo required. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
@@ -28,5 +28,10 @@ The user subsequently requested sol-medium coding subagents.
   not new public canonical schema decisions. Unsupported forms are not dropped.
 - A successful pure subset check does not establish membership, active lineage,
   cross-recipient self binding, administration, or permission to save.
+- Independent review found that the initial role-based narrowing API could
+  accept a loose permission expansion not bound to the selected role. The fix
+  derives the whole selected list from the exact role record, shared with
+  definition validation. It cannot silently trim or substitute that list.
+  This is an internal API correction, not a canonical model change.
 
 No whole-handbook criterion or production Auth integration is closed by CP1.

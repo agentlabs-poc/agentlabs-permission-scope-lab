@@ -134,7 +134,7 @@ func TestNarrowKeepsAllRestrictionsAndCopiesInputs(t *testing.T) {
 	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read, write}, Predicates: []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}}, AssignmentIDs: []string{"A1"}, Validities: []domain.Validity{{ExpiresAt: &expires}}}
 	g := content()
 	g.Scope = map[string]string{"dept": "ENG", "cert": "C17"}
-	got, err := Narrow(a, parent, g, []string{read})
+	got, err := Narrow(a, parent, g, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,11 +146,11 @@ func TestNarrowKeepsAllRestrictionsAndCopiesInputs(t *testing.T) {
 	got.Permissions[0] = "BROKEN"
 	got.AssignmentIDs[0] = "BROKEN"
 	*got.Validities[0].ExpiresAt = time.Time{}
-	if parent.Predicates[0].Value != "FIN" || parent.Permissions[0] != read || parent.AssignmentIDs[0] != "A1" || expires.IsZero() {
+	if parent.Predicates[0].Value != "FIN" || parent.Permissions[0] != read || parent.AssignmentIDs[0] != "A1" || g.Permissions[0] != read || expires.IsZero() {
 		t.Fatal("mutated parent's authority through alias")
 	}
 	g.Scope = map[string]string{}
-	got, err = Narrow(a, parent, g, []string{read})
+	got, err = Narrow(a, parent, g, nil)
 	if err != nil || len(got.Predicates) != 1 || got.Predicates[0].Value != "FIN" {
 		t.Fatal("{} widened inherited boundary", err)
 	}
@@ -163,15 +163,14 @@ func TestNarrowAppendsChildValidityAndDeepCopiesEveryConstraint(t *testing.T) {
 	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read}, Validities: []domain.Validity{{NotBefore: &parentStart}}}
 	g := content()
 	g.Validity = &domain.Validity{ExpiresAt: &childEnd}
-	selected := []string{read}
-	got, err := Narrow(a, parent, g, selected)
+	got, err := Narrow(a, parent, g, nil)
 	if err != nil || len(got.Validities) != 2 || got.Validities[1].ExpiresAt == nil || !got.Validities[1].ExpiresAt.Equal(childEnd) {
 		t.Fatalf("child validity was not appended: %#v, %v", got, err)
 	}
 	*got.Validities[0].NotBefore = time.Time{}
 	*got.Validities[1].ExpiresAt = time.Time{}
 	got.Permissions[0] = "changed"
-	if parentStart.IsZero() || childEnd.IsZero() || selected[0] != read || g.Validity.ExpiresAt.IsZero() {
+	if parentStart.IsZero() || childEnd.IsZero() || g.Permissions[0] != read || g.Validity.ExpiresAt.IsZero() {
 		t.Fatal("result aliases a parent, child, or selected-permission constraint")
 	}
 }
@@ -179,10 +178,12 @@ func TestNarrowRejectsPermissionAndOuterBoundaryEscape(t *testing.T) {
 	a := area(t)
 	g := content()
 	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read}}
-	if _, err := Narrow(a, parent, g, []string{write}); !errors.Is(err, domain.ErrRejected) {
+	g.Permissions = []string{write}
+	if _, err := Narrow(a, parent, g, nil); !errors.Is(err, domain.ErrRejected) {
 		t.Fatal("expanded permission", err)
 	}
-	if _, err := Narrow(domain.Area{}, parent, g, []string{read}); !errors.Is(err, domain.ErrMalformed) {
+	g.Permissions = []string{read}
+	if _, err := Narrow(domain.Area{}, parent, g, nil); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatal("zero context", err)
 	}
 	for _, ids := range [][2]string{{"other", "hrms"}, {"acme", "accounting"}} {
@@ -190,12 +191,72 @@ func TestNarrowRejectsPermissionAndOuterBoundaryEscape(t *testing.T) {
 		if e != nil {
 			t.Fatal(e)
 		}
-		if _, err := Narrow(other, parent, g, []string{read}); !errors.Is(err, domain.ErrRejected) {
+		if _, err := Narrow(other, parent, g, nil); !errors.Is(err, domain.ErrRejected) {
 			t.Fatal("crossed boundary", err)
 		}
 	}
 	parent.GrantID = "unrelated"
-	if _, err := Narrow(a, parent, g, []string{read}); !errors.Is(err, domain.ErrRejected) {
+	if _, err := Narrow(a, parent, g, nil); !errors.Is(err, domain.ErrRejected) {
 		t.Fatal("unrelated parent", err)
+	}
+}
+
+func TestNarrowDerivesExactAdoptedRolePermissions(t *testing.T) {
+	a := area(t)
+	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read, write}}
+	child := content()
+	child.Permissions = nil
+	child.RoleID = "reader"
+	child.RoleRevision = 1
+	roles := map[domain.RoleKey]domain.RoleContent{
+		{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{read}},
+	}
+	if err := CheckContent(a, catalog(), child, roles); err != nil {
+		t.Fatal("valid role premise", err)
+	}
+	got, err := Narrow(a, parent, child, roles)
+	if err != nil || !reflect.DeepEqual(got.Permissions, []string{read}) {
+		t.Fatalf("did not derive exact adopted role: %#v, %v", got, err)
+	}
+	got.Permissions[0] = "changed"
+	if roles[domain.RoleKey{ID: "reader", Revision: 1}].Permissions[0] != read {
+		t.Fatal("result aliases adopted role permissions")
+	}
+}
+
+func TestNarrowRejectsIncompleteOrCorruptPermissionSources(t *testing.T) {
+	a := area(t)
+	roleChild := content()
+	roleChild.Permissions = nil
+	roleChild.RoleID = "reader"
+	roleChild.RoleRevision = 1
+	for _, tc := range []struct {
+		name              string
+		parentPermissions []string
+		child             domain.GrantContent
+		roles             map[domain.RoleKey]domain.RoleContent
+	}{
+		{"missing role", []string{read}, roleChild, nil},
+		{"only newer revision", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
+			{ID: "reader", Revision: 2}: {ID: "reader", Revision: 2, Permissions: []string{read}},
+		}},
+		{"mismatched role record", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
+			{ID: "reader", Revision: 1}: {ID: "other", Revision: 1, Permissions: []string{read}},
+		}},
+		{"role cannot be partially trimmed", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
+			{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{read, write}},
+		}},
+		{"direct content cannot be partially trimmed", []string{read}, func() domain.GrantContent {
+			g := content()
+			g.Permissions = []string{read, write}
+			return g
+		}(), nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			parent := domain.Route{Area: a, GrantID: "G1", Permissions: tc.parentPermissions}
+			if got, err := Narrow(a, parent, tc.child, tc.roles); !errors.Is(err, domain.ErrRejected) {
+				t.Fatalf("accepted incomplete or corrupt permission source: %#v, %v", got, err)
+			}
+		})
 	}
 }
