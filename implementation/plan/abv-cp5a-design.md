@@ -1,6 +1,6 @@
 # CP5-A — Application registration and computed root coverage
 
-Status: CP5-P01 direction approved; written specification ready for review.
+Status: CP5-P01 and written specification approved for execution by “keep moving”.
 This is an implementation design, not a new canonical wire contract.
 
 ## Goal and bounds
@@ -10,9 +10,11 @@ through reusable ABV and the in-process lab CLI. Legitimate roots compute their
 permission ceiling from that application's active catalog. Ordinary grants keep
 their explicit selections and adopted revisions.
 
-Planning/review is bounded to one specification review and one correction pass.
-Execution will use three independently testable units, Sol-medium coding and
-independent review: catalog writes, root computation, then CLI acceptance. Each
+The user subsequently requested working implementation first with no review
+passes. Retain Sol-medium coding and verification, but do not dispatch reviewers.
+Execution uses independently testable units: catalog writes, root computation,
+then CLI acceptance. Catalog writes are split into persistence and protected
+coordination in the [provider plan](abv-cp5a-provider-plan.md) to clarify ownership. Each
 unit receives a concrete time cap in its execution plan; a missed cap triggers
 reassessment, not an automatic extension. No runtime work is claimed here.
 
@@ -119,8 +121,9 @@ not gain export. A disabled root remains ineffective.
 
 Use existing Go test infrastructure, temporary SQLite databases and CLI harness.
 Run focused red/green tests per unit, then full tests, race, vet and build before
-claiming slice completion. Independently review both authority gates and no-write
-failures. No performance project or external service is necessary.
+claiming slice completion. Tests must exercise both authority gates and no-write
+failures. Independent review is paused by the user, not claimed complete.
+No performance project or external service is necessary.
 
 ## Explicitly outside this slice
 

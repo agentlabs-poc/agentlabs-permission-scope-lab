@@ -1,5 +1,15 @@
 # ABV implementation progress
 
+## CP5-A started — registration persistence first
+
+The user approved [CP5-A](abv-cp5a-design.md), then requested no review passes:
+get it working first. Sol-medium implementation and mandatory tests continue;
+do not describe new CP5 work as independently reviewed. The first bounded
+[task](abv-cp5a-provider-plan.md) implements application-only catalog persistence.
+Protected registration, computed roots and CLI acceptance remain subsequent work.
+This grouping separates persistence proof from administrative authorization.
+Existing completed CP1–CP4-A/B evidence below is unchanged.
+
 ## Current delivery — CP1–CP3 and CP4-A/B complete and independently reviewed
 
 **Scope correction — 9 September 2026:** production Auth-service integration is
@@ -25,7 +35,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
 | CP4: lifecycle | CP4-A and CP4-B complete; full assignment-control slice approved through `2681550` | [Acceptance](../abv/docs/acceptance.md#cp4-b--protected-assignment-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); other lifecycle operations remain. |
-| CP5: ABV definition management | Not started | Permission/scope/role operations and dependency checks; production Auth integration excluded. |
+| CP5: ABV definition management | CP5-A catalog persistence in progress | Add-only permission/scope registration first; protected flow, computed roots, CLI and roles remain. Production Auth integration excluded. |
 | CP6: PostgreSQL | Deferred by user; not required now | Provider boundary retained; backend implementation/transfer rehearsal are later work. |
 
 ### Execution tree

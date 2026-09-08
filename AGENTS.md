@@ -1,5 +1,18 @@
 # Handbook working rules
 
+## Current CP5 execution — working implementation first
+
+The user explicitly says: “do not review, just get it working first.” Do not
+dispatch independent reviewers for the current implementation work. Retain
+focused tests, full verification before completion claims, bounded tasks and
+scoped publication. This supersedes review-dispatch requirements below, not the
+authorization model or validation gates implemented by ABV.
+
+CP5-P01 and the written CP5-A specification are approved for execution. Start
+with `implementation/plan/abv-cp5a-provider-plan.md`; persistence is deliberately
+separate from protected registration, root coverage and CLI acceptance. Do not
+claim an internal provider write is an authorized public operation.
+
 ## Standing rule — bounded execution
 
 All activity, including implementation, investigation, reviews, tests and
