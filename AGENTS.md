@@ -1,14 +1,16 @@
 # Handbook working rules
 
-## Current implementation execution — CP2 complete; CP3 next
+## Current implementation execution — CP3 in progress
 
 CP1 was implemented, independently reviewed and pushed through `ccb426d`.
 Task 3 / CP2 SQLite provider and conformance are implemented and independently
 approved at `8ac7593`, including all review fixes. Do not redispatch CP1/CP2.
 See `implementation/plan/progress.md` and the provider evidence document.
-The reusable working CLI and administrative/lineage integration are next in CP3;
-Tasks 4–7 remain pending. The retained isolated worktree currently uses branch
-`implementation/abv-cp2`; preserve its execution evidence for the continuing plan.
+The user approved continuing CP3: Tasks 4–7 implement actual parent/team lineage,
+both authority gates, the working lab CLI and first-slice acceptance. Task 4 is
+active first; no CP3 completion is claimed until the integration tests pass.
+The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
+its execution evidence for the continuing plan.
 Never present internal provider writes or controlled fixture creation as a
 production authorization gate; both required authority checks arrive in CP3.
 

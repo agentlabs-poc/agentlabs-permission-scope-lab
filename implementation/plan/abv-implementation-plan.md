@@ -21,6 +21,12 @@ the same helper as definition validation. This prevents substituting another
 parent permission or silently trimming the selected role bundle. The earlier
 loose expansion parameter is superseded; canonical grant JSON is unchanged.
 
+**CP3 interface refinement:** `ResolveParentTeam` receives the exact selected
+child `GrantContent`, not a bare child-grant ID with implicit revision selection.
+This binds parent discovery/cycle checks to the proposal. The coordinator checks
+latest-only creation; traversal follows actual parent-team adoptions. The older
+two-string sketch is superseded only at this internal seam, not in public JSON.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > or superpowers:executing-plans to implement this plan task-by-task. The default
 > handoff is inline execution; do not infer approval to spawn agents, commit,
@@ -218,7 +224,7 @@ func CheckContent(domain.Area, domain.Catalog, domain.GrantContent,
     map[domain.RoleKey]domain.RoleContent) error
 func Narrow(domain.Area, domain.Route, domain.GrantContent,
     map[domain.RoleKey]domain.RoleContent) (domain.Route, error)
-func ResolveParentTeam(storage.Snapshot, string, string, time.Time) (domain.Route, error)
+func ResolveParentTeam(storage.Snapshot, domain.GrantContent, string, time.Time) (domain.Route, error)
 func HasSource(storage.Snapshot, domain.Identity, domain.Route, time.Time) error
 
 // internal/mutation — administrative adapter must use state bound to this write.

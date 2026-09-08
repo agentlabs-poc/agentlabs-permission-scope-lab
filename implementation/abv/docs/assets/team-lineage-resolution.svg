@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="940" viewBox="0 0 1160 940" role="img" aria-labelledby="title desc">
+  <title id="title">Actual adopted team lineage and separate source access</title>
+  <desc id="desc">In one tenant and application, RootTeam holds explicitly established G0 via A0. Team1 holds G1 via A1. Team2 proposes A2 adopting G2. Each team parent is paired with the actual parent grant assignment. Maya's Team1 membership supplies source access at issuance but does not become a permanent child dependency. Administrative authorization is a separate required check.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#334155"/></marker>
+    <style>
+      text { font-family: sans-serif; fill: #172b45; }
+      .h { font-size: 23px; font-weight: 700; }
+      .t { font-size: 18px; }
+      .s { font-size: 16px; }
+      .box { fill: white; stroke: #64748b; stroke-width: 1.5; rx: 10; }
+      .flow { fill: none; stroke: #334155; stroke-width: 2; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1160" height="940" fill="white"/>
+  <text x="36" y="43" class="h">CP3: actual adopted support, then narrowing</text>
+  <text x="36" y="74" class="t">Lab example · each column pairs a team with its actual grant holding</text>
+  <rect x="28" y="98" width="1104" height="548" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="50" y="134" class="h">One mandatory tenant + application boundary</text>
+  <rect x="60" y="165" width="286" height="90" class="box"/>
+  <text x="203" y="198" text-anchor="middle" class="h">RootTeam</text>
+  <text x="203" y="228" text-anchor="middle" class="t">No parent in this lab fixture</text>
+  <rect x="437" y="165" width="286" height="90" class="box"/>
+  <text x="580" y="198" text-anchor="middle" class="h">Team1</text>
+  <text x="580" y="228" text-anchor="middle" class="t">Parent: RootTeam</text>
+  <rect x="814" y="165" width="286" height="90" class="box"/>
+  <text x="957" y="198" text-anchor="middle" class="h">Team2</text>
+  <text x="957" y="228" text-anchor="middle" class="t">Parent: Team1</text>
+  <path d="M346 211H431" class="flow"/>
+  <path d="M723 211H808" class="flow"/>
+  <path d="M203 255V294" class="flow"/>
+  <path d="M580 255V294" class="flow"/>
+  <path d="M957 255V294" class="flow"/>
+  <rect x="60" y="300" width="286" height="73" class="box"/>
+  <text x="203" y="329" text-anchor="middle" class="h">A0 · enabled</text>
+  <text x="203" y="355" text-anchor="middle" class="t">Adopts G0 revision 1</text>
+  <rect x="437" y="300" width="286" height="73" class="box"/>
+  <text x="580" y="329" text-anchor="middle" class="h">A1 · enabled</text>
+  <text x="580" y="355" text-anchor="middle" class="t">Adopts G1 revision 1</text>
+  <rect x="814" y="300" width="286" height="73" rx="10" fill="#fff7ed" stroke="#c2410c" stroke-width="2" stroke-dasharray="7 4"/>
+  <text x="957" y="329" text-anchor="middle" class="h">A2 · proposed</text>
+  <text x="957" y="355" text-anchor="middle" class="t">Selects G2 revision 1</text>
+  <path d="M203 373V410" class="flow"/>
+  <path d="M580 373V410" class="flow"/>
+  <path d="M957 373V410" class="flow"/>
+  <rect x="60" y="416" width="286" height="176" class="box"/>
+  <text x="203" y="449" text-anchor="middle" class="h">G0 revision 1</text>
+  <text x="203" y="480" text-anchor="middle" class="t">Explicit established-root entry</text>
+  <text x="203" y="513" text-anchor="middle" class="t">Read / write / delete</text>
+  <text x="203" y="545" text-anchor="middle" class="t">Scope: {}</text>
+  <text x="203" y="574" text-anchor="middle" class="s">Omitted parent alone is not trust</text>
+  <rect x="437" y="416" width="286" height="176" class="box"/>
+  <text x="580" y="449" text-anchor="middle" class="h">G1 revision 1</text>
+  <text x="580" y="480" text-anchor="middle" class="t">Parent grant: G0</text>
+  <text x="580" y="513" text-anchor="middle" class="t">Read / write</text>
+  <text x="580" y="545" text-anchor="middle" class="t">dept = FIN</text>
+  <text x="580" y="574" text-anchor="middle" class="s">Complete supported parent route</text>
+  <rect x="814" y="416" width="286" height="176" class="box"/>
+  <text x="957" y="449" text-anchor="middle" class="h">G2 revision 1</text>
+  <text x="957" y="480" text-anchor="middle" class="t">Parent grant: G1</text>
+  <text x="957" y="513" text-anchor="middle" class="t">Select read; add cert = C17</text>
+  <text x="957" y="545" text-anchor="middle" class="t">Effective: FIN AND C17</text>
+  <text x="957" y="574" text-anchor="middle" class="s">Still requires both checks to save</text>
+  <path d="M346 509H431" class="flow"/>
+  <path d="M723 509H808" class="flow"/>
+  <text x="50" y="625" class="s">Lookup toward root uses actual adoptions; authority is composed top-down. TeamX and unused newer revisions cannot substitute.</text>
+  <rect x="28" y="686" width="695" height="152" rx="12" fill="#ecfdf5" stroke="#047857" stroke-width="2"/>
+  <text x="50" y="721" class="h">Separate issuance-time source check</text>
+  <text x="50" y="754" class="t">Maya → explicit Team1 membership → actual A1 / G1 route</text>
+  <text x="50" y="788" class="t">No implicit ancestor membership or ownership shortcut.</text>
+  <text x="50" y="817" class="s">Later owner/member changes do not add an issuer dependency to Team2.</text>
+  <rect x="758" y="686" width="374" height="152" rx="12" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <text x="781" y="721" class="h">Another mandatory check</text>
+  <text x="781" y="754" class="t">May Maya administer A2?</text>
+  <text x="781" y="788" class="t">Possession alone does not answer.</text>
+  <text x="781" y="817" class="s">Implemented with the coordinator next.</text>
+  <text x="36" y="880" class="t">Nutan's Team2 membership consumes supported child authority; it does not supply Maya's source.</text>
+  <text x="36" y="918" class="s">Task 4 design · no application database lookup · no production bootstrap · Task 5 adds both gates and atomic persistence.</text>
+</svg>

@@ -11,7 +11,7 @@ The user subsequently requested sol-medium coding subagents.
 |---|---|---|
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
-| CP3: resolver and working CLI | Not started | Actual team support, both gates, atomic assignment, restart demo required. |
+| CP3: resolver and working CLI | In progress: Task 4 lineage first | Actual team support, both gates, atomic assignment, restart demo required. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
@@ -29,8 +29,8 @@ ABV implementation
 │   ├── Isolation, persistence and transaction conformance
 │   ├── All independent-review findings resolved
 │   └── Provider rationale, evidence and transaction SVG
-├── CP3 working in-process ABV + CLI                     NEXT
-│   ├── Task 4: actual parent/team lineage resolution
+├── CP3 working in-process ABV + CLI                     IN PROGRESS
+│   ├── Task 4: actual parent/team lineage resolution    ACTIVE
 │   ├── Task 5: administration + ABV, atomic assignment
 │   ├── Task 6: inspect/check/assign commands + restart demo
 │   └── Task 7: adversarial and end-to-end acceptance

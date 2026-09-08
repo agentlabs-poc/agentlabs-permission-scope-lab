@@ -70,6 +70,19 @@ func selectedPermissions(g domain.GrantContent, roles map[domain.RoleKey]domain.
 	return role.Permissions, nil
 }
 
+// SelectedPermissions returns a copy of the content's complete, exact direct
+// or adopted-role permission source after validating its typed shape.
+func SelectedPermissions(g domain.GrantContent, roles map[domain.RoleKey]domain.RoleContent) ([]string, error) {
+	if err := codec.ValidateContent(g); err != nil {
+		return nil, err
+	}
+	permissions, err := selectedPermissions(g, roles)
+	if err != nil {
+		return nil, err
+	}
+	return slices.Clone(permissions), nil
+}
+
 func selectedTokens(tokens []string) error {
 	seen := make(map[string]bool, len(tokens))
 	for _, token := range tokens {
