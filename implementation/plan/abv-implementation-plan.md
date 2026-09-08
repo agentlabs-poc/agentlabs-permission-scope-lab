@@ -417,15 +417,15 @@ extend `internal/lab/fixture.go` and add `internal/lab/cases.go`.
 **Consumes:** snapshot and pure validation. **Produces:** `ResolveParentTeam`
 and `HasSource` with no provider or CLI dependency.
 
-- [ ] Seed the exact baseline internally: G0 legitimate fixture root; Team1
+- [x] Seed the exact baseline internally: G0 legitimate fixture root; Team1
   holding G1 through A1; Team2 child of Team1; G2 parent G1; Maya in Team1;
   Nutan in Team2. A2 is proposed and absent initially. Role catalog, permission
   registrations, controls and explicit administrative test premises are present.
-- [ ] Write a baseline test resolving G2 support for Team2: find Team1, then
+- [x] Write a baseline test resolving G2 support for Team2: find Team1, then
   Team1's actual G1 assignment, then its selected content and G0 support.
   Assert effective permissions include read/write at the parent and Finance
   predicates remain. Create no permanent dependency on issuer Maya.
-- [ ] Write table cases before implementation:
+- [x] Write table cases before implementation:
 
 | Case | Expected result |
 |---|---|
@@ -440,13 +440,17 @@ and `HasSource` with no provider or CLI dependency.
 | Direct-human differing-support case | Explicit unsupported gap, not guessed authority. |
 | Self binding would change across recipients | Explicit unsupported gap, not literal-equality proof. |
 
-- [ ] Implement DFS with a recursion-stack cycle check and bounded traversal;
+- [x] Implement DFS with a recursion-stack cycle check and bounded traversal;
   resolve actual adopted support top-down. Preserve complete route associations.
   Do not union historical versions into a synthetic graph or inherit membership.
-- [ ] Test expiry boundary using an injected timestamp; exact expiry is
+- [x] Test expiry boundary using an injected timestamp; exact expiry is
   ineligible, inclusive start is eligible. Copy all inherited validity limits.
-- [ ] Run `go test ./internal/lineage ./internal/validation -count=1`; checkpoint
+- [x] Run `go test ./internal/lineage ./internal/validation -count=1`; checkpoint
   the passing cases and record unsupported cases separately from canonical denials.
+
+Task 4 completion: independently approved at `4550860`; see
+[lineage evidence](../abv/docs/lineage-resolution.md), including the source-binding
+uniqueness correction and genuine exact-expiry revalidation.
 
 ## Task 5 — both checks and transaction-safe assignment creation [CP3]
 

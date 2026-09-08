@@ -11,7 +11,7 @@ The user subsequently requested sol-medium coding subagents.
 |---|---|---|
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
-| CP3: resolver and working CLI | In progress: Task 4 lineage first | Actual team support, both gates, atomic assignment, restart demo required. |
+| CP3: resolver and working CLI | In progress: Task 4 reviewed; Task 5 next | [Lineage evidence](../abv/docs/lineage-resolution.md) complete; both gates, atomic assignment and restart demo remain. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
@@ -30,8 +30,8 @@ ABV implementation
 │   ├── All independent-review findings resolved
 │   └── Provider rationale, evidence and transaction SVG
 ├── CP3 working in-process ABV + CLI                     IN PROGRESS
-│   ├── Task 4: actual parent/team lineage resolution    ACTIVE
-│   ├── Task 5: administration + ABV, atomic assignment
+│   ├── Task 4: actual parent/team lineage resolution    COMPLETE
+│   ├── Task 5: administration + ABV, atomic assignment  NEXT
 │   ├── Task 6: inspect/check/assign commands + restart demo
 │   └── Task 7: adversarial and end-to-end acceptance
 ├── CP4 lifecycle                                       PENDING
@@ -89,5 +89,19 @@ verification and staged whitespace checks. SQLite statement coverage is 72.6%,
 reported as test coverage only. The existing documentation site builds and all
 10 site tests pass. See the provider evidence for concrete tests and limitations.
 
-Next: CP3 / Task 4. Reuse the existing plan and preserved execution evidence;
-do not redispatch CP1/CP2 or claim either supplies the two authorization gates.
+### CP3 / Task 4 milestone
+
+`0fa7163` implemented actual parent/team lineage, explicit source membership and
+the reusable FIN/C17 scenario. `4550860` corrected final-source uniqueness
+revalidation and added a genuine exact-expiry regression. Independent review:
+spec and quality approved, ready for Task 5. Full tests/race/vet/build pass.
+
+The resolver now takes exact selected child content rather than implicitly
+choosing a revision from an ID; parent support follows actual adoptions. The lab
+fixture explicitly establishes RootTeam/A0/G0 so a stored root-shaped definition
+does not manufacture trust. Direct-human discovery, proxies and cross-recipient
+self binding remain unsupported implementation cases, not new canonical bans.
+
+Next: Task 5. Reuse the existing plan and preserved execution evidence; do not
+redispatch completed tasks. CP3 is not complete until both gates, atomic writes,
+working CLI commands and first-slice acceptance are delivered.

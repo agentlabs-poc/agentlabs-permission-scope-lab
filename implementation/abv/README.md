@@ -2,6 +2,8 @@
 
 An isolated Go module for the authorization model developed in this repository.
 CP1 foundations and CP2 storage are implemented and independently reviewed.
+CP3 Task 4 parent/team lineage and source checks are also reviewed; protected
+mutation and working CLI integration remain pending.
 This is not a production Auth service or working database CLI.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
@@ -14,6 +16,8 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
   does not make a record authorized, trusted or safe to persist.
 - `internal/validation`: registered definition checks and non-expanding permission/
   scope composition. Child scope is appended as AND predicates, never map-overwritten.
+- `internal/lineage`: actual parent-team adoption and independently revalidated
+  source-membership checks. See [Task 4 evidence](docs/lineage-resolution.md).
 - `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
   implementation and reusable provider conformance suite are delivered in CP2.
 - `internal/lab`: controlled fixtures for new disposable SQLite databases only,
