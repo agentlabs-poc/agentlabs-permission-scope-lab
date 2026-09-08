@@ -49,6 +49,35 @@ func TestGenericABVDatabaseCannotUseFixtureIdentity(t *testing.T) {
 	if _, err = statusAPI.SetGrantStatus(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("unmarked database grant-status error = %v", err)
 	}
+	assignmentStatusAPI := api.(interface {
+		SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error)
+	})
+	if got, err := assignmentStatusAPI.SetAssignmentStatus(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, "A1", "disabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
+		t.Fatalf("unmarked database assignment-status = %+v, %v", got, err)
+	}
+}
+
+func TestAssignmentStatusRequiresFixtureAndLeavesRecordUntouched(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	path := filepath.Join(t.TempDir(), "lab.db")
+	if err := (Scenarios{}).Seed(t.Context(), area, "team-fin-c17", path); err != nil {
+		t.Fatal(err)
+	}
+	api, closeConnection, err := Connect(t.Context(), area, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeConnection()
+	statusAPI := api.(interface {
+		SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error)
+	})
+	if got, err := statusAPI.SetAssignmentStatus(t.Context(), area, domain.FixtureContext{Name: "wrong"}, "A1", "disabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
+		t.Fatalf("refusal = %+v, %v", got, err)
+	}
+	record, err := api.Inspect(t.Context(), area, "assignment", "A1")
+	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"Team1"},"status":"enabled"}` {
+		t.Fatalf("A1 changed: %s %v", record.CanonicalJSON, err)
+	}
 }
 
 func TestMarkerBindsExactAreaAndFixtureContext(t *testing.T) {

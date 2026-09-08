@@ -38,6 +38,8 @@ the seed command succeed.
 ./bin/abv check assignment --file testdata/a2.json --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv assign --file testdata/a2.json --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv inspect assignment A2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv assignment disable A2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv assignment enable A2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv grant disable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv inspect grant-control G2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv grant enable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
@@ -71,7 +73,9 @@ this does not mean the assignment succeeded.
 
 ## Lab identity is not authentication
 
-Only the known `maya-team1` fixture context is supported. Grant status is further
+Only the known `maya-team1` fixture context is supported. Assignment status is
+separately limited to the fixture's exact A1/G1/Team1 and A2/G2/Team2 bindings,
+with Maya's current direct `AssignmentAdmins` membership. Grant status is further
 limited to G2 and Maya's current direct membership in `AssignmentAdmins`; this
 separate lab capability does not follow from assignment administration. A distinct internal
 scenario marker binds the lab database to its scenario and tenant/application.
@@ -85,9 +89,14 @@ The lab administrative premise is bounded to Maya, Team2 and the exact operation
 ABV separately checks her current source membership and complete grant lineage.
 Do not deploy this composition as a production administration interface.
 
+The compiled-process acceptance exercises bottom-up disablement and enablement:
+A1 cannot be disabled while enabled A2 depends on it; A2 then A1 can be disabled;
+A2 cannot be re-enabled before A1; and restoring A1 does not cascade a write to
+A2. Task 4 and final independent review of this CP4-B slice are pending.
+
 CLI parsing is reusable through the application adapter. The reusable library
-does not import CLI or lab code. Real authenticated administration remains CP5;
-PostgreSQL remains CP6. Neither requires moving SQL into the CLI or interpreting
+does not import CLI or lab code. Real Auth-service integration is out of scope;
+PostgreSQL is also outside this slice. Neither boundary permits moving SQL into the CLI or interpreting
 application business facts inside ABV.
 
 ## Verification record

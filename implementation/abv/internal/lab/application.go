@@ -41,7 +41,7 @@ func Connect(ctx context.Context, area domain.Area, path string) (application.AP
 		return nil, nil, errors.Join(domain.ErrUnavailable, err)
 	}
 	fixture := TeamFINC17(area)
-	administration, err := NewGrantStatusAdministration(area, fixture.Administration)
+	administration, err := NewAssignmentStatusAdministration(area, fixture.Administration)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -89,6 +89,16 @@ func (a *labApplication) SetGrantStatus(ctx context.Context, area domain.Area, f
 		return domain.GrantControl{}, err
 	}
 	return a.facade.SetGrantStatus(ctx, area, TeamFINC17(area).Issuer, proposed)
+}
+
+func (a *labApplication) SetAssignmentStatus(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, assignmentID, status string) (domain.Assignment, error) {
+	if area != a.area || fixtureContext.Name != labFixtureContext {
+		return domain.Assignment{}, domain.ErrRejected
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.Assignment{}, err
+	}
+	return a.facade.SetAssignmentStatus(ctx, area, TeamFINC17(area).Issuer, assignmentID, status)
 }
 
 func readOnlyDatabase(path string) (*sql.DB, error) {

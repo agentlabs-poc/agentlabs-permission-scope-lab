@@ -1,5 +1,21 @@
 # ABV first-slice acceptance evidence
 
+## CP4-B — protected assignment enable/disable
+
+Task 4 and final independent review are pending. The implemented CLI accepts
+only `assignment enable|disable ID` with explicit database, tenant, application
+and fixture context. It calls the optional application capability directly—no
+CLI pre-read—and prints the committed version-1 Assignment JSON.
+
+The lab capability is explicitly prototype-only, not production authentication.
+It binds the scenario marker and exact Area, direct Maya identity, current
+`AssignmentAdmins` membership, and only A1/G1/Team1 or A2/G2/Team2. ABV still
+validates current support and adopted revision. Binary acceptance proves the
+bottom-up sequence, no cascade, exact record preservation after reopen, unchanged
+G1/G2 controls, and restored diagnosis. Existing snapshot and 256-step lineage
+bounds reject rather than truncate; no schema, fixture, canonical JSON or real
+Auth operation was added.
+
 ## Current delivery
 
 CP1, CP2 and CP3 are complete for the approved local prototype slice. Task 7
@@ -71,7 +87,7 @@ checks the error, empty receipt and unchanged assignment count.
 
 | Case | Evidence and supported result | Limit or remaining work |
 |---|---|---|
-| T01: FIN/C17 baseline | `TestCreateAssignmentPersistsExactProposalAfterBothChecks`; `TestSQLiteFacadeReopensCommittedAssignment` in `abv_test.go`. Exact A2 persists after both checks and survives reopen. | Lab administration only; real Auth adapter is CP5. |
+| T01: FIN/C17 baseline | `TestCreateAssignmentPersistsExactProposalAfterBothChecks`; `TestSQLiteFacadeReopensCommittedAssignment` in `abv_test.go`. Exact A2 persists after both checks and survives reopen. | Lab administration only; real Auth-service integration is out of scope. |
 | T02: source but no administration | Failure-table subtest `administration absent while source present`: no write. | Does not equate source membership with administration. |
 | T03: administration but no source | Failure-table subtest `source absent while administration present`: no write. | Administration supplies no business authority. |
 | T04: changed recipient | Failure-table subtest `wrong recipient`; `TestLabAdministrationRejectsAnyChangedTrustedPremise/recipient`. Both reject changed recipient premises. | Tests substitute Team1, not the source example's exact Team3 name; the bound recipient remains Team2. |
@@ -180,7 +196,7 @@ Database and fixture creation are outside the timed loop.
 
 These measurements cover SQLite snapshot loading and read-only boundary
 diagnosis. They do not establish source/administrative authority and do not
-measure mutation, administrative evidence copying, commit, real Auth calls or
+measure mutation, administrative evidence copying, commit, out-of-scope external Auth calls or
 application enforcement. Three local samples are not a latency SLA, capacity
 forecast or PostgreSQL result. The measured allocations document the current
 whole-snapshot cost; optimization is not part of this acceptance checkpoint.

@@ -24,7 +24,19 @@ type grantAPI struct {
 	control domain.GrantControl
 }
 
+type assignmentStatusAPI struct {
+	apiSpy
+	id, status string
+	calls      int
+}
+
+func (s *assignmentStatusAPI) SetAssignmentStatus(_ context.Context, area domain.Area, fixture domain.FixtureContext, id, status string) (domain.Assignment, error) {
+	s.area, s.fixture, s.id, s.status, s.calls = area, fixture, id, status, s.calls+1
+	return domain.Assignment{Version: "1", ID: id, GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team2"}, Status: status}, nil
+}
+
 type nilMapAPI map[string]string
+type nilAssignmentMap map[string]string
 
 var nilMapAPICalls int
 
@@ -40,6 +52,18 @@ func (nilMapAPI) Assign(context.Context, domain.Area, domain.FixtureContext, []b
 func (nilMapAPI) SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error) {
 	nilMapAPICalls++
 	return domain.GrantControl{}, nil
+}
+func (nilAssignmentMap) Inspect(context.Context, domain.Area, string, string) (domain.Record, error) {
+	return domain.Record{}, nil
+}
+func (nilAssignmentMap) CheckAssignment(context.Context, domain.Area, []byte) (domain.Diagnostic, error) {
+	return domain.Diagnostic{}, nil
+}
+func (nilAssignmentMap) Assign(context.Context, domain.Area, domain.FixtureContext, []byte) (domain.Receipt, error) {
+	return domain.Receipt{}, nil
+}
+func (nilAssignmentMap) SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error) {
+	panic("typed nil capability called")
 }
 
 func (s *grantAPI) SetGrantStatus(_ context.Context, area domain.Area, fixture domain.FixtureContext, control domain.GrantControl) (domain.GrantControl, error) {
@@ -106,6 +130,10 @@ func TestInvalidCommandNeverDispatches(t *testing.T) {
 		{"grant", "disable", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"grant", "disable", "G2", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"grant", "disable", "G2", "--recipient", "Team2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "pause", "A2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "disable", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "disable", "A2", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "disable", "A2", "--recipient", "Team2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 	}
 	for _, args := range cases {
 		var out, diag bytes.Buffer
@@ -115,6 +143,41 @@ func TestInvalidCommandNeverDispatches(t *testing.T) {
 		if out.Len() != 0 || diag.Len() == 0 {
 			t.Fatalf("wrong output streams for %q", args)
 		}
+	}
+}
+
+func TestAssignmentStatusForwardsExactRequestAndClosesOnce(t *testing.T) {
+	for _, tc := range []struct{ verb, status string }{{"disable", "disabled"}, {"enable", "enabled"}} {
+		api := &assignmentStatusAPI{}
+		connector := &connectorSpy{api: api}
+		var out, diag bytes.Buffer
+		args := []string{"assignment", tc.verb, "A2", "--db", "relative.db", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+		if got := Run(t.Context(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 0 {
+			t.Fatalf("%s: exit %d: %s", tc.verb, got, diag.String())
+		}
+		if api.id != "A2" || api.status != tc.status || api.fixture.Name != "maya-team1" || api.area.TenantID() != "acme" || api.area.ApplicationID() != "hrms" || connector.path != "relative.db" || connector.closes != 1 || api.calls != 1 {
+			t.Fatalf("wrong forwarding: api=%+v connector=%+v", api, connector)
+		}
+		if out.String() != `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"`+tc.status+`"}`+"\n" {
+			t.Fatalf("output = %q", out.String())
+		}
+	}
+}
+
+func TestAssignmentStatusRequiresOptionalCapability(t *testing.T) {
+	args := []string{"assignment", "disable", "A2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+	for _, api := range []application.API{&apiSpy{}, (*assignmentStatusAPI)(nil), nilAssignmentMap(nil)} {
+		connector := &connectorSpy{api: api}
+		var out, diag bytes.Buffer
+		if got := Run(t.Context(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 5 || connector.closes != 1 {
+			t.Fatalf("exit=%d closes=%d stderr=%q", got, connector.closes, diag.String())
+		}
+	}
+	api := &assignmentStatusAPI{}
+	connector := &connectorSpy{api: api}
+	var diag bytes.Buffer
+	if got := Run(t.Context(), args, strings.NewReader(""), failingWriter{}, &diag, connector.connect, nil); got != 4 || api.calls != 1 || connector.closes != 1 {
+		t.Fatalf("exit=%d calls=%d closes=%d", got, api.calls, connector.closes)
 	}
 }
 

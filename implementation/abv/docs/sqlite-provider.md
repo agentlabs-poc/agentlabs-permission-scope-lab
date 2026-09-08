@@ -1,5 +1,12 @@
 # CP2 — SQLite provider
 
+**CP4-B update (Task 4/final independent review pending):** the existing
+conditional assignment-status write is now reached by the protected facade and
+lab CLI. It updates one exact assignment after both gates and commit, preserves
+all other fields and records, and never cascades dependent status writes. The
+provider schema, fixture counts, snapshot limit and 256-step lineage bound are
+unchanged.
+
 **CP4-A Task 1 extension — `f4a781c`, independently approved:** the internal
 write set now also supports one conditional existing grant-control status update,
 separate from assignment creation. Exact stored `Before` must match; only the
@@ -59,7 +66,7 @@ provider tests, not assumptions that every database shares the same SQL.
 Foreign-key enforcement is connection-specific, so provider connections must
 enable and verify it. [SQLite foreign-key documentation](https://www.sqlite.org/foreignkeys.html).
 Neither database locks nor foreign keys establish current-time grant validity;
-the future coordinator must perform that authorization check.
+the later protected coordinator (now implemented) performs that authorization check.
 
 ## Isolation and data ownership
 
@@ -188,6 +195,6 @@ new checkpoint branch to preserve prior evidence; no user files were removed.
 Fixtures remain restricted to new disposable database paths to avoid a live-data
 seed bypass. PostgreSQL will need its own fixture adapter and conformance run.
 
-PostgreSQL, real
-Auth administration, actual lineage resolution, lifecycle mutation and working
-CLI commands are not claimed by this checkpoint.
+At this historical CP2 checkpoint, PostgreSQL, actual lineage resolution,
+lifecycle mutation and working CLI commands were not yet claimed. Real
+Auth-service integration is outside the ABV build's scope.

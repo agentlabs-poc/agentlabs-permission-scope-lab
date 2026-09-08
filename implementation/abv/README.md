@@ -5,8 +5,9 @@ CP1 foundations, CP2 storage and CP3 parent/team lineage, protected assignment
 writes and working CLI are implemented and independently reviewed. First-slice
 acceptance and final CP3 integration are approved at `5b81b84`.
 CP4-A grant enable/disable and control inspection are independently approved
-through `ed8f227`. Other
-lifecycle operations, real Auth integration and PostgreSQL remain CP4–CP6.
+through `ed8f227`. CP4-B assignment enable/disable is implemented; Task 4 and
+final independent review are pending. Other lifecycle operations and PostgreSQL
+remain outside this slice; real Auth-service integration is out of scope.
 This is a local test harness, not a production Auth service.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
@@ -24,14 +25,14 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
 - `internal/mutation`: separate administration and ABV checks, immutable evidence
   isolation and exact transactional assignment/control writes. See [acceptance](docs/acceptance.md).
 - `abv`: reusable facade for inspection, read-only diagnosis and protected
-  assignment creation and grant enable/disable; no raw provider writes exposed.
+  assignment creation and grant/assignment enable/disable; no raw provider writes exposed.
 - `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
   implementation and reusable provider conformance suite are delivered in CP2.
 - `internal/lab`: controlled fixtures for new disposable SQLite databases only,
   not a seed-into-live-database or ordinary bootstrap API.
 - `application`: interface between reusable CLI and its in-process adapter.
 - `cli`: testable command shell with injected streams, no SQL or process exit.
-  Explicit context/database binding; inspect, check, assign, grant status and controlled
+  Explicit context/database binding; inspect, check, assign, grant/assignment status and controlled
   scenarios use the in-process adapter. See [local testing](docs/local-testing.md).
 
 ## Run the checks

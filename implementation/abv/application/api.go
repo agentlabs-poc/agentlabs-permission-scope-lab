@@ -15,6 +15,9 @@ type API interface {
 type GrantStatusAPI interface {
 	SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
 }
+type AssignmentStatusAPI interface {
+	SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error)
+}
 type Connect func(context.Context, domain.Area, string) (API, func() error, error)
 
 type ScenarioRunner interface {
