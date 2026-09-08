@@ -37,9 +37,11 @@ does not block grant enablement. A broken enabled assignment still blocks the
 whole operation. See docs/parent-grant-bindings.md and handbook chapter 8.
 The exact CP4-A plan is implementation/plan/abv-cp4a-implementation-plan.md,
 with design beside it. Task 1's internal provider control update is independently
-approved at `f4a781c`; it is not yet a public authorized enable/disable operation.
-Next is Task 2's two-gate coordinator/facade, not another broad research/approval
-loop over settled principles.
+approved at `f4a781c`; Task 2's protected coordinator/facade is independently
+approved through `7ea2aba`, including direct operation-specific matrix tests.
+Next is Task 3's CLI/lab wiring and final integration review. No CLI grant-status
+command or complete CP4 lifecycle is delivered yet. Do not redispatch Tasks 1–2
+or reopen settled model principles.
 CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.
