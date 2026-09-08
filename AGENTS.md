@@ -1,5 +1,20 @@
 # Handbook working rules
 
+## Standing rule — bounded execution
+
+All activity, including implementation, investigation, reviews, tests and
+subagent work, must be bounded. Set a concrete scope, completion criteria,
+time budget and retry/review limit before starting a work unit. Check progress
+at meaningful checkpoints. If it takes too long or repeated attempts stop
+producing progress, stop that approach, step back and rethink: narrow or split
+the task, diagnose the obstacle, or choose a different approach. Do not silently
+extend the same loop. Resume with a revised bounded plan; ask the user when a
+new decision or authority is required. Never weaken security or verification
+requirements, or claim completion, merely to meet a time budget.
+
+Rationale: the user explicitly requires finite, progress-driven activity;
+persistence must not become indefinite task, retry or review loops.
+
 ## Current implementation execution — CP3 in progress
 
 CP1 was implemented, independently reviewed and pushed through `ccb426d`.
@@ -10,8 +25,10 @@ The user approved continuing CP3: Tasks 4–7 implement actual parent/team linea
 both authority gates, the working lab CLI and first-slice acceptance. Task 4
 lineage/source checks are independently approved at `4550860` and pushed through
 `b4d0d17`. Task 5 coordinator/facade is independently approved at `d7fea85`,
-including its deterministic-ordering test correction. Task 6 CLI is next.
-Do not redispatch Tasks 4–5. No CP3 completion is claimed until acceptance passes.
+including its deterministic-ordering test correction and pushed at `1786b22`.
+Task 6 working CLI is independently approved through `5815abf`, including its
+cleanup and missing-file regression fixes. Task 7 acceptance is next.
+Do not redispatch Tasks 4–6. No CP3 completion is claimed until acceptance passes.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.
 Never present internal provider writes or controlled fixture creation as a

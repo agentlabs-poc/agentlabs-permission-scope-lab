@@ -1,6 +1,6 @@
 # Local ABV testing
 
-**Task 6 implemented and verified at `fb836ba`; independent review pending.**
+**Task 6 implemented, verified and independently approved through `5815abf`.**
 This page documents the working first-slice demo, not production Auth
 administration or completion of all ABV checkpoints.
 
@@ -96,7 +96,7 @@ The negative scenario reported `observed expected rejection; assignment was not
 created`. A new inspection process then returned exit 3 with A2 absent. These
 checks ran independently of the implementer's automated binary tests.
 
-Full Go tests, race checks, vet and build pass on `fb836ba`. Tests additionally
+Full Go tests, race checks, vet and build pass on `5815abf`. Tests additionally
 cover unmarked databases, wrong marker format/context, unknown fixture identity,
 both isolation dimensions, existing seed paths, malformed JSON, missing files,
 input bounds, output failures and once-only connection cleanup. Source-case

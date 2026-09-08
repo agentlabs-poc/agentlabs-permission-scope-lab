@@ -11,7 +11,7 @@ The user subsequently requested sol-medium coding subagents.
 |---|---|---|
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
-| CP3: resolver and working CLI | In progress: Tasks 4–5 reviewed; Task 6 next | [Lineage](../abv/docs/lineage-resolution.md) and [protected assignment](../abv/docs/assignment-creation.md) verified; working CLI/restart demo and final acceptance remain. |
+| CP3: resolver and working CLI | In progress: Tasks 4–6 reviewed; Task 7 next | [Lineage](../abv/docs/lineage-resolution.md), [protected assignment](../abv/docs/assignment-creation.md) and [CLI/restart demo](../abv/docs/local-testing.md) verified; final acceptance remains. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
@@ -32,7 +32,7 @@ ABV implementation
 ├── CP3 working in-process ABV + CLI                     IN PROGRESS
 │   ├── Task 4: actual parent/team lineage resolution    COMPLETE
 │   ├── Task 5: administration + ABV, atomic assignment  COMPLETE
-│   ├── Task 6: inspect/check/assign commands + restart demo
+│   ├── Task 6: inspect/check/assign commands + restart demo COMPLETE
 │   └── Task 7: adversarial and end-to-end acceptance
 ├── CP4 lifecycle                                       PENDING
 ├── CP5 registration + real Auth integration             PENDING
@@ -123,3 +123,22 @@ Task 6 is next. Its plan binds the parsed database path through an injected
 connector and requires distinct scenario provenance for fixture-based mutation.
 The optional lab metadata does not change canonical records or core schema v1.
 Working CLI commands and first-slice acceptance are still required to close CP3.
+
+### CP3 / Task 6 milestone
+
+`fb836ba` implements the reusable CLI and controlled local scenarios. `5815abf`
+closes a cleanup edge case and corrects the compiled missing-file regression
+to exercise file opening against a valid seeded database. Independent review
+and scoped fix review approve specification compliance and quality. Parent-run
+full Go tests, race checks, vet and build pass on the corrected source.
+
+The independent CLI demonstration saves A2 and reopens it in another process;
+the out-of-bound permission scenario rejects and independently proves A2 absent.
+The scenario marker guards accidental fixture use, not hostile database owners
+or real authentication. Read-only diagnosis is never a save ticket. An input-file
+close-error minor remains explicitly tracked in Task 7 alongside the source-case
+matrix, isolation evidence and bounded-snapshot benchmarks.
+
+Execution is now explicitly bounded: each work unit has scope, exit criteria,
+time and retry/review limits. Overrun or stalled progress requires reassessment,
+not another unchanged loop. This preserves security and verification gates.

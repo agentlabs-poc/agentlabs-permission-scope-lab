@@ -551,35 +551,39 @@ marker on the lab assignment path. This guards accidental use of a generic ABV
 database; it does not resist a hostile database/filesystem owner. All authority
 reads and assignment writes still use the facade/provider and both checks.
 
-- [ ] Write CLI tests before parsing: capture stdout/stderr in `bytes.Buffer`,
+- [x] Write CLI tests before parsing: capture stdout/stderr in `bytes.Buffer`,
   inject an API spy and call `Run`. Assert exact tenant/app forwarding and that
   absent context causes zero API calls. No test must rely on process globals.
-- [ ] Implement inspect dispatch for permission, scope, role, grant, assignment,
+- [x] Implement inspect dispatch for permission, scope, role, grant, assignment,
   team and membership. Parameterize all lookups by Area. Print approved core
   JSON only where it exists; print internal relationship projections as tables.
-- [ ] Implement `check assignment` as read-only diagnosis, prominently saying
+- [x] Implement `check assignment` as read-only diagnosis, prominently saying
   it does not authorize a later write. Implement `assign` through the coordinator,
   never by calling provider SQL or treating a prior check as a permit.
-- [ ] Implement fixed lab scenario initialization using exclusive file creation.
+- [x] Implement fixed lab scenario initialization using exclusive file creation.
   Refuse existing files and non-lab databases without deletion, reset or overwrite.
   A missing/wrong `fixture-context` cannot mutate. Display test-identity limitations
   clearly; never accept an arbitrary `--actor` as authenticated authority.
-- [ ] Map failures to the proposed CLI statuses: 2 malformed, 3 rejected,
+- [x] Map failures to the proposed CLI statuses: 2 malformed, 3 rejected,
   4 unavailable/conflict/cancelled, 5 unsupported; successful action is 0.
   A scenario runner may return 0 when an expected rejection is correctly observed,
   but must print the observed rejection rather than claiming the mutation succeeded.
-- [ ] Test file-not-found, duplicate JSON key, missing context, invalid scenario,
+- [x] Test file-not-found, duplicate JSON key, missing context, invalid scenario,
   existing seed database, cross-application lookup and pipe-safe record output.
-- [ ] Compile with `go build -o ./bin/abv ./cmd/abv`. In tests, use `t.TempDir()`
+- [x] Compile with `go build -o ./bin/abv ./cmd/abv`. In tests, use `t.TempDir()`
   paths and `exec.CommandContext` to exercise the binary's seed → inspect → check
   → assign → reopen → inspect workflow and the no-write negative cases.
-- [ ] Run `go test ./cli ./internal/lab ./cmd/abv -count=1`. Document the commands,
+- [x] Run `go test ./cli ./internal/lab ./cmd/abv -count=1`. Document the commands,
   supported prototype boundaries and eventual authenticated adapter requirement.
 
 ## Task 7 — security and portability acceptance [CP1–CP3 exit]
 
-**Create:** `acceptance_test.go`, `docs/acceptance.md`,
-`internal/storage/contracttest/concurrency.go`; add tests in the responsible packages.
+**Create:** `acceptance_test.go`; extend the existing `docs/acceptance.md` while
+preserving its historical CP1 evidence, and add missing tests in responsible
+packages. Reuse the already-delivered provider/mutation concurrency suites;
+create `internal/storage/contracttest/concurrency.go` only if a required portable
+check is absent. This supersedes the earlier unconditional new-file sketch,
+not its concurrency acceptance requirements.
 
 **Consumes:** all first-slice components. **Produces:** reproducible evidence,
 not a claim that the entire handbook or PostgreSQL is implemented.

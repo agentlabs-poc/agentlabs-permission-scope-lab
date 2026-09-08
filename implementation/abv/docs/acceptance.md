@@ -1,10 +1,26 @@
-# CP1 acceptance evidence
+# ABV first-slice acceptance evidence
+
+## Current delivery
+
+CP1 and CP2 are delivered. CP3 has reviewed parent-team lineage and protected
+assignment creation, published through `1786b22`. The working CLI is verified
+and independently approved through `5815abf`. Full first-slice source-case and
+benchmark acceptance remain Task 7; this is not full ABV or production Auth
+completion.
+
+- [CP2 provider evidence](sqlite-provider.md)
+- [CP3 lineage evidence](lineage-resolution.md)
+- [CP3 protected assignment evidence](assignment-creation.md)
+- [Verified CLI walkthrough](local-testing.md)
+
+## Historical CP1 acceptance evidence
 
 **Current state: CP1 implemented, verified and independently reviewed.**
 This page preserves CP1's evidence and limits at delivery, when no SQLite or
 production ABV tests existed. SQLite persistence is now independently verified
-in [CP2 evidence](sqlite-provider.md); production authorization and actual lineage
-remain later work. Statements below about missing persistence describe CP1.
+in [CP2 evidence](sqlite-provider.md); actual lineage and protected assignment
+are covered by the CP3 links above. Production Auth remains later work.
+Statements below about missing persistence or resolution describe CP1.
 
 ## Scope
 

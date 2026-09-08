@@ -2,9 +2,10 @@
 
 An isolated Go module for the authorization model developed in this repository.
 CP1 foundations and CP2 storage are implemented and independently reviewed.
-CP3 Task 4 parent/team lineage and source checks are also reviewed; protected
-mutation and working CLI integration remain pending.
-This is not a production Auth service or working database CLI.
+CP3 Tasks 4–5 parent/team lineage, source checks and protected assignment writes
+are also reviewed. Task 6 provides a working local CLI, verified and independently
+approved through `5815abf`. First-slice acceptance remains Task 7.
+This is a local test harness, not a production Auth service.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
 
@@ -18,13 +19,18 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
   scope composition. Child scope is appended as AND predicates, never map-overwritten.
 - `internal/lineage`: actual parent-team adoption and independently revalidated
   source-membership checks. See [Task 4 evidence](docs/lineage-resolution.md).
+- `internal/mutation`: separate administration and ABV checks, immutable evidence
+  isolation and exact transactional assignment writes. See [Task 5 evidence](docs/assignment-creation.md).
+- `abv`: reusable facade for inspection, read-only diagnosis and protected
+  assignment creation; no raw provider writes exposed.
 - `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
   implementation and reusable provider conformance suite are delivered in CP2.
 - `internal/lab`: controlled fixtures for new disposable SQLite databases only,
   not a seed-into-live-database or ordinary bootstrap API.
-- `application`: interface between reusable CLI and later in-process facade.
+- `application`: interface between reusable CLI and its in-process adapter.
 - `cli`: testable command shell with injected streams, no SQL or process exit.
-  Help is available; data operations explicitly return unsupported at CP1.
+  Explicit context/database binding; inspect, check, assign and controlled
+  scenarios use the in-process adapter. See [local testing](docs/local-testing.md).
 
 ## Run the checks
 
@@ -38,8 +44,8 @@ go vet ./...
 
 CP1 introduced no external dependencies. CP2 adds pinned `modernc.org/sqlite`
 and its dependencies; see [provider checkpoint evidence](docs/sqlite-provider.md).
-Actual lineage resolution, the executable and successful protected CLI mutation
-commands remain CP3 work.
+Build the executable with `go build -o ./bin/abv ./cmd/abv`. The
+[walkthrough](docs/local-testing.md) demonstrates seed/inspect/check/assign/reopen.
 
 ## Input and authority boundaries
 
@@ -59,8 +65,9 @@ Prototype parser limits: 1 MiB per record and 64 nested levels. The supported
 subset requires non-empty, duplicate-free permission lists and positive signed
 64-bit revision values; these limits are not approval of full public schemas.
 An empty validity object is unsupported; contradictory time windows are malformed.
-Validity instants are parsed and preserved; current time eligibility is later
-resolver/mutation work. The application owns domain values and `$self` meaning.
+Validity instants are parsed and preserved; the resolver and coordinator check
+current eligibility, including a pre-write recheck. This does not promise
+production commit-time expiry. The application owns domain values and `$self` meaning.
 
 `CheckContent` assumes a provider-established area's catalog and role snapshot.
 `Narrow` assumes a valid supported parent and checked child. It derives the full
