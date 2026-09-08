@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="280" viewBox="0 0 840 280" role="img" aria-labelledby="title desc">
+  <title id="title">Shared grant enabled, explicitly disabled assignment unchanged</title>
+  <desc id="desc">After required checks, G2 is enabled globally. Enabled A2 with valid parent support may supply authority. Explicitly disabled A3 with missing support remains disabled and supplies no authority. If A3 were enabled with broken support, global enablement would fail.</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526174"/></marker></defs>
+  <rect width="840" height="280" rx="12" fill="#f8fafc"/>
+  <g font-family="sans-serif" text-anchor="middle" fill="#172033">
+    <rect x="210" y="18" width="420" height="64" rx="8" fill="#dcfce7" stroke="#15803d"/>
+    <text x="420" y="44" font-size="20" font-weight="bold">G2 — enabled globally</text>
+    <text x="420" y="67" font-size="14">Only after administration and required ABV checks</text>
+    <g stroke="#526174" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M320 82L215 124"/><path d="M520 82L625 124"/></g>
+    <rect x="30" y="128" width="370" height="88" rx="8" fill="#dcfce7" stroke="#15803d"/>
+    <text x="215" y="153" font-size="18" font-weight="bold">A2 → Team2: enabled</text>
+    <text x="215" y="178" font-size="15">Required parent support valid</text>
+    <text x="215" y="201" font-size="14">May supply its bounded authority</text>
+    <rect x="440" y="128" width="370" height="88" rx="8" fill="#e2e8f0" stroke="#526174"/>
+    <text x="625" y="153" font-size="18" font-weight="bold">A3 → Team3: stays disabled</text>
+    <text x="625" y="178" font-size="15">Required parent support missing</text>
+    <text x="625" y="201" font-size="14">No authority; its own enablement must validate</text>
+    <text x="420" y="245" font-size="15" font-weight="bold">Counterexample: enabled A3 + broken support blocks G2 enablement.</text>
+    <text x="420" y="269" font-size="13">No assignment-state rewrite, revision upgrade, parent replacement or repair.</text>
+  </g>
+</svg>

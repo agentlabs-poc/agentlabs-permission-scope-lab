@@ -127,6 +127,38 @@ enables the same grant for Nutan while ignoring that required validation.
 questions. Their separation permits reversible pauses without unnecessary
 cascading writes while ensuring no assignment overrides a disabled grant.
 
+### CP4-P03 reconciliation — inactive assignment versus failed required support
+
+![Grant enabled while an explicitly disabled assignment stays disabled](assets/grant-enable-disabled-assignment.svg)
+
+This is an explicit application of Q-101A/B/C and Q-101E-3, not a new
+implementation-selected policy. The user requested continuation after checking
+that the model already supplies this distinction.
+
+Suppose G2 is disabled globally. A2 assigns it to Team2 and remains enabled,
+with valid parent-team support. A3 assigns the same grant to Team3 but is
+explicitly disabled; its parent-team support is missing. A3's missing support
+does not by itself block enabling G2. All required enable checks must pass;
+A2 may then become effective, while A3 remains explicitly disabled and supplies
+no authority. Explicitly enabling A3 later must validate its then-current
+relationships, adopted revision, support, boundaries and administration.
+
+**Counterexample:** if A3 is enabled rather than explicitly disabled, its broken
+required support remains an enablement failure. Do not relabel that failure as
+an inactive assignment or enable G2 only for A2. The grant-wide operation fails.
+
+**Rationale:** assignment state and grant state are independent controls.
+Restoring one does not restore the other. A deliberately disabled binding can
+remain through structural change precisely because it supplies no authority
+until a later validated enablement. Inventorying disabled records is still
+necessary; this rule does not make them absent for uniqueness, integrity or
+structural checks, permit cycles, or bypass a disabled upstream assignment
+needed by an enabled route. Derived descendants are not automatically rewritten.
+
+The initial CP4 planning note mistakenly presented this interaction as a new
+decision blocker. Its question and alternatives are preserved as history in
+[the CP4-A design](../implementation/plan/abv-cp4a-design.md), not live options.
+
 ## 4. Direct humans and shared assignments are different cases
 
 ![Original Nutan direct assignment, separate subteam support, and the combined shared-grant disable case](assets/parent-grant-routes.svg)

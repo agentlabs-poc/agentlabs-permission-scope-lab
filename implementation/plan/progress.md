@@ -13,7 +13,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A grant enable/disable scope approved; design decision CP4-P03 pending | [Design and concrete binding case](abv-cp4a-design.md); no runtime implementation yet. |
+| CP4: lifecycle | CP4-A grant enable/disable planned; CP4-P03 reconciled from existing rules | [Bounded execution plan](abv-cp4a-implementation-plan.md) and [design/history](abv-cp4a-design.md); no runtime implementation yet. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
@@ -35,9 +35,10 @@ ABV implementation
 │   ├── Task 5: administration + ABV, atomic assignment  COMPLETE
 │   ├── Task 6: inspect/check/assign commands + restart demo COMPLETE
 │   └── Task 7: adversarial and end-to-end acceptance    COMPLETE
-├── CP4 lifecycle                                       DESIGN
+├── CP4 lifecycle                                       PLANNED FIRST SLICE
 │   ├── CP4-A grant enable/disable scope                 APPROVED
-│   └── CP4-P03 disabled binding in global enablement    DECISION PENDING
+│   ├── CP4-P03 disabled binding clarification           RECONCILED
+│   └── Provider update → two gates → CLI/tests          NEXT
 ├── CP5 registration + real Auth integration             PENDING
 └── CP6 PostgreSQL                                      PENDING
 ```

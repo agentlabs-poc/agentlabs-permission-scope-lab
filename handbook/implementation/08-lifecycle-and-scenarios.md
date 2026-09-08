@@ -41,6 +41,26 @@ to ordinary explicit permission selection, not a reason to make all revisions li
 | G3 itself was explicitly disabled | Its disabled state remains. | Parent restoration does not enable it. |
 | Delete a grant | Permanent withdrawal from usable authority. | It cannot be enabled back; delete is the selected permanent operation, not a separate revoke state. |
 
+### Shared grant, explicitly disabled assignment
+
+![Separate grant and assignment controls](../../docs/assets/grant-enable-disabled-assignment.svg)
+
+G2 is globally disabled. A2 assigns it to Team2 and remains enabled with valid
+parent support. A3 assigns it to Team3 but is explicitly disabled and its parent
+support is missing. Enabling G2 does not enable A3: A3's missing support alone
+does not block the otherwise valid A2 route from resuming after all required
+grant-enable checks pass. A3 stays disabled, and its later explicit enablement
+must validate current support. No repair or revision upgrade occurs.
+
+If A3 is instead **enabled** with broken required support, that failure blocks
+global enablement of G2. Do not enable the shared grant only for A2 or silently
+treat the broken enabled assignment as disabled. Grant-wide status and separate
+assignment eligibility remain distinct in both examples.
+
+This applies Q-101A/B/C and Q-101E-3; it is not an implementation-specific option.
+Disabled records remain relevant to integrity, uniqueness and structural checks.
+See the [model reconciliation and rationale](../../docs/parent-grant-bindings.md#cp4-p03-reconciliation--inactive-assignment-versus-failed-required-support).
+
 Grant validity belongs to immutable revision content. This independent core
 example has a local expiry; it still requires valid upstream support and an
 authorized assignment:

@@ -1,8 +1,10 @@
 # CP4-A — grant enable/disable design
 
-Status: CP4-P01 scope approved; CP4-P02 approach recorded. CP4-P03 below needs
-a user decision before the enablement algorithm or an executable task plan is
-finalized. This document is not approval of a new canonical rule or runtime code.
+Status: CP4-P01 scope approved. CP4-P03 is reconciled as an application of the
+existing Q-101 rules, not a new decision blocker. The user requested continuation
+after that source check. The [execution plan](abv-cp4a-implementation-plan.md)
+defines the internal contracts and bounded tasks. No runtime code is delivered
+by this documentation checkpoint.
 
 ## 1. Approved scope and rationale
 
@@ -51,10 +53,31 @@ introduced by this design note.
 6. Recheck cancellation and applicable time eligibility before the write set.
 7. Persist only the grant-control change; return success only after commit.
 
-The enablement validation set in step 4 is the unresolved item below. There is
-no implementation authorization to choose its semantics by convenience.
+Step 4 uses the reconciled distinction below; implementers must not select a
+different policy or treat an enabled but unsupported assignment as disabled.
 
-## 4. CP4-P03 — does a disabled broken assignment block global enablement?
+## 4. CP4-P03 — reconciled from the existing model
+
+![Current rule and enabled/broken counterexample](../../docs/assets/grant-enable-disabled-assignment.svg)
+
+Inventory every assignment. An explicitly disabled assignment stays disabled
+and is not required to regain eligibility merely because its grant is enabled.
+Its missing parent support alone does not block another valid assignment from
+resuming. In contrast, broken required support for an enabled assignment causes
+the whole grant-enable operation to fail. Required upstream assignments must
+still be enabled; this is not a bypass for an inactive source of an active route.
+
+The [canonical explanation and counterexample](../../docs/parent-grant-bindings.md#cp4-p03-reconciliation--inactive-assignment-versus-failed-required-support)
+derive this behavior from Q-101A/B/C and Q-101E-3. Disabled records remain stored
+and relevant to integrity/uniqueness/structural checks. Grant enablement changes
+no assignment status, content revision, scope, membership or parent relationship.
+
+<details>
+<summary>Historical planning question — reconciled, not a pending model decision</summary>
+
+The following question, recommendation and alternatives were recorded before
+the model/history check. Their pending wording is superseded by the clarification
+above and is retained to preserve the reasoning trail.
 
 ![One shared disabled grant, one enabled valid assignment and one disabled broken assignment](assets/cp4a-disabled-binding-question.svg)
 
@@ -126,6 +149,8 @@ either silently.
 - Canonical restraint: this is a proposed validation-set rule, not a new field,
   new status, permission name or grant format.
 
+</details>
+
 ## 5. Acceptance requirements already fixed by approved rules
 
 | Case | Required result |
@@ -139,13 +164,11 @@ either silently.
 | Administration missing | No control write, even if business source authority exists. |
 | Concurrent change or cancellation | Existing transaction ordering, rollback and no-success-on-failure guarantees hold. |
 | Snapshot or traversal bound exceeded | Explicit failure; no partial validation or write. |
-| CP4-P03's disabled broken assignment | Expected outcome must follow the user's decision, not a guessed test assertion. |
+| CP4-P03's disabled broken assignment | Does not by itself block grant enable; remains disabled. The otherwise identical enabled/broken assignment blocks the whole operation. |
 
 ## 6. Bounded continuation
 
-The current work stops at this concrete decision; no coding, speculative fallback
-or repeated research loop is needed. After CP4-P03 is decided, finalize exact
-operation payloads and affected-binding traversal in `implementation/plan/`, then
-execute small tested tasks with Sol-medium coding agents. Each dispatch needs a
+CP4-P03 is closed as reconciliation, not an open decision. Execute the linked
+plan in small tested tasks with Sol-medium coding agents. Each dispatch needs a
 scope, exit criterion and time/retry budget. Preserve existing reviewed tests,
 history and source decisions. CP1–CP3 remain complete.

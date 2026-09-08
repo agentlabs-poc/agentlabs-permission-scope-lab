@@ -31,11 +31,14 @@ cleanup and missing-file regression fixes. Task 7 and the complete CP3 local
 prototype are independently approved at `5b81b84`: full verification, all 28
 source-case classifications and three bounded benchmark sizes are recorded.
 Do not redispatch Tasks 1–7. CP4-P01 grant enable/disable scope is approved.
-The draft is implementation/plan/abv-cp4a-design.md. CP4-P03 asks whether an
-explicitly disabled assignment with missing support blocks global grant enable.
-Its recommendation is not approved; do not encode either selection rule until
-the user decides. The executable CP4-A plan follows that decision, not another
-broad research pass. CP5 real Auth/registration and CP6 PostgreSQL remain later work.
+CP4-P03 is reconciled from Q-101A/B/C and Q-101E-3, not a new policy blocker:
+an explicitly disabled assignment stays disabled; its missing support alone
+does not block grant enablement. A broken enabled assignment still blocks the
+whole operation. See docs/parent-grant-bindings.md and handbook chapter 8.
+The exact CP4-A plan is implementation/plan/abv-cp4a-implementation-plan.md,
+with design beside it. No runtime CP4 work is delivered yet. Next is Task 1
+of that plan, not another broad research/approval loop over settled principles.
+CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.
 Never present internal provider writes or controlled fixture creation as a
