@@ -62,7 +62,7 @@ adapter optionally implements CatalogAdministration. Absence must return
 ErrUnsupported, not a fallback to CheckAssignment. A publisher adapter may reject
 all assignment administration; this does not require tenant context for publishing.
 
-- [ ] **1. Write RED tests.** Use real SQLite fixtures with a focused test
+- [x] **1. Write RED tests.** Use real SQLite fixtures with a focused test
   administration adapter; it checks exact application, identity and proposed
   definition. Example postcondition after a successful service call:
 
@@ -88,9 +88,9 @@ if got.ID != "hrms:payroll:payslip::export" || !got.Active {
   supported keys, not aliases used by persistence. Caller input remains unchanged.
   Facade test exercises real forwarding plus denied authority, not method presence.
 
-- [ ] **2. Run RED:** `go test ./internal/mutation . -run 'Register|Catalog' -count=1`.
+- [x] **2. Run RED:** `go test ./internal/mutation . -run 'Register|Catalog' -count=1`.
   Record expected missing behavior, not accidental fixture/build breakage.
-- [ ] **3. Implement:** precheck cancellation, application and existing supported
+- [x] **3. Implement:** precheck cancellation, application and existing supported
   identity validation. Detect optional capabilities with existing `nilInterface`.
   Snapshot application must equal requested application. Clone caller slice inputs
   before entering the operation; isolate admin evidence and proposal copies.
@@ -107,9 +107,9 @@ if got.ID != "hrms:payroll:payslip::export" || !got.Active {
 // -> committed definition; on any error, zero definition.
 ```
 
-- [ ] **4. Run GREEN:** focused command, `go test ./...`,
+- [x] **4. Run GREEN:** focused command, `go test ./...`,
   `go test -race ./internal/mutation .`, `go vet ./...`, `git diff --check`.
-- [ ] **5. Commit only listed source/tests**, message
+- [x] **5. Commit only listed source/tests**, message
   `feat(abv): protect application catalog registration`. No push and no review
   agents. Report RED/GREEN, SHA, exact files, concerns and remaining root/CLI work.
 

@@ -7,6 +7,13 @@ and verified commit/push checkpoints. Track actual delivery in
 [checkpoint progress](progress.md). Planning-only statements below preserve the
 original stage; they do not override that subsequent authorization.
 
+**CP5-A clarification:** approved [application registration](abv-cp5a-design.md)
+uses explicit application-only context and separately bounded publisher authority.
+Tenant grant/assignment operations still require tenant plus application. This
+supersedes the original “every call carries a pair” wording below only for catalog
+management; no fake tenant or cross-application lookup is introduced. New CP5 work
+uses tests without independent review passes at the user's explicit request.
+
 **Scope correction — 9 September 2026:** the user excludes production Auth-service
 integration from this build. CP5 is ABV definition management only. Prior real
 adapter/integration requirements are superseded; retain a replaceable administrative

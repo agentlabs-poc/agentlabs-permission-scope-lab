@@ -79,7 +79,7 @@ before protected operation; do not require a fabricated tenant. Extract shared
 marker decoding from existing verifyMarker so both connectors preserve its strict
 checks. Existing tenant verification still compares the actual tenant and app.
 
-- [ ] **1. RED:** add real CLI/lab end-to-end tests that seed the current scenario,
+- [x] **1. RED:** add real CLI/lab end-to-end tests that seed the current scenario,
   register scope then permission, close/reopen and inspect through existing tenant
   `inspect permission`/`inspect scope`. Assert literal persisted values, unchanged
   G0/G1/G2 content and assignments, success output and lab warning.
@@ -89,8 +89,8 @@ checks. Existing tenant verification still compares the actual tenant and app.
   writer error and close error. On failed mutation stdout must not contain success.
   Test tenant commands still reject missing tenant. For full root behavior, the
   root unit's Go tests remain the acceptance proof; don't invent another scenario.
-- [ ] **2. Run RED:** `go test ./cli ./internal/lab ./cmd/abv -run Catalog -count=1`.
-- [ ] **3. Implement:** reuse parser/helper patterns; one dedicated catalog
+- [x] **2. Run RED:** `go test ./cli ./internal/lab ./cmd/abv -run Catalog -count=1`.
+- [x] **3. Implement:** reuse parser/helper patterns; one dedicated catalog
   dispatch handler, optional connector and lab adapter. Registration calls the
   protected facade, never internal SQL insert. Use existing error codes and
   buffered labeled output such as `internal projection: permission` plus ID and
@@ -103,11 +103,11 @@ checks. Existing tenant verification still compares the actual tenant and app.
 // Successful definition is rendered only after facade registration returns nil.
 ```
 
-- [ ] **4. GREEN:** focused command, `go test ./...`,
+- [x] **4. GREEN:** focused command, `go test ./...`,
   `go test -race ./cli ./internal/lab ./cmd/abv`, `go vet ./...`, `go build ./...`,
   `git diff --check`. Document the three working commands, lab-only authority,
   add-only limits and ordinary child non-expansion in local-testing.md.
-- [ ] **5. Commit explicit files:** `feat(abv): expose protected catalog CLI`.
+- [x] **5. Commit explicit files:** `feat(abv): expose protected catalog CLI`.
   No push or reviewer. Report RED/GREEN, SHA, tests and remaining limits.
 
 ## Exit

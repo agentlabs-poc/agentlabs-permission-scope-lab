@@ -9,13 +9,19 @@ through `ed8f227`. CP4-B assignment enable/disable, Task 4 and final integration
 are independently approved through `2681550`. Other lifecycle operations and PostgreSQL
 remain outside this slice; real Auth-service integration is out of scope.
 This is a local test harness, not a production Auth service.
+CP5-A delivers application-only catalog persistence, protected permission/scope
+registration, additive computed trusted-root coverage and catalog CLI commands
+through `f4973f9`. Full verification passes; independent review was skipped at the
+user's request. See [progress](../plan/progress.md) and the
+[working commands](docs/local-testing.md).
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
 
 ## Current components
 
 - `domain`: canonical core grant/control/assignment/identity records and internal
-  context/error/relationship projections. `Area` requires tenant and application.
+  context/error/relationship projections. `Area` requires tenant and application;
+  `Application` is the separate application-only catalog boundary.
 - `internal/codec`: strict supported-core JSON decoding. Representation validity
   does not make a record authorized, trusted or safe to persist.
 - `internal/validation`: registered definition checks and non-expanding permission/
@@ -25,7 +31,8 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
 - `internal/mutation`: separate administration and ABV checks, immutable evidence
   isolation and exact transactional assignment/control writes. See [acceptance](docs/acceptance.md).
 - `abv`: reusable facade for inspection, read-only diagnosis and protected
-  assignment creation and grant/assignment enable/disable; no raw provider writes exposed.
+  assignment creation, grant/assignment enable/disable and protected application
+  registration; no raw provider writes exposed.
 - `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
   implementation and reusable provider conformance suite are delivered in CP2.
 - `internal/lab`: controlled fixtures for new disposable SQLite databases only,
@@ -55,7 +62,16 @@ Build the executable with `go build -o ./bin/abv ./cmd/abv`. The
 Grant content has no recipient or tenant/application scope fields. The context
 is passed separately to authority checks, and retained on internal routes. Exact
 IDs are preserved; there is no default tenant, case normalization or wildcard
-context. The provider must establish the installation before catalog use.
+context. Tenant operations must establish the installation before catalog use.
+Catalog registration instead establishes an existing application and separate
+application-publisher authority; no tenant is fabricated or inferred. It cannot
+bootstrap an application or create tenant access. Permission/scope registration
+is add-only; role publication and definition lifecycle edits are not delivered.
+
+Trusted roots compute active application-catalog coverage while preserving scope,
+validity and enablement. Ordinary child grants retain their explicit selections.
+This additive slice does not implement permission retirement: a retired reference
+in stored root content can still conservatively reject the whole route.
 
 Only supported string version `"1"` core records are decoded. Unsupported
 extensions are rejected, not discarded. Null values, duplicate JSON keys,

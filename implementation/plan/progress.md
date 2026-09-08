@@ -1,12 +1,19 @@
 # ABV implementation progress
 
-## CP5-A started — registration persistence first
+## CP5-A complete — additive registration, computed roots and CLI
 
 The user approved [CP5-A](abv-cp5a-design.md), then requested no review passes:
 get it working first. Sol-medium implementation and mandatory tests continue;
 do not describe new CP5 work as independently reviewed. The first bounded
-[task](abv-cp5a-provider-plan.md) implements application-only catalog persistence.
-Protected registration, computed roots and CLI acceptance remain subsequent work.
+[task](abv-cp5a-provider-plan.md) delivered application-only catalog persistence
+at `fd334f7`. [Protected registration](abv-cp5a-registration-plan.md) is delivered
+at `882b4f5`; both are pushed to main. Focused/full tests, targeted race checks
+and vet pass. No independent review was performed, as requested.
+Computed roots are delivered at `50d870b`; CLI acceptance and the empty-token-list
+integration fix are delivered at `f4973f9`. Final full Go/full race/vet/build/module
+verification passes, as do the site build and all ten site tests. Compiled CLI
+registration/reopen works. All four Sol-medium units finished within their caps;
+no review passes were dispatched. Tests remain the verification evidence.
 This grouping separates persistence proof from administrative authorization.
 Existing completed CP1–CP4-A/B evidence below is unchanged.
 
@@ -35,7 +42,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
 | CP4: lifecycle | CP4-A and CP4-B complete; full assignment-control slice approved through `2681550` | [Acceptance](../abv/docs/acceptance.md#cp4-b--protected-assignment-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); other lifecycle operations remain. |
-| CP5: ABV definition management | CP5-A catalog persistence in progress | Add-only permission/scope registration first; protected flow, computed roots, CLI and roles remain. Production Auth integration excluded. |
+| CP5: ABV definition management | CP5-A complete and tested through `f4973f9` | Add-only registration, computed roots and CLI delivered; roles and further definition lifecycle remain. Production Auth integration excluded. |
 | CP6: PostgreSQL | Deferred by user; not required now | Provider boundary retained; backend implementation/transfer rehearsal are later work. |
 
 ### Execution tree
@@ -69,7 +76,12 @@ ABV implementation
 │   │   └── CLI/lab/acceptance + final review            COMPLETE / REVIEWED
 │   ├── Publication / explicit adoption                 PENDING
 │   └── Deletion / parent changes                       DEFERRED BY USER
-├── CP5 ABV definition management                       PENDING
+├── CP5 ABV definition management                       IN PROGRESS
+│   ├── Application-only catalog provider               COMPLETE / TESTED
+│   ├── Protected registration Go API                   COMPLETE / TESTED
+│   ├── Computed root coverage                          COMPLETE / TESTED
+│   ├── Catalog CLI                                     COMPLETE / TESTED
+│   └── Roles / further definition lifecycle             PENDING
 └── CP6 PostgreSQL provider                             DEFERRED BY USER
 ```
 
@@ -77,7 +89,7 @@ Three numbered checkpoints are delivered for the local prototype. Checkpoints
 differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
 delivers grant-wide enable/disable; CP4-B delivers protected team-assignment
 enable/disable. Remaining current-build work is publication/adoption and CP5
-definition management, each requiring a bounded operation plan. PostgreSQL,
+roles/further definition lifecycle, each requiring a bounded operation plan. PostgreSQL,
 deletion and parent changes are deferred, not completed. Real Auth-service
 integration is excluded, not part of this build's completion denominator.
 

@@ -34,7 +34,7 @@ to understand source reconstruction and the separate dependency inventory.
 continues producing `domain.Route`; `HasSource` reconstructs it through the same
 resolver. Do not alter ordinary `validation.SelectedPermissions` or `Narrow`.
 
-- [ ] **1. RED:** use `lab.TeamFINC17` and `ResolveParentTeam` with its G1 content
+- [x] **1. RED:** use `lab.TeamFINC17` and `ResolveParentTeam` with its G1 content
   and Team1 recipient, so the returned parent is G0, not narrowed G1. Add one
   active permission only to the catalog and require its presence in the root
   route without modifying stored G0. Independently expect sorted read/write/
@@ -57,8 +57,8 @@ if !slices.Contains(root.Permissions, "hrms:payroll:payslip::export") {
   and source revalidation through `HasSource` for a root holder. Deep-compare
   unchanged snapshot including validity values. Compatibility enabled must not
   silently cover new permissions incompatible with root scope: fail closed.
-- [ ] **2. Run RED:** `go test ./internal/lineage -run RootCatalog -count=1`.
-- [ ] **3. Implement:** after the existing trusted-root guard, derive active
+- [x] **2. Run RED:** `go test ./internal/lineage -run RootCatalog -count=1`.
+- [x] **3. Implement:** after the existing trusted-root guard, derive active
   permission IDs, validate key/definition identity and existing permission grammar,
   sort, and use the derived list for root route permissions. Validate computed
   selection against the root's scope/compatibility using a temporary content copy
@@ -77,9 +77,9 @@ if err := validation.CheckContent(s.Area, s.Catalog, computed, s.Roles); err != 
 }
 ```
 
-- [ ] **4. GREEN:** focused command, `go test ./...`,
+- [x] **4. GREEN:** focused command, `go test ./...`,
   `go test -race ./internal/lineage`, `go vet ./...`, `git diff --check`.
-- [ ] **5. Commit exact files:** `feat(abv): compute trusted root catalog coverage`.
+- [x] **5. Commit exact files:** `feat(abv): compute trusted root catalog coverage`.
   Report RED/GREEN, SHA and limitations. No push, review agent or unrelated edits.
 
 ## Completion boundary

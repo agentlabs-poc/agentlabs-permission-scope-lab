@@ -80,7 +80,7 @@ returns ErrMalformed; unsupported token/key/active state returns ErrRejected.
 Missing application returns ErrNotFound. Duplicate SQL keys return ErrConflict.
 Keep existing storage cancellation/unavailability classifications.
 
-- [ ] **1. Write failing tests before implementation.** Start with a real
+- [x] **1. Write failing tests before implementation.** Start with a real
   temporary fixture, create via `CreateFixture`, and assert the returned provider
   implements `storage.CatalogProvider`. Before the new interface exists, use a
   local interface with the planned signatures after introducing only type stubs;
@@ -106,11 +106,11 @@ if err != nil { t.Fatal(err) }
   Cover two concurrent duplicate inserts with at most one success; other result
   must be ErrConflict. Never busy-loop/retry in the provider.
 
-- [ ] **2. Run RED.** From `implementation/abv`, run
+- [x] **2. Run RED.** From `implementation/abv`, run
   `go test ./domain ./internal/validation ./internal/storage/sqlite -run 'Application|Catalog' -count=1`.
   Record the expected failure and cause in the worker report.
 
-- [ ] **3. Implement the minimal provider.** Reuse `p.connection` and
+- [x] **3. Implement the minimal provider.** Reuse `p.connection` and
   `p.transaction`: BEGIN for reads, BEGIN IMMEDIATE for updates. Validate context
   and callback before DB work, verify existing application, load bounded catalog,
   invoke callback once, check cancellation, validate one write category and insert.
@@ -130,13 +130,13 @@ if err != nil { t.Fatal(err) }
 // INSERT permission first, then its supported keys; transaction rolls both back.
 ```
 
-- [ ] **4. Verify GREEN and preservation.** Run the focused command above,
+- [x] **4. Verify GREEN and preservation.** Run the focused command above,
   `go test ./...`, and
   `go test -race ./internal/storage/sqlite ./internal/validation ./domain`.
   Assert existing tenant snapshots retain their prior records and compatibility
   mode. No source change outside the listed ownership except a narrowly necessary
   shared-helper change reported to the controller.
-- [ ] **5. Commit scoped code/tests.** Run `git diff --check`; stage explicit
+- [x] **5. Commit scoped code/tests.** Run `git diff --check`; stage explicit
   task files; commit `feat(abv): add application catalog persistence`.
   Do not commit local reports or push. Report SHA, RED/GREEN evidence, changed
   files, remaining limitations and any cap reached. Controller owns publication.

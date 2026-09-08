@@ -13,6 +13,15 @@ with `implementation/plan/abv-cp5a-provider-plan.md`; persistence is deliberatel
 separate from protected registration, root coverage and CLI acceptance. Do not
 claim an internal provider write is an authorized public operation.
 
+CP5-A is implemented and verified through `f4973f9`: provider `fd334f7`,
+protected registration `882b4f5`, computed roots `50d870b`, CLI `f4973f9`.
+Do not redispatch these units. The CLI integration corrected empty-token-list
+cloning with a regression; validation semantics remain unchanged. Full Go,
+full race, vet, build and module verification pass; site build/10 tests pass.
+Review was skipped by explicit user direction, not performed or approved.
+Remaining current build: CP4 publication/adoption, role management and further
+definition lifecycle (including complete retirement behavior). See progress.md.
+
 ## Standing rule — bounded execution
 
 All activity, including implementation, investigation, reviews, tests and

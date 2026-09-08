@@ -1,5 +1,45 @@
 # ABV first-slice acceptance evidence
 
+## CP5-A — additive application registration
+
+**Complete and verified through `f4973f9`.** Provider `fd334f7`, protected
+registration `882b4f5`, computed roots `50d870b` and CLI `f4973f9` are implemented
+and tested. Independent review was deliberately skipped at the user's request;
+earlier CP1–CP4 review evidence below remains unchanged.
+
+| Required behavior | Test evidence |
+|---|---|
+| Explicit application context; missing/invalid context rejected | `domain/application_test.go`, SQLite catalog tests |
+| Atomic add-only permission/scope persistence | `internal/storage/sqlite/catalog_test.go`: reopen, duplicates, cancellation, support rows and fresh-read rollback checks |
+| One app catalog across tenants, separate app isolation | SQLite catalog tests; existing tenant snapshot tests retained |
+| Application publisher check separate from ABV validation | `internal/mutation/catalog_test.go`, public `catalog_test.go` |
+| Callback cannot forge registered dependencies or change proposal | Provider callback-mutation tests and hostile administration tests |
+| Trusted root reflects active catalog additions | `internal/lineage/root_catalog_test.go` |
+| Child selection, scope, validity and enablement preserved | Root catalog and existing lineage/control suites |
+| Compiled registration commands, reopen persistence, original grants unchanged | `cmd/abv/main_test.go`, catalog CLI/lab tests and manual compiled demo |
+| Explicit empty scope-token list survives service copies | `TestRegisterScopePreservesExplicitEmptyAllowedTokens`; reproduced CLI failure before fix |
+
+Each unit recorded a failing test before implementation, followed by passing
+focused/full tests, targeted race checks and vet where applicable. No schema
+migration or dependency was introduced. Application-only catalog management does
+not weaken tenant `Area`, install an app, establish a root or confer tenant data
+access on the publisher. No canonical catalog JSON or root wildcard encoding is
+introduced.
+
+Final controller verification on 9 September 2026 local time passed
+`go test ./... -count=1`, `go test -race ./... -count=1`, `go vet ./...`,
+`go build ./...` and `go mod verify`. The documentation site build and all ten
+site tests also pass. The compiled demo registers region, owner/$self and export,
+then reopens and inspects stored definitions. The nil-versus-empty token-list
+clone bug was fixed without relaxing validation. No reviewer ran.
+
+This is add-only registration. Role management, permission retirement and further
+definition lifecycle operations are not completed here. In particular, a retired
+permission still referenced by stored root content can conservatively reject the
+whole route; complete retirement semantics need their own bounded implementation.
+CP4 revision publication/adoption remains pending. Production Auth integration is
+outside scope; PostgreSQL, deletion and reparenting remain deferred by the user.
+
 ## CP4-B — protected assignment enable/disable
 
 **Complete and independently approved through `2681550`.** The CLI accepts
