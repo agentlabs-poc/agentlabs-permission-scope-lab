@@ -43,8 +43,11 @@ Task 3's CLI/lab wiring is implemented at `ccf7eef`; `ed8f227` fixes the final
 review's typed-nil capability guard. Task 3 spec/quality and whole CP4-A integration
 are independently approved, with final full Go/race/vet/build verification passing.
 Do not redispatch CP4-A Tasks 1–3. This slice delivers grant-wide enable/disable,
-not complete CP4. Next: a bounded plan for the next lifecycle operation, preserving
-assignment controls, bottom-up binding guards and explicit current-state validation.
+not complete CP4. CP4-B01's assignment enable/disable design and execution draft
+are in implementation/plan/abv-cp4b-design.md and abv-cp4b-implementation-plan.md.
+They propose team-held controls with bottom-up discovery, preserving adopted
+records and both gates. Runtime CP4-B has not started; review this bounded
+scope/interface proposal before execution, without reopening Q-101 principles.
 CP5 real Auth/registration and CP6 PostgreSQL remain later work.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve
 its execution evidence for the continuing plan.

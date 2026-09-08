@@ -13,7 +13,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A grant enable/disable complete and independently approved through `ed8f227` | [Acceptance evidence](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable); other CP4 lifecycle operations remain open. |
+| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B assignment controls drafted for review | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution draft](abv-cp4b-implementation-plan.md); CP4-B runtime not started. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
@@ -41,6 +41,7 @@ ABV implementation
 │   ├── Conditional provider control update             COMPLETE / REVIEWED
 │   ├── Two-gate coordinator/facade                     COMPLETE / REVIEWED
 │   ├── CLI and integration tests                       COMPLETE / REVIEWED
+│   ├── CP4-B assignment enable/disable                  DRAFT FOR REVIEW
 │   └── Other lifecycle operations                      PENDING
 ├── CP5 registration + real Auth integration             PENDING
 └── CP6 PostgreSQL                                      PENDING
