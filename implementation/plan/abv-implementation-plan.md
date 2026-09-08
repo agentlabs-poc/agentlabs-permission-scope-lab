@@ -27,6 +27,14 @@ This binds parent discovery/cycle checks to the proposal. The coordinator checks
 latest-only creation; traversal follows actual parent-team adoptions. The older
 two-string sketch is superseded only at this internal seam, not in public JSON.
 
+**Task 6 composition refinement:** the CLI's parsed `--db` must select the actual
+store. Replace its prebound `application.API` argument with a small injected
+connector function, returning the API and its close function for the validated
+area/path. Keep the three API operations unchanged. This supersedes only the
+earlier `Run` signature sketch below; no duplicate parsing in `main` or ignored
+database flag is permitted. A function is sufficient; no factory hierarchy is
+needed. Help, malformed commands and scenarios do not open the ordinary API.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > or superpowers:executing-plans to implement this plan task-by-task. The default
 > handoff is inline execution; do not infer approval to spawn agents, commit,
@@ -461,12 +469,12 @@ uniqueness correction and genuine exact-expiry revalidation.
 administrative adapter. **Produces:** `CreateAssignment`, facade retrieval and
 diagnostic methods. Public callers do not receive provider raw-write methods.
 
-- [ ] Write failing tests asserting no rows are written when administration
+- [x] Write failing tests asserting no rows are written when administration
   rejects, the source is missing, the proposal is malformed, the grant is too
   broad, the recipient is wrong or validation cannot finish. The lab evaluator
   checks its explicit fixture permission/recipient boundary; never use a general
   `return nil` evaluator in the production-intended composition.
-- [ ] Implement the operation sequence:
+- [x] Implement the operation sequence:
 
 ```text
 CreateAssignment(ctx, area, identity, proposed)
@@ -488,20 +496,23 @@ CreateAssignment(ctx, area, identity, proposed)
 Snapshot mutation is not proof that a proposal passed validation. The coordinator
 builds the write set itself and never accepts a caller's `validated` flag.
 
-- [ ] Add tests that a successful diagnostic check followed by parent disablement
+- [x] Add tests that a successful diagnostic check followed by parent disablement
   does not permit a later assign. A new assign must re-read and recheck. A failed
   commit produces no success receipt, and a failed attempt does not silently
   select another content revision.
-- [ ] Use two SQLite handles and channel barriers to test a competing parent
+- [x] Use two SQLite handles and channel barriers to test a competing parent
   disablement before mutation acquisition versus after commit. Establish and
   assert ordering; do not call a legitimate later update a retroactive failure.
   Verify busy/conflict/cancellation paths never replay the callback automatically.
-- [ ] Advance a fake clock across the content's expiry during validation and
+- [x] Advance a fake clock across the content's expiry during validation and
   assert no assignment write is issued. Record the precise time-check point;
   a production commit-time expiry contract still needs explicit review.
-- [ ] Run `go test ./internal/mutation -count=1`, then `go test -race ./...`.
+- [x] Run `go test ./internal/mutation -count=1`, then `go test -race ./...`.
   CP3's guarantee covers SQLite and the controlled administrative port, not
   unreviewed external Auth evidence or a complete production evaluator.
+
+Task 5 completion: independently approved at `d7fea85`, including the
+deterministic-ordering test correction. See [protected assignment evidence](../abv/docs/assignment-creation.md).
 
 ## Task 6 — reusable CLI with in-process adapter [CP3]
 
@@ -511,6 +522,34 @@ builds the write set itself and never accepts a caller's `validated` flag.
 
 **Consumes:** `application.API` and `ScenarioRunner`. **Produces:** the exact
 commands listed in design section 8A, backed by an in-process facade.
+
+Internal binding seam (supersedes the prebound API argument in the earlier sketch):
+
+```go
+// application/api.go
+type Connect func(context.Context, domain.Area, string) (API, func() error, error)
+
+// cli/run.go
+func Run(context.Context, []string, io.Reader, io.Writer, io.Writer,
+    application.Connect, application.ScenarioRunner) int
+```
+
+Validate command/context before connecting, forward the exact path and area,
+close a successful connection exactly once, and report close/output failures.
+The lab connector implements this seam; neither CLI parsing nor the reusable
+facade imports lab identity assumptions.
+
+The generic CP2 database marker is not a lab-scenario marker. Store a distinct
+internal scenario marker in the new lab database, bound to its scenario name
+and exact tenant/application. Only exclusive scenario creation may establish it;
+ordinary opening must never add or repair it. Missing/mismatched/unsupported
+markers cannot enable fixture-identity assignment. Use an optional lab-owned
+metadata table, not a changed core schema-v1 contract or new canonical field.
+Create it only after successful new-file fixture loading; a failure leaves an
+unusable-for-lab-assignment file and reports failure without deletion. Verify the
+marker on the lab assignment path. This guards accidental use of a generic ABV
+database; it does not resist a hostile database/filesystem owner. All authority
+reads and assignment writes still use the facade/provider and both checks.
 
 - [ ] Write CLI tests before parsing: capture stdout/stderr in `bytes.Buffer`,
   inject an API spy and call `Run`. Assert exact tenant/app forwarding and that

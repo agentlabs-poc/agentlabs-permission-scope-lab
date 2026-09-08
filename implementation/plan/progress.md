@@ -11,7 +11,7 @@ The user subsequently requested sol-medium coding subagents.
 |---|---|---|
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
-| CP3: resolver and working CLI | In progress: Task 4 reviewed; Task 5 next | [Lineage evidence](../abv/docs/lineage-resolution.md) complete; both gates, atomic assignment and restart demo remain. |
+| CP3: resolver and working CLI | In progress: Tasks 4–5 reviewed; Task 6 next | [Lineage](../abv/docs/lineage-resolution.md) and [protected assignment](../abv/docs/assignment-creation.md) verified; working CLI/restart demo and final acceptance remain. |
 | CP4: lifecycle | Not started | Full affected-binding and enablement tests required. |
 | CP5: registration/Auth integration | Not started | Trusted real administration and reviewed definition operations required. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
@@ -31,7 +31,7 @@ ABV implementation
 │   └── Provider rationale, evidence and transaction SVG
 ├── CP3 working in-process ABV + CLI                     IN PROGRESS
 │   ├── Task 4: actual parent/team lineage resolution    COMPLETE
-│   ├── Task 5: administration + ABV, atomic assignment  NEXT
+│   ├── Task 5: administration + ABV, atomic assignment  COMPLETE
 │   ├── Task 6: inspect/check/assign commands + restart demo
 │   └── Task 7: adversarial and end-to-end acceptance
 ├── CP4 lifecycle                                       PENDING
@@ -102,6 +102,24 @@ fixture explicitly establishes RootTeam/A0/G0 so a stored root-shaped definition
 does not manufacture trust. Direct-human discovery, proxies and cross-recipient
 self binding remain unsupported implementation cases, not new canonical bans.
 
-Next: Task 5. Reuse the existing plan and preserved execution evidence; do not
-redispatch completed tasks. CP3 is not complete until both gates, atomic writes,
-working CLI commands and first-slice acceptance are delivered.
+At this Task 4 checkpoint, Task 5 was next; its delivery is recorded below.
+
+### CP3 / Task 5 milestone
+
+`651bb2a` adds the reusable facade, separately bounded lab administration and
+transactional assignment creation. `d7fea85` corrects a scheduler-dependent
+test failure by acknowledging the committed receipt before parent withdrawal.
+Independent implementation review and scoped fix review close the Task 5 gate.
+Full tests, race checks, vet and build pass on the corrected source.
+
+The public evidence alias makes the administrative port implementable outside
+internal packages without exposing raw provider writes. Administrative evidence
+is deep-copied; ABV validates the original snapshot. Pre-write time eligibility
+is not a production commit-time guarantee, and the administrative adapter remains
+a controlled lab premise. Two nonblocking evidence improvements are retained for
+Task 7: independently isolate mutated snapshot fields and cross parent-only expiry.
+
+Task 6 is next. Its plan binds the parsed database path through an injected
+connector and requires distinct scenario provenance for fixture-based mutation.
+The optional lab metadata does not change canonical records or core schema v1.
+Working CLI commands and first-slice acceptance are still required to close CP3.
