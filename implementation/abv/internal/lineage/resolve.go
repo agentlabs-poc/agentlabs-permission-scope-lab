@@ -110,8 +110,20 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 }
 
 func rootRoute(s storage.Snapshot, content domain.GrantContent, assignmentID string) (domain.Route, error) {
-	permissions, err := validation.SelectedPermissions(content, s.Roles)
-	if err != nil {
+	permissions := make([]string, 0, len(s.Catalog.Permissions))
+	for id, definition := range s.Catalog.Permissions {
+		if definition.ID != id {
+			return domain.Route{}, domain.ErrRejected
+		}
+		if definition.Active {
+			permissions = append(permissions, id)
+		}
+	}
+	sort.Strings(permissions)
+	computed := content
+	computed.Permissions = permissions
+	computed.RoleID, computed.RoleRevision = "", 0
+	if err := validation.CheckContent(s.Area, s.Catalog, computed, s.Roles); err != nil {
 		return domain.Route{}, err
 	}
 	result := domain.Route{Area: s.Area, GrantID: content.GrantID, Permissions: permissions, AssignmentIDs: []string{assignmentID}}
