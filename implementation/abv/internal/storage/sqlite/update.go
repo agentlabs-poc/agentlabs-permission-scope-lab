@@ -9,7 +9,9 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 type transactionConnection interface {
@@ -68,8 +70,55 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if err = ctx.Err(); err != nil {
 			return err
 		}
+		if writes.GrantStatusChange != nil && len(writes.NewAssignments) != 0 {
+			return domain.ErrMalformed
+		}
+		if writes.GrantStatusChange != nil {
+			return p.writeGrantStatus(ctx, conn, area, s, *writes.GrantStatusChange)
+		}
 		return p.writeAssignments(ctx, conn, area, writes.NewAssignments)
 	})
+}
+
+func (p *provider) writeGrantStatus(ctx context.Context, conn *sql.Conn, area domain.Area, snapshot storage.Snapshot, change storage.GrantStatusChange) error {
+	before, after := change.Before, change.After
+	for _, control := range []domain.GrantControl{before, after} {
+		if control.Version == "" || !utf8.ValidString(control.Version) || control.ID == "" || strings.TrimSpace(control.ID) == "" || strings.Contains(control.ID, "*") || !utf8.ValidString(control.ID) {
+			return domain.ErrMalformed
+		}
+		if control.Version != "1" {
+			return domain.ErrUnsupported
+		}
+		if control.Status != "enabled" && control.Status != "disabled" {
+			return domain.ErrMalformed
+		}
+	}
+	if before.ID != after.ID {
+		return domain.ErrMalformed
+	}
+	current, ok := snapshot.Controls[before.ID]
+	if !ok {
+		return domain.ErrNotFound
+	}
+	if current != before {
+		return domain.ErrConflict
+	}
+	raw, err := json.Marshal(after)
+	if err != nil {
+		return domain.ErrMalformed
+	}
+	result, err := conn.ExecContext(ctx, `UPDATE grant_controls SET status=?, canonical_json=? WHERE tenant_id=? AND application_id=? AND grant_id=? AND status=?`, after.Status, raw, area.TenantID(), area.ApplicationID(), before.ID, before.Status)
+	if err != nil {
+		return classify(err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return classify(err)
+	}
+	if rows != 1 {
+		return domain.ErrConflict
+	}
+	return nil
 }
 
 func (p *provider) transaction(ctx context.Context, conn transactionConnection, begin string, body func() error) (err error) {

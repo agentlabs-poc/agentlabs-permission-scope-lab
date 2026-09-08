@@ -18,8 +18,14 @@ type Snapshot struct {
 	TrustedRoots map[string]bool
 }
 
+type GrantStatusChange struct {
+	Before domain.GrantControl
+	After  domain.GrantControl
+}
+
 type WriteSet struct {
-	NewAssignments []domain.Assignment
+	NewAssignments    []domain.Assignment
+	GrantStatusChange *GrantStatusChange
 }
 
 type Provider interface {
