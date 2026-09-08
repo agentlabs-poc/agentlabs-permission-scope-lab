@@ -41,6 +41,11 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 	if err = r.catalog(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
+	if p.afterCatalog != nil {
+		if err = p.afterCatalog(ctx); err != nil {
+			return storage.Snapshot{}, err
+		}
+	}
 	if err = r.controls(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
@@ -72,6 +77,9 @@ func (r *snapshotReader) catalog(s *storage.Snapshot) error {
 	}
 	if err := r.add(); err != nil {
 		return err
+	}
+	if compat != 0 && compat != 1 {
+		return domain.ErrMalformed
 	}
 	s.Catalog = domain.Catalog{ApplicationID: r.area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1, SupportedKeys: map[string][]string{}}
 	rows, err := r.conn.QueryContext(r.ctx, `SELECT permission_id,active FROM permissions WHERE application_id=? ORDER BY permission_id`, r.area.ApplicationID())
@@ -114,7 +122,7 @@ func (r *snapshotReader) catalog(s *storage.Snapshot) error {
 			return err
 		}
 		var tokens []string
-		if key == "" || json.Unmarshal(raw, &tokens) != nil || tokens == nil {
+		if key == "" || json.Unmarshal(raw, &tokens) != nil || validateAllowedTokens(tokens) != nil {
 			rows.Close()
 			return domain.ErrMalformed
 		}

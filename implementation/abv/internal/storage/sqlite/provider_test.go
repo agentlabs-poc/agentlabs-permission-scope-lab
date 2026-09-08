@@ -8,10 +8,36 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 )
+
+type beginThenCancelConnection struct {
+	conn      *sql.Conn
+	beginSeen bool
+	rollbacks int
+}
+
+func (c *beginThenCancelConnection) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
+	if strings.HasPrefix(query, "BEGIN") && !c.beginSeen {
+		c.beginSeen = true
+		if _, err := c.conn.ExecContext(context.Background(), query, args...); err != nil {
+			return nil, err
+		}
+		return nil, context.Canceled
+	}
+	if query == "ROLLBACK" {
+		c.rollbacks++
+	}
+	return c.conn.ExecContext(ctx, query, args...)
+}
+
+func (c *beginThenCancelConnection) Raw(callback func(any) error) error {
+	return c.conn.Raw(callback)
+}
 
 func TestProviderContract(t *testing.T) {
 	contracttest.Run(t, contracttest.Factory{
@@ -21,6 +47,73 @@ func TestProviderContract(t *testing.T) {
 			return OpenWithOptions(ctx, path, Options{MaxSnapshotRecords: limit})
 		},
 	})
+}
+
+func TestCancelledBeginThatExecutedIsRolledBackBeforeConnectionReuse(t *testing.T) {
+	path := t.TempDir() + "/authority.db"
+	opened, err := Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := opened.(*provider)
+	defer p.Close()
+	conn, err := p.connection(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	uncertain := &beginThenCancelConnection{conn: conn}
+	bodyCalled := false
+	err = p.transaction(t.Context(), uncertain, "BEGIN IMMEDIATE", func() error {
+		bodyCalled = true
+		return nil
+	})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("cancellation sentinel lost: %v", err)
+	}
+	if bodyCalled {
+		t.Fatal("transaction body ran after failed BEGIN result")
+	}
+	if uncertain.rollbacks != 1 {
+		t.Fatalf("uncertain BEGIN cleanup count = %d, want 1", uncertain.rollbacks)
+	}
+	if _, err := conn.ExecContext(t.Context(), "BEGIN IMMEDIATE"); err != nil {
+		t.Fatalf("connection retained dirty transaction: %v", err)
+	}
+	if _, err := conn.ExecContext(t.Context(), "ROLLBACK"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestMigrationCancelledBeginThatExecutedLeavesConnectionAndSchemaClean(t *testing.T) {
+	db, err := sql.Open("sqlite", t.TempDir()+"/migration.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	conn, err := db.Conn(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	uncertain := &beginThenCancelConnection{conn: conn}
+	err = migrateWithConnection(t.Context(), uncertain)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("cancellation sentinel lost: %v", err)
+	}
+	if uncertain.rollbacks != 1 {
+		t.Fatalf("uncertain migration BEGIN cleanup count = %d, want 1", uncertain.rollbacks)
+	}
+	var markerTables int
+	if err := conn.QueryRowContext(t.Context(), `SELECT count(*) FROM sqlite_schema WHERE type='table' AND name='abv_metadata'`).Scan(&markerTables); err != nil {
+		t.Fatal(err)
+	}
+	if markerTables != 0 {
+		t.Fatal("cancelled migration left a partial ownership schema")
+	}
+	if err := migrate(t.Context(), conn); err != nil {
+		t.Fatalf("connection was not reusable for clean migration: %v", err)
+	}
 }
 
 func TestOpenRejectsUnknownExistingDatabaseWithoutMigration(t *testing.T) {
@@ -43,6 +136,54 @@ func TestOpenRejectsUnknownExistingDatabaseWithoutMigration(t *testing.T) {
 	var value string
 	if err := db.QueryRow(`SELECT value FROM foreign_data`).Scan(&value); err != nil || value != "keep" {
 		t.Fatalf("foreign database changed: %q %v", value, err)
+	}
+}
+
+func TestMarkerCancellationRemainsCancellationNotUnsupported(t *testing.T) {
+	path := t.TempDir() + "/authority.db"
+	opened, err := Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := opened.(*provider)
+	defer p.Close()
+	conn, err := p.connection(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	found, err := hasMarker(ctx, conn)
+	if found || !errors.Is(err, context.Canceled) || errors.Is(err, storage.ErrNotABVDatabase) {
+		t.Fatalf("marker result found=%v err=%v", found, err)
+	}
+}
+
+func TestLockedMarkerReadRemainsConflictNotUnsupported(t *testing.T) {
+	path := t.TempDir() + "/unknown.db"
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	if _, err := db.ExecContext(t.Context(), `CREATE TABLE foreign_data(value TEXT)`); err != nil {
+		t.Fatal(err)
+	}
+	locker, err := db.Conn(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer locker.Close()
+	if _, err := locker.ExecContext(t.Context(), "BEGIN EXCLUSIVE"); err != nil {
+		t.Fatal(err)
+	}
+	defer locker.ExecContext(context.Background(), "ROLLBACK")
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
+	defer cancel()
+	_, err = Open(ctx, path)
+	if !errors.Is(err, domain.ErrConflict) || errors.Is(err, storage.ErrNotABVDatabase) {
+		t.Fatalf("locked marker classified as %v", err)
 	}
 }
 
@@ -126,6 +267,78 @@ func TestReadRejectsCanonicalPayloadAndIndexDisagreement(t *testing.T) {
 	}
 }
 
+func TestCorruptCatalogProjectionsDoNotReachCallback(t *testing.T) {
+	cases := map[string]func(*testing.T, *provider, domain.Area){
+		"compatibility boolean": func(t *testing.T, p *provider, area domain.Area) {
+			p.db.SetMaxOpenConns(1)
+			conn, err := p.connection(t.Context())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := conn.ExecContext(t.Context(), `PRAGMA ignore_check_constraints=ON`); err != nil {
+				conn.Close()
+				t.Fatal(err)
+			}
+			if _, err := conn.ExecContext(t.Context(), `UPDATE applications SET compatibility_enabled=2 WHERE application_id=?`, area.ApplicationID()); err != nil {
+				conn.Close()
+				t.Fatal(err)
+			}
+			if err := conn.Close(); err != nil {
+				t.Fatal(err)
+			}
+		},
+		"duplicate token": func(t *testing.T, p *provider, area domain.Area) {
+			if _, err := p.db.ExecContext(t.Context(), `UPDATE scope_definitions SET allowed_tokens_json='["$self","$self"]' WHERE application_id=?`, area.ApplicationID()); err != nil {
+				t.Fatal(err)
+			}
+		},
+		"unsupported token": func(t *testing.T, p *provider, area domain.Area) {
+			if _, err := p.db.ExecContext(t.Context(), `UPDATE scope_definitions SET allowed_tokens_json='["other"]' WHERE application_id=?`, area.ApplicationID()); err != nil {
+				t.Fatal(err)
+			}
+		},
+		"null token": func(t *testing.T, p *provider, area domain.Area) {
+			if _, err := p.db.ExecContext(t.Context(), `UPDATE scope_definitions SET allowed_tokens_json='[null]' WHERE application_id=?`, area.ApplicationID()); err != nil {
+				t.Fatal(err)
+			}
+		},
+	}
+	for name, corrupt := range cases {
+		t.Run(name, func(t *testing.T) {
+			base := contractFixture(t)
+			base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept", AllowedTokens: []string{"$self"}}
+			path := t.TempDir() + "/authority.db"
+			opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
+			if err != nil {
+				t.Fatal(err)
+			}
+			p := opened.(*provider)
+			defer p.Close()
+			corrupt(t, p, base.Area)
+			var calls atomic.Int32
+			err = p.Read(t.Context(), base.Area, func(storage.Snapshot) error { calls.Add(1); return nil })
+			if !errors.Is(err, domain.ErrMalformed) || calls.Load() != 0 {
+				t.Fatalf("corrupt catalog reached callback: calls=%d err=%v", calls.Load(), err)
+			}
+		})
+	}
+}
+
+func TestFixtureRejectsInvalidCatalogTokens(t *testing.T) {
+	for name, tokens := range map[string][]string{
+		"duplicate":   {"$self", "$self"},
+		"unsupported": {"other"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			base := contractFixture(t)
+			base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept", AllowedTokens: tokens}
+			if _, err := CreateFixture(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{base}); !errors.Is(err, domain.ErrMalformed) {
+				t.Fatalf("invalid fixture tokens accepted: %v", err)
+			}
+		})
+	}
+}
+
 func TestFailureAfterFirstInsertRollsBackWholeWriteSetAndPersistsAfterReopen(t *testing.T) {
 	path := t.TempDir() + "/authority.db"
 	base := contractFixture(t)
@@ -194,12 +407,93 @@ func TestTwoProvidersNeverReplayCompetingCallback(t *testing.T) {
 	if err == nil || (!errors.Is(err, domain.ErrConflict) && !errors.Is(err, context.DeadlineExceeded)) {
 		t.Fatalf("want explicit conflict/deadline, got %v", err)
 	}
+	if errors.Is(err, domain.ErrUnavailable) {
+		t.Fatalf("definite writer conflict was polluted by rollback cleanup: %v", err)
+	}
 	if calls.Load() != 0 {
 		t.Fatalf("callback ran or replayed %d times before lock acquisition", calls.Load())
 	}
 	close(release)
 	if first := <-done; first != nil {
 		t.Fatalf("first writer: %v", first)
+	}
+}
+
+func TestReadTransactionPinsOneVersionAcrossCatalogAndAssignmentQueries(t *testing.T) {
+	path := t.TempDir() + "/authority.db"
+	base := contractFixture(t)
+	opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
+	if err != nil {
+		t.Fatal(err)
+	}
+	reader := opened.(*provider)
+	defer reader.Close()
+	writerOpened, err := Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer := writerOpened.(*provider)
+	defer writer.Close()
+
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+	afterCatalog := make(chan struct{})
+	continueRead := make(chan struct{})
+	var release sync.Once
+	defer release.Do(func() { close(continueRead) })
+	reader.afterCatalog = func(ctx context.Context) error {
+		close(afterCatalog)
+		select {
+		case <-continueRead:
+			return nil
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+	readDone := make(chan error, 1)
+	callbackSawNew := make(chan bool, 1)
+	go func() {
+		readDone <- reader.Read(ctx, base.Area, func(snapshot storage.Snapshot) error {
+			_, exists := snapshot.Assignments["between-queries"]
+			callbackSawNew <- exists
+			return nil
+		})
+	}()
+	select {
+	case <-afterCatalog:
+	case <-ctx.Done():
+		t.Fatalf("reader did not reach catalog boundary: %v", ctx.Err())
+	}
+	created := domain.Assignment{Version: "1", ID: "between-queries", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "between-user"}, Status: "enabled"}
+	if err := writer.Update(ctx, base.Area, func(storage.Snapshot) (storage.WriteSet, error) {
+		return storage.WriteSet{NewAssignments: []domain.Assignment{created}}, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	release.Do(func() { close(continueRead) })
+	select {
+	case err := <-readDone:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-ctx.Done():
+		t.Fatalf("reader did not finish: %v", ctx.Err())
+	}
+	select {
+	case sawNew := <-callbackSawNew:
+		if sawNew {
+			t.Fatal("one snapshot combined pre-commit catalog with post-commit assignment")
+		}
+	case <-ctx.Done():
+		t.Fatalf("callback result missing: %v", ctx.Err())
+	}
+	if err := writer.Read(ctx, base.Area, func(snapshot storage.Snapshot) error {
+		if _, exists := snapshot.Assignments[created.ID]; !exists {
+			t.Fatal("later snapshot missed committed assignment")
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -1,6 +1,6 @@
 # CP2 — SQLite provider
 
-**Implementation in progress; verification and independent review pending.**
+**Implemented and review fixes tested; independent re-review pending.**
 This checkpoint adds persistence, not production Auth integration. The source
 requirements are [Task 3](../../plan/abv-implementation-plan.md) and the
 [provider design](../../plan/abv-design.md).
@@ -92,21 +92,71 @@ keep their version and adopted revision fields.
 
 | Required evidence | Status |
 |---|---|
-| Full-value persistence and reopen for all planned record families | Pending |
-| Same IDs in different tenants and different applications remain isolated | Pending |
-| Unknown installation and zero context never invoke callbacks | Pending |
-| Shared application catalog, not independent tenant copies | Pending |
-| Duplicate grant/recipient rejection includes disabled bindings | Pending |
-| Two-row failure rolls back both rows, including after reopen | Pending |
-| Callback snapshot mutation cannot bypass persistence checks | Pending |
-| Callback error, panic and cancellation release the transaction | Pending |
-| Two independent providers: write ordering/conflict and consistent reads | Pending |
-| WAL and foreign keys verified on provider connections | Pending |
-| Corrupt evidence is an error, never a partial successful snapshot | Pending |
-| Configured snapshot bound errors rather than truncating proof | Pending |
-| Provider-neutral conformance separate from SQLite-specific tests | Pending |
-| Full tests, race detector, vet and independent review | Pending |
+| Full-value persistence and reopen for all planned record families | Pass: provider conformance round trip |
+| Same IDs in different tenants and different applications remain isolated | Pass: isolated read/write cases |
+| Unknown installation and zero context never invoke callbacks | Pass: zero callback assertions |
+| Shared application catalog, not independent tenant copies | Pass: shared reads and conflicting fixture rejection |
+| Duplicate grant/recipient rejection includes disabled bindings | Pass: across both status and revision |
+| Two-row failure rolls back both rows, including after reopen | Pass: duplicate batch and second-insert rejecting trigger |
+| Callback snapshot mutation cannot bypass persistence checks | Pass: inert edits and actual-row reference checks |
+| Callback error, panic and cancellation release the transaction | Pass: rollback and subsequent usable connection |
+| Two independent providers: write ordering/conflict and consistent reads | Pass: concurrent commit between catalog and assignment reads; no callback replay |
+| WAL and foreign keys verified on provider connections | Pass: four acquired connections and actual FK rejection |
+| Corrupt evidence is an error, never a partial successful snapshot | Pass: payload/index disagreement, malformed catalog flag/token list, zero callbacks |
+| Configured snapshot bound errors rather than truncating proof | Pass: aggregate limit, no callback |
+| Provider-neutral conformance separate from SQLite-specific tests | Pass: SQL-free conformance factory |
+| Full tests, race detector, vet and build | Pass |
+| Independent review | Four fixes implemented and tested; re-review pending |
 
-SQLite-only evidence will be recorded here once available. PostgreSQL, real
+Initial verification at implementation commit `e43be35`, repeated successfully
+after the review-fix wave:
+
+```text
+go test ./internal/storage/... -v -count=1  PASS
+go test ./... -count=1                     PASS
+go test -race ./... -count=1               PASS
+go vet ./...                               PASS
+go build ./...                             PASS
+go mod verify                              PASS
+git diff --cached --check                  PASS
+```
+
+The [provider-neutral suite](../internal/storage/contracttest/suite.go) is run
+by the [SQLite tests](../internal/storage/sqlite/provider_test.go). These tests
+exercise storage semantics, not grant authorization. The default aggregate
+snapshot limit is 10,000 loaded records; `OpenWithOptions` can configure it.
+Exceeding it returns `ErrSnapshotLimit` (an unavailable error), never a partial
+snapshot. Unknown preexisting files return `ErrNotABVDatabase` (unsupported);
+operation cancellation preserves the standard Go context error for `errors.Is`.
+These are internal provider errors and prototype limits, not new public contracts.
+
+## Review findings and rationale
+
+The initial review of `e43be35` found four issues requiring fixes:
+
+- A cancelled transaction-start call can have started the SQL transaction even
+  when the driver reports failure. Cleanup must cover that uncertain outcome,
+  not only failures after a confirmed start; otherwise the connection may retain
+  a transaction when returned to the pool.
+- Checking database ownership must distinguish missing/unsupported metadata
+  from a timeout, lock conflict or I/O failure. Operational failure is not
+  evidence that a database is unsupported.
+- Malformed catalog flags and token lists must fail before the callback. A
+  corrupted flag must never silently disable permission/scope compatibility.
+- A stable materialized callback value does not prove that several SQL reads
+  used one snapshot. A concurrent commit must be coordinated between evidence
+  queries to exercise that guarantee directly.
+
+These are implementation corrections to already-required guarantees. They do
+not change canonical grant, scope, assignment or authorization semantics.
+
+The fix wave registers cleanup before attempting `BEGIN`, uses the same protected
+transaction runner for migration, preserves marker-query operational failures,
+validates catalog flags/token lists on load and fixture ingress, and adds a
+deterministic cross-query read test. Focused regressions and the full/race/vet/build
+checks pass; independent re-review remains the next gate. Provider-specific test
+coverage after the fixes is 72.3%; this is not a completion or security score.
+
+PostgreSQL, real
 Auth administration, actual lineage resolution, lifecycle mutation and working
 CLI commands are not claimed by this checkpoint.

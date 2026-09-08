@@ -100,7 +100,7 @@ func seedCatalog(ctx context.Context, conn *sql.Conn, c domain.Catalog) error {
 	scopeKeys := sortedKeys(c.Scopes)
 	for _, key := range scopeKeys {
 		d := c.Scopes[key]
-		if invalid(key) || d.Key != key || d.AllowedTokens == nil {
+		if invalid(key) || d.Key != key || validateAllowedTokens(d.AllowedTokens) != nil {
 			return domain.ErrMalformed
 		}
 		raw, err := json.Marshal(d.AllowedTokens)
@@ -240,6 +240,19 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 }
 
 func invalid(value string) bool { return strings.TrimSpace(value) == "" || !utf8.ValidString(value) }
+func validateAllowedTokens(tokens []string) error {
+	if tokens == nil {
+		return domain.ErrMalformed
+	}
+	seenSelf := false
+	for _, token := range tokens {
+		if token != "$self" || seenSelf {
+			return domain.ErrMalformed
+		}
+		seenSelf = true
+	}
+	return nil
+}
 func boolInt(value bool) int {
 	if value {
 		return 1

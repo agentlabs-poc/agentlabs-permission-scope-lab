@@ -24,6 +24,9 @@
   <path d="M378 213V241" class="flow"/>
   <rect x="96" y="243" width="565" height="58" class="box"/>
   <text x="378" y="278" text-anchor="middle" class="h">BEGIN IMMEDIATE</text>
+  <path d="M661 272H1029V370H879V378" fill="none" stroke="#9f1239" stroke-width="2" marker-end="url(#red-arrow)"/>
+  <text x="713" y="314" class="s">Uncertain BEGIN failure:</text>
+  <text x="713" y="340" class="s">cleanup still required</text>
   <path d="M378 301V329" class="flow"/>
   <rect x="66" y="331" width="625" height="495" rx="14" fill="#f0fdfa" stroke="#0f766e" stroke-width="2"/>
   <text x="88" y="362" class="h">Write protection held until commit or rollback</text>
@@ -51,7 +54,7 @@
   <text x="879" y="457" text-anchor="middle" class="t">Error, panic, cancellation</text>
   <text x="879" y="484" text-anchor="middle" class="t">or persistence conflict</text>
   <text x="879" y="526" text-anchor="middle" class="h">ROLLBACK</text>
-  <text x="879" y="566" text-anchor="middle" class="t">Clean up connection</text>
+  <text x="879" y="566" text-anchor="middle" class="t">Clean / discard connection</text>
   <text x="879" y="593" text-anchor="middle" class="t">Return failure / re-panic</text>
   <text x="879" y="631" text-anchor="middle" class="s">No partial write or retry</text>
   <path d="M691 530H734" fill="none" stroke="#9f1239" stroke-width="2" marker-end="url(#red-arrow)"/>

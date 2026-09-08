@@ -24,6 +24,9 @@ type Options struct{ MaxSnapshotRecords int }
 type provider struct {
 	db                 *sql.DB
 	maxSnapshotRecords int
+	// afterCatalog is an internal deterministic test seam for proving that one
+	// read transaction pins all cross-query evidence to the same DB version.
+	afterCatalog func(context.Context) error
 }
 
 func Open(ctx context.Context, path string) (storage.Provider, error) {
@@ -88,8 +91,14 @@ func open(ctx context.Context, path string, options Options, fixtureCreated bool
 		if err := migrate(ctx, conn); err != nil {
 			return fail(classify(err))
 		}
-	} else if !hasMarker(ctx, conn) {
-		return fail(storage.ErrNotABVDatabase)
+	} else {
+		found, markerErr := hasMarker(ctx, conn)
+		if markerErr != nil {
+			return fail(classify(markerErr))
+		}
+		if !found {
+			return fail(storage.ErrNotABVDatabase)
+		}
 	}
 	var mode string
 	if err := conn.QueryRowContext(ctx, `PRAGMA journal_mode=WAL`).Scan(&mode); err != nil {

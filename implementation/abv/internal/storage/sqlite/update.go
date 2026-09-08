@@ -12,6 +12,11 @@ import (
 	"time"
 )
 
+type transactionConnection interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+	Raw(func(any) error) error
+}
+
 func (p *provider) Read(ctx context.Context, area domain.Area, callback func(storage.Snapshot) error) (err error) {
 	if err = area.Validate(); err != nil {
 		return err
@@ -67,10 +72,11 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 	})
 }
 
-func (p *provider) transaction(ctx context.Context, conn *sql.Conn, begin string, body func() error) (err error) {
-	if _, err = conn.ExecContext(ctx, begin); err != nil {
-		return classify(err)
-	}
+func (p *provider) transaction(ctx context.Context, conn transactionConnection, begin string, body func() error) (err error) {
+	return runTransaction(ctx, conn, begin, body)
+}
+
+func runTransaction(ctx context.Context, conn transactionConnection, begin string, body func() error) (err error) {
 	active := true
 	cleanup := func() error {
 		if !active {
@@ -92,6 +98,14 @@ func (p *provider) transaction(ctx context.Context, conn *sql.Conn, begin string
 			panic(recovered)
 		}
 	}()
+	if _, err = conn.ExecContext(ctx, begin); err != nil {
+		classified := classify(err)
+		// BEGIN's result is uncertain, so always attempt rollback. cleanup marks
+		// the connection bad when rollback cannot establish cleanliness; the
+		// operation still reports the original cancellation/conflict category.
+		_ = cleanup()
+		return classified
+	}
 	if err = body(); err != nil {
 		if rollbackErr := cleanup(); rollbackErr != nil {
 			return errors.Join(err, rollbackErr)
