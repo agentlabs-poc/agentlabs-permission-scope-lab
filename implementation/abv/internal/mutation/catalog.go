@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
 	"context"
+	"slices"
 )
 
 func (s *Service) RegisterPermission(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.PermissionDefinition, supportedKeys []string) (domain.PermissionDefinition, error) {
@@ -68,13 +69,13 @@ func (s *Service) RegisterScope(ctx context.Context, app domain.Application, ide
 	if !ok || nilInterface(admin) {
 		return fail(domain.ErrUnsupported)
 	}
-	definition.AllowedTokens = append([]string(nil), definition.AllowedTokens...)
+	definition.AllowedTokens = slices.Clone(definition.AllowedTokens)
 	err := provider.UpdateCatalog(ctx, app, func(catalog domain.Catalog) (storage.CatalogWriteSet, error) {
 		if catalog.ApplicationID != app.ID() {
 			return storage.CatalogWriteSet{}, domain.ErrRejected
 		}
 		evidence := definition
-		evidence.AllowedTokens = append([]string(nil), definition.AllowedTokens...)
+		evidence.AllowedTokens = slices.Clone(definition.AllowedTokens)
 		if err := admin.CheckScopeRegistration(ctx, app, cloneCatalog(catalog), identity, evidence, s.clock.Now()); err != nil {
 			return storage.CatalogWriteSet{}, err
 		}
@@ -85,7 +86,7 @@ func (s *Service) RegisterScope(ctx context.Context, app domain.Application, ide
 			return storage.CatalogWriteSet{}, err
 		}
 		result := definition
-		result.AllowedTokens = append([]string(nil), definition.AllowedTokens...)
+		result.AllowedTokens = slices.Clone(definition.AllowedTokens)
 		return storage.CatalogWriteSet{Scope: &result}, nil
 	})
 	if err != nil {
@@ -99,7 +100,7 @@ func cloneCatalog(source domain.Catalog) domain.Catalog {
 	result.Permissions = cloneMap(source.Permissions)
 	result.Scopes = make(map[string]domain.ScopeDefinition, len(source.Scopes))
 	for key, value := range source.Scopes {
-		value.AllowedTokens = append([]string(nil), value.AllowedTokens...)
+		value.AllowedTokens = slices.Clone(value.AllowedTokens)
 		result.Scopes[key] = value
 	}
 	result.SupportedKeys = make(map[string][]string, len(source.SupportedKeys))

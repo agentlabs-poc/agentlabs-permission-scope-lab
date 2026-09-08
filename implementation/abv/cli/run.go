@@ -12,9 +12,9 @@ import (
 )
 
 func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
-	connect application.Connect, scenarios application.ScenarioRunner) int {
+	connect application.Connect, scenarios application.ScenarioRunner, catalogConnect ...application.CatalogConnect) int {
 	if len(args) == 1 && (args[0] == "help" || args[0] == "--help" || args[0] == "-h") {
-		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, grant, assignment, scenario\nEvery data operation requires --tenant ID --app ID. No default context."); err != nil {
+		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, grant, assignment, catalog, scenario\nTenant operations require --tenant ID --app ID; catalog operations require --app ID. No default context."); err != nil {
 			return 4
 		}
 		return 0
@@ -26,9 +26,12 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	if len(args) == 0 {
 		return fail(2, "command required; use help")
 	}
+	if len(catalogConnect) > 1 {
+		return fail(2, "multiple catalog connectors are unsupported")
+	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "grant", "assignment", "scenario":
+	case "inspect", "check", "assign", "grant", "assignment", "scenario", "catalog":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -42,7 +45,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
-		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case":
+		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -60,6 +63,48 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			return fail(2, "empty flag value")
 		}
 		flags[name] = value
+	}
+	if command == "catalog" {
+		if len(positional) != 2 || (positional[0] != "register-permission" && positional[0] != "register-scope") || empty(positional[1]) || flags["--app"] == "" || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "catalog requires registration kind, definition, application, database and fixture context")
+		}
+		allowed := []string{"--app", "--db", "--fixture-context"}
+		if positional[0] == "register-permission" {
+			allowed = append(allowed, "--supported-keys")
+		} else {
+			allowed = append(allowed, "--allowed-tokens")
+		}
+		if !only(flags, allowed...) {
+			return fail(2, "unsupported catalog flag")
+		}
+		if _, err := catalogList(flags["--supported-keys"], has(flags, "--supported-keys")); err != nil {
+			return report(diag, err)
+		}
+		if _, err := catalogList(flags["--allowed-tokens"], has(flags, "--allowed-tokens")); err != nil {
+			return report(diag, err)
+		}
+		app, err := domain.NewApplication(flags["--app"])
+		if err != nil {
+			return fail(2, "explicit application required; wildcards are unsupported")
+		}
+		if len(catalogConnect) == 0 || catalogConnect[0] == nil {
+			return fail(5, "catalog support is unavailable")
+		}
+		api, closeConnection, err := catalogConnect[0](ctx, app, flags["--db"])
+		if err != nil {
+			return report(diag, err)
+		}
+		if closeConnection == nil || nilCapability(api) {
+			if closeConnection != nil {
+				_ = closeConnection()
+			}
+			return fail(4, "database connection unavailable")
+		}
+		code := catalog(ctx, api, app, positional, flags, out, diag)
+		if err := closeConnection(); err != nil && code == 0 {
+			return fail(4, "database close failed")
+		}
+		return code
 	}
 	area, err := domain.NewArea(flags["--tenant"], flags["--app"])
 	if err != nil {

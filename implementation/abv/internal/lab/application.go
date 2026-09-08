@@ -114,32 +114,42 @@ func readOnlyDatabase(path string) (*sql.DB, error) {
 }
 
 func verifyMarker(ctx context.Context, path string, area domain.Area) error {
-	db, err := readOnlyDatabase(path)
+	marker, err := loadMarker(ctx, path)
 	if err != nil {
 		return err
+	}
+	if marker.tenant != area.TenantID() || marker.applicationID != area.ApplicationID() {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+type labMarker struct{ tenant, applicationID string }
+
+func loadMarker(ctx context.Context, path string) (labMarker, error) {
+	db, err := readOnlyDatabase(path)
+	if err != nil {
+		return labMarker{}, err
 	}
 	defer db.Close()
 	var found int
 	if err = db.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_schema WHERE type='table' AND name='abv_lab_metadata'`).Scan(&found); err != nil {
-		return errors.Join(domain.ErrUnavailable, err)
+		return labMarker{}, errors.Join(domain.ErrUnavailable, err)
 	}
 	if found != 1 {
-		return domain.ErrRejected
+		return labMarker{}, domain.ErrRejected
 	}
 	var version int
 	var scenario, tenant, applicationID string
 	err = db.QueryRowContext(ctx, `SELECT format_version,scenario_name,tenant_id,application_id FROM abv_lab_metadata WHERE marker='agentlabs-abv-lab'`).Scan(&version, &scenario, &tenant, &applicationID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return domain.ErrRejected
+		return labMarker{}, domain.ErrRejected
 	}
 	if err != nil {
-		return errors.Join(domain.ErrUnavailable, err)
+		return labMarker{}, errors.Join(domain.ErrUnavailable, err)
 	}
 	if version != 1 || scenario != labScenario {
-		return domain.ErrUnsupported
+		return labMarker{}, domain.ErrUnsupported
 	}
-	if tenant != area.TenantID() || applicationID != area.ApplicationID() {
-		return domain.ErrRejected
-	}
-	return nil
+	return labMarker{tenant: tenant, applicationID: applicationID}, nil
 }

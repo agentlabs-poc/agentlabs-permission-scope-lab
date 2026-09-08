@@ -94,6 +94,29 @@ func TestRegisterCatalogDefinitionsPersistsHostileAdminCannotForgeEvidence(t *te
 	}
 }
 
+func TestRegisterScopePreservesExplicitEmptyAllowedTokens(t *testing.T) {
+	app, _ := domain.NewApplication("hrms")
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
+	provider := &catalogFake{catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}}
+	admin := catalogAdmin{
+		scope: func(_ context.Context, _ domain.Application, _ domain.Catalog, _ domain.Identity, d domain.ScopeDefinition, _ time.Time) error {
+			if d.AllowedTokens == nil {
+				t.Fatal("administration received nil tokens")
+			}
+			return nil
+		},
+		permission: func(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, []string, time.Time) error {
+			return nil
+		},
+	}
+	service, _ := New(provider, admin, fixedClock{})
+	input := domain.ScopeDefinition{Key: "region", AllowedTokens: []string{}}
+	got, err := service.RegisterScope(t.Context(), app, identity, input)
+	if err != nil || got.AllowedTokens == nil || input.AllowedTokens == nil {
+		t.Fatalf("scope=%#v input=%#v err=%v", got, input, err)
+	}
+}
+
 type catalogFake struct {
 	catalog  domain.Catalog
 	wrongApp bool

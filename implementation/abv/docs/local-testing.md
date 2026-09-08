@@ -43,6 +43,9 @@ the seed command succeed.
 ./bin/abv grant disable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv inspect grant-control G2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv grant enable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv catalog register-scope region --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
+./bin/abv catalog register-scope owner --allowed-tokens '$self' --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
+./bin/abv catalog register-permission hrms:payroll:payslip::export --supported-keys dept,region --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
 ```
 
 Each invocation opens the selected database independently. The final inspection
@@ -73,7 +76,14 @@ this does not mean the assignment succeeded.
 
 ## Lab identity is not authentication
 
-Only the known `maya-team1` fixture context is supported. Assignment status is
+Catalog registration is add-only. The separate fixed `application-publisher`
+fixture can add active permission and scope definitions for the marked
+application; Maya's `maya-team1` tenant administration cannot. Registration
+cannot edit or retire definitions or change compatibility mode. Catalog growth
+expands only legitimate application roots; ordinary child grants retain their
+explicit permission selections.
+
+For tenant mutations, only the known `maya-team1` fixture context is supported. Assignment status is
 separately limited to the fixture's exact A1/G1/Team1 and A2/G2/Team2 bindings,
 with Maya's current direct `AssignmentAdmins` membership. Grant status is further
 limited to G2 and Maya's current direct membership in `AssignmentAdmins`; this
