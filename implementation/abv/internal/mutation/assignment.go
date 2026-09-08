@@ -194,16 +194,7 @@ func eligibleRoute(route domain.Route, now time.Time) error {
 
 func cloneSnapshot(source storage.Snapshot) storage.Snapshot {
 	result := source
-	result.Catalog.Permissions = cloneMap(source.Catalog.Permissions)
-	result.Catalog.Scopes = make(map[string]domain.ScopeDefinition, len(source.Catalog.Scopes))
-	for key, value := range source.Catalog.Scopes {
-		value.AllowedTokens = append([]string(nil), value.AllowedTokens...)
-		result.Catalog.Scopes[key] = value
-	}
-	result.Catalog.SupportedKeys = make(map[string][]string, len(source.Catalog.SupportedKeys))
-	for key, value := range source.Catalog.SupportedKeys {
-		result.Catalog.SupportedKeys[key] = append([]string(nil), value...)
-	}
+	result.Catalog = cloneCatalog(source.Catalog)
 	result.Controls = cloneMap(source.Controls)
 	result.Contents = make(map[domain.GrantKey]domain.GrantContent, len(source.Contents))
 	for key, value := range source.Contents {
