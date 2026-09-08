@@ -39,6 +39,24 @@ func TestFacadeAdministrativePortIsImplementableOutsideInternalPackages(t *testi
 	}
 }
 
+func TestOldAdministrationCannotAuthorizeGrantStatus(t *testing.T) {
+	area, _ := domain.NewArea("tenant-fin", "hrms")
+	fixture := lab.TeamFINC17(area)
+	p := &memoryProvider{snapshot: fixture.Snapshot}
+	facade, err := abv.New(p, externalAdministration{area: area}, clock{now: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	got, err := facade.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed)
+	if !errors.Is(err, domain.ErrUnsupported) || got != (domain.GrantControl{}) {
+		t.Fatalf("old adapter acquired authority: %#v, %v", got, err)
+	}
+	if p.snapshot.Controls["G2"].Status != "enabled" {
+		t.Fatal("unauthorized write")
+	}
+}
+
 func TestFacadeInspectsCanonicalRecordsAndDiagnosesWithoutWriting(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
@@ -170,6 +188,9 @@ func (p *memoryProvider) Update(_ context.Context, _ domain.Area, callback func(
 	}
 	for _, assignment := range writes.NewAssignments {
 		p.snapshot.Assignments[assignment.ID] = assignment
+	}
+	if writes.GrantStatusChange != nil {
+		p.snapshot.Controls[writes.GrantStatusChange.After.ID] = writes.GrantStatusChange.After
 	}
 	return nil
 }
