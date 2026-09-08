@@ -38,7 +38,7 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 		return storage.Snapshot{}, classify(err)
 	}
 	s := storage.Snapshot{Area: area, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
-	if err = r.catalog(&s); err != nil {
+	if err = r.catalog(area.ApplicationID(), &s.Catalog); err != nil {
 		return storage.Snapshot{}, err
 	}
 	if p.afterCatalog != nil {
@@ -70,9 +70,9 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 	return s, nil
 }
 
-func (r *snapshotReader) catalog(s *storage.Snapshot) error {
+func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) error {
 	var compat int
-	if err := r.conn.QueryRowContext(r.ctx, `SELECT compatibility_enabled FROM applications WHERE application_id=?`, r.area.ApplicationID()).Scan(&compat); err != nil {
+	if err := r.conn.QueryRowContext(r.ctx, `SELECT compatibility_enabled FROM applications WHERE application_id=?`, applicationID).Scan(&compat); err != nil {
 		return corruptOrDB(err)
 	}
 	if err := r.add(); err != nil {
@@ -81,8 +81,8 @@ func (r *snapshotReader) catalog(s *storage.Snapshot) error {
 	if compat != 0 && compat != 1 {
 		return domain.ErrMalformed
 	}
-	s.Catalog = domain.Catalog{ApplicationID: r.area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1, SupportedKeys: map[string][]string{}}
-	rows, err := r.conn.QueryContext(r.ctx, `SELECT permission_id,active FROM permissions WHERE application_id=? ORDER BY permission_id`, r.area.ApplicationID())
+	*catalog = domain.Catalog{ApplicationID: applicationID, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1, SupportedKeys: map[string][]string{}}
+	rows, err := r.conn.QueryContext(r.ctx, `SELECT permission_id,active FROM permissions WHERE application_id=? ORDER BY permission_id`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
@@ -97,16 +97,16 @@ func (r *snapshotReader) catalog(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		if id == "" || (active != 0 && active != 1) {
+		if codec.PermissionList([]string{id}) != nil || (active != 0 && active != 1) {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		s.Catalog.Permissions[id] = domain.PermissionDefinition{ID: id, Active: active == 1}
+		catalog.Permissions[id] = domain.PermissionDefinition{ID: id, Active: active == 1}
 	}
 	if err = finishRows(rows); err != nil {
 		return err
 	}
-	rows, err = r.conn.QueryContext(r.ctx, `SELECT scope_key,allowed_tokens_json FROM scope_definitions WHERE application_id=? ORDER BY scope_key`, r.area.ApplicationID())
+	rows, err = r.conn.QueryContext(r.ctx, `SELECT scope_key,allowed_tokens_json FROM scope_definitions WHERE application_id=? ORDER BY scope_key`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
@@ -122,16 +122,16 @@ func (r *snapshotReader) catalog(s *storage.Snapshot) error {
 			return err
 		}
 		var tokens []string
-		if key == "" || json.Unmarshal(raw, &tokens) != nil || validateAllowedTokens(tokens) != nil {
+		if invalid(key) || key == "*" || json.Unmarshal(raw, &tokens) != nil || validateAllowedTokens(tokens) != nil {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		s.Catalog.Scopes[key] = domain.ScopeDefinition{Key: key, AllowedTokens: tokens}
+		catalog.Scopes[key] = domain.ScopeDefinition{Key: key, AllowedTokens: tokens}
 	}
 	if err = finishRows(rows); err != nil {
 		return err
 	}
-	rows, err = r.conn.QueryContext(r.ctx, `SELECT permission_id,scope_key FROM supported_scope_keys WHERE application_id=? ORDER BY permission_id,ordinal`, r.area.ApplicationID())
+	rows, err = r.conn.QueryContext(r.ctx, `SELECT permission_id,scope_key FROM supported_scope_keys WHERE application_id=? ORDER BY permission_id,ordinal`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
@@ -145,15 +145,15 @@ func (r *snapshotReader) catalog(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		if _, ok := s.Catalog.Permissions[permission]; !ok {
+		if _, ok := catalog.Permissions[permission]; !ok {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		if _, ok := s.Catalog.Scopes[key]; !ok {
+		if _, ok := catalog.Scopes[key]; !ok {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		s.Catalog.SupportedKeys[permission] = append(s.Catalog.SupportedKeys[permission], key)
+		catalog.SupportedKeys[permission] = append(catalog.SupportedKeys[permission], key)
 	}
 	return finishRows(rows)
 }
