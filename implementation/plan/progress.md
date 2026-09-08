@@ -1,6 +1,6 @@
 # ABV implementation progress
 
-## Current delivery — CP1–CP3 and CP4-A complete and independently reviewed
+## Current delivery — CP1–CP3 and CP4-A/B complete and independently reviewed
 
 **Scope correction — 9 September 2026:** production Auth-service integration is
 outside this ABV build, not remaining required work. CP5 previously mixed ABV
@@ -18,7 +18,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A complete through `ed8f227`; CP4-B Tasks 1–3 independently approved through `34319e4` | [CP4-A acceptance](../abv/docs/acceptance.md#cp4-a--protected-grant-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); CLI and final acceptance remain. |
+| CP4: lifecycle | CP4-A and CP4-B complete; full assignment-control slice approved through `2681550` | [Acceptance](../abv/docs/acceptance.md#cp4-b--protected-assignment-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); other lifecycle operations remain. |
 | CP5: ABV definition management | Not started | Permission/scope/role operations and dependency checks; production Auth integration excluded. |
 | CP6: PostgreSQL | Not started | Backend equivalence and transfer rehearsal required. |
 
@@ -40,17 +40,17 @@ ABV implementation
 │   ├── Task 5: administration + ABV, atomic assignment  COMPLETE
 │   ├── Task 6: inspect/check/assign commands + restart demo COMPLETE
 │   └── Task 7: adversarial and end-to-end acceptance    COMPLETE
-├── CP4 lifecycle                                       FIRST SLICE COMPLETE
+├── CP4 lifecycle                                       TWO SLICES COMPLETE
 │   ├── CP4-A grant enable/disable                       COMPLETE / REVIEWED
 │   ├── CP4-P03 disabled binding clarification           RECONCILED
 │   ├── Conditional provider control update             COMPLETE / REVIEWED
 │   ├── Two-gate coordinator/facade                     COMPLETE / REVIEWED
 │   ├── CLI and integration tests                       COMPLETE / REVIEWED
-│   ├── CP4-B assignment enable/disable                  IN PROGRESS
+│   ├── CP4-B assignment enable/disable                  COMPLETE / REVIEWED
 │   │   ├── Conditional assignment persistence          COMPLETE / REVIEWED
 │   │   ├── Reverse team-binding discovery              COMPLETE / REVIEWED
 │   │   ├── Protected coordinator/facade                COMPLETE / REVIEWED
-│   │   └── CLI/lab/acceptance + final review            PENDING
+│   │   └── CLI/lab/acceptance + final review            COMPLETE / REVIEWED
 │   └── Other lifecycle operations                      PENDING
 ├── CP5 ABV definition management                       PENDING
 └── CP6 PostgreSQL provider                             LATER
@@ -58,11 +58,32 @@ ABV implementation
 
 Three numbered checkpoints are delivered for the local prototype. Checkpoints
 differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
-delivers grant-wide enable/disable. Remaining CP4 operations and CP5–CP6 still
+delivers grant-wide enable/disable; CP4-B delivers protected team-assignment
+enable/disable. Remaining CP4 operations and CP5–CP6 still
 need bounded operation plans before implementation. Real Auth-service integration
 is not part of the remaining workload or this build's completion denominator.
 
-### CP4-B Task 1 — conditional assignment persistence
+### CP4-B final delivery and rationale
+
+`fb6e9a5` connects the optional CLI seam and independently bounded lab capability;
+`2681550` closes final acceptance/documentation findings. Astra-medium approves
+Task 4 specification, quality and the complete CP4-B integration with no Critical
+or Important findings. All four coding units finished inside their caps, each
+task used at most one focused correction, and final review used one fix wave.
+
+At the 60-minute reassessment, implementation and tests were complete. Work was
+restricted to a bounded closure stage (review, corrections and publication), not
+another feature. Final full Go/race/vet/build, dependency/import checks and site
+build/10 tests pass. Local file-link checks pass. Existing records, provider,
+resolver and CLI patterns were reused; no migration or dependency was introduced.
+
+The only deferred minor is the future validity-pointer graph-test fingerprint
+limitation described below; the final reviewer accepted it as nonblocking.
+Production Auth integration was removed from required scope after the user's
+correction. Permission/scope/role management remains a distinct ABV concern.
+No next lifecycle operation or external integration has been started.
+
+### CP4-B Task 1 — conditional assignment persistence (historical checkpoint)
 
 `3a5d30b` adds one conditional Before/After assignment-status write. Only status
 may change; the provider reads the persisted Before inside the transaction, so
@@ -75,7 +96,7 @@ tests passed; controller full Go/vet and site build/10 tests also passed.
 This is internal persistence only: protected assignment controls still require
 reverse binding discovery, both authority gates and CLI acceptance in Tasks 2–4.
 
-### CP4-B Task 2 — reverse team-binding discovery
+### CP4-B Task 2 — reverse team-binding discovery (historical checkpoint)
 
 `5e9b4c0` adds pure, indexed discovery using actual grant and team parents,
 exact adopted revisions and complete disabled-binding inventory. Missing upstream
@@ -86,11 +107,11 @@ Independent review found a delimiter-based uniqueness collision for legal IDs.
 `6414d80` uses an exact comparable tuple, with a reproduced RED/GREEN regression.
 The same bounded fix strengthens unchanged-input assertions. Scoped review approves
 specification and quality; focused/race and controller full Go/vet tests pass.
-A minor future-test limitation remains for final review: the snapshot fingerprint
+A minor future-test limitation was accepted as deferred in final review: the snapshot fingerprint
 does not inspect pointees of non-nil validity fields; current graph fixtures use
 none. No runtime mutation or authorization bypass was found.
 
-### CP4-B Task 3 — protected assignment status
+### CP4-B Task 3 — protected assignment status (historical checkpoint)
 
 `c2d1d24` connects the operation-specific administrative gate, complete binding
 inventory and boundary validation to the conditional write. Disablement is

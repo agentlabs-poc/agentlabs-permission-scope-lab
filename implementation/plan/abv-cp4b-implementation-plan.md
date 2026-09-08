@@ -8,7 +8,11 @@
 **Architecture:** Extend the existing typed write set and two-gate facade; add
 one pure reverse-binding lookup, then connect the reusable CLI. No generic CRUD.
 **Tech Stack:** Existing Go module, standard library and pinned SQLite provider.
-**Spec:** [CP4-B01 design](abv-cp4b-design.md). Status: approved; execution in progress.
+**Spec:** [CP4-B01 design](abv-cp4b-design.md). Status: complete and independently approved through `2681550`.
+
+All four tasks and the final integration review are complete. The 60-minute
+reassessment restricted continuation to a bounded review/fix/publication stage;
+no further feature work was opened. See [delivery evidence](progress.md).
 
 ## Global constraints
 
@@ -57,7 +61,7 @@ add optional capabilities. Do not treat assignment creation as enablement.
 **Consumes:** Provider.Update, Assignment, strict DecodeAssignment.
 **Produces:** AssignmentStatusChange and provider-neutral conformance coverage.
 
-- [ ] Add and invoke `RunAssignmentStatus(t *testing.T, factory Factory)`.
+- [x] Add and invoke `RunAssignmentStatus(t *testing.T, factory Factory)`.
   First failing case, using existing fixtures/Factory/assertSnapshot:
 
 ```go
@@ -77,11 +81,11 @@ seeded.Assignments["A1"] = after
 assertSnapshot(t, p, seeded)
 ```
 
-- [ ] Run `go test ./internal/storage/... -count=1`; capture missing-type RED,
+- [x] Run `go test ./internal/storage/... -count=1`; capture missing-type RED,
   then real no-persistence RED before implementing the write.
-- [ ] Accept only one write category: assignment creation, grant-status change,
+- [x] Accept only one write category: assignment creation, grant-status change,
   or assignment-status change. Reject every mixed combination before effects.
-- [ ] Validate both records through codec round-trip; compare copies with Status
+- [x] Validate both records through codec round-trip; compare copies with Status
   equalized and reject any other difference. Obtain exact persisted Before from
   the database inside the transaction, not the callback's mutable snapshot maps.
   Missing row is ErrNotFound; mismatch is ErrConflict. No upsert or recipient move.
@@ -95,11 +99,11 @@ WHERE tenant_id=? AND application_id=? AND assignment_id=?
 ```
 
   Require one row. Preserve existing cancellation, rollback and error categories.
-- [ ] Cover enable/disable/same-state, every immutable field alteration, malformed
+- [x] Cover enable/disable/same-state, every immutable field alteration, malformed
   version/status/ID, stale Before, forged callback snapshot, missing row, each
   tenant/app isolation dimension, every mixed-write pair, rollback and reopen.
   Reuse two-provider lock-contention pattern; competing callback count stays zero.
-- [ ] Run focused provider tests, provider race checks and full Go suite once on
+- [x] Run focused provider tests, provider race checks and full Go suite once on
   final source. Self-review, commit, then independent task review.
 
 ## Task 2 — reverse team-binding discovery
@@ -109,7 +113,7 @@ WHERE tenant_id=? AND application_id=? AND assignment_id=?
 existing private `validateTeamChain`, `assignmentContent`, `maxChainSteps`.
 **Produces:** DependentTeamAssignments; no mutation or administrative decision.
 
-- [ ] Write a failing external `lineage_test` case using `lab.TeamFINC17(area)`
+- [x] Write a failing external `lineage_test` case using `lab.TeamFINC17(area)`
   with A2 inserted, proving A1 discovers A2:
 
 ```go
@@ -121,8 +125,8 @@ if err != nil || len(got) != 1 || got[0] != fixture.Proposed {
 }
 ```
 
-- [ ] Run `go test ./internal/lineage -count=1` and capture RED.
-- [ ] Implement one bounded structural index/walk, not a general graph framework:
+- [x] Run `go test ./internal/lineage -count=1` and capture RED.
+- [x] Implement one bounded structural index/walk, not a general graph framework:
 
 ```text
 validate context/Area/catalog and requested existing group assignment
@@ -148,13 +152,13 @@ return all descendant assignment records sorted by assignment ID, excluding self
   context checks during construction/traversal. No O(n²) scan per visited node.
   For enabled non-group assignments whose adopted parent grant matches a visited
   grant, fail unsupported rather than invent which team supplies their source.
-- [ ] Test: three levels; branching; one grant held at unrelated teams; mismatched
+- [x] Test: three levels; branching; one grant held at unrelated teams; mismatched
   grant/team links; unassigned definitions; disabled bridge with enabled lower
   binding; cycles including disabled edges; missing upstream holding; missing
   content/team; duplicate bindings; cancellation; exact depth-bound overflow;
   direct-human ambiguity; newer unadopted content not affecting the graph.
   Assert empty output on every error and unchanged input snapshot.
-- [ ] Run lineage tests/race once on final source; self-review, commit and review.
+- [x] Run lineage tests/race once on final source; self-review, commit and review.
 
 ## Task 3 — protected coordinator and facade
 
@@ -164,7 +168,7 @@ modify `internal/mutation/service.go`, `abv.go`, `abv_test.go`.
 ResolveParentTeam, validation.Narrow and eligibleRoute.
 **Produces:** SetAssignmentStatus and optional AssignmentStatusAdministration.
 
-- [ ] Add a failing public compatibility test using existing externalAdministration:
+- [x] Add a failing public compatibility test using existing externalAdministration:
 
 ```go
 got, err := facade.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A1", "disabled")
@@ -173,8 +177,8 @@ if !errors.Is(err, domain.ErrUnsupported) || got != (domain.Assignment{}) {
 }
 ```
 
-- [ ] Capture RED with `go test . ./internal/mutation -count=1`.
-- [ ] Implement the exact operation sequence:
+- [x] Capture RED with `go test . ./internal/mutation -count=1`.
+- [x] Implement the exact operation sequence:
 
 ```text
 validate ctx, explicit Area, direct-human identity, exact ID and desired status
@@ -199,7 +203,7 @@ return After only when Update commits; otherwise zero Assignment
   historical-issuer membership dependency or automatic descendant activation.
   A same-state call still passes its applicable checks. Other recipients of the
   same grant retain their independent status; do not call SetGrantStatus.
-- [ ] Direct SQLite-backed matrix: enabled child blocks parent disable even when
+- [x] Direct SQLite-backed matrix: enabled child blocks parent disable even when
   its grant is disabled/expired; leaf-up disables succeed; every fork is inspected;
   disabled bridge cannot hide enabled lower binding; no unrelated holding blocked
   merely by grant reuse; restoration fails with disabled grant/support or changed
@@ -208,7 +212,7 @@ return After only when Update commits; otherwise zero Assignment
   absent/malicious/typed-nil admin; malformed/wrong-Area request; parent and child
   expiry crossing; cancellation/competing writer; depth/snapshot overflow; zero
   result and no write on every failure, including after reopen.
-- [ ] Focused normal/race and full Go tests; self-review, commit and task review.
+- [x] Focused normal/race and full Go tests; self-review, commit and task review.
 
 ## Task 4 — CLI, bounded lab authority and acceptance
 
@@ -223,14 +227,14 @@ abv assignment disable A2 --db PATH --tenant acme --app hrms --fixture-context m
 abv assignment enable A2 --db PATH --tenant acme --app hrms --fixture-context maya-team1
 ```
 
-- [ ] Write failing CLI tests for exact ID/status/context forwarding, missing
+- [x] Write failing CLI tests for exact ID/status/context forwarding, missing
   inputs/unknown verb/forbidden revision-recipient flags before connection,
   absent and non-pointer typed-nil capability (status 5, zero method calls),
   output failure, close once and old command compatibility. Reuse CP4-A nil helper.
-- [ ] Add the optional seam and dispatch. Success prints the existing canonical
+- [x] Add the optional seam and dispatch. Success prints the existing canonical
   version-1 Assignment JSON. `assign` remains creation; `inspect assignment` is
   reused unchanged. Do not read the assignment in CLI before the protected call.
-- [ ] Add an explicit lab wrapper preserving both existing administrative methods.
+- [x] Add an explicit lab wrapper preserving both existing administrative methods.
   Use `AssignmentStatusAdministration` embedding `*GrantStatusAdministration`,
   constructed by `NewAssignmentStatusAdministration(area domain.Area,
   premise AdministrationPremise) (*AssignmentStatusAdministration, error)`;
@@ -242,9 +246,9 @@ abv assignment enable A2 --db PATH --tenant acme --app hrms --fixture-context ma
   stored current revision is validated by ABV, not pinned by the lab premise.
   This is a separately declared testing capability, not authority inherited from
   assignment-create or grant-status permission. Preserve base fixture counts.
-- [ ] Verify marker, exact Area and fixture context before facade dispatch. Test
+- [x] Verify marker, exact Area and fixture context before facade dispatch. Test
   unmarked/wrong-context databases and administrative refusal with no write.
-- [ ] Extend the existing compiled-process scenario without adding/resetting seeds:
+- [x] Extend the existing compiled-process scenario without adding/resetting seeds:
 
 ```text
 seed → create A2 → disable A1 rejected
@@ -254,7 +258,7 @@ reopen A1/A2 and assert exact original fields except explicit status changes
 inspect G1/G2 controls and contents unchanged; diagnosis succeeds again
 ```
 
-- [ ] Run full Go suite, full race suite, vet, binary build, import-boundary checks,
+- [x] Run full Go suite, full race suite, vet, binary build, import-boundary checks,
   site build and `node --test tests/*.test.mjs`, and diff/link checks. Record
   rationale, exact test evidence, prototype limits and reviewed commit IDs.
   One combined independent Task 4 + full-slice review with separate verdicts;

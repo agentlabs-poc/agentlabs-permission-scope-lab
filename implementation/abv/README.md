@@ -5,8 +5,8 @@ CP1 foundations, CP2 storage and CP3 parent/team lineage, protected assignment
 writes and working CLI are implemented and independently reviewed. First-slice
 acceptance and final CP3 integration are approved at `5b81b84`.
 CP4-A grant enable/disable and control inspection are independently approved
-through `ed8f227`. CP4-B assignment enable/disable is implemented; Task 4 and
-final independent review are pending. Other lifecycle operations and PostgreSQL
+through `ed8f227`. CP4-B assignment enable/disable, Task 4 and final integration
+are independently approved through `2681550`. Other lifecycle operations and PostgreSQL
 remain outside this slice; real Auth-service integration is out of scope.
 This is a local test harness, not a production Auth service.
 See the [implementation plan](../plan/abv-implementation-plan.md) and

@@ -65,9 +65,12 @@ Task 1 conditional assignment persistence is independently approved at `3a5d30b`
 Task 2 pure reverse-binding discovery is independently approved through `6414d80`,
 including its exact-key collision fix. Task 3 protected assignment status is
 independently approved through `34319e4`, including UTF8 and test-read fixes.
-Do not redispatch Tasks 1–3; Task 4 CLI/acceptance remains pending.
-Retain the minor future validity-pointer test-helper limitation for final
-review, as recorded in implementation/plan/progress.md.
+Task 4 CLI/lab is implemented at `fb6e9a5`; final acceptance/scope fixes are
+`2681550`. Astra-medium independently approves Task 4 spec/quality and the whole
+CP4-B slice. Final full Go/race/vet/build and site/10 tests pass. Do not redispatch
+CP4-B Tasks 1–4. The future validity-pointer fingerprint test-helper limitation is
+an explicitly deferred nonblocking minor, not an unfinished runtime requirement.
+See implementation/plan/progress.md. Other CP4 lifecycle operations are not done.
 CP5 covers ABV definition management only; external Auth integration is excluded.
 CP6 PostgreSQL is a later provider direction, not already delivered.
 The retained isolated worktree now uses branch `implementation/abv-cp3`; preserve

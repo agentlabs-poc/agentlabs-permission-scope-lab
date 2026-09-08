@@ -2,7 +2,7 @@
 
 ## CP4-B — protected assignment enable/disable
 
-Task 4 and final independent review are pending. The implemented CLI accepts
+**Complete and independently approved through `2681550`.** The CLI accepts
 only `assignment enable|disable ID` with explicit database, tenant, application
 and fixture context. It calls the optional application capability directly—no
 CLI pre-read—and prints the committed version-1 Assignment JSON.
@@ -15,6 +15,20 @@ bottom-up sequence, no cascade, exact record preservation after reopen, unchange
 G1/G2 controls, and restored diagnosis. Existing snapshot and 256-step lineage
 bounds reject rather than truncate; no schema, fixture, canonical JSON or real
 Auth operation was added.
+
+Sol-medium implemented all four tasks; independent task reviews and Astra-medium
+whole-slice/scoped reviews approved the result. The final compiled-process test
+compares both G1 and G2 content, both grant controls and exact A1/A2 records after
+the lifecycle sequence. The final controller run passed full Go tests, full race
+tests, vet and binary build. Module verification, import-boundary inspection,
+site build/all 10 site tests and local file-link checks also passed.
+
+One nonblocking test-helper limitation is explicitly deferred: the pure graph
+tests' formatted snapshot fingerprint cannot detect mutations behind a future
+non-nil validity pointer. Current graph fixtures contain no such pointer and
+discovery does not mutate evidence. When adding pointer-bearing graph fixtures,
+capture pointee values or a deep copy; do not claim that proof from this helper.
+This is not an unsupported runtime authorization rule or an open security finding.
 
 ## Current delivery
 

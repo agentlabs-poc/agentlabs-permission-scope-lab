@@ -1,7 +1,7 @@
 # CP4-B01 — assignment enable/disable design
 
 Status: CP4-B01 approved for bounded implementation by the user's “proceed”.
-Runtime work is in progress, not yet delivered. The governing
+Runtime work is delivered and independently approved through `2681550`. The governing
 model is already approved. This document chooses a bounded implementation scope
 and interfaces, not a new canonical assignment format or new authorization policy.
 
