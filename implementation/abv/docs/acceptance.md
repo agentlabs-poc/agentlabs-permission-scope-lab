@@ -20,9 +20,9 @@ Auth operation was added.
 
 CP1, CP2 and CP3 are complete for the approved local prototype slice. Task 7
 specification compliance, Task 7 quality and final CP3 integration received
-independent approval at `5b81b84`, with no findings. Lifecycle operations, real
-Auth/registration integration and PostgreSQL remain CP4–CP6; this is not full
-ABV or production Auth completion.
+independent approval at `5b81b84`, with no findings. Other lifecycle and ABV
+definition-management operations remain future work; real Auth-service integration
+is out of scope. PostgreSQL is not delivered by this local SQLite prototype.
 
 CP4-A Task 3 provides the optional reusable `GrantStatusAPI`, bounded lab G2
 enable/disable commands, and separate canonical `grant-control` inspection.

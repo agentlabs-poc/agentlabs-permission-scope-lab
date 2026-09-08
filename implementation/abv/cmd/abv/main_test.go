@@ -70,11 +70,12 @@ func TestCompiledBinarySeedInspectCheckAssignAndReopen(t *testing.T) {
 	if a1Final != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"Team1"},"status":"enabled"}`+"\n" || a2Final != after {
 		t.Fatalf("assignments not restored: A1=%q A2=%q", a1Final, a2Final)
 	}
+	g1Final, _ := run(0, "inspect", "grant", "G1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	g2, _ := run(0, "inspect", "grant", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
 	g1Control, _ := run(0, "inspect", "grant-control", "G1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	g2Control, _ := run(0, "inspect", "grant-control", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if g2 != `{"version":"1","grant_id":"G2","revision":1,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`+"\n" || g1Control != `{"version":"1","id":"G1","status":"enabled"}`+"\n" || g2Control != `{"version":"1","id":"G2","status":"enabled"}`+"\n" {
-		t.Fatalf("grant records changed: G2=%q G1-control=%q G2-control=%q", g2, g1Control, g2Control)
+	if g1Final != grant || g2 != `{"version":"1","grant_id":"G2","revision":1,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`+"\n" || g1Control != `{"version":"1","id":"G1","status":"enabled"}`+"\n" || g2Control != `{"version":"1","id":"G2","status":"enabled"}`+"\n" {
+		t.Fatalf("grant records changed: G1=%q G2=%q G1-control=%q G2-control=%q", g1Final, g2, g1Control, g2Control)
 	}
 	run(0, "grant", "disable", "G2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	control, _ := run(0, "inspect", "grant-control", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
