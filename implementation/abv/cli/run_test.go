@@ -24,6 +24,24 @@ type grantAPI struct {
 	control domain.GrantControl
 }
 
+type nilMapAPI map[string]string
+
+var nilMapAPICalls int
+
+func (nilMapAPI) Inspect(context.Context, domain.Area, string, string) (domain.Record, error) {
+	return domain.Record{}, nil
+}
+func (nilMapAPI) CheckAssignment(context.Context, domain.Area, []byte) (domain.Diagnostic, error) {
+	return domain.Diagnostic{}, nil
+}
+func (nilMapAPI) Assign(context.Context, domain.Area, domain.FixtureContext, []byte) (domain.Receipt, error) {
+	return domain.Receipt{}, nil
+}
+func (nilMapAPI) SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error) {
+	nilMapAPICalls++
+	return domain.GrantControl{}, nil
+}
+
 func (s *grantAPI) SetGrantStatus(_ context.Context, area domain.Area, fixture domain.FixtureContext, control domain.GrantControl) (domain.GrantControl, error) {
 	s.area, s.fixture, s.control = area, fixture, control
 	return control, nil
@@ -131,6 +149,16 @@ func TestGrantStatusRequiresOptionalCapabilityAndReportsOutputFailure(t *testing
 		if got := Run(context.Background(), args, strings.NewReader(""), tc.out, &diag, connector.connect, nil); got != tc.code || connector.closes != 1 {
 			t.Fatalf("exit=%d closes=%d stderr=%q", got, connector.closes, diag.String())
 		}
+	}
+}
+
+func TestGrantStatusRejectsNonPointerTypedNilWithoutCallingIt(t *testing.T) {
+	nilMapAPICalls = 0
+	connector := &connectorSpy{api: nilMapAPI(nil)}
+	var out, diag bytes.Buffer
+	args := []string{"grant", "disable", "G2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+	if got := Run(context.Background(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 5 || nilMapAPICalls != 0 || connector.closes != 1 {
+		t.Fatalf("exit=%d method calls=%d closes=%d", got, nilMapAPICalls, connector.closes)
 	}
 }
 

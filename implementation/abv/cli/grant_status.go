@@ -11,7 +11,7 @@ import (
 
 func grantStatus(ctx context.Context, api application.API, area domain.Area, fixture, verb, id string, out io.Writer) error {
 	statusAPI, ok := api.(application.GrantStatusAPI)
-	if !ok || reflect.ValueOf(statusAPI).Kind() == reflect.Ptr && reflect.ValueOf(statusAPI).IsNil() {
+	if !ok || nilCapability(statusAPI) {
 		return domain.ErrUnsupported
 	}
 	status := "enabled"
@@ -29,4 +29,12 @@ func grantStatus(ctx context.Context, api application.API, area domain.Area, fix
 	raw = append(raw, '\n')
 	_, err = out.Write(raw)
 	return err
+}
+
+func nilCapability(value any) bool {
+	if value == nil {
+		return true
+	}
+	kind := reflect.ValueOf(value).Kind()
+	return (kind == reflect.Chan || kind == reflect.Func || kind == reflect.Interface || kind == reflect.Map || kind == reflect.Pointer || kind == reflect.Slice) && reflect.ValueOf(value).IsNil()
 }
