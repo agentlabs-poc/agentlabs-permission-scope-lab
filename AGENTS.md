@@ -6,8 +6,9 @@ User authorized autonomous implementation and direct SQLite local testing.
 M1 policy/result codecs plus read-only SQLite reader are pushed at d299cdb;
 Auth-owned group-held human query is pushed at 614c3f1. Do not redispatch them.
 M2 evaluator is pushed at bf0d3a3; localadapter/in-process command is implemented
-and verified. M3 HTTP wrapper is implemented/tested; M4 constrained handler/demo
-checks are in progress. Do not repeat completed core/wrapper tasks.
+and verified. M3 HTTP wrapper and M4 constrained handler/demo are implemented
+and verified. Do not repeat completed M0–M4 local-slice tasks. Production identity,
+Auth transport and unsupported evidence paths are not implemented by this demo.
 See implementation/plan/auth-middleware-execution.md for actual
 status. No SQL or ABV mutation dependency in middleware; no new storage schema.
 Internal evidence preserves both grant NotBefore and expiry. No reviews by user

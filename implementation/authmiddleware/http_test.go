@@ -312,6 +312,45 @@ func TestWrapGETUsesRoutedPathWithoutARequestBody(t *testing.T) {
 	}
 }
 
+func TestAllowedSynchronousEffectCompletesAfterAuthorityWithdrawalAndNextRequestDenies(t *testing.T) {
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	var effects []string
+	denials := 0
+	h, err := Wrap(httpPolicy(http.MethodPut), identity, httpEvaluator(t, authority), func(_ context.Context, _ RequestContext, values InputValues, _ map[string]json.RawMessage) (BoundOperation, error) {
+		var cert, dept string
+		if err := json.Unmarshal(values["cert"], &cert); err != nil {
+			return BoundOperation{}, err
+		}
+		if err := json.Unmarshal(values["dept"], &dept); err != nil {
+			return BoundOperation{}, err
+		}
+		return BoundOperation{
+			Material: Material{"cert": {Kind: SelectionExact, Value: cert}, "dept": {Kind: SelectionExact, Value: dept}},
+			Execute: func(context.Context, http.ResponseWriter) {
+				authority.authority = Authority{}
+				effects = append(effects, cert+":"+dept)
+			},
+		}, nil
+	}, func(_ http.ResponseWriter, _ *http.Request, result Result, err error) {
+		if err != nil || result.Decision != Deny {
+			t.Fatalf("failure = %#v, %v", result, err)
+		}
+		denials++
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := func() *http.Request {
+		return httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
+	}
+	h.ServeHTTP(httptest.NewRecorder(), request())
+	h.ServeHTTP(httptest.NewRecorder(), request())
+	if len(effects) != 1 || effects[0] != "C17:FIN" || denials != 1 || authority.called != 2 {
+		t.Fatalf("effects=%v denials=%d evaluations=%d", effects, denials, authority.called)
+	}
+}
+
 func TestBusinessBodyRejectsNonObjectTrailingInvalidUnicodeAndDepth(t *testing.T) {
 	deep := strings.Repeat(`{"x":`, maxJSONDepth+1) + `0` + strings.Repeat(`}`, maxJSONDepth+1)
 	for name, raw := range map[string]string{

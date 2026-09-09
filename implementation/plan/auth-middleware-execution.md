@@ -1,6 +1,35 @@
 # AUTH-MW-02 — bounded execution ledger
 
-## Active continuation — HTTP wrapper and constrained handlers
+## Current checkpoint — M0–M4 local slice complete
+
+The wrapper, constrained GET/PUT/collection handlers and in-process HTTP demo
+are implemented and verified. Fresh controller checks pass: both Go modules'
+uncached full tests, race tests, vet/build; ABV module verification; all 10 site
+tests and production build. The compiled SQLite-backed walkthrough gives Maya
+FIN/C17 read/write and FIN collection access, rejects FIN/C18 without ENG data,
+and denies all-department access. Nutan can read C17 but cannot write or list FIN.
+Q-129/MW20 explicitly proves an already-allowed synchronous effect completes once
+after fixture authority withdrawal, while the next request denies.
+
+M3 and M4 finished within their original bounds. Narrow final corrections added
+that Q-129 test and removed the demo's unnecessary Auth lab import. Production
+demo dependencies exclude the ABV mutation coordinator, facade and lab package;
+the deliberately local SQLite adapter remains. The reusable middleware module
+has no SQL/ABV dependency. No new tables, dependencies, canonical JSON or reviews.
+
+Rationale: application-owned fixed permission strings avoid importing an Auth
+mutation package merely for constants. The effect closure retains validated
+business values through the single gate; it is not prepared authorization.
+HTTP error rendering remains host-owned, preserving evaluator messages/errors.
+
+Limits remain explicit: trusted lab identity is not JWT authentication; local
+committed reads are not a production freshness protocol. Direct-recipient/proxy
+discovery and SQLite `$self` remain unsupported; runtime `$self` is fixture-tested.
+Moves, batch/streaming composition and real Auth transport are not delivered.
+This closes the agreed local implementation slice, not all production/model work.
+Retain the worktree and ignored execution reports for continuation.
+
+## Historical continuation — HTTP wrapper and constrained handlers
 
 User requested autonomous continuation after core checkpoint 600c645.
 M3 authmw_m3 (Sol-medium) dispatched 10:52 UTC, cap 11:12 UTC; owns middleware

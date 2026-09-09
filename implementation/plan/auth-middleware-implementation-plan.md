@@ -140,6 +140,15 @@ This scope is a proposal to get the first harness working, not a handbook deferr
 
 ## E. Implementation tasks after M0 approval
 
+Execution status (9 September 2026): M0–M4 local slice is implemented and verified.
+The original task checklist below is retained as the design/RED-GREEN brief, not
+an outstanding-work count. Actual evidence and unsupported cases are tracked in
+[the execution ledger](auth-middleware-execution.md) and
+[acceptance mapping](auth-middleware-acceptance.md).
+M4's final home is `implementation/abv/internal/httpdemo` with
+`cmd/auth-http-demo`, reusing the existing local SQLite adapter. This replaces
+the tentative demo filename below, without putting SQL in the middleware module.
+
 Each implementation unit has a 20-minute first attempt and one 10-minute focused
 correction maximum. If Sol-medium cannot deliver, report the blocker and escalate
 once to Astra-medium on the narrowed remainder, at most 15 minutes. A larger model

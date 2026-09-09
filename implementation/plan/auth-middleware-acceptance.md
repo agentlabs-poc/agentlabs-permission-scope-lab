@@ -37,6 +37,27 @@ An invalid/unavailable database is evaluation failure, not an empty authority se
 
 ## Integration test discipline
 
+### Local completion evidence
+
+M1–M4 now have executable proof across middleware policy/result/evidence/evaluator/
+HTTP tests, ABV lineage/read-only reader/localadapter tests, and HTTP demo tests.
+MW09 uses trusted resolved `$self` fixtures, not unsupported SQLite issuance.
+MW19 uses a protected ABV control change between real SQLite-backed HTTP requests;
+MW20 separately proves Q-129 prior-allow completion and denial of the next request.
+MW22 is rejection coverage, not implemented proxy/direct-recipient discovery.
+
+MW24 placement distinction: `implementation/authmiddleware` is stdlib-only and
+imports no ABV or SQL packages. The AUTH-MW-04 local demo intentionally links the
+read-only SQLite adapter; it is not a production API binary. Its production
+dependency graph excludes the ABV facade, application, lab and mutation packages.
+This proves the local seam, not a production Auth transport deployment.
+
+Full verification and runnable walkthrough outcomes are recorded in
+[the execution ledger](auth-middleware-execution.md); commands and explicit
+limitations are in [the module README](../authmiddleware/README.md).
+
+### Preserved test discipline
+
 Use known fixture route sets and a small in-memory application data store. Record
 exact handler call/effect counts, not just status codes. Prove identity/material
 cannot be changed between checked input and protected effect through adapter misuse

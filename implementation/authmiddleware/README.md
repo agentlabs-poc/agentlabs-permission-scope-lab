@@ -27,8 +27,8 @@ all-values selections.
 These flags are trusted **test context**, not authentication or HTTP permission
 selection. The adapter supports literal SQLite scope values only, reads a bounded
 full snapshot, and has no JWT verification or production freshness mechanism.
-The HTTP wrapper and handler integration remain pending; this checkpoint is only
-the reusable core evaluator plus a local in-process SQLite test command.
+The reusable HTTP wrapper and bounded application demonstration are also
+available. They remain local proof, not an Auth-service integration.
 
 To exercise Nutan's narrower Team2 grant through the existing protected lab flow:
 
@@ -40,6 +40,31 @@ go run ./cmd/abv assign --db /tmp/authority.db --tenant acme --app hrms --fixtur
 Expected allow: `{"version":"1","decision":"allow","grant_ids":["G0","G1","G2"]}`.
 Changing FIN to ENG or C17 to C18 denies. `--all dept` also denies this route.
 Grant/assignment changes are observed on the next read; no allow cache is used.
-These decisions do not prove certificate ownership: endpoint/handler enforcement
-is the next integration step. Runtime `$self` is tested using resolved fixtures;
+These decisions do not prove certificate ownership: the HTTP demo below shows
+the required endpoint/handler enforcement. Runtime `$self` is tested using resolved fixtures;
 the current SQLite lineage adapter explicitly rejects it rather than guessing.
+
+## In-process HTTP application demo
+
+Using the same seeded database, run the HTTP walkthrough without opening a
+network listener:
+
+```sh
+go run ./cmd/auth-http-demo --db /tmp/authority.db --tenant acme --application hrms --human maya
+```
+
+Maya's expected highlights are `GET /api/v1/acme/FIN/C17` → 200,
+`GET /api/v1/acme/FIN/C18` → 404, and `GET /api/v1/acme/certificates` → 403.
+The PUT policy selects `department_id` as authorization input; the application
+also validates `title` as a business field from the same parsed JSON body. It
+updates FIN/C17 in the in-memory application store and returns the revised
+title through the FIN collection. A FIN body claim cannot move or rename ENG/C18.
+
+![Auth middleware and validator placement](../plan/assets/auth-middleware-validator.svg)
+
+The diagram is architectural context. This demo does not deliver production
+identity/freshness transport, JWT verification, proxy support, direct-user
+integration, or Auth-storage writes. Literal scopes and between-request control
+changes are proven with SQLite; `$self` and timeout behavior use complete trusted
+fixtures because the SQLite adapter intentionally supports literal scopes only.
+HTTP statuses are local-example conventions.
