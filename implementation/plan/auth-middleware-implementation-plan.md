@@ -219,6 +219,11 @@ Reject nil/typed-nil source or clock at construction. Validate direct-human
 identity and nonempty UTF-8, non-wildcard area/IDs; reject proxy actor types.
 Validate request permission and Exact/All selection shapes; All has no value.
 
+M0 safety refinement: Route also carries internal ValidFrom (latest contributing
+NotBefore). Recheck it and ValidUntil at decision time, including a backwards
+wall-clock test. Inverted interval errors; not-yet-valid route cannot allow.
+No canonical JSON changes: preserve the existing grant validity rules completely.
+
 Every source route must be well-formed and match area, human and permission.
 Validate ALL returned routes before choosing an allow: an earlier matching route
 does not hide malformed later evidence. Nonempty unique contributing grant IDs,

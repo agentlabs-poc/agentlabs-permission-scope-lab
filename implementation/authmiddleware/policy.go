@@ -55,8 +55,7 @@ func (p Policy) Validate() error {
 	if err != nil {
 		return err
 	}
-	permissionParts := strings.Split(p.Permission, "::")
-	if invalidText(p.Permission) || len(permissionParts) != 2 || permissionParts[0] == "" || permissionParts[1] == "" || strings.ContainsAny(p.Permission, "*, \t\r\n") {
+	if !validPermission(p.Permission) {
 		return errors.New("invalid policy permission")
 	}
 	if p.Inputs == nil {
@@ -80,6 +79,11 @@ func (p Policy) Validate() error {
 		}
 	}
 	return nil
+}
+
+func validPermission(permission string) bool {
+	parts := strings.Split(permission, "::")
+	return !invalidText(permission) && len(parts) == 2 && parts[0] != "" && parts[1] != "" && !strings.ContainsAny(permission, "*, \t\r\n")
 }
 
 func pathPlaceholders(path string) (map[string]struct{}, error) {

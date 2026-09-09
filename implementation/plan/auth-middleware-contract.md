@@ -141,6 +141,7 @@ type Route struct {
 	Permission  string
 	GrantIDs    []string
 	Predicates  []Predicate
+	ValidFrom   *time.Time
 	ValidUntil  *time.Time
 }
 
@@ -206,7 +207,9 @@ only on the host identity/wrapper port.
 `Evaluate` returns `(allow, nil)` or `(deny, nil)` only after complete
 evaluation. A source timeout, cancellation, malformed/incomplete evidence,
 unsupported evidence condition, or inability to establish required freshness
-returns a zero `Result` and `*EvaluationError`. Protected execution requires
+returns a zero `Result` and an error (`*EvaluationError` when a supported external
+error record exists; otherwise a preserved Go error pending the catalogue).
+Protected execution requires
 exactly `result.Decision == Allow`, `err == nil`, and `result.Validate() == nil`.
 The HTTP status mapping and exhaustive error-code/message catalogue are not
 selected here.
@@ -276,6 +279,13 @@ obligation. The production mechanism needed to ensure that checks begun after a
 confirmed reduction cannot use withdrawn authority is a genuine integration gap;
 no timestamp, cache duration, or invented version token closes it.
 
+Implementation refinement: `ValidFrom` carries the latest contributing
+`not_before`, and `ValidUntil` the earliest expiry. Recheck both at decision time.
+Rationale: checking the lower bound only at load would become unsafe if the wall
+clock moved backwards before the decision. These are internal copies of existing
+grant validity, not new canonical fields or freshness proofs. An inverted interval
+is malformed evidence; a currently out-of-interval route supplies no authority.
+
 ### Application policy, material, and handler
 
 The endpoint owns one static `Policy`. Startup/registration validation requires
@@ -295,10 +305,14 @@ For each predicate in one route:
   key;
 - `$self` matches only an exact selection whose value equals
   `Request.Context.Identity.HumanID`;
-- `SelectionAll`, a missing key, an empty value, an unsupported token, or a
+- `SelectionAll`, a missing key, an empty value, or a
   conflicting repeated predicate does not match that route; and
 - predicates with different keys all match (AND). Predicates from different
   routes are never combined. Any one complete matching route may allow.
+
+An unsupported predicate token is an evidence error, not merely a failed match;
+it cannot be ignored in favor of another route. Likewise malformed request
+selection values fail input validation before authority loading.
 
 A route with no predicate for a key adds no restriction on that dimension; it
 does not remove the trusted `Area` or the endpoint's concrete record binding.

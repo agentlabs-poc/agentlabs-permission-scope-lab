@@ -84,3 +84,13 @@ contextless lineage traversal remains capped at 256 steps; cancellation is
 observed before/after each candidate, not within that reused traversal.
 Disposable controller walkthrough database: /tmp/authmw-run.AOhZGo/authority.db,
 seeded with the existing team-fin-c17 CLI fixture (not committed or production).
+
+M2 completed 10:34 UTC within its bound. Controller reran uncached tests, race,
+vet, build and `go list -m all`; all pass, and the middleware module has no external
+module dependency. One internal evidence refinement preserves both grant start
+and expiry times, including decision-time recheck; it changes no canonical JSON.
+
+SQLite adapter/command dispatched 10:35 UTC to authmw_sqlite_adapter (Sol-medium),
+twenty-minute attempt. Exact owned seams are localadapter, cmd/auth-evaluate,
+ABV module local replacement and middleware README. Source/consumer definitions
+are now stable; this unit converts them and proves real in-process decisions.
