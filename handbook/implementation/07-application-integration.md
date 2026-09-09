@@ -9,6 +9,13 @@ allow/prepared result. There is no prepared state in the selected model.
 
 ## Follow the request
 
+**Placement clarification — AUTH-ARCH-02:** Auth Middleware/evaluator is the
+API-service-side component. Core Auth Validator / ABV remains inside Auth Service
+for its definition and authority-changing operations. The API-side component
+consumes Auth authority; it does not embed ABV's mutation engine or database.
+This naming clarification preserves the endpoint-owned gate and application
+enforcement described below; it does not introduce a prepared handoff.
+
 ![Client request through authentication, endpoint input binding, embedded Auth evaluation, constrained data access and response](../../docs/assets/authorization-system.svg)
 
 The endpoint declares its required permission and selected inputs. Its handler

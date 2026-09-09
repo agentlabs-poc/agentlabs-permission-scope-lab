@@ -88,6 +88,14 @@ and exact trust/intent evidence remain pending.
 
 ## Two checks inside Auth's own endpoint gate
 
+**Placement clarification — AUTH-ARCH-02:** the user names the Auth-service-side
+authority-boundary validator **core Auth Validator / ABV**. API services host
+the **Auth Middleware / evaluator**. Auth Service's own APIs use the same
+API-side authorization and then ABV where the operation requires authority-change
+validation. ABV is not deployed into every application API service by this model.
+Shared canonical primitives do not merge these two responsibilities. See the
+[implementation planning pin](../../implementation/plan/auth-middleware-implementation-plan.md).
+
 Auth Service protects its administrative APIs with the same framework. The
 endpoint declares one required administrative permission and its input bindings.
 Its handler must establish both operation authority and the proposed authority's

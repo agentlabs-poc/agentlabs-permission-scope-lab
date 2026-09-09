@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" role="img" aria-labelledby="title desc">
+ <title id="title">Auth Middleware and core Auth Validator — handbook-aligned proposal</title>
+ <desc id="desc">Application APIs use endpoint-owned middleware evaluation followed by constrained handler execution. Auth authority-changing APIs additionally use the core authority-boundary validator before an atomic write. Middleware evaluation and core validation are distinct checks.</desc>
+ <defs>
+  <marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="#334155"/></marker>
+  <style>text{font-family:system-ui,sans-serif;fill:#172033;font-size:16px}.h{font-size:21px;font-weight:700}.b{font-weight:650}.s{font-size:14px}.box{fill:white;stroke:#64748b;stroke-width:1.5;rx:8}.arrow{fill:none;stroke:#334155;stroke-width:2;marker-end:url(#a)}</style>
+ </defs>
+ <rect width="960" height="660" fill="#f8fafc"/>
+ <text x="28" y="36" class="h">Same API-side gate; additional core check for authority changes</text>
+ <text x="28" y="66">Proposal maps names onto existing handbook responsibilities.</text>
+ <rect x="20" y="86" width="440" height="498" rx="12" fill="#eff6ff" stroke="#2563eb"/>
+ <rect x="490" y="86" width="450" height="498" rx="12" fill="#f0fdf4" stroke="#15803d"/>
+ <text x="42" y="116" class="h">Application API</text>
+ <text x="512" y="116" class="h">Auth authority-changing API</text>
+ <rect x="42" y="137" width="395" height="49" class="box"/>
+ <text x="59" y="167">Client: read Finance certificate C17</text>
+ <rect x="512" y="137" width="405" height="49" class="box"/>
+ <text x="529" y="167">Client: assign a grant to Team2</text>
+ <path d="M239 186 V213" class="arrow"/><path d="M714 186 V213" class="arrow"/>
+ <rect x="42" y="216" width="395" height="126" class="box"/>
+ <text x="59" y="243" class="b">Auth Middleware / embedded evaluator</text>
+ <text x="59" y="270">Verified context + endpoint policy</text>
+ <text x="59" y="294">Declared inputs + sufficient authority</text>
+ <text x="59" y="322">May this request read within Finance?</text>
+ <rect x="512" y="216" width="405" height="126" class="box"/>
+ <text x="529" y="243" class="b">Auth Middleware / embedded evaluator</text>
+ <text x="529" y="270">Verified context + endpoint policy</text>
+ <text x="529" y="294">Declared inputs + sufficient authority</text>
+ <text x="529" y="322">May Maya assign to Team2?</text>
+ <path d="M239 342 V387" class="arrow"/><text x="253" y="369" class="s">allow</text>
+ <path d="M714 342 V366" class="arrow"/>
+ <rect x="512" y="369" width="405" height="90" class="box"/>
+ <text x="529" y="397" class="b">Core Auth Validator (ABV)</text>
+ <text x="529" y="422">Is the proposed authority supported?</text>
+ <text x="529" y="445" class="s">Registration, source, lineage, subset, lifecycle</text>
+ <rect x="42" y="390" width="395" height="94" class="box"/>
+ <text x="59" y="418" class="b">Endpoint executes constrained operation</text>
+ <text x="59" y="444">Tenant + Finance + C17 bound to query</text>
+ <text x="59" y="468" class="s">No grant inspection or unrestricted fallback.</text>
+ <path d="M714 459 V492" class="arrow"/>
+ <rect x="512" y="495" width="405" height="66" class="box"/>
+ <text x="529" y="521" class="b">Protected coordinator commits</text>
+ <text x="529" y="546" class="s">Both checks preserved through persistence.</text>
+ <path d="M239 484 V514" class="arrow"/>
+ <text x="105" y="543">Return matching application data</text>
+ <text x="28" y="611" class="b">Any required denial, evaluation error or validation failure stops protected effects.</text>
+ <text x="28" y="640" class="s">One endpoint-owned gate. No prepared state. Shared resolution rules; distinct responsibilities.</text>
+</svg>

@@ -1,5 +1,36 @@
 # Handbook working rules
 
+## AUTH-ARCH-02 — pinned component placement
+
+User confirms ABV/core Auth Validator belongs inside Auth Service. Auth Middleware
+and request evaluator are API-service-side; handler enforces actual data/effects.
+Auth protects its own APIs with that same authorization plus ABV for authority
+changes. Do not merge the responsibilities or embed ABV mutation/storage in apps.
+The requested implementation plan is implementation/plan/auth-middleware-implementation-plan.md.
+This is a planning pin, not approval of unresolved evidence transports, SDK types,
+production integration or canonical result changes. M0 resolves the contract
+before coding. Preserve single endpoint-owned gate and no prepared state.
+
+## Current direction — ABV 123 simplification pin
+
+The user explicitly requires reconciliation with the existing auth model.
+ABV-123-07 in implementation/plan/abv-123-auth-reconciliation.md records the
+rule matrix and proposed contract-design steps. Static per-operation/kind routes
+and explicit application path binding are proposed refinements, not approved
+canonical changes. Never trade one-permission endpoint policies or separate
+administrative/ABV checks for a universal execute permission or generic writes.
+
+The user pinned the 123 storage/endpoint direction and asks about functional
+coverage. See implementation/plan/abv-123-storage-plan.md: one L1 record store,
+dedicated assignments/teams/memberships and metadata; tenant API base
+/api/v1/{tenant}/abv/. This supersedes the earlier two-store proposal, not the
+authorization rules. Read/validate/execute endpoint families are pinned direction;
+exact versioned contracts, application binding and one-permission-per-endpoint
+mapping remain unresolved. No generic mutation bypass. Pause adoption coding
+while this simplification is settled. No migration/runtime replacement is approved
+by the pin; retain prior implementation and history. Functional coverage does
+not mean adoption, lifecycle or team-management APIs are already implemented.
+
 ## Current CP4-C execution — grant revision publication
 
 CP4-C is complete/tested through `7624edf`: internal storage `e7c43bb`, protected
