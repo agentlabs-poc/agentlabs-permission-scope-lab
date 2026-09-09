@@ -23,6 +23,10 @@ type AssignmentStatusAdministration interface {
 	CheckAssignmentStatus(context.Context, storage.Snapshot, domain.Identity, domain.Assignment, time.Time) error
 }
 
+type RoleAdministration interface {
+	CheckRolePublication(context.Context, storage.Snapshot, domain.Identity, domain.RoleContent, time.Time) error
+}
+
 type CatalogAdministration interface {
 	CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, []string, time.Time) error
 	CheckScopeRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.ScopeDefinition, time.Time) error

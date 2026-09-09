@@ -4,6 +4,7 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/internal/validation"
 	"context"
 	"database/sql"
 	"database/sql/driver"
@@ -80,6 +81,9 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.AssignmentStatusChange != nil {
 			categories++
 		}
+		if writes.NewRoleRevision != nil {
+			categories++
+		}
 		if categories > 1 {
 			return domain.ErrMalformed
 		}
@@ -88,6 +92,16 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		}
 		if writes.AssignmentStatusChange != nil {
 			return p.writeAssignmentStatus(ctx, conn, area, *writes.AssignmentStatusChange)
+		}
+		if writes.NewRoleRevision != nil {
+			authoritative, err := p.readCatalog(ctx, conn, area.ApplicationID())
+			if err != nil {
+				return err
+			}
+			if err := validation.CheckRolePublication(area, authoritative, *writes.NewRoleRevision); err != nil {
+				return err
+			}
+			return p.insertRole(ctx, conn, area, *writes.NewRoleRevision)
 		}
 		return p.writeAssignments(ctx, conn, area, writes.NewAssignments)
 	})
