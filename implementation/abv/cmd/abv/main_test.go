@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestCompiledBinarySeedInspectCheckAssignAndReopen(t *testing.T) {
+func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testing.T) {
 	root, err := filepath.Abs("../..")
 	if err != nil {
 		t.Fatal(err)
@@ -117,6 +117,20 @@ func TestCompiledBinarySeedInspectCheckAssignAndReopen(t *testing.T) {
 	if reopened != after {
 		t.Fatalf("grant status changed assignment: before=%q after=%q", after, reopened)
 	}
+	g2v2 := filepath.Join(t.TempDir(), "g2-v2.json")
+	g2v2JSON := `{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}`
+	if err := os.WriteFile(g2v2, []byte(g2v2JSON), 0600); err != nil {
+		t.Fatal(err)
+	}
+	published, publicationWarning := run(0, "grant", "publish", "--file", g2v2, "--support-assignment", "A1", "--tenant", "acme", "--app", "hrms", "--db", database, "--fixture-context", "maya-grant-publisher")
+	if published != g2v2JSON+"\n" || !strings.Contains(publicationWarning, "transient publication evidence") {
+		t.Fatalf("publication stdout=%q stderr=%q", published, publicationWarning)
+	}
+	reopenedGrant, _ := run(0, "inspect", "grant", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	reopenedAssignment, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if reopenedGrant != published || reopenedAssignment != after {
+		t.Fatalf("reopen grant=%q assignment before=%q after=%q", reopenedGrant, after, reopenedAssignment)
+	}
 	testCompiledBinaryNegativeCases(t, binary, root)
 }
 
@@ -144,4 +158,13 @@ func testCompiledBinaryNegativeCases(t *testing.T, binary, root string) {
 	run(2, "check", "assignment", "--file", duplicate, "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(3, "assign", "--file", filepath.Join(root, "testdata", "a2.json"), "--fixture-context", "unknown", "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(3, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	revision := filepath.Join(dir, "g2-v2.json")
+	if err := os.WriteFile(revision, []byte(`{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	missingDB := filepath.Join(dir, "missing.db")
+	run(4, "grant", "publish", "--file", revision, "--support-assignment", "A1", "--fixture-context", "maya-grant-publisher", "--db", missingDB, "--tenant", "acme", "--app", "hrms")
+	if _, err := os.Stat(missingDB); !os.IsNotExist(err) {
+		t.Fatalf("missing publication database was created: %v", err)
+	}
 }

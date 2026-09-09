@@ -30,6 +30,7 @@ type labApplication struct {
 }
 
 var _ application.API = (*labApplication)(nil)
+var _ application.GrantRevisionAPI = (*labApplication)(nil)
 var _ application.Connect = Connect
 
 // Connect opens an existing ABV database. It never creates or repairs one.
@@ -45,7 +46,7 @@ func Connect(ctx context.Context, area domain.Area, path string) (application.AP
 	if err != nil {
 		return nil, nil, err
 	}
-	administration := &RoleAdministration{AssignmentStatusAdministration: statusAdministration}
+	administration := &GrantRevisionAdministration{RoleAdministration: &RoleAdministration{AssignmentStatusAdministration: statusAdministration}}
 	facade, err := abv.OpenSQLite(ctx, path, administration, clock{})
 	if err != nil {
 		return nil, nil, err
@@ -110,6 +111,20 @@ func (a *labApplication) PublishRole(ctx context.Context, area domain.Area, fixt
 		return domain.RoleContent{}, err
 	}
 	return a.facade.PublishRole(ctx, area, TeamFINC17(area).Issuer, proposed)
+}
+
+func (a *labApplication) PublishGrantRevision(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, sourceAssignmentID string, raw []byte) (domain.GrantContent, error) {
+	if area != a.area || fixtureContext.Name != grantRevisionFixtureContext {
+		return domain.GrantContent{}, domain.ErrRejected
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.GrantContent{}, err
+	}
+	proposed, err := codec.DecodeContent(raw)
+	if err != nil {
+		return domain.GrantContent{}, err
+	}
+	return a.facade.PublishGrantRevision(ctx, area, TeamFINC17(area).Issuer, sourceAssignmentID, proposed)
 }
 
 func readOnlyDatabase(path string) (*sql.DB, error) {

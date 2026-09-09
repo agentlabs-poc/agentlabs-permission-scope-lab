@@ -46,7 +46,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
-		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens", "--revision", "--permissions":
+		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens", "--revision", "--permissions", "--support-assignment":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -124,7 +124,13 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		if len(positional) != 0 || !only(flags, "--tenant", "--app", "--db", "--file", "--fixture-context") || flags["--db"] == "" || flags["--file"] == "" || flags["--fixture-context"] == "" {
 			return fail(2, "assign accepts flags only")
 		}
-	case "grant", "assignment":
+	case "grant":
+		publish := len(positional) == 1 && positional[0] == "publish" && only(flags, "--tenant", "--app", "--db", "--file", "--support-assignment", "--fixture-context") && flags["--db"] != "" && flags["--file"] != "" && flags["--support-assignment"] != "" && flags["--fixture-context"] != ""
+		status := len(positional) == 2 && (positional[0] == "enable" || positional[0] == "disable") && !empty(positional[1]) && only(flags, "--tenant", "--app", "--db", "--fixture-context") && flags["--db"] != "" && flags["--fixture-context"] != ""
+		if !publish && !status {
+			return fail(2, "grant requires publish flags or enable/disable and ID")
+		}
+	case "assignment":
 		if len(positional) != 2 || (positional[0] != "enable" && positional[0] != "disable") || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") || flags["--db"] == "" || flags["--fixture-context"] == "" {
 			return fail(2, command+" requires enable/disable and ID")
 		}

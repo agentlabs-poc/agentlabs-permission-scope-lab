@@ -48,6 +48,8 @@ the seed command succeed.
 ./bin/abv catalog register-permission hrms:payroll:payslip::export --supported-keys dept,region --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
 ./bin/abv role publish payslip-reader --revision 2 --permissions hrms:payroll:payslip::read,hrms:payroll:payslip::write --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context maya-role-publisher
 ./bin/abv inspect role payslip-reader --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db
+./bin/abv grant publish --file /tmp/g2-v2.json --support-assignment A1 --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context maya-grant-publisher
+./bin/abv inspect grant G2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ```
 
 Each invocation opens the selected database independently. The final inspection
@@ -58,6 +60,17 @@ enable/disable record. Permission, scope, role,
 team and membership inspection uses labeled internal tables; those are not new
 canonical JSON contracts. Tenant/application is explicit command context, not
 an added inner grant scope.
+
+For the publication command, `/tmp/g2-v2.json` is exactly:
+
+```json
+{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}
+```
+
+The command publishes only a new immutable revision of existing G2. `A1` is
+transient supporting request context: it is passed to both publication checks
+and is never added to canonical grant JSON. Publication does not adopt A2,
+create a grant, change G2's parent, or modify any assignment.
 
 `check assignment` is read-only boundary diagnosis. It neither establishes
 administrative authority nor issues a save ticket. `assign` rereads current
@@ -84,6 +97,13 @@ the `payslip-reader` role, read/write permissions, and Maya's current direct
 `AssignmentAdmins` membership. Publishing revision 2 leaves revision 1 and all
 grants and assignments unchanged; it does not assign the role or confer business
 access. `maya-team1` and `application-publisher` are not role publishers.
+
+Grant revision publication similarly uses only `maya-grant-publisher`. Its lab
+premise is limited to Maya's exact version-1 direct identity, this marked area,
+G2, support assignment A1, and Maya's current direct `AssignmentAdmins`
+membership. ABV—not the fixture—checks the real source route, unchanged parent,
+and permission/scope ceiling. `maya-team1`, `application-publisher`, and
+`maya-role-publisher` are rejected for this operation.
 
 Catalog registration is add-only. The separate fixed `application-publisher`
 fixture can add active permission and scope definitions for the marked

@@ -35,6 +35,16 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 		}
 		return 0
 	case "grant":
+		if positional[0] == "publish" {
+			raw, err := readInput(flags["--file"], in)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err = publishGrantRevision(ctx, api, area, flags["--fixture-context"], flags["--support-assignment"], raw, out, diag); err != nil {
+				return report(diag, err)
+			}
+			return 0
+		}
 		if err := grantStatus(ctx, api, area, flags["--fixture-context"], positional[0], positional[1], out); err != nil {
 			return report(diag, err)
 		}
