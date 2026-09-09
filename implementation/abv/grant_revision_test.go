@@ -17,7 +17,7 @@ type publicRevisionAdmin struct{}
 func (publicRevisionAdmin) CheckAssignment(context.Context, abv.Evidence, domain.Identity, domain.Assignment, time.Time) error {
 	return nil
 }
-func (publicRevisionAdmin) CheckGrantRevisionPublication(context.Context, abv.Evidence, domain.Identity, domain.GrantContent, time.Time) error {
+func (publicRevisionAdmin) CheckGrantRevisionPublication(context.Context, abv.Evidence, domain.Identity, string, domain.GrantContent, time.Time) error {
 	return nil
 }
 

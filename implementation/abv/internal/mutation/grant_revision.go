@@ -13,7 +13,7 @@ import (
 )
 
 type GrantRevisionAdministration interface {
-	CheckGrantRevisionPublication(context.Context, storage.Snapshot, domain.Identity, domain.GrantContent, time.Time) error
+	CheckGrantRevisionPublication(context.Context, storage.Snapshot, domain.Identity, string, domain.GrantContent, time.Time) error
 }
 
 func (s *Service) PublishGrantRevision(ctx context.Context, area domain.Area, identity domain.Identity, sourceAssignmentID string, proposed domain.GrantContent) (domain.GrantContent, error) {
@@ -46,7 +46,7 @@ func (s *Service) PublishGrantRevision(ctx context.Context, area domain.Area, id
 			return storage.WriteSet{}, err
 		}
 		now := s.clock.Now()
-		if err := admin.CheckGrantRevisionPublication(ctx, cloneSnapshot(snapshot), identity, cloneContent(proposed), now); err != nil {
+		if err := admin.CheckGrantRevisionPublication(ctx, cloneSnapshot(snapshot), identity, sourceAssignmentID, cloneContent(proposed), now); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckContent(area, snapshot.Catalog, proposed, snapshot.Roles); err != nil {

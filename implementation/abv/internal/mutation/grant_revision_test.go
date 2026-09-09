@@ -11,13 +11,17 @@ import (
 )
 
 type revisionAdmin struct {
-	check func(storage.Snapshot, domain.Identity, domain.GrantContent) error
+	check  func(storage.Snapshot, domain.Identity, domain.GrantContent) error
+	source *string
 }
 
 func (a revisionAdmin) CheckAssignment(context.Context, storage.Snapshot, domain.Identity, domain.Assignment, time.Time) error {
 	return nil
 }
-func (a revisionAdmin) CheckGrantRevisionPublication(_ context.Context, s storage.Snapshot, i domain.Identity, g domain.GrantContent, _ time.Time) error {
+func (a revisionAdmin) CheckGrantRevisionPublication(_ context.Context, s storage.Snapshot, i domain.Identity, source string, g domain.GrantContent, _ time.Time) error {
+	if a.source != nil {
+		*a.source = source
+	}
 	if a.check != nil {
 		return a.check(s, i, g)
 	}
@@ -73,6 +77,7 @@ func TestPublishGrantRevisionUsesSeparateAdministrationAndActualSource(t *testin
 	snapshot, issuer := revisionFixture(area)
 	candidate := revisionCandidate()
 	p := &revisionProvider{snapshot: snapshot}
+	var adminSource string
 	admin := revisionAdmin{check: func(s storage.Snapshot, gotID domain.Identity, got domain.GrantContent) error {
 		if gotID != issuer || !reflect.DeepEqual(got, candidate) {
 			return domain.ErrRejected
@@ -82,10 +87,10 @@ func TestPublishGrantRevisionUsesSeparateAdministrationAndActualSource(t *testin
 		got.Permissions[0] = "forged"
 		got.Scope["cert"] = "forged"
 		return nil
-	}}
+	}, source: &adminSource}
 	s, _ := New(p, admin, fixedClock{now: time.Now()})
 	got, err := s.PublishGrantRevision(t.Context(), area, issuer, "A1", candidate)
-	if err != nil || !reflect.DeepEqual(got, candidate) || p.writes != 1 || candidate.Permissions[0] != "read" || candidate.Scope["cert"] != "C17" {
+	if err != nil || adminSource != "A1" || !reflect.DeepEqual(got, candidate) || p.writes != 1 || candidate.Permissions[0] != "read" || candidate.Scope["cert"] != "C17" {
 		t.Fatalf("got=%#v writes=%d input=%#v err=%v", got, p.writes, candidate, err)
 	}
 }

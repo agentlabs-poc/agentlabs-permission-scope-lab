@@ -7,7 +7,7 @@ import (
 )
 
 type GrantRevisionAdministration interface {
-	CheckGrantRevisionPublication(context.Context, Evidence, domain.Identity, domain.GrantContent, time.Time) error
+	CheckGrantRevisionPublication(context.Context, Evidence, domain.Identity, string, domain.GrantContent, time.Time) error
 }
 
 func (f *Facade) PublishGrantRevision(ctx context.Context, area domain.Area, identity domain.Identity, sourceAssignmentID string, proposed domain.GrantContent) (domain.GrantContent, error) {
