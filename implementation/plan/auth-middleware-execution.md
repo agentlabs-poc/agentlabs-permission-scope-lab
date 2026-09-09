@@ -4,12 +4,23 @@ User requested autonomous continuation after pinning API-side middleware/evaluat
 and Auth-service-side core ABV placement. Current activity begins with M0 contract
 design from auth-middleware-implementation-plan.md, not guessed wire schemas.
 
-## Active unit
+## M0 handoff
 
 M0: authmw_contract, Sol-medium, dispatched 9 September 2026 09:23 UTC.
 First attempt stops by 09:43 UTC. Exclusive output: auth-middleware-contract.md.
 Controller separately prepares auth-middleware-acceptance.md and records/publishes
 documentation already requested. No worker commit/push or shared-file editing.
+
+Handoff received 09:34 UTC, within the original bound. The contract draft now
+defines the in-process authority-source/evaluator seam, existing policy/result
+JSON, completeness and error behavior, handler responsibility, and the requested
+SQLite test adapter. No runtime code is delivered by this checkpoint.
+
+Before adapter coding, settle its package wiring under the ABV module so existing
+internal read/lineage code is reusable without an evaluator dependency on SQLite.
+The current issuance resolver rejects `$self`: literal SQLite integration and
+resolved-fixture `$self` consumer tests are separate acceptance claims. Missing,
+malformed or unsupported authority must never become an empty successful read.
 
 M0 report must establish exact internal types, trust/evidence boundaries, freshness
 limits, permitted first-slice behavior and unknown production integration choices.
