@@ -1,5 +1,31 @@
 # AUTH-MW-02 — bounded execution ledger
 
+## Current checkpoint — reusable evaluator + SQLite test command complete
+
+M1, M2, read-only SQLite opening, Auth-owned human route discovery, localadapter
+and `cmd/auth-evaluate` are implemented and verified. No schema changes or real
+Auth HTTP dependency. The next task is M3 request wrapping, followed by constrained
+GET/PUT/collection application handlers. Those are NOT completed by a CLI decision.
+
+Fresh controller evidence after the final code handoff:
+
+- ABV: uncached full tests, full race, vet/build, module verification pass.
+- Middleware: uncached full tests, race, vet/build pass; module list contains only
+  the middleware module, with no ABV/SQLite dependency.
+- Site: all 10 tests and production build pass.
+- Compiled command against the existing disposable fixture: Nutan FIN/C17 allows
+  with G0/G1/G2; ENG/C17, FIN/C18 and all-departments deny (exit 3).
+- G2 disabled through the existing protected ABV command: next check denies;
+  explicitly re-enabled: next check allows. Selected assignment remains intact.
+- Missing database: error exit 4, no allow/deny result and no new database file.
+
+All workers finished inside their original bounds; one focused cancellation
+correction was needed. No reviews or higher-model escalation. Parser strictness,
+bounded snapshot/traversal, unsupported direct recipients/proxies, fixture-only
+`$self`, unmapped error catalogue and no production freshness remain explicit.
+This completes the regrouped core-testing checkpoint, not the entire middleware
+plan. The retained worktree and execution evidence remain for M3/M4 continuation.
+
 User requested autonomous continuation after pinning API-side middleware/evaluator
 and Auth-service-side core ABV placement. Current activity begins with M0 contract
 design from auth-middleware-implementation-plan.md, not guessed wire schemas.

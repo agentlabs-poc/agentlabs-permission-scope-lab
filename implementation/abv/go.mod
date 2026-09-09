@@ -2,7 +2,12 @@ module agentlabs.local/abv
 
 go 1.25.0
 
-require modernc.org/sqlite v1.58.0
+require (
+	agentlabs.local/authmiddleware v0.0.0
+	modernc.org/sqlite v1.58.0
+)
+
+replace agentlabs.local/authmiddleware => ../authmiddleware
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
