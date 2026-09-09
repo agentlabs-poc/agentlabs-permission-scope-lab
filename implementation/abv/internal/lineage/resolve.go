@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -13,6 +14,10 @@ import (
 
 // maxChainSteps is a defensive traversal bound, not a canonical lineage limit.
 const maxChainSteps = 256
+
+// ErrInactive identifies established but currently ineffective lineage while
+// remaining rejection-compatible for existing issuance callers.
+var ErrInactive = fmt.Errorf("inactive authority: %w", domain.ErrRejected)
 
 func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientTeamID string, now time.Time) (domain.Route, error) {
 	fail := func(err error) (domain.Route, error) { return domain.Route{}, err }
@@ -68,7 +73,7 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	r.active[assignment.GrantID] = true
 	defer delete(r.active, assignment.GrantID)
 	if assignment.Status != "enabled" {
-		return fail(domain.ErrRejected)
+		return fail(ErrInactive)
 	}
 	content, err := assignmentContent(r.s, assignment)
 	if err != nil {
@@ -147,14 +152,17 @@ func validateSelectedContent(s storage.Snapshot, content domain.GrantContent, no
 		return domain.ErrRejected
 	}
 	control, ok := s.Controls[content.GrantID]
-	if !ok || control.ID != content.GrantID || control.Version != "1" || control.Status != "enabled" {
+	if !ok || control.ID != content.GrantID || control.Version != "1" || (control.Status != "enabled" && control.Status != "disabled") {
 		return domain.ErrRejected
+	}
+	if control.Status == "disabled" {
+		return ErrInactive
 	}
 	if err := validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil {
 		return err
 	}
 	if content.Validity != nil && !eligible(*content.Validity, now) {
-		return domain.ErrRejected
+		return ErrInactive
 	}
 	return nil
 }
@@ -180,6 +188,9 @@ func uniqueAssignment(s storage.Snapshot, grantID, teamID string) (domain.Assign
 			}
 			found, count = assignment, count+1
 		}
+	}
+	if count == 0 {
+		return domain.Assignment{}, ErrInactive
 	}
 	if count != 1 {
 		return domain.Assignment{}, domain.ErrRejected

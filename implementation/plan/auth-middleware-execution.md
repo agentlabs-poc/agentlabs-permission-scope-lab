@@ -75,3 +75,12 @@ complete SQLite-to-evaluator integration is claimed yet.
 
 M2 dispatched to authmw_m2 (Sol-medium) at 10:22 UTC; twenty-minute attempt.
 The independent authority-query task continues within its original bound.
+
+Authority query completed by 10:26 UTC, including one focused cancellation
+correction. Controller reran lineage tests successfully; full ABV tests passed
+before that focused correction. The read query preserves existing issuance
+rejection classification and skips only explicit inactive routes. Existing
+contextless lineage traversal remains capped at 256 steps; cancellation is
+observed before/after each candidate, not within that reused traversal.
+Disposable controller walkthrough database: /tmp/authmw-run.AOhZGo/authority.db,
+seeded with the existing team-fin-c17 CLI fixture (not committed or production).
