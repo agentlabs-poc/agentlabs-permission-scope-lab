@@ -1,5 +1,15 @@
 # Handbook working rules
 
+## Current CP4-C execution — grant revision publication
+
+Continue implementation/plan/abv-cp4c-publication-plan.md, not completed CP5-A/B.
+Three sequential bounded Sol-medium tasks: immutable storage/source resolver,
+protected publication, CLI/lab. Publication changes no assignments or controls;
+support assignment ID is transient request evidence, not a canonical grant field.
+Explicit adoption remains separate. User's no-review instruction remains active;
+retain tests, scoped commits and evidence. Do not implement deferred reparenting,
+deletion, PostgreSQL or excluded external Auth integration.
+
 ## Current CP5 execution — working implementation first
 
 The user explicitly says: “do not review, just get it working first.” Do not

@@ -1,5 +1,18 @@
 # ABV implementation progress
 
+## CP4-C in progress — publication without adoption
+
+[Three bounded tasks](abv-cp4c-publication-plan.md) implement immutable grant
+revision storage, protected publication, then CLI acceptance. Each coding task
+has a 15-minute first attempt and at most one bounded correction; reassess the
+slice after 50 minutes. Sol-medium coding, no review passes as requested.
+
+Publication checks both administrative authority and the publisher's actual
+parent route. The supporting assignment ID is transient operation input, not
+a new canonical grant field or permanent issuer dependency. Existing assignments
+retain their adopted revision. This separation prevents publication from silently
+expanding access and keeps explicit adoption as the next bounded operation.
+
 ## CP5-B complete — immutable role publication and CLI
 
 [Bounded two-task plan](abv-cp5b-role-plan.md): protected Go/SQLite publication
@@ -85,7 +98,8 @@ ABV implementation
 │   │   ├── Reverse team-binding discovery              COMPLETE / REVIEWED
 │   │   ├── Protected coordinator/facade                COMPLETE / REVIEWED
 │   │   └── CLI/lab/acceptance + final review            COMPLETE / REVIEWED
-│   ├── Publication / explicit adoption                 PENDING
+│   ├── CP4-C grant revision publication                IN PROGRESS
+│   ├── Explicit adoption                              PENDING
 │   └── Deletion / parent changes                       DEFERRED BY USER
 ├── CP5 ABV definition management                       IN PROGRESS
 │   ├── Application-only catalog provider               COMPLETE / TESTED
