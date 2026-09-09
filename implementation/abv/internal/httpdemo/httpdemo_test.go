@@ -82,6 +82,69 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C17", "", http.StatusForbidden, `"decision":"deny"`)
 }
 
+func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	fixture := lab.TeamFINC17(area)
+	dbPath := filepath.Join(t.TempDir(), "authority.db")
+	if err := (lab.Scenarios{}).Seed(t.Context(), area, "team-fin-c17", dbPath); err != nil {
+		t.Fatal(err)
+	}
+	api, closeAPI, err := lab.Connect(t.Context(), area, dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = closeAPI() })
+	raw, err := json.Marshal(fixture.Proposed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := api.Assign(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, raw); err != nil {
+		t.Fatal(err)
+	}
+	assignmentStatus := api.(interface {
+		SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error)
+	})
+	grantStatus := api.(interface {
+		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
+	})
+	fixtureContext := domain.FixtureContext{Name: "maya-team1"}
+	source, err := localadapter.Open(t.Context(), dbPath, fixedClock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = source.Close() })
+	handler, err := NewHandler(NewStore(DefaultRecords()), evaluatorFor(t, source), TrustedIdentity("acme", "hrms", "nutan"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertAccess := func(status int) {
+		t.Helper()
+		fragments := []string{`"certificate_id":"C17"`}
+		if status != http.StatusOK {
+			fragments = []string{`"decision":"deny"`, `!"title":"FIN annual"`}
+		}
+		assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C17", "", status, fragments...)
+	}
+
+	assertAccess(http.StatusOK)
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "disabled"); err != nil {
+		t.Fatal(err)
+	}
+	assertAccess(http.StatusForbidden)
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "enabled"); err != nil {
+		t.Fatal(err)
+	}
+	assertAccess(http.StatusOK)
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}); err != nil {
+		t.Fatal(err)
+	}
+	assertAccess(http.StatusForbidden)
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "enabled"}); err != nil {
+		t.Fatal(err)
+	}
+	assertAccess(http.StatusOK)
+}
+
 func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 	store := NewStore(DefaultRecords())
 	evaluator := evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{

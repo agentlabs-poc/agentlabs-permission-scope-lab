@@ -71,12 +71,15 @@ func TestEvaluateRejectsMalformedRequestBeforeLoading(t *testing.T) {
 		"wildcard application": func(r *Request) { r.Context.Area.ApplicationID = "*" },
 		"unsupported identity": func(r *Request) { r.Context.Identity.Version = "2" },
 		"proxy actor":          func(r *Request) { r.Context.Identity.Actor.Type = "service" },
-		"indirect human":       func(r *Request) { r.Context.Identity.Actor.ID = "proxy" },
-		"bad permission":       func(r *Request) { r.Permission = "certificate::*" },
-		"empty material key":   func(r *Request) { r.Material[""] = Selection{Kind: SelectionAll} },
-		"empty exact":          func(r *Request) { r.Material["department"] = Selection{Kind: SelectionExact} },
-		"valued all":           func(r *Request) { r.Material["department"] = Selection{Kind: SelectionAll, Value: "FIN"} },
-		"unknown selection":    func(r *Request) { r.Material["department"] = Selection{} },
+		"attributed proxy": func(r *Request) {
+			r.Context.Identity.Actor = Actor{Type: "service", ID: "agent-17"}
+		},
+		"indirect human":     func(r *Request) { r.Context.Identity.Actor.ID = "proxy" },
+		"bad permission":     func(r *Request) { r.Permission = "certificate::*" },
+		"empty material key": func(r *Request) { r.Material[""] = Selection{Kind: SelectionAll} },
+		"empty exact":        func(r *Request) { r.Material["department"] = Selection{Kind: SelectionExact} },
+		"valued all":         func(r *Request) { r.Material["department"] = Selection{Kind: SelectionAll, Value: "FIN"} },
+		"unknown selection":  func(r *Request) { r.Material["department"] = Selection{} },
 	}
 	for name, edit := range cases {
 		t.Run(name, func(t *testing.T) {

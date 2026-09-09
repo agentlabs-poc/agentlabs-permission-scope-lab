@@ -8,13 +8,12 @@ import (
 	"agentlabs.local/authmiddleware"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
-
-	_ "modernc.org/sqlite"
 )
 
 type fixedClock struct{ now time.Time }
@@ -166,6 +165,70 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	setGrant("disabled")
 	assertDecision(authmiddleware.Deny)
 	setGrant("enabled")
+	assertDecision(authmiddleware.Allow)
+}
+
+func TestSQLiteAuthoritySourceSeesProtectedDescendantStatusChanges(t *testing.T) {
+	now := time.Now()
+	area, _ := domain.NewArea("acme", "hrms")
+	fixture := lab.TeamFINC17(area)
+	dbPath := filepath.Join(t.TempDir(), "status.db")
+	if err := (lab.Scenarios{}).Seed(t.Context(), area, "team-fin-c17", dbPath); err != nil {
+		t.Fatal(err)
+	}
+	api, closeAPI, err := lab.Connect(t.Context(), area, dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = closeAPI() })
+	raw, err := json.Marshal(fixture.Proposed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := api.Assign(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, raw); err != nil {
+		t.Fatal(err)
+	}
+	assignmentStatus := api.(interface {
+		SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error)
+	})
+	grantStatus := api.(interface {
+		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
+	})
+	fixtureContext := domain.FixtureContext{Name: "maya-team1"}
+	source, err := Open(t.Context(), dbPath, &fixedClock{now})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer source.Close()
+	evaluator, _ := authmiddleware.New(source, &fixedClock{now})
+	request := authmiddleware.Request{
+		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "nutan"}, HumanID: "nutan"}},
+		Permission: lab.PayslipRead,
+		Material:   authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionExact, Value: "FIN"}, "cert": {Kind: authmiddleware.SelectionExact, Value: "C17"}},
+	}
+	assertDecision := func(want authmiddleware.Decision) {
+		t.Helper()
+		got, err := evaluator.Evaluate(t.Context(), request)
+		if err != nil || got.Decision != want {
+			t.Fatalf("got=%+v err=%v want=%s", got, err, want)
+		}
+	}
+	assertDecision(authmiddleware.Allow)
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "disabled"); err != nil {
+		t.Fatal(err)
+	}
+	assertDecision(authmiddleware.Deny)
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "enabled"); err != nil {
+		t.Fatal(err)
+	}
+	assertDecision(authmiddleware.Allow)
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}); err != nil {
+		t.Fatal(err)
+	}
+	assertDecision(authmiddleware.Deny)
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "enabled"}); err != nil {
+		t.Fatal(err)
+	}
 	assertDecision(authmiddleware.Allow)
 }
 

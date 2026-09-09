@@ -74,6 +74,31 @@ func TestEvaluateDeniesWithoutAnIndependentlyMatchingRoute(t *testing.T) {
 	}
 }
 
+func TestEvaluateAddingPredicateOnlyNarrowsRoute(t *testing.T) {
+	broad := route([]string{"G1"})
+	narrow := route([]string{"G1"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "G1"})
+	for name, test := range map[string]struct {
+		selection Selection
+		want      Decision
+	}{
+		"matching exact":  {Selection{Kind: SelectionExact, Value: "FIN"}, Allow},
+		"other exact":     {Selection{Kind: SelectionExact, Value: "ENG"}, Deny},
+		"all departments": {Selection{Kind: SelectionAll}, Deny},
+	} {
+		t.Run(name, func(t *testing.T) {
+			request := validRequest()
+			request.Material["department"] = test.selection
+			if got, err := evaluate(t, request, Authority{Routes: []Route{broad}}, time.Time{}); err != nil || got.Decision != Allow {
+				t.Fatalf("broad Evaluate() = %#v, %v", got, err)
+			}
+			got, err := evaluate(t, request, Authority{Routes: []Route{narrow}}, time.Time{})
+			if err != nil || got.Decision != test.want {
+				t.Fatalf("narrow Evaluate() = %#v, %v; want %q", got, err, test.want)
+			}
+		})
+	}
+}
+
 func TestEvaluateValidatesEveryRouteBeforeAllowing(t *testing.T) {
 	request := validRequest()
 	valid := route([]string{"G1"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "G1"})
@@ -123,10 +148,58 @@ func TestEvaluateRejectsInvertedValidityInterval(t *testing.T) {
 }
 
 func TestEvaluateUsesDirectHumanForGroupSelf(t *testing.T) {
-	request := validRequest()
-	got, err := evaluate(t, request, Authority{Routes: []Route{route([]string{"group-grant"}, Predicate{Key: "employee", Value: "$self", SourceGrantID: "group-grant"})}}, time.Time{})
-	if err != nil || got.Decision != Allow {
-		t.Fatalf("Evaluate() = %#v, %v", got, err)
+	self := route([]string{"group-grant"}, Predicate{Key: "employee", Value: "$self", SourceGrantID: "group-grant"})
+	for name, selection := range map[string]struct {
+		selection Selection
+		want      Decision
+	}{
+		"human exact": {Selection{Kind: SelectionExact, Value: "maya"}, Allow},
+		"other exact": {Selection{Kind: SelectionExact, Value: "agent-17"}, Deny},
+		"all humans":  {Selection{Kind: SelectionAll}, Deny},
+	} {
+		t.Run(name, func(t *testing.T) {
+			request := validRequest()
+			request.Material["employee"] = selection.selection
+			got, err := evaluate(t, request, Authority{Routes: []Route{self}}, time.Time{})
+			if err != nil || got.Decision != selection.want {
+				t.Fatalf("Evaluate() = %#v, %v; want %q", got, err, selection.want)
+			}
+		})
+	}
+}
+
+func TestEvaluateAcceptsExactWorkLimits(t *testing.T) {
+	grants := make([]string, 256)
+	for i := range grants {
+		grants[i] = string(rune(0x1000 + i))
+	}
+	predicates := make([]Predicate, 10_000)
+	for i := range predicates {
+		predicates[i] = Predicate{Key: "department", Value: "FIN", SourceGrantID: grants[0]}
+	}
+	routes := make([]Route, 10_000)
+	for i := range routes {
+		routes[i] = route([]string{"G"})
+	}
+	material := make(Material, 10_000)
+	for i := 0; i < 10_000; i++ {
+		material["k"+string(rune(0x1000+i))+"x"] = Selection{Kind: SelectionAll}
+	}
+	for name, test := range map[string]struct {
+		request   Request
+		authority Authority
+	}{
+		"material":   {Request{Context: validRequest().Context, Permission: validRequest().Permission, Material: material}, Authority{Routes: []Route{route([]string{"G"})}}},
+		"routes":     {validRequest(), Authority{Routes: routes}},
+		"grants":     {validRequest(), Authority{Routes: []Route{route(grants)}}},
+		"predicates": {validRequest(), Authority{Routes: []Route{route(grants[:1], predicates...)}}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got, err := evaluate(t, test.request, test.authority, time.Time{})
+			if err != nil || got.Decision != Allow {
+				t.Fatalf("Evaluate() = %#v, %v", got, err)
+			}
+		})
 	}
 }
 

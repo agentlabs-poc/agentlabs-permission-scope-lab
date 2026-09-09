@@ -1,5 +1,9 @@
 # AUTH-MW-03 — first-slice acceptance obligations
 
+Broader model coverage is tracked separately in
+[AUTH-TEST-01](auth-model-test-coverage.md). Completing this first-slice matrix
+does not complete unsupported direct-user, proxy, move or batch model paths.
+
 This matrix fixes observable behavior from the existing handbook before SDK code.
 It does not invent Auth transport or mark unimplemented model paths supported.
 Authority supplied by a deterministic test adapter is explicitly fixture evidence.
