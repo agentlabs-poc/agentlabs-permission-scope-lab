@@ -149,7 +149,7 @@ Task files below are responsibilities; M0 fixes exact exported type signatures
 and dependency reuse before generating the worker briefs. Do not dispatch workers
 against undefined interfaces. This plan is not an executable SDK contract yet.
 
-### M1 — canonical policy and result handling
+### Task 1: M1 — canonical policy and result handling
 
 **Files:** policy.go, policy_test.go, result.go, result_test.go in the new component.
 
@@ -166,7 +166,35 @@ variants are fixtures. Deliberately unsupported source/nested selectors are erro
 not silently ignored fields. Strictness for unfinalized schema extensions is a
 prototype limit, not a newly approved general contract.
 
-### M2 — evaluator over trusted complete evidence
+Execution refinement after M0 (user authorized autonomous implementation):
+create Go module `agentlabs.local/authmiddleware`, Go 1.25.0, stdlib only at
+`implementation/authmiddleware`. Implement M0's Policy/Input/Source and
+Result/EvaluationError types, Validate methods, Error/Unwrap and DecodeResult;
+add `DecodePolicy([]byte) (Policy, error)` for strict JSON loading. Do not add
+evaluator, evidence, HTTP wrapper or SQL placeholders in this task. Request-time
+source presence belongs to M3; this task validates source declarations only.
+
+Read `auth-middleware-contract.md` sections 2–3 and the canonical policy/result
+examples in `docs/endpoint-policy-format.md` and `docs/decision-results.md`.
+Reuse existing canonical semantics; existing ABV internal codec cannot be imported
+across modules. Small stdlib strict decoding may be local; no shared-module move.
+Reject unknown or duplicate object keys, wrong field types, nulls, trailing JSON,
+mixed result variants and unsupported versions. Permit an explicitly empty inputs
+object; missing/null inputs is invalid. Preserve exact lowercase canonical names.
+Policy method/path are static nonempty HTTP method/absolute path declarations,
+and permission is one canonical literal (no wildcard or alias). Path inputs must
+name a declared path placeholder. Body inputs are top-level names, not selectors.
+Do not invent a schema/type/nullability field or error catalogue. Evaluation-error
+JSON decodes to zero Result plus *EvaluationError; malformed JSON never yields allow.
+Both messages remain available to the consumer. A 1 MiB JSON bound and 64-level
+nesting bound are local parser safety ceilings, not new canonical policy.
+
+Tests first, focused RED/GREEN evidence then `go test ./...`, `go vet ./...`,
+`go test -race ./...` and `git diff --check`. Keep files inside the new module;
+no commit/push by worker. Twenty-minute attempt, one ten-minute focused correction.
+Controller owns docs/status and publication. No reviews or child agents.
+
+### Task 2: M2 — evaluator over trusted complete evidence
 
 **Files:** evaluate.go, evaluate_test.go, evidence.go, evidence_test.go.
 Consumes M0 evidence/material/context types and M1 result types.
@@ -182,7 +210,44 @@ Consumes M0 evidence/material/context types and M1 result types.
   no applicable authority; failed/incomplete loading means evaluation error. Enforce
   finite work bounds and reject unsupported constraints rather than dropping them.
 
-### M3 — API-side wrapper and binding
+Execution details: implement M0's Area/Actor/Identity/RequestContext, Request,
+Selection/Material, AuthorityQuery/Predicate/Route/Authority, AuthoritySource,
+Clock, New and Evaluate exactly as the local contract. These are internal Go
+types, not new wire contracts. Defer IdentitySource (HTTP) to M3. No SQL/ABV
+dependency. Existing M1 result validation and literal permission helper are reused.
+Reject nil/typed-nil source or clock at construction. Validate direct-human
+identity and nonempty UTF-8, non-wildcard area/IDs; reject proxy actor types.
+Validate request permission and Exact/All selection shapes; All has no value.
+
+Every source route must be well-formed and match area, human and permission.
+Validate ALL returned routes before choosing an allow: an earlier matching route
+does not hide malformed later evidence. Nonempty unique contributing grant IDs,
+predicate keys/values and source-grant membership are required. Only literal and
+`$self` predicates are supported; any other token is evaluation error. Missing
+request material or conflicting valid predicates merely means that route cannot
+match. Expired routes cannot allow but do not suppress another valid route.
+Evaluate route predicates by AND, never combine routes. Choose matching route
+by lexicographic GrantIDs tuple and copy result IDs; do not mutate source data.
+
+Success with no matching route returns canonical deny with illustrative
+NO_AUTHORIZING_GRANT and both nonempty readable messages. Cancellation/source
+errors/malformed evidence return zero Result plus error, never deny. Preserve
+errors.Is/As and an existing valid EvaluationError; do not invent a complete error
+catalogue or relabel corruption as timeout. M0's blanket *EvaluationError wording
+is qualified by its own later unresolved-catalogue rule: ordinary Go errors are
+allowed for currently unmapped failures and cannot be rendered as an allow/deny.
+
+Check context before/after Load and during loops. Prototype safety ceilings:
+10000 routes, 256 contributing grants per route, 10000 total predicates and
+10000 material entries; reject overflow with error, never truncate authority.
+The trusted source must respect cancellation; do not leak goroutines to race it.
+Use `_test.go` deterministic trusted source and clock; no production fixture API.
+Provider-owned membership/lifecycle/revision resolution is covered by the separate
+real SQLite integration, not invented raw-grant resolution in consumer tests.
+Full/race/vet tests and diff check. Only new middleware module files owned.
+Twenty-minute attempt, one focused ten-minute correction; no worker publication.
+
+### Task 3: M3 — API-side wrapper and binding
 
 **Files:** http.go, http_test.go; small identity/provider adapter definitions only
 if not already in the M0 contracts. Consumes M1/M2 stable signatures.
@@ -198,7 +263,7 @@ if not already in the M0 contracts. Consumes M1/M2 stable signatures.
   propagation, no unverified body identity, no second permission selection, and
   bounded input sizes. Authentication cryptography is not invented here.
 
-### M4 — executable API-service harness and integration proof
+### Task 4: M4 — executable API-service harness and integration proof
 
 **Files:** cmd/authmiddleware-demo/main.go; integration_test.go; README.md.
 Test provider/fixtures remain explicitly lab-only, not Auth authority publication.

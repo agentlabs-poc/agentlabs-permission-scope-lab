@@ -360,6 +360,21 @@ make the core evaluator module depend on ABV. Pick the smallest package/module
 layout satisfying those two compile-time constraints before M2/M4; this document
 does not falsely claim the current internal packages are already callable.
 
+Implementation refinement (autonomous continuation): use the existing ABV module's
+`internal/storage/sqlite.Reader` for read-only Open/Read/Close and
+`internal/lineage.ResolveHuman` for group-held route discovery. The thin conversion
+adapter will live at `implementation/abv/localadapter`, importing the separate
+`agentlabs.local/authmiddleware` module through a local Go replacement. Dependency
+direction is ABV lab adapter → middleware, never middleware → ABV. This avoids a
+third module or shared-domain extraction. It is local harness wiring, not an Auth
+transport API. Reader/query are bounded prerequisites, not already implemented.
+
+The read query must distinguish established inactivity (disabled, outside validity,
+missing required parent assignment) from invalid or unsupported evidence. Existing
+issuance rejection remains intact; the read query may skip only the explicit
+inactive classification, never every generic rejection. Otherwise a corrupt record
+could be reported to the evaluator as a legitimate absence of authority.
+
 The current `agentlabs.local/abv/internal/lineage` helpers are Auth-internal and
 were built for issuance. In particular they reject `$self` routes and do not yet
 provide the complete human-to-group route query required here. The adapter may

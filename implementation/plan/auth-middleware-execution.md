@@ -42,3 +42,36 @@ validator/evaluator testing. Worker notified to replace fixture-only authority
 with existing-schema read-only SQLite authority adapter planning. No HTTP service
 needed. M0 deadline remains unchanged; code package seam must keep SQL and ABV
 mutations outside middleware evaluator logic. ABV already has its SQLite provider.
+
+## Implementation started after user continuation
+
+- M1 policy/result codecs: authmw_m1, Sol-medium, 20-minute attempt; owns only
+  new implementation/authmiddleware module. Request extraction remains M3.
+- SQLite read-only opener: authmw_sqlite_reader, Sol-medium, dispatched 10:12 UTC,
+  20-minute attempt; owns only readonly.go/readonly_test.go in existing storage.
+- Auth-owned human route query: authmw_authority_read, Sol-medium, dispatched
+  10:13 UTC, 20-minute attempt; owns human.go/human_test.go and narrow resolver
+  inactivity diagnostics. No new authority model or issuance semantics.
+
+These are independent file sets; user explicitly requests useful parallelism.
+Controller owns contract wiring, acceptance and publication. Exact task briefs and
+RED/GREEN reports are in the plan's ignored SDD directory. No worker commits,
+pushes or reviews. Completion requires fresh test evidence, not worker dispatch.
+
+Next checkpoint is regrouped as M1/M2 + SQLite adapter + in-process runnable test
+command, before M3 HTTP plumbing. Rationale: the user specifically wants direct
+SQLite testing of the validator; this proves the core sooner without pretending
+the API wrapper is finished. M3 and constrained application-handler demonstrations
+remain required for the original complete middleware slice. No policy is deferred
+or changed by this sequencing. Reassess after sixty minutes of coding.
+
+### Verified checkpoint at 10:23 UTC
+
+M1 policy/result codecs complete: fresh controller `go test ./... -count=1` and
+`go vet ./...` pass; worker also records race and RED/GREEN evidence. Read-only
+SQLite opener complete: fresh focused `TestOpenReadOnly|TestReader` tests and
+SQLite vet pass; worker reports full ABV regression passing. No HTTP behavior or
+complete SQLite-to-evaluator integration is claimed yet.
+
+M2 dispatched to authmw_m2 (Sol-medium) at 10:22 UTC; twenty-minute attempt.
+The independent authority-query task continues within its original bound.
