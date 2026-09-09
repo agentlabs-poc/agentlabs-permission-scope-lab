@@ -17,6 +17,10 @@ user's request. See [progress](../plan/progress.md) and the
 CP5-B adds protected immutable role publication and the `role publish` CLI through
 `4d9f05c`. Publication preserves existing grants' selected role revisions; it is
 not grant adoption. Full verification passes, without independent review per user.
+CP4-C protected grant revision publication and its CLI are complete through
+`7624edf`, with full Go/race/vet/build verification. It checks publication administration and the
+publisher's actual parent route, then inserts new immutable content without
+changing any assignment. See the [publication flow](docs/assets/grant-publication.svg).
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
 
@@ -35,7 +39,7 @@ See the [implementation plan](../plan/abv-implementation-plan.md) and
   isolation and exact transactional assignment/control writes. See [acceptance](docs/acceptance.md).
 - `abv`: reusable facade for inspection, read-only diagnosis and protected
   assignment creation, grant/assignment enable/disable and protected application
-  registration; no raw provider writes exposed.
+  registration, role publication and grant revision publication; no raw provider writes exposed.
 - `internal/storage`: SQL-free snapshot/write-set provider boundary; the SQLite
   implementation and reusable provider conformance suite are delivered in CP2.
 - `internal/lab`: controlled fixtures for new disposable SQLite databases only,

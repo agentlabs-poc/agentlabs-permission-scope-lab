@@ -1,5 +1,62 @@
 # ABV first-slice acceptance evidence
 
+## CP4-C — immutable grant revision publication
+
+**Complete and verified through `7624edf`.** Internal
+storage is delivered at `e7c43bb`, protected publication at `fc624565`, and the
+planned source-context admin argument at `9cb22b4`. No review passes were run,
+as requested. Focused/full Go tests, targeted race checks and vet pass, including
+a fresh controller full-suite/vet run after the protected API handoff. CLI/lab
+and compiled-process acceptance are delivered at `7624edf`.
+
+![Publication and unchanged assignment adoption](assets/grant-publication.svg)
+
+Publication inserts a newer immutable revision of an existing non-root grant.
+It checks separate administrative authority and the publisher's actual held
+parent route, then registration and permission/scope narrowing. The selected
+support assignment is transient request evidence: the grant still stores only
+its parent grant ID. Future adoption must validate the actual recipient route;
+publication is neither adoption approval nor a permanent publisher dependency.
+
+| Requirement | Evidence |
+|---|---|
+| Resolve actual adopted support, not newest published content | `internal/lineage/assignment_route_test.go` and existing route tests |
+| Insert only; preserve old revision, controls and assignments | `internal/storage/sqlite/grant_revision_test.go`, public `grant_revision_test.go` |
+| Persisted registration checks cannot be forged by callback mutation | SQLite grant revision tests |
+| Administrative approval and current source membership both required | `internal/mutation/grant_revision_test.go` |
+| Reject amplification, unrelated support, root/parent changes and stale revision numbers | Mutation and SQLite grant revision tests |
+| Disabled own control and future candidate validity remain unchanged | Mutation grant revision tests |
+| Cancellation, transaction failure and duplicate publication leave no partial revision | SQLite and mutation grant revision tests |
+
+Reused schema, route resolver, strict codec and narrowing helpers; no dependency
+or canonical field was added. Parent constraints compose by AND, not replacement.
+A contradictory child scope does not become an override. Current source must
+be eligible, but merely publishing future-valid candidate content does not
+activate it. Root creation, new grant identities, adoption and parent changes
+are not implemented by this publication slice.
+
+Final controller checks passed on 9 September 2026 at 04:36 UTC:
+`go test ./... -count=1`, `go test -race ./... -count=1`, `go vet ./...`,
+`go build ./...` and `go mod verify`. Site build and all 10 site tests pass.
+A freshly compiled binary seeded a disposable SQLite database, created A2,
+published G2/revision2, then reopened both records in separate processes:
+
+```json
+{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}
+{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}
+```
+
+These are two separate output records. The command and fixture restriction are
+documented in [local testing](local-testing.md). Wrong fixture/source, malformed
+input, missing database, duplicate publication, permission overflow and
+output/close errors are covered by CLI/lab/process tests. The lab remains a
+controlled testing adapter, not authenticated production administration.
+
+All three coding attempts finished within their 15-minute caps; one bounded
+Task2 correction restored the planned source-ID admin argument. No review passes
+were run. Explicit assignment adoption and advisory update candidates remain next;
+this is publication completion, not whole CP4/ABV completion.
+
 ## CP5-B — immutable role publication
 
 **Complete and verified through `4d9f05c`.** Protected Go/SQLite publication is

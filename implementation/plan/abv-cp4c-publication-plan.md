@@ -210,14 +210,14 @@ maya-team1/application-publisher/maya-role-publisher for this operation. No prod
 permission names, root bootstrap or new ownership relationship. Publication does not
 need A2 to exist and does not create it.
 
-- [ ] **1. RED:** seed, create A2/revision1 using existing assign command, publish
+- [x] **1. RED:** seed, create A2/revision1 using existing assign command, publish
   G2/2 via compiled CLI, reopen and inspect G2/2 and unchanged A2/revision1. Include
   missing/nil/typed-nil capability, malformed JSON/flags, missing Area/file/source,
   wrong fixture/marker, missing DB remaining absent, rejected source and permission
   overflow, duplicate revision, canceled operation, output/close error and no
   success output on rejection. No partial record or implicit adoption.
-- [ ] **2. RED command:** `go test ./cli ./internal/lab ./cmd/abv -run 'GrantRevision|GrantPublication' -count=1`.
-- [ ] **3. Implement:** parser+optional interface+strict lab decode+facade call;
+- [x] **2. RED command:** `go test ./cli ./internal/lab ./cmd/abv -run 'GrantRevision|GrantPublication' -count=1`.
+- [x] **3. Implement:** parser+optional interface+strict lab decode+facade call;
   no SQL or source-resolution logic in CLI. Warn lab-only and keep existing error
   codes. Document exact JSON/command and transient source-context semantics.
 
@@ -225,9 +225,9 @@ need A2 to exist and does not create it.
 return a.facade.PublishGrantRevision(ctx, area, TeamFINC17(area).Issuer, sourceAssignmentID, proposed)
 ```
 
-- [ ] **4. GREEN:** focused/full Go; race CLI/lab/cmd; vet/build/diff checks and
+- [x] **4. GREEN:** focused/full Go; race CLI/lab/cmd; vet/build/diff checks and
   actual compiled publish/reopen demo on a disposable DB.
-- [ ] **5. Commit exact files:** `feat(abv): expose grant revision publication CLI`.
+- [x] **5. Commit exact files:** `feat(abv): expose grant revision publication CLI`.
   Report RED/GREEN/demo/SHA, no review/push.
 
 ## Final exit

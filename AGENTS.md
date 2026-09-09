@@ -2,6 +2,14 @@
 
 ## Current CP4-C execution — grant revision publication
 
+CP4-C is complete/tested through `7624edf`: internal storage `e7c43bb`, protected
+API `fc624565` plus planned source-ID argument correction `9cb22b4`, CLI/lab
+`7624edf`. Do not redispatch these tasks. Final full Go/full race/vet/build/module
+checks, site build/10 tests and compiled publish/reopen demo pass. No review
+passes were run as requested. Next is explicit assignment adoption/advisory
+candidates, requiring a bounded operation plan; publication did not implement them.
+The execution directions below describe this completed slice.
+
 Continue implementation/plan/abv-cp4c-publication-plan.md, not completed CP5-A/B.
 Three sequential bounded Sol-medium tasks: immutable storage/source resolver,
 protected publication, CLI/lab. Publication changes no assignments or controls;

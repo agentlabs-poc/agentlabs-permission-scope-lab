@@ -1,6 +1,6 @@
 # ABV implementation progress
 
-## CP4-C in progress — publication without adoption
+## CP4-C complete — publication without adoption
 
 [Three bounded tasks](abv-cp4c-publication-plan.md) implement immutable grant
 revision storage, protected publication, then CLI acceptance. Each coding task
@@ -16,6 +16,15 @@ Task 2 subsequently delivers protected publication at `fc624565`, with its
 planned source-ID admin callback completed at `9cb22b4`. Focused/full Go,
 targeted race, vet and diff checks pass. Both authority gates are implemented;
 CLI/lab acceptance is the remaining task in CP4-C. No review passes were run.
+
+Task 3 now completes CLI/lab/process acceptance at `7624edf`. Final full Go,
+full race, vet, build and module checks pass; site build and all 10 tests pass.
+The compiled demo publishes G2/revision2 and reopens A2 still on revision1.
+All three first attempts finished within their caps; one bounded Task2 interface
+correction restored the planned admin source-ID argument. No review was performed.
+See [evidence and SVG](../abv/docs/acceptance.md#cp4-c--immutable-grant-revision-publication).
+Next: explicit assignment adoption and advisory update candidates, separately
+bounded. Parent changes, deletion and PostgreSQL remain deferred.
 
 Publication checks both administrative authority and the publisher's actual
 parent route. The supporting assignment ID is transient operation input, not
@@ -75,7 +84,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP1: records, decoder, pure checks | Complete; role-source fix independently approved at `6a192f4` | [CP1 evidence](../abv/docs/acceptance.md) |
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
-| CP4: lifecycle | CP4-A and CP4-B complete; full assignment-control slice approved through `2681550` | [Acceptance](../abv/docs/acceptance.md#cp4-b--protected-assignment-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); other lifecycle operations remain. |
+| CP4: lifecycle | CP4-A/B reviewed; CP4-C publication complete/tested through `7624edf` | [Acceptance](../abv/docs/acceptance.md); explicit adoption and advisory update candidates remain. Deletion/reparenting deferred. |
 | CP5: ABV definition management | CP5-A and CP5-B complete/tested through `4d9f05c` | Add-only registration, computed roots, immutable role publication and CLI delivered; further definition lifecycle remains. Production Auth integration excluded. |
 | CP6: PostgreSQL | Deferred by user; not required now | Provider boundary retained; backend implementation/transfer rehearsal are later work. |
 
@@ -97,7 +106,7 @@ ABV implementation
 │   ├── Task 5: administration + ABV, atomic assignment  COMPLETE
 │   ├── Task 6: inspect/check/assign commands + restart demo COMPLETE
 │   └── Task 7: adversarial and end-to-end acceptance    COMPLETE
-├── CP4 lifecycle                                       TWO SLICES COMPLETE
+├── CP4 lifecycle                                       THREE SLICES COMPLETE
 │   ├── CP4-A grant enable/disable                       COMPLETE / REVIEWED
 │   ├── CP4-P03 disabled binding clarification           RECONCILED
 │   ├── Conditional provider control update             COMPLETE / REVIEWED
@@ -108,7 +117,7 @@ ABV implementation
 │   │   ├── Reverse team-binding discovery              COMPLETE / REVIEWED
 │   │   ├── Protected coordinator/facade                COMPLETE / REVIEWED
 │   │   └── CLI/lab/acceptance + final review            COMPLETE / REVIEWED
-│   ├── CP4-C grant revision publication                IN PROGRESS
+│   ├── CP4-C grant revision publication                COMPLETE / TESTED
 │   ├── Explicit adoption                              PENDING
 │   └── Deletion / parent changes                       DEFERRED BY USER
 ├── CP5 ABV definition management                       IN PROGRESS
@@ -125,7 +134,7 @@ ABV implementation
 Three numbered checkpoints are delivered for the local prototype. Checkpoints
 differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
 delivers grant-wide enable/disable; CP4-B delivers protected team-assignment
-enable/disable. Remaining current-build work is publication/adoption and CP5
+enable/disable. CP4-C adds immutable publication. Remaining current-build work is explicit adoption/advisory candidates and CP5
 further definition lifecycle, each requiring a bounded operation plan. PostgreSQL,
 deletion and parent changes are deferred, not completed. Real Auth-service
 integration is excluded, not part of this build's completion denominator.
