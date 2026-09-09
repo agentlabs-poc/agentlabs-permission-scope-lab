@@ -12,6 +12,11 @@ revision insertion with persisted catalog/role checks. Focused/full Go, targeted
 race, vet and diff checks pass. This is internal persistence only; the protected
 publication gate and CLI are not delivered by that commit.
 
+Task 2 subsequently delivers protected publication at `fc624565`, with its
+planned source-ID admin callback completed at `9cb22b4`. Focused/full Go,
+targeted race, vet and diff checks pass. Both authority gates are implemented;
+CLI/lab acceptance is the remaining task in CP4-C. No review passes were run.
+
 Publication checks both administrative authority and the publisher's actual
 parent route. The supporting assignment ID is transient operation input, not
 a new canonical grant field or permanent issuer dependency. Existing assignments

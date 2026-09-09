@@ -134,7 +134,7 @@ PublishGrantRevision(context.Context, domain.Area, domain.Identity, string,
     domain.GrantContent) (domain.GrantContent, error)
 ```
 
-- [ ] **1. RED:** real SQLite successful publication using A1/G1 and Maya,
+- [x] **1. RED:** real SQLite successful publication using A1/G1 and Maya,
   both direct and exact role source. Assert old content and every assignment/control
   unchanged after reopen. Reject missing admin, wrong Area, bad identity/input,
   source ID pointing to unrelated grant/team holding, lost membership, disabled/
@@ -151,8 +151,8 @@ if got.GrantID != "G2" || got.Revision != 2 { t.Fatalf("bad content: %#v", got) 
 // Independent persisted assertion: A2 still adopts revision1, G2/1 untouched.
 ```
 
-- [ ] **2. Run RED:** `go test ./internal/mutation . -run PublishGrantRevision -count=1`.
-- [ ] **3. Implement:** validate context/identity/source ID and strict canonical
+- [x] **2. Run RED:** `go test ./internal/mutation . -run PublishGrantRevision -count=1`.
+- [x] **3. Implement:** validate context/identity/source ID and strict canonical
   content, clone candidate, require optional operation-specific admin. In Update,
   establish existing non-root grant, max revision and unchanged parent; call admin
   with isolated snapshot/proposal. Validate registered candidate and reject $self
@@ -169,9 +169,9 @@ if err := eligibleRoute(parent, s.clock.Now()); err != nil { return storage.Writ
 return storage.WriteSet{NewGrantRevision: &candidate}, nil
 ```
 
-- [ ] **4. GREEN:** focused/full Go; `go test -race ./internal/mutation .`;
+- [x] **4. GREEN:** focused/full Go; `go test -race ./internal/mutation .`;
   `go vet ./...`; `git diff --check`.
-- [ ] **5. Commit exact files:** `feat(abv): protect grant revision publication`.
+- [x] **5. Commit exact files:** `feat(abv): protect grant revision publication`.
   Report evidence/SHA/limits; no review/push.
 
 ### Task 3: Publication CLI and bounded lab premise
