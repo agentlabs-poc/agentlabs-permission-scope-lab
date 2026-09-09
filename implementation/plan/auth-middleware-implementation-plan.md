@@ -268,6 +268,75 @@ if not already in the M0 contracts. Consumes M1/M2 stable signatures.
   propagation, no unverified body identity, no second permission selection, and
   bounded input sizes. Authentication cryptography is not invented here.
 
+Executable internal seam for the current local slice (not new policy JSON):
+
+```go
+type IdentitySource interface {
+    Establish(context.Context, *http.Request) (RequestContext, error)
+}
+type InputValues map[string]json.RawMessage
+type BoundOperation struct {
+    Material Material
+    Execute func(context.Context, http.ResponseWriter)
+}
+type Binder func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error)
+type FailureHandler func(http.ResponseWriter, *http.Request, Result, error)
+func Wrap(Policy, IdentitySource, *Evaluator, Binder, FailureHandler) (http.Handler, error)
+```
+
+The binder validates the application schema and binds selected values to Material;
+it returns a synchronous effect closure capturing those SAME validated values.
+It receives parsed business body fields so it need not reinterpret request bytes.
+No HTTP request is passed to Execute, discouraging body/path reparsing after allow.
+Binder may prepare facts but must not publish protected output or perform effects.
+Only Execute performs protected work. This is internal host wiring, not a prepared
+authorization result: the evaluator still makes exactly one completed decision.
+Handler constraint correctness remains application responsibility, tested in M4.
+
+Wrap validates policy and nonnil/typed-nil identity, initialized evaluator, binder
+and failure callback at construction; clone the policy inputs against later caller
+mutation. Use one private stdlib ServeMux registering the exact method/path so
+path values come from actual routing, not caller-supplied context. Registration
+pattern panic becomes construction error. Enforce exact method inside the gate
+(GET must not silently execute HEAD). Unmatched routes use normal router behavior,
+not an invented auth decision. No third-party router or new registry framework.
+
+Establish trusted identity/area before binder. Reuse validateRequest with empty
+Material for direct-human/context validation. If the path declares `{tenant}` or
+`{application}`, compare those decoded path values with established Area; mismatch
+stops before binding/evaluation. These two prototype path conventions reuse the
+existing examples, not new scope keys. Other path names have no inferred meaning.
+IdentitySource must not consume the body or treat caller JSON as authentication.
+
+Read at most existing maxJSONBytes+1, reject oversized/invalid JSON/duplicate keys,
+trailing JSON/invalid Unicode/depth overflow. A nonempty body must be a JSON object;
+empty body gives nil body map. Preserve top-level RawMessage values. Permit JSON
+null inside business body: its meaning/acceptability belongs to the application,
+not a new auth-policy nullability rule. Selected inputs must exist at EXACT path
+or top-level body source, with no case-fold/query/path fallback. Encode path input
+strings as JSON strings. Pass named InputValues plus parsed full body to Binder.
+No policy-driven interpretation of business values or automatic grant filtering.
+
+Reuse the current strict JSON scanner by introducing an internal allow-null scan
+path for HTTP bodies; canonical policy/result codecs retain their existing null
+rejection. Do not duplicate the scanner. Tests must prove this preservation and
+that selected JSON null reaches application validation rather than becoming absent.
+Reject nil Execute before evaluation. Evaluate using static policy.Permission,
+trusted context and returned Material. Invoke Execute exactly once only for valid
+Allow and nil error; cancellation before effect also stops. Deny reaches failure
+callback with its canonical Result; failures pass zero Result plus error. Preserve
+both messages and errors.Is/As. Mandatory failure callback lets the host choose
+HTTP statuses/unmapped input/error rendering without inventing a canonical catalogue.
+
+Owned code: http.go/http_test.go and only the necessary JSON scanner reuse in
+policy.go/policy_test.go. Do not modify evaluation/ABV/SQLite. Test first:
+construction/copy/method/tenant/application/identity errors; exact-source body/path
+and no fallback; bounded malformed/duplicate JSON; business null vs strict policy
+null; denied/error/cancelled path never executes; allow executes once with captured
+values; static permission and both message propagation. Full/race/vet/build and
+diff check. Twenty-minute attempt, one focused ten-minute correction; no worker
+publication/review/subagents. M4 consumes this exact seam in disjoint ABV test files.
+
 ### Task 4: M4 — executable API-service harness and integration proof
 
 **Files:** cmd/authmiddleware-demo/main.go; integration_test.go; README.md.

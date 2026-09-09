@@ -472,3 +472,39 @@ support discovery; recipient-relative `$self` issuance across recipients; move
 composition; and the complete error-code/message/HTTP catalogue. None is guessed
 by this contract. They do not block the bounded literal SQLite harness plus
 trusted resolved-route `$self` consumer tests described above.
+
+## 8. HTTP host binding — AUTH-MW-05 implementation refinement
+
+Task 3 in the implementation plan now defines the exact internal Wrap/Binder
+seam. IdentitySource establishes server-trusted context; the wrapper uses a
+private standard-library router to extract actual path values and checks exact
+method, tenant and application path claims where those named placeholders exist.
+Policy configuration is copied at registration so later map edits cannot change
+the active endpoint declaration. Unknown routes remain router behavior, not an
+authorization result. No HTTP status catalogue is canonically selected.
+
+The wrapper parses one bounded JSON object and passes exact-source named inputs
+plus parsed business fields to the application binder. Request values remain
+case-sensitive; no query/body/path fallback is allowed. JSON duplicates or invalid
+encoding are errors. Business null values may reach application schema validation;
+this does not relax canonical policy/result JSON validation.
+
+The binder returns Material and an Execute closure capturing validated values.
+Rationale: both authorization and data access should use the same interpretation,
+without handing the handler a raw request to reparse. This closure is ordinary
+in-process application code, not a new canonical record, authorization ticket,
+prepared result or independently reusable authority. Binding performs no protected
+effects. Only after the evaluator returns a valid completed allow can Execute run.
+The application still owns same-boundary lookup/update correctness; a closure
+cannot prove that arbitrary application code enforces its declared intent.
+
+A required host failure callback receives the canonical deny or the original
+evaluation/input error. It preserves both result messages and allows the host to
+choose its HTTP mapping without inventing a new canonical catalogue. The local
+demo's 403/404/error mappings are examples, not additional handbook decisions.
+
+The HTTP demo keeps application records in memory and reads Auth authority from
+SQLite. GET/PUT/collection tests exercise actual constrained effects, while
+`$self` and timeout use explicitly trusted resolved fixtures until their real
+adapters exist. No listener, JWT verifier, Auth write API or second grant resolver
+is added to application handlers.

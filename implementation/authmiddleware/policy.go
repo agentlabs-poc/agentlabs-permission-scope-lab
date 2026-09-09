@@ -34,6 +34,9 @@ func DecodePolicy(raw []byte) (Policy, error) {
 	if err := validateJSON(raw); err != nil {
 		return Policy{}, err
 	}
+	if err := validatePolicyFields(raw); err != nil {
+		return Policy{}, err
+	}
 	var policy Policy
 	if err := strictDecode(raw, &policy); err != nil {
 		return Policy{}, err
@@ -42,6 +45,24 @@ func DecodePolicy(raw []byte) (Policy, error) {
 		return Policy{}, err
 	}
 	return policy, nil
+}
+
+func validatePolicyFields(raw []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil || !hasOnly(fields, "version", "method", "path", "permission", "inputs") {
+		return errors.New("invalid policy fields")
+	}
+	var inputs map[string]json.RawMessage
+	if err := json.Unmarshal(fields["inputs"], &inputs); err != nil || inputs == nil {
+		return errors.New("invalid policy inputs")
+	}
+	for _, rawInput := range inputs {
+		var inputFields map[string]json.RawMessage
+		if err := json.Unmarshal(rawInput, &inputFields); err != nil || !hasOnly(inputFields, "source", "name") {
+			return errors.New("invalid policy input fields")
+		}
+	}
+	return nil
 }
 
 func (p Policy) Validate() error {
@@ -144,6 +165,14 @@ func strictDecode(raw []byte, dst any) error {
 }
 
 func validateJSON(raw []byte) error {
+	return validateJSONNull(raw, false)
+}
+
+func validateJSONAllowNull(raw []byte) error {
+	return validateJSONNull(raw, true)
+}
+
+func validateJSONNull(raw []byte, allowNull bool) error {
 	if len(raw) > maxJSONBytes {
 		return errors.New("JSON exceeds 1 MiB")
 	}
@@ -151,7 +180,7 @@ func validateJSON(raw []byte) error {
 		return errors.New("invalid JSON Unicode")
 	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
-	if err := jsonNode(decoder, 0); err != nil {
+	if err := jsonNode(decoder, 0, allowNull); err != nil {
 		return err
 	}
 	if _, err := decoder.Token(); !errors.Is(err, io.EOF) {
@@ -160,12 +189,12 @@ func validateJSON(raw []byte) error {
 	return nil
 }
 
-func jsonNode(decoder *json.Decoder, depth int) error {
+func jsonNode(decoder *json.Decoder, depth int, allowNull bool) error {
 	if depth > maxJSONDepth {
 		return errors.New("JSON exceeds nesting limit")
 	}
 	token, err := decoder.Token()
-	if err != nil || token == nil {
+	if err != nil || token == nil && !allowNull {
 		return errors.New("invalid JSON")
 	}
 	delim, ok := token.(json.Delim)
@@ -188,7 +217,7 @@ func jsonNode(decoder *json.Decoder, depth int) error {
 			}
 			seen[name] = struct{}{}
 		}
-		if err := jsonNode(decoder, depth+1); err != nil {
+		if err := jsonNode(decoder, depth+1, allowNull); err != nil {
 			return err
 		}
 	}

@@ -1,5 +1,28 @@
 # AUTH-MW-02 — bounded execution ledger
 
+## Active continuation — HTTP wrapper and constrained handlers
+
+User requested autonomous continuation after core checkpoint 600c645.
+M3 authmw_m3 (Sol-medium) dispatched 10:52 UTC, cap 11:12 UTC; owns middleware
+HTTP wrapper and narrow shared JSON scanner reuse only. M4 authmw_http_demo
+(Sol-medium) dispatched 10:53 UTC, cap 11:13 UTC; owns ABV internal/httpdemo,
+cmd/auth-http-demo and middleware README. Exact shared interface is in Task 3.
+M4 may develop independent tests in parallel but final gates require stable M3.
+One focused ten-minute correction each maximum; regroup on failure, no reviews.
+No new tables, services, canonical policy fields or HTTP error catalogue.
+
+Controller noted one relevant canonical-parser gap while tracing scanner reuse:
+Go JSON field matching can fold case despite DisallowUnknownFields. M3 includes
+exact canonical policy/Input key-casing regression; business field names remain
+application-owned and are not case-folded or given extra policy semantics.
+
+M3 completed by 11:03 UTC, inside its original bound. Controller reran uncached
+tests, race, vet/build successfully. Exact-key policy regression and business-null
+preservation are covered. The wrapper passes identity a clone with NoBody, binds
+actual routed inputs, and invokes the effect only after a completed valid allow.
+M4 has been notified that the interface is stable; its final integration checks
+remain in progress within the original cap.
+
 ## Current checkpoint — reusable evaluator + SQLite test command complete
 
 M1, M2, read-only SQLite opening, Auth-owned human route discovery, localadapter

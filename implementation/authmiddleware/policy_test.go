@@ -50,8 +50,12 @@ func TestDecodePolicyRejectsUnsupportedOrAmbiguousJSON(t *testing.T) {
 		"missing inputs":      `{"version":"1","method":"GET","path":"/x","permission":"x::read"}`,
 		"null inputs":         `{"version":"1","method":"GET","path":"/x","permission":"x::read","inputs":null}`,
 		"unknown root":        strings.Replace(policyFixture, `"version": "1"`, `"version": "1", "relationship": {}`, 1),
+		"capitalized root":    strings.Replace(policyFixture, `"version": "1"`, `"Version": "1"`, 1),
+		"mixed case root":     strings.Replace(policyFixture, `"version": "1"`, `"version": "1", "Version": "1"`, 1),
 		"duplicate root":      strings.Replace(policyFixture, `"version": "1"`, `"version": "1", "version": "1"`, 1),
 		"unknown input":       strings.Replace(policyFixture, `"source": "path"`, `"source": "path", "type": "string"`, 1),
+		"capitalized source":  strings.Replace(policyFixture, `"source": "path"`, `"Source": "path"`, 1),
+		"capitalized name":    strings.Replace(policyFixture, `"name": "tenant"`, `"Name": "tenant"`, 1),
 		"duplicate input":     strings.Replace(policyFixture, `"source": "path"`, `"source": "path", "source": "path"`, 1),
 		"escaped duplicate":   strings.Replace(policyFixture, `"source": "path"`, `"source": "path", "\u0073ource": "path"`, 1),
 		"wrong type":          strings.Replace(policyFixture, `"method": "GET"`, `"method": 1`, 1),
@@ -68,6 +72,18 @@ func TestDecodePolicyRejectsUnsupportedOrAmbiguousJSON(t *testing.T) {
 				t.Fatalf("accepted invalid policy: %#v, %v", got, err)
 			}
 		})
+	}
+}
+
+func TestPolicyJSONValidationRemainsStrictWhileBusinessJSONAllowsNull(t *testing.T) {
+	if err := validateJSON([]byte(`{"x":null}`)); err == nil {
+		t.Fatal("canonical JSON accepted null")
+	}
+	if err := validateJSONAllowNull([]byte(`{"x":null}`)); err != nil {
+		t.Fatalf("business JSON rejected null: %v", err)
+	}
+	if err := validateJSONAllowNull([]byte(`{"x":null,"x":1}`)); err == nil {
+		t.Fatal("business JSON accepted a duplicate key")
 	}
 }
 
