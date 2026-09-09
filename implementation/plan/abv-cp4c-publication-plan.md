@@ -39,6 +39,8 @@ operation boundaries, not a new canonical request envelope or grant field.
 
 ## Flow / acceptance ownership
 
+![Publication flow and unchanged adoption](../abv/docs/assets/grant-publication.svg)
+
 ```text
 grant publish: existing G2 + revision2 + source assignment A1
   -> administrative publication gate for G2 and selected source context
