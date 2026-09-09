@@ -31,6 +31,7 @@ type AssignmentStatusChange struct {
 type WriteSet struct {
 	NewAssignments         []domain.Assignment
 	NewRoleRevision        *domain.RoleContent
+	NewGrantRevision       *domain.GrantContent
 	GrantStatusChange      *GrantStatusChange
 	AssignmentStatusChange *AssignmentStatusChange
 }

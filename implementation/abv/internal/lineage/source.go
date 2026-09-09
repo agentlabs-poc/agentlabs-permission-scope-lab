@@ -22,31 +22,13 @@ func HasSource(s storage.Snapshot, identity domain.Identity, parent domain.Route
 		return domain.ErrRejected
 	}
 	sourceID := parent.AssignmentIDs[len(parent.AssignmentIDs)-1]
-	assignment, ok := s.Assignments[sourceID]
-	if !ok || assignment.ID != sourceID {
-		return domain.ErrRejected
-	}
-	if assignment.Recipient.Type == "user" {
-		return domain.ErrUnsupported
-	}
-	if assignment.Recipient.Type != "group" || !validAssignment(assignment) || assignment.GrantID != parent.GrantID {
-		return domain.ErrRejected
-	}
-	unique, err := uniqueAssignment(s, parent.GrantID, assignment.Recipient.ID)
+	anchored, err := ResolveTeamAssignment(s, sourceID, now)
 	if err != nil {
 		return err
 	}
-	if unique.ID != sourceID {
+	assignment := s.Assignments[sourceID]
+	if assignment.GrantID != parent.GrantID {
 		return domain.ErrRejected
-	}
-	assignment = unique
-	if err := validateTeamChain(s, assignment.Recipient.ID); err != nil {
-		return err
-	}
-	resolver := routeResolver{s: s, now: now, active: map[string]bool{}, remaining: maxChainSteps}
-	anchored, err := resolver.resolve(assignment, assignment.Recipient.ID)
-	if err != nil {
-		return err
 	}
 	if !reflect.DeepEqual(anchored, parent) {
 		return domain.ErrRejected
@@ -57,6 +39,43 @@ func HasSource(s storage.Snapshot, identity domain.Identity, parent domain.Route
 		}
 	}
 	return domain.ErrRejected
+}
+
+// ResolveTeamAssignment reconstructs an eligible established route from its
+// exact team-held assignment. It performs no membership or administration check.
+func ResolveTeamAssignment(s storage.Snapshot, assignmentID string, now time.Time) (domain.Route, error) {
+	fail := func(err error) (domain.Route, error) { return domain.Route{}, err }
+	if err := s.Area.Validate(); err != nil {
+		return fail(err)
+	}
+	if s.Catalog.ApplicationID != s.Area.ApplicationID() {
+		return fail(domain.ErrRejected)
+	}
+	if invalidIdentityString(assignmentID) {
+		return fail(domain.ErrMalformed)
+	}
+	assignment, ok := s.Assignments[assignmentID]
+	if !ok || assignment.ID != assignmentID {
+		return fail(domain.ErrRejected)
+	}
+	if assignment.Recipient.Type == "user" {
+		return fail(domain.ErrUnsupported)
+	}
+	if assignment.Recipient.Type != "group" || !validAssignment(assignment) {
+		return fail(domain.ErrRejected)
+	}
+	unique, err := uniqueAssignment(s, assignment.GrantID, assignment.Recipient.ID)
+	if err != nil || unique.ID != assignmentID {
+		if err != nil {
+			return fail(err)
+		}
+		return fail(domain.ErrRejected)
+	}
+	if err := validateTeamChain(s, assignment.Recipient.ID); err != nil {
+		return fail(err)
+	}
+	resolver := routeResolver{s: s, now: now, active: map[string]bool{}, remaining: maxChainSteps}
+	return resolver.resolve(unique, unique.Recipient.ID)
 }
 
 func validateIdentity(identity domain.Identity) error {

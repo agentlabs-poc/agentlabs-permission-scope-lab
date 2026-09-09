@@ -84,6 +84,9 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.NewRoleRevision != nil {
 			categories++
 		}
+		if writes.NewGrantRevision != nil {
+			categories++
+		}
 		if categories > 1 {
 			return domain.ErrMalformed
 		}
@@ -102,6 +105,9 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 				return err
 			}
 			return p.insertRole(ctx, conn, area, *writes.NewRoleRevision)
+		}
+		if writes.NewGrantRevision != nil {
+			return p.insertGrantRevision(ctx, conn, area, *writes.NewGrantRevision)
 		}
 		return p.writeAssignments(ctx, conn, area, writes.NewAssignments)
 	})
