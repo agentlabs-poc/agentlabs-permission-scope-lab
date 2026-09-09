@@ -1,5 +1,16 @@
 # ABV implementation progress
 
+## CP5-B complete — immutable role publication and CLI
+
+[Bounded two-task plan](abv-cp5b-role-plan.md): protected Go/SQLite publication
+is delivered at `bef3eed`; bounded lab publisher and CLI at `4d9f05c`.
+Final full Go/full race/vet/build/module verification passes; site build and ten
+site tests pass. Compiled publish/reopen demonstrates both revisions. Both tasks
+finished within their 15-minute caps. Reuse existing tenant/application role storage and explicit RoleContent
+revisions; publication does not mutate grants or their adopted role revision.
+No review passes were run, as requested; tests supply the verification evidence.
+Grant publication/adoption and remaining definition lifecycle stay pending.
+
 ## CP5-A complete — additive registration, computed roots and CLI
 
 The user approved [CP5-A](abv-cp5a-design.md), then requested no review passes:
@@ -42,7 +53,7 @@ The user subsequently requested sol-medium coding subagents.
 | CP2: SQLite provider | Complete; all review fixes approved at `8ac7593` | [Provider evidence](../abv/docs/sqlite-provider.md): isolation, rollback, persistence, cancellation and cross-query consistency verified. |
 | CP3: resolver and working CLI | Complete; Task 7 and final integration approved at `5b81b84` | [Acceptance](../abv/docs/acceptance.md): two gates, actual lineage, CLI/restart, no-write failures, source-case map and bounded benchmarks. |
 | CP4: lifecycle | CP4-A and CP4-B complete; full assignment-control slice approved through `2681550` | [Acceptance](../abv/docs/acceptance.md#cp4-b--protected-assignment-enabledisable), [CP4-B01 design](abv-cp4b-design.md) and [execution plan](abv-cp4b-implementation-plan.md); other lifecycle operations remain. |
-| CP5: ABV definition management | CP5-A complete and tested through `f4973f9` | Add-only registration, computed roots and CLI delivered; roles and further definition lifecycle remain. Production Auth integration excluded. |
+| CP5: ABV definition management | CP5-A and CP5-B complete/tested through `4d9f05c` | Add-only registration, computed roots, immutable role publication and CLI delivered; further definition lifecycle remains. Production Auth integration excluded. |
 | CP6: PostgreSQL | Deferred by user; not required now | Provider boundary retained; backend implementation/transfer rehearsal are later work. |
 
 ### Execution tree
@@ -81,7 +92,9 @@ ABV implementation
 │   ├── Protected registration Go API                   COMPLETE / TESTED
 │   ├── Computed root coverage                          COMPLETE / TESTED
 │   ├── Catalog CLI                                     COMPLETE / TESTED
-│   └── Roles / further definition lifecycle             PENDING
+│   ├── Protected role publication Go API                COMPLETE / TESTED
+│   ├── Role publication CLI                             COMPLETE / TESTED
+│   └── Further definition lifecycle                     PENDING
 └── CP6 PostgreSQL provider                             DEFERRED BY USER
 ```
 
@@ -89,7 +102,7 @@ Three numbered checkpoints are delivered for the local prototype. Checkpoints
 differ in size; this is not a percentage-of-effort estimate. CP4-A additionally
 delivers grant-wide enable/disable; CP4-B delivers protected team-assignment
 enable/disable. Remaining current-build work is publication/adoption and CP5
-roles/further definition lifecycle, each requiring a bounded operation plan. PostgreSQL,
+further definition lifecycle, each requiring a bounded operation plan. PostgreSQL,
 deletion and parent changes are deferred, not completed. Real Auth-service
 integration is excluded, not part of this build's completion denominator.
 

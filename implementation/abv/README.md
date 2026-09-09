@@ -14,6 +14,9 @@ registration, additive computed trusted-root coverage and catalog CLI commands
 through `f4973f9`. Full verification passes; independent review was skipped at the
 user's request. See [progress](../plan/progress.md) and the
 [working commands](docs/local-testing.md).
+CP5-B adds protected immutable role publication and the `role publish` CLI through
+`4d9f05c`. Publication preserves existing grants' selected role revisions; it is
+not grant adoption. Full verification passes, without independent review per user.
 See the [implementation plan](../plan/abv-implementation-plan.md) and
 [checkpoint evidence](docs/acceptance.md).
 
@@ -66,7 +69,8 @@ context. Tenant operations must establish the installation before catalog use.
 Catalog registration instead establishes an existing application and separate
 application-publisher authority; no tenant is fabricated or inferred. It cannot
 bootstrap an application or create tenant access. Permission/scope registration
-is add-only; role publication and definition lifecycle edits are not delivered.
+is add-only. Role publication uses the existing tenant/application boundary;
+definition lifecycle edits and grant adoption remain separate pending operations.
 
 Trusted roots compute active application-catalog coverage while preserving scope,
 validity and enablement. Ordinary child grants retain their explicit selections.

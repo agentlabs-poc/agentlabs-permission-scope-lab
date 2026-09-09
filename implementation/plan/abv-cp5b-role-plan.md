@@ -81,7 +81,7 @@ type RoleAdministration interface {
 PublishRole(context.Context, domain.Area, domain.Identity, domain.RoleContent) (domain.RoleContent, error)
 ```
 
-- [ ] **1. RED tests:** use existing real SQLite fixtures; insert R/1, publish
+- [x] **1. RED tests:** use existing real SQLite fixtures; insert R/1, publish
   R/2 and verify both literal permission lists after close/reopen. Seed a grant
   referring to R/1 and prove its selected permissions and stored content/assignment
   stay unchanged after R/2 publication. Example desired assertion:
@@ -103,8 +103,8 @@ if got.ID != "payslip-reader" || got.Revision != 2 { t.Fatalf("bad result: %#v",
   hostile callback/catalog mutation; administration mutates permission slice;
   zero output and no DB change on failure. Check shared snapshot limits continue
   to reject rather than truncate. Existing role data must never be overwritten.
-- [ ] **2. Run RED:** `go test ./internal/validation ./internal/storage/sqlite ./internal/mutation . -run 'RolePublication|PublishRole' -count=1`.
-- [ ] **3. Implement:** validate Area, identity and role shape; optional admin
+- [x] **2. Run RED:** `go test ./internal/validation ./internal/storage/sqlite ./internal/mutation . -run 'RolePublication|PublishRole' -count=1`.
+- [x] **3. Implement:** validate Area, identity and role shape; optional admin
   must exist (including typed-nil protection). In Update callback require exact
   Area/catalog match; call admin with cloned snapshot and separately cloned role
   permissions; validate original proposal against unmodified catalog; reject
@@ -121,17 +121,17 @@ return proposed, nil
 // Never update grants when inserting a role revision.
 ```
 
-- [ ] **4. GREEN:** focused command; `go test ./...`;
+- [x] **4. GREEN:** focused command; `go test ./...`;
   `go test -race ./internal/storage/sqlite ./internal/mutation ./internal/validation .`;
   `go vet ./...`; `git diff --check`.
-- [ ] **5. Commit exact files:** `feat(abv): publish immutable role revisions`.
+- [x] **5. Commit exact files:** `feat(abv): publish immutable role revisions`.
   Report RED/GREEN, SHA and API details. No reviewer or push. Controller dispatches Task2 only after this passes.
 
 ### Task 2: Bounded lab role publisher and CLI
 
 **Files:** create `implementation/abv/application/role.go`, `cli/role.go`,
 `cli/role_test.go`, `internal/lab/role.go`, `internal/lab/role_test.go`.
-Modify `cli/run.go`, `cli/assign.go` (existing dispatch), `internal/lab/application.go`,
+Modify `cli/run.go`, `cli/scenario.go` (existing dispatch), `internal/lab/application.go`,
 `cmd/abv/main_test.go` and `docs/local-testing.md`. Read current dispatch location
 before coding; if it differs, change only actual dispatch owner and report it.
 Optional operation checks reuse nilCapability and report/output helpers.
@@ -170,14 +170,14 @@ publishing authority in the model. `maya-role-publisher` selects this lab operat
 verification. No role scope or parent source is invented; publication does not
 assign business access. No production permission name or new canonical admin grant.
 
-- [ ] **1. RED:** real seeded-DB CLI publication of revision2, reopen inspect both
+- [x] **1. RED:** real seeded-DB CLI publication of revision2, reopen inspect both
   revisions, preserve G0/G1/G2 and assignments. Include wrong fixture/role, permission
   outside lab publish ceiling (registered delete), missing membership, unregistered
   permission, malformed revision/list, duplicate revision, nil/typed-nil capability,
   missing/unmarked DB, cancellation, output and close failures. Failure has no
   success output or partial role record. Existing commands must still pass.
-- [ ] **2. Run RED:** `go test ./cli ./internal/lab ./cmd/abv -run 'Role|Publish' -count=1`.
-- [ ] **3. Implement:** parser/dispatch -> optional RoleAPI -> lab marker/context
+- [x] **2. Run RED:** `go test ./cli ./internal/lab ./cmd/abv -run 'Role|Publish' -count=1`.
+- [x] **3. Implement:** parser/dispatch -> optional RoleAPI -> lab marker/context
   -> facade PublishRole -> administration + validation + insertion. No direct SQL
   mutation in CLI/lab. Parse revision via strconv.ParseInt; use existing list
   parsing helper if applicable. Preserve existing connectors and signatures.
@@ -187,11 +187,11 @@ assign business access. No production permission name or new canonical admin gra
 return a.facade.PublishRole(ctx, area, TeamFINC17(area).Issuer, proposed)
 ```
 
-- [ ] **4. GREEN:** focused command, `go test ./...`,
+- [x] **4. GREEN:** focused command, `go test ./...`,
   `go test -race ./cli ./internal/lab ./cmd/abv`, `go vet ./...`, `go build ./...`,
   `git diff --check`. Run compiled CLI example above on a disposable DB and inspect
   after reopening. Update local-testing with exact commands and lab-only caveat.
-- [ ] **5. Commit explicit files:** `feat(abv): expose role publication CLI`.
+- [x] **5. Commit explicit files:** `feat(abv): expose role publication CLI`.
   Report commands, output, SHA and limitations; no review or push.
 
 ## Final controller exit

@@ -19,8 +19,16 @@ Do not redispatch these units. The CLI integration corrected empty-token-list
 cloning with a regression; validation semantics remain unchanged. Full Go,
 full race, vet, build and module verification pass; site build/10 tests pass.
 Review was skipped by explicit user direction, not performed or approved.
-Remaining current build: CP4 publication/adoption, role management and further
+Remaining after CP5-A: CP4 publication/adoption, role management and further
 definition lifecycle (including complete retirement behavior). See progress.md.
+
+CP5-B role publication is now complete and tested through `4d9f05c`:
+protected immutable Go/SQLite publication `bef3eed`, bounded lab publisher/CLI
+`4d9f05c`. Do not redispatch its two tasks. Full Go/full race/vet/build/module
+checks and site build/10 tests pass; compiled publish/reopen demo works. No review
+passes were run. No automatic adoption, new canonical role schema or number
+allocator is introduced. Remaining current work is CP4 grant publication/adoption
+and further definition lifecycle. User's no-review instruction remains active.
 
 ## Standing rule — bounded execution
 

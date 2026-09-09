@@ -1,5 +1,37 @@
 # ABV first-slice acceptance evidence
 
+## CP5-B — immutable role publication
+
+**Complete and verified through `4d9f05c`.** Protected Go/SQLite publication is
+delivered at `bef3eed`; bounded lab publisher and CLI at `4d9f05c`.
+No independent review was run, per the user's working-first instruction.
+
+Publication creates one immutable role revision in the existing tenant/application
+boundary. It requires separate role-publication administration and active registered
+permissions; it does not create a grant, assign a role, or change adopted revisions.
+This implements Q-089-B without restoring the deprecated live-role model.
+
+Provider, validator, coordinator and facade role tests cover registered permissions,
+immutable duplicate keys, simultaneous insert conflicts, isolated tenant/app data,
+transaction rollback, malformed input, rejecting/missing administration and hostile
+callback mutation. Reopen tests retain both role revisions and prove that a grant
+pinned to revision1 still selects its original permission list after revision2
+publication. Worker focused/full/race/vet checks and controller full Go/vet pass.
+
+Final controller full Go/full race/vet/build/module verification passed on
+9 September 2026. Site build and all ten site tests pass. CLI/lab and compiled
+process tests publish revision2, reopen and inspect both revisions, and preserve
+the original grants/assignments. Wrong fixture, missing membership, registered
+delete outside the lab publisher's ceiling, malformed revision/list, duplicate
+revision, unsupported capability, cancellation and output/close errors are covered.
+The manual compiled demo prints revision1 read and revision2 read/write.
+
+Revision numbers are caller-supplied positive int64 values using existing internal
+RoleContent. Number allocation/consecutive sequencing and complete role JSON are
+not canonized here. No new scope, recipient or parent field belongs to a role.
+Grant revision publication/adoption, role deletion and permission retirement remain
+separate work. This is not full CP4 or CP5 completion.
+
 ## CP5-A — additive application registration
 
 **Complete and verified through `f4973f9`.** Provider `fd334f7`, protected
@@ -33,8 +65,9 @@ site tests also pass. The compiled demo registers region, owner/$self and export
 then reopens and inspects stored definitions. The nil-versus-empty token-list
 clone bug was fixed without relaxing validation. No reviewer ran.
 
-This is add-only registration. Role management, permission retirement and further
-definition lifecycle operations are not completed here. In particular, a retired
+This CP5-A checkpoint is add-only registration. Role publication was added later
+by CP5-B above; permission retirement and further definition lifecycle operations
+are not completed here. In particular, a retired
 permission still referenced by stored root content can conservatively reject the
 whole route; complete retirement semantics need their own bounded implementation.
 CP4 revision publication/adoption remains pending. Production Auth integration is
