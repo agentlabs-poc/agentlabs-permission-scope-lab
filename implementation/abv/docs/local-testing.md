@@ -46,6 +46,8 @@ the seed command succeed.
 ./bin/abv catalog register-scope region --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
 ./bin/abv catalog register-scope owner --allowed-tokens '$self' --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
 ./bin/abv catalog register-permission hrms:payroll:payslip::export --supported-keys dept,region --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
+./bin/abv role publish payslip-reader --revision 2 --permissions hrms:payroll:payslip::read,hrms:payroll:payslip::write --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context maya-role-publisher
+./bin/abv inspect role payslip-reader --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db
 ```
 
 Each invocation opens the selected database independently. The final inspection
@@ -75,6 +77,13 @@ command may complete successfully because it observed that expected rejection;
 this does not mean the assignment succeeded.
 
 ## Lab identity is not authentication
+
+Role publication uses the distinct `maya-role-publisher` lab fixture. It is
+limited to Maya's version-1 direct-user identity, the marked tenant/application,
+the `payslip-reader` role, read/write permissions, and Maya's current direct
+`AssignmentAdmins` membership. Publishing revision 2 leaves revision 1 and all
+grants and assignments unchanged; it does not assign the role or confer business
+access. `maya-team1` and `application-publisher` are not role publishers.
 
 Catalog registration is add-only. The separate fixed `application-publisher`
 fixture can add active permission and scope definitions for the marked

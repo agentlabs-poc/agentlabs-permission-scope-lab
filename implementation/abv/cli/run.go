@@ -8,13 +8,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 )
 
 func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	connect application.Connect, scenarios application.ScenarioRunner, catalogConnect ...application.CatalogConnect) int {
 	if len(args) == 1 && (args[0] == "help" || args[0] == "--help" || args[0] == "-h") {
-		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, grant, assignment, catalog, scenario\nTenant operations require --tenant ID --app ID; catalog operations require --app ID. No default context."); err != nil {
+		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, grant, assignment, role, catalog, scenario\nTenant operations require --tenant ID --app ID; catalog operations require --app ID. No default context."); err != nil {
 			return 4
 		}
 		return 0
@@ -31,7 +32,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "grant", "assignment", "scenario", "catalog":
+	case "inspect", "check", "assign", "grant", "assignment", "role", "scenario", "catalog":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -45,7 +46,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
-		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens":
+		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens", "--revision", "--permissions":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -127,6 +128,16 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		if len(positional) != 2 || (positional[0] != "enable" && positional[0] != "disable") || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") || flags["--db"] == "" || flags["--fixture-context"] == "" {
 			return fail(2, command+" requires enable/disable and ID")
 		}
+	case "role":
+		if len(positional) != 2 || positional[0] != "publish" || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision", "--permissions") || flags["--db"] == "" || flags["--fixture-context"] == "" || !has(flags, "--revision") || !has(flags, "--permissions") {
+			return fail(2, "role publish requires ID, revision, permissions, database and fixture context")
+		}
+		revision, parseErr := strconv.ParseInt(flags["--revision"], 10, 64)
+		permissions, listErr := catalogList(flags["--permissions"], true)
+		if parseErr != nil || revision <= 0 || listErr != nil || len(permissions) == 0 {
+			return fail(2, "malformed role publication")
+		}
+		flags["--revision"] = strconv.FormatInt(revision, 10)
 	case "scenario":
 		if len(positional) != 2 || empty(positional[1]) || (positional[0] != "seed" && positional[0] != "run") || flags["--db"] == "" {
 			return fail(2, "scenario requires seed/run and scenario name")

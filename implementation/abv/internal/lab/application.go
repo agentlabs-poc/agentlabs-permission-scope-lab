@@ -41,10 +41,11 @@ func Connect(ctx context.Context, area domain.Area, path string) (application.AP
 		return nil, nil, errors.Join(domain.ErrUnavailable, err)
 	}
 	fixture := TeamFINC17(area)
-	administration, err := NewAssignmentStatusAdministration(area, fixture.Administration)
+	statusAdministration, err := NewAssignmentStatusAdministration(area, fixture.Administration)
 	if err != nil {
 		return nil, nil, err
 	}
+	administration := &RoleAdministration{AssignmentStatusAdministration: statusAdministration}
 	facade, err := abv.OpenSQLite(ctx, path, administration, clock{})
 	if err != nil {
 		return nil, nil, err
@@ -99,6 +100,16 @@ func (a *labApplication) SetAssignmentStatus(ctx context.Context, area domain.Ar
 		return domain.Assignment{}, err
 	}
 	return a.facade.SetAssignmentStatus(ctx, area, TeamFINC17(area).Issuer, assignmentID, status)
+}
+
+func (a *labApplication) PublishRole(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, proposed domain.RoleContent) (domain.RoleContent, error) {
+	if area != a.area || fixtureContext.Name != roleFixtureContext {
+		return domain.RoleContent{}, domain.ErrRejected
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.RoleContent{}, err
+	}
+	return a.facade.PublishRole(ctx, area, TeamFINC17(area).Issuer, proposed)
 }
 
 func readOnlyDatabase(path string) (*sql.DB, error) {

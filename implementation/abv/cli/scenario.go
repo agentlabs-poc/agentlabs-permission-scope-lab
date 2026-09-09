@@ -7,6 +7,8 @@ import (
 	"errors"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 )
 
 const maxAssignmentBytes = 1 << 20
@@ -39,6 +41,12 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 		return 0
 	case "assignment":
 		if err := assignmentStatus(ctx, api, area, flags["--fixture-context"], positional[0], positional[1], out); err != nil {
+			return report(diag, err)
+		}
+		return 0
+	case "role":
+		revision, _ := strconv.ParseInt(flags["--revision"], 10, 64)
+		if err := publishRole(ctx, api, area, flags["--fixture-context"], domain.RoleContent{ID: positional[1], Revision: revision, Permissions: strings.Split(flags["--permissions"], ",")}, out, diag); err != nil {
 			return report(diag, err)
 		}
 		return 0
