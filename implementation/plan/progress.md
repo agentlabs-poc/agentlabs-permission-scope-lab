@@ -7,6 +7,11 @@ revision storage, protected publication, then CLI acceptance. Each coding task
 has a 15-minute first attempt and at most one bounded correction; reassess the
 slice after 50 minutes. Sol-medium coding, no review passes as requested.
 
+Task 1 is delivered at `e7c43bb`: actual held-route reconstruction and immutable
+revision insertion with persisted catalog/role checks. Focused/full Go, targeted
+race, vet and diff checks pass. This is internal persistence only; the protected
+publication gate and CLI are not delivered by that commit.
+
 Publication checks both administrative authority and the publisher's actual
 parent route. The supporting assignment ID is transient operation input, not
 a new canonical grant field or permanent issuer dependency. Existing assignments

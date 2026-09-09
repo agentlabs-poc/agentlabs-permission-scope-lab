@@ -70,7 +70,7 @@ func ResolveTeamAssignment(storage.Snapshot, string, time.Time) (domain.Route, e
 NewGrantRevision *domain.GrantContent
 ```
 
-- [ ] **1. RED:** expose existing route resolution through assignment ID (A1
+- [x] **1. RED:** expose existing route resolution through assignment ID (A1
   resolves G1 read/write FIN). Test unique actual team holding, Area mismatch,
   invalid/missing ID, malformed projection, disabled assignment/control, expiry,
   cycles, root trust, unsupported user recipient and input immutability.
@@ -88,8 +88,8 @@ if route.GrantID != "G1" || !slices.Equal(route.Permissions, []string{lab.Paysli
 }
 ```
 
-- [ ] **2. Run RED:** `go test ./internal/lineage ./internal/storage/sqlite -run 'TeamAssignment|GrantRevision' -count=1`.
-- [ ] **3. Implement:** extract/reuse existing unique-assignment/team-chain/
+- [x] **2. Run RED:** `go test ./internal/lineage ./internal/storage/sqlite -run 'TeamAssignment|GrantRevision' -count=1`.
+- [x] **3. Implement:** extract/reuse existing unique-assignment/team-chain/
   routeResolver logic from HasSource; keep HasSource behavior and public signature.
   ResolveTeamAssignment validates snapshot Area/catalog, exact assignment map key,
   group recipient, unique holding, team chain and existing route eligibility.
@@ -108,9 +108,9 @@ if route.GrantID != "G1" || !slices.Equal(route.Permissions, []string{lab.Paysli
 // Existing controls and assignments receive no UPDATE.
 ```
 
-- [ ] **4. GREEN:** focused command; full `go test ./...`;
+- [x] **4. GREEN:** focused command; full `go test ./...`;
   `go test -race ./internal/lineage ./internal/storage/sqlite`; `go vet ./...`; diff check.
-- [ ] **5. Commit task files:** `feat(abv): persist immutable grant revisions`.
+- [x] **5. Commit task files:** `feat(abv): persist immutable grant revisions`.
   Report RED/GREEN, SHA, exact produced APIs and concerns; no review/push.
 
 ### Task 2: Protected grant revision publication
