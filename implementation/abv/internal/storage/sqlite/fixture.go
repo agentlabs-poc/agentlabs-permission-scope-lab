@@ -117,12 +117,18 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 	}
 	for _, key := range sortedRoleKeys(s.Roles) {
 		r := s.Roles[key]
-		if invalid(r.ID) || r.ID != key.ID || r.Revision <= 0 || r.Revision != key.Revision || codec.PermissionList(r.Permissions) != nil {
+		if !codec.ValidRoleID(r.ID) || r.ID != key.ID || r.Revision != key.Revision ||
+			invalid(r.Name) || codec.PermissionList(r.Permissions) != nil {
 			return domain.ErrMalformed
 		}
-		raw, _ := json.Marshal(r.Permissions)
-		if _, err := conn.ExecContext(ctx, `INSERT INTO roles(tenant_id,application_id,role_id,revision,permissions_json) VALUES(?,?,?,?,?)`, tenant, app, r.ID, r.Revision, raw); err != nil {
-			return classify(err)
+		// Through the same writer the contract uses: a fixture that wrote rows
+		// its own way could seed a shape the contract cannot produce.
+		tenant := s.Area.TenantID()
+		if r.Managed == domain.ApplicationManaged {
+			tenant = ""
+		}
+		if err := insertRole(ctx, conn, s.Area.ApplicationID(), tenant, r); err != nil {
+			return err
 		}
 	}
 	for _, id := range sortedKeys(s.Controls) {

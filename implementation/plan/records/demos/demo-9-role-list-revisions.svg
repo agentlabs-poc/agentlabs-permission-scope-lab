@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 871" width="800" height="871" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
+<rect width="800" height="871" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h786a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<circle cx="20" cy="17" r="5" fill="#e0787c"/><circle cx="38" cy="17" r="5" fill="#d9a441"/><circle cx="56" cy="17" r="5" fill="#6cc292"/>
+<text x="400.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">auth-al — role · list</text>
+<text x="22" y="62" fill="#6b7687" xml:space="preserve"># one listing, both kinds, each labelled — the catalog a tenant</text>
+<text x="22" y="83" fill="#6b7687" xml:space="preserve"># administrator actually reads. every revision, by default.</text>
+<text x="22" y="104" fill="#4fb8e8">$</text><text x="38.8" y="104" fill="#e8ecf2" xml:space="preserve">abv role list \</text>
+<text x="38.8" y="125" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
+<text x="22" y="146" fill="#9aa4b4" xml:space="preserve">count  5     total  5     generation  4</text>
+<text x="22" y="167" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=1  tenant       payslip-reader         payslip::read</text>
+<text x="22" y="188" fill="#9b8cd8" xml:space="preserve">fy52ef7ztla8  rev=1  application  Viewer                 payslip::read</text>
+<text x="22" y="209" fill="#9b8cd8" xml:space="preserve">fy52ef7ztla8  rev=2  application  Viewer                 payslip::read,::write</text>
+<text x="22" y="230" fill="#6cc292" xml:space="preserve">fy52efa2qjnk  rev=1  tenant       acme-payroll-approver  payslip::read,::write</text>
+<text x="22" y="251" fill="#6cc292" xml:space="preserve">fy52efa2qjnk  rev=2  tenant       acme-payroll-approver  payslip::read</text>
+<text x="22" y="272" fill="#9aa4b4" xml:space="preserve">rc=0</text>
+<text x="22" y="293" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="314" fill="#6b7687" xml:space="preserve"># narrowed to what the platform ships</text>
+<text x="22" y="335" fill="#4fb8e8">$</text><text x="38.8" y="335" fill="#e8ecf2" xml:space="preserve">abv role list --managed application \</text>
+<text x="38.8" y="356" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
+<text x="22" y="377" fill="#9aa4b4" xml:space="preserve">count  2     total  2     generation  4</text>
+<text x="22" y="398" fill="#9b8cd8" xml:space="preserve">fy52ef7ztla8  rev=1  application  Viewer  hrms:payroll:payslip::read</text>
+<text x="22" y="419" fill="#9b8cd8" xml:space="preserve">fy52ef7ztla8  rev=2  application  Viewer  hrms:payroll:payslip::read,...::write</text>
+<text x="22" y="440" fill="#9aa4b4" xml:space="preserve">rc=0</text>
+<text x="22" y="461" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="482" fill="#6b7687" xml:space="preserve"># narrowed to what this tenant composed</text>
+<text x="22" y="503" fill="#4fb8e8">$</text><text x="38.8" y="503" fill="#e8ecf2" xml:space="preserve">abv role list --managed tenant \</text>
+<text x="38.8" y="524" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
+<text x="22" y="545" fill="#9aa4b4" xml:space="preserve">count  3     total  3     generation  4</text>
+<text x="22" y="566" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=1  tenant  payslip-reader</text>
+<text x="22" y="587" fill="#6cc292" xml:space="preserve">fy52efa2qjnk  rev=1  tenant  acme-payroll-approver</text>
+<text x="22" y="608" fill="#6cc292" xml:space="preserve">fy52efa2qjnk  rev=2  tenant  acme-payroll-approver</text>
+<text x="22" y="629" fill="#9aa4b4" xml:space="preserve">rc=0</text>
+<text x="22" y="650" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="671" fill="#6b7687" xml:space="preserve"># --latest: the highest revision of each, across both kinds.</text>
+<text x="22" y="692" fill="#6b7687" xml:space="preserve"># computed as MAX(key5) per key4, never stored, so nothing goes stale.</text>
+<text x="22" y="713" fill="#6b7687" xml:space="preserve"># note total changes with it: rows by default, roles here.</text>
+<text x="22" y="734" fill="#4fb8e8">$</text><text x="38.8" y="734" fill="#e8ecf2" xml:space="preserve">abv role list --latest \</text>
+<text x="38.8" y="755" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
+<text x="22" y="776" fill="#9aa4b4" xml:space="preserve">count  3     total  3     generation  4</text>
+<text x="22" y="797" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=1  tenant       payslip-reader</text>
+<text x="22" y="818" fill="#9b8cd8" xml:space="preserve">fy52ef7ztla8  rev=2  application  Viewer</text>
+<text x="22" y="839" fill="#6cc292" xml:space="preserve">fy52efa2qjnk  rev=2  tenant       acme-payroll-approver</text>
+<text x="22" y="860" fill="#9aa4b4" xml:space="preserve">rc=0</text>
+</svg>

@@ -3,6 +3,7 @@ package mutation
 
 import (
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
 	"context"
 	"reflect"
@@ -25,6 +26,22 @@ type AssignmentStatusAdministration interface {
 
 type RoleAdministration interface {
 	CheckRolePublication(context.Context, storage.Snapshot, domain.Identity, domain.RoleContent, time.Time) error
+}
+
+// RoleReadAdministration gates reads of a tenant's role catalog, the way
+// PermissionAdministration does for permissions. It is separate from
+// RoleAdministration so an adapter can supply publication without reads; a
+// provider that does not implement it makes the reads ErrUnsupported rather than
+// unprotected.
+// ApplicationRoleAdministration gates publication of a role the application
+// ships. It is separate from RoleAdministration because the authority differs:
+// shipping a role is the platform acting, composing one is a tenant acting.
+type ApplicationRoleAdministration interface {
+	CheckApplicationRolePublication(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.RoleContent, time.Time) error
+}
+
+type RoleReadAdministration interface {
+	CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error
 }
 
 // PermissionAdministration gates the read and status operations on an
@@ -53,13 +70,31 @@ type Service struct {
 	provider       storage.Provider
 	administration Administration
 	clock          Clock
+	ids            IDs
+}
+
+// IDs issues record identifiers. It is a seam for the same reason Clock is: a
+// generated id is not the caller's to choose, and a test needs it predictable.
+type IDs interface {
+	Next() string
 }
 
 func New(provider storage.Provider, administration Administration, clock Clock) (*Service, error) {
-	if nilInterface(provider) || nilInterface(administration) || nilInterface(clock) {
+	ids, err := codec.NewSnowflakes(0, nil)
+	if err != nil {
+		return nil, err
+	}
+	return NewWithIDs(provider, administration, clock, ids)
+}
+
+// NewWithIDs builds a service with an explicit id source. Production supplies a
+// generator whose node id comes from its own reserved block; New defaults to
+// node 0, which is correct for a single-process lab and wrong for a fleet.
+func NewWithIDs(provider storage.Provider, administration Administration, clock Clock, ids IDs) (*Service, error) {
+	if nilInterface(provider) || nilInterface(administration) || nilInterface(clock) || nilInterface(ids) {
 		return nil, domain.ErrMalformed
 	}
-	return &Service{provider: provider, administration: administration, clock: clock}, nil
+	return &Service{provider: provider, administration: administration, clock: clock, ids: ids}, nil
 }
 
 func nilInterface(value any) bool {

@@ -40,11 +40,11 @@ func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testin
 		return stdout.String(), stderr.String()
 	}
 	run(0, "scenario", "seed", "team-fin-c17", "--db", database, "--tenant", "acme", "--app", "hrms")
-	roleOutput, roleWarning := run(0, "role", "publish", "payslip-reader", "--revision", "2", "--permissions", "hrms:payroll:payslip::read,hrms:payroll:payslip::write", "--tenant", "acme", "--app", "hrms", "--db", database, "--fixture-context", "maya-role-publisher")
+	roleOutput, roleWarning := run(0, "role", "publish", "--id", "fi9jvxobqsxs", "--name", "payslip-reader", "--revision", "2", "--permissions", "hrms:payroll:payslip::read,hrms:payroll:payslip::write", "--tenant", "acme", "--app", "hrms", "--db", database, "--fixture-context", "maya-role-publisher")
 	if !strings.Contains(roleOutput, "revision  2") || !strings.Contains(roleWarning, "does not grant business access") {
 		t.Fatalf("role stdout=%q stderr=%q", roleOutput, roleWarning)
 	}
-	reopenedRoles, _ := run(0, "inspect", "role", "payslip-reader", "--tenant", "acme", "--app", "hrms", "--db", database)
+	reopenedRoles, _ := run(0, "inspect", "role", "fi9jvxobqsxs", "--tenant", "acme", "--app", "hrms", "--db", database)
 	if !strings.Contains(reopenedRoles, "1         hrms:payroll:payslip::read") || !strings.Contains(reopenedRoles, "2         hrms:payroll:payslip::read,hrms:payroll:payslip::write") {
 		t.Fatalf("roles=%q", reopenedRoles)
 	}

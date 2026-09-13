@@ -57,7 +57,7 @@ func TeamFINC17(area domain.Area) TeamFINC17Case {
 				"A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team1"}, Status: "enabled"},
 			},
 			Roles: map[domain.RoleKey]domain.RoleContent{
-				{ID: "payslip-reader", Revision: 1}: {ID: "payslip-reader", Revision: 1, Permissions: []string{PayslipRead}},
+				{ID: "fi9jvxobqsxs", Revision: 1}: {ID: "fi9jvxobqsxs", Name: "payslip-reader", Revision: 1, Permissions: []string{PayslipRead}},
 			},
 			Teams: map[string]domain.Team{
 				"RootTeam": {ID: "RootTeam"}, "Team1": {ID: "Team1", ParentID: "RootTeam"}, "Team2": {ID: "Team2", ParentID: "Team1"}, "AssignmentAdmins": {ID: "AssignmentAdmins"},

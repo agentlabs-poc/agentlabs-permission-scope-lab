@@ -116,7 +116,7 @@ func TestInspectCarriesAreaForEverySupportedKind(t *testing.T) {
 		canonical bool
 	}{
 		{kind: "scope", id: "dept"},
-		{kind: "role", id: "payslip-reader"},
+		{kind: "role", id: "fi9jvxobqsxs"},
 		{kind: "grant", id: "G1", canonical: true},
 		{kind: "assignment", id: "A1", canonical: true},
 		{kind: "team", id: "Team1"},

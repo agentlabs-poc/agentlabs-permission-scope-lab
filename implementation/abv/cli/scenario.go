@@ -55,9 +55,76 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 		}
 		return 0
 	case "role":
-		revision, _ := strconv.ParseInt(flags["--revision"], 10, 64)
-		if err := publishRole(ctx, api, area, flags["--fixture-context"], domain.RoleContent{ID: positional[1], Revision: revision, Permissions: strings.Split(flags["--permissions"], ",")}, out, diag); err != nil {
-			return report(diag, err)
+		switch positional[0] {
+		case "publish":
+			revision, _ := strconv.ParseInt(flags["--revision"], 10, 64)
+			proposed := domain.RoleContent{ID: flags["--id"], Name: flags["--name"], Revision: revision, Permissions: strings.Split(flags["--permissions"], ",")}
+			if has(flags, "--application") {
+				roleAPI, ok := api.(application.RoleAPI)
+				if !ok || nilCapability(roleAPI) {
+					return report(diag, domain.ErrUnsupported)
+				}
+				app, appErr := domain.NewApplication(area.ApplicationID())
+				if appErr != nil {
+					return report(diag, appErr)
+				}
+				role, err := roleAPI.PublishApplicationRole(ctx, app, domain.FixtureContext{Name: flags["--fixture-context"]}, proposed)
+				if err != nil {
+					return report(diag, err)
+				}
+				if err := renderRole(out, diag, role); err != nil {
+					return 4
+				}
+				break
+			}
+			if err := publishRole(ctx, api, area, flags["--fixture-context"], proposed, out, diag); err != nil {
+				return report(diag, err)
+			}
+		case "get":
+			roleAPI, ok := api.(application.RoleAPI)
+			if !ok || nilCapability(roleAPI) {
+				return report(diag, domain.ErrUnsupported)
+			}
+			revision, _ := strconv.ParseInt(flags["--revision"], 10, 64)
+			role, err := roleAPI.GetRole(ctx, area, domain.FixtureContext{Name: flags["--fixture-context"]}, positional[1], revision)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderRole(out, diag, role); err != nil {
+				return 4
+			}
+		case "list":
+			roleAPI, ok := api.(application.RoleAPI)
+			if !ok || nilCapability(roleAPI) {
+				return report(diag, domain.ErrUnsupported)
+			}
+			filter := domain.RoleFilter{ID: flags["--id"], Name: flags["--name"]}
+			if has(flags, "--managed") {
+				managed := domain.TenantManaged
+				if flags["--managed"] == "application" {
+					managed = domain.ApplicationManaged
+				}
+				filter.Managed = &managed
+			}
+			if has(flags, "--latest") {
+				filter.Revisions = domain.LatestRevision
+			}
+			for flag, target := range map[string]*int{"--offset": &filter.Offset, "--limit": &filter.Limit} {
+				if has(flags, flag) {
+					value, convErr := strconv.Atoi(flags[flag])
+					if convErr != nil {
+						return report(diag, domain.ErrMalformed)
+					}
+					*target = value
+				}
+			}
+			page, err := roleAPI.ListRoles(ctx, area, domain.FixtureContext{Name: flags["--fixture-context"]}, filter)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderRolePage(out, diag, page); err != nil {
+				return 4
+			}
 		}
 		return 0
 	}

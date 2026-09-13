@@ -17,7 +17,14 @@ func (a *RoleAdministration) CheckRolePublication(ctx context.Context, snapshot 
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) || proposed.ID != "payslip-reader" {
+	// The gate cannot pin the id. An id is issued by the service, so it does not
+	// exist when a new role is proposed — a policy that keyed on one could only
+	// ever admit roles that already exist. It gates the name, the bundle and the
+	// publisher's membership, which are the things a proposal actually carries.
+	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+		return domain.ErrRejected
+	}
+	if proposed.Name == "" {
 		return domain.ErrRejected
 	}
 	for _, permission := range proposed.Permissions {
@@ -31,4 +38,37 @@ func (a *RoleAdministration) CheckRolePublication(ctx context.Context, snapshot 
 		}
 	}
 	return domain.ErrRejected
+}
+
+// CheckRoleRead gates the role reads. Reading a tenant's role catalog is a
+// weaker act than publishing into it, so it admits the same fixture publisher
+// without requiring the proposal checks publication makes.
+func (a *RoleAdministration) CheckRoleRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+// CheckApplicationRolePublication gates a role the application ships. It is the
+// catalog publisher acting, not a tenant administrator — the same identity that
+// registers permissions and scope keys, because shipping a role is the same kind
+// of act.
+func (a *RoleAdministration) CheckApplicationRolePublication(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, proposed domain.RoleContent, _ time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if app.ID() != a.area.ApplicationID() || catalog.ApplicationID != app.ID() {
+		return domain.ErrRejected
+	}
+	if identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+		return domain.ErrRejected
+	}
+	if proposed.Name == "" {
+		return domain.ErrRejected
+	}
+	return nil
 }

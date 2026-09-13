@@ -135,3 +135,6 @@ func PermissionFromSlots(slots PermissionSlots) (string, error) {
 	}
 	return PermissionKey{Nouns: nouns, Verb: verb}.Render(), nil
 }
+
+// errNodeRange marks a node id outside the Snowflake layout's range.
+var errNodeRange = domain.ErrMalformed

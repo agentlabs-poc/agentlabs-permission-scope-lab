@@ -64,7 +64,7 @@ func (p *provider) UpdateCatalog(ctx context.Context, app domain.Application, ca
 		}
 		// Exactly one write kind per call.
 		kinds := 0
-		for _, set := range []bool{writes.Permission != nil, writes.Scope != nil, writes.PermissionStatus != nil} {
+		for _, set := range []bool{writes.Permission != nil, writes.Scope != nil, writes.PermissionStatus != nil, writes.ApplicationRole != nil} {
 			if set {
 				kinds++
 			}
@@ -84,6 +84,35 @@ func (p *provider) UpdateCatalog(ctx context.Context, app domain.Application, ca
 				return err
 			}
 			return insertPermissionRecord(ctx, conn, app.ID(), *writes.Permission)
+		}
+		if writes.ApplicationRole != nil {
+			role := *writes.ApplicationRole
+			if err := validation.CheckApplicationRolePublication(authoritative, role); err != nil {
+				return err
+			}
+			// The same id rule the tenant path holds: an issued id must be new,
+			// and a supplied one must already name an application role, which
+			// makes the publication a new revision of it.
+			existing, err := applicationRoleRevisions(ctx, conn, app.ID(), role.ID)
+			if err != nil {
+				return err
+			}
+			if writes.ApplicationRoleIssued && len(existing) > 0 {
+				return domain.ErrConflict
+			}
+			if !writes.ApplicationRoleIssued && len(existing) == 0 {
+				return domain.ErrNotFound
+			}
+			slot, err := codec.RenderRevision(role.Revision)
+			if err != nil {
+				return err
+			}
+			for _, held := range existing {
+				if held == slot {
+					return domain.ErrConflict
+				}
+			}
+			return insertRole(ctx, conn, app.ID(), "", role)
 		}
 		if writes.PermissionStatus != nil {
 			if err := validation.CheckPermissionStatus(authoritative, writes.PermissionStatus.ID, writes.PermissionStatus.Active); err != nil {
@@ -218,4 +247,30 @@ func insertScopeRecord(ctx context.Context, conn *sql.Conn, applicationID string
 		return classify(err)
 	}
 	return nil
+}
+
+// applicationRoleRevisions lists the revision slots an application role already
+// holds. An empty result means the id names no application role.
+func applicationRoleRevisions(ctx context.Context, conn *sql.Conn, applicationID, id string) ([]string, error) {
+	rows, err := conn.QueryContext(ctx, `
+		SELECT key5 FROM abv_l1_records
+		 WHERE boundary='application' AND tenant_id='' AND application_id=?
+		   AND key1='abv' AND key2='role' AND key4=?
+		 ORDER BY key5`, applicationID, id)
+	if err != nil {
+		return nil, classify(err)
+	}
+	defer rows.Close()
+	var slots []string
+	for rows.Next() {
+		var slot string
+		if err := rows.Scan(&slot); err != nil {
+			return nil, classify(err)
+		}
+		slots = append(slots, slot)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, classify(err)
+	}
+	return slots, nil
 }

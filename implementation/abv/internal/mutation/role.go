@@ -2,13 +2,23 @@ package mutation
 
 import (
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
 	"context"
 	"slices"
+	"sort"
 )
 
+// PublishRole publishes a role a tenant composed from the application's
+// vocabulary. Which words travel together for this organisation is the tenant's
+// decision, so the record carries its tenant.
+//
+// PublishApplicationRole is the other path: the same record type, published by
+// the application platform for every tenant. They are separate operations
+// because the authority differs, not because the data does.
 func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity domain.Identity, proposed domain.RoleContent) (domain.RoleContent, error) {
+	proposed.Managed = domain.TenantManaged
 	fail := func(err error) (domain.RoleContent, error) { return domain.RoleContent{}, err }
 	if err := ctx.Err(); err != nil {
 		return fail(err)
@@ -24,11 +34,23 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 		return fail(domain.ErrUnsupported)
 	}
 	proposed.Permissions = slices.Clone(proposed.Permissions)
+	// An id is issued, never accepted. A caller supplying one could invent any
+	// value it liked, which is exactly what a generated id exists to prevent —
+	// so an empty id means "a new role, issue one", and a non-empty id must name
+	// a role that already exists, which makes it a new revision of that role.
+	issued := proposed.ID == ""
+	if issued {
+		proposed.ID = s.ids.Next()
+	} else if !codec.ValidRoleID(proposed.ID) {
+		return fail(domain.ErrMalformed)
+	}
 	err := s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area || snapshot.Catalog.ApplicationID != area.ApplicationID() {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
 		key := domain.RoleKey{ID: proposed.ID, Revision: proposed.Revision}
+		known := false
+		knownManagement := proposed.Managed
 		for storedKey, role := range snapshot.Roles {
 			if storedKey.ID != role.ID || storedKey.Revision != role.Revision {
 				return storage.WriteSet{}, domain.ErrRejected
@@ -36,6 +58,25 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 			if storedKey == key {
 				return storage.WriteSet{}, domain.ErrConflict
 			}
+			if storedKey.ID == proposed.ID {
+				known, knownManagement = true, role.Managed
+			}
+		}
+		// A supplied id that names nothing is a caller choosing an identifier.
+		// Refuse it: the only ways to hold an id are to be issued one or to
+		// name one already issued.
+		if !issued && !known {
+			return storage.WriteSet{}, domain.ErrNotFound
+		}
+		// A tenant may not revise a role the application ships. The shipped role
+		// is the application's property, and a tenant that wants a different
+		// bundle composes its own rather than editing someone else's.
+		if !issued && knownManagement != proposed.Managed {
+			return storage.WriteSet{}, domain.ErrRejected
+		}
+		// An issued id that already exists would mean the generator collided.
+		if issued && known {
+			return storage.WriteSet{}, domain.ErrConflict
 		}
 		evidence := proposed
 		evidence.Permissions = slices.Clone(proposed.Permissions)
@@ -51,6 +92,245 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 		write := proposed
 		write.Permissions = slices.Clone(proposed.Permissions)
 		return storage.WriteSet{NewRoleRevision: &write}, nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return proposed, nil
+}
+
+// defaultRolePage and maxRolePage bound a role listing, as the catalog listings
+// are bounded. There is no unbounded page and no query interface.
+const (
+	defaultRolePage = 100
+	maxRolePage     = 500
+)
+
+// GetRole returns one published revision by its exact id and revision.
+//
+// A revision is always required. A caller wanting the newest bundle uses
+// ListRoles with Revisions: LatestRevision, which is administrative and
+// explicit — keeping the typed single read exact is what stops an implicit
+// latest-role fallback, which Q-118 forbids, from appearing on the path that
+// adoption uses.
+//
+// Permissions come back as published, not re-filtered against the catalog: a
+// permission retired after publication still appears here. The record is what it
+// is; whether it still resolves is CheckContent's question at evaluation.
+func (s *Service) GetRole(ctx context.Context, area domain.Area, identity domain.Identity, id string, revision int64) (domain.RoleContent, error) {
+	fail := func(err error) (domain.RoleContent, error) { return domain.RoleContent{}, err }
+	admin, err := s.roleCatalog(ctx, area, identity)
+	if err != nil {
+		return fail(err)
+	}
+	if !codec.ValidRoleID(id) {
+		return fail(domain.ErrMalformed)
+	}
+	if _, err = codec.RenderRevision(revision); err != nil {
+		return fail(err)
+	}
+	var result domain.RoleContent
+	err = s.provider.Read(ctx, area, func(snapshot storage.Snapshot) error {
+		if snapshot.Area != area {
+			return domain.ErrRejected
+		}
+		if err := admin.CheckRoleRead(ctx, area, identity, s.clock.Now()); err != nil {
+			return err
+		}
+		content, ok := snapshot.Roles[domain.RoleKey{ID: id, Revision: revision}]
+		if !ok || content.ID != id || content.Revision != revision {
+			return domain.ErrNotFound
+		}
+		result = content
+		result.Permissions = slices.Clone(content.Permissions)
+		return nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return result, nil
+}
+
+// ListRoles returns one bounded page of a tenant's role catalog, ordered by id
+// then revision.
+//
+// A role is a family of revisions, so AllRevisions is the default: the reverse
+// would hide history behind a flag nobody sets. LatestRevision returns the
+// highest revision of each selected role, computed here and never stored, so
+// nothing can go stale.
+//
+// ID and Name are exact matches, never prefixes — both are flat tokens, so a
+// prefix would be a string match inside one key slot rather than a structural
+// one. Name is not unique, so filtering by it may select more than one role.
+func (s *Service) ListRoles(ctx context.Context, area domain.Area, identity domain.Identity, filter domain.RoleFilter) (domain.RolePage, error) {
+	fail := func(err error) (domain.RolePage, error) { return domain.RolePage{}, err }
+	admin, err := s.roleCatalog(ctx, area, identity)
+	if err != nil {
+		return fail(err)
+	}
+	if filter.Offset < 0 || filter.Limit < 0 || filter.Limit > maxRolePage {
+		return fail(domain.ErrMalformed)
+	}
+	if filter.Revisions != domain.AllRevisions && filter.Revisions != domain.LatestRevision {
+		return fail(domain.ErrMalformed)
+	}
+	if filter.ID != "" && !codec.ValidRoleID(filter.ID) {
+		return fail(domain.ErrMalformed)
+	}
+	if filter.Managed != nil && *filter.Managed != domain.TenantManaged && *filter.Managed != domain.ApplicationManaged {
+		return fail(domain.ErrMalformed)
+	}
+	limit := filter.Limit
+	if limit == 0 {
+		limit = defaultRolePage
+	}
+
+	var page domain.RolePage
+	err = s.provider.Read(ctx, area, func(snapshot storage.Snapshot) error {
+		if snapshot.Area != area {
+			return domain.ErrRejected
+		}
+		if err := admin.CheckRoleRead(ctx, area, identity, s.clock.Now()); err != nil {
+			return err
+		}
+		matched := make([]domain.RoleContent, 0, len(snapshot.Roles))
+		for key, content := range snapshot.Roles {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			if content.ID != key.ID || content.Revision != key.Revision {
+				return domain.ErrRejected
+			}
+			if filter.ID != "" && content.ID != filter.ID {
+				continue
+			}
+			if filter.Name != "" && content.Name != filter.Name {
+				continue
+			}
+			if filter.Managed != nil && content.Managed != *filter.Managed {
+				continue
+			}
+			clone := content
+			clone.Permissions = slices.Clone(content.Permissions)
+			matched = append(matched, clone)
+		}
+		// Ordering by id then revision is what makes an offset mean the same
+		// thing on every call, and it is the order an administrator reads a
+		// revision history in.
+		sort.Slice(matched, func(i, j int) bool {
+			if matched[i].ID != matched[j].ID {
+				return matched[i].ID < matched[j].ID
+			}
+			return matched[i].Revision < matched[j].Revision
+		})
+		if filter.Revisions == domain.LatestRevision {
+			matched = latestPerRole(matched)
+		}
+
+		// Total follows the selector: rows under AllRevisions, roles under
+		// LatestRevision, so the page count is right for what was asked.
+		page.Total = len(matched)
+		page.Generation = snapshot.Catalog.Generation
+		if filter.Offset >= len(matched) {
+			page.Roles = []domain.RoleContent{}
+			return nil
+		}
+		end := filter.Offset + limit
+		if end > len(matched) {
+			end = len(matched)
+		}
+		page.Roles = matched[filter.Offset:end]
+		return nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return page, nil
+}
+
+// latestPerRole keeps the highest revision of each id. Its input is already
+// ordered by id then revision ascending, so the last entry of each run wins.
+func latestPerRole(ordered []domain.RoleContent) []domain.RoleContent {
+	result := make([]domain.RoleContent, 0, len(ordered))
+	for i, content := range ordered {
+		if i+1 == len(ordered) || ordered[i+1].ID != content.ID {
+			result = append(result, content)
+		}
+	}
+	return result
+}
+
+// roleCatalog resolves the administration seam the two role reads share. An
+// adapter that does not support them makes the operation unsupported rather than
+// unprotected.
+func (s *Service) roleCatalog(ctx context.Context, area domain.Area, identity domain.Identity) (RoleReadAdministration, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := area.Validate(); err != nil {
+		return nil, err
+	}
+	if err := validateSupportedIdentity(identity); err != nil {
+		return nil, err
+	}
+	admin, ok := s.administration.(RoleReadAdministration)
+	if !ok || nilInterface(admin) {
+		return nil, domain.ErrUnsupported
+	}
+	return admin, nil
+}
+
+// PublishApplicationRole publishes a role the application ships to every tenant,
+// the way it registers permissions and scope keys. It is Application-scoped, so
+// the record carries no tenant.
+//
+// Separate from PublishRole because the authority differs: shipping a role is
+// the application platform acting, composing one is a tenant administrator
+// acting. The record, the storage and the validation are identical — only the
+// boundary and the gate change.
+func (s *Service) PublishApplicationRole(ctx context.Context, app domain.Application, identity domain.Identity, proposed domain.RoleContent) (domain.RoleContent, error) {
+	fail := func(err error) (domain.RoleContent, error) { return domain.RoleContent{}, err }
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	if err := app.Validate(); err != nil {
+		return fail(err)
+	}
+	if err := validateSupportedIdentity(identity); err != nil {
+		return fail(err)
+	}
+	admin, ok := s.administration.(ApplicationRoleAdministration)
+	if !ok || nilInterface(admin) {
+		return fail(domain.ErrUnsupported)
+	}
+	proposed.Managed = domain.ApplicationManaged
+	proposed.Permissions = slices.Clone(proposed.Permissions)
+	issued := proposed.ID == ""
+	if issued {
+		proposed.ID = s.ids.Next()
+	} else if !codec.ValidRoleID(proposed.ID) {
+		return fail(domain.ErrMalformed)
+	}
+	provider, ok := s.provider.(storage.CatalogProvider)
+	if !ok || nilInterface(provider) {
+		return fail(domain.ErrUnsupported)
+	}
+	err := provider.UpdateCatalog(ctx, app, func(catalog domain.Catalog) (storage.CatalogWriteSet, error) {
+		if catalog.ApplicationID != app.ID() {
+			return storage.CatalogWriteSet{}, domain.ErrRejected
+		}
+		if err := admin.CheckApplicationRolePublication(ctx, app, cloneCatalog(catalog), identity, proposed, s.clock.Now()); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		if err := validation.CheckApplicationRolePublication(catalog, proposed); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		write := proposed
+		write.Permissions = slices.Clone(proposed.Permissions)
+		return storage.CatalogWriteSet{ApplicationRole: &write, ApplicationRoleIssued: issued}, nil
 	})
 	if err != nil {
 		return fail(err)

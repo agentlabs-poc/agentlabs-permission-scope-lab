@@ -354,7 +354,7 @@ func fixtures(t *testing.T) []storage.Snapshot {
 		return storage.Snapshot{Area: area, Catalog: catalog,
 			Controls: map[string]domain.GrantControl{"G1": {Version: "1", ID: "G1", Status: "enabled"}},
 			Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 2}: content}, Assignments: map[string]domain.Assignment{"A1": assignment},
-			Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 3}: {ID: "reader", Revision: 3, Permissions: []string{"許可🚀::読む"}}},
+			Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 3}: {ID: "reader", Name: "payslip-reader", Revision: 3, Permissions: []string{"許可🚀::読む"}}},
 			Teams: map[string]domain.Team{"Team1": {ID: "Team1", ParentID: "preserved-orphan-parent"}}, Memberships: []domain.Membership{{TeamID: "Team1", HumanID: human}}, TrustedRoots: map[string]bool{"G1": true}}
 	}
 	return []storage.Snapshot{makeSnapshot(a1, hrms, "人間🚀"), makeSnapshot(a2, hrms, "other"), makeSnapshot(a3, crm, "third")}

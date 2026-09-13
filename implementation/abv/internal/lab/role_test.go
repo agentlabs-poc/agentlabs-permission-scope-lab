@@ -21,12 +21,15 @@ func TestRoleAdministrationRequiresExactBoundedPremiseAndMembership(t *testing.T
 	}
 	admin := &RoleAdministration{AssignmentStatusAdministration: base}
 	identity := TeamFINC17(area).Issuer
-	role := domain.RoleContent{ID: "payslip-reader", Revision: 2, Permissions: []string{PayslipRead, PayslipWrite}}
+	role := domain.RoleContent{Name: "payslip-reader", ID: "fi9jvxobqsxs", Revision: 2, Permissions: []string{PayslipRead, PayslipWrite}}
 	if err := admin.CheckRolePublication(t.Context(), TeamFINC17(area).Snapshot, identity, role, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 	for _, mutate := range []func(*abv.Evidence, *domain.Identity, *domain.RoleContent){
-		func(_ *abv.Evidence, _ *domain.Identity, r *domain.RoleContent) { r.ID = "other" },
+		// The id is no longer the gate's to judge: it is issued by the service,
+		// so a proposal for a new role does not carry one. A blank name is what
+		// an unusable proposal looks like now.
+		func(_ *abv.Evidence, _ *domain.Identity, r *domain.RoleContent) { r.Name = "" },
 		func(_ *abv.Evidence, _ *domain.Identity, r *domain.RoleContent) {
 			r.Permissions = []string{PayslipDelete}
 		},
@@ -52,7 +55,7 @@ func TestRolePublicationUsesMarkedFixtureAndPreservesRevisions(t *testing.T) {
 		t.Fatal(err)
 	}
 	roleAPI := api.(application.RoleAPI)
-	role := domain.RoleContent{ID: "payslip-reader", Revision: 2, Permissions: []string{PayslipRead, PayslipWrite}}
+	role := domain.RoleContent{Name: "payslip-reader", ID: "fi9jvxobqsxs", Revision: 2, Permissions: []string{PayslipRead, PayslipWrite}}
 	got, err := roleAPI.PublishRole(t.Context(), area, domain.FixtureContext{Name: roleFixtureContext}, role)
 	if err != nil || got.ID != role.ID || got.Revision != 2 {
 		t.Fatalf("publish=%+v, %v", got, err)
@@ -65,14 +68,14 @@ func TestRolePublicationUsesMarkedFixtureAndPreservesRevisions(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer closeConnection()
-	record, err := api.Inspect(t.Context(), area, "role", "payslip-reader")
+	record, err := api.Inspect(t.Context(), area, "role", "fi9jvxobqsxs")
 	if err != nil || len(record.Rows) != 3 || record.Rows[1][0] != "1" || record.Rows[2][0] != "2" {
 		t.Fatalf("reopened role=%+v, %v", record.Rows, err)
 	}
 	for _, proposed := range []domain.RoleContent{
-		{ID: "other", Revision: 2, Permissions: []string{PayslipRead}},
-		{ID: "payslip-reader", Revision: 3, Permissions: []string{PayslipDelete}},
-		{ID: "payslip-reader", Revision: 3, Permissions: []string{"hrms:payroll:payslip::export"}},
+		{Name: "payslip-reader", ID: "other", Revision: 2, Permissions: []string{PayslipRead}},
+		{ID: "fi9jvxobqsxs", Revision: 3, Permissions: []string{PayslipDelete}},
+		{ID: "fi9jvxobqsxs", Revision: 3, Permissions: []string{"hrms:payroll:payslip::export"}},
 		role,
 	} {
 		if _, err := api.(application.RoleAPI).PublishRole(t.Context(), area, domain.FixtureContext{Name: roleFixtureContext}, proposed); err == nil {
@@ -80,11 +83,11 @@ func TestRolePublicationUsesMarkedFixtureAndPreservesRevisions(t *testing.T) {
 		}
 	}
 	for _, fixture := range []string{"maya-team1", "application-publisher"} {
-		if _, err := roleAPI.PublishRole(t.Context(), area, domain.FixtureContext{Name: fixture}, domain.RoleContent{ID: "payslip-reader", Revision: 4, Permissions: []string{PayslipRead}}); !errors.Is(err, domain.ErrRejected) {
+		if _, err := roleAPI.PublishRole(t.Context(), area, domain.FixtureContext{Name: fixture}, domain.RoleContent{Name: "payslip-reader", ID: "fi9jvxobqsxs", Revision: 4, Permissions: []string{PayslipRead}}); !errors.Is(err, domain.ErrRejected) {
 			t.Fatalf("fixture %q error=%v", fixture, err)
 		}
 	}
-	record, err = api.Inspect(t.Context(), area, "role", "payslip-reader")
+	record, err = api.Inspect(t.Context(), area, "role", "fi9jvxobqsxs")
 	if err != nil || len(record.Rows) != 3 {
 		t.Fatalf("failed publications changed roles: %+v, %v", record.Rows, err)
 	}
@@ -111,7 +114,7 @@ func TestRolePublicationRequiresCurrentAdminMembership(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer closeConnection()
-	got, err := api.(application.RoleAPI).PublishRole(t.Context(), area, domain.FixtureContext{Name: roleFixtureContext}, domain.RoleContent{ID: "payslip-reader", Revision: 2, Permissions: []string{PayslipRead}})
+	got, err := api.(application.RoleAPI).PublishRole(t.Context(), area, domain.FixtureContext{Name: roleFixtureContext}, domain.RoleContent{Name: "payslip-reader", ID: "fi9jvxobqsxs", Revision: 2, Permissions: []string{PayslipRead}})
 	if !errors.Is(err, domain.ErrRejected) || got.ID != "" || got.Revision != 0 || got.Permissions != nil {
 		t.Fatalf("publish=%+v, %v", got, err)
 	}
@@ -133,7 +136,7 @@ func TestRolePublicationRejectsUnmarkedDatabase(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer closeConnection()
-	if _, err := api.(application.RoleAPI).PublishRole(t.Context(), area, domain.FixtureContext{Name: roleFixtureContext}, domain.RoleContent{ID: "payslip-reader", Revision: 2, Permissions: []string{PayslipRead}}); !errors.Is(err, domain.ErrRejected) {
+	if _, err := api.(application.RoleAPI).PublishRole(t.Context(), area, domain.FixtureContext{Name: roleFixtureContext}, domain.RoleContent{Name: "payslip-reader", ID: "fi9jvxobqsxs", Revision: 2, Permissions: []string{PayslipRead}}); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("unmarked publish error=%v", err)
 	}
 }

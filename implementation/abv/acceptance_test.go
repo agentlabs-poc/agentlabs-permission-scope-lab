@@ -126,7 +126,7 @@ func benchmarkSnapshot(area domain.Area, records int) lab.TeamFINC17Case {
 	fixture := lab.TeamFINC17(area)
 	// Loader count: application + catalog rows + every area-owned map/slice row.
 	const baseRecords = 32
-	fixture.Snapshot.Roles[domain.RoleKey{ID: "independent-role", Revision: 1}] = domain.RoleContent{ID: "independent-role", Revision: 1, Permissions: []string{lab.PayslipRead}}
+	fixture.Snapshot.Roles[domain.RoleKey{ID: "independent-role", Revision: 1}] = domain.RoleContent{Name: "payslip-reader", ID: "independent-role", Revision: 1, Permissions: []string{lab.PayslipRead}}
 	for i := 0; i < (records-baseRecords)/2; i++ {
 		id := fmt.Sprintf("independent-%05d", i)
 		fixture.Snapshot.Controls[id] = domain.GrantControl{Version: "1", ID: id, Status: "enabled"}

@@ -25,7 +25,7 @@ func TestFacadePublishGrantRevisionPersistsOnlyNewContent(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	f := lab.TeamFINC17(area)
 	g1 := f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
-	g1.Permissions, g1.RoleID, g1.RoleRevision = nil, "payslip-reader", 1
+	g1.Permissions, g1.RoleID, g1.RoleRevision = nil, "fi9jvxobqsxs", 1
 	f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g1
 	f.Snapshot.Controls["G2"] = domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
 	before := f.Snapshot
@@ -38,7 +38,7 @@ func TestFacadePublishGrantRevisionPersistsOnlyNewContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	candidate := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", RoleID: "payslip-reader", RoleRevision: 1, Scope: map[string]string{"cert": "C17", "dept": "ENG"}}
+	candidate := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", RoleID: "fi9jvxobqsxs", RoleRevision: 1, Scope: map[string]string{"cert": "C17", "dept": "ENG"}}
 	got, err := facade.PublishGrantRevision(t.Context(), area, f.Issuer, "A1", candidate)
 	if err != nil {
 		t.Fatal(err)

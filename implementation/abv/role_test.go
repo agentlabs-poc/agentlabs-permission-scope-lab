@@ -1,6 +1,7 @@
 package abv_test
 
 import (
+	"errors"
 	"agentlabs.local/abv"
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/storage"
@@ -35,8 +36,18 @@ func TestFacadePublishRole(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	role := domain.RoleContent{ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
-	if got, err := f.PublishRole(t.Context(), area, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}, role); err != nil || got.ID != "reader" {
+	// No id: a new role is issued one, and the issued id comes back in the
+	// returned record. A caller cannot choose an identifier.
+	role := domain.RoleContent{Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	got, err := f.PublishRole(t.Context(), area, identity, role)
+	if err != nil || got.ID == "" || got.Name != "payslip-reader" {
 		t.Fatalf("got=%#v err=%v", got, err)
+	}
+	// An id the caller invented names no role, so it is refused rather than
+	// quietly creating one.
+	invented := domain.RoleContent{Name: "x", ID: "zzzzzzzz", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
+	if _, err := f.PublishRole(t.Context(), area, identity, invented); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("an invented id gave %v, want ErrNotFound", err)
 	}
 }

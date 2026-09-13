@@ -21,7 +21,7 @@ func TestGrantRevisionInsertIsImmutableAndAreaBound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	next := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", RoleID: "payslip-reader", RoleRevision: 1, Scope: map[string]string{"cert": "C17"}}
+	next := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", RoleID: "fi9jvxobqsxs", RoleRevision: 1, Scope: map[string]string{"cert": "C17"}}
 	for _, area := range []domain.Area{a1, a2} {
 		candidate := next
 		if area == a2 {
@@ -106,7 +106,7 @@ func TestGrantRevisionRejectsInvalidOrForgedWritesAtomically(t *testing.T) {
 			x.Permissions = nil
 			x.RoleID = "forged"
 			x.RoleRevision = 1
-			s.Roles[domain.RoleKey{ID: "forged", Revision: 1}] = domain.RoleContent{ID: "forged", Revision: 1, Permissions: []string{lab.PayslipRead}}
+			s.Roles[domain.RoleKey{ID: "forged", Revision: 1}] = domain.RoleContent{Name: "payslip-reader", ID: "forged", Revision: 1, Permissions: []string{lab.PayslipRead}}
 			return storage.WriteSet{NewGrantRevision: &x}
 		}},
 		{"mixed", func(storage.Snapshot) storage.WriteSet {
