@@ -441,13 +441,13 @@ is four functions.
 Real CLI output against a real SQLite store, captured after the contract was
 built. Layout is reconstructed for legibility; no value is altered.
 
-![Registration is add-only and the grammar is enforced; a typed read rejects unregistered identifiers and wildcards](demo-1-create-and-read.svg)
+![Registration is add-only and the grammar is enforced; a typed read rejects unregistered identifiers and wildcards](demos/demo-1-create-and-read.svg)
 
-![Retirement and restoration are one reversible idempotent operation; a retired permission stays visible to administration and cannot be created by a status change](demo-2-retire-and-restore.svg)
+![Retirement and restoration are one reversible idempotent operation; a retired permission stays visible to administration and cannot be created by a status change](demos/demo-2-retire-and-restore.svg)
 
-![Listing 603 permissions with total and generation, a whole-segment prefix filter, offset paging into the middle and past the end](demo-3-list-and-page.svg)
+![Listing 603 permissions with total and generation, a whole-segment prefix filter, offset paging into the middle and past the end](demos/demo-3-list-and-page.svg)
 
-![Page size capped, partial-segment prefixes rejected, an empty page rather than a fallback, and the measured cost of each operation](demo-4-bounds-and-cost.svg)
+![Page size capped, partial-segment prefixes rejected, an empty page rather than a fallback, and the measured cost of each operation](demos/demo-4-bounds-and-cost.svg)
 
 The measurements in the fourth are from
 `permission_scale_test.go` and `catalog_scale_test.go`, which run at 600
