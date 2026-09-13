@@ -2,7 +2,7 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE abv_metadata (
     marker TEXT PRIMARY KEY CHECK (marker = 'agentlabs-abv'),
-    schema_version INTEGER NOT NULL CHECK (schema_version = 6)
+    schema_version INTEGER NOT NULL CHECK (schema_version = 7)
 );
 
 -- The ABV-123 L1 record store. Permissions and scopes live here; the remaining
@@ -13,6 +13,12 @@ CREATE TABLE abv_metadata (
 -- would let duplicate records coexist. An empty string is a real, comparable
 -- absent value, and the boundary column names which case applies.
 CREATE TABLE abv_l1_records (
+    -- Who owns the record. This is the one fact the key path cannot carry:
+    -- a tenant record is told by its tenant, but an application record and a
+    -- platform record both have no tenant and both put a namespace in key3.
+    -- Deriving it from key3 would mean holding the platform's reserved
+    -- namespace list, which belongs to the auth service rather than here.
+    boundary TEXT NOT NULL CHECK (boundary IN ('platform', 'application', 'tenant')),
     tenant_id TEXT NOT NULL,
     key1 TEXT NOT NULL, key2 TEXT NOT NULL,
     key3 TEXT NOT NULL DEFAULT '', key4 TEXT NOT NULL DEFAULT '',
@@ -32,11 +38,13 @@ CREATE TABLE abv_l1_records (
        AND (key6  <> '' OR (key7 = '' AND key8 = '' AND key9 = ''))
        AND (key7  <> '' OR (key8 = '' AND key9 = ''))
        AND (key8  <> '' OR  key9 = '')),
-    PRIMARY KEY (tenant_id, key1, key2, key3, key4, key5, key6, key7, key8, key9, key10)
+    CHECK ((boundary = 'tenant' AND tenant_id <> '')
+        OR (boundary <> 'tenant' AND tenant_id = '')),
+    PRIMARY KEY (boundary, tenant_id, key1, key2, key3, key4, key5, key6, key7, key8, key9, key10)
 );
 
 CREATE INDEX abv_l1_records_prefix ON abv_l1_records
-    (tenant_id, key1, key2, key3, key4, key5);
+    (boundary, tenant_id, key1, key2, key3, key4, key5);
 
 CREATE TABLE applications (
     application_id TEXT PRIMARY KEY,
@@ -114,4 +122,4 @@ CREATE TABLE assignments (
 
 -- The ownership marker is written last, so an incomplete initialization is
 -- never accepted as an ABV database on a later open.
-INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 6);
+INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 7);

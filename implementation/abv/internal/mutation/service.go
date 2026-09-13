@@ -40,6 +40,14 @@ type ApplicationRoleAdministration interface {
 	CheckApplicationRolePublication(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.RoleContent, time.Time) error
 }
 
+// PlatformAdministration gates registration in a platform namespace. It is
+// separate from CatalogAdministration because the authority differs: defining
+// platform vocabulary is the platform acting, and no application administrator
+// may reach it.
+type PlatformAdministration interface {
+	CheckPlatformPermissionRegistration(context.Context, string, domain.Identity, domain.PermissionDefinition, time.Time) error
+}
+
 type RoleReadAdministration interface {
 	CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error
 }

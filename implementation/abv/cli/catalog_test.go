@@ -20,6 +20,7 @@ type catalogSpy struct {
 	scopeFilter domain.ScopeFilter
 	page       domain.PermissionPage
 	id         string
+	namespace  string
 	active     bool
 	err        error
 }
@@ -71,6 +72,14 @@ func (s *catalogSpy) RegisterPermission(_ context.Context, app domain.Applicatio
 	s.app, s.fixture, s.permission = app, fixture, definition
 	return definition, nil
 }
+func (s *catalogSpy) RegisterPlatformPermission(_ context.Context, namespace string, fixture domain.FixtureContext, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
+	s.fixture, s.namespace, s.permission = fixture, namespace, definition
+	if s.err != nil {
+		return domain.PermissionDefinition{}, s.err
+	}
+	return definition, nil
+}
+
 func (s *catalogSpy) RegisterScope(_ context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.ScopeDefinition) (domain.ScopeDefinition, error) {
 	if s.err != nil {
 		return domain.ScopeDefinition{}, s.err

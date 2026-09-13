@@ -8,6 +8,19 @@ import (
 )
 
 func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionDefinition) error {
+	return CheckPermissionRegistrationAt(domain.ApplicationBoundary, c, definition)
+}
+
+// CheckPermissionRegistrationAt validates a registration at a named boundary.
+//
+// The leading-noun rule is the only thing the boundary changes. At the
+// application boundary a permission's first noun must be the application, which
+// is what lets key3 answer "which application owns this row" by construction. At
+// the platform boundary key3 holds a namespace the platform defines and no
+// application can claim, so there is nothing to compare it against — and
+// comparing would require Auth-AL to hold the platform's reserved list, which is
+// the auth service's vocabulary rather than ours.
+func CheckPermissionRegistrationAt(boundary domain.Boundary, c domain.Catalog, definition domain.PermissionDefinition) error {
 	if err := codec.PermissionList([]string{definition.ID}); err != nil {
 		return err
 	}
@@ -20,12 +33,17 @@ func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionD
 	if err != nil {
 		return err
 	}
-	// The first noun segment IS the application. An identifier that starts with
-	// anything else is canonically incorrect: key3 carries the application for
-	// every record type, and the identifier would then disagree with the row
-	// that stores it. The rule is what removes the duplication — the segment is
-	// stored once, in key3, and the noun path holds only what follows.
-	if key.Nouns[0] != c.ApplicationID {
+	if !boundary.Valid() {
+		return domain.ErrMalformed
+	}
+	// At the application boundary the first noun segment IS the application. An
+	// identifier starting with anything else is canonically incorrect: key3
+	// carries the application, and the identifier would disagree with the row
+	// storing it. That rule is also what removes the duplication — the segment
+	// is stored once, in key3, and the noun path holds only what follows.
+	//
+	// At the platform boundary there is no application to compare against.
+	if boundary == domain.ApplicationBoundary && key.Nouns[0] != c.ApplicationID {
 		return domain.ErrRejected
 	}
 	if _, exists := c.Permissions[definition.ID]; exists {

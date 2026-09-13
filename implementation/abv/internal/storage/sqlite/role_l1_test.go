@@ -37,8 +37,10 @@ func TestRolesAreL1Records(t *testing.T) {
 	if _, err := provider.db.Exec(`SELECT 1 FROM roles LIMIT 1`); err == nil {
 		t.Fatal("the roles table still exists; it should be folded away")
 	}
-	// The envelope carries no column beyond the canonical 123 shape.
-	for _, drifted := range []string{"boundary", "application_id", "revision"} {
+	// The envelope carries no column beyond the canonical shape plus boundary —
+	// the one fact no key slot holds, since an application record and a platform
+	// record both have no tenant and both put a namespace in key3.
+	for _, drifted := range []string{"application_id", "revision"} {
 		if _, err := provider.db.Exec(`SELECT ` + drifted + ` FROM abv_l1_records LIMIT 1`); err == nil {
 			t.Fatalf("the drifted column %q is still on abv_l1_records", drifted)
 		}

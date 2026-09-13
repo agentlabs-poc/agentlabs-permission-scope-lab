@@ -47,7 +47,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
-			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application":
+			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -80,6 +80,12 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			return fail(2, "catalog requires a supported verb, its argument, application, database and fixture context")
 		}
 		allowed := []string{"--app", "--db", "--fixture-context"}
+		if positional[0] == "register-platform-permission" {
+			allowed = append(allowed, "--namespace")
+			if empty(flags["--namespace"]) {
+				return fail(2, "register-platform-permission requires --namespace")
+			}
+		}
 		switch positional[0] {
 		case "list-permissions":
 			allowed = append(allowed, "--prefix", "--active-only", "--offset", "--limit")
@@ -246,7 +252,8 @@ func catalogVerb(positional []string) bool {
 	switch positional[0] {
 	case "list-permissions", "list-scopes":
 		return len(positional) == 1
-	case "register-permission", "register-scope", "get-permission", "get-scope", "set-permission-status":
+	case "register-permission", "register-scope", "get-permission", "get-scope", "set-permission-status",
+		"register-platform-permission":
 		return len(positional) == 2 && !empty(positional[1])
 	}
 	return false

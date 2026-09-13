@@ -113,6 +113,16 @@ func (a *labApplication) PublishRole(ctx context.Context, area domain.Area, fixt
 	return a.facade.PublishRole(ctx, area, TeamFINC17(area).Issuer, proposed)
 }
 
+func (a *labApplication) RegisterPlatformPermission(ctx context.Context, namespace string, fixtureContext domain.FixtureContext, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
+	if fixtureContext.Name != catalogFixtureContext {
+		return domain.PermissionDefinition{}, domain.ErrRejected
+	}
+	if err := verifyMarker(ctx, a.path, a.area); err != nil {
+		return domain.PermissionDefinition{}, err
+	}
+	return a.facade.RegisterPlatformPermission(ctx, namespace, catalogPublisher, definition)
+}
+
 func (a *labApplication) PublishApplicationRole(ctx context.Context, app domain.Application, fixtureContext domain.FixtureContext, proposed domain.RoleContent) (domain.RoleContent, error) {
 	if app.ID() != a.area.ApplicationID() || fixtureContext.Name != roleFixtureContext {
 		return domain.RoleContent{}, domain.ErrRejected

@@ -429,3 +429,57 @@ func (s *Service) scopeCatalog(ctx context.Context, app domain.Application, iden
 func invalidScopeKey(key string) bool {
 	return strings.TrimSpace(key) == "" || !utf8.ValidString(key) || strings.Contains(key, "*")
 }
+
+// RegisterPlatformPermission registers a permission in a namespace the platform
+// defines — `system:user::read` and its kind — which no application can claim,
+// because the application registry reserves those names.
+//
+// It takes a namespace rather than an application, and the leading-noun rule
+// does not apply: there is no application to compare the first segment against.
+// Auth-AL holds no list of reserved names; the caller names the namespace it is
+// entitled to, and the platform gate decides whether it may.
+//
+// The permission is then visible to every application's catalog, which is what
+// makes it usable: a grant in any application may reference it, the same way a
+// tenant's grant may reference a role the application ships.
+func (s *Service) RegisterPlatformPermission(ctx context.Context, namespace string, identity domain.Identity, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
+	fail := func(err error) (domain.PermissionDefinition, error) { return domain.PermissionDefinition{}, err }
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	if strings.TrimSpace(namespace) == "" || !utf8.ValidString(namespace) || strings.Contains(namespace, "*") {
+		return fail(domain.ErrMalformed)
+	}
+	if err := validateSupportedIdentity(identity); err != nil {
+		return fail(err)
+	}
+	admin, ok := s.administration.(PlatformAdministration)
+	if !ok || nilInterface(admin) {
+		return fail(domain.ErrUnsupported)
+	}
+	provider, ok := s.provider.(storage.CatalogProvider)
+	if !ok || nilInterface(provider) {
+		return fail(domain.ErrUnsupported)
+	}
+	err := provider.UpdatePlatformCatalog(ctx, namespace, func() (storage.CatalogWriteSet, error) {
+		if err := admin.CheckPlatformPermissionRegistration(ctx, namespace, identity, definition, s.clock.Now()); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		// The catalog carries the namespace so the boundary check has something
+		// coherent to read; the platform boundary does not compare key3 against
+		// it, which is the whole point.
+		catalog := domain.Catalog{ApplicationID: namespace, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}}
+		if err := validation.CheckPermissionRegistrationAt(domain.PlatformBoundary, catalog, definition); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		result := definition
+		return storage.CatalogWriteSet{PlatformPermission: &result, PlatformNamespace: namespace}, nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return definition, nil
+}

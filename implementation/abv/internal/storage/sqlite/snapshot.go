@@ -89,17 +89,19 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	// Permissions are L1 records. The identifier is rebuilt from its slots by
 	// the shared codec; storage never assembles the string itself.
 	rows, err := r.conn.QueryContext(r.ctx, `
-		SELECT key4,key5,key6,key7,key8,key9,key10,value
+		SELECT boundary,key3,key4,key5,key6,key7,key8,key9,key10,value
 		  FROM abv_l1_records
-		 WHERE tenant_id='' AND key1='abv' AND key2='permission' AND key3=?
-		 ORDER BY key4,key5,key6,key7,key8,key9,key10`, applicationID)
+		 WHERE tenant_id='' AND key1='abv' AND key2='permission'
+		   AND ((boundary='application' AND key3=?) OR boundary='platform')
+		 ORDER BY key3,key4,key5,key6,key7,key8,key9,key10`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
 	for rows.Next() {
 		var slots codec.PermissionSlots
+		var boundary, namespace string
 		var payload []byte
-		if err = rows.Scan(&slots[0], &slots[1], &slots[2], &slots[3], &slots[4], &slots[5], &slots[6], &payload); err != nil {
+		if err = rows.Scan(&boundary, &namespace, &slots[0], &slots[1], &slots[2], &slots[3], &slots[4], &slots[5], &slots[6], &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -107,7 +109,12 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 			rows.Close()
 			return err
 		}
-		id, keyErr := codec.PermissionFromSlots(applicationID, slots)
+		// The identifier is rebuilt from the namespace the row carries, which is
+		// the application for an application permission and the platform's own
+		// namespace for a platform one. An application's catalog holds both:
+		// platform permissions are vocabulary every application inherits, the
+		// same way application roles are vocabulary every tenant inherits.
+		id, keyErr := codec.PermissionFromSlots(namespace, slots)
 		if keyErr != nil {
 			rows.Close()
 			return keyErr
@@ -127,7 +134,7 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	// Scopes are L1 records: key3 the application, key4 the key.
 	rows, err = r.conn.QueryContext(r.ctx, `
 		SELECT key4, value FROM abv_l1_records
-		 WHERE tenant_id='' AND key1='abv' AND key2='scope' AND key3=? ORDER BY key4`, applicationID)
+		 WHERE boundary='application' AND tenant_id='' AND key1='abv' AND key2='scope' AND key3=? ORDER BY key4`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
@@ -255,7 +262,7 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 	rows, err := r.conn.QueryContext(r.ctx, `
 		SELECT key4, key5, key6, tenant_id, value FROM abv_l1_records
 		 WHERE key1='abv' AND key2='role' AND key3=?
-		   AND (tenant_id=? OR tenant_id='')
+		   AND ((boundary='tenant' AND tenant_id=?) OR boundary='application')
 		 ORDER BY key4, key5`, r.area.ApplicationID(), r.area.TenantID())
 	if err != nil {
 		err = classify(err)

@@ -224,3 +224,14 @@ func TestRegisterPermissionRejectsFailuresWithoutResultOrWrite(t *testing.T) {
 		})
 	}
 }
+
+// UpdatePlatformCatalog satisfies the provider seam. The platform boundary is
+// exercised in the storage and validation suites; here it only has to exist so
+// the capability check passes.
+func (p *catalogFake) UpdatePlatformCatalog(_ context.Context, namespace string, callback func() (storage.CatalogWriteSet, error)) error {
+	if namespace == "" || callback == nil {
+		return domain.ErrMalformed
+	}
+	_, err := callback()
+	return err
+}

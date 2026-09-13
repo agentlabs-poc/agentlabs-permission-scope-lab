@@ -86,3 +86,39 @@ func TestPermissionMustStartWithItsApplication(t *testing.T) {
 		}
 	}
 }
+
+// The leading-noun rule is the only thing the boundary changes. At the platform
+// boundary key3 holds a namespace no application can claim, so there is nothing
+// to compare against — and comparing would mean Auth-AL holding the platform's
+// reserved list, which belongs to the auth service rather than here.
+func TestTheLeadingNounRuleAppliesOnlyAtTheApplicationBoundary(t *testing.T) {
+	catalog := domain.Catalog{
+		ApplicationID: "hrms",
+		Permissions:   map[string]domain.PermissionDefinition{},
+		Scopes:        map[string]domain.ScopeDefinition{},
+	}
+	platform := domain.Catalog{
+		ApplicationID: "system",
+		Permissions:   map[string]domain.PermissionDefinition{},
+		Scopes:        map[string]domain.ScopeDefinition{},
+	}
+	// system:user::read is a permission the auth service already ships. At the
+	// application boundary it is unregistrable, because no application may be
+	// called "system" — the registry reserves the name.
+	const platformPermission = "system:user::read"
+	if err := CheckPermissionRegistrationAt(domain.ApplicationBoundary, catalog, domain.PermissionDefinition{ID: platformPermission, Active: true}); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("application boundary accepted a foreign namespace: %v", err)
+	}
+	if err := CheckPermissionRegistrationAt(domain.PlatformBoundary, platform, domain.PermissionDefinition{ID: platformPermission, Active: true}); err != nil {
+		t.Fatalf("platform boundary rejected its own namespace: %v", err)
+	}
+	// The platform boundary does not check key3 at all, so any namespace passes.
+	if err := CheckPermissionRegistrationAt(domain.PlatformBoundary, catalog, domain.PermissionDefinition{ID: "auth:client::read", Active: true}); err != nil {
+		t.Fatalf("platform boundary compared against an application: %v", err)
+	}
+	// A boundary that is not one of the three is malformed, not silently
+	// treated as the permissive case.
+	if err := CheckPermissionRegistrationAt(domain.Boundary("elsewhere"), catalog, domain.PermissionDefinition{ID: "hrms:x::read", Active: true}); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("an unknown boundary gave %v, want ErrMalformed", err)
+	}
+}

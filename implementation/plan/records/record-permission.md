@@ -57,6 +57,50 @@ their slots; the wrapper renders this form on the way out and parses it on the
 way in. Nothing inside Auth-AL ever concatenates them, which is why there is no
 escaping — see `20-storage-encoding.md`.
 
+### The three boundaries
+
+A record's **boundary** says who owns it, and it is the one fact the key path
+cannot carry. The handbook is explicit that these authorities must stay distinct:
+
+> **Auth platform administration**, application platform administration, tenant
+> administration and business access **must not be collapsed into one vague
+> administrator role.**
+> — `handbook/implementation/06-auth-service.md`
+
+| `boundary` | Who publishes | `key3` | Is `key3` checked? |
+|---|---|---|---|
+| `platform` | Auth platform administration | a namespace no application can claim — `system`, `auth` | **no** |
+| `application` | application platform administration | the application | **yes — the first noun must equal it** |
+| `tenant` | tenant application administration | the application the record lives in | no |
+
+**Why it is a column and not derived.** `tenant` is derivable — a tenant is
+present or it is not. `application` versus `platform` is not: both have an empty
+tenant and both put a namespace in `key3`. Telling them apart from the *value*
+would mean Auth-AL holding the platform's reserved-name list, which belongs to
+the auth service. That is application vocabulary in the engine, which this domain
+does not carry.
+
+So the boundary is genuinely new information, and a column is the honest place
+for it. That is the test the three drifted columns failed and this one passes:
+*is it derivable from the key path without outside knowledge?*
+
+**`system:user::read` is why this exists.** It is a permission the auth service
+already ships. At the application boundary it is unregistrable — no application
+may be called `system`, because the registry reserves the name. At the platform
+boundary it registers, and every application's catalog then contains it:
+
+```
+$ abv catalog register-platform-permission system:user::read --namespace system
+    rc=0
+$ abv catalog register-permission system:user::write --app hrms
+    operation rejected or record not found          rc=3
+```
+
+**Platform permissions are inherited vocabulary.** An application's catalog
+returns its own permissions and the platform's, in one read — the same union that
+gives a tenant the roles its application ships. A grant in any application may
+reference `system:user::read`, which is what a built-in namespace is for.
+
 ### Canonical key layout
 
 The identifier is **decomposed across key slots**, never stored as one string.
