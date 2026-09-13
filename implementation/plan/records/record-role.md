@@ -358,10 +358,26 @@ what makes the revision meaningful.
 
 **Settled: a role is either the application's or a tenant's, and both exist.**
 
-| | Who owns it | The record |
-|---|---|---|
-| **application-managed** | the application ships it to every tenant, as it ships permissions and scope keys | no tenant — `boundary = application` |
-| **tenant-managed** | a tenant composed it from the application's vocabulary | its tenant — `boundary = tenant` |
+| | Who publishes it | Operation | The record |
+|---|---|---|---|
+| **application-managed** | the **platform administrator** — the same authority that registers permissions and scope keys | `PublishApplicationRole` | no tenant — `boundary = application` |
+| **tenant-managed** | a **tenant administrator**, for their own organisation | `PublishRole` | its tenant — `boundary = tenant` |
+
+**The two administrators are the point.** This is not a storage distinction with
+an authority bolted on; the authority is what makes it two record kinds at all. A
+platform administrator ships vocabulary and standard bundles to everyone who
+installs the application. A tenant administrator arranges that vocabulary for one
+organisation. Neither can do the other's job, and the contract enforces it rather
+than documenting it:
+
+```
+PublishApplicationRole   Application-scoped   gated as the catalog is
+PublishRole              Area-scoped          gated as tenant administration is
+```
+
+A single operation with a sometimes-empty tenant would make that distinction a
+convention, and a caller could publish application-wide by passing the wrong
+argument. Two operations make it structural.
 
 The reasoning is the distinction the whole domain turns on. **Permission and
 scope are vocabulary** — what words exist, what dimensions may bound. They change
@@ -386,7 +402,7 @@ disappear, and is not overridden. Shadowing by name would need precedence rules,
 which nothing in the handbook backs — coexistence needs none.
 
 **A tenant may not revise a shipped role.** `PublishRole` refuses an id that names
-an application role: it is the application's property. The safety that makes all
+an application role: it is the platform's property, not the tenant's. The safety that makes all
 of this sound is that a tenant's role can only name permissions the application
 registered — **the tenant composes, it cannot invent**.
 

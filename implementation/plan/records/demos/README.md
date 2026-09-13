@@ -13,9 +13,9 @@ directly. Only the layout is reconstructed, for legibility.
 | `demo-5-scope-register-and-read.svg` | Scope registration is add-only and rejects a wildcard anywhere in the key; a typed read returns the key and nothing else |
 | `demo-6-scope-list.svg` | Scope listing ordered by key, offset paging, an empty page past the end, a capped page size |
 | `demo-7-storage-table.svg` | The record store itself: permissions and scopes in one table, told apart by `key2`, the application in `key3` for both, and an empty scope payload |
-| `demo-8-role-publish-and-get.svg` | Role publication is add-only per `(id, revision)`, the id is a base-36 Snowflake, a bundle cannot name an unregistered permission, and a read takes an exact revision |
-| `demo-9-role-list-revisions.svg` | Every revision by default, `--latest` collapsing to one row per role, and an empty page past the end with a true total |
-| `demo-10-role-storage-table.svg` | The role rows: the revision zero-padded in `key5`, the name in `key6`, and the drifted `revision` column left at `0` |
+| `demo-8-role-publish-and-get.svg` | The two publication paths side by side — the platform administrator shipping a role with `--application`, a tenant administrator composing one without it, a new revision of each, and the boundary enforced rather than merely recorded |
+| `demo-9-role-list-revisions.svg` | One listing carrying both kinds each labelled, `--managed` narrowing to either, and `--latest` taking the highest revision of each across both |
+| `demo-10-role-storage-table.svg` | The role rows: an application role carrying no tenant beside tenant roles that do, the revision zero-padded in `key5`, the name in `key6`, and the drifted `revision` column left at `0` |
 
 Demonstrations are captured, not described, and they earn their place: the
 wildcard hole in scope registration was found by running demo 5, not by reading
