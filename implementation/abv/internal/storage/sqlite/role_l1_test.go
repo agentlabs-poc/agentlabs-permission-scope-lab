@@ -14,13 +14,13 @@ func TestRolesAreL1Records(t *testing.T) {
 	defer provider.Close()
 
 	rows := queryRecords(t, provider, `
-		SELECT boundary, tenant_id, key1, key2, key3, key4, key5, key6, revision, value
+		SELECT tenant_id, key1, key2, key3, key4, key5, key6, value
 		  FROM abv_l1_records WHERE key2='role' ORDER BY key4, key5`)
 	if len(rows) == 0 {
 		t.Fatal("no role records in the L1 store")
 	}
 	for _, r := range rows {
-		if r["boundary"] != "tenant" || r["tenant_id"] != area.TenantID() {
+		if r["tenant_id"] != area.TenantID() {
 			t.Fatalf("a role is tenant-scoped: %#v", r)
 		}
 		if r["key1"] != "abv" || r["key2"] != "role" || r["key3"] != area.ApplicationID() {
@@ -29,16 +29,19 @@ func TestRolesAreL1Records(t *testing.T) {
 		if len(r["key5"]) != 10 {
 			t.Fatalf("the revision slot is not padded: %q", r["key5"])
 		}
-		// The envelope's revision column is drift and roles must not use it.
-		if r["revision"] != "0" {
-			t.Fatalf("a role wrote to the drifted revision column: %q", r["revision"])
-		}
+
 		if r["key6"] == "" {
 			t.Fatalf("the name slot is empty: %#v", r)
 		}
 	}
 	if _, err := provider.db.Exec(`SELECT 1 FROM roles LIMIT 1`); err == nil {
 		t.Fatal("the roles table still exists; it should be folded away")
+	}
+	// The envelope carries no column beyond the canonical 123 shape.
+	for _, drifted := range []string{"boundary", "application_id", "revision"} {
+		if _, err := provider.db.Exec(`SELECT ` + drifted + ` FROM abv_l1_records LIMIT 1`); err == nil {
+			t.Fatalf("the drifted column %q is still on abv_l1_records", drifted)
+		}
 	}
 }
 
@@ -148,13 +151,13 @@ func TestApplicationAndTenantRolesDifferOnlyInTheBoundary(t *testing.T) {
 	defer p.Close()
 
 	for _, r := range queryRecords(t, p, `
-		SELECT boundary, tenant_id, key3, key4 FROM abv_l1_records
-		 WHERE key2='role' ORDER BY boundary, key4`) {
+		SELECT tenant_id, key3, key4 FROM abv_l1_records
+		 WHERE key2='role' ORDER BY tenant_id, key4`) {
 		shipped := r["key4"] == "aaaaaaaaaaaa"
-		if shipped && (r["boundary"] != "application" || r["tenant_id"] != "") {
+		if shipped && (r["tenant_id"] != "") {
 			t.Fatalf("a shipped role carries a tenant: %#v", r)
 		}
-		if !shipped && (r["boundary"] != "tenant" || r["tenant_id"] == "") {
+		if !shipped && (r["tenant_id"] == "") {
 			t.Fatalf("a composed role has no tenant: %#v", r)
 		}
 		// The application is in key3 either way — the path is the same shape.

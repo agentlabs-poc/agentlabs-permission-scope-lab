@@ -157,11 +157,10 @@ func (p *provider) updatePermissionStatus(ctx context.Context, conn *sql.Conn, a
 	}
 	result, err := conn.ExecContext(ctx, `
 		UPDATE abv_l1_records SET value=?
-		 WHERE boundary='application' AND tenant_id='' AND application_id=?
-		   AND key1='abv' AND key2='permission'
-		   AND key3=? AND key4=? AND key5=? AND key6=? AND key7=? AND key8=? AND key9=? AND key10=?`,
+		 WHERE tenant_id='' AND key1='abv' AND key2='permission' AND key3=?
+		   AND key4=? AND key5=? AND key6=? AND key7=? AND key8=? AND key9=? AND key10=?`,
 		payload, applicationID,
-		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6], slots[7])
+		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6])
 	if err != nil {
 		return classify(err)
 	}
@@ -191,11 +190,11 @@ func insertPermissionRecord(ctx context.Context, conn *sql.Conn, applicationID s
 	}
 	_, err = conn.ExecContext(ctx, `
 		INSERT INTO abv_l1_records
-		  (boundary, tenant_id, application_id, key1, key2,
-		   key3, key4, key5, key6, key7, key8, key9, key10, revision, value)
-		VALUES ('application', '', ?, 'abv', 'permission', ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
+		  (tenant_id, key1, key2, key3,
+		   key4, key5, key6, key7, key8, key9, key10, value)
+		VALUES ('', 'abv', 'permission', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		applicationID,
-		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6], slots[7],
+		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6],
 		payload)
 	if err != nil {
 		return classify(err)
@@ -241,9 +240,9 @@ func insertScopeRecord(ctx context.Context, conn *sql.Conn, applicationID string
 	// reserved token the evaluator knows, not something a key declares.
 	if _, err := conn.ExecContext(ctx, `
 		INSERT INTO abv_l1_records
-		  (boundary, tenant_id, application_id, key1, key2, key3, key4, revision, value)
-		VALUES ('application', '', ?, 'abv', 'scope', ?, ?, 0, '{}')`,
-		applicationID, applicationID, definition.Key); err != nil {
+		  (tenant_id, key1, key2, key3, key4, value)
+		VALUES ('', 'abv', 'scope', ?, ?, '{}')`,
+		applicationID, definition.Key); err != nil {
 		return classify(err)
 	}
 	return nil
@@ -254,8 +253,7 @@ func insertScopeRecord(ctx context.Context, conn *sql.Conn, applicationID string
 func applicationRoleRevisions(ctx context.Context, conn *sql.Conn, applicationID, id string) ([]string, error) {
 	rows, err := conn.QueryContext(ctx, `
 		SELECT key5 FROM abv_l1_records
-		 WHERE boundary='application' AND tenant_id='' AND application_id=?
-		   AND key1='abv' AND key2='role' AND key4=?
+		 WHERE tenant_id='' AND key1='abv' AND key2='role' AND key3=? AND key4=?
 		 ORDER BY key5`, applicationID, id)
 	if err != nil {
 		return nil, classify(err)

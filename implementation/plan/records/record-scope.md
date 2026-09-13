@@ -57,7 +57,6 @@ boundary, which is why there is no escaping.
 | `key3` | **the application** | `hrms` |
 | `key4` | the key — whole, never split | `dept` |
 | `key5` … `key10` | unused → `''` | `''` |
-| `revision` | unused for scopes | `0` |
 
 **For a scope, `key3` is the application** — written from `application_id`
 directly, so it holds it by construction.
@@ -82,15 +81,12 @@ envelope one shape across record types.
 ```
 dept
 
-boundary        = application      ← no tenant; shared by every tenant
-tenant_id       = ''
-application_id  = hrms
+tenant_id       = ''               ← empty: shared by every tenant
 key1            = abv
 key2            = scope
 key3            = hrms
 key4            = dept
 key5 … key10    = ''
-revision        = 0
 value           = {}
 state           = enabled
 ```
@@ -268,13 +264,12 @@ The row is shown in section 1, and it is **live**: scopes are stored in
 
 `tenant_id` is `''` rather than NULL for an application-scoped record. SQLite and
 PostgreSQL both treat NULLs in a unique index as distinct, which would let
-duplicate catalog rows coexist; an empty string is comparable, and the `boundary`
-column already names which case applies.
+duplicate catalog rows coexist; an empty string is comparable, and an empty
+tenant is itself the statement that the record is application-wide.
 
 ```sql
 -- fetch one: every slot constrained, a unique hit
-get     boundary = 'application' AND tenant_id = ''
-        AND application_id = $1
+get     tenant_id = ''
         AND key1 = 'abv' AND key2 = 'scope'
         AND key3 = $1 AND key4 = $2
 

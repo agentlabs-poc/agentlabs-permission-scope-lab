@@ -10,8 +10,9 @@ import (
 //
 //	hrms:employee:certificate::read
 //
-// Storage decomposes it across key slots — the noun path left to right from
-// key3, the verb pinned to key10 — so the identifier must be parseable. An
+// Storage decomposes it across key slots — the application in key3, the noun
+// path left to right from key4, the verb pinned to key10 — so the identifier
+// must be parseable. An
 // identifier that cannot be decomposed has no canonical storage representation,
 // which is why the shape is enforced here rather than left to convention.
 //
@@ -19,8 +20,16 @@ import (
 // string itself, and the contract never assembles one by hand.
 const (
 	// MaxNounSegments is what the envelope leaves for the noun path: ten slots,
-	// less the domain namespace, the record type and the reserved verb slot.
-	MaxNounSegments = 7
+	// less the domain namespace, the record type, the application and the
+	// reserved verb slot.
+	//
+	// key3 holds the application for every record type, written from the
+	// application id rather than taken from the identifier. That is what lets
+	// the envelope drop its application_id column: without it, two applications
+	// registering the same identifier would produce the same key path and
+	// collide. The leading noun stays in the noun path, so an identifier still
+	// renders exactly as its author wrote it and nothing assumes the two agree.
+	MaxNounSegments = 6
 
 	verbSeparator = "::"
 	nounSeparator = ":"
@@ -99,8 +108,10 @@ func NounPrefix(prefix string) ([]string, error) {
 }
 
 // PermissionSlots is the key-slot representation of an identifier: the noun
-// path in key3…key9 padded with empty strings, and the verb in key10.
-type PermissionSlots [8]string
+// path in key4…key9 padded with empty strings, and the verb in key10. The
+// application in key3 is not part of this — storage writes it from the
+// application id, because it is not the identifier's to carry.
+type PermissionSlots [7]string
 
 // Slots lays the key out for storage. Storage writes these columns verbatim and
 // never parses the identifier itself.

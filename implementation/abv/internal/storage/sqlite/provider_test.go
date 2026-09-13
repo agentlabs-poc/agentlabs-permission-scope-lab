@@ -318,12 +318,12 @@ func TestCorruptCatalogProjectionsDoNotReachCallback(t *testing.T) {
 		// A scope record carries no payload beyond its presence, so the
 		// corruptions worth testing are a blank key and an empty value.
 		"blank scope key": func(t *testing.T, p *provider, area domain.Area) {
-			if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET key4='' WHERE key2='scope' AND application_id=?`, area.ApplicationID()); err != nil {
+			if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET key4='' WHERE key2='scope' AND key3=?`, area.ApplicationID()); err != nil {
 				t.Fatal(err)
 			}
 		},
 		"empty scope payload": func(t *testing.T, p *provider, area domain.Area) {
-			if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value='' WHERE key2='scope' AND application_id=?`, area.ApplicationID()); err != nil {
+			if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value='' WHERE key2='scope' AND key3=?`, area.ApplicationID()); err != nil {
 				t.Fatal(err)
 			}
 		},
