@@ -1,23 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 409" width="660" height="409" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
-<rect width="660" height="409" rx="7" fill="#12161d"/>
-<path d="M0 7a7 7 0 0 1 7-7h646a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 556" width="760" height="556" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
+<rect width="760" height="556" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h746a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
 <circle cx="20" cy="17" r="5" fill="#e0787c"/><circle cx="38" cy="17" r="5" fill="#d9a441"/><circle cx="56" cy="17" r="5" fill="#6cc292"/>
-<text x="330.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">auth-al — role · list</text>
+<text x="380.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">auth-al — role · list</text>
 <text x="22" y="62" fill="#6b7687" xml:space="preserve"># a role is a family of revisions, and the default listing says so</text>
-<text x="22" y="83" fill="#4fb8e8">$</text><text x="38.8" y="83" fill="#e8ecf2" xml:space="preserve">abv role list</text>
-<text x="22" y="104" fill="#9aa4b4" xml:space="preserve">count  2     total  2     generation  1</text>
-<text x="22" y="125" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=1  payslip-reader  payslip::read</text>
-<text x="22" y="146" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=2  payslip-reader  payslip::read,payslip::write</text>
-<text x="22" y="167" fill="#9aa4b4" xml:space="preserve">rc=0</text>
-<text x="22" y="188" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="209" fill="#6b7687" xml:space="preserve"># --latest collapses to one row per role, computed, never stored</text>
-<text x="22" y="230" fill="#4fb8e8">$</text><text x="38.8" y="230" fill="#e8ecf2" xml:space="preserve">abv role list --latest</text>
-<text x="22" y="251" fill="#9aa4b4" xml:space="preserve">count  1     total  1     generation  1</text>
-<text x="22" y="272" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=2  payslip-reader  payslip::read,payslip::write</text>
-<text x="22" y="293" fill="#9aa4b4" xml:space="preserve">rc=0</text>
-<text x="22" y="314" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="335" fill="#6b7687" xml:space="preserve"># past the end: an empty page with a true total, never an error</text>
-<text x="22" y="356" fill="#4fb8e8">$</text><text x="38.8" y="356" fill="#e8ecf2" xml:space="preserve">abv role list --offset 99</text>
-<text x="22" y="377" fill="#9aa4b4" xml:space="preserve">count  0     total  2     generation  1</text>
-<text x="22" y="398" fill="#9aa4b4" xml:space="preserve">rc=0</text>
+<text x="22" y="83" fill="#4fb8e8">$</text><text x="38.8" y="83" fill="#e8ecf2" xml:space="preserve">abv role list \</text>
+<text x="38.8" y="104" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
+<text x="22" y="125" fill="#9aa4b4" xml:space="preserve">count  3     total  3     generation  2</text>
+<text x="22" y="146" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=1  payslip-reader    hrms:payroll:payslip::read</text>
+<text x="22" y="167" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=2  payslip-reader    hrms:payroll:payslip::read,...write</text>
+<text x="22" y="188" fill="#6cc292" xml:space="preserve">fy50rb4l143k  rev=1  payroll-approver  hrms:payroll:payslip::read</text>
+<text x="22" y="209" fill="#9aa4b4" xml:space="preserve">rc=0</text>
+<text x="22" y="230" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="251" fill="#6b7687" xml:space="preserve"># --latest keeps the highest revision of each. computed as MAX(key5),</text>
+<text x="22" y="272" fill="#6b7687" xml:space="preserve"># never stored, so nothing can go stale. note total changes with it:</text>
+<text x="22" y="293" fill="#6b7687" xml:space="preserve"># it counts rows by default and roles here.</text>
+<text x="22" y="314" fill="#4fb8e8">$</text><text x="38.8" y="314" fill="#e8ecf2" xml:space="preserve">abv role list --latest \</text>
+<text x="38.8" y="335" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
+<text x="22" y="356" fill="#9aa4b4" xml:space="preserve">count  2     total  2     generation  2</text>
+<text x="22" y="377" fill="#6cc292" xml:space="preserve">fi9jvxobqsxs  rev=2  payslip-reader    hrms:payroll:payslip::read,...write</text>
+<text x="22" y="398" fill="#6cc292" xml:space="preserve">fy50rb4l143k  rev=1  payroll-approver  hrms:payroll:payslip::read</text>
+<text x="22" y="419" fill="#9aa4b4" xml:space="preserve">rc=0</text>
+<text x="22" y="440" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="461" fill="#6b7687" xml:space="preserve"># past the end: an empty page with a true total, never an error</text>
+<text x="22" y="482" fill="#4fb8e8">$</text><text x="38.8" y="482" fill="#e8ecf2" xml:space="preserve">abv role list --offset 99 \</text>
+<text x="38.8" y="503" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
+<text x="22" y="524" fill="#9aa4b4" xml:space="preserve">count  0     total  3     generation  2</text>
+<text x="22" y="545" fill="#9aa4b4" xml:space="preserve">rc=0</text>
 </svg>

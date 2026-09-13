@@ -1,6 +1,9 @@
 package codec
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestRoleIDAcceptsBase36AndRejectsEverythingElse(t *testing.T) {
 	for _, id := range []string{"fi8c8111kow0", "0", "1y2p0ij32e8e7", "reader"} {
@@ -58,5 +61,48 @@ func TestRevisionRoundTripsAndRejectsUnstorable(t *testing.T) {
 		if _, err := ParseRevision(slot); err == nil {
 			t.Fatalf("parsed a slot this encoder never wrote: %q", slot)
 		}
+	}
+}
+
+// Two ids issued in the same millisecond must differ, which is the sequence's
+// whole job, and every id must be a valid role id.
+func TestSnowflakesIssueDistinctBase36IDs(t *testing.T) {
+	frozen := time.UnixMilli(1788000000000)
+	gen, err := NewSnowflakes(0, func() time.Time { return frozen })
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for i := 0; i < 500; i++ {
+		id := gen.Next()
+		if !ValidRoleID(id) {
+			t.Fatalf("issued an id that is not a valid role id: %q", id)
+		}
+		if seen[id] {
+			t.Fatalf("issued %q twice inside one millisecond", id)
+		}
+		seen[id] = true
+	}
+}
+
+func TestSnowflakesRefuseANodeOutsideTheLayout(t *testing.T) {
+	if _, err := NewSnowflakes(SnowflakeNodeMax+1, nil); err == nil {
+		t.Fatal("accepted a node id the layout cannot hold")
+	}
+	if _, err := NewSnowflakes(-1, nil); err == nil {
+		t.Fatal("accepted a negative node id")
+	}
+}
+
+// Ids are time-sortable: a later millisecond yields a larger id, which is what
+// makes them useful as a key.
+func TestSnowflakesAreTimeOrdered(t *testing.T) {
+	now := time.UnixMilli(1788000000000)
+	gen, _ := NewSnowflakes(0, func() time.Time { return now })
+	first := gen.Next()
+	now = now.Add(time.Second)
+	second := gen.Next()
+	if !(len(first) < len(second) || (len(first) == len(second) && first < second)) {
+		t.Fatalf("ids are not time-ordered: %q then %q", first, second)
 	}
 }

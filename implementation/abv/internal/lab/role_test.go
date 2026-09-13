@@ -26,7 +26,10 @@ func TestRoleAdministrationRequiresExactBoundedPremiseAndMembership(t *testing.T
 		t.Fatal(err)
 	}
 	for _, mutate := range []func(*abv.Evidence, *domain.Identity, *domain.RoleContent){
-		func(_ *abv.Evidence, _ *domain.Identity, r *domain.RoleContent) { r.ID = "other" },
+		// The id is no longer the gate's to judge: it is issued by the service,
+		// so a proposal for a new role does not carry one. A blank name is what
+		// an unusable proposal looks like now.
+		func(_ *abv.Evidence, _ *domain.Identity, r *domain.RoleContent) { r.Name = "" },
 		func(_ *abv.Evidence, _ *domain.Identity, r *domain.RoleContent) {
 			r.Permissions = []string{PayslipDelete}
 		},

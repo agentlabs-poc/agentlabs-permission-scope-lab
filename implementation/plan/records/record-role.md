@@ -421,7 +421,7 @@ The only way a role revision comes into existence. Add-only per
 |---|---|
 | `area` | tenant **and** application |
 | `identity` | acting human; version `"1"`, actor type `user`, actor id = human id |
-| `proposed.ID` | non-blank, valid UTF-8, no `*` |
+| `proposed.ID` | **empty for a new role** — the service issues one. Non-empty means a new revision of that role, and it must already exist. |
 | `proposed.Revision` | `> 0` |
 | `proposed.Permissions` | non-empty, no duplicates, no `*`, **each registered and active** |
 
@@ -440,6 +440,32 @@ Validated twice, deliberately: once against the snapshot in `mutation`, then
 again inside the transaction in `update.go` against the authoritative snapshot, so
 a catalog change racing the publication cannot slip a retired permission into a
 bundle. Any failure writes nothing.
+
+### The id is issued, never accepted
+
+A caller does not choose an identifier. `PublishRole` reads `proposed.ID` as a
+mode rather than a value:
+
+| `proposed.ID` | Means | If wrong |
+|---|---|---|
+| empty | a **new role** — the service issues a base-36 Snowflake and returns it | — |
+| an id that exists | a **new revision** of that role | `ErrConflict` if that revision is published |
+| an id that does not exist | nothing — a caller inventing an identifier | `ErrNotFound` |
+
+**There are exactly two ways to hold an id: be issued one, or name one that was
+issued earlier.** A caller-supplied id would let anything into the key path, which
+is precisely what generating ids exists to prevent — and it would put back the
+ambiguity free text had.
+
+The generator is a seam, like the clock: `NewWithIDs` takes one, and `New`
+defaults to node 0, which is right for a single process and wrong for a fleet.
+Production supplies a generator whose node id comes from its own reserved block,
+the way `agentlabs-auth` already does.
+
+> **A policy gate cannot pin a generated id.** Gate 1 runs on the proposal, and a
+> new role's id does not exist until the service issues it. A gate that keyed on
+> an id could only ever admit roles that already existed. It judges the name, the
+> bundle and the publisher instead — the things a proposal actually carries.
 
 **Returns — `(RoleContent, error)`**
 

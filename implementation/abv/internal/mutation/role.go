@@ -26,11 +26,22 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 		return fail(domain.ErrUnsupported)
 	}
 	proposed.Permissions = slices.Clone(proposed.Permissions)
+	// An id is issued, never accepted. A caller supplying one could invent any
+	// value it liked, which is exactly what a generated id exists to prevent —
+	// so an empty id means "a new role, issue one", and a non-empty id must name
+	// a role that already exists, which makes it a new revision of that role.
+	issued := proposed.ID == ""
+	if issued {
+		proposed.ID = s.ids.Next()
+	} else if !codec.ValidRoleID(proposed.ID) {
+		return fail(domain.ErrMalformed)
+	}
 	err := s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area || snapshot.Catalog.ApplicationID != area.ApplicationID() {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
 		key := domain.RoleKey{ID: proposed.ID, Revision: proposed.Revision}
+		known := false
 		for storedKey, role := range snapshot.Roles {
 			if storedKey.ID != role.ID || storedKey.Revision != role.Revision {
 				return storage.WriteSet{}, domain.ErrRejected
@@ -38,6 +49,19 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 			if storedKey == key {
 				return storage.WriteSet{}, domain.ErrConflict
 			}
+			if storedKey.ID == proposed.ID {
+				known = true
+			}
+		}
+		// A supplied id that names nothing is a caller choosing an identifier.
+		// Refuse it: the only ways to hold an id are to be issued one or to
+		// name one already issued.
+		if !issued && !known {
+			return storage.WriteSet{}, domain.ErrNotFound
+		}
+		// An issued id that already exists would mean the generator collided.
+		if issued && known {
+			return storage.WriteSet{}, domain.ErrConflict
 		}
 		evidence := proposed
 		evidence.Permissions = slices.Clone(proposed.Permissions)

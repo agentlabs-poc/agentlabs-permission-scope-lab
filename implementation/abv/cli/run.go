@@ -150,8 +150,10 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		switch positional[0] {
 		case "publish":
-			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision", "--permissions", "--name") || !has(flags, "--revision") || !has(flags, "--permissions") || empty(flags["--name"]) {
-				return fail(2, "role publish requires ID, name, revision, permissions, database and fixture context")
+			// No positional id: an id is issued, not chosen. --id names an
+			// existing role, which makes the publication a new revision of it.
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision", "--permissions", "--name", "--id") || !has(flags, "--revision") || !has(flags, "--permissions") || empty(flags["--name"]) {
+				return fail(2, "role publish requires name, revision, permissions, database and fixture context; --id only to add a revision")
 			}
 			revision, parseErr := strconv.ParseInt(flags["--revision"], 10, 64)
 			permissions, listErr := catalogList(flags["--permissions"], true)

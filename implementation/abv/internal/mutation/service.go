@@ -3,6 +3,7 @@ package mutation
 
 import (
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
 	"context"
 	"reflect"
@@ -62,13 +63,31 @@ type Service struct {
 	provider       storage.Provider
 	administration Administration
 	clock          Clock
+	ids            IDs
+}
+
+// IDs issues record identifiers. It is a seam for the same reason Clock is: a
+// generated id is not the caller's to choose, and a test needs it predictable.
+type IDs interface {
+	Next() string
 }
 
 func New(provider storage.Provider, administration Administration, clock Clock) (*Service, error) {
-	if nilInterface(provider) || nilInterface(administration) || nilInterface(clock) {
+	ids, err := codec.NewSnowflakes(0, nil)
+	if err != nil {
+		return nil, err
+	}
+	return NewWithIDs(provider, administration, clock, ids)
+}
+
+// NewWithIDs builds a service with an explicit id source. Production supplies a
+// generator whose node id comes from its own reserved block; New defaults to
+// node 0, which is correct for a single-process lab and wrong for a fleet.
+func NewWithIDs(provider storage.Provider, administration Administration, clock Clock, ids IDs) (*Service, error) {
+	if nilInterface(provider) || nilInterface(administration) || nilInterface(clock) || nilInterface(ids) {
 		return nil, domain.ErrMalformed
 	}
-	return &Service{provider: provider, administration: administration, clock: clock}, nil
+	return &Service{provider: provider, administration: administration, clock: clock, ids: ids}, nil
 }
 
 func nilInterface(value any) bool {

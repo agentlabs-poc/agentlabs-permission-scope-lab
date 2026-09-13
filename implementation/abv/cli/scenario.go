@@ -58,7 +58,7 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 		switch positional[0] {
 		case "publish":
 			revision, _ := strconv.ParseInt(flags["--revision"], 10, 64)
-			proposed := domain.RoleContent{ID: positional[1], Name: flags["--name"], Revision: revision, Permissions: strings.Split(flags["--permissions"], ",")}
+			proposed := domain.RoleContent{ID: flags["--id"], Name: flags["--name"], Revision: revision, Permissions: strings.Split(flags["--permissions"], ",")}
 			if err := publishRole(ctx, api, area, flags["--fixture-context"], proposed, out, diag); err != nil {
 				return report(diag, err)
 			}

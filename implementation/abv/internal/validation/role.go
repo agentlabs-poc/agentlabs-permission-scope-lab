@@ -14,9 +14,9 @@ func CheckRolePublication(area domain.Area, catalog domain.Catalog, role domain.
 	if catalog.ApplicationID != area.ApplicationID() {
 		return domain.ErrRejected
 	}
-	// The id is a base-36 Snowflake, not free text. A generated id removes the
-	// ambiguity free text had — Payroll-Admin and payroll-admin were two roles
-	// that read as one — and it never needs renaming.
+	// The id is a base-36 Snowflake, not free text — and by this point it has
+	// been issued by the service or matched against a role that exists, never
+	// taken from the caller unchecked.
 	if !codec.ValidRoleID(role.ID) {
 		return domain.ErrMalformed
 	}

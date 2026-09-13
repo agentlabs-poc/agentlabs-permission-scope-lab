@@ -17,7 +17,14 @@ func (a *RoleAdministration) CheckRolePublication(ctx context.Context, snapshot 
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) || proposed.ID != "fi9jvxobqsxs" {
+	// The gate cannot pin the id. An id is issued by the service, so it does not
+	// exist when a new role is proposed — a policy that keyed on one could only
+	// ever admit roles that already exist. It gates the name, the bundle and the
+	// publisher's membership, which are the things a proposal actually carries.
+	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+		return domain.ErrRejected
+	}
+	if proposed.Name == "" {
 		return domain.ErrRejected
 	}
 	for _, permission := range proposed.Permissions {
