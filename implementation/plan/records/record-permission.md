@@ -64,7 +64,7 @@ never moves regardless of how deep the noun path is.
 |---|---|---|
 | `key1` | domain namespace | `abv` |
 | `key2` | record type | `permission` |
-| `key3` | noun 1 — **the application** | `hrms` |
+| `key3` | noun 1 — the application *by convention* | `hrms` |
 | `key4` | noun 2 | `employee` |
 | `key5` | noun 3 | `certificate` |
 | `key6` … `key9` | nouns 4 – 7, unused → `''` | `''` |
@@ -74,11 +74,39 @@ never moves regardless of how deep the noun path is.
 **Seven slots for nouns.** Three of ten are spoken for: two by the canonical type
 path and one reserved for the verb.
 
-**`key3` is the application, in every record type.** Here it arrives as the
-leading noun of the identifier — settled below — rather than being written from
-`application_id`, but it answers the same question a scope record's `key3`
-answers. A reader of the store never has to know which record type a row is to
-know which application owns it.
+**`key3` holds the leading noun, which is *conventionally* the application.**
+Nothing checks that it is. A scope record writes `application_id` into `key3` by
+construction; a permission puts whatever noun its author wrote first, so the two
+record types do not give the slot one meaning:
+
+```
+$ abv catalog register-permission 'billing:invoice::read' --app hrms
+rc=0                                       ← accepted
+
+key2         key3     key4     key10   application_id
+permission   billing  invoice  read    hrms      ← key3 is not the application
+permission   hrms     payroll  read    hrms
+```
+
+**A reader who needs to know which application owns a row uses the
+`application_id` column.** It is authoritative, and it sits ahead of `key1` in the
+primary key, so `key3` buys no query the column does not already give. What `key3`
+buys is the *rendering*: a canonical path that reads complete without consulting a
+column, which is the duplication accepted below.
+
+> **Open — should the leading noun be required to be the application?** Three
+> answers. Reject a registration whose leading noun differs, which collides with
+> the grammar question in section 6 — the Auth registry's `<namespace>` has no
+> reason to equal an application id, and Q-126 makes renames permanent. Or write
+> `application_id` into `key3` for every record type and shift the noun path to
+> `key4`…`key9`, costing a noun slot and storing a matching leading noun twice. Or
+> leave it as convention.
+>
+> **Recommended: leave it, and let Gate 1 enforce naming if the platform wants
+> it.** Requiring an `hrms` identifier to lead with `hrms` is policy about an
+> application's own namespace, which by the Auth-AL / Auth Agent split belongs to
+> the injected Gate 1 callback. Auth-AL enforces that an identifier is
+> *parseable*, which it does.
 
 Why decomposed rather than one string: a query over a whole string slot is a
 lexical prefix match, which on PostgreSQL uses an index only under a special
@@ -126,14 +154,6 @@ its author wrote, with no reconstruction step and no assumption to violate.
 > record table, so the domain namespace in `key1` restates what the table says.
 > Dropping it would give eight noun slots. Kept for now because the payroll
 > envelope uses the same shape, and consistency across domains is worth a slot.
-
-> **Open — should `key3` be the application as its own slot?** Today the leading
-> noun lands there and *happens* to be the application name; a scope record writes
-> `application_id` there directly. Making it a dedicated slot for every record
-> type would make `key3` mean one thing by construction rather than by convention,
-> at the cost of one noun slot (seven → six) and a code change to
-> `codec.PermissionSlots`. Worth deciding before the next record type is added,
-> since every type inherits the answer.
 
 ### Where it lives
 
@@ -445,9 +465,11 @@ functions above are unaffected: registration does not take supported keys, and
 3. **Prefix index** — `C` collation or `text_pattern_ops`, at checkpoint 2.
 4. **P-11 — relationship representation.** The feature is canonical, its shape
    is not. Until it is decided, no permission-side field or record exists.
-5. **`key3` as a dedicated application slot** — one meaning by construction
-   instead of by convention, costing one noun slot. Every record type inherits
-   the answer, so settle it before the next one.
+5. **Must the leading noun be the application?** Today nothing checks it, so
+   `key3` means the application for a scope and merely the first noun for a
+   permission. Stated in full under *Canonical key layout*; recommendation is to
+   leave it to Gate 1. Every record type inherits the answer, so settle it before
+   the next one.
 
 **Settled:** retirement is reversible, so status is one operation. The contract
 is four functions.
