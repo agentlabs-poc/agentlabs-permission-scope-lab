@@ -64,7 +64,7 @@ never moves regardless of how deep the noun path is.
 |---|---|---|
 | `key1` | domain namespace | `abv` |
 | `key2` | record type | `permission` |
-| `key3` | noun 1 | `hrms` |
+| `key3` | noun 1 — **the application** | `hrms` |
 | `key4` | noun 2 | `employee` |
 | `key5` | noun 3 | `certificate` |
 | `key6` … `key9` | nouns 4 – 7, unused → `''` | `''` |
@@ -73,6 +73,12 @@ never moves regardless of how deep the noun path is.
 
 **Seven slots for nouns.** Three of ten are spoken for: two by the canonical type
 path and one reserved for the verb.
+
+**`key3` is the application, in every record type.** Here it arrives as the
+leading noun of the identifier — settled below — rather than being written from
+`application_id`, but it answers the same question a scope record's `key3`
+answers. A reader of the store never has to know which record type a row is to
+know which application owns it.
 
 Why decomposed rather than one string: a query over a whole string slot is a
 lexical prefix match, which on PostgreSQL uses an index only under a special
@@ -92,7 +98,7 @@ the rarer, usually audit-side question.
 hrms:employee:certificate::read
 
 boundary        = application      ← no tenant; shared by every tenant
-tenant_id       = NULL
+tenant_id       = ''               ← not NULL: a NULL is distinct in a unique index
 application_id  = hrms
 key1            = abv
 key2            = permission
@@ -120,6 +126,14 @@ its author wrote, with no reconstruction step and no assumption to violate.
 > record table, so the domain namespace in `key1` restates what the table says.
 > Dropping it would give eight noun slots. Kept for now because the payroll
 > envelope uses the same shape, and consistency across domains is worth a slot.
+
+> **Open — should `key3` be the application as its own slot?** Today the leading
+> noun lands there and *happens* to be the application name; a scope record writes
+> `application_id` there directly. Making it a dedicated slot for every record
+> type would make `key3` mean one thing by construction rather than by convention,
+> at the cost of one noun slot (seven → six) and a code change to
+> `codec.PermissionSlots`. Worth deciding before the next record type is added,
+> since every type inherits the answer.
 
 ### Where it lives
 
@@ -288,8 +302,8 @@ than a typed definition, and — decisively — **one function covering eight ki
 cannot carry one fixed permission per endpoint**, which ABV-123-05/06 requires.
 It stays a CLI and diagnostic tool. `GetPermission` replaces it here.
 
-Also absent: no update, no delete, no bulk register, and no separate accessor for
-supported keys — they ride in `PermissionDefinition`.
+Also absent: no update, no delete, no bulk register, and no supported-keys
+argument — see section 5.
 
 ---
 
@@ -307,7 +321,7 @@ column already names which case applies.
 
 ```sql
 -- fetch one: every slot constrained, a unique hit
-get     boundary = 'application' AND tenant_id IS NULL
+get     boundary = 'application' AND tenant_id = ''
         AND application_id = $1
         AND key1 = 'abv' AND key2 = 'permission'
         AND key3 = $2 AND key4 = $3 AND key5 = $4
@@ -402,11 +416,12 @@ no field and no format is approved. Appendix P-11 lists *optional declared
 compatibility checking* as pending, so the representation was left open
 deliberately.
 
-The prototype carries `Catalog.SupportedKeys` and a `supported_scope_keys` table,
-consulted only when `CompatibilityEnabled` is set. That is implementation ahead
+The prototype carried `Catalog.SupportedKeys` and a `supported_scope_keys` table,
+consulted only when `CompatibilityEnabled` was set. That was implementation ahead
 of the model, not a settled shape — and it is a relationship *between*
-permissions and scopes, so hanging it off the permission record is itself an
-unapproved modelling choice.
+permissions and scopes, so hanging it off the permission record was itself an
+unapproved modelling choice. **Both are removed** by the scope change; see
+`record-scope.md` section 5.
 
 **Nothing about it belongs in this document until P-11 is decided.** The four
 functions above are unaffected: registration does not take supported keys, and
@@ -430,6 +445,9 @@ functions above are unaffected: registration does not take supported keys, and
 3. **Prefix index** — `C` collation or `text_pattern_ops`, at checkpoint 2.
 4. **P-11 — relationship representation.** The feature is canonical, its shape
    is not. Until it is decided, no permission-side field or record exists.
+5. **`key3` as a dedicated application slot** — one meaning by construction
+   instead of by convention, costing one noun slot. Every record type inherits
+   the answer, so settle it before the next one.
 
 **Settled:** retirement is reversible, so status is one operation. The contract
 is four functions.
