@@ -8,8 +8,6 @@ import (
 	"context"
 	"slices"
 	"sort"
-	"strings"
-	"unicode/utf8"
 )
 
 func (s *Service) RegisterPermission(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.PermissionDefinition, supportedKeys []string) (domain.PermissionDefinition, error) {
@@ -180,7 +178,11 @@ func (s *Service) ListPermissions(ctx context.Context, app domain.Application, i
 		if err := admin.CheckPermissionRead(ctx, app, identity, s.clock.Now()); err != nil {
 			return err
 		}
-		selected := make([]domain.PermissionDefinition, 0, len(catalog.Permissions))
+		prefix, err := codec.NounPrefix(filter.Prefix)
+		if err != nil {
+			return err
+		}
+		matched := make([]domain.PermissionDefinition, 0, len(catalog.Permissions))
 		for id, definition := range catalog.Permissions {
 			if err := ctx.Err(); err != nil {
 				return err
@@ -191,19 +193,27 @@ func (s *Service) ListPermissions(ctx context.Context, app domain.Application, i
 			if filter.ActiveOnly && !definition.Active {
 				continue
 			}
-			if !strings.HasPrefix(id, filter.Prefix) {
+			if !matchesPrefix(id, prefix) {
 				continue
 			}
-			if filter.After != "" && id <= filter.After {
-				continue
-			}
-			selected = append(selected, definition)
+			matched = append(matched, definition)
 		}
-		sort.Slice(selected, func(i, j int) bool { return selected[i].ID < selected[j].ID })
-		if len(selected) > limit {
-			selected = selected[:limit]
-			page.NextAfter = selected[len(selected)-1].ID
+		// Ordering by identifier is what makes an offset mean the same thing on
+		// every call. Without a total order the same offset could name different
+		// records between pages.
+		sort.Slice(matched, func(i, j int) bool { return matched[i].ID < matched[j].ID })
+
+		page.Total = len(matched)
+		page.Generation = catalog.Generation
+		if filter.Offset >= len(matched) {
+			page.Permissions = []domain.PermissionDefinition{}
+			return nil
 		}
+		end := filter.Offset + limit
+		if end > len(matched) {
+			end = len(matched)
+		}
+		selected := matched[filter.Offset:end]
 		page.Permissions = selected
 		return nil
 	})
@@ -280,7 +290,7 @@ func validateFilter(filter domain.PermissionFilter) error {
 	if filter.Limit < 0 || filter.Limit > maxPermissionPage {
 		return domain.ErrMalformed
 	}
-	if !utf8.ValidString(filter.After) || strings.Contains(filter.After, "*") {
+	if filter.Offset < 0 {
 		return domain.ErrMalformed
 	}
 	// A prefix must end on a noun-segment boundary. Only whole segments have a
@@ -292,4 +302,24 @@ func validateFilter(filter domain.PermissionFilter) error {
 		return err
 	}
 	return nil
+}
+
+
+// matchesPrefix reports whether an identifier's noun path starts with the given
+// whole segments. Comparison is segment by segment, never a string prefix: only
+// whole segments have a structural form in the key slots.
+func matchesPrefix(id string, prefix []string) bool {
+	if len(prefix) == 0 {
+		return true
+	}
+	key, err := codec.ParsePermission(id)
+	if err != nil || len(key.Nouns) < len(prefix) {
+		return false
+	}
+	for i, segment := range prefix {
+		if key.Nouns[i] != segment {
+			return false
+		}
+	}
+	return true
 }

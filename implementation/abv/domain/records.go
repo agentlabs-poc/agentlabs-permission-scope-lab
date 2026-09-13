@@ -60,18 +60,32 @@ type PermissionDefinition struct {
 // PermissionFilter bounds a catalog listing. Prefix is an administrative
 // convenience for grouping identifiers; it confers no authority, and evaluation
 // never matches on a prefix.
+//
+// Paging is by offset rather than a cursor, deliberately. A catalog is browsed
+// in a UI where a reader jumps between pages rather than walking one, and a
+// cursor cannot answer "page 20" without walking to it. Ordering is by the key
+// slots, which is what makes an offset mean the same thing on every call.
 type PermissionFilter struct {
 	Prefix     string
 	ActiveOnly bool
-	After      string
+	Offset     int
 	Limit      int
 }
 
-// PermissionPage is one bounded page of a catalog listing, ordered by
-// identifier. NextAfter is empty on the last page.
+// PermissionPage is one page of a catalog listing, ordered by the key slots.
+//
+// Total is every record matching the filter, not the page, so a reader can
+// compute how many pages exist.
+//
+// Generation is the application catalog's version at the moment of the read. It
+// is unchanged across pages exactly when nothing was written between them, which
+// is what makes an offset walk safe to cache: read a generation, page through,
+// read it again, and retry if it moved. Without it an insert between two pages
+// can shift a row across the boundary and the walk silently misses it.
 type PermissionPage struct {
 	Permissions []PermissionDefinition
-	NextAfter   string
+	Total       int
+	Generation  int64
 }
 type ScopeDefinition struct {
 	Key           string
@@ -79,6 +93,7 @@ type ScopeDefinition struct {
 }
 type Catalog struct {
 	ApplicationID        string
+	Generation           int64
 	Permissions          map[string]PermissionDefinition
 	Scopes               map[string]ScopeDefinition
 	CompatibilityEnabled bool

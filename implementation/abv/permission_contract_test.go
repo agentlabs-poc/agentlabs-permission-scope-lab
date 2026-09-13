@@ -90,10 +90,11 @@ func TestListPermissionsFiltersPagesAndOrders(t *testing.T) {
 	}, []string{"hrms:employee:profile::read"})
 
 	all, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{})
-	if err != nil || len(all.Permissions) != 4 || all.NextAfter != "" {
-		t.Fatalf("all got=%d next=%q err=%v", len(all.Permissions), all.NextAfter, err)
+	if err != nil || len(all.Permissions) != 4 || all.Total != 4 {
+		t.Fatalf("all got=%d total=%d err=%v", len(all.Permissions), all.Total, err)
 	}
-	// Ordering is by identifier, always.
+	// Ordering is by identifier, always — it is what makes an offset mean the
+	// same thing on every call.
 	for i := 1; i < len(all.Permissions); i++ {
 		if all.Permissions[i-1].ID >= all.Permissions[i].ID {
 			t.Fatalf("not ordered: %q then %q", all.Permissions[i-1].ID, all.Permissions[i].ID)
@@ -101,22 +102,29 @@ func TestListPermissionsFiltersPagesAndOrders(t *testing.T) {
 	}
 
 	byPrefix, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Prefix: "hrms:employee:certificate:"})
-	if err != nil || len(byPrefix.Permissions) != 2 {
-		t.Fatalf("prefix got=%d err=%v", len(byPrefix.Permissions), err)
+	if err != nil || len(byPrefix.Permissions) != 2 || byPrefix.Total != 2 {
+		t.Fatalf("prefix got=%d total=%d err=%v", len(byPrefix.Permissions), byPrefix.Total, err)
 	}
 
 	activeOnly, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{ActiveOnly: true})
-	if err != nil || len(activeOnly.Permissions) != 3 {
-		t.Fatalf("active got=%d err=%v", len(activeOnly.Permissions), err)
+	if err != nil || len(activeOnly.Permissions) != 3 || activeOnly.Total != 3 {
+		t.Fatalf("active got=%d total=%d err=%v", len(activeOnly.Permissions), activeOnly.Total, err)
 	}
 
-	// Paging walks the whole catalog exactly once, in order, with no repeats.
+	// Offset paging walks the catalog once, in order, with no repeats — and
+	// Total lets a reader compute the page count up front rather than
+	// discovering the end by walking into it.
 	seen := map[string]bool{}
-	after, pages := "", 0
-	for {
-		page, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{After: after, Limit: 2})
+	for offset := 0; offset < all.Total; offset += 2 {
+		page, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Offset: offset, Limit: 2})
 		if err != nil {
 			t.Fatal(err)
+		}
+		if page.Total != all.Total {
+			t.Fatalf("total moved between pages: %d then %d", all.Total, page.Total)
+		}
+		if page.Generation != all.Generation {
+			t.Fatalf("generation moved during a quiet walk: %d then %d", all.Generation, page.Generation)
 		}
 		for _, definition := range page.Permissions {
 			if seen[definition.ID] {
@@ -124,22 +132,48 @@ func TestListPermissionsFiltersPagesAndOrders(t *testing.T) {
 			}
 			seen[definition.ID] = true
 		}
-		pages++
-		if page.NextAfter == "" {
-			break
-		}
-		if after = page.NextAfter; pages > 10 {
-			t.Fatal("paging did not terminate")
-		}
 	}
 	if len(seen) != 4 {
 		t.Fatalf("paged over %d identifiers, want 4", len(seen))
 	}
 
+	// An offset past the end is an empty page, not an error — a reader that
+	// jumps beyond the last page sees nothing rather than failing.
+	beyond, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Offset: 999, Limit: 2})
+	if err != nil || len(beyond.Permissions) != 0 || beyond.Total != 4 {
+		t.Fatalf("beyond got=%#v err=%v", beyond, err)
+	}
+
 	// A filter matching nothing is an empty page, never a fallback to everything.
 	empty, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Prefix: "codehost:"})
-	if err != nil || len(empty.Permissions) != 0 || empty.NextAfter != "" {
+	if err != nil || len(empty.Permissions) != 0 || empty.Total != 0 {
 		t.Fatalf("empty got=%#v err=%v", empty, err)
+	}
+}
+
+// TestGenerationDetectsAWriteBetweenPages is why an offset walk is safe to
+// cache: a reader compares the generation across its pages and retries when it
+// moved, rather than silently missing a record an insert shifted past it.
+func TestGenerationDetectsAWriteBetweenPages(t *testing.T) {
+	f, app, id := seeded(t, true, []string{"hrms:a:b::read", "hrms:a:b::write"}, nil)
+
+	before, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Limit: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = f.RegisterPermission(t.Context(), app, id,
+		domain.PermissionDefinition{ID: "hrms:a:b::approve", Active: true}, nil); err != nil {
+		t.Fatal(err)
+	}
+	after, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Offset: 1, Limit: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if after.Generation == before.Generation {
+		t.Fatal("generation did not move across a write; an offset walk could silently miss a record")
+	}
+	if after.Total == before.Total {
+		t.Fatalf("total did not move: %d then %d", before.Total, after.Total)
 	}
 }
 
@@ -148,9 +182,10 @@ func TestListPermissionsRejectsUnboundedOrWildcardFilters(t *testing.T) {
 
 	for name, filter := range map[string]domain.PermissionFilter{
 		"negative limit":  {Limit: -1},
+		"negative offset": {Offset: -1},
 		"limit over cap":  {Limit: 501},
 		"wildcard prefix": {Prefix: "hrms:*"},
-		"wildcard cursor": {After: "*"},
+		"partial segment": {Prefix: "hrms:emp"},
 	} {
 		if _, err := f.ListPermissions(t.Context(), app, id, filter); !errors.Is(err, domain.ErrMalformed) {
 			t.Fatalf("%s: err=%v, want ErrMalformed", name, err)

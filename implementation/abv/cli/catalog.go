@@ -63,7 +63,13 @@ func catalog(ctx context.Context, api application.CatalogAPI, app domain.Applica
 		filter := domain.PermissionFilter{
 			Prefix:     flags["--prefix"],
 			ActiveOnly: has(flags, "--active-only"),
-			After:      flags["--after"],
+		}
+		if has(flags, "--offset") {
+			offset, err := strconv.Atoi(flags["--offset"])
+			if err != nil {
+				return report(diag, domain.ErrMalformed)
+			}
+			filter.Offset = offset
 		}
 		if has(flags, "--limit") {
 			limit, err := strconv.Atoi(flags["--limit"])
@@ -76,11 +82,11 @@ func catalog(ctx context.Context, api application.CatalogAPI, app domain.Applica
 		if err != nil {
 			return report(diag, err)
 		}
-		fmt.Fprintf(&rendered, "internal projection: permissions\ncount  %d\n", len(page.Permissions))
+		fmt.Fprintf(&rendered, "internal projection: permissions\ncount  %d\ntotal  %d\ngeneration  %d\n",
+			len(page.Permissions), page.Total, page.Generation)
 		for _, definition := range page.Permissions {
 			fmt.Fprintf(&rendered, "%s  active=%t\n", definition.ID, definition.Active)
 		}
-		fmt.Fprintf(&rendered, "next-after  %s\n", page.NextAfter)
 	case "set-permission-status":
 		active := flags["--active"] == "true"
 		if flags["--active"] != "true" && flags["--active"] != "false" {

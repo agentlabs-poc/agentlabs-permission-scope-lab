@@ -64,6 +64,9 @@ func (p *catalogMemoryProvider) UpdateCatalog(_ context.Context, _ domain.Applic
 	if err != nil {
 		return err
 	}
+	// Mirror the real provider: any catalog write advances the generation in
+	// the same step, so a reader can tell a quiet walk from a disturbed one.
+	p.catalog.Generation++
 	if w.Scope != nil {
 		p.catalog.Scopes[w.Scope.Key] = *w.Scope
 	}

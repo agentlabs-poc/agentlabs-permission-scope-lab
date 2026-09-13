@@ -97,3 +97,41 @@ func NounPrefix(prefix string) ([]string, error) {
 	}
 	return segments, nil
 }
+
+// PermissionSlots is the key-slot representation of an identifier: the noun
+// path in key3…key9 padded with empty strings, and the verb in key10.
+type PermissionSlots [8]string
+
+// Slots lays the key out for storage. Storage writes these columns verbatim and
+// never parses the identifier itself.
+func (k PermissionKey) Slots() PermissionSlots {
+	var slots PermissionSlots
+	copy(slots[:MaxNounSegments], k.Nouns)
+	slots[MaxNounSegments] = k.Verb
+	return slots
+}
+
+// PermissionFromSlots rebuilds the identifier a row holds. It is the inverse of
+// Slots, and the round-trip is what keeps storage and the contract from drifting:
+// a layout that cannot rebuild its identifier has silently changed its meaning.
+func PermissionFromSlots(slots PermissionSlots) (string, error) {
+	verb := slots[MaxNounSegments]
+	var nouns []string
+	for _, noun := range slots[:MaxNounSegments] {
+		if noun == "" {
+			break
+		}
+		nouns = append(nouns, noun)
+	}
+	if len(nouns) == 0 || invalidString(verb) {
+		return "", domain.ErrMalformed
+	}
+	// Padding must be contiguous: a gap means the row was not written by this
+	// encoder and its identifier cannot be trusted.
+	for _, noun := range slots[len(nouns):MaxNounSegments] {
+		if noun != "" {
+			return "", domain.ErrMalformed
+		}
+	}
+	return PermissionKey{Nouns: nouns, Verb: verb}.Render(), nil
+}

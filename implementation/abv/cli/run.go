@@ -47,7 +47,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens", "--revision", "--permissions", "--support-assignment",
-			"--prefix", "--after", "--limit", "--active", "--active-only":
+			"--prefix", "--offset", "--limit", "--active", "--active-only":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -86,7 +86,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		case "register-scope":
 			allowed = append(allowed, "--allowed-tokens")
 		case "list-permissions":
-			allowed = append(allowed, "--prefix", "--active-only", "--after", "--limit")
+			allowed = append(allowed, "--prefix", "--active-only", "--offset", "--limit")
 		case "set-permission-status":
 			allowed = append(allowed, "--active")
 			if flags["--active"] == "" {

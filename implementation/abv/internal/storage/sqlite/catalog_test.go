@@ -348,3 +348,71 @@ func TestPermissionStatusUpdatePersistsAndNeverInserts(t *testing.T) {
 		t.Fatal("restored status did not survive a reopen")
 	}
 }
+
+// TestPermissionsAreL1Records proves permissions live in the ABV-123 record
+// store with their identifier decomposed across key slots, not in a table of
+// their own with the identifier as one opaque string.
+func TestPermissionsAreL1Records(t *testing.T) {
+	const id = "hrms:employee:certificate::read"
+	path := t.TempDir() + "/authority.db"
+	app, _ := domain.NewApplication("hrms")
+
+	opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{contractFixture(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer opened.Close()
+	catalogs := opened.(storage.CatalogProvider)
+	db := opened.(*provider).db
+
+	if err = catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
+		definition := domain.PermissionDefinition{ID: id, Active: true}
+		return storage.CatalogWriteSet{Permission: &definition}, nil
+	}); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+
+	// The old dedicated table must be gone entirely.
+	if err = db.QueryRow(`SELECT 1 FROM sqlite_schema WHERE type='table' AND name='permissions'`).Scan(new(int)); err == nil {
+		t.Fatal("the permissions table still exists; permissions did not move")
+	}
+
+	// The row is in the record store, with the identifier in slots.
+	var boundary, tenant, k1, k2, k3, k4, k5, k6, k10, value string
+	if err = db.QueryRow(`
+		SELECT boundary, tenant_id, key1, key2, key3, key4, key5, key6, key10, value
+		  FROM abv_l1_records
+		 WHERE application_id='hrms' AND key1='abv' AND key2='permission' AND key3='hrms'
+		   AND key4='employee' AND key5='certificate'`).
+		Scan(&boundary, &tenant, &k1, &k2, &k3, &k4, &k5, &k6, &k10, &value); err != nil {
+		t.Fatalf("record not found in abv_l1_records: %v", err)
+	}
+	for name, got := range map[string]string{
+		"boundary": boundary, "tenant_id": tenant, "key1": k1, "key2": k2,
+		"key3": k3, "key4": k4, "key5": k5, "key6": k6, "key10": k10, "value": value,
+	} {
+		want := map[string]string{
+			"boundary": "application", // application-wide: no tenant dimension
+			"tenant_id": "",           // '' not NULL, so the identity key stays usable
+			"key1": "abv", "key2": "permission",
+			"key3": "hrms", "key4": "employee", "key5": "certificate",
+			"key6": "",       // padding is contiguous
+			"key10": "read",  // the verb is pinned to the last slot, never floating
+			"value": `{"active":true}`,
+		}[name]
+		if got != want {
+			t.Errorf("%s = %q, want %q", name, got, want)
+		}
+	}
+
+	// And it round-trips: the snapshot rebuilds the identifier from those slots.
+	if err = catalogs.ReadCatalog(t.Context(), app, func(c domain.Catalog) error {
+		definition, ok := c.Permissions[id]
+		if !ok || definition.ID != id || !definition.Active {
+			return domain.ErrNotFound
+		}
+		return nil
+	}); err != nil {
+		t.Fatalf("identifier did not rebuild from its slots: %v", err)
+	}
+}

@@ -81,15 +81,26 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	if compat != 0 && compat != 1 {
 		return domain.ErrMalformed
 	}
-	*catalog = domain.Catalog{ApplicationID: applicationID, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1, SupportedKeys: map[string][]string{}}
-	rows, err := r.conn.QueryContext(r.ctx, `SELECT permission_id,active FROM permissions WHERE application_id=? ORDER BY permission_id`, applicationID)
+	var generation int64
+	if err := r.conn.QueryRowContext(r.ctx, `SELECT generation FROM applications WHERE application_id=?`, applicationID).Scan(&generation); err != nil {
+		return classify(err)
+	}
+	*catalog = domain.Catalog{ApplicationID: applicationID, Generation: generation, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1, SupportedKeys: map[string][]string{}}
+	// Permissions are L1 records. The identifier is rebuilt from its slots by
+	// the shared codec; storage never assembles the string itself.
+	rows, err := r.conn.QueryContext(r.ctx, `
+		SELECT key3,key4,key5,key6,key7,key8,key9,key10,value
+		  FROM abv_l1_records
+		 WHERE boundary='application' AND tenant_id='' AND application_id=?
+		   AND key1='abv' AND key2='permission'
+		 ORDER BY key3,key4,key5,key6,key7,key8,key9,key10`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
 	for rows.Next() {
-		var id string
-		var active int
-		if err = rows.Scan(&id, &active); err != nil {
+		var slots codec.PermissionSlots
+		var payload []byte
+		if err = rows.Scan(&slots[0], &slots[1], &slots[2], &slots[3], &slots[4], &slots[5], &slots[6], &slots[7], &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -97,11 +108,19 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 			rows.Close()
 			return err
 		}
-		if codec.PermissionList([]string{id}) != nil || (active != 0 && active != 1) {
+		id, keyErr := codec.PermissionFromSlots(slots)
+		if keyErr != nil {
+			rows.Close()
+			return keyErr
+		}
+		var value struct {
+			Active *bool `json:"active"`
+		}
+		if json.Unmarshal(payload, &value) != nil || value.Active == nil {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		catalog.Permissions[id] = domain.PermissionDefinition{ID: id, Active: active == 1}
+		catalog.Permissions[id] = domain.PermissionDefinition{ID: id, Active: *value.Active}
 	}
 	if err = finishRows(rows); err != nil {
 		return err
