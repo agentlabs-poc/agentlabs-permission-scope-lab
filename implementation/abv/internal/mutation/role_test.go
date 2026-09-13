@@ -51,18 +51,18 @@ func (p *roleProvider) Update(_ context.Context, _ domain.Area, cb func(storage.
 func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
-	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"read"}}
-	snap := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
+	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
+	snap := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
 	p := &roleProvider{snapshot: snap}
 	admin := roleAdmin{check: func(s storage.Snapshot, _ domain.Identity, r domain.RoleContent) error {
 		s.Area = domain.Area{}
-		s.Catalog.Permissions["read"] = domain.PermissionDefinition{}
+		s.Catalog.Permissions["hrms:payroll:payslip::read"] = domain.PermissionDefinition{}
 		r.Permissions[0] = "forged"
 		return nil
 	}}
 	s, _ := New(p, admin, fixedClock{})
 	got, err := s.PublishRole(t.Context(), area, id, role)
-	if err != nil || !reflect.DeepEqual(got, role) || p.writes != 1 || role.Permissions[0] != "read" {
+	if err != nil || !reflect.DeepEqual(got, role) || p.writes != 1 || role.Permissions[0] != "hrms:payroll:payslip::read" {
 		t.Fatalf("got=%#v writes=%d input=%#v err=%v", got, p.writes, role, err)
 	}
 }
@@ -70,8 +70,8 @@ func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
-	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"read"}}
-	base := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
+	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
+	base := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
 	for _, tc := range []struct {
 		name  string
 		snap  storage.Snapshot
@@ -101,11 +101,11 @@ func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 func TestPublishRoleCancellationInsideAdministrationDoesNotWrite(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
-	p := &roleProvider{snapshot: storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}}
+	p := &roleProvider{snapshot: storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}}
 	ctx, cancel := context.WithCancel(t.Context())
 	admin := roleAdmin{check: func(storage.Snapshot, domain.Identity, domain.RoleContent) error { cancel(); return nil }}
 	s, _ := New(p, admin, fixedClock{})
-	got, err := s.PublishRole(ctx, area, id, domain.RoleContent{ID: "reader", Revision: 1, Permissions: []string{"read"}})
+	got, err := s.PublishRole(ctx, area, id, domain.RoleContent{ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}})
 	if !errors.Is(err, context.Canceled) || !reflect.DeepEqual(got, domain.RoleContent{}) || p.writes != 0 {
 		t.Fatalf("got=%#v writes=%d err=%v", got, p.writes, err)
 	}

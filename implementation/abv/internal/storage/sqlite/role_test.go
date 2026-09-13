@@ -12,7 +12,7 @@ import (
 )
 
 func roleSnapshot(area domain.Area) storage.Snapshot {
-	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}, "write": {ID: "write", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "grant", Revision: 1}: {Version: "1", GrantID: "grant", Revision: 1, RoleID: "reader", RoleRevision: 1, Scope: map[string]string{}}}, Assignments: map[string]domain.Assignment{"assignment": {Version: "1", ID: "assignment", GrantID: "grant", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "u"}, Status: "enabled"}}, Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{"read"}}}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
+	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::write": {ID: "hrms:payroll:payslip::write", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "grant", Revision: 1}: {Version: "1", GrantID: "grant", Revision: 1, RoleID: "reader", RoleRevision: 1, Scope: map[string]string{}}}, Assignments: map[string]domain.Assignment{"assignment": {Version: "1", ID: "assignment", GrantID: "grant", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "u"}, Status: "enabled"}}, Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 }
 
 func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
@@ -23,7 +23,7 @@ func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"read", "write"}}
+	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::write"}}
 	if err = p.Update(t.Context(), a1, func(s storage.Snapshot) (storage.WriteSet, error) {
 		return storage.WriteSet{NewRoleRevision: &role}, nil
 	}); err != nil {
@@ -31,7 +31,7 @@ func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
 	}
 	if err = p.Update(t.Context(), a2, func(s storage.Snapshot) (storage.WriteSet, error) {
 		copy := role
-		copy.Permissions = []string{"write"}
+		copy.Permissions = []string{"hrms:payroll:payslip::write"}
 		return storage.WriteSet{NewRoleRevision: &copy}, nil
 	}); err != nil {
 		t.Fatal(err)
@@ -52,13 +52,13 @@ func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
 	for _, tc := range []struct {
 		area domain.Area
 		want []string
-	}{{a1, []string{"read", "write"}}, {a2, []string{"write"}}} {
+	}{{a1, []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::write"}}, {a2, []string{"hrms:payroll:payslip::write"}}} {
 		if err := p.Read(t.Context(), tc.area, func(s storage.Snapshot) error {
-			if !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "reader", Revision: 1}].Permissions, []string{"read"}) || !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "reader", Revision: 2}].Permissions, tc.want) {
+			if !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "reader", Revision: 1}].Permissions, []string{"hrms:payroll:payslip::read"}) || !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "reader", Revision: 2}].Permissions, tc.want) {
 				t.Fatalf("roles=%#v", s.Roles)
 			}
 			permissions, err := validation.SelectedPermissions(s.Contents[domain.GrantKey{ID: "grant", Revision: 1}], s.Roles)
-			if err != nil || !reflect.DeepEqual(permissions, []string{"read"}) {
+			if err != nil || !reflect.DeepEqual(permissions, []string{"hrms:payroll:payslip::read"}) {
 				t.Fatalf("adopted revision changed: permissions=%v err=%v", permissions, err)
 			}
 			if got := s.Assignments["assignment"]; got.GrantID != "grant" || got.GrantRevision != 1 || got.Status != "enabled" {
@@ -78,7 +78,7 @@ func TestRolePublicationConcurrentDuplicateHasOneWinner(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer p.Close()
-	role := domain.RoleContent{ID: "concurrent", Revision: 1, Permissions: []string{"read"}}
+	role := domain.RoleContent{ID: "concurrent", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
 	var wg sync.WaitGroup
 	errs := make(chan error, 2)
 	for range 2 {
@@ -112,10 +112,10 @@ func TestRolePublicationProviderRejectsMixedAndHostileWrites(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer p.Close()
-	role := domain.RoleContent{ID: "new", Revision: 1, Permissions: []string{"read"}}
+	role := domain.RoleContent{ID: "new", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
 	for _, cb := range []func(storage.Snapshot) (storage.WriteSet, error){
 		func(s storage.Snapshot) (storage.WriteSet, error) {
-			s.Catalog.Permissions["forged"] = domain.PermissionDefinition{ID: "forged", Active: true}
+			s.Catalog.Permissions["hrms:payroll:payslip::forged"] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::forged", Active: true}
 			x := role
 			x.Permissions = []string{"forged"}
 			return storage.WriteSet{NewRoleRevision: &x}, nil

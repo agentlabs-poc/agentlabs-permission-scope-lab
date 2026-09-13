@@ -64,11 +64,36 @@ func (p *catalogMemoryProvider) UpdateCatalog(_ context.Context, _ domain.Applic
 	if err != nil {
 		return err
 	}
+	// Mirror the real provider: any catalog write advances the generation in
+	// the same step, so a reader can tell a quiet walk from a disturbed one.
+	p.catalog.Generation++
 	if w.Scope != nil {
 		p.catalog.Scopes[w.Scope.Key] = *w.Scope
 	}
 	if w.Permission != nil {
 		p.catalog.Permissions[w.Permission.ID] = *w.Permission
+	}
+	if w.PermissionStatus != nil {
+		existing, ok := p.catalog.Permissions[w.PermissionStatus.ID]
+		if !ok {
+			return domain.ErrNotFound
+		}
+		existing.Active = w.PermissionStatus.Active
+		p.catalog.Permissions[w.PermissionStatus.ID] = existing
+	}
+	return nil
+}
+
+func (a catalogAdministration) CheckPermissionRead(context.Context, domain.Application, domain.Identity, time.Time) error {
+	if !a.allow {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+func (a catalogAdministration) CheckPermissionStatus(context.Context, domain.Application, domain.Catalog, domain.Identity, string, bool, time.Time) error {
+	if !a.allow {
+		return domain.ErrRejected
 	}
 	return nil
 }

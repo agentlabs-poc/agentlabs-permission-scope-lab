@@ -7,6 +7,10 @@ import (
 	"errors"
 )
 
+// supportedSchemaVersion is the only layout this build accepts. A database at
+// another version is rejected rather than migrated: fail closed.
+const supportedSchemaVersion = 3
+
 //go:embed migrations/001_initial.sql
 var initialMigration string
 
@@ -38,5 +42,5 @@ func hasMarker(ctx context.Context, conn *sql.Conn) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return version == 1, nil
+	return version == supportedSchemaVersion, nil
 }

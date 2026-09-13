@@ -341,20 +341,20 @@ func Run(t *testing.T, factory Factory) {
 
 func fixtures(t *testing.T) []storage.Snapshot {
 	t.Helper()
-	hrms := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"許可🚀": {ID: "許可🚀", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"部門": {Key: "部門", AllowedTokens: []string{"$self"}}}, CompatibilityEnabled: true, SupportedKeys: map[string][]string{"許可🚀": {"部門"}}}
-	crm := domain.Catalog{ApplicationID: "crm", Permissions: map[string]domain.PermissionDefinition{"許可🚀": {ID: "許可🚀", Active: false}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}
+	hrms := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"許可🚀::読む": {ID: "許可🚀::読む", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"部門": {Key: "部門", AllowedTokens: []string{"$self"}}}, CompatibilityEnabled: true, SupportedKeys: map[string][]string{"許可🚀::読む": {"部門"}}}
+	crm := domain.Catalog{ApplicationID: "crm", Permissions: map[string]domain.PermissionDefinition{"許可🚀::読む": {ID: "許可🚀::読む", Active: false}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}
 	a1, _ := domain.NewArea("acme", "hrms")
 	a2, _ := domain.NewArea("beta", "hrms")
 	a3, _ := domain.NewArea("acme", "crm")
 	nb := time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC)
 	ex := time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)
 	makeSnapshot := func(area domain.Area, catalog domain.Catalog, human string) storage.Snapshot {
-		content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 2, Permissions: []string{"許可🚀"}, Scope: map[string]string{"部門": "財務"}, Validity: &domain.Validity{NotBefore: &nb, ExpiresAt: &ex}}
+		content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 2, Permissions: []string{"許可🚀::読む"}, Scope: map[string]string{"部門": "財務"}, Validity: &domain.Validity{NotBefore: &nb, ExpiresAt: &ex}}
 		assignment := domain.Assignment{Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "Team1"}, Status: "disabled"}
 		return storage.Snapshot{Area: area, Catalog: catalog,
 			Controls: map[string]domain.GrantControl{"G1": {Version: "1", ID: "G1", Status: "enabled"}},
 			Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 2}: content}, Assignments: map[string]domain.Assignment{"A1": assignment},
-			Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 3}: {ID: "reader", Revision: 3, Permissions: []string{"許可🚀"}}},
+			Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 3}: {ID: "reader", Revision: 3, Permissions: []string{"許可🚀::読む"}}},
 			Teams: map[string]domain.Team{"Team1": {ID: "Team1", ParentID: "preserved-orphan-parent"}}, Memberships: []domain.Membership{{TeamID: "Team1", HumanID: human}}, TrustedRoots: map[string]bool{"G1": true}}
 	}
 	return []storage.Snapshot{makeSnapshot(a1, hrms, "人間🚀"), makeSnapshot(a2, hrms, "other"), makeSnapshot(a3, crm, "third")}

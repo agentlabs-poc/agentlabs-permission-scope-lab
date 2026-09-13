@@ -31,6 +31,14 @@ func (a catalogAdministration) CheckPermissionRegistration(ctx context.Context, 
 func (a catalogAdministration) CheckScopeRegistration(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, _ domain.ScopeDefinition, _ time.Time) error {
 	return a.check(ctx, app, catalog, identity)
 }
+func (a catalogAdministration) CheckPermissionRead(ctx context.Context, app domain.Application, identity domain.Identity, _ time.Time) error {
+	return a.check(ctx, app, domain.Catalog{ApplicationID: app.ID()}, identity)
+}
+
+func (a catalogAdministration) CheckPermissionStatus(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, _ string, _ bool, _ time.Time) error {
+	return a.check(ctx, app, catalog, identity)
+}
+
 func (a catalogAdministration) check(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -74,6 +82,36 @@ func (a *catalogApplication) RegisterScope(ctx context.Context, app domain.Appli
 		return domain.ScopeDefinition{}, err
 	}
 	return a.facade.RegisterScope(ctx, app, catalogPublisher, definition)
+}
+
+func (a *catalogApplication) GetPermission(ctx context.Context, app domain.Application, fixture domain.FixtureContext, id string) (domain.PermissionDefinition, error) {
+	if app != a.app || fixture.Name != catalogFixtureContext {
+		return domain.PermissionDefinition{}, domain.ErrRejected
+	}
+	if err := verifyCatalogMarker(ctx, a.path, app); err != nil {
+		return domain.PermissionDefinition{}, err
+	}
+	return a.facade.GetPermission(ctx, app, catalogPublisher, id)
+}
+
+func (a *catalogApplication) ListPermissions(ctx context.Context, app domain.Application, fixture domain.FixtureContext, filter domain.PermissionFilter) (domain.PermissionPage, error) {
+	if app != a.app || fixture.Name != catalogFixtureContext {
+		return domain.PermissionPage{}, domain.ErrRejected
+	}
+	if err := verifyCatalogMarker(ctx, a.path, app); err != nil {
+		return domain.PermissionPage{}, err
+	}
+	return a.facade.ListPermissions(ctx, app, catalogPublisher, filter)
+}
+
+func (a *catalogApplication) SetPermissionStatus(ctx context.Context, app domain.Application, fixture domain.FixtureContext, id string, active bool) (domain.PermissionDefinition, error) {
+	if app != a.app || fixture.Name != catalogFixtureContext {
+		return domain.PermissionDefinition{}, domain.ErrRejected
+	}
+	if err := verifyCatalogMarker(ctx, a.path, app); err != nil {
+		return domain.PermissionDefinition{}, err
+	}
+	return a.facade.SetPermissionStatus(ctx, app, catalogPublisher, id, active)
 }
 
 func verifyCatalogMarker(ctx context.Context, path string, app domain.Application) error {

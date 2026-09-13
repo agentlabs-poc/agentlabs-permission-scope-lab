@@ -235,7 +235,7 @@ func TestMissingContextMakesZeroConnectorAndAPICalls(t *testing.T) {
 	}
 }
 func TestInspectForwardsExactAreaPathAndCloses(t *testing.T) {
-	for _, kind := range []string{"permission", "scope", "role", "grant", "assignment", "team", "membership"} {
+	for _, kind := range []string{"scope", "role", "grant", "assignment", "team", "membership"} {
 		api := &apiSpy{}
 		connector := &connectorSpy{api: api}
 		var out, diag bytes.Buffer

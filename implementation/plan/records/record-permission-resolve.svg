@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 250" width="760" height="250" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+  <defs>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,1 10,5 0,9" fill="#5b6478"/>
+    </marker>
+  </defs>
+  <rect width="760" height="250" fill="#fbfcfe"/>
+
+  <rect x="24" y="44" width="512" height="132" rx="5" fill="none" stroke="#26608f" stroke-width="1" stroke-dasharray="6 4"/>
+  <text x="36" y="38" font-size="11.5" font-weight="600" fill="#26608f">Auth-AL</text>
+
+  <rect x="566" y="44" width="170" height="132" rx="5" fill="none" stroke="#5c6478" stroke-width="1" stroke-dasharray="6 4"/>
+  <text x="578" y="38" font-size="11.5" font-weight="600" fill="#5c6478">Auth Agent</text>
+
+  <rect x="40" y="70" width="112" height="82" rx="4" fill="#eef3f9" stroke="#26608f" stroke-width="1.2"/>
+  <text x="96" y="94" text-anchor="middle" font-size="15" font-weight="600" fill="#26608f">1</text>
+  <text x="96" y="116" text-anchor="middle" font-size="11" fill="#16202e">ResolveHuman</text>
+  <text x="96" y="134" text-anchor="middle" font-size="10" fill="#5b6478">gate the request</text>
+
+  <rect x="168" y="70" width="112" height="82" rx="4" fill="#eef3f9" stroke="#26608f" stroke-width="1.2"/>
+  <text x="224" y="94" text-anchor="middle" font-size="15" font-weight="600" fill="#26608f">2</text>
+  <text x="224" y="116" text-anchor="middle" font-size="11" fill="#16202e">CheckContent</text>
+  <text x="224" y="134" text-anchor="middle" font-size="10" fill="#5b6478">validate content</text>
+
+  <rect x="296" y="70" width="112" height="82" rx="4" fill="#eef3f9" stroke="#26608f" stroke-width="1.2"/>
+  <text x="352" y="94" text-anchor="middle" font-size="15" font-weight="600" fill="#26608f">3</text>
+  <text x="352" y="116" text-anchor="middle" font-size="11" fill="#16202e">rootRoute</text>
+  <text x="352" y="134" text-anchor="middle" font-size="10" fill="#5b6478">root coverage</text>
+
+  <rect x="424" y="70" width="96" height="82" rx="4" fill="#eef3f9" stroke="#26608f" stroke-width="1.2"/>
+  <text x="472" y="94" text-anchor="middle" font-size="15" font-weight="600" fill="#26608f">4</text>
+  <text x="472" y="116" text-anchor="middle" font-size="11" fill="#16202e">Narrow</text>
+  <text x="472" y="134" text-anchor="middle" font-size="10" fill="#5b6478">child ⊆ parent</text>
+
+  <rect x="582" y="70" width="138" height="82" rx="4" fill="#eef0f4" stroke="#5c6478" stroke-width="1.2"/>
+  <text x="651" y="94" text-anchor="middle" font-size="15" font-weight="600" fill="#5c6478">5</text>
+  <text x="651" y="116" text-anchor="middle" font-size="11" fill="#16202e">validateRoute</text>
+  <text x="651" y="134" text-anchor="middle" font-size="10" fill="#5b6478">exact match</text>
+
+  <line x1="152" y1="111" x2="166" y2="111" stroke="#5b6478" stroke-width="1.3" marker-end="url(#c)"/>
+  <line x1="280" y1="111" x2="294" y2="111" stroke="#5b6478" stroke-width="1.3" marker-end="url(#c)"/>
+  <line x1="408" y1="111" x2="422" y2="111" stroke="#5b6478" stroke-width="1.3" marker-end="url(#c)"/>
+  <line x1="520" y1="111" x2="580" y2="111" stroke="#5b6478" stroke-width="1.3" marker-end="url(#c)"/>
+
+  <text x="30" y="206" font-size="11" fill="#5b6478">1  must be in the catalog and active before any grant is examined</text>
+  <text x="30" y="224" font-size="11" fill="#5b6478">3  a root's permissions are computed here, never stored</text>
+  <text x="400" y="206" font-size="11" fill="#5b6478">4  a child can never introduce a permission</text>
+  <text x="400" y="224" font-size="11" fill="#5b6478">5  no prefix, no wildcard, no hierarchy</text>
+</svg>

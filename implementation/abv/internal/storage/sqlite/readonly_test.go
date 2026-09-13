@@ -41,7 +41,7 @@ func TestOpenReadOnlyRejectsInvalidDatabaseWithoutChangingIt(t *testing.T) {
 	}{
 		{name: "empty", schema: ""},
 		{name: "foreign", schema: `CREATE TABLE foreign_data(value TEXT); INSERT INTO foreign_data VALUES ('keep')`},
-		{name: "unsupported marker", schema: `CREATE TABLE abv_metadata(marker TEXT PRIMARY KEY, schema_version INTEGER NOT NULL); INSERT INTO abv_metadata VALUES ('agentlabs-abv', 2)`},
+		{name: "unsupported marker", schema: `CREATE TABLE abv_metadata(marker TEXT PRIMARY KEY, schema_version INTEGER NOT NULL); INSERT INTO abv_metadata VALUES ('agentlabs-abv', 99)`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "database.db")

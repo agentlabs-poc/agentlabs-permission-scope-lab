@@ -93,8 +93,8 @@ func seedCatalog(ctx context.Context, conn *sql.Conn, c domain.Catalog) error {
 		if invalid(id) || d.ID != id {
 			return domain.ErrMalformed
 		}
-		if _, err := conn.ExecContext(ctx, `INSERT INTO permissions(application_id,permission_id,active) VALUES(?,?,?)`, c.ApplicationID, id, boolInt(d.Active)); err != nil {
-			return classify(err)
+		if err := insertPermissionRecord(ctx, conn, c.ApplicationID, d); err != nil {
+			return err
 		}
 	}
 	scopeKeys := sortedKeys(c.Scopes)

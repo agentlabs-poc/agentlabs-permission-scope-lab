@@ -108,7 +108,7 @@ func TestCatalogProviderRejectsInvalidOperationsWithoutWrites(t *testing.T) {
 		},
 		"mixed write": func() error {
 			return p.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-				permission := domain.PermissionDefinition{ID: "new", Active: true}
+				permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
 				scope := domain.ScopeDefinition{Key: "new", AllowedTokens: []string{}}
 				return storage.CatalogWriteSet{Permission: &permission, Scope: &scope}, nil
 			})
@@ -145,7 +145,7 @@ func TestCatalogProviderUsesPersistedEvidenceAndHandlesCancellation(t *testing.T
 	defer opened.Close()
 	p := opened.(storage.CatalogProvider)
 	app, _ := domain.NewApplication("hrms")
-	permission := domain.PermissionDefinition{ID: "new", Active: true}
+	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
 	err = p.UpdateCatalog(t.Context(), app, func(c domain.Catalog) (storage.CatalogWriteSet, error) {
 		c.Scopes["invented"] = domain.ScopeDefinition{Key: "invented", AllowedTokens: []string{}}
 		return storage.CatalogWriteSet{Permission: &permission, SupportedKeys: []string{"invented"}}, nil
@@ -182,7 +182,7 @@ func TestCatalogProviderDuplicateAndConcurrentInsertConflict(t *testing.T) {
 	app, _ := domain.NewApplication("hrms")
 	for _, active := range []bool{true, false} {
 		err := p.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-			permission := domain.PermissionDefinition{ID: "read", Active: active}
+			permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::read", Active: active}
 			return storage.CatalogWriteSet{Permission: &permission}, nil
 		})
 		if !errors.Is(err, domain.ErrConflict) {
@@ -205,7 +205,7 @@ func TestCatalogProviderDuplicateAndConcurrentInsertConflict(t *testing.T) {
 			ready.Done()
 			<-start
 			results <- provider.UpdateCatalog(context.Background(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-				definition := domain.PermissionDefinition{ID: "concurrent", Active: true}
+				definition := domain.PermissionDefinition{ID: "hrms:payroll:payslip::concurrent", Active: true}
 				return storage.CatalogWriteSet{Permission: &definition}, nil
 			})
 		}(provider)
@@ -267,4 +267,152 @@ func p1Path(p *provider) string {
 	var path string
 	_ = p.db.QueryRow(`SELECT file FROM pragma_database_list WHERE name='main'`).Scan(&path)
 	return path
+}
+
+// TestPermissionStatusUpdatePersistsAndNeverInserts proves the status write is a
+// genuine update against real storage: it flips an existing row, survives a
+// reopen, and cannot bring an identifier into existence.
+func TestPermissionStatusUpdatePersistsAndNeverInserts(t *testing.T) {
+	const id = "hrms:employee:certificate::read"
+	path := t.TempDir() + "/authority.db"
+	app, _ := domain.NewApplication("hrms")
+
+	provider, err := CreateFixture(t.Context(), path, []storage.Snapshot{contractFixture(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalogs, ok := provider.(storage.CatalogProvider)
+	if !ok {
+		t.Fatal("provider does not support catalogs")
+	}
+
+	register := func() error {
+		return catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
+			definition := domain.PermissionDefinition{ID: id, Active: true}
+			return storage.CatalogWriteSet{Permission: &definition}, nil
+		})
+	}
+	setStatus := func(target string, active bool) error {
+		return catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
+			definition := domain.PermissionDefinition{ID: target, Active: active}
+			return storage.CatalogWriteSet{PermissionStatus: &definition}, nil
+		})
+	}
+	active := func(p storage.CatalogProvider) bool {
+		t.Helper()
+		var got bool
+		if err := p.ReadCatalog(t.Context(), app, func(c domain.Catalog) error {
+			got = c.Permissions[id].Active
+			return nil
+		}); err != nil {
+			t.Fatal(err)
+		}
+		return got
+	}
+
+	if err = register(); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+	if !active(catalogs) {
+		t.Fatal("registered permission is not active")
+	}
+
+	if err = setStatus(id, false); err != nil {
+		t.Fatalf("retire: %v", err)
+	}
+	if active(catalogs) {
+		t.Fatal("retirement did not persist")
+	}
+
+	// An identifier that was never registered cannot be created by a status
+	// change, which would let a permanent identifier appear without its
+	// administrative registration check.
+	if err = setStatus("hrms:employee:profile::read", true); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("unregistered status err=%v, want ErrNotFound", err)
+	}
+
+	// Retirement is reversible.
+	if err = setStatus(id, true); err != nil {
+		t.Fatalf("restore: %v", err)
+	}
+	if err = provider.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	reopened, err := Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	if !active(reopened.(storage.CatalogProvider)) {
+		t.Fatal("restored status did not survive a reopen")
+	}
+}
+
+// TestPermissionsAreL1Records proves permissions live in the ABV-123 record
+// store with their identifier decomposed across key slots, not in a table of
+// their own with the identifier as one opaque string.
+func TestPermissionsAreL1Records(t *testing.T) {
+	const id = "hrms:employee:certificate::read"
+	path := t.TempDir() + "/authority.db"
+	app, _ := domain.NewApplication("hrms")
+
+	opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{contractFixture(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer opened.Close()
+	catalogs := opened.(storage.CatalogProvider)
+	db := opened.(*provider).db
+
+	if err = catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
+		definition := domain.PermissionDefinition{ID: id, Active: true}
+		return storage.CatalogWriteSet{Permission: &definition}, nil
+	}); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+
+	// The old dedicated table must be gone entirely.
+	if err = db.QueryRow(`SELECT 1 FROM sqlite_schema WHERE type='table' AND name='permissions'`).Scan(new(int)); err == nil {
+		t.Fatal("the permissions table still exists; permissions did not move")
+	}
+
+	// The row is in the record store, with the identifier in slots.
+	var boundary, tenant, k1, k2, k3, k4, k5, k6, k10, value string
+	if err = db.QueryRow(`
+		SELECT boundary, tenant_id, key1, key2, key3, key4, key5, key6, key10, value
+		  FROM abv_l1_records
+		 WHERE application_id='hrms' AND key1='abv' AND key2='permission' AND key3='hrms'
+		   AND key4='employee' AND key5='certificate'`).
+		Scan(&boundary, &tenant, &k1, &k2, &k3, &k4, &k5, &k6, &k10, &value); err != nil {
+		t.Fatalf("record not found in abv_l1_records: %v", err)
+	}
+	for name, got := range map[string]string{
+		"boundary": boundary, "tenant_id": tenant, "key1": k1, "key2": k2,
+		"key3": k3, "key4": k4, "key5": k5, "key6": k6, "key10": k10, "value": value,
+	} {
+		want := map[string]string{
+			"boundary": "application", // application-wide: no tenant dimension
+			"tenant_id": "",           // '' not NULL, so the identity key stays usable
+			"key1": "abv", "key2": "permission",
+			"key3": "hrms", "key4": "employee", "key5": "certificate",
+			"key6": "",       // padding is contiguous
+			"key10": "read",  // the verb is pinned to the last slot, never floating
+			"value": `{"active":true}`,
+		}[name]
+		if got != want {
+			t.Errorf("%s = %q, want %q", name, got, want)
+		}
+	}
+
+	// And it round-trips: the snapshot rebuilds the identifier from those slots.
+	if err = catalogs.ReadCatalog(t.Context(), app, func(c domain.Catalog) error {
+		definition, ok := c.Permissions[id]
+		if !ok || definition.ID != id || !definition.Active {
+			return domain.ErrNotFound
+		}
+		return nil
+	}); err != nil {
+		t.Fatalf("identifier did not rebuild from its slots: %v", err)
+	}
 }
