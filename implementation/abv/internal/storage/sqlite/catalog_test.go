@@ -29,13 +29,13 @@ func TestCatalogProviderPersistsAndIsolatesApplicationCatalog(t *testing.T) {
 	}
 	app, _ := domain.NewApplication("hrms")
 	if err = catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-		return storage.CatalogWriteSet{Scope: &domain.ScopeDefinition{Key: "dept", AllowedTokens: []string{"$self"}}}, nil
+		return storage.CatalogWriteSet{Scope: &domain.ScopeDefinition{Key: "dept"}}, nil
 	}); err != nil {
 		t.Fatal(err)
 	}
 	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true}
 	if err = catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-		return storage.CatalogWriteSet{Permission: &permission, SupportedKeys: []string{"dept"}}, nil
+		return storage.CatalogWriteSet{Permission: &permission}, nil
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -109,13 +109,13 @@ func TestCatalogProviderRejectsInvalidOperationsWithoutWrites(t *testing.T) {
 		"mixed write": func() error {
 			return p.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
 				permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
-				scope := domain.ScopeDefinition{Key: "new", AllowedTokens: []string{}}
+				scope := domain.ScopeDefinition{Key: "new"}
 				return storage.CatalogWriteSet{Permission: &permission, Scope: &scope}, nil
 			})
 		},
 		"keys alone": func() error {
 			return p.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-				return storage.CatalogWriteSet{SupportedKeys: []string{"x"}}, nil
+				return storage.CatalogWriteSet{}, nil
 			})
 		},
 	}
@@ -146,12 +146,22 @@ func TestCatalogProviderUsesPersistedEvidenceAndHandlesCancellation(t *testing.T
 	p := opened.(storage.CatalogProvider)
 	app, _ := domain.NewApplication("hrms")
 	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
-	err = p.UpdateCatalog(t.Context(), app, func(c domain.Catalog) (storage.CatalogWriteSet, error) {
-		c.Scopes["invented"] = domain.ScopeDefinition{Key: "invented", AllowedTokens: []string{}}
-		return storage.CatalogWriteSet{Permission: &permission, SupportedKeys: []string{"invented"}}, nil
-	})
-	if !errors.Is(err, domain.ErrRejected) {
-		t.Fatalf("trusted callback mutation: %v", err)
+	// A callback that mutates its catalog copy must not influence the store: the
+	// write re-reads authoritatively, so the forged entry cannot persist.
+	forgedProbe := domain.PermissionDefinition{ID: "hrms:payroll:payslip::probe", Active: true}
+	if err = p.UpdateCatalog(t.Context(), app, func(c domain.Catalog) (storage.CatalogWriteSet, error) {
+		c.Scopes["invented"] = domain.ScopeDefinition{Key: "invented"}
+		return storage.CatalogWriteSet{Permission: &forgedProbe}, nil
+	}); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+	if err = p.ReadCatalog(t.Context(), app, func(c domain.Catalog) error {
+		if _, forged := c.Scopes["invented"]; forged {
+			t.Fatal("a callback's mutation of its own copy reached the store")
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancel(t.Context())
 	err = p.UpdateCatalog(ctx, app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
@@ -253,9 +263,6 @@ func assertCatalogPermission(t *testing.T, p storage.CatalogProvider, app domain
 		}
 		if c.ApplicationID != "hrms" {
 			t.Fatal("application boundary changed")
-		}
-		if len(c.SupportedKeys[id]) != 1 || c.SupportedKeys[id][0] != "dept" {
-			t.Fatal("supported keys missing")
 		}
 		return nil
 	}); err != nil {
@@ -414,5 +421,62 @@ func TestPermissionsAreL1Records(t *testing.T) {
 		return nil
 	}); err != nil {
 		t.Fatalf("identifier did not rebuild from its slots: %v", err)
+	}
+}
+
+// TestScopesAreL1Records proves scopes moved out of their own table and into the
+// record store, with the application in key3 and the key in key4.
+func TestScopesAreL1Records(t *testing.T) {
+	path := t.TempDir() + "/authority.db"
+	app, _ := domain.NewApplication("hrms")
+	opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{contractFixture(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer opened.Close()
+	catalogs := opened.(storage.CatalogProvider)
+	db := opened.(*provider).db
+
+	if err = catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
+		definition := domain.ScopeDefinition{Key: "region"}
+		return storage.CatalogWriteSet{Scope: &definition}, nil
+	}); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+
+	if err = db.QueryRow(`SELECT 1 FROM sqlite_schema WHERE type='table' AND name='scope_definitions'`).Scan(new(int)); err == nil {
+		t.Fatal("the scope_definitions table still exists; scopes did not move")
+	}
+
+	var boundary, tenant, k1, k2, k3, k4, k5, value string
+	if err = db.QueryRow(`
+		SELECT boundary, tenant_id, key1, key2, key3, key4, key5, value
+		  FROM abv_l1_records
+		 WHERE application_id='hrms' AND key1='abv' AND key2='scope' AND key4='region'`).
+		Scan(&boundary, &tenant, &k1, &k2, &k3, &k4, &k5, &value); err != nil {
+		t.Fatalf("record not found in abv_l1_records: %v", err)
+	}
+	for name, pair := range map[string][2]string{
+		"boundary":  {boundary, "application"}, // application-wide: no tenant dimension
+		"tenant_id": {tenant, ""},
+		"key1":      {k1, "abv"}, "key2": {k2, "scope"},
+		"key3": {k3, "hrms"},   // the application, in every record type
+		"key4": {k4, "region"}, // a scope key is flat: one slot, whole
+		"key5": {k5, ""},       // nothing follows
+		"value": {value, `{}`}, // a scope record's presence is the fact
+	} {
+		if pair[0] != pair[1] {
+			t.Errorf("%s = %q, want %q", name, pair[0], pair[1])
+		}
+	}
+
+	if err = catalogs.ReadCatalog(t.Context(), app, func(c domain.Catalog) error {
+		definition, ok := c.Scopes["region"]
+		if !ok || definition.Key != "region" {
+			return domain.ErrNotFound
+		}
+		return nil
+	}); err != nil {
+		t.Fatalf("scope did not round-trip: %v", err)
 	}
 }

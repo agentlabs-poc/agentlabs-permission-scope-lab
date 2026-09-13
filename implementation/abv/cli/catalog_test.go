@@ -16,12 +16,28 @@ type catalogSpy struct {
 	fixture    domain.FixtureContext
 	permission domain.PermissionDefinition
 	scope      domain.ScopeDefinition
-	keys       []string
-	filter     domain.PermissionFilter
+	filter      domain.PermissionFilter
+	scopeFilter domain.ScopeFilter
 	page       domain.PermissionPage
 	id         string
 	active     bool
 	err        error
+}
+
+func (s *catalogSpy) GetScope(_ context.Context, app domain.Application, fixture domain.FixtureContext, key string) (domain.ScopeDefinition, error) {
+	if s.err != nil {
+		return domain.ScopeDefinition{}, s.err
+	}
+	s.app, s.fixture, s.id = app, fixture, key
+	return domain.ScopeDefinition{Key: key}, nil
+}
+
+func (s *catalogSpy) ListScopes(_ context.Context, app domain.Application, fixture domain.FixtureContext, filter domain.ScopeFilter) (domain.ScopePage, error) {
+	if s.err != nil {
+		return domain.ScopePage{}, s.err
+	}
+	s.app, s.fixture, s.scopeFilter = app, fixture, filter
+	return domain.ScopePage{}, nil
 }
 
 func (s *catalogSpy) GetPermission(_ context.Context, app domain.Application, fixture domain.FixtureContext, id string) (domain.PermissionDefinition, error) {
@@ -48,11 +64,11 @@ func (s *catalogSpy) SetPermissionStatus(_ context.Context, app domain.Applicati
 	return domain.PermissionDefinition{ID: id, Active: active}, nil
 }
 
-func (s *catalogSpy) RegisterPermission(_ context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.PermissionDefinition, keys []string) (domain.PermissionDefinition, error) {
+func (s *catalogSpy) RegisterPermission(_ context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
 	if s.err != nil {
 		return domain.PermissionDefinition{}, s.err
 	}
-	s.app, s.fixture, s.permission, s.keys = app, fixture, definition, append([]string(nil), keys...)
+	s.app, s.fixture, s.permission = app, fixture, definition
 	return definition, nil
 }
 func (s *catalogSpy) RegisterScope(_ context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.ScopeDefinition) (domain.ScopeDefinition, error) {
@@ -83,8 +99,8 @@ func TestCatalogCommandsForwardValidatedDefinitions(t *testing.T) {
 		return spy, func() error { return nil }, nil
 	}
 	for _, args := range [][]string{
-		{"catalog", "register-scope", "owner", "--allowed-tokens", "$self", "--app", "hrms", "--db", "lab.db", "--fixture-context", "application-publisher"},
-		{"catalog", "register-permission", "hrms:payroll:payslip::export", "--supported-keys", "dept,region", "--app", "hrms", "--db", "lab.db", "--fixture-context", "application-publisher"},
+		{"catalog", "register-scope", "owner", "--app", "hrms", "--db", "lab.db", "--fixture-context", "application-publisher"},
+		{"catalog", "register-permission", "hrms:payroll:payslip::export", "--app", "hrms", "--db", "lab.db", "--fixture-context", "application-publisher"},
 	} {
 		var out, diag bytes.Buffer
 		if got := Run(t.Context(), args, strings.NewReader(""), &out, &diag, nil, nil, connect); got != 0 {
@@ -94,18 +110,16 @@ func TestCatalogCommandsForwardValidatedDefinitions(t *testing.T) {
 			t.Fatalf("stdout=%q stderr=%q", out.String(), diag.String())
 		}
 	}
-	if spy.scope.Key != "owner" || len(spy.scope.AllowedTokens) != 1 || spy.scope.AllowedTokens[0] != "$self" {
+	if spy.scope.Key != "owner" {
 		t.Fatalf("scope=%+v", spy.scope)
 	}
-	if spy.permission.ID != "hrms:payroll:payslip::export" || !spy.permission.Active || strings.Join(spy.keys, ",") != "dept,region" || spy.fixture.Name != "application-publisher" {
-		t.Fatalf("permission=%+v keys=%v fixture=%+v", spy.permission, spy.keys, spy.fixture)
+	if spy.permission.ID != "hrms:payroll:payslip::export" || !spy.permission.Active || spy.fixture.Name != "application-publisher" {
+		t.Fatalf("permission=%+v fixture=%+v", spy.permission, spy.fixture)
 	}
 }
 
 func TestCatalogCommandsRejectMalformedListsAndTenant(t *testing.T) {
 	for _, args := range [][]string{
-		{"catalog", "register-scope", "owner", "--allowed-tokens", "$self,", "--app", "hrms", "--db", "x", "--fixture-context", "application-publisher"},
-		{"catalog", "register-permission", "hrms:payroll:payslip::export", "--supported-keys", "dept, dept", "--app", "hrms", "--db", "x", "--fixture-context", "application-publisher"},
 		{"catalog", "register-scope", "region", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "application-publisher"},
 	} {
 		var out, diag bytes.Buffer

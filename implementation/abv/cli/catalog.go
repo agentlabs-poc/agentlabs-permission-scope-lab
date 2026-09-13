@@ -34,25 +34,17 @@ func catalog(ctx context.Context, api application.CatalogAPI, app domain.Applica
 	var rendered bytes.Buffer
 	switch positional[0] {
 	case "register-permission":
-		keys, err := catalogList(flags["--supported-keys"], has(flags, "--supported-keys"))
-		if err != nil {
-			return report(diag, err)
-		}
-		definition, err := api.RegisterPermission(ctx, app, fixture, domain.PermissionDefinition{ID: positional[1], Active: true}, keys)
+		definition, err := api.RegisterPermission(ctx, app, fixture, domain.PermissionDefinition{ID: positional[1], Active: true})
 		if err != nil {
 			return report(diag, err)
 		}
 		fmt.Fprintf(&rendered, "internal projection: permission\nid  %s\nactive  %t\n", definition.ID, definition.Active)
 	case "register-scope":
-		tokens, err := catalogList(flags["--allowed-tokens"], has(flags, "--allowed-tokens"))
+		definition, err := api.RegisterScope(ctx, app, fixture, domain.ScopeDefinition{Key: positional[1]})
 		if err != nil {
 			return report(diag, err)
 		}
-		definition, err := api.RegisterScope(ctx, app, fixture, domain.ScopeDefinition{Key: positional[1], AllowedTokens: tokens})
-		if err != nil {
-			return report(diag, err)
-		}
-		fmt.Fprintf(&rendered, "internal projection: scope\nkey  %s\nallowed tokens  %s\n", definition.Key, strings.Join(definition.AllowedTokens, ","))
+		fmt.Fprintf(&rendered, "internal projection: scope\nkey  %s\n", definition.Key)
 	case "get-permission":
 		definition, err := api.GetPermission(ctx, app, fixture, positional[1])
 		if err != nil {
@@ -86,6 +78,32 @@ func catalog(ctx context.Context, api application.CatalogAPI, app domain.Applica
 			len(page.Permissions), page.Total, page.Generation)
 		for _, definition := range page.Permissions {
 			fmt.Fprintf(&rendered, "%s  active=%t\n", definition.ID, definition.Active)
+		}
+	case "get-scope":
+		definition, err := api.GetScope(ctx, app, fixture, positional[1])
+		if err != nil {
+			return report(diag, err)
+		}
+		fmt.Fprintf(&rendered, "internal projection: scope\nkey  %s\n", definition.Key)
+	case "list-scopes":
+		filter := domain.ScopeFilter{}
+		for flag, target := range map[string]*int{"--offset": &filter.Offset, "--limit": &filter.Limit} {
+			if has(flags, flag) {
+				value, err := strconv.Atoi(flags[flag])
+				if err != nil {
+					return report(diag, domain.ErrMalformed)
+				}
+				*target = value
+			}
+		}
+		page, err := api.ListScopes(ctx, app, fixture, filter)
+		if err != nil {
+			return report(diag, err)
+		}
+		fmt.Fprintf(&rendered, "internal projection: scopes\ncount  %d\ntotal  %d\ngeneration  %d\n",
+			len(page.Scopes), page.Total, page.Generation)
+		for _, definition := range page.Scopes {
+			fmt.Fprintf(&rendered, "%s\n", definition.Key)
 		}
 	case "set-permission-status":
 		active := flags["--active"] == "true"

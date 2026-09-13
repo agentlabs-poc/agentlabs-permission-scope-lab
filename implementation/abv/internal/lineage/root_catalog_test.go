@@ -5,7 +5,6 @@ import (
 	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/lineage"
 	"agentlabs.local/abv/internal/storage"
-	"errors"
 	"reflect"
 	"slices"
 	"testing"
@@ -63,7 +62,6 @@ func TestRootCatalogPreservesScopeValidityAndRevalidatesSource(t *testing.T) {
 	g0.Validity = &domain.Validity{ExpiresAt: &expires}
 	f.Snapshot.Contents[domain.GrantKey{ID: "G0", Revision: 1}] = g0
 	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "RootTeam", HumanID: "root-user"})
-	f.Snapshot.Catalog.SupportedKeys[payslipExport] = []string{"dept"}
 
 	root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "Team1", now)
 	if err != nil || !reflect.DeepEqual(root.Predicates, []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G0"}}) || len(root.Validities) != 1 || root.Validities[0].ExpiresAt == nil || !root.Validities[0].ExpiresAt.Equal(expires) {
@@ -123,27 +121,10 @@ func TestRootCatalogRejectsInvalidOrIneligibleRoot(t *testing.T) {
 	}
 }
 
-func TestRootCatalogCompatibilityFailsClosed(t *testing.T) {
-	area, _ := domain.NewArea("acme", "hrms")
-	f := lab.TeamFINC17(area)
-	f.Snapshot.Catalog.CompatibilityEnabled = true
-	f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true}
-	g0 := f.Snapshot.Contents[domain.GrantKey{ID: "G0", Revision: 1}]
-	g0.Scope = map[string]string{"dept": "FIN"}
-	f.Snapshot.Contents[domain.GrantKey{ID: "G0", Revision: 1}] = g0
-	if _, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "Team1", time.Time{}); !errors.Is(err, domain.ErrRejected) {
-		t.Fatalf("incompatible computed permission accepted: %v", err)
-	}
-}
-
 func cloneRootSnapshot(source storage.Snapshot) storage.Snapshot {
 	result := source
 	result.Catalog.Permissions = cloneRootMap(source.Catalog.Permissions)
 	result.Catalog.Scopes = cloneRootMap(source.Catalog.Scopes)
-	result.Catalog.SupportedKeys = make(map[string][]string, len(source.Catalog.SupportedKeys))
-	for key, value := range source.Catalog.SupportedKeys {
-		result.Catalog.SupportedKeys[key] = slices.Clone(value)
-	}
 	result.Controls = cloneRootMap(source.Controls)
 	result.Contents = make(map[domain.GrantKey]domain.GrantContent, len(source.Contents))
 	for key, value := range source.Contents {

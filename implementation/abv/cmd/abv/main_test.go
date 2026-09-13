@@ -57,8 +57,8 @@ func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testin
 	if !strings.Contains(scopeOutput, "internal projection: scope") || !strings.Contains(scopeOutput, "key  region") || !strings.Contains(warning, "LAB ONLY") {
 		t.Fatalf("scope stdout=%q stderr=%q", scopeOutput, warning)
 	}
-	run(0, "catalog", "register-scope", "owner", "--allowed-tokens", "$self", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
-	permissionOutput, _ := run(0, "catalog", "register-permission", "hrms:payroll:payslip::export", "--supported-keys", "dept,region", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	run(0, "catalog", "register-scope", "owner", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	permissionOutput, _ := run(0, "catalog", "register-permission", "hrms:payroll:payslip::export", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
 	if !strings.Contains(permissionOutput, "internal projection: permission") || !strings.Contains(permissionOutput, "active  true") {
 		t.Fatalf("permission stdout=%q", permissionOutput)
 	}
@@ -103,7 +103,7 @@ func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testin
 
 	persistedPermission := fetched
 	g0After, _ := run(0, "inspect", "grant", "G0", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if !strings.Contains(persistedScope, "$self") || !strings.Contains(persistedPermission, "true") || g0After != g0Before {
+	if !strings.Contains(persistedScope, "owner") || !strings.Contains(persistedPermission, "true") || g0After != g0Before {
 		t.Fatalf("reopen scope=%q permission=%q G0 before=%q after=%q", persistedScope, persistedPermission, g0Before, g0After)
 	}
 	run(0, "inspect", "assignment", "A1", "--db", database, "--tenant", "acme", "--app", "hrms")

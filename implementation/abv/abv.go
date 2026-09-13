@@ -155,10 +155,7 @@ func inspectSnapshot(snapshot storage.Snapshot, record *domain.Record) error {
 		if !ok || value.Key != record.ID {
 			return domain.ErrNotFound
 		}
-		record.Rows = [][]string{{"allowed_token"}}
-		for _, token := range value.AllowedTokens {
-			record.Rows = append(record.Rows, []string{token})
-		}
+		record.Rows = [][]string{{"field", "value"}, {"key", value.Key}}
 	case "role":
 		record.Rows = [][]string{{"revision", "permissions"}}
 		for key, value := range snapshot.Roles {

@@ -22,8 +22,7 @@ func area(t *testing.T) domain.Area {
 func catalog() domain.Catalog {
 	return domain.Catalog{ApplicationID: "hrms",
 		Permissions:   map[string]domain.PermissionDefinition{read: {ID: read, Active: true}, write: {ID: write, Active: true}},
-		Scopes:        map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user", AllowedTokens: []string{"$self"}}},
-		SupportedKeys: map[string][]string{read: {"dept", "cert", "user"}, write: {"dept"}},
+		Scopes:        map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"}},
 	}
 }
 func content() domain.GrantContent {
@@ -44,14 +43,9 @@ func TestContentRequiresRegisteredDefinitionsAndContext(t *testing.T) {
 		}, domain.ErrRejected},
 		{"unknown key", func(c *domain.Catalog, g *domain.GrantContent) { g.Scope["secret"] = "x" }, domain.ErrRejected},
 		{"unknown token", func(c *domain.Catalog, g *domain.GrantContent) { g.Scope["user"] = "$owner" }, domain.ErrRejected},
-		{"wrong key token", func(c *domain.Catalog, g *domain.GrantContent) { g.Scope["dept"] = "$self" }, domain.ErrRejected},
 		{"registered self", func(c *domain.Catalog, g *domain.GrantContent) { g.Scope["user"] = "$self" }, nil},
 		{"different app catalog", func(c *domain.Catalog, g *domain.GrantContent) { c.ApplicationID = "accounting" }, domain.ErrRejected},
-		{"compatibility disabled", func(c *domain.Catalog, g *domain.GrantContent) { g.Permissions = []string{write} }, nil},
-		{"compatibility enabled", func(c *domain.Catalog, g *domain.GrantContent) {
-			c.CompatibilityEnabled = true
-			g.Permissions = []string{write}
-		}, domain.ErrRejected},
+		{"a second registered permission", func(c *domain.Catalog, g *domain.GrantContent) { g.Permissions = []string{write} }, nil},
 		{"nil scope", func(c *domain.Catalog, g *domain.GrantContent) { g.Scope = nil }, domain.ErrMalformed},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -104,19 +98,6 @@ func TestContentChecksSelectedDefinitionIntegrityAndTokens(t *testing.T) {
 		},
 		"scope identity mismatch": func(c *domain.Catalog, _ *domain.GrantContent) {
 			c.Scopes["cert"] = domain.ScopeDefinition{Key: "other"}
-		},
-		"duplicate selected token definition": func(c *domain.Catalog, g *domain.GrantContent) {
-			c.Scopes["user"] = domain.ScopeDefinition{Key: "user", AllowedTokens: []string{"$self", "$self"}}
-			g.Scope = map[string]string{"user": "$self"}
-		},
-		"unsupported selected token definition": func(c *domain.Catalog, g *domain.GrantContent) {
-			c.Scopes["user"] = domain.ScopeDefinition{Key: "user", AllowedTokens: []string{"$owner"}}
-			g.Scope = map[string]string{"user": "maya"}
-		},
-		"compatibility references unregistered key": func(c *domain.Catalog, g *domain.GrantContent) {
-			c.CompatibilityEnabled = true
-			c.SupportedKeys[read] = []string{"cert", "missing"}
-			g.Scope = map[string]string{"cert": "C17"}
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

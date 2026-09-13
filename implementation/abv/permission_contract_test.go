@@ -25,7 +25,6 @@ func seeded(t *testing.T, allow bool, active []string, retired []string) (*abv.F
 		ApplicationID: "hrms",
 		Permissions:   permissions,
 		Scopes:        map[string]domain.ScopeDefinition{},
-		SupportedKeys: map[string][]string{},
 	}}
 	facade, err := abv.New(provider, catalogAdministration{allow: allow}, clock{})
 	if err != nil {
@@ -162,7 +161,7 @@ func TestGenerationDetectsAWriteBetweenPages(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err = f.RegisterPermission(t.Context(), app, id,
-		domain.PermissionDefinition{ID: "hrms:a:b::approve", Active: true}, nil); err != nil {
+		domain.PermissionDefinition{ID: "hrms:a:b::approve", Active: true}); err != nil {
 		t.Fatal(err)
 	}
 	after, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Offset: 1, Limit: 1})

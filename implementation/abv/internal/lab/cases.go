@@ -43,10 +43,7 @@ func TeamFINC17(area domain.Area) TeamFINC17Case {
 					PayslipRead: {ID: PayslipRead, Active: true}, PayslipWrite: {ID: PayslipWrite, Active: true}, PayslipDelete: {ID: PayslipDelete, Active: true},
 				},
 				Scopes: map[string]domain.ScopeDefinition{
-					"dept": {Key: "dept", AllowedTokens: []string{}}, "cert": {Key: "cert", AllowedTokens: []string{}}, "user": {Key: "user", AllowedTokens: []string{"$self"}},
-				},
-				SupportedKeys: map[string][]string{
-					PayslipRead: {"dept", "cert", "user"}, PayslipWrite: {"dept", "user"}, PayslipDelete: {"dept", "user"},
+					"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"},
 				},
 			},
 			Controls: map[string]domain.GrantControl{

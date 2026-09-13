@@ -36,8 +36,14 @@ type PermissionAdministration interface {
 	CheckPermissionStatus(context.Context, domain.Application, domain.Catalog, domain.Identity, string, bool, time.Time) error
 }
 
+// ScopeAdministration gates reads of an application's scope catalog, the way
+// PermissionAdministration does for permissions.
+type ScopeAdministration interface {
+	CheckScopeRead(context.Context, domain.Application, domain.Identity, time.Time) error
+}
+
 type CatalogAdministration interface {
-	CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, []string, time.Time) error
+	CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, time.Time) error
 	CheckScopeRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.ScopeDefinition, time.Time) error
 }
 

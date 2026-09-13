@@ -18,10 +18,10 @@ func TestCatalogPublisherRegistersAndTenantAdministratorCannot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = api.RegisterScope(t.Context(), app, domain.FixtureContext{Name: "maya-team1"}, domain.ScopeDefinition{Key: "region", AllowedTokens: []string{}}); !errors.Is(err, domain.ErrRejected) {
+	if _, err = api.RegisterScope(t.Context(), app, domain.FixtureContext{Name: "maya-team1"}, domain.ScopeDefinition{Key: "region"}); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("maya error=%v", err)
 	}
-	if _, err = api.RegisterScope(t.Context(), app, domain.FixtureContext{Name: "application-publisher"}, domain.ScopeDefinition{Key: "region", AllowedTokens: []string{}}); err != nil {
+	if _, err = api.RegisterScope(t.Context(), app, domain.FixtureContext{Name: "application-publisher"}, domain.ScopeDefinition{Key: "region"}); err != nil {
 		t.Fatal(err)
 	}
 	if err = closeConnection(); err != nil {

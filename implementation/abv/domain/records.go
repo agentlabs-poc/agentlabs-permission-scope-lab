@@ -87,17 +87,51 @@ type PermissionPage struct {
 	Total       int
 	Generation  int64
 }
+// The two implicit boundaries. Neither is ever a registered scope key: an empty
+// scope is already a complete scope, and $self is resolved by the evaluator
+// rather than declared by a definition.
+const (
+	// SelfToken binds a boundary to the authorizing human. It is not the group
+	// that received an assignment, and not the agent sending the request.
+	SelfToken = "$self"
+	// ReservedTokenPrefix marks a value as a reserved token rather than an
+	// application value. $self is the only one.
+	ReservedTokenPrefix = "$"
+)
+
+// ScopeDefinition is a registered boundary key. It carries nothing else: $self
+// is a reserved token the evaluator knows, not something a key declares, and a
+// per-key list of permitted tokens appears nowhere in the handbook.
 type ScopeDefinition struct {
-	Key           string
-	AllowedTokens []string
+	Key string
+}
+
+// ScopeFilter bounds a scope listing. A scope key is a single flat token rather
+// than a path, so there is no prefix filter: a prefix here would be a string
+// match inside one slot, which is what the key layout exists to avoid, and a
+// scope catalog is a handful of keys rather than hundreds.
+type ScopeFilter struct {
+	Offset int
+	Limit  int
+}
+
+// ScopePage is one page of a scope listing, ordered by key. Total and
+// Generation carry the same meaning as on a permission page.
+type ScopePage struct {
+	Scopes     []ScopeDefinition
+	Total      int
+	Generation int64
 }
 type Catalog struct {
 	ApplicationID        string
 	Generation           int64
 	Permissions          map[string]PermissionDefinition
 	Scopes               map[string]ScopeDefinition
+	// CompatibilityEnabled is the application's declared choice under Q-041.
+	// Nothing enforces it yet: permission/scope relationship validation has no
+	// approved representation (P-11), so the declaration is stored and the check
+	// is unimplemented rather than implemented against an invented shape.
 	CompatibilityEnabled bool
-	SupportedKeys        map[string][]string
 }
 type GrantKey struct {
 	ID       string

@@ -9,7 +9,7 @@ import (
 
 // supportedSchemaVersion is the only layout this build accepts. A database at
 // another version is rejected rather than migrated: fail closed.
-const supportedSchemaVersion = 3
+const supportedSchemaVersion = 4
 
 //go:embed migrations/001_initial.sql
 var initialMigration string
