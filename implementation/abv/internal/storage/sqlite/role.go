@@ -36,20 +36,20 @@ func insertRole(ctx context.Context, conn *sql.Conn, applicationID, tenantID str
 	if err != nil {
 		return domain.ErrMalformed
 	}
-	// The boundary is the whole difference between an application role and a
+	// An empty tenant is the whole difference between an application role and a
 	// tenant role: same key path, same payload, one carries a tenant and the
-	// other does not. tenant_id is '' rather than NULL for the same reason
-	// permissions and scopes use '': a NULL is distinct in a unique index.
-	boundary := "tenant"
+	// other does not. It is '' rather than NULL for the reason permissions and
+	// scopes use '': a NULL is distinct in a unique index, so duplicates could
+	// coexist.
+	boundary := domain.TenantBoundary
 	if tenantID == "" {
-		boundary = "application"
+		boundary = domain.ApplicationBoundary
 	}
 	_, err = conn.ExecContext(ctx, `
 		INSERT INTO abv_l1_records
-		  (boundary, tenant_id, application_id, key1, key2, key3, key4, key5, key6, revision, value)
-		VALUES (?, ?, ?, 'abv', 'role', ?, ?, ?, ?, 0, ?)`,
-		boundary, tenantID, applicationID, applicationID,
-		role.ID, slot, role.Name, string(raw))
+		  (boundary, tenant_id, key1, key2, key3, key4, key5, key6, value)
+		VALUES (?, ?, 'abv', 'role', ?, ?, ?, ?, ?)`,
+		string(boundary), tenantID, applicationID, role.ID, slot, role.Name, string(raw))
 	return classify(err)
 }
 

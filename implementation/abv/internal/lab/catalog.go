@@ -78,6 +78,20 @@ func (a *catalogApplication) RegisterPermission(ctx context.Context, app domain.
 	}
 	return a.facade.RegisterPermission(ctx, app, catalogPublisher, definition)
 }
+// RegisterPlatformPermission registers into a namespace the platform owns. It
+// takes a namespace rather than an application, because a platform permission
+// belongs to no application — which is exactly why the leading-noun rule cannot
+// apply to it.
+func (a *catalogApplication) RegisterPlatformPermission(ctx context.Context, namespace string, fixture domain.FixtureContext, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
+	if fixture.Name != catalogFixtureContext {
+		return domain.PermissionDefinition{}, domain.ErrRejected
+	}
+	if err := verifyCatalogMarker(ctx, a.path, a.app); err != nil {
+		return domain.PermissionDefinition{}, err
+	}
+	return a.facade.RegisterPlatformPermission(ctx, namespace, catalogPublisher, definition)
+}
+
 func (a *catalogApplication) RegisterScope(ctx context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.ScopeDefinition) (domain.ScopeDefinition, error) {
 	if app != a.app || fixture.Name != catalogFixtureContext {
 		return domain.ScopeDefinition{}, domain.ErrRejected
@@ -144,6 +158,19 @@ func verifyCatalogMarker(ctx context.Context, path string, app domain.Applicatio
 		return err
 	}
 	if marker.applicationID != app.ID() {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+// CheckPlatformPermissionRegistration gates a platform namespace. The lab admits
+// the same fixture publisher; a real deployment would admit only the platform's
+// own administrator, which is the point of the seam being separate.
+func (a catalogAdministration) CheckPlatformPermissionRegistration(ctx context.Context, namespace string, identity domain.Identity, _ domain.PermissionDefinition, _ time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if namespace == "" || identity != catalogPublisher {
 		return domain.ErrRejected
 	}
 	return nil

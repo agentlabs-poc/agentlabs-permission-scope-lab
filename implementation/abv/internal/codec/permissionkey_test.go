@@ -14,7 +14,7 @@ func TestParsePermissionDecomposesAndRoundTrips(t *testing.T) {
 		"a:b::c",
 		"single::verb",
 		"hrms::read", // a one-segment noun path is legitimate
-		"one:two:three:four:five:six:seven::verb", // exactly the envelope's limit
+		"one:two:three:four:five:six::verb", // exactly the envelope's limit
 	} {
 		key, err := ParsePermission(id)
 		if err != nil {

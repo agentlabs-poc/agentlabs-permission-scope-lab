@@ -7,6 +7,7 @@ import (
 	"agentlabs.local/abv/internal/validation"
 	"context"
 	"database/sql"
+	"strings"
 	"encoding/json"
 	"errors"
 )
@@ -32,6 +33,44 @@ func (p *provider) ReadCatalog(ctx context.Context, app domain.Application, call
 			return err
 		}
 		return callback(catalog)
+	})
+}
+
+// UpdatePlatformCatalog writes at the platform boundary, in one transaction,
+// without requiring an applications row for the namespace — a platform namespace
+// is reserved precisely so it can never be an application.
+func (p *provider) UpdatePlatformCatalog(ctx context.Context, namespace string, callback func() (storage.CatalogWriteSet, error)) (err error) {
+	if strings.TrimSpace(namespace) == "" || callback == nil {
+		return domain.ErrMalformed
+	}
+	if err = ctx.Err(); err != nil {
+		return err
+	}
+	conn, err := p.connection(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if closeErr := conn.Close(); closeErr != nil && err == nil {
+			err = classify(closeErr)
+		}
+	}()
+	return p.transaction(ctx, conn, "BEGIN IMMEDIATE", func() error {
+		writes, err := callback()
+		if err != nil {
+			return err
+		}
+		if writes.PlatformPermission == nil {
+			return domain.ErrMalformed
+		}
+		if err := insertPermissionAt(ctx, conn, domain.PlatformBoundary, namespace, *writes.PlatformPermission); err != nil {
+			return err
+		}
+		// A platform permission is in every application's catalog, so a write to
+		// it invalidates every cached view. Bumping all of them keeps the
+		// read-page-reread guarantee true rather than nearly true.
+		_, err = conn.ExecContext(ctx, `UPDATE applications SET generation = generation + 1`)
+		return classify(err)
 	})
 }
 
@@ -64,7 +103,7 @@ func (p *provider) UpdateCatalog(ctx context.Context, app domain.Application, ca
 		}
 		// Exactly one write kind per call.
 		kinds := 0
-		for _, set := range []bool{writes.Permission != nil, writes.Scope != nil, writes.PermissionStatus != nil, writes.ApplicationRole != nil} {
+		for _, set := range []bool{writes.Permission != nil, writes.Scope != nil, writes.PermissionStatus != nil, writes.ApplicationRole != nil, writes.PlatformPermission != nil} {
 			if set {
 				kinds++
 			}
@@ -84,6 +123,12 @@ func (p *provider) UpdateCatalog(ctx context.Context, app domain.Application, ca
 				return err
 			}
 			return insertPermissionRecord(ctx, conn, app.ID(), *writes.Permission)
+		}
+		if writes.PlatformPermission != nil {
+			if err := validation.CheckPermissionRegistrationAt(domain.PlatformBoundary, authoritative, *writes.PlatformPermission); err != nil {
+				return err
+			}
+			return insertPermissionAt(ctx, conn, domain.PlatformBoundary, writes.PlatformNamespace, *writes.PlatformPermission)
 		}
 		if writes.ApplicationRole != nil {
 			role := *writes.ApplicationRole
@@ -157,11 +202,10 @@ func (p *provider) updatePermissionStatus(ctx context.Context, conn *sql.Conn, a
 	}
 	result, err := conn.ExecContext(ctx, `
 		UPDATE abv_l1_records SET value=?
-		 WHERE boundary='application' AND tenant_id='' AND application_id=?
-		   AND key1='abv' AND key2='permission'
-		   AND key3=? AND key4=? AND key5=? AND key6=? AND key7=? AND key8=? AND key9=? AND key10=?`,
+		 WHERE boundary='application' AND tenant_id='' AND key1='abv' AND key2='permission' AND key3=?
+		   AND key4=? AND key5=? AND key6=? AND key7=? AND key8=? AND key9=? AND key10=?`,
 		payload, applicationID,
-		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6], slots[7])
+		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6])
 	if err != nil {
 		return classify(err)
 	}
@@ -180,6 +224,13 @@ func (p *provider) updatePermissionStatus(ctx context.Context, conn *sql.Conn, a
 // decomposed by the shared codec — storage never splits the string itself, so
 // the two layers cannot disagree about what a row means.
 func insertPermissionRecord(ctx context.Context, conn *sql.Conn, applicationID string, definition domain.PermissionDefinition) error {
+	return insertPermissionAt(ctx, conn, domain.ApplicationBoundary, applicationID, definition)
+}
+
+// insertPermissionAt writes a permission at a named boundary. key3 holds the
+// namespace: the application at the application boundary, whatever the platform
+// defines at the platform boundary.
+func insertPermissionAt(ctx context.Context, conn *sql.Conn, boundary domain.Boundary, namespace string, definition domain.PermissionDefinition) error {
 	key, err := codec.ParsePermission(definition.ID)
 	if err != nil {
 		return err
@@ -191,11 +242,11 @@ func insertPermissionRecord(ctx context.Context, conn *sql.Conn, applicationID s
 	}
 	_, err = conn.ExecContext(ctx, `
 		INSERT INTO abv_l1_records
-		  (boundary, tenant_id, application_id, key1, key2,
-		   key3, key4, key5, key6, key7, key8, key9, key10, revision, value)
-		VALUES ('application', '', ?, 'abv', 'permission', ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
-		applicationID,
-		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6], slots[7],
+		  (boundary, tenant_id, key1, key2, key3,
+		   key4, key5, key6, key7, key8, key9, key10, value)
+		VALUES (?, '', 'abv', 'permission', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		string(boundary), namespace,
+		slots[0], slots[1], slots[2], slots[3], slots[4], slots[5], slots[6],
 		payload)
 	if err != nil {
 		return classify(err)
@@ -241,9 +292,9 @@ func insertScopeRecord(ctx context.Context, conn *sql.Conn, applicationID string
 	// reserved token the evaluator knows, not something a key declares.
 	if _, err := conn.ExecContext(ctx, `
 		INSERT INTO abv_l1_records
-		  (boundary, tenant_id, application_id, key1, key2, key3, key4, revision, value)
-		VALUES ('application', '', ?, 'abv', 'scope', ?, ?, 0, '{}')`,
-		applicationID, applicationID, definition.Key); err != nil {
+		  (boundary, tenant_id, key1, key2, key3, key4, value)
+		VALUES ('application', '', 'abv', 'scope', ?, ?, '{}')`,
+		applicationID, definition.Key); err != nil {
 		return classify(err)
 	}
 	return nil
@@ -254,8 +305,7 @@ func insertScopeRecord(ctx context.Context, conn *sql.Conn, applicationID string
 func applicationRoleRevisions(ctx context.Context, conn *sql.Conn, applicationID, id string) ([]string, error) {
 	rows, err := conn.QueryContext(ctx, `
 		SELECT key5 FROM abv_l1_records
-		 WHERE boundary='application' AND tenant_id='' AND application_id=?
-		   AND key1='abv' AND key2='role' AND key4=?
+		 WHERE boundary='application' AND tenant_id='' AND key1='abv' AND key2='role' AND key3=? AND key4=?
 		 ORDER BY key5`, applicationID, id)
 	if err != nil {
 		return nil, classify(err)

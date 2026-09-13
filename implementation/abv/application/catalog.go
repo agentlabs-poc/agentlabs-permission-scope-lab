@@ -6,6 +6,7 @@ import (
 )
 
 type CatalogAPI interface {
+	RegisterPlatformPermission(context.Context, string, domain.FixtureContext, domain.PermissionDefinition) (domain.PermissionDefinition, error)
 	RegisterPermission(context.Context, domain.Application, domain.FixtureContext, domain.PermissionDefinition) (domain.PermissionDefinition, error)
 	RegisterScope(context.Context, domain.Application, domain.FixtureContext, domain.ScopeDefinition) (domain.ScopeDefinition, error)
 	GetPermission(context.Context, domain.Application, domain.FixtureContext, string) (domain.PermissionDefinition, error)

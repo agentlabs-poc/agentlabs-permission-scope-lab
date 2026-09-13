@@ -39,6 +39,12 @@ func catalog(ctx context.Context, api application.CatalogAPI, app domain.Applica
 			return report(diag, err)
 		}
 		fmt.Fprintf(&rendered, "internal projection: permission\nid  %s\nactive  %t\n", definition.ID, definition.Active)
+	case "register-platform-permission":
+		definition, err := api.RegisterPlatformPermission(ctx, flags["--namespace"], fixture, domain.PermissionDefinition{ID: positional[1], Active: true})
+		if err != nil {
+			return report(diag, err)
+		}
+		fmt.Fprintf(&rendered, "internal projection: permission\nid  %s\nnamespace  %s\nboundary  platform\nactive  %t\n", definition.ID, flags["--namespace"], definition.Active)
 	case "register-scope":
 		definition, err := api.RegisterScope(ctx, app, fixture, domain.ScopeDefinition{Key: positional[1]})
 		if err != nil {

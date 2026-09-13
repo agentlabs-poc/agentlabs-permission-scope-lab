@@ -385,26 +385,31 @@ func TestPermissionsAreL1Records(t *testing.T) {
 	}
 
 	// The row is in the record store, with the identifier in slots.
-	var boundary, tenant, k1, k2, k3, k4, k5, k6, k10, value string
+	var tenant, k1, k2, k3, k4, k5, k6, k7, k10, value string
 	if err = db.QueryRow(`
-		SELECT boundary, tenant_id, key1, key2, key3, key4, key5, key6, key10, value
+		SELECT tenant_id, key1, key2, key3, key4, key5, key6, key7, key10, value
 		  FROM abv_l1_records
-		 WHERE application_id='hrms' AND key1='abv' AND key2='permission' AND key3='hrms'
+		 WHERE tenant_id='' AND key1='abv' AND key2='permission' AND key3='hrms'
 		   AND key4='employee' AND key5='certificate'`).
-		Scan(&boundary, &tenant, &k1, &k2, &k3, &k4, &k5, &k6, &k10, &value); err != nil {
+		Scan(&tenant, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k10, &value); err != nil {
 		t.Fatalf("record not found in abv_l1_records: %v", err)
 	}
 	for name, got := range map[string]string{
-		"boundary": boundary, "tenant_id": tenant, "key1": k1, "key2": k2,
-		"key3": k3, "key4": k4, "key5": k5, "key6": k6, "key10": k10, "value": value,
+		"tenant_id": tenant, "key1": k1, "key2": k2,
+		"key3": k3, "key4": k4, "key5": k5, "key6": k6, "key7": k7, "key10": k10, "value": value,
 	} {
 		want := map[string]string{
-			"boundary": "application", // application-wide: no tenant dimension
-			"tenant_id": "",           // '' not NULL, so the identity key stays usable
+			"tenant_id": "", // '' not NULL, so the identity key stays usable
 			"key1": "abv", "key2": "permission",
-			"key3": "hrms", "key4": "employee", "key5": "certificate",
-			"key6": "",       // padding is contiguous
-			"key10": "read",  // the verb is pinned to the last slot, never floating
+			// key3 is the application AND the identifier's first segment — the
+			// same fact, stored once. A permission whose first noun is not the
+			// application is rejected at registration, which is what makes that
+			// true rather than merely hoped for.
+			"key3": "hrms",
+			// Segments two onward. The first is not repeated here.
+			"key4": "employee", "key5": "certificate", "key6": "",
+			"key7": "",      // padding is contiguous
+			"key10": "read", // the verb is pinned to the last slot, never floating
 			"value": `{"active":true}`,
 		}[name]
 		if got != want {
@@ -448,17 +453,16 @@ func TestScopesAreL1Records(t *testing.T) {
 		t.Fatal("the scope_definitions table still exists; scopes did not move")
 	}
 
-	var boundary, tenant, k1, k2, k3, k4, k5, value string
+	var tenant, k1, k2, k3, k4, k5, value string
 	if err = db.QueryRow(`
-		SELECT boundary, tenant_id, key1, key2, key3, key4, key5, value
+		SELECT tenant_id, key1, key2, key3, key4, key5, value
 		  FROM abv_l1_records
-		 WHERE application_id='hrms' AND key1='abv' AND key2='scope' AND key4='region'`).
-		Scan(&boundary, &tenant, &k1, &k2, &k3, &k4, &k5, &value); err != nil {
+		 WHERE tenant_id='' AND key1='abv' AND key2='scope' AND key3='hrms' AND key4='region'`).
+		Scan(&tenant, &k1, &k2, &k3, &k4, &k5, &value); err != nil {
 		t.Fatalf("record not found in abv_l1_records: %v", err)
 	}
 	for name, pair := range map[string][2]string{
-		"boundary":  {boundary, "application"}, // application-wide: no tenant dimension
-		"tenant_id": {tenant, ""},
+		"tenant_id": {tenant, ""}, // an empty tenant is what application-wide means now
 		"key1":      {k1, "abv"}, "key2": {k2, "scope"},
 		"key3": {k3, "hrms"},   // the application, in every record type
 		"key4": {k4, "region"}, // a scope key is flat: one slot, whole

@@ -64,6 +64,34 @@ type RoleContent struct {
 	Managed RoleManagement
 }
 
+// Boundary says who owns a record, and it is the one fact the key path cannot
+// carry. Two of the three were removed as drift precisely because the key path
+// did hold them — a tenant is present or it is not — but nothing distinguishes
+// an application record from a platform one: both have no tenant, and both put
+// a namespace in key3. That distinction is genuinely new information.
+//
+// Deriving it from key3's value would mean Auth-AL holding the platform's
+// reserved-namespace list, which belongs to the auth service and not to us.
+type Boundary string
+
+const (
+	// PlatformBoundary is authority the platform itself defines, in a namespace
+	// no application can claim. key3 holds that namespace and is NOT checked
+	// against any application.
+	PlatformBoundary Boundary = "platform"
+	// ApplicationBoundary is authority an application defines. key3 holds the
+	// application, and a permission's first noun must equal it.
+	ApplicationBoundary Boundary = "application"
+	// TenantBoundary is authority a tenant composed inside an application. key3
+	// still holds the application — a tenant role belongs to one — but nothing
+	// about an identifier is checked against it.
+	TenantBoundary Boundary = "tenant"
+)
+
+func (b Boundary) Valid() bool {
+	return b == PlatformBoundary || b == ApplicationBoundary || b == TenantBoundary
+}
+
 // RoleManagement distinguishes a role the application ships from one a tenant
 // composed.
 //

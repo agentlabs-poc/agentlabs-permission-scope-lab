@@ -60,3 +60,9 @@ func (f *Facade) GetScope(ctx context.Context, app domain.Application, identity 
 func (f *Facade) ListScopes(ctx context.Context, app domain.Application, identity domain.Identity, filter domain.ScopeFilter) (domain.ScopePage, error) {
 	return f.service.ListScopes(ctx, app, identity, filter)
 }
+
+// RegisterPlatformPermission registers a permission in a namespace the platform
+// defines. See internal/mutation for why the leading-noun rule does not apply.
+func (f *Facade) RegisterPlatformPermission(ctx context.Context, namespace string, identity domain.Identity, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
+	return f.service.RegisterPlatformPermission(ctx, namespace, identity, definition)
+}

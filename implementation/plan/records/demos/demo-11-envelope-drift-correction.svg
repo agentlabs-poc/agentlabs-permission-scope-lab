@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1018" width="800" height="1018" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
+<rect width="800" height="1018" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h786a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<circle cx="20" cy="17" r="5" fill="#e0787c"/><circle cx="38" cy="17" r="5" fill="#d9a441"/><circle cx="56" cy="17" r="5" fill="#6cc292"/>
+<text x="400.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">auth-al — the envelope, corrected</text>
+<text x="22" y="62" fill="#d9a441" xml:space="preserve">BEFORE                        AFTER</text>
+<text x="22" y="83" fill="#e0787c" xml:space="preserve">boundary        &lt;- drift</text>
+<text x="22" y="104" fill="#9aa4b4" xml:space="preserve">tenant_id                     tenant_id</text>
+<text x="22" y="125" fill="#e0787c" xml:space="preserve">application_id  &lt;- drift</text>
+<text x="22" y="146" fill="#9aa4b4" xml:space="preserve">key1 … key10                  key1 … key10</text>
+<text x="22" y="167" fill="#e0787c" xml:space="preserve">revision        &lt;- drift</text>
+<text x="22" y="188" fill="#9aa4b4" xml:space="preserve">value                         value</text>
+<text x="22" y="209" fill="#9aa4b4" xml:space="preserve">ts                            ts</text>
+<text x="22" y="230" fill="#9aa4b4" xml:space="preserve">state                         state</text>
+<text x="22" y="251" fill="#6cc292" xml:space="preserve">                              = the frozen 123 shape, exactly</text>
+<text x="22" y="272" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="293" fill="#d9a441" xml:space="preserve">EVERY RECORD TYPE, ONE SHAPE</text>
+<text x="22" y="314" fill="#9aa4b4" xml:space="preserve">tenant  key1  key2        key3  key4          key5         key6            key10</text>
+<text x="22" y="335" fill="#9aa4b4" xml:space="preserve">─────────────────────────────────────────────────────────────────────────────────</text>
+<text x="22" y="356" fill="#9aa4b4" xml:space="preserve">(none)  abv   permission  hrms  employee      certificate                  read</text>
+<text x="22" y="377" fill="#9aa4b4" xml:space="preserve">(none)  abv   permission  hrms  employee      department                   read</text>
+<text x="22" y="398" fill="#9aa4b4" xml:space="preserve">(none)  abv   permission  hrms  payroll       payslip                      delete</text>
+<text x="22" y="419" fill="#9aa4b4" xml:space="preserve">(none)  abv   permission  hrms  payroll       payslip                      read</text>
+<text x="22" y="440" fill="#9aa4b4" xml:space="preserve">(none)  abv   permission  hrms  payroll       payslip                      write</text>
+<text x="22" y="461" fill="#9b8cd8" xml:space="preserve">acme    abv   role        hrms  fi9jvxobqsxs  0000000001   payslip-reader</text>
+<text x="22" y="482" fill="#9b8cd8" xml:space="preserve">(none)  abv   role        hrms  fy58pgz8ioe8  0000000001   Viewer</text>
+<text x="22" y="503" fill="#6cc292" xml:space="preserve">(none)  abv   scope       hrms  cert</text>
+<text x="22" y="524" fill="#6cc292" xml:space="preserve">(none)  abv   scope       hrms  dept</text>
+<text x="22" y="545" fill="#6cc292" xml:space="preserve">(none)  abv   scope       hrms  region</text>
+<text x="22" y="566" fill="#6cc292" xml:space="preserve">(none)  abv   scope       hrms  user</text>
+<text x="22" y="587" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="608" fill="#6b7687" xml:space="preserve"># key3 = hrms in EVERY row. that one column answers "which application</text>
+<text x="22" y="629" fill="#6b7687" xml:space="preserve"># owns this row" for every record type — which is what let application_id</text>
+<text x="22" y="650" fill="#6b7687" xml:space="preserve"># be removed. key4 carries what FOLLOWS: employee, payroll, an id, a key.</text>
+<text x="22" y="671" fill="#6b7687" xml:space="preserve">#</text>
+<text x="22" y="692" fill="#6b7687" xml:space="preserve"># key3 and key4 no longer say the same thing. a permission's first noun IS</text>
+<text x="22" y="713" fill="#6b7687" xml:space="preserve"># the application, so it is stored once, in key3, and never repeated.</text>
+<text x="22" y="734" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="755" fill="#d9a441" xml:space="preserve">THE RULE, ENFORCED AT REGISTRATION</text>
+<text x="22" y="776" fill="#6cc292" xml:space="preserve">  hrms:employee:department::read     accepted</text>
+<text x="22" y="797" fill="#e0787c" xml:space="preserve">  billing:invoice::read              rejected  rc=3</text>
+<text x="22" y="818" fill="#e0787c" xml:space="preserve">  reporting:ledger::export           rejected  rc=3</text>
+<text x="22" y="839" fill="#6b7687" xml:space="preserve"># an identifier that does not start with its application is canonically</text>
+<text x="22" y="860" fill="#6b7687" xml:space="preserve"># incorrect: the row and the string it renders to would disagree.</text>
+<text x="22" y="881" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="902" fill="#e0787c" xml:space="preserve">  boundary        gone</text>
+<text x="22" y="923" fill="#e0787c" xml:space="preserve">  application_id  gone</text>
+<text x="22" y="944" fill="#e0787c" xml:space="preserve">  revision        gone</text>
+<text x="22" y="965" fill="#6b7687" xml:space="preserve"></text>
+<text x="22" y="986" fill="#6cc292" xml:space="preserve"># the rendered canonical string is still NOT stored. the slots are the</text>
+<text x="22" y="1007" fill="#6cc292" xml:space="preserve"># truth; one renderer, in Go, at the boundary. nothing else spells it.</text>
+</svg>

@@ -40,10 +40,13 @@ abv.permission:hrms:employee:certificate::read
  │      │       │       │         │          │
  │      │       └───────┴─────────┘          │
  │      │            noun path               │
- │      │          key3 … key9               │
+ │      │          key4 … key9               │
  │      │                                    │
  │      └─ record type · key2                └─ verb · key10
  └──────── domain namespace · key1
+
+                 key3 holds segment 1, which IS the application —
+                 enforced at registration, so the two never disagree
 ```
 
 `.` separates the domain namespace from the record type. `:` separates the
@@ -54,59 +57,123 @@ their slots; the wrapper renders this form on the way out and parses it on the
 way in. Nothing inside Auth-AL ever concatenates them, which is why there is no
 escaping — see `20-storage-encoding.md`.
 
+### The three boundaries
+
+A record's **boundary** says who owns it, and it is the one fact the key path
+cannot carry. The handbook is explicit that these authorities must stay distinct:
+
+> **Auth platform administration**, application platform administration, tenant
+> administration and business access **must not be collapsed into one vague
+> administrator role.**
+> — `handbook/implementation/06-auth-service.md`
+
+| `boundary` | Who publishes | `key3` | Is `key3` checked? |
+|---|---|---|---|
+| `platform` | Auth platform administration | a namespace no application can claim — `system`, `auth` | **no** |
+| `application` | application platform administration | the application | **yes — the first noun must equal it** |
+| `tenant` | tenant application administration | the application the record lives in | no |
+
+**Why it is a column and not derived.** `tenant` is derivable — a tenant is
+present or it is not. `application` versus `platform` is not: both have an empty
+tenant and both put a namespace in `key3`. Telling them apart from the *value*
+would mean Auth-AL holding the platform's reserved-name list, which belongs to
+the auth service. That is application vocabulary in the engine, which this domain
+does not carry.
+
+So the boundary is genuinely new information, and a column is the honest place
+for it. That is the test the three drifted columns failed and this one passes:
+*is it derivable from the key path without outside knowledge?*
+
+**`system:user::read` is why this exists.** It is a permission the auth service
+already ships. At the application boundary it is unregistrable — no application
+may be called `system`, because the registry reserves the name. At the platform
+boundary it registers, and every application's catalog then contains it:
+
+```
+$ abv catalog register-platform-permission system:user::read --namespace system
+    rc=0
+$ abv catalog register-permission system:user::write --app hrms
+    operation rejected or record not found          rc=3
+```
+
+**Platform permissions are inherited vocabulary.** An application's catalog
+returns its own permissions and the platform's, in one read — the same union that
+gives a tenant the roles its application ships. A grant in any application may
+reference `system:user::read`, which is what a built-in namespace is for.
+
 ### Canonical key layout
 
 The identifier is **decomposed across key slots**, never stored as one string.
-The noun path runs left to right from `key3`; the verb is pinned to `key10` so it
-never moves regardless of how deep the noun path is.
+The noun path runs left to right from `key3`, whose first segment is the
+application; the verb is pinned to `key10` so it never moves regardless of how
+deep the path is.
 
 | Slot | Holds | Example |
 |---|---|---|
 | `key1` | domain namespace | `abv` |
 | `key2` | record type | `permission` |
-| `key3` | noun 1 — the application *by convention* | `hrms` |
+| `key3` | **the application — and noun 1**, the same fact stored once | `hrms` |
 | `key4` | noun 2 | `employee` |
 | `key5` | noun 3 | `certificate` |
 | `key6` … `key9` | nouns 4 – 7, unused → `''` | `''` |
 | `key10` | **verb — always this slot** | `read` |
-| `revision` | unused for permissions | `0` |
 
-**Seven slots for nouns.** Three of ten are spoken for: two by the canonical type
-path and one reserved for the verb.
 
-**`key3` holds the leading noun, which is *conventionally* the application.**
-Nothing checks that it is. A scope record writes `application_id` into `key3` by
+**Seven noun segments.** `key3` carries the first — which is the application —
+and `key4`…`key9` carry the rest. Three of ten slots are spoken for: two by the
+canonical type path, one reserved for the verb.
+
+**`key3` is the application, and it is also the identifier's first noun.** Those
+are the same fact, and it is stored once.
+
+The envelope dropped its `application_id` column, and that forced the question:
+without it, two applications registering `billing:invoice::read` would produce an
+identical key path and collide. Scope and role already wrote the application into
+`key3`; permissions now do the same, and the noun path starts at `key4`.
+
+**A permission's first noun IS the application, and registration enforces it.**
+An identifier that starts with anything else is canonically incorrect and is
+rejected:
+
+```
+application hrms:
+  hrms:employee:certificate::read      registered
+  billing:invoice::read                rejected
+  reporting:ledger:entry::export       rejected
+```
+
+So `hrms:employee:certificate::read` becomes
+`key3=hrms | key4=employee | key5=certificate | key10=read`. Nothing is
+duplicated: `key3` is both the application and segment one. Rendering prefixes
+`key3`; parsing checks the first segment against the application.
+
+The document said this was settled from the start — *the leading noun is the
+application name* — but nothing enforced it, so storage had to keep the segment
+twice in case an author disagreed. Enforcing the rule removes the duplication and
+returns the seventh noun slot. A scope record writes `application_id` into `key3` by
 construction; a permission puts whatever noun its author wrote first, so the two
 record types do not give the slot one meaning:
 
 ```
-$ abv catalog register-permission 'billing:invoice::read' --app hrms
-rc=0                                       ← accepted
-
-key2         key3     key4     key10   application_id
-permission   billing  invoice  read    hrms      ← key3 is not the application
-permission   hrms     payroll  read    hrms
+key2         key3  key4      key5         key10
+permission   hrms  employee  certificate  read
+permission   hrms  payroll   payslip      write
+role         hrms  …
+scope        hrms  dept
 ```
 
-**A reader who needs to know which application owns a row uses the
-`application_id` column.** It is authoritative, and it sits ahead of `key1` in the
-primary key, so `key3` buys no query the column does not already give. What `key3`
-buys is the *rendering*: a canonical path that reads complete without consulting a
-column, which is the duplication accepted below.
+`key3` answers *which application owns this row* for every record type, by
+construction. That is what the envelope needs now that `application_id` is gone,
+and it is what makes a canonical path render complete without consulting a
+column.
 
-> **Open — should the leading noun be required to be the application?** Three
-> answers. Reject a registration whose leading noun differs, which collides with
-> the grammar question in section 6 — the Auth registry's `<namespace>` has no
-> reason to equal an application id, and Q-126 makes renames permanent. Or write
-> `application_id` into `key3` for every record type and shift the noun path to
-> `key4`…`key9`, costing a noun slot and storing a matching leading noun twice. Or
-> leave it as convention.
->
-> **Recommended: leave it, and let Gate 1 enforce naming if the platform wants
-> it.** Requiring an `hrms` identifier to lead with `hrms` is policy about an
-> application's own namespace, which by the Auth-AL / Auth Agent split belongs to
-> the injected Gate 1 callback. Auth-AL enforces that an identifier is
-> *parseable*, which it does.
+> **The cost of the rule, recorded.** It makes identifier naming a requirement.
+> The `agentlabs-auth` registry's `<namespace>:<resource-path>:<action>` has no
+> rule that its namespace equals an application id, so adopting Auth-AL there
+> means either the two matching or renaming identifiers — and Q-126 makes an
+> identifier's meaning permanent, so renaming is not free. Accepted: the
+> alternative was storing the same fact in two slots and explaining it to every
+> reader of the store forever.
 
 Why decomposed rather than one string: a query over a whole string slot is a
 lexical prefix match, which on PostgreSQL uses an index only under a special
@@ -125,24 +192,21 @@ the rarer, usually audit-side question.
 ```
 hrms:employee:certificate::read
 
-boundary        = application      ← no tenant; shared by every tenant
 tenant_id       = ''               ← not NULL: a NULL is distinct in a unique index
-application_id  = hrms
 key1            = abv
 key2            = permission
-key3            = hrms
-key4            = employee
-key5            = certificate
+key3            = hrms             ← the application, and noun 1: one fact
+key4            = employee         ← noun 2
+key5            = certificate      ← noun 3
 key6 … key9     = ''
 key10           = read
-revision        = 0
 value           = {"active": true}
 state           = enabled
 ```
 
 A deeper identifier, `codehost:repository:branch:protection:rule::write`, fills
-`key3` through `key7` and still lands its verb in `key10` — five of the seven
-noun slots used.
+`key3` through `key7` and still lands its verb in `key10` — five of the seven noun
+segments used.
 
 **Settled — the leading noun is the application name, and that duplicates
 `application_id`.** Accepted. Dropping it would free a slot but would assume an
@@ -336,27 +400,27 @@ string match inside a slot.
 
 `tenant_id` is `''` rather than NULL for an application-scoped record. SQLite and
 PostgreSQL both treat NULLs in a unique index as distinct, which would let
-duplicate catalog rows coexist; an empty string is comparable, and the `boundary`
-column already names which case applies.
+duplicate catalog rows coexist; an empty string is comparable, and an empty
+tenant is itself the statement that the record is application-wide.
 
 ```sql
 -- fetch one: every slot constrained, a unique hit
-get     boundary = 'application' AND tenant_id = ''
+get     tenant_id = ''
         AND application_id = $1
-        AND key1 = 'abv' AND key2 = 'permission'
-        AND key3 = $2 AND key4 = $3 AND key5 = $4
+        AND key1 = 'abv' AND key2 = 'permission' AND key3 = $1
+        AND key4 = $2 AND key5 = $3
         AND key6 = '' AND key7 = '' AND key8 = '' AND key9 = ''
-        AND key10 = $5
+        AND key10 = $4
 
 -- every permission in an application
-list    ... AND key1 = 'abv' AND key2 = 'permission'
-        ORDER BY key3, key4, key5, key6, key7, key8, key9, key10
+list    ... AND key1 = 'abv' AND key2 = 'permission' AND key3 = $1
+        ORDER BY key4, key5, key6, key7, key8, key9, key10
 
 -- one domain: hrms:employee:  → two whole noun segments
         ... AND key3 = 'hrms' AND key4 = 'employee'
 
 -- one resource: hrms:employee:certificate:
-        ... AND key3 = 'hrms' AND key4 = 'employee' AND key5 = 'certificate'
+        ... AND key3 = 'hrms' AND key4 = 'employee' AND key6 = 'certificate'
 
 -- every write verb in an application
         ... AND key10 = 'write'
@@ -465,11 +529,9 @@ functions above are unaffected: registration does not take supported keys, and
 3. **Prefix index** — `C` collation or `text_pattern_ops`, at checkpoint 2.
 4. **P-11 — relationship representation.** The feature is canonical, its shape
    is not. Until it is decided, no permission-side field or record exists.
-5. **Must the leading noun be the application?** Today nothing checks it, so
-   `key3` means the application for a scope and merely the first noun for a
-   permission. Stated in full under *Canonical key layout*; recommendation is to
-   leave it to Gate 1. Every record type inherits the answer, so settle it before
-   the next one.
+5. ~~**Must the leading noun be the application?**~~ **Settled: yes, and
+   registration enforces it.** `key3` holds that one fact for every record type.
+   An identifier starting with anything else is rejected.
 
 **Settled:** retirement is reversible, so status is one operation. The contract
 is four functions.

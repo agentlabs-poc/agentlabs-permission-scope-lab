@@ -89,18 +89,19 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	// Permissions are L1 records. The identifier is rebuilt from its slots by
 	// the shared codec; storage never assembles the string itself.
 	rows, err := r.conn.QueryContext(r.ctx, `
-		SELECT key3,key4,key5,key6,key7,key8,key9,key10,value
+		SELECT boundary,key3,key4,key5,key6,key7,key8,key9,key10,value
 		  FROM abv_l1_records
-		 WHERE boundary='application' AND tenant_id='' AND application_id=?
-		   AND key1='abv' AND key2='permission'
+		 WHERE tenant_id='' AND key1='abv' AND key2='permission'
+		   AND ((boundary='application' AND key3=?) OR boundary='platform')
 		 ORDER BY key3,key4,key5,key6,key7,key8,key9,key10`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
 	for rows.Next() {
 		var slots codec.PermissionSlots
+		var boundary, namespace string
 		var payload []byte
-		if err = rows.Scan(&slots[0], &slots[1], &slots[2], &slots[3], &slots[4], &slots[5], &slots[6], &slots[7], &payload); err != nil {
+		if err = rows.Scan(&boundary, &namespace, &slots[0], &slots[1], &slots[2], &slots[3], &slots[4], &slots[5], &slots[6], &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -108,7 +109,12 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 			rows.Close()
 			return err
 		}
-		id, keyErr := codec.PermissionFromSlots(slots)
+		// The identifier is rebuilt from the namespace the row carries, which is
+		// the application for an application permission and the platform's own
+		// namespace for a platform one. An application's catalog holds both:
+		// platform permissions are vocabulary every application inherits, the
+		// same way application roles are vocabulary every tenant inherits.
+		id, keyErr := codec.PermissionFromSlots(namespace, slots)
 		if keyErr != nil {
 			rows.Close()
 			return keyErr
@@ -128,8 +134,7 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	// Scopes are L1 records: key3 the application, key4 the key.
 	rows, err = r.conn.QueryContext(r.ctx, `
 		SELECT key4, value FROM abv_l1_records
-		 WHERE boundary='application' AND tenant_id='' AND application_id=?
-		   AND key1='abv' AND key2='scope' AND key3=? ORDER BY key4`, applicationID, applicationID)
+		 WHERE boundary='application' AND tenant_id='' AND key1='abv' AND key2='scope' AND key3=? ORDER BY key4`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
@@ -255,8 +260,8 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 	// application ships to every tenant. They are the same record told apart by
 	// the boundary, and a tenant administrator reads its catalog as one list.
 	rows, err := r.conn.QueryContext(r.ctx, `
-		SELECT key4, key5, key6, boundary, value FROM abv_l1_records
-		 WHERE application_id=? AND key1='abv' AND key2='role'
+		SELECT key4, key5, key6, tenant_id, value FROM abv_l1_records
+		 WHERE key1='abv' AND key2='role' AND key3=?
 		   AND ((boundary='tenant' AND tenant_id=?) OR boundary='application')
 		 ORDER BY key4, key5`, r.area.ApplicationID(), r.area.TenantID())
 	if err != nil {
@@ -266,8 +271,8 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 		return err
 	}
 	for rows.Next() {
-		var id, slot, name, boundary, payload string
-		if err = rows.Scan(&id, &slot, &name, &boundary, &payload); err != nil {
+		var id, slot, name, tenant, payload string
+		if err = rows.Scan(&id, &slot, &name, &tenant, &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -283,8 +288,10 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 			rows.Close()
 			return domain.ErrMalformed
 		}
+		// An empty tenant is the whole distinction: a role the application ships
+		// carries none; a role a tenant composed carries its own.
 		managed := domain.TenantManaged
-		if boundary == "application" {
+		if tenant == "" {
 			managed = domain.ApplicationManaged
 		}
 		s.Roles[domain.RoleKey{ID: id, Revision: revision}] = domain.RoleContent{

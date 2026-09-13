@@ -324,7 +324,7 @@ and choosing `application_id` is the consistent choice.
 
 | | Why it matters |
 |---|---|
-| **`boundary = 'tenant'`** | Declared in the schema's CHECK constraint and written by nothing. Permission and scope are both application-scoped with `tenant_id = ''`. A role is the first record with a real tenant. |
+| **a real tenant** | Permission and scope both write `tenant_id = ''`. A role is the first record that carries one, and the first whose *absence* of one means something: that is how an application role is told from a tenant role. |
 | **a revisioned identity** | Permission and scope have none. A role's identity *includes* its revision, so `key5` carries it and two revisions coexist as two rows. |
 | **A cross-record-type reference** | A role names permissions, so publication validates against the permission catalog. Nothing has crossed record types before. |
 
@@ -336,9 +336,7 @@ assignments, which need all three plus lineage and validity.
 ```
 fi9jvxobqsxs "R-PAYROLL-READER", revision 1, in tenant acme
 
-boundary        = tenant           ← the first record that is not application-wide
-tenant_id       = acme
-application_id  = hrms
+tenant_id       = acme             ← a tenant role; an application role leaves it empty
 key1            = abv
 key2            = role
 key3            = hrms
@@ -740,8 +738,7 @@ form, under a `permissions` key:
 
 ```sql
 -- fetch one revision: every slot constrained, a unique hit
-get     boundary = 'tenant' AND tenant_id = $1
-        AND application_id = $2
+get     tenant_id = $1
         AND key1 = 'abv' AND key2 = 'role'
         AND key3 = $2 AND key4 = $3        -- the id
         AND key5 = $4                      -- the revision, zero-padded
