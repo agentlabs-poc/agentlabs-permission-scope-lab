@@ -27,6 +27,15 @@ type RoleAdministration interface {
 	CheckRolePublication(context.Context, storage.Snapshot, domain.Identity, domain.RoleContent, time.Time) error
 }
 
+// PermissionAdministration gates the read and status operations on an
+// application's permission catalog. It is separate from CatalogAdministration so
+// an adapter can supply registration without the rest; a provider that does not
+// implement it makes those operations ErrUnsupported rather than unprotected.
+type PermissionAdministration interface {
+	CheckPermissionRead(context.Context, domain.Application, domain.Identity, time.Time) error
+	CheckPermissionStatus(context.Context, domain.Application, domain.Catalog, domain.Identity, string, bool, time.Time) error
+}
+
 type CatalogAdministration interface {
 	CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, []string, time.Time) error
 	CheckScopeRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.ScopeDefinition, time.Time) error

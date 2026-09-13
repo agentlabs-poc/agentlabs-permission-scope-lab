@@ -56,6 +56,23 @@ type PermissionDefinition struct {
 	ID     string
 	Active bool
 }
+
+// PermissionFilter bounds a catalog listing. Prefix is an administrative
+// convenience for grouping identifiers; it confers no authority, and evaluation
+// never matches on a prefix.
+type PermissionFilter struct {
+	Prefix     string
+	ActiveOnly bool
+	After      string
+	Limit      int
+}
+
+// PermissionPage is one bounded page of a catalog listing, ordered by
+// identifier. NextAfter is empty on the last page.
+type PermissionPage struct {
+	Permissions []PermissionDefinition
+	NextAfter   string
+}
 type ScopeDefinition struct {
 	Key           string
 	AllowedTokens []string

@@ -70,5 +70,27 @@ func (p *catalogMemoryProvider) UpdateCatalog(_ context.Context, _ domain.Applic
 	if w.Permission != nil {
 		p.catalog.Permissions[w.Permission.ID] = *w.Permission
 	}
+	if w.PermissionStatus != nil {
+		existing, ok := p.catalog.Permissions[w.PermissionStatus.ID]
+		if !ok {
+			return domain.ErrNotFound
+		}
+		existing.Active = w.PermissionStatus.Active
+		p.catalog.Permissions[w.PermissionStatus.ID] = existing
+	}
+	return nil
+}
+
+func (a catalogAdministration) CheckPermissionRead(context.Context, domain.Application, domain.Identity, time.Time) error {
+	if !a.allow {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+func (a catalogAdministration) CheckPermissionStatus(context.Context, domain.Application, domain.Catalog, domain.Identity, string, bool, time.Time) error {
+	if !a.allow {
+		return domain.ErrRejected
+	}
 	return nil
 }

@@ -20,6 +20,21 @@ func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionD
 	return selectedKeys(c, supportedKeys)
 }
 
+// CheckPermissionStatus validates a status change against the catalog. The
+// identifier must already be registered: a status change never creates one,
+// because Q-126 makes an identifier's meaning permanent. Setting the status a
+// definition already holds is valid and writes nothing new.
+func CheckPermissionStatus(c domain.Catalog, id string, active bool) error {
+	if err := codec.PermissionList([]string{id}); err != nil {
+		return err
+	}
+	existing, ok := c.Permissions[id]
+	if !ok || existing.ID != id {
+		return domain.ErrNotFound
+	}
+	return nil
+}
+
 func CheckScopeRegistration(c domain.Catalog, definition domain.ScopeDefinition) error {
 	if strings.TrimSpace(definition.Key) == "" || !utf8.ValidString(definition.Key) || definition.Key == "*" {
 		return domain.ErrMalformed

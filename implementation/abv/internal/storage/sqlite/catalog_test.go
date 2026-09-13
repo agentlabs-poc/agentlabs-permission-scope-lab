@@ -268,3 +268,83 @@ func p1Path(p *provider) string {
 	_ = p.db.QueryRow(`SELECT file FROM pragma_database_list WHERE name='main'`).Scan(&path)
 	return path
 }
+
+// TestPermissionStatusUpdatePersistsAndNeverInserts proves the status write is a
+// genuine update against real storage: it flips an existing row, survives a
+// reopen, and cannot bring an identifier into existence.
+func TestPermissionStatusUpdatePersistsAndNeverInserts(t *testing.T) {
+	const id = "hrms:employee:certificate::read"
+	path := t.TempDir() + "/authority.db"
+	app, _ := domain.NewApplication("hrms")
+
+	provider, err := CreateFixture(t.Context(), path, []storage.Snapshot{contractFixture(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalogs, ok := provider.(storage.CatalogProvider)
+	if !ok {
+		t.Fatal("provider does not support catalogs")
+	}
+
+	register := func() error {
+		return catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
+			definition := domain.PermissionDefinition{ID: id, Active: true}
+			return storage.CatalogWriteSet{Permission: &definition}, nil
+		})
+	}
+	setStatus := func(target string, active bool) error {
+		return catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
+			definition := domain.PermissionDefinition{ID: target, Active: active}
+			return storage.CatalogWriteSet{PermissionStatus: &definition}, nil
+		})
+	}
+	active := func(p storage.CatalogProvider) bool {
+		t.Helper()
+		var got bool
+		if err := p.ReadCatalog(t.Context(), app, func(c domain.Catalog) error {
+			got = c.Permissions[id].Active
+			return nil
+		}); err != nil {
+			t.Fatal(err)
+		}
+		return got
+	}
+
+	if err = register(); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+	if !active(catalogs) {
+		t.Fatal("registered permission is not active")
+	}
+
+	if err = setStatus(id, false); err != nil {
+		t.Fatalf("retire: %v", err)
+	}
+	if active(catalogs) {
+		t.Fatal("retirement did not persist")
+	}
+
+	// An identifier that was never registered cannot be created by a status
+	// change, which would let a permanent identifier appear without its
+	// administrative registration check.
+	if err = setStatus("hrms:employee:profile::read", true); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("unregistered status err=%v, want ErrNotFound", err)
+	}
+
+	// Retirement is reversible.
+	if err = setStatus(id, true); err != nil {
+		t.Fatalf("restore: %v", err)
+	}
+	if err = provider.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	reopened, err := Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	if !active(reopened.(storage.CatalogProvider)) {
+		t.Fatal("restored status did not survive a reopen")
+	}
+}
