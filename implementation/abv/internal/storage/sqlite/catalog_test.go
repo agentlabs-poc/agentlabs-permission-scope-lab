@@ -108,7 +108,7 @@ func TestCatalogProviderRejectsInvalidOperationsWithoutWrites(t *testing.T) {
 		},
 		"mixed write": func() error {
 			return p.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-				permission := domain.PermissionDefinition{ID: "new", Active: true}
+				permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
 				scope := domain.ScopeDefinition{Key: "new", AllowedTokens: []string{}}
 				return storage.CatalogWriteSet{Permission: &permission, Scope: &scope}, nil
 			})
@@ -145,7 +145,7 @@ func TestCatalogProviderUsesPersistedEvidenceAndHandlesCancellation(t *testing.T
 	defer opened.Close()
 	p := opened.(storage.CatalogProvider)
 	app, _ := domain.NewApplication("hrms")
-	permission := domain.PermissionDefinition{ID: "new", Active: true}
+	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
 	err = p.UpdateCatalog(t.Context(), app, func(c domain.Catalog) (storage.CatalogWriteSet, error) {
 		c.Scopes["invented"] = domain.ScopeDefinition{Key: "invented", AllowedTokens: []string{}}
 		return storage.CatalogWriteSet{Permission: &permission, SupportedKeys: []string{"invented"}}, nil
@@ -182,7 +182,7 @@ func TestCatalogProviderDuplicateAndConcurrentInsertConflict(t *testing.T) {
 	app, _ := domain.NewApplication("hrms")
 	for _, active := range []bool{true, false} {
 		err := p.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-			permission := domain.PermissionDefinition{ID: "read", Active: active}
+			permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::read", Active: active}
 			return storage.CatalogWriteSet{Permission: &permission}, nil
 		})
 		if !errors.Is(err, domain.ErrConflict) {
@@ -205,7 +205,7 @@ func TestCatalogProviderDuplicateAndConcurrentInsertConflict(t *testing.T) {
 			ready.Done()
 			<-start
 			results <- provider.UpdateCatalog(context.Background(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-				definition := domain.PermissionDefinition{ID: "concurrent", Active: true}
+				definition := domain.PermissionDefinition{ID: "hrms:payroll:payslip::concurrent", Active: true}
 				return storage.CatalogWriteSet{Permission: &definition}, nil
 			})
 		}(provider)

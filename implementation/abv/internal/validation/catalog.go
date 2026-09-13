@@ -11,6 +11,14 @@ func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionD
 	if err := codec.PermissionList([]string{definition.ID}); err != nil {
 		return err
 	}
+	// The identifier must decompose into the noun path and verb that storage
+	// holds in its key slots. One that cannot be parsed has no canonical
+	// storage representation, so the shape is enforced here rather than left to
+	// convention. This is also the only parser: nothing splits the string
+	// itself.
+	if _, err := codec.ParsePermission(definition.ID); err != nil {
+		return err
+	}
 	if _, exists := c.Permissions[definition.ID]; exists {
 		return domain.ErrConflict
 	}

@@ -93,7 +93,7 @@ func TestGrantRevisionRejectsInvalidOrForgedWritesAtomically(t *testing.T) {
 		{"unknown permission", func(s storage.Snapshot) storage.WriteSet {
 			x := valid
 			x.Permissions = []string{"forged"}
-			s.Catalog.Permissions["forged"] = domain.PermissionDefinition{ID: "forged", Active: true}
+			s.Catalog.Permissions["hrms:payroll:payslip::forged"] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::forged", Active: true}
 			return storage.WriteSet{NewGrantRevision: &x}
 		}},
 		{"unknown scope", func(storage.Snapshot) storage.WriteSet {

@@ -280,10 +280,16 @@ func validateFilter(filter domain.PermissionFilter) error {
 	if filter.Limit < 0 || filter.Limit > maxPermissionPage {
 		return domain.ErrMalformed
 	}
-	for _, value := range []string{filter.Prefix, filter.After} {
-		if strings.Contains(value, "*") || !utf8.ValidString(value) {
-			return domain.ErrMalformed
-		}
+	if !utf8.ValidString(filter.After) || strings.Contains(filter.After, "*") {
+		return domain.ErrMalformed
+	}
+	// A prefix must end on a noun-segment boundary. Only whole segments have a
+	// structural form — equality on leading key slots. A partial segment would
+	// fall back to a string match inside one slot, which is the cost the slot
+	// decomposition exists to avoid, so it is rejected rather than answered
+	// slowly and silently.
+	if _, err := codec.NounPrefix(filter.Prefix); err != nil {
+		return err
 	}
 	return nil
 }

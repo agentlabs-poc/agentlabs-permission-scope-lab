@@ -34,7 +34,7 @@ func TestRegisterCatalogDefinitionsPersistsHostileAdminCannotForgeEvidence(t *te
 	area, _ := domain.NewArea("acme", "hrms")
 	app, _ := domain.NewApplication("hrms")
 	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
-	snapshot := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
+	snapshot := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 	path := t.TempDir() + "/authority.db"
 	provider, err := sqlite.CreateFixture(t.Context(), path, []storage.Snapshot{snapshot})
 	if err != nil {
@@ -175,7 +175,7 @@ func TestRegisterPermissionRejectsFailuresWithoutResultOrWrite(t *testing.T) {
 	app, _ := domain.NewApplication("hrms")
 	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
 	definition := domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true}
-	base := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"dept": {Key: "dept", AllowedTokens: []string{"$self"}}}, SupportedKeys: map[string][]string{}}
+	base := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"dept": {Key: "dept", AllowedTokens: []string{"$self"}}}, SupportedKeys: map[string][]string{}}
 	approve := catalogAdmin{permission: func(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, []string, time.Time) error {
 		return nil
 	}}
@@ -207,7 +207,7 @@ func TestRegisterPermissionRejectsFailuresWithoutResultOrWrite(t *testing.T) {
 			return domain.ErrRejected
 		}}, t.Context(), app, identity, definition, []string{"dept"}, domain.ErrRejected},
 		{"invalid registered key", &catalogFake{catalog: cloneCatalog(base)}, approve, t.Context(), app, identity, definition, []string{"missing"}, domain.ErrRejected},
-		{"duplicate definition", &catalogFake{catalog: cloneCatalog(base)}, approve, t.Context(), app, identity, domain.PermissionDefinition{ID: "read", Active: true}, nil, domain.ErrConflict},
+		{"duplicate definition", &catalogFake{catalog: cloneCatalog(base)}, approve, t.Context(), app, identity, domain.PermissionDefinition{ID: "hrms:payroll:payslip::read", Active: true}, nil, domain.ErrConflict},
 		{"pre-cancelled", &catalogFake{catalog: cloneCatalog(base)}, approve, cancelled, app, identity, definition, []string{"dept"}, context.Canceled},
 		{"cancelled inside administration", &catalogFake{catalog: cloneCatalog(base)}, cancellingAdmin, duringAdmin, app, identity, definition, []string{"dept"}, context.Canceled},
 		{"provider write error", &catalogFake{catalog: cloneCatalog(base), writeErr: domain.ErrUnavailable}, approve, t.Context(), app, identity, definition, []string{"dept"}, domain.ErrUnavailable},

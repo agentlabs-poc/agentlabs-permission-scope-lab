@@ -536,8 +536,8 @@ func contractFixture(t *testing.T) storage.Snapshot {
 }
 
 func minimalFixture(area domain.Area) storage.Snapshot {
-	content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, Permissions: []string{"read"}, Scope: map[string]string{}}
-	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 1}: content}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
+	content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{}}
+	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 1}: content}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 }
 
 func assertSQLiteAssignmentsAbsent(t *testing.T, p storage.Provider, area domain.Area, ids ...string) {

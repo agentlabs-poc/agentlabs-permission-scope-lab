@@ -53,20 +53,20 @@ func (p *revisionProvider) Update(_ context.Context, _ domain.Area, cb func(stor
 }
 
 func revisionCandidate() domain.GrantContent {
-	return domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", Permissions: []string{"read"}, Scope: map[string]string{"cert": "C17"}}
+	return domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"cert": "C17"}}
 }
 
 func revisionFixture(area domain.Area) (storage.Snapshot, domain.Identity) {
-	g0 := domain.GrantContent{Version: "1", GrantID: "G0", Revision: 1, Permissions: []string{"read", "delete"}, Scope: map[string]string{}}
-	g1 := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, ParentGrantID: "G0", Permissions: []string{"read"}, Scope: map[string]string{"dept": "FIN"}}
-	g2 := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{"read"}, Scope: map[string]string{"cert": "C17"}}
+	g0 := domain.GrantContent{Version: "1", GrantID: "G0", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::delete"}, Scope: map[string]string{}}
+	g1 := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, ParentGrantID: "G0", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"dept": "FIN"}}
+	g2 := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"cert": "C17"}}
 	return storage.Snapshot{
 		Area:        area,
-		Catalog:     domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"read": {ID: "read", Active: true}, "delete": {ID: "delete", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user", AllowedTokens: []string{"$self"}}}},
+		Catalog:     domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::delete": {ID: "hrms:payroll:payslip::delete", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user", AllowedTokens: []string{"$self"}}}},
 		Controls:    map[string]domain.GrantControl{"G0": {Version: "1", ID: "G0", Status: "enabled"}, "G1": {Version: "1", ID: "G1", Status: "enabled"}, "G2": {Version: "1", ID: "G2", Status: "enabled"}},
 		Contents:    map[domain.GrantKey]domain.GrantContent{{ID: "G0", Revision: 1}: g0, {ID: "G1", Revision: 1}: g1, {ID: "G2", Revision: 1}: g2},
 		Assignments: map[string]domain.Assignment{"A0": {Version: "1", ID: "A0", GrantID: "G0", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Root"}, Status: "enabled"}, "A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team1"}, Status: "enabled"}},
-		Roles:       map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{"read"}}},
+		Roles:       map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}},
 		Teams:       map[string]domain.Team{"Root": {ID: "Root"}, "Team1": {ID: "Team1", ParentID: "Root"}},
 		Memberships: []domain.Membership{{TeamID: "Team1", HumanID: "maya"}}, TrustedRoots: map[string]bool{"G0": true},
 	}, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}
@@ -82,7 +82,7 @@ func TestPublishGrantRevisionUsesSeparateAdministrationAndActualSource(t *testin
 		if gotID != issuer || !reflect.DeepEqual(got, candidate) {
 			return domain.ErrRejected
 		}
-		s.Catalog.Permissions["read"] = domain.PermissionDefinition{}
+		s.Catalog.Permissions["hrms:payroll:payslip::read"] = domain.PermissionDefinition{}
 		s.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = domain.GrantContent{}
 		got.Permissions[0] = "forged"
 		got.Scope["cert"] = "forged"
@@ -90,7 +90,7 @@ func TestPublishGrantRevisionUsesSeparateAdministrationAndActualSource(t *testin
 	}, source: &adminSource}
 	s, _ := New(p, admin, fixedClock{now: time.Now()})
 	got, err := s.PublishGrantRevision(t.Context(), area, issuer, "A1", candidate)
-	if err != nil || adminSource != "A1" || !reflect.DeepEqual(got, candidate) || p.writes != 1 || candidate.Permissions[0] != "read" || candidate.Scope["cert"] != "C17" {
+	if err != nil || adminSource != "A1" || !reflect.DeepEqual(got, candidate) || p.writes != 1 || candidate.Permissions[0] != "hrms:payroll:payslip::read" || candidate.Scope["cert"] != "C17" {
 		t.Fatalf("got=%#v writes=%d input=%#v err=%v", got, p.writes, candidate, err)
 	}
 }
@@ -138,7 +138,7 @@ func TestPublishGrantRevisionRejectsInvalidAuthorityAndContentWithoutWrite(t *te
 		}, want: domain.ErrRejected},
 		{name: "unknown permission", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Permissions = []string{"unknown"} }, want: domain.ErrRejected},
 		{name: "unknown scope", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Scope = map[string]string{"unknown": "x"} }, want: domain.ErrRejected},
-		{name: "amplified permissions", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Permissions = []string{"delete"} }, want: domain.ErrRejected},
+		{name: "amplified permissions", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Permissions = []string{"hrms:payroll:payslip::delete"} }, want: domain.ErrRejected},
 		{name: "self scope", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Scope = map[string]string{"user": "$self"} }, want: domain.ErrUnsupported},
 		{name: "unknown role", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) {
 			g.Permissions, g.RoleID, g.RoleRevision = nil, "unknown", 1

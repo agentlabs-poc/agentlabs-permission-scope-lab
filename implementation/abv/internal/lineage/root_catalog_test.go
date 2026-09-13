@@ -83,7 +83,7 @@ func TestRootCatalogRejectsInvalidOrIneligibleRoot(t *testing.T) {
 		edit func(*lab.TeamFINC17Case)
 	}{
 		{"catalog key mismatch", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: "other", Active: true}
+			f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::other", Active: true}
 		}},
 		{"untrusted", func(f *lab.TeamFINC17Case) { delete(f.Snapshot.TrustedRoots, "G0") }},
 		{"disabled grant", func(f *lab.TeamFINC17Case) {

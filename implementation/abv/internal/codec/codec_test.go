@@ -126,7 +126,7 @@ func TestContentDistinguishesAbsentParentFromPresentEmptyParent(t *testing.T) {
 }
 
 func TestValidateContentRejectsMalformedTypedValues(t *testing.T) {
-	valid := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{"read"}, Scope: map[string]string{}}
+	valid := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{}}
 	for name, edit := range map[string]func(*domain.GrantContent){
 		"invalid UTF-8 grant ID": func(g *domain.GrantContent) { g.GrantID = string([]byte{0xff}) },
 		"blank parent":           func(g *domain.GrantContent) { g.ParentGrantID = "  " },
