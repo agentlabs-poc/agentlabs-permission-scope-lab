@@ -59,12 +59,15 @@ boundary, which is why there is no escaping.
 | `key5` … `key10` | unused → `''` | `''` |
 | `revision` | unused for scopes | `0` |
 
-**`key3` is the application, in every record type.** For a scope it is written
-from `application_id` directly. For a permission it arrives as the leading noun
-of the identifier, which the permission document settles as the application name.
-Either way the third slot answers the same question, so a reader of the store
-never has to know which record type they are looking at to know which application
-owns the row.
+**For a scope, `key3` is the application** — written from `application_id`
+directly, so it holds it by construction.
+
+> **Not a cross-type guarantee.** A permission puts its *leading noun* in `key3`
+> instead, and nothing checks that the noun is the application:
+> `register-permission 'billing:invoice::read' --app hrms` is accepted and leaves
+> `billing` in the slot. A reader who needs to know which application owns a row
+> uses the `application_id` column, which is authoritative. See
+> `record-permission.md` — whether to close that gap is open.
 
 That duplicates `application_id`, and it is a deliberate choice: a canonical path
 then renders complete on its own, with no column to consult and nothing to
