@@ -46,7 +46,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
-		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens", "--revision", "--permissions", "--support-assignment",
+		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
 			"--prefix", "--offset", "--limit", "--active", "--active-only":
 		default:
 			return fail(2, "unknown flag")
@@ -81,12 +81,10 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		allowed := []string{"--app", "--db", "--fixture-context"}
 		switch positional[0] {
-		case "register-permission":
-			allowed = append(allowed, "--supported-keys")
-		case "register-scope":
-			allowed = append(allowed, "--allowed-tokens")
 		case "list-permissions":
 			allowed = append(allowed, "--prefix", "--active-only", "--offset", "--limit")
+		case "list-scopes":
+			allowed = append(allowed, "--offset", "--limit")
 		case "set-permission-status":
 			allowed = append(allowed, "--active")
 			if flags["--active"] == "" {
@@ -95,12 +93,6 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		if !only(flags, allowed...) {
 			return fail(2, "unsupported catalog flag")
-		}
-		if _, err := catalogList(flags["--supported-keys"], has(flags, "--supported-keys")); err != nil {
-			return report(diag, err)
-		}
-		if _, err := catalogList(flags["--allowed-tokens"], has(flags, "--allowed-tokens")); err != nil {
-			return report(diag, err)
 		}
 		app, err := domain.NewApplication(flags["--app"])
 		if err != nil {
@@ -224,9 +216,9 @@ func catalogVerb(positional []string) bool {
 		return false
 	}
 	switch positional[0] {
-	case "list-permissions":
+	case "list-permissions", "list-scopes":
 		return len(positional) == 1
-	case "register-permission", "register-scope", "get-permission", "set-permission-status":
+	case "register-permission", "register-scope", "get-permission", "get-scope", "set-permission-status":
 		return len(positional) == 2 && !empty(positional[1])
 	}
 	return false

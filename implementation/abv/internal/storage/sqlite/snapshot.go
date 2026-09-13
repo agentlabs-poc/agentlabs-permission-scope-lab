@@ -85,7 +85,7 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	if err := r.conn.QueryRowContext(r.ctx, `SELECT generation FROM applications WHERE application_id=?`, applicationID).Scan(&generation); err != nil {
 		return classify(err)
 	}
-	*catalog = domain.Catalog{ApplicationID: applicationID, Generation: generation, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1, SupportedKeys: map[string][]string{}}
+	*catalog = domain.Catalog{ApplicationID: applicationID, Generation: generation, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1}
 	// Permissions are L1 records. The identifier is rebuilt from its slots by
 	// the shared codec; storage never assembles the string itself.
 	rows, err := r.conn.QueryContext(r.ctx, `
@@ -125,14 +125,18 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	if err = finishRows(rows); err != nil {
 		return err
 	}
-	rows, err = r.conn.QueryContext(r.ctx, `SELECT scope_key,allowed_tokens_json FROM scope_definitions WHERE application_id=? ORDER BY scope_key`, applicationID)
+	// Scopes are L1 records: key3 the application, key4 the key.
+	rows, err = r.conn.QueryContext(r.ctx, `
+		SELECT key4, value FROM abv_l1_records
+		 WHERE boundary='application' AND tenant_id='' AND application_id=?
+		   AND key1='abv' AND key2='scope' AND key3=? ORDER BY key4`, applicationID, applicationID)
 	if err != nil {
 		return classify(err)
 	}
 	for rows.Next() {
 		var key string
-		var raw []byte
-		if err = rows.Scan(&key, &raw); err != nil {
+		var payload []byte
+		if err = rows.Scan(&key, &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -140,41 +144,17 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 			rows.Close()
 			return err
 		}
-		var tokens []string
-		if invalid(key) || key == "*" || json.Unmarshal(raw, &tokens) != nil || validateAllowedTokens(tokens) != nil {
+		// A scope record's payload is empty: its presence is the fact.
+		if key == "" || len(payload) == 0 {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		catalog.Scopes[key] = domain.ScopeDefinition{Key: key, AllowedTokens: tokens}
+		catalog.Scopes[key] = domain.ScopeDefinition{Key: key}
 	}
 	if err = finishRows(rows); err != nil {
 		return err
 	}
-	rows, err = r.conn.QueryContext(r.ctx, `SELECT permission_id,scope_key FROM supported_scope_keys WHERE application_id=? ORDER BY permission_id,ordinal`, applicationID)
-	if err != nil {
-		return classify(err)
-	}
-	for rows.Next() {
-		var permission, key string
-		if err = rows.Scan(&permission, &key); err != nil {
-			rows.Close()
-			return classify(err)
-		}
-		if err = r.add(); err != nil {
-			rows.Close()
-			return err
-		}
-		if _, ok := catalog.Permissions[permission]; !ok {
-			rows.Close()
-			return domain.ErrMalformed
-		}
-		if _, ok := catalog.Scopes[key]; !ok {
-			rows.Close()
-			return domain.ErrMalformed
-		}
-		catalog.SupportedKeys[permission] = append(catalog.SupportedKeys[permission], key)
-	}
-	return finishRows(rows)
+	return nil
 }
 
 func (r *snapshotReader) controls(s *storage.Snapshot) error {

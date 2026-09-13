@@ -8,12 +8,12 @@ import (
 )
 
 type CatalogAdministration interface {
-	CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, []string, time.Time) error
+	CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, time.Time) error
 	CheckScopeRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.ScopeDefinition, time.Time) error
 }
 
-func (f *Facade) RegisterPermission(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.PermissionDefinition, supportedKeys []string) (domain.PermissionDefinition, error) {
-	return f.service.RegisterPermission(ctx, app, identity, definition, supportedKeys)
+func (f *Facade) RegisterPermission(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
+	return f.service.RegisterPermission(ctx, app, identity, definition)
 }
 
 func (f *Facade) RegisterScope(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.ScopeDefinition) (domain.ScopeDefinition, error) {
@@ -44,4 +44,19 @@ func (f *Facade) ListPermissions(ctx context.Context, app domain.Application, id
 // rewritten, deleted or disabled.
 func (f *Facade) SetPermissionStatus(ctx context.Context, app domain.Application, identity domain.Identity, id string, active bool) (domain.PermissionDefinition, error) {
 	return f.service.SetPermissionStatus(ctx, app, identity, id, active)
+}
+
+// ScopeAdministration gates reads of an application's scope catalog.
+type ScopeAdministration = mutation.ScopeAdministration
+
+// GetScope returns one registered scope definition by exact key.
+func (f *Facade) GetScope(ctx context.Context, app domain.Application, identity domain.Identity, key string) (domain.ScopeDefinition, error) {
+	return f.service.GetScope(ctx, app, identity, key)
+}
+
+// ListScopes returns one bounded page of an application's scope catalog, ordered
+// by key. There is no prefix filter: a scope key is a flat token, so a prefix
+// would be a string match inside one slot rather than a structural one.
+func (f *Facade) ListScopes(ctx context.Context, app domain.Application, identity domain.Identity, filter domain.ScopeFilter) (domain.ScopePage, error) {
+	return f.service.ListScopes(ctx, app, identity, filter)
 }

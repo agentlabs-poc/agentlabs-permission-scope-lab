@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 648 673" width="648" height="673" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+<rect width="648" height="673" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h634a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<circle cx="20" cy="17.0" r="5.5" fill="#e0787c"/>
+<circle cx="37" cy="17.0" r="5.5" fill="#d9a441"/>
+<circle cx="54" cy="17.0" r="5.5" fill="#6cc292"/>
+<text x="324.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">auth-al — what the store holds</text>
+<text x="22" y="62" fill="#e8ecf2" xml:space="preserve">abv_l1_records — permissions and scopes in one store</text>
+<text x="22" y="104" fill="#9aa4b4" xml:space="preserve">key2         key3   key4      key10    value</text>
+<text x="22" y="125" fill="#9aa4b4" xml:space="preserve">──────────────────────────────────────────────────────────</text>
+<text x="22" y="146" fill="#6cc292" xml:space="preserve">permission   hrms   payroll   delete   {&quot;active&quot;:true}</text>
+<text x="22" y="167" fill="#6cc292" xml:space="preserve">permission   hrms   payroll   read     {&quot;active&quot;:true}</text>
+<text x="22" y="188" fill="#6cc292" xml:space="preserve">permission   hrms   payroll   write    {&quot;active&quot;:true}</text>
+<text x="22" y="209" fill="#d9a441" xml:space="preserve">scope        hrms   cert               {}</text>
+<text x="22" y="230" fill="#d9a441" xml:space="preserve">scope        hrms   dept               {}</text>
+<text x="22" y="251" fill="#d9a441" xml:space="preserve">scope        hrms   region             {}</text>
+<text x="22" y="272" fill="#d9a441" xml:space="preserve">scope        hrms   user               {}</text>
+<text x="22" y="314" fill="#6b7687" xml:space="preserve"># two record types, one table, told apart by key2</text>
+<text x="22" y="335" fill="#6b7687" xml:space="preserve"># key3 is the application in both — the rule for every record type</text>
+<text x="22" y="356" fill="#6b7687" xml:space="preserve"># a permission fills key4..key9 with its noun path, verb pinned to key10</text>
+<text x="22" y="377" fill="#6b7687" xml:space="preserve"># a scope key is flat: key4 whole, nothing after it</text>
+<text x="22" y="419" fill="#e8ecf2" xml:space="preserve">what a scope record does NOT carry</text>
+<text x="22" y="440" fill="#6b7687" xml:space="preserve"># allowed_tokens — appeared nowhere in the handbook</text>
+<text x="22" y="461" fill="#6b7687" xml:space="preserve"># supported keys — removed with the relationship check</text>
+<text x="22" y="482" fill="#6b7687" xml:space="preserve"># an active flag — the handbook gives a scope no status</text>
+<text x="22" y="524" fill="#9aa4b4" xml:space="preserve">two boundaries are implicit, never registered keys:</text>
+<text x="22" y="545" fill="#6cc292" xml:space="preserve">  {}       an empty scope is already a complete scope —</text>
+<text x="22" y="566" fill="#6cc292" xml:space="preserve">           the whole application boundary</text>
+<text x="22" y="587" fill="#6cc292" xml:space="preserve">  $self    the authorizing human, resolved by the evaluator</text>
+<text x="22" y="629" fill="#e0787c" xml:space="preserve">tables removed:  scope_definitions · supported_scope_keys</text>
+<text x="22" y="650" fill="#9aa4b4" xml:space="preserve">remaining:  11, from 13 before permissions moved</text>
+</svg>

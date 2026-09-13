@@ -2,11 +2,11 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE abv_metadata (
     marker TEXT PRIMARY KEY CHECK (marker = 'agentlabs-abv'),
-    schema_version INTEGER NOT NULL CHECK (schema_version = 3)
+    schema_version INTEGER NOT NULL CHECK (schema_version = 4)
 );
 
--- The ABV-123 L1 record store. Permissions live here; the remaining concepts
--- still have their own tables and move deliberately, one at a time.
+-- The ABV-123 L1 record store. Permissions and scopes live here; the remaining
+-- concepts still have their own tables and move deliberately, one at a time.
 --
 -- tenant_id is '' rather than NULL for a record that is not tenant-scoped:
 -- both SQLite and PostgreSQL treat NULLs in a unique index as distinct, which
@@ -52,25 +52,6 @@ CREATE TABLE installations (
     application_id TEXT NOT NULL,
     PRIMARY KEY (tenant_id, application_id),
     FOREIGN KEY (application_id) REFERENCES applications(application_id)
-);
-CREATE TABLE scope_definitions (
-    application_id TEXT NOT NULL,
-    scope_key TEXT NOT NULL,
-    allowed_tokens_json BLOB NOT NULL,
-    PRIMARY KEY (application_id, scope_key),
-    FOREIGN KEY (application_id) REFERENCES applications(application_id)
-);
-CREATE TABLE supported_scope_keys (
-    application_id TEXT NOT NULL,
-    permission_id TEXT NOT NULL,
-    scope_key TEXT NOT NULL,
-    ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
-    PRIMARY KEY (application_id, permission_id, scope_key),
-    UNIQUE (application_id, permission_id, ordinal),
-    -- The permissions foreign key is gone: permissions are now records in
-    -- abv_l1_records, which a composite key cannot reference. Registration
-    -- validates the permission exists before writing here.
-    FOREIGN KEY (application_id, scope_key) REFERENCES scope_definitions(application_id, scope_key)
 );
 CREATE TABLE roles (
     tenant_id TEXT NOT NULL,
@@ -142,4 +123,4 @@ CREATE TABLE assignments (
 
 -- The ownership marker is written last, so an incomplete initialization is
 -- never accepted as an ABV database on a later open.
-INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 3);
+INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 4);

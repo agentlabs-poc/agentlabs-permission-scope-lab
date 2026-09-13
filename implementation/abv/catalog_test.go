@@ -15,7 +15,7 @@ type catalogAdministration struct{ allow bool }
 func (catalogAdministration) CheckAssignment(context.Context, abv.Evidence, domain.Identity, domain.Assignment, time.Time) error {
 	return domain.ErrUnsupported
 }
-func (a catalogAdministration) CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, []string, time.Time) error {
+func (a catalogAdministration) CheckPermissionRegistration(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, time.Time) error {
 	if !a.allow {
 		return domain.ErrRejected
 	}
@@ -31,17 +31,17 @@ func (a catalogAdministration) CheckScopeRegistration(context.Context, domain.Ap
 func TestFacadeForwardsProtectedCatalogRegistration(t *testing.T) {
 	app, _ := domain.NewApplication("hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
-	provider := &catalogMemoryProvider{catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}}
+	provider := &catalogMemoryProvider{catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}}}
 	facade, err := abv.New(provider, catalogAdministration{allow: true}, clock{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	definition := domain.ScopeDefinition{Key: "dept", AllowedTokens: []string{"$self"}}
+	definition := domain.ScopeDefinition{Key: "dept"}
 	if got, err := facade.RegisterScope(t.Context(), app, id, definition); err != nil || got.Key != definition.Key {
 		t.Fatalf("got=%#v err=%v", got, err)
 	}
 	denied, _ := abv.New(provider, catalogAdministration{}, clock{})
-	got, err := denied.RegisterPermission(t.Context(), app, id, domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true}, []string{"dept"})
+	got, err := denied.RegisterPermission(t.Context(), app, id, domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true})
 	if !errors.Is(err, domain.ErrRejected) || got != (domain.PermissionDefinition{}) {
 		t.Fatalf("denied got=%#v err=%v", got, err)
 	}
@@ -80,6 +80,13 @@ func (p *catalogMemoryProvider) UpdateCatalog(_ context.Context, _ domain.Applic
 		}
 		existing.Active = w.PermissionStatus.Active
 		p.catalog.Permissions[w.PermissionStatus.ID] = existing
+	}
+	return nil
+}
+
+func (a catalogAdministration) CheckScopeRead(context.Context, domain.Application, domain.Identity, time.Time) error {
+	if !a.allow {
+		return domain.ErrRejected
 	}
 	return nil
 }

@@ -81,7 +81,7 @@ func seedSnapshots(ctx context.Context, conn *sql.Conn, snapshots []storage.Snap
 }
 
 func seedCatalog(ctx context.Context, conn *sql.Conn, c domain.Catalog) error {
-	if invalid(c.ApplicationID) || c.Permissions == nil || c.Scopes == nil || c.SupportedKeys == nil {
+	if invalid(c.ApplicationID) || c.Permissions == nil || c.Scopes == nil {
 		return domain.ErrMalformed
 	}
 	if _, err := conn.ExecContext(ctx, `INSERT INTO applications(application_id,compatibility_enabled) VALUES(?,?)`, c.ApplicationID, boolInt(c.CompatibilityEnabled)); err != nil {
@@ -100,31 +100,11 @@ func seedCatalog(ctx context.Context, conn *sql.Conn, c domain.Catalog) error {
 	scopeKeys := sortedKeys(c.Scopes)
 	for _, key := range scopeKeys {
 		d := c.Scopes[key]
-		if invalid(key) || d.Key != key || validateAllowedTokens(d.AllowedTokens) != nil {
+		if invalid(key) || d.Key != key {
 			return domain.ErrMalformed
 		}
-		raw, err := json.Marshal(d.AllowedTokens)
-		if err != nil {
-			return domain.ErrMalformed
-		}
-		if _, err = conn.ExecContext(ctx, `INSERT INTO scope_definitions(application_id,scope_key,allowed_tokens_json) VALUES(?,?,?)`, c.ApplicationID, key, raw); err != nil {
-			return classify(err)
-		}
-	}
-	supportedPermissions := sortedKeys(c.SupportedKeys)
-	for _, permission := range supportedPermissions {
-		if _, ok := c.Permissions[permission]; !ok {
-			return domain.ErrMalformed
-		}
-		seen := map[string]bool{}
-		for ordinal, key := range c.SupportedKeys[permission] {
-			if _, ok := c.Scopes[key]; !ok || seen[key] {
-				return domain.ErrMalformed
-			}
-			seen[key] = true
-			if _, err := conn.ExecContext(ctx, `INSERT INTO supported_scope_keys(application_id,permission_id,scope_key,ordinal) VALUES(?,?,?,?)`, c.ApplicationID, permission, key, ordinal); err != nil {
-				return classify(err)
-			}
+		if err := insertScopeRecord(ctx, conn, c.ApplicationID, d); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -240,19 +220,6 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 }
 
 func invalid(value string) bool { return strings.TrimSpace(value) == "" || !utf8.ValidString(value) }
-func validateAllowedTokens(tokens []string) error {
-	if tokens == nil {
-		return domain.ErrMalformed
-	}
-	seenSelf := false
-	for _, token := range tokens {
-		if token != "$self" || seenSelf {
-			return domain.ErrMalformed
-		}
-		seenSelf = true
-	}
-	return nil
-}
 func boolInt(value bool) int {
 	if value {
 		return 1

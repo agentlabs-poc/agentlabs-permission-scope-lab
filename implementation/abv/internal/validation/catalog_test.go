@@ -12,18 +12,15 @@ func TestCatalogPermissionRegistrationValidation(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		def  domain.PermissionDefinition
-		keys []string
 		want error
 	}{
-		{"valid", valid, []string{"dept"}, nil},
-		{"malformed ID", domain.PermissionDefinition{ID: "bad*", Active: true}, nil, domain.ErrMalformed},
-		{"inactive", domain.PermissionDefinition{ID: valid.ID}, nil, domain.ErrRejected},
-		{"duplicate", domain.PermissionDefinition{ID: read, Active: true}, nil, domain.ErrConflict},
-		{"unknown key", valid, []string{"missing"}, domain.ErrRejected},
-		{"duplicate key", valid, []string{"dept", "dept"}, domain.ErrRejected},
+		{"valid", valid, nil},
+		{"malformed id", domain.PermissionDefinition{ID: "bad*", Active: true}, domain.ErrMalformed},
+		{"inactive at registration", domain.PermissionDefinition{ID: valid.ID}, domain.ErrRejected},
+		{"already registered", domain.PermissionDefinition{ID: read, Active: true}, domain.ErrConflict},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if err := CheckPermissionRegistration(c, tc.def, tc.keys); !errors.Is(err, tc.want) {
+			if err := CheckPermissionRegistration(c, tc.def); !errors.Is(err, tc.want) {
 				t.Fatalf("got %v want %v", err, tc.want)
 			}
 		})
@@ -37,17 +34,32 @@ func TestCatalogScopeRegistrationValidation(t *testing.T) {
 		def  domain.ScopeDefinition
 		want error
 	}{
-		{"valid", domain.ScopeDefinition{Key: "region", AllowedTokens: []string{"$self"}}, nil},
-		{"duplicate", domain.ScopeDefinition{Key: "dept", AllowedTokens: []string{}}, domain.ErrConflict},
-		{"malformed key", domain.ScopeDefinition{Key: "*", AllowedTokens: []string{}}, domain.ErrMalformed},
-		{"nil tokens", domain.ScopeDefinition{Key: "region"}, domain.ErrMalformed},
-		{"unsupported token", domain.ScopeDefinition{Key: "region", AllowedTokens: []string{"$owner"}}, domain.ErrRejected},
-		{"duplicate token", domain.ScopeDefinition{Key: "region", AllowedTokens: []string{"$self", "$self"}}, domain.ErrRejected},
+		{"valid", domain.ScopeDefinition{Key: "region"}, nil},
+		{"duplicate", domain.ScopeDefinition{Key: "dept"}, domain.ErrConflict},
+		{"malformed key", domain.ScopeDefinition{Key: "*"}, domain.ErrMalformed},
+		{"blank key", domain.ScopeDefinition{Key: "  "}, domain.ErrMalformed},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if err := CheckScopeRegistration(c, tc.def); !errors.Is(err, tc.want) {
 				t.Fatalf("got %v want %v", err, tc.want)
 			}
 		})
+	}
+}
+
+// TestScopeRegistrationRejectsAnyWildcard guards a defect a demo run caught: the
+// check rejected a key that was exactly "*" but accepted one merely containing
+// it, unlike the permission path.
+func TestScopeRegistrationRejectsAnyWildcard(t *testing.T) {
+	c := domain.Catalog{ApplicationID: "hrms", Scopes: map[string]domain.ScopeDefinition{}}
+	for _, key := range []string{"*", "bad*", "*bad", "de*pt"} {
+		definition := domain.ScopeDefinition{Key: key}
+		if err := CheckScopeRegistration(c, definition); !errors.Is(err, domain.ErrMalformed) {
+			t.Errorf("key %q: err=%v, want ErrMalformed", key, err)
+		}
+	}
+	valid := domain.ScopeDefinition{Key: "dept"}
+	if err := CheckScopeRegistration(c, valid); err != nil {
+		t.Fatalf("valid key rejected: %v", err)
 	}
 }

@@ -6,11 +6,12 @@ import (
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
 	"context"
-	"slices"
 	"sort"
+	"unicode/utf8"
+	"strings"
 )
 
-func (s *Service) RegisterPermission(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.PermissionDefinition, supportedKeys []string) (domain.PermissionDefinition, error) {
+func (s *Service) RegisterPermission(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
 	fail := func(err error) (domain.PermissionDefinition, error) { return domain.PermissionDefinition{}, err }
 	if err := ctx.Err(); err != nil {
 		return fail(err)
@@ -29,22 +30,21 @@ func (s *Service) RegisterPermission(ctx context.Context, app domain.Application
 	if !ok || nilInterface(admin) {
 		return fail(domain.ErrUnsupported)
 	}
-	keys := append([]string(nil), supportedKeys...)
 	err := provider.UpdateCatalog(ctx, app, func(catalog domain.Catalog) (storage.CatalogWriteSet, error) {
 		if catalog.ApplicationID != app.ID() {
 			return storage.CatalogWriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckPermissionRegistration(ctx, app, cloneCatalog(catalog), identity, definition, append([]string(nil), keys...), s.clock.Now()); err != nil {
+		if err := admin.CheckPermissionRegistration(ctx, app, cloneCatalog(catalog), identity, definition, s.clock.Now()); err != nil {
 			return storage.CatalogWriteSet{}, err
 		}
-		if err := validation.CheckPermissionRegistration(catalog, definition, keys); err != nil {
+		if err := validation.CheckPermissionRegistration(catalog, definition); err != nil {
 			return storage.CatalogWriteSet{}, err
 		}
 		if err := ctx.Err(); err != nil {
 			return storage.CatalogWriteSet{}, err
 		}
 		result := definition
-		return storage.CatalogWriteSet{Permission: &result, SupportedKeys: append([]string(nil), keys...)}, nil
+		return storage.CatalogWriteSet{Permission: &result}, nil
 	})
 	if err != nil {
 		return fail(err)
@@ -71,13 +71,11 @@ func (s *Service) RegisterScope(ctx context.Context, app domain.Application, ide
 	if !ok || nilInterface(admin) {
 		return fail(domain.ErrUnsupported)
 	}
-	definition.AllowedTokens = slices.Clone(definition.AllowedTokens)
 	err := provider.UpdateCatalog(ctx, app, func(catalog domain.Catalog) (storage.CatalogWriteSet, error) {
 		if catalog.ApplicationID != app.ID() {
 			return storage.CatalogWriteSet{}, domain.ErrRejected
 		}
 		evidence := definition
-		evidence.AllowedTokens = slices.Clone(definition.AllowedTokens)
 		if err := admin.CheckScopeRegistration(ctx, app, cloneCatalog(catalog), identity, evidence, s.clock.Now()); err != nil {
 			return storage.CatalogWriteSet{}, err
 		}
@@ -88,7 +86,6 @@ func (s *Service) RegisterScope(ctx context.Context, app domain.Application, ide
 			return storage.CatalogWriteSet{}, err
 		}
 		result := definition
-		result.AllowedTokens = slices.Clone(definition.AllowedTokens)
 		return storage.CatalogWriteSet{Scope: &result}, nil
 	})
 	if err != nil {
@@ -100,15 +97,7 @@ func (s *Service) RegisterScope(ctx context.Context, app domain.Application, ide
 func cloneCatalog(source domain.Catalog) domain.Catalog {
 	result := source
 	result.Permissions = cloneMap(source.Permissions)
-	result.Scopes = make(map[string]domain.ScopeDefinition, len(source.Scopes))
-	for key, value := range source.Scopes {
-		value.AllowedTokens = slices.Clone(value.AllowedTokens)
-		result.Scopes[key] = value
-	}
-	result.SupportedKeys = make(map[string][]string, len(source.SupportedKeys))
-	for key, value := range source.SupportedKeys {
-		result.SupportedKeys[key] = append([]string(nil), value...)
-	}
+	result.Scopes = cloneMap(source.Scopes)
 	return result
 }
 
@@ -322,4 +311,121 @@ func matchesPrefix(id string, prefix []string) bool {
 		}
 	}
 	return true
+}
+
+const (
+	defaultScopePage = 100
+	maxScopePage     = 500
+)
+
+// GetScope returns one registered scope definition by exact key.
+func (s *Service) GetScope(ctx context.Context, app domain.Application, identity domain.Identity, key string) (domain.ScopeDefinition, error) {
+	fail := func(err error) (domain.ScopeDefinition, error) { return domain.ScopeDefinition{}, err }
+	provider, admin, err := s.scopeCatalog(ctx, app, identity)
+	if err != nil {
+		return fail(err)
+	}
+	if invalidScopeKey(key) {
+		return fail(domain.ErrMalformed)
+	}
+	var result domain.ScopeDefinition
+	err = provider.ReadCatalog(ctx, app, func(catalog domain.Catalog) error {
+		if catalog.ApplicationID != app.ID() {
+			return domain.ErrRejected
+		}
+		if err := admin.CheckScopeRead(ctx, app, identity, s.clock.Now()); err != nil {
+			return err
+		}
+		definition, ok := catalog.Scopes[key]
+		if !ok || definition.Key != key {
+			return domain.ErrNotFound
+		}
+		result = definition
+		return nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return result, nil
+}
+
+// ListScopes returns one bounded page of an application's scope catalog, ordered
+// by key. There is no prefix filter: a scope key is flat, so a prefix would be a
+// string match inside one slot rather than a structural one.
+func (s *Service) ListScopes(ctx context.Context, app domain.Application, identity domain.Identity, filter domain.ScopeFilter) (domain.ScopePage, error) {
+	fail := func(err error) (domain.ScopePage, error) { return domain.ScopePage{}, err }
+	provider, admin, err := s.scopeCatalog(ctx, app, identity)
+	if err != nil {
+		return fail(err)
+	}
+	if filter.Offset < 0 || filter.Limit < 0 || filter.Limit > maxScopePage {
+		return fail(domain.ErrMalformed)
+	}
+	limit := filter.Limit
+	if limit == 0 {
+		limit = defaultScopePage
+	}
+
+	var page domain.ScopePage
+	err = provider.ReadCatalog(ctx, app, func(catalog domain.Catalog) error {
+		if catalog.ApplicationID != app.ID() {
+			return domain.ErrRejected
+		}
+		if err := admin.CheckScopeRead(ctx, app, identity, s.clock.Now()); err != nil {
+			return err
+		}
+		matched := make([]domain.ScopeDefinition, 0, len(catalog.Scopes))
+		for key, definition := range catalog.Scopes {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			if definition.Key != key {
+				return domain.ErrRejected
+			}
+			matched = append(matched, definition)
+		}
+		sort.Slice(matched, func(i, j int) bool { return matched[i].Key < matched[j].Key })
+
+		page.Total = len(matched)
+		page.Generation = catalog.Generation
+		if filter.Offset >= len(matched) {
+			page.Scopes = []domain.ScopeDefinition{}
+			return nil
+		}
+		end := filter.Offset + limit
+		if end > len(matched) {
+			end = len(matched)
+		}
+		page.Scopes = matched[filter.Offset:end]
+		return nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return page, nil
+}
+
+func (s *Service) scopeCatalog(ctx context.Context, app domain.Application, identity domain.Identity) (storage.CatalogProvider, ScopeAdministration, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
+	if err := app.Validate(); err != nil {
+		return nil, nil, err
+	}
+	if err := validateSupportedIdentity(identity); err != nil {
+		return nil, nil, err
+	}
+	provider, ok := s.provider.(storage.CatalogProvider)
+	if !ok || nilInterface(provider) {
+		return nil, nil, domain.ErrUnsupported
+	}
+	admin, ok := s.administration.(ScopeAdministration)
+	if !ok || nilInterface(admin) {
+		return nil, nil, domain.ErrUnsupported
+	}
+	return provider, admin, nil
+}
+
+func invalidScopeKey(key string) bool {
+	return strings.TrimSpace(key) == "" || !utf8.ValidString(key) || strings.Contains(key, "*")
 }

@@ -66,7 +66,9 @@ func TestSnapshotLimitReturnsNoReceiptAndNoWrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	provider.Close()
-	provider, err = sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 30})
+	// Deliberately far below the fixture's size, so the bound keeps biting as
+	// records are added or removed rather than being tuned to one count.
+	provider, err = sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 5})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,8 +137,5 @@ func benchmarkSnapshot(area domain.Area, records int) lab.TeamFINC17Case {
 
 func snapshotRecordCount(snapshot storage.Snapshot) int {
 	supported := 0
-	for _, keys := range snapshot.Catalog.SupportedKeys {
-		supported += len(keys)
-	}
 	return 1 + len(snapshot.Catalog.Permissions) + len(snapshot.Catalog.Scopes) + supported + len(snapshot.Controls) + len(snapshot.Contents) + len(snapshot.Assignments) + len(snapshot.Roles) + len(snapshot.Teams) + len(snapshot.Memberships) + len(snapshot.TrustedRoots)
 }

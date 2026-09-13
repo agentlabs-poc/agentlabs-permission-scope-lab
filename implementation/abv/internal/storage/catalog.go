@@ -7,7 +7,6 @@ import (
 
 type CatalogWriteSet struct {
 	Permission    *domain.PermissionDefinition
-	SupportedKeys []string
 	Scope         *domain.ScopeDefinition
 	// PermissionStatus updates an existing definition's active flag. It is
 	// distinct from Permission, which inserts a new one: a status change must

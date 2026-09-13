@@ -7,7 +7,7 @@ import (
 	"unicode/utf8"
 )
 
-func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionDefinition, supportedKeys []string) error {
+func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionDefinition) error {
 	if err := codec.PermissionList([]string{definition.ID}); err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionD
 	if !definition.Active {
 		return domain.ErrRejected
 	}
-	return selectedKeys(c, supportedKeys)
+	return nil
 }
 
 // CheckPermissionStatus validates a status change against the catalog. The
@@ -44,14 +44,14 @@ func CheckPermissionStatus(c domain.Catalog, id string, active bool) error {
 }
 
 func CheckScopeRegistration(c domain.Catalog, definition domain.ScopeDefinition) error {
-	if strings.TrimSpace(definition.Key) == "" || !utf8.ValidString(definition.Key) || definition.Key == "*" {
-		return domain.ErrMalformed
-	}
-	if definition.AllowedTokens == nil {
+	// A wildcard anywhere, not merely a key that is exactly "*": a scope key is
+	// matched for equality during evaluation, so a key containing "*" could only
+	// ever mislead a reader into thinking it matches more than itself.
+	if strings.TrimSpace(definition.Key) == "" || !utf8.ValidString(definition.Key) || strings.Contains(definition.Key, "*") {
 		return domain.ErrMalformed
 	}
 	if _, exists := c.Scopes[definition.Key]; exists {
 		return domain.ErrConflict
 	}
-	return selectedTokens(definition.AllowedTokens)
+	return nil
 }

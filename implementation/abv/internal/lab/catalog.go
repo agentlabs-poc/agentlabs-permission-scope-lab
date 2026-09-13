@@ -25,7 +25,7 @@ type catalogAdministration struct{ app domain.Application }
 func (catalogAdministration) CheckAssignment(context.Context, abv.Evidence, domain.Identity, domain.Assignment, time.Time) error {
 	return domain.ErrRejected
 }
-func (a catalogAdministration) CheckPermissionRegistration(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, _ domain.PermissionDefinition, _ []string, _ time.Time) error {
+func (a catalogAdministration) CheckPermissionRegistration(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, _ domain.PermissionDefinition, _ time.Time) error {
 	return a.check(ctx, app, catalog, identity)
 }
 func (a catalogAdministration) CheckScopeRegistration(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, _ domain.ScopeDefinition, _ time.Time) error {
@@ -37,6 +37,10 @@ func (a catalogAdministration) CheckPermissionRead(ctx context.Context, app doma
 
 func (a catalogAdministration) CheckPermissionStatus(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, _ string, _ bool, _ time.Time) error {
 	return a.check(ctx, app, catalog, identity)
+}
+
+func (a catalogAdministration) CheckScopeRead(ctx context.Context, app domain.Application, identity domain.Identity, _ time.Time) error {
+	return a.check(ctx, app, domain.Catalog{ApplicationID: app.ID()}, identity)
 }
 
 func (a catalogAdministration) check(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity) error {
@@ -65,14 +69,14 @@ func ConnectCatalog(ctx context.Context, app domain.Application, path string) (a
 	return &catalogApplication{app: app, path: path, facade: facade}, facade.Close, nil
 }
 
-func (a *catalogApplication) RegisterPermission(ctx context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.PermissionDefinition, keys []string) (domain.PermissionDefinition, error) {
+func (a *catalogApplication) RegisterPermission(ctx context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
 	if app != a.app || fixture.Name != catalogFixtureContext {
 		return domain.PermissionDefinition{}, domain.ErrRejected
 	}
 	if err := verifyCatalogMarker(ctx, a.path, app); err != nil {
 		return domain.PermissionDefinition{}, err
 	}
-	return a.facade.RegisterPermission(ctx, app, catalogPublisher, definition, keys)
+	return a.facade.RegisterPermission(ctx, app, catalogPublisher, definition)
 }
 func (a *catalogApplication) RegisterScope(ctx context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.ScopeDefinition) (domain.ScopeDefinition, error) {
 	if app != a.app || fixture.Name != catalogFixtureContext {
@@ -112,6 +116,26 @@ func (a *catalogApplication) SetPermissionStatus(ctx context.Context, app domain
 		return domain.PermissionDefinition{}, err
 	}
 	return a.facade.SetPermissionStatus(ctx, app, catalogPublisher, id, active)
+}
+
+func (a *catalogApplication) GetScope(ctx context.Context, app domain.Application, fixture domain.FixtureContext, key string) (domain.ScopeDefinition, error) {
+	if app != a.app || fixture.Name != catalogFixtureContext {
+		return domain.ScopeDefinition{}, domain.ErrRejected
+	}
+	if err := verifyCatalogMarker(ctx, a.path, app); err != nil {
+		return domain.ScopeDefinition{}, err
+	}
+	return a.facade.GetScope(ctx, app, catalogPublisher, key)
+}
+
+func (a *catalogApplication) ListScopes(ctx context.Context, app domain.Application, fixture domain.FixtureContext, filter domain.ScopeFilter) (domain.ScopePage, error) {
+	if app != a.app || fixture.Name != catalogFixtureContext {
+		return domain.ScopePage{}, domain.ErrRejected
+	}
+	if err := verifyCatalogMarker(ctx, a.path, app); err != nil {
+		return domain.ScopePage{}, err
+	}
+	return a.facade.ListScopes(ctx, app, catalogPublisher, filter)
 }
 
 func verifyCatalogMarker(ctx context.Context, path string, app domain.Application) error {

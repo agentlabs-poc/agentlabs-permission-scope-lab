@@ -315,18 +315,15 @@ func TestCorruptCatalogProjectionsDoNotReachCallback(t *testing.T) {
 				t.Fatal(err)
 			}
 		},
-		"duplicate token": func(t *testing.T, p *provider, area domain.Area) {
-			if _, err := p.db.ExecContext(t.Context(), `UPDATE scope_definitions SET allowed_tokens_json='["$self","$self"]' WHERE application_id=?`, area.ApplicationID()); err != nil {
+		// A scope record carries no payload beyond its presence, so the
+		// corruptions worth testing are a blank key and an empty value.
+		"blank scope key": func(t *testing.T, p *provider, area domain.Area) {
+			if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET key4='' WHERE key2='scope' AND application_id=?`, area.ApplicationID()); err != nil {
 				t.Fatal(err)
 			}
 		},
-		"unsupported token": func(t *testing.T, p *provider, area domain.Area) {
-			if _, err := p.db.ExecContext(t.Context(), `UPDATE scope_definitions SET allowed_tokens_json='["other"]' WHERE application_id=?`, area.ApplicationID()); err != nil {
-				t.Fatal(err)
-			}
-		},
-		"null token": func(t *testing.T, p *provider, area domain.Area) {
-			if _, err := p.db.ExecContext(t.Context(), `UPDATE scope_definitions SET allowed_tokens_json='[null]' WHERE application_id=?`, area.ApplicationID()); err != nil {
+		"empty scope payload": func(t *testing.T, p *provider, area domain.Area) {
+			if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value='' WHERE key2='scope' AND application_id=?`, area.ApplicationID()); err != nil {
 				t.Fatal(err)
 			}
 		},
@@ -334,7 +331,7 @@ func TestCorruptCatalogProjectionsDoNotReachCallback(t *testing.T) {
 	for name, corrupt := range cases {
 		t.Run(name, func(t *testing.T) {
 			base := contractFixture(t)
-			base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept", AllowedTokens: []string{"$self"}}
+			base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept"}
 			path := t.TempDir() + "/authority.db"
 			opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
 			if err != nil {
@@ -347,21 +344,6 @@ func TestCorruptCatalogProjectionsDoNotReachCallback(t *testing.T) {
 			err = p.Read(t.Context(), base.Area, func(storage.Snapshot) error { calls.Add(1); return nil })
 			if !errors.Is(err, domain.ErrMalformed) || calls.Load() != 0 {
 				t.Fatalf("corrupt catalog reached callback: calls=%d err=%v", calls.Load(), err)
-			}
-		})
-	}
-}
-
-func TestFixtureRejectsInvalidCatalogTokens(t *testing.T) {
-	for name, tokens := range map[string][]string{
-		"duplicate":   {"$self", "$self"},
-		"unsupported": {"other"},
-	} {
-		t.Run(name, func(t *testing.T) {
-			base := contractFixture(t)
-			base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept", AllowedTokens: tokens}
-			if _, err := CreateFixture(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{base}); !errors.Is(err, domain.ErrMalformed) {
-				t.Fatalf("invalid fixture tokens accepted: %v", err)
 			}
 		})
 	}
@@ -537,7 +519,7 @@ func contractFixture(t *testing.T) storage.Snapshot {
 
 func minimalFixture(area domain.Area) storage.Snapshot {
 	content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{}}
-	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}, SupportedKeys: map[string][]string{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 1}: content}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
+	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 1}: content}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 }
 
 func assertSQLiteAssignmentsAbsent(t *testing.T, p storage.Provider, area domain.Area, ids ...string) {
