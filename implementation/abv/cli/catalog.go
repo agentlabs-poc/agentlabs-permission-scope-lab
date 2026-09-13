@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 )
 
@@ -52,6 +53,44 @@ func catalog(ctx context.Context, api application.CatalogAPI, app domain.Applica
 			return report(diag, err)
 		}
 		fmt.Fprintf(&rendered, "internal projection: scope\nkey  %s\nallowed tokens  %s\n", definition.Key, strings.Join(definition.AllowedTokens, ","))
+	case "get-permission":
+		definition, err := api.GetPermission(ctx, app, fixture, positional[1])
+		if err != nil {
+			return report(diag, err)
+		}
+		fmt.Fprintf(&rendered, "internal projection: permission\nid  %s\nactive  %t\n", definition.ID, definition.Active)
+	case "list-permissions":
+		filter := domain.PermissionFilter{
+			Prefix:     flags["--prefix"],
+			ActiveOnly: has(flags, "--active-only"),
+			After:      flags["--after"],
+		}
+		if has(flags, "--limit") {
+			limit, err := strconv.Atoi(flags["--limit"])
+			if err != nil {
+				return report(diag, domain.ErrMalformed)
+			}
+			filter.Limit = limit
+		}
+		page, err := api.ListPermissions(ctx, app, fixture, filter)
+		if err != nil {
+			return report(diag, err)
+		}
+		fmt.Fprintf(&rendered, "internal projection: permissions\ncount  %d\n", len(page.Permissions))
+		for _, definition := range page.Permissions {
+			fmt.Fprintf(&rendered, "%s  active=%t\n", definition.ID, definition.Active)
+		}
+		fmt.Fprintf(&rendered, "next-after  %s\n", page.NextAfter)
+	case "set-permission-status":
+		active := flags["--active"] == "true"
+		if flags["--active"] != "true" && flags["--active"] != "false" {
+			return report(diag, domain.ErrMalformed)
+		}
+		definition, err := api.SetPermissionStatus(ctx, app, fixture, positional[1], active)
+		if err != nil {
+			return report(diag, err)
+		}
+		fmt.Fprintf(&rendered, "internal projection: permission\nid  %s\nactive  %t\n", definition.ID, definition.Active)
 	}
 	if _, err := fmt.Fprintln(diag, "LAB ONLY: fixed fixture identity; not authenticated application administration"); err != nil {
 		return 4

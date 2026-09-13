@@ -46,12 +46,22 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
-		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens", "--revision", "--permissions", "--support-assignment":
+		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--supported-keys", "--allowed-tokens", "--revision", "--permissions", "--support-assignment",
+			"--prefix", "--after", "--limit", "--active", "--active-only":
 		default:
 			return fail(2, "unknown flag")
 		}
 		if _, exists := flags[name]; exists {
 			return fail(2, "duplicate flag")
+		}
+		// --active-only is a presence flag: it carries no value and must not
+		// consume the next argument.
+		if name == "--active-only" {
+			if inline {
+				return fail(2, "flag takes no value")
+			}
+			flags[name] = "present"
+			continue
 		}
 		if !inline {
 			i++
@@ -66,14 +76,22 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		flags[name] = value
 	}
 	if command == "catalog" {
-		if len(positional) != 2 || (positional[0] != "register-permission" && positional[0] != "register-scope") || empty(positional[1]) || flags["--app"] == "" || flags["--db"] == "" || flags["--fixture-context"] == "" {
-			return fail(2, "catalog requires registration kind, definition, application, database and fixture context")
+		if !catalogVerb(positional) || flags["--app"] == "" || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "catalog requires a supported verb, its argument, application, database and fixture context")
 		}
 		allowed := []string{"--app", "--db", "--fixture-context"}
-		if positional[0] == "register-permission" {
+		switch positional[0] {
+		case "register-permission":
 			allowed = append(allowed, "--supported-keys")
-		} else {
+		case "register-scope":
 			allowed = append(allowed, "--allowed-tokens")
+		case "list-permissions":
+			allowed = append(allowed, "--prefix", "--active-only", "--after", "--limit")
+		case "set-permission-status":
+			allowed = append(allowed, "--active")
+			if flags["--active"] == "" {
+				return fail(2, "set-permission-status requires --active")
+			}
 		}
 		if !only(flags, allowed...) {
 			return fail(2, "unsupported catalog flag")
@@ -199,9 +217,26 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 
 func empty(value string) bool { return strings.TrimSpace(value) == "" }
 
+// catalogVerb reports whether the positional arguments name a supported catalog
+// operation. list-permissions takes no argument; the others take exactly one.
+func catalogVerb(positional []string) bool {
+	if len(positional) == 0 {
+		return false
+	}
+	switch positional[0] {
+	case "list-permissions":
+		return len(positional) == 1
+	case "register-permission", "register-scope", "get-permission", "set-permission-status":
+		return len(positional) == 2 && !empty(positional[1])
+	}
+	return false
+}
+
 func inspectKind(kind string) bool {
 	switch kind {
-	case "permission", "scope", "role", "grant", "grant-control", "assignment", "team", "membership":
+	// A permission is read through catalog get-permission, which is
+	// application-scoped. Inspect requires a tenant a permission does not have.
+	case "scope", "role", "grant", "grant-control", "assignment", "team", "membership":
 		return true
 	default:
 		return false

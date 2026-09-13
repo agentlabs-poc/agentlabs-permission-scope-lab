@@ -63,7 +63,45 @@ func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testin
 		t.Fatalf("permission stdout=%q", permissionOutput)
 	}
 	persistedScope, _ := run(0, "inspect", "scope", "owner", "--db", database, "--tenant", "acme", "--app", "hrms")
-	persistedPermission, _ := run(0, "inspect", "permission", "hrms:payroll:payslip::export", "--db", database, "--tenant", "acme", "--app", "hrms")
+	// The full permission contract, end to end against the real SQLite store.
+	fetched, _ := run(0, "catalog", "get-permission", "hrms:payroll:payslip::export", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	if !strings.Contains(fetched, "id  hrms:payroll:payslip::export") || !strings.Contains(fetched, "active  true") {
+		t.Fatalf("get-permission=%q", fetched)
+	}
+	run(3, "catalog", "get-permission", "hrms:payroll:payslip::nothing", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+
+	listed, _ := run(0, "catalog", "list-permissions", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	if !strings.Contains(listed, "hrms:payroll:payslip::export  active=true") {
+		t.Fatalf("list-permissions=%q", listed)
+	}
+	// A prefix that matches nothing is an empty page, never a fallback to all.
+	narrowed, _ := run(0, "catalog", "list-permissions", "--prefix", "codehost:", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	if !strings.Contains(narrowed, "count  0") {
+		t.Fatalf("empty prefix page=%q", narrowed)
+	}
+
+	retired, _ := run(0, "catalog", "set-permission-status", "hrms:payroll:payslip::export", "--active", "false", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	if !strings.Contains(retired, "active  false") {
+		t.Fatalf("retire=%q", retired)
+	}
+	// Retirement survives a fresh process and is visible to active-only listing.
+	afterRetire, _ := run(0, "catalog", "get-permission", "hrms:payroll:payslip::export", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	if !strings.Contains(afterRetire, "active  false") {
+		t.Fatalf("retirement did not persist across processes: %q", afterRetire)
+	}
+	activeOnly, _ := run(0, "catalog", "list-permissions", "--active-only", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	if strings.Contains(activeOnly, "hrms:payroll:payslip::export") {
+		t.Fatalf("retired permission still listed as active: %q", activeOnly)
+	}
+	// Reversible.
+	restored, _ := run(0, "catalog", "set-permission-status", "hrms:payroll:payslip::export", "--active", "true", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+	if !strings.Contains(restored, "active  true") {
+		t.Fatalf("restore=%q", restored)
+	}
+	// A status change never creates an identifier.
+	run(3, "catalog", "set-permission-status", "hrms:payroll:payslip::invented", "--active", "true", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
+
+	persistedPermission := fetched
 	g0After, _ := run(0, "inspect", "grant", "G0", "--db", database, "--tenant", "acme", "--app", "hrms")
 	if !strings.Contains(persistedScope, "$self") || !strings.Contains(persistedPermission, "true") || g0After != g0Before {
 		t.Fatalf("reopen scope=%q permission=%q G0 before=%q after=%q", persistedScope, persistedPermission, g0Before, g0After)

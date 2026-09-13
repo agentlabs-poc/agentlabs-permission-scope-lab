@@ -17,7 +17,35 @@ type catalogSpy struct {
 	permission domain.PermissionDefinition
 	scope      domain.ScopeDefinition
 	keys       []string
+	filter     domain.PermissionFilter
+	page       domain.PermissionPage
+	id         string
+	active     bool
 	err        error
+}
+
+func (s *catalogSpy) GetPermission(_ context.Context, app domain.Application, fixture domain.FixtureContext, id string) (domain.PermissionDefinition, error) {
+	if s.err != nil {
+		return domain.PermissionDefinition{}, s.err
+	}
+	s.app, s.fixture, s.id = app, fixture, id
+	return domain.PermissionDefinition{ID: id, Active: true}, nil
+}
+
+func (s *catalogSpy) ListPermissions(_ context.Context, app domain.Application, fixture domain.FixtureContext, filter domain.PermissionFilter) (domain.PermissionPage, error) {
+	if s.err != nil {
+		return domain.PermissionPage{}, s.err
+	}
+	s.app, s.fixture, s.filter = app, fixture, filter
+	return s.page, nil
+}
+
+func (s *catalogSpy) SetPermissionStatus(_ context.Context, app domain.Application, fixture domain.FixtureContext, id string, active bool) (domain.PermissionDefinition, error) {
+	if s.err != nil {
+		return domain.PermissionDefinition{}, s.err
+	}
+	s.app, s.fixture, s.id, s.active = app, fixture, id, active
+	return domain.PermissionDefinition{ID: id, Active: active}, nil
 }
 
 func (s *catalogSpy) RegisterPermission(_ context.Context, app domain.Application, fixture domain.FixtureContext, definition domain.PermissionDefinition, keys []string) (domain.PermissionDefinition, error) {
