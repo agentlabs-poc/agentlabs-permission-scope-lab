@@ -17,7 +17,7 @@ func (a *RoleAdministration) CheckRolePublication(ctx context.Context, snapshot 
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) || proposed.ID != "payslip-reader" {
+	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) || proposed.ID != "fi9jvxobqsxs" {
 		return domain.ErrRejected
 	}
 	for _, permission := range proposed.Permissions {
@@ -31,4 +31,17 @@ func (a *RoleAdministration) CheckRolePublication(ctx context.Context, snapshot 
 		}
 	}
 	return domain.ErrRejected
+}
+
+// CheckRoleRead gates the role reads. Reading a tenant's role catalog is a
+// weaker act than publishing into it, so it admits the same fixture publisher
+// without requiring the proposal checks publication makes.
+func (a *RoleAdministration) CheckRoleRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+		return domain.ErrRejected
+	}
+	return nil
 }

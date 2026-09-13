@@ -243,7 +243,7 @@ func TestResolveHumanPreservesAdoptedRevisionValidityAndCancellation(t *testing.
 	f := lab.TeamFINC17(area)
 	expires := time.Date(2026, 9, 10, 0, 0, 0, 0, time.UTC)
 	g := f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
-	g.Permissions, g.RoleID, g.RoleRevision = nil, "payslip-reader", 1
+	g.Permissions, g.RoleID, g.RoleRevision = nil, "fi9jvxobqsxs", 1
 	g.Validity = &domain.Validity{ExpiresAt: &expires}
 	f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g
 

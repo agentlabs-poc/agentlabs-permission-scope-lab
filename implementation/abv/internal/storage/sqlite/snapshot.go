@@ -247,16 +247,21 @@ func (r *snapshotReader) assignments(s *storage.Snapshot) error {
 	}
 	return finishRows(rows)
 }
+// roles reads the tenant's role revisions from the L1 record store. The
+// identity fields come back out of their key slots and the bundle out of the
+// value, each by the same codec that wrote them.
 func (r *snapshotReader) roles(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`SELECT role_id,revision,permissions_json FROM roles WHERE tenant_id=? AND application_id=? ORDER BY role_id,revision`)
+	rows, err := r.areaRows(`
+		SELECT key4, key5, key6, value FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND application_id=?
+		   AND key1='abv' AND key2='role'
+		 ORDER BY key4, key5`)
 	if err != nil {
 		return err
 	}
 	for rows.Next() {
-		var id string
-		var rev int64
-		var raw []byte
-		if err = rows.Scan(&id, &rev, &raw); err != nil {
+		var id, slot, name, payload string
+		if err = rows.Scan(&id, &slot, &name, &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -264,15 +269,21 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		var permissions []string
-		if id == "" || rev <= 0 || json.Unmarshal(raw, &permissions) != nil || codec.PermissionList(permissions) != nil {
+		revision, revErr := codec.ParseRevision(slot)
+		var content rolePayload
+		if !codec.ValidRoleID(id) || revErr != nil || name == "" ||
+			json.Unmarshal([]byte(payload), &content) != nil ||
+			codec.PermissionList(content.Permissions) != nil {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		s.Roles[domain.RoleKey{ID: id, Revision: rev}] = domain.RoleContent{ID: id, Revision: rev, Permissions: permissions}
+		s.Roles[domain.RoleKey{ID: id, Revision: revision}] = domain.RoleContent{
+			ID: id, Name: name, Revision: revision, Permissions: content.Permissions,
+		}
 	}
 	return finishRows(rows)
 }
+
 func (r *snapshotReader) teams(s *storage.Snapshot) error {
 	rows, err := r.areaRows(`SELECT team_id,parent_id FROM teams WHERE tenant_id=? AND application_id=? ORDER BY team_id`)
 	if err != nil {

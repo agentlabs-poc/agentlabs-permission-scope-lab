@@ -11,8 +11,9 @@ import (
 
 type roleAPI struct {
 	apiSpy
-	role domain.RoleContent
-	err  error
+	role   domain.RoleContent
+	filter domain.RoleFilter
+	err    error
 }
 
 func (a *roleAPI) PublishRole(_ context.Context, area domain.Area, fixture domain.FixtureContext, role domain.RoleContent) (domain.RoleContent, error) {
@@ -23,18 +24,34 @@ func (a *roleAPI) PublishRole(_ context.Context, area domain.Area, fixture domai
 	return role, nil
 }
 
+func (a *roleAPI) GetRole(_ context.Context, area domain.Area, fixture domain.FixtureContext, id string, revision int64) (domain.RoleContent, error) {
+	a.area, a.fixture = area, fixture
+	if a.err != nil {
+		return domain.RoleContent{}, a.err
+	}
+	return domain.RoleContent{ID: id, Name: a.role.Name, Revision: revision, Permissions: a.role.Permissions}, nil
+}
+
+func (a *roleAPI) ListRoles(_ context.Context, area domain.Area, fixture domain.FixtureContext, filter domain.RoleFilter) (domain.RolePage, error) {
+	a.area, a.fixture, a.filter = area, fixture, filter
+	if a.err != nil {
+		return domain.RolePage{}, a.err
+	}
+	return domain.RolePage{Roles: []domain.RoleContent{a.role}, Total: 1, Generation: 7}, nil
+}
+
 func TestRolePublishParsesAndForwardsProposal(t *testing.T) {
 	api := &roleAPI{}
 	connector := &connectorSpy{api: api}
-	args := []string{"role", "publish", "payslip-reader", "--revision", "2", "--permissions", "hrms:payroll:payslip::read,hrms:payroll:payslip::write", "--tenant", "acme", "--app", "hrms", "--db", "lab.db", "--fixture-context", "maya-role-publisher"}
+	args := []string{"role", "publish", "fi9jvxobqsxs", "--name", "payslip-reader", "--revision", "2", "--permissions", "hrms:payroll:payslip::read,hrms:payroll:payslip::write", "--tenant", "acme", "--app", "hrms", "--db", "lab.db", "--fixture-context", "maya-role-publisher"}
 	var out, diag bytes.Buffer
 	if got := Run(t.Context(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 0 {
 		t.Fatalf("exit=%d stderr=%q", got, diag.String())
 	}
-	if api.role.ID != "payslip-reader" || api.role.Revision != 2 || strings.Join(api.role.Permissions, ",") != "hrms:payroll:payslip::read,hrms:payroll:payslip::write" || api.fixture.Name != "maya-role-publisher" {
+	if api.role.ID != "fi9jvxobqsxs" || api.role.Revision != 2 || strings.Join(api.role.Permissions, ",") != "hrms:payroll:payslip::read,hrms:payroll:payslip::write" || api.fixture.Name != "maya-role-publisher" {
 		t.Fatalf("proposal=%+v fixture=%+v", api.role, api.fixture)
 	}
-	want := "internal projection: role\nid  payslip-reader\nrevision  2\npermissions  hrms:payroll:payslip::read,hrms:payroll:payslip::write\n"
+	want := "internal projection: role\nid  fi9jvxobqsxs\nname  payslip-reader\nrevision  2\npermissions  hrms:payroll:payslip::read,hrms:payroll:payslip::write\n"
 	if out.String() != want || !strings.Contains(diag.String(), "LAB ONLY") {
 		t.Fatalf("stdout=%q stderr=%q", out.String(), diag.String())
 	}
@@ -42,11 +59,11 @@ func TestRolePublishParsesAndForwardsProposal(t *testing.T) {
 
 func TestRolePublishRejectsMalformedInputBeforeConnecting(t *testing.T) {
 	cases := [][]string{
-		{"role", "publish", "payslip-reader", "--revision", "0", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
-		{"role", "publish", "payslip-reader", "--revision", "2x", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
-		{"role", "publish", "payslip-reader", "--revision", "2", "--permissions", "read,", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
-		{"role", "publish", "payslip-reader", "extra", "--revision", "2", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
-		{"role", "publish", "payslip-reader", "--revision", "2", "--permissions", "read", "--permissions", "write", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
+		{"role", "publish", "fi9jvxobqsxs", "--name", "payslip-reader", "--revision", "0", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
+		{"role", "publish", "fi9jvxobqsxs", "--name", "payslip-reader", "--revision", "2x", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
+		{"role", "publish", "fi9jvxobqsxs", "--name", "payslip-reader", "--revision", "2", "--permissions", "read,", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
+		{"role", "publish", "fi9jvxobqsxs", "extra", "--revision", "2", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
+		{"role", "publish", "fi9jvxobqsxs", "--name", "payslip-reader", "--revision", "2", "--permissions", "read", "--permissions", "write", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"},
 	}
 	for _, args := range cases {
 		connector := &connectorSpy{api: &roleAPI{}}
@@ -58,7 +75,7 @@ func TestRolePublishRejectsMalformedInputBeforeConnecting(t *testing.T) {
 }
 
 func TestRolePublishRequiresCapabilityAndSuppressesSuccessOutputOnFailure(t *testing.T) {
-	args := []string{"role", "publish", "payslip-reader", "--revision", "2", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"}
+	args := []string{"role", "publish", "fi9jvxobqsxs", "--name", "payslip-reader", "--revision", "2", "--permissions", "read", "--tenant", "acme", "--app", "hrms", "--db", "x", "--fixture-context", "maya-role-publisher"}
 	for _, api := range []any{&apiSpy{}, (*roleAPI)(nil), &roleAPI{err: domain.ErrRejected}, &roleAPI{err: context.Canceled}} {
 		connector := &connectorSpy{api: api.(interface {
 			Inspect(context.Context, domain.Area, string, string) (domain.Record, error)

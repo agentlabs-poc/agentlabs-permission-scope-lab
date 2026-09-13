@@ -144,8 +144,8 @@ func TestResolveParentTeamPreservesExactRootRoleRevision(t *testing.T) {
 	g0.Permissions = nil
 	g0.RoleID, g0.RoleRevision = "root-role", 1
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "G0", Revision: 1}] = g0
-	fixture.Snapshot.Roles[domain.RoleKey{ID: "root-role", Revision: 1}] = domain.RoleContent{ID: "root-role", Revision: 1, Permissions: []string{lab.PayslipRead, lab.PayslipWrite, lab.PayslipDelete}}
-	fixture.Snapshot.Roles[domain.RoleKey{ID: "root-role", Revision: 2}] = domain.RoleContent{ID: "root-role", Revision: 2, Permissions: []string{lab.PayslipRead}}
+	fixture.Snapshot.Roles[domain.RoleKey{ID: "root-role", Revision: 1}] = domain.RoleContent{Name: "payslip-reader", ID: "root-role", Revision: 1, Permissions: []string{lab.PayslipRead, lab.PayslipWrite, lab.PayslipDelete}}
+	fixture.Snapshot.Roles[domain.RoleKey{ID: "root-role", Revision: 2}] = domain.RoleContent{Name: "payslip-reader", ID: "root-role", Revision: 2, Permissions: []string{lab.PayslipRead}}
 
 	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
 	if err != nil || !reflect.DeepEqual(got.Permissions, []string{lab.PayslipRead, lab.PayslipWrite}) {

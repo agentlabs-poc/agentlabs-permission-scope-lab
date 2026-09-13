@@ -113,6 +113,26 @@ func (a *labApplication) PublishRole(ctx context.Context, area domain.Area, fixt
 	return a.facade.PublishRole(ctx, area, TeamFINC17(area).Issuer, proposed)
 }
 
+func (a *labApplication) GetRole(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, id string, revision int64) (domain.RoleContent, error) {
+	if area != a.area || fixtureContext.Name != roleFixtureContext {
+		return domain.RoleContent{}, domain.ErrRejected
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.RoleContent{}, err
+	}
+	return a.facade.GetRole(ctx, area, TeamFINC17(area).Issuer, id, revision)
+}
+
+func (a *labApplication) ListRoles(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, filter domain.RoleFilter) (domain.RolePage, error) {
+	if area != a.area || fixtureContext.Name != roleFixtureContext {
+		return domain.RolePage{}, domain.ErrRejected
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.RolePage{}, err
+	}
+	return a.facade.ListRoles(ctx, area, TeamFINC17(area).Issuer, filter)
+}
+
 func (a *labApplication) PublishGrantRevision(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, sourceAssignmentID string, raw []byte) (domain.GrantContent, error) {
 	if area != a.area || fixtureContext.Name != grantRevisionFixtureContext {
 		return domain.GrantContent{}, domain.ErrRejected

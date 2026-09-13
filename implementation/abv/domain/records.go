@@ -45,10 +45,51 @@ type Assignment struct {
 }
 
 // The following types are internal projections, NOT canonical JSON contracts.
+// RoleContent is one published role revision: a reusable permission bundle,
+// immutable once published. Q-118 approves version, id, revision and permissions
+// as the record's shape; Name is ours, because a generated id is unreadable.
+//
+// ID is a base-36 Snowflake. Name is a human label and is deliberately NOT
+// unique: the record's identity is the id, and a lookup by name may match more
+// than one role.
 type RoleContent struct {
 	ID          string
+	Name        string
 	Revision    int64
 	Permissions []string
+}
+
+// Revisions selects which revisions of a role a listing returns.
+//
+// A role is a family of revisions, so AllRevisions is the default: the reverse
+// would hide history behind a flag nobody sets. LatestRevision is computed at
+// read time, never stored, so nothing can go stale.
+type Revisions int
+
+const (
+	AllRevisions Revisions = iota
+	LatestRevision
+)
+
+// RoleFilter bounds a role listing. ID and Name are exact matches, never
+// prefixes: both are flat tokens, so a prefix would be a string match inside one
+// key slot rather than a structural one.
+type RoleFilter struct {
+	ID        string
+	Name      string
+	Revisions Revisions
+	Offset    int
+	Limit     int
+}
+
+// RolePage is one page of a role listing, ordered by id then revision.
+//
+// Total follows the selector: rows under AllRevisions, distinct roles under
+// LatestRevision, so a reader can compute the page count for what it asked for.
+type RolePage struct {
+	Roles      []RoleContent
+	Total      int
+	Generation int64
 }
 type Team struct{ ID, ParentID string }
 type Membership struct{ TeamID, HumanID string }

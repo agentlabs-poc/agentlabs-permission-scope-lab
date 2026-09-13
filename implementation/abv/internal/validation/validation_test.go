@@ -67,7 +67,7 @@ func TestRoleUsesExactAdoptedRevision(t *testing.T) {
 	g.RoleID = "reader"
 	g.RoleRevision = 1
 	roles := map[domain.RoleKey]domain.RoleContent{
-		{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{read}},
+		{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{read}},
 		{ID: "reader", Revision: 2}: {ID: "reader", Revision: 2, Permissions: []string{"hrms:employee:certificate::delete"}},
 	}
 	if err := CheckContent(area(t), catalog(), g, roles); err != nil {
@@ -78,7 +78,7 @@ func TestRoleUsesExactAdoptedRevision(t *testing.T) {
 		t.Fatal("silently adopted latest role", err)
 	}
 	for name, role := range map[string]domain.RoleContent{
-		"mismatched ID":        {ID: "other", Revision: 1, Permissions: []string{read}},
+		"mismatched ID":        {Name: "payslip-reader", ID: "other", Revision: 1, Permissions: []string{read}},
 		"mismatched revision":  {ID: "reader", Revision: 2, Permissions: []string{read}},
 		"duplicate permission": {ID: "reader", Revision: 1, Permissions: []string{read, read}},
 	} {
@@ -190,7 +190,7 @@ func TestNarrowDerivesExactAdoptedRolePermissions(t *testing.T) {
 	child.RoleID = "reader"
 	child.RoleRevision = 1
 	roles := map[domain.RoleKey]domain.RoleContent{
-		{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{read}},
+		{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{read}},
 	}
 	if err := CheckContent(a, catalog(), child, roles); err != nil {
 		t.Fatal("valid role premise", err)
@@ -219,13 +219,13 @@ func TestNarrowRejectsIncompleteOrCorruptPermissionSources(t *testing.T) {
 	}{
 		{"missing role", []string{read}, roleChild, nil},
 		{"only newer revision", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
-			{ID: "reader", Revision: 2}: {ID: "reader", Revision: 2, Permissions: []string{read}},
+			{ID: "reader", Revision: 2}: {ID: "reader", Name: "payslip-reader", Revision: 2, Permissions: []string{read}},
 		}},
 		{"mismatched role record", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
 			{ID: "reader", Revision: 1}: {ID: "other", Revision: 1, Permissions: []string{read}},
 		}},
 		{"role cannot be partially trimmed", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
-			{ID: "reader", Revision: 1}: {ID: "reader", Revision: 1, Permissions: []string{read, write}},
+			{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{read, write}},
 		}},
 		{"direct content cannot be partially trimmed", []string{read}, func() domain.GrantContent {
 			g := content()

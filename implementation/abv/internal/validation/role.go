@@ -14,8 +14,21 @@ func CheckRolePublication(area domain.Area, catalog domain.Catalog, role domain.
 	if catalog.ApplicationID != area.ApplicationID() {
 		return domain.ErrRejected
 	}
-	if strings.TrimSpace(role.ID) == "" || strings.Contains(role.ID, "*") || !utf8.ValidString(role.ID) || role.Revision <= 0 {
+	// The id is a base-36 Snowflake, not free text. A generated id removes the
+	// ambiguity free text had — Payroll-Admin and payroll-admin were two roles
+	// that read as one — and it never needs renaming.
+	if !codec.ValidRoleID(role.ID) {
 		return domain.ErrMalformed
+	}
+	// The name is a human label, and deliberately not unique: identity is the id.
+	// It must still be storable, because it occupies a key slot.
+	if strings.TrimSpace(role.Name) == "" || !utf8.ValidString(role.Name) {
+		return domain.ErrMalformed
+	}
+	// The revision must render into its slot, which is what rejects <= 0 and
+	// anything too wide to pad.
+	if _, err := codec.RenderRevision(role.Revision); err != nil {
+		return err
 	}
 	if err := codec.PermissionList(role.Permissions); err != nil {
 		return err

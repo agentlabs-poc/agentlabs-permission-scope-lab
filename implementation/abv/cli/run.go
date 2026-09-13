@@ -47,7 +47,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
-			"--prefix", "--offset", "--limit", "--active", "--active-only":
+			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -56,7 +56,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		// --active-only is a presence flag: it carries no value and must not
 		// consume the next argument.
-		if name == "--active-only" {
+		if name == "--active-only" || name == "--latest" {
 			if inline {
 				return fail(2, "flag takes no value")
 			}
@@ -145,15 +145,36 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			return fail(2, command+" requires enable/disable and ID")
 		}
 	case "role":
-		if len(positional) != 2 || positional[0] != "publish" || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision", "--permissions") || flags["--db"] == "" || flags["--fixture-context"] == "" || !has(flags, "--revision") || !has(flags, "--permissions") {
-			return fail(2, "role publish requires ID, revision, permissions, database and fixture context")
+		if len(positional) == 0 || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "role requires a verb, database and fixture context")
 		}
-		revision, parseErr := strconv.ParseInt(flags["--revision"], 10, 64)
-		permissions, listErr := catalogList(flags["--permissions"], true)
-		if parseErr != nil || revision <= 0 || listErr != nil || len(permissions) == 0 {
-			return fail(2, "malformed role publication")
+		switch positional[0] {
+		case "publish":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision", "--permissions", "--name") || !has(flags, "--revision") || !has(flags, "--permissions") || empty(flags["--name"]) {
+				return fail(2, "role publish requires ID, name, revision, permissions, database and fixture context")
+			}
+			revision, parseErr := strconv.ParseInt(flags["--revision"], 10, 64)
+			permissions, listErr := catalogList(flags["--permissions"], true)
+			if parseErr != nil || revision <= 0 || listErr != nil || len(permissions) == 0 {
+				return fail(2, "malformed role publication")
+			}
+			flags["--revision"] = strconv.FormatInt(revision, 10)
+		case "get":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision") || !has(flags, "--revision") {
+				return fail(2, "role get requires ID, revision, database and fixture context")
+			}
+			revision, parseErr := strconv.ParseInt(flags["--revision"], 10, 64)
+			if parseErr != nil || revision <= 0 {
+				return fail(2, "malformed role revision")
+			}
+			flags["--revision"] = strconv.FormatInt(revision, 10)
+		case "list":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--id", "--name", "--latest", "--offset", "--limit") {
+				return fail(2, "role list accepts id, name, latest, offset and limit only")
+			}
+		default:
+			return fail(2, "role requires publish, get or list")
 		}
-		flags["--revision"] = strconv.FormatInt(revision, 10)
 	case "scenario":
 		if len(positional) != 2 || empty(positional[1]) || (positional[0] != "seed" && positional[0] != "run") || flags["--db"] == "" {
 			return fail(2, "scenario requires seed/run and scenario name")

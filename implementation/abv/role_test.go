@@ -35,7 +35,7 @@ func TestFacadePublishRole(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	role := domain.RoleContent{ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
+	role := domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
 	if got, err := f.PublishRole(t.Context(), area, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}, role); err != nil || got.ID != "reader" {
 		t.Fatalf("got=%#v err=%v", got, err)
 	}

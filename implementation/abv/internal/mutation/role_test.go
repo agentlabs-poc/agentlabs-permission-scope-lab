@@ -11,7 +11,8 @@ import (
 )
 
 type roleAdmin struct {
-	check func(storage.Snapshot, domain.Identity, domain.RoleContent) error
+	check   func(storage.Snapshot, domain.Identity, domain.RoleContent) error
+	readErr error
 }
 
 func (a roleAdmin) CheckAssignment(context.Context, storage.Snapshot, domain.Identity, domain.Assignment, time.Time) error {
@@ -51,7 +52,7 @@ func (p *roleProvider) Update(_ context.Context, _ domain.Area, cb func(storage.
 func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
-	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
+	role := domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
 	snap := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
 	p := &roleProvider{snapshot: snap}
 	admin := roleAdmin{check: func(s storage.Snapshot, _ domain.Identity, r domain.RoleContent) error {
@@ -70,7 +71,7 @@ func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
-	role := domain.RoleContent{ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
+	role := domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
 	base := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
 	for _, tc := range []struct {
 		name  string
@@ -105,8 +106,160 @@ func TestPublishRoleCancellationInsideAdministrationDoesNotWrite(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	admin := roleAdmin{check: func(storage.Snapshot, domain.Identity, domain.RoleContent) error { cancel(); return nil }}
 	s, _ := New(p, admin, fixedClock{})
-	got, err := s.PublishRole(ctx, area, id, domain.RoleContent{ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}})
+	got, err := s.PublishRole(ctx, area, id, domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}})
 	if !errors.Is(err, context.Canceled) || !reflect.DeepEqual(got, domain.RoleContent{}) || p.writes != 0 {
 		t.Fatalf("got=%#v writes=%d err=%v", got, p.writes, err)
+	}
+}
+
+// roleReader serves a fixed snapshot to the two read operations.
+type roleReader struct {
+	snapshot storage.Snapshot
+	err      error
+}
+
+func (p *roleReader) Read(_ context.Context, _ domain.Area, cb func(storage.Snapshot) error) error {
+	if p.err != nil {
+		return p.err
+	}
+	return cb(p.snapshot)
+}
+func (p *roleReader) Close() error { return nil }
+func (p *roleReader) Update(context.Context, domain.Area, func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return domain.ErrUnsupported
+}
+
+func (a roleAdmin) CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error {
+	if a.readErr != nil {
+		return a.readErr
+	}
+	return nil
+}
+
+func roleReadFixture(t *testing.T, readErr error) (*Service, domain.Area, domain.Identity) {
+	t.Helper()
+	area, _ := domain.NewArea("acme", "hrms")
+	read := "hrms:payroll:payslip::read"
+	write := "hrms:payroll:payslip::write"
+	snap := storage.Snapshot{
+		Area:    area,
+		Catalog: domain.Catalog{ApplicationID: "hrms", Generation: 9},
+		Roles: map[domain.RoleKey]domain.RoleContent{
+			{ID: "aaa", Revision: 1}:  {ID: "aaa", Name: "reader", Revision: 1, Permissions: []string{read}},
+			{ID: "aaa", Revision: 2}:  {ID: "aaa", Name: "reader", Revision: 2, Permissions: []string{read, write}},
+			{ID: "aaa", Revision: 10}: {ID: "aaa", Name: "reader", Revision: 10, Permissions: []string{write}},
+			{ID: "bbb", Revision: 1}:  {ID: "bbb", Name: "reader", Revision: 1, Permissions: []string{read}},
+		},
+	}
+	service, err := New(&roleReader{snapshot: snap}, roleAdmin{readErr: readErr}, fixedClock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return service, area, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+}
+
+// A role is a family of revisions, and the default listing says so.
+func TestListRolesReturnsEveryRevisionByDefault(t *testing.T) {
+	service, area, identity := roleReadFixture(t, nil)
+	page, err := service.ListRoles(t.Context(), area, identity, domain.RoleFilter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if page.Total != 4 || len(page.Roles) != 4 || page.Generation != 9 {
+		t.Fatalf("total=%d len=%d generation=%d", page.Total, len(page.Roles), page.Generation)
+	}
+	// Ordered by id, then revision — numerically, not as text, which is what
+	// the padded slot buys: revision 10 comes after 2, never between 1 and 2.
+	want := []int64{1, 2, 10, 1}
+	for i, role := range page.Roles {
+		if role.Revision != want[i] {
+			t.Fatalf("position %d is revision %d, want %d", i, role.Revision, want[i])
+		}
+	}
+}
+
+// LatestRevision is computed at read time, and Total counts roles rather than
+// rows so the page count is right for what was asked.
+func TestListRolesLatestCollapsesToOneRowPerRole(t *testing.T) {
+	service, area, identity := roleReadFixture(t, nil)
+	page, err := service.ListRoles(t.Context(), area, identity, domain.RoleFilter{Revisions: domain.LatestRevision})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if page.Total != 2 || len(page.Roles) != 2 {
+		t.Fatalf("total=%d len=%d, want 2 roles", page.Total, len(page.Roles))
+	}
+	if page.Roles[0].ID != "aaa" || page.Roles[0].Revision != 10 {
+		t.Fatalf("latest of aaa is %d, want 10", page.Roles[0].Revision)
+	}
+	if page.Roles[1].ID != "bbb" || page.Roles[1].Revision != 1 {
+		t.Fatalf("latest of bbb is %d, want 1", page.Roles[1].Revision)
+	}
+}
+
+func TestListRolesFiltersExactlyAndPages(t *testing.T) {
+	service, area, identity := roleReadFixture(t, nil)
+	byID, err := service.ListRoles(t.Context(), area, identity, domain.RoleFilter{ID: "aaa"})
+	if err != nil || byID.Total != 3 {
+		t.Fatalf("one role's history is %d entries err=%v", byID.Total, err)
+	}
+	// The name is not unique, so filtering by it may select several roles.
+	byName, err := service.ListRoles(t.Context(), area, identity, domain.RoleFilter{Name: "reader"})
+	if err != nil || byName.Total != 4 {
+		t.Fatalf("name matched %d, want every row err=%v", byName.Total, err)
+	}
+	// Past the end is an empty page with a true total, never an error.
+	past, err := service.ListRoles(t.Context(), area, identity, domain.RoleFilter{Offset: 99})
+	if err != nil || past.Total != 4 || len(past.Roles) != 0 || past.Roles == nil {
+		t.Fatalf("total=%d roles=%#v err=%v", past.Total, past.Roles, err)
+	}
+	for _, bad := range []domain.RoleFilter{{Limit: maxRolePage + 1}, {Offset: -1}, {Limit: -1}, {ID: "r*"}, {Revisions: 7}} {
+		if _, err := service.ListRoles(t.Context(), area, identity, bad); !errors.Is(err, domain.ErrMalformed) {
+			t.Fatalf("filter %#v gave %v, want ErrMalformed", bad, err)
+		}
+	}
+}
+
+// GetRole always requires a revision: keeping the typed single read exact is
+// what stops an implicit latest-role fallback appearing where adoption reads.
+func TestGetRoleRequiresAnExactRevision(t *testing.T) {
+	service, area, identity := roleReadFixture(t, nil)
+	role, err := service.GetRole(t.Context(), area, identity, "aaa", 2)
+	if err != nil || role.Revision != 2 || len(role.Permissions) != 2 || role.Name != "reader" {
+		t.Fatalf("role=%#v err=%v", role, err)
+	}
+	if _, err := service.GetRole(t.Context(), area, identity, "aaa", 3); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("an unpublished revision gave %v, want ErrNotFound", err)
+	}
+	if _, err := service.GetRole(t.Context(), area, identity, "aaa", 0); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("a missing revision gave %v, want ErrMalformed — never the latest", err)
+	}
+	if _, err := service.GetRole(t.Context(), area, identity, "payslip-reader", 1); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("a non-base-36 id gave %v, want ErrMalformed", err)
+	}
+}
+
+// Unsupported, never unprotected: a denied read yields nothing.
+func TestRoleReadsAreProtected(t *testing.T) {
+	service, area, identity := roleReadFixture(t, domain.ErrRejected)
+	if _, err := service.GetRole(t.Context(), area, identity, "aaa", 1); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("get past a denying gate: %v", err)
+	}
+	if _, err := service.ListRoles(t.Context(), area, identity, domain.RoleFilter{}); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("list past a denying gate: %v", err)
+	}
+}
+
+// A mutated returned slice must not reach the stored snapshot.
+func TestRoleReadsReturnCopies(t *testing.T) {
+	service, area, identity := roleReadFixture(t, nil)
+	role, err := service.GetRole(t.Context(), area, identity, "aaa", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	role.Permissions[0] = "forged"
+	again, err := service.GetRole(t.Context(), area, identity, "aaa", 1)
+	if err != nil || again.Permissions[0] == "forged" {
+		t.Fatalf("a caller reached into stored content: %#v err=%v", again, err)
 	}
 }

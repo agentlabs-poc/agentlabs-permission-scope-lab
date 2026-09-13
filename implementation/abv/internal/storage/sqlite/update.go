@@ -104,7 +104,20 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 			if err := validation.CheckRolePublication(area, authoritative, *writes.NewRoleRevision); err != nil {
 				return err
 			}
-			return p.insertRole(ctx, conn, area, *writes.NewRoleRevision)
+			if err := p.insertRole(ctx, conn, area, *writes.NewRoleRevision); err != nil {
+				return err
+			}
+			// In the same transaction as the write, so a reader that sees one
+			// generation before an offset walk and the same after knows nothing
+			// moved between its pages. Without this a role listing would report a
+			// generation that never changes, and the guarantee would be a lie.
+			//
+			// The counter is per application while a role is per tenant, so one
+			// tenant's publication invalidates every tenant's cached view of that
+			// application. Over-invalidation is wrong in the cheap direction —
+			// a retry — where the alternative is a missed row. Narrowing it waits
+			// on whether a role is tenant- or application-scoped.
+			return bumpGeneration(ctx, conn, area.ApplicationID())
 		}
 		if writes.NewGrantRevision != nil {
 			return p.insertGrantRevision(ctx, conn, area, *writes.NewGrantRevision)

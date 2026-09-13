@@ -27,6 +27,15 @@ type RoleAdministration interface {
 	CheckRolePublication(context.Context, storage.Snapshot, domain.Identity, domain.RoleContent, time.Time) error
 }
 
+// RoleReadAdministration gates reads of a tenant's role catalog, the way
+// PermissionAdministration does for permissions. It is separate from
+// RoleAdministration so an adapter can supply publication without reads; a
+// provider that does not implement it makes the reads ErrUnsupported rather than
+// unprotected.
+type RoleReadAdministration interface {
+	CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error
+}
+
 // PermissionAdministration gates the read and status operations on an
 // application's permission catalog. It is separate from CatalogAdministration so
 // an adapter can supply registration without the rest; a provider that does not
