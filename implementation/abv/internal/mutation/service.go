@@ -33,6 +33,13 @@ type RoleAdministration interface {
 // RoleAdministration so an adapter can supply publication without reads; a
 // provider that does not implement it makes the reads ErrUnsupported rather than
 // unprotected.
+// ApplicationRoleAdministration gates publication of a role the application
+// ships. It is separate from RoleAdministration because the authority differs:
+// shipping a role is the platform acting, composing one is a tenant acting.
+type ApplicationRoleAdministration interface {
+	CheckApplicationRolePublication(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.RoleContent, time.Time) error
+}
+
 type RoleReadAdministration interface {
 	CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error
 }

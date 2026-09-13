@@ -34,8 +34,8 @@ func publishRole(ctx context.Context, api application.API, area domain.Area, fix
 // contract carries, never the zero-padded slot: padding is storage's business
 // and a reader never sees it.
 func roleLines(role domain.RoleContent) string {
-	return fmt.Sprintf("internal projection: role\nid  %s\nname  %s\nrevision  %d\npermissions  %s\n",
-		role.ID, role.Name, role.Revision, strings.Join(role.Permissions, ","))
+	return fmt.Sprintf("internal projection: role\nid  %s\nname  %s\nmanaged  %s\nrevision  %d\npermissions  %s\n",
+		role.ID, role.Name, role.Managed, role.Revision, strings.Join(role.Permissions, ","))
 }
 
 func renderRole(out, diag io.Writer, role domain.RoleContent) error {
@@ -57,8 +57,8 @@ func renderRolePage(out, diag io.Writer, page domain.RolePage) error {
 	fmt.Fprintf(&rendered, "internal projection: roles\ncount  %d\ntotal  %d\ngeneration  %d\n",
 		len(page.Roles), page.Total, page.Generation)
 	for _, role := range page.Roles {
-		fmt.Fprintf(&rendered, "%s  rev=%d  %s  %s\n",
-			role.ID, role.Revision, role.Name, strings.Join(role.Permissions, ","))
+		fmt.Fprintf(&rendered, "%s  rev=%d  %-11s  %s  %s\n",
+			role.ID, role.Revision, role.Managed, role.Name, strings.Join(role.Permissions, ","))
 	}
 	_, err := out.Write(rendered.Bytes())
 	return err

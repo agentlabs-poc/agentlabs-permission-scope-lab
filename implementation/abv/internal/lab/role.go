@@ -52,3 +52,23 @@ func (a *RoleAdministration) CheckRoleRead(ctx context.Context, area domain.Area
 	}
 	return nil
 }
+
+// CheckApplicationRolePublication gates a role the application ships. It is the
+// catalog publisher acting, not a tenant administrator — the same identity that
+// registers permissions and scope keys, because shipping a role is the same kind
+// of act.
+func (a *RoleAdministration) CheckApplicationRolePublication(ctx context.Context, app domain.Application, catalog domain.Catalog, identity domain.Identity, proposed domain.RoleContent, _ time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if app.ID() != a.area.ApplicationID() || catalog.ApplicationID != app.ID() {
+		return domain.ErrRejected
+	}
+	if identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+		return domain.ErrRejected
+	}
+	if proposed.Name == "" {
+		return domain.ErrRejected
+	}
+	return nil
+}

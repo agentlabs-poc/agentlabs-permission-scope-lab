@@ -10,7 +10,15 @@ import (
 	"sort"
 )
 
+// PublishRole publishes a role a tenant composed from the application's
+// vocabulary. Which words travel together for this organisation is the tenant's
+// decision, so the record carries its tenant.
+//
+// PublishApplicationRole is the other path: the same record type, published by
+// the application platform for every tenant. They are separate operations
+// because the authority differs, not because the data does.
 func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity domain.Identity, proposed domain.RoleContent) (domain.RoleContent, error) {
+	proposed.Managed = domain.TenantManaged
 	fail := func(err error) (domain.RoleContent, error) { return domain.RoleContent{}, err }
 	if err := ctx.Err(); err != nil {
 		return fail(err)
@@ -42,6 +50,7 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 		}
 		key := domain.RoleKey{ID: proposed.ID, Revision: proposed.Revision}
 		known := false
+		knownManagement := proposed.Managed
 		for storedKey, role := range snapshot.Roles {
 			if storedKey.ID != role.ID || storedKey.Revision != role.Revision {
 				return storage.WriteSet{}, domain.ErrRejected
@@ -50,7 +59,7 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 				return storage.WriteSet{}, domain.ErrConflict
 			}
 			if storedKey.ID == proposed.ID {
-				known = true
+				known, knownManagement = true, role.Managed
 			}
 		}
 		// A supplied id that names nothing is a caller choosing an identifier.
@@ -58,6 +67,12 @@ func (s *Service) PublishRole(ctx context.Context, area domain.Area, identity do
 		// name one already issued.
 		if !issued && !known {
 			return storage.WriteSet{}, domain.ErrNotFound
+		}
+		// A tenant may not revise a role the application ships. The shipped role
+		// is the application's property, and a tenant that wants a different
+		// bundle composes its own rather than editing someone else's.
+		if !issued && knownManagement != proposed.Managed {
+			return storage.WriteSet{}, domain.ErrRejected
 		}
 		// An issued id that already exists would mean the generator collided.
 		if issued && known {
@@ -162,6 +177,9 @@ func (s *Service) ListRoles(ctx context.Context, area domain.Area, identity doma
 	if filter.ID != "" && !codec.ValidRoleID(filter.ID) {
 		return fail(domain.ErrMalformed)
 	}
+	if filter.Managed != nil && *filter.Managed != domain.TenantManaged && *filter.Managed != domain.ApplicationManaged {
+		return fail(domain.ErrMalformed)
+	}
 	limit := filter.Limit
 	if limit == 0 {
 		limit = defaultRolePage
@@ -187,6 +205,9 @@ func (s *Service) ListRoles(ctx context.Context, area domain.Area, identity doma
 				continue
 			}
 			if filter.Name != "" && content.Name != filter.Name {
+				continue
+			}
+			if filter.Managed != nil && content.Managed != *filter.Managed {
 				continue
 			}
 			clone := content
@@ -257,4 +278,62 @@ func (s *Service) roleCatalog(ctx context.Context, area domain.Area, identity do
 		return nil, domain.ErrUnsupported
 	}
 	return admin, nil
+}
+
+// PublishApplicationRole publishes a role the application ships to every tenant,
+// the way it registers permissions and scope keys. It is Application-scoped, so
+// the record carries no tenant.
+//
+// Separate from PublishRole because the authority differs: shipping a role is
+// the application platform acting, composing one is a tenant administrator
+// acting. The record, the storage and the validation are identical — only the
+// boundary and the gate change.
+func (s *Service) PublishApplicationRole(ctx context.Context, app domain.Application, identity domain.Identity, proposed domain.RoleContent) (domain.RoleContent, error) {
+	fail := func(err error) (domain.RoleContent, error) { return domain.RoleContent{}, err }
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	if err := app.Validate(); err != nil {
+		return fail(err)
+	}
+	if err := validateSupportedIdentity(identity); err != nil {
+		return fail(err)
+	}
+	admin, ok := s.administration.(ApplicationRoleAdministration)
+	if !ok || nilInterface(admin) {
+		return fail(domain.ErrUnsupported)
+	}
+	proposed.Managed = domain.ApplicationManaged
+	proposed.Permissions = slices.Clone(proposed.Permissions)
+	issued := proposed.ID == ""
+	if issued {
+		proposed.ID = s.ids.Next()
+	} else if !codec.ValidRoleID(proposed.ID) {
+		return fail(domain.ErrMalformed)
+	}
+	provider, ok := s.provider.(storage.CatalogProvider)
+	if !ok || nilInterface(provider) {
+		return fail(domain.ErrUnsupported)
+	}
+	err := provider.UpdateCatalog(ctx, app, func(catalog domain.Catalog) (storage.CatalogWriteSet, error) {
+		if catalog.ApplicationID != app.ID() {
+			return storage.CatalogWriteSet{}, domain.ErrRejected
+		}
+		if err := admin.CheckApplicationRolePublication(ctx, app, cloneCatalog(catalog), identity, proposed, s.clock.Now()); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		if err := validation.CheckApplicationRolePublication(catalog, proposed); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		write := proposed
+		write.Permissions = slices.Clone(proposed.Permissions)
+		return storage.CatalogWriteSet{ApplicationRole: &write, ApplicationRoleIssued: issued}, nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return proposed, nil
 }

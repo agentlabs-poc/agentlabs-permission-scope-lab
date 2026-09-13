@@ -129,3 +129,52 @@ func roleSeed(t *testing.T) storage.Snapshot {
 		TrustedRoots: map[string]bool{},
 	}
 }
+
+// An application role and a tenant role are the same record told apart by the
+// boundary. Nothing else about them differs, which is what makes one store and
+// one read serve both.
+func TestApplicationAndTenantRolesDifferOnlyInTheBoundary(t *testing.T) {
+	snapshot := roleSeed(t)
+	snapshot.Roles[domain.RoleKey{ID: "aaaaaaaaaaaa", Revision: 1}] = domain.RoleContent{
+		ID: "aaaaaaaaaaaa", Name: "Viewer", Revision: 1,
+		Permissions: []string{"hrms:payroll:payslip::read"},
+		Managed:     domain.ApplicationManaged,
+	}
+	opened, err := CreateFixture(t.Context(), t.TempDir()+"/both.db", []storage.Snapshot{snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := opened.(*provider)
+	defer p.Close()
+
+	for _, r := range queryRecords(t, p, `
+		SELECT boundary, tenant_id, key3, key4 FROM abv_l1_records
+		 WHERE key2='role' ORDER BY boundary, key4`) {
+		shipped := r["key4"] == "aaaaaaaaaaaa"
+		if shipped && (r["boundary"] != "application" || r["tenant_id"] != "") {
+			t.Fatalf("a shipped role carries a tenant: %#v", r)
+		}
+		if !shipped && (r["boundary"] != "tenant" || r["tenant_id"] == "") {
+			t.Fatalf("a composed role has no tenant: %#v", r)
+		}
+		// The application is in key3 either way — the path is the same shape.
+		if r["key3"] != "hrms" {
+			t.Fatalf("key3 differs between the two kinds: %#v", r)
+		}
+	}
+
+	// A tenant's read returns both, each labelled with who owns it.
+	if err := p.Read(t.Context(), snapshot.Area, func(s storage.Snapshot) error {
+		shipped := s.Roles[domain.RoleKey{ID: "aaaaaaaaaaaa", Revision: 1}]
+		composed := s.Roles[domain.RoleKey{ID: "fi9jvxobqsxs", Revision: 1}]
+		if shipped.Managed != domain.ApplicationManaged {
+			t.Fatalf("a shipped role read back as %v", shipped.Managed)
+		}
+		if composed.Managed != domain.TenantManaged {
+			t.Fatalf("a composed role read back as %v", composed.Managed)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+}

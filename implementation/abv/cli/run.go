@@ -47,7 +47,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
-			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id":
+			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -56,7 +56,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		// --active-only is a presence flag: it carries no value and must not
 		// consume the next argument.
-		if name == "--active-only" || name == "--latest" {
+		if name == "--active-only" || name == "--latest" || name == "--application" {
 			if inline {
 				return fail(2, "flag takes no value")
 			}
@@ -152,7 +152,9 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		case "publish":
 			// No positional id: an id is issued, not chosen. --id names an
 			// existing role, which makes the publication a new revision of it.
-			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision", "--permissions", "--name", "--id") || !has(flags, "--revision") || !has(flags, "--permissions") || empty(flags["--name"]) {
+			// --application ships the role to every tenant; without it the role
+			// belongs to the tenant publishing it.
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision", "--permissions", "--name", "--id", "--application") || !has(flags, "--revision") || !has(flags, "--permissions") || empty(flags["--name"]) {
 				return fail(2, "role publish requires name, revision, permissions, database and fixture context; --id only to add a revision")
 			}
 			revision, parseErr := strconv.ParseInt(flags["--revision"], 10, 64)
@@ -171,8 +173,11 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			}
 			flags["--revision"] = strconv.FormatInt(revision, 10)
 		case "list":
-			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--id", "--name", "--latest", "--offset", "--limit") {
-				return fail(2, "role list accepts id, name, latest, offset and limit only")
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--id", "--name", "--latest", "--offset", "--limit", "--managed") {
+				return fail(2, "role list accepts id, name, latest, managed, offset and limit only")
+			}
+			if has(flags, "--managed") && flags["--managed"] != "tenant" && flags["--managed"] != "application" {
+				return fail(2, "--managed is tenant or application")
 			}
 		default:
 			return fail(2, "role requires publish, get or list")

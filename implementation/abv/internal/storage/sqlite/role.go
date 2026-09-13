@@ -27,7 +27,7 @@ type rolePayload struct {
 //
 // Nothing is written to the envelope's revision column: it is drift from the
 // canonical 123 shape and is to be removed.
-func insertRole(ctx context.Context, conn *sql.Conn, area domain.Area, role domain.RoleContent) error {
+func insertRole(ctx context.Context, conn *sql.Conn, applicationID, tenantID string, role domain.RoleContent) error {
 	slot, err := codec.RenderRevision(role.Revision)
 	if err != nil {
 		return err
@@ -36,15 +36,27 @@ func insertRole(ctx context.Context, conn *sql.Conn, area domain.Area, role doma
 	if err != nil {
 		return domain.ErrMalformed
 	}
+	// The boundary is the whole difference between an application role and a
+	// tenant role: same key path, same payload, one carries a tenant and the
+	// other does not. tenant_id is '' rather than NULL for the same reason
+	// permissions and scopes use '': a NULL is distinct in a unique index.
+	boundary := "tenant"
+	if tenantID == "" {
+		boundary = "application"
+	}
 	_, err = conn.ExecContext(ctx, `
 		INSERT INTO abv_l1_records
 		  (boundary, tenant_id, application_id, key1, key2, key3, key4, key5, key6, revision, value)
-		VALUES ('tenant', ?, ?, 'abv', 'role', ?, ?, ?, ?, 0, ?)`,
-		area.TenantID(), area.ApplicationID(), area.ApplicationID(),
+		VALUES (?, ?, ?, 'abv', 'role', ?, ?, ?, ?, 0, ?)`,
+		boundary, tenantID, applicationID, applicationID,
 		role.ID, slot, role.Name, string(raw))
 	return classify(err)
 }
 
 func (p *provider) insertRole(ctx context.Context, conn *sql.Conn, area domain.Area, role domain.RoleContent) error {
-	return insertRole(ctx, conn, area, role)
+	tenant := area.TenantID()
+	if role.Managed == domain.ApplicationManaged {
+		tenant = ""
+	}
+	return insertRole(ctx, conn, area.ApplicationID(), tenant, role)
 }

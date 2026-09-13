@@ -41,3 +41,35 @@ func CheckRolePublication(area domain.Area, catalog domain.Catalog, role domain.
 	}
 	return nil
 }
+
+// CheckApplicationRolePublication validates a role the application ships. The
+// rules are the permission ones: the id must be a base-36 Snowflake, the name
+// storable, the revision renderable into its slot, and every permission in the
+// bundle registered and active.
+//
+// It differs from CheckRolePublication only in taking a catalog rather than an
+// area, because an application role has no tenant to check against.
+func CheckApplicationRolePublication(catalog domain.Catalog, role domain.RoleContent) error {
+	if !codec.ValidRoleID(role.ID) {
+		return domain.ErrMalformed
+	}
+	if strings.TrimSpace(role.Name) == "" || !utf8.ValidString(role.Name) {
+		return domain.ErrMalformed
+	}
+	if _, err := codec.RenderRevision(role.Revision); err != nil {
+		return err
+	}
+	if role.Managed != domain.ApplicationManaged {
+		return domain.ErrRejected
+	}
+	if err := codec.PermissionList(role.Permissions); err != nil {
+		return err
+	}
+	for _, permission := range role.Permissions {
+		definition, ok := catalog.Permissions[permission]
+		if !ok || definition.ID != permission || !definition.Active {
+			return domain.ErrRejected
+		}
+	}
+	return nil
+}

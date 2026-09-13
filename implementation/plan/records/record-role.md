@@ -354,26 +354,41 @@ state           = enabled
 (`{"active": true}`), a role's value is the substance of the record — which is
 what makes the revision meaningful.
 
-### Where it lives
+### Where it lives — both, and the boundary says which
 
-A role belongs to a **tenant *and* an application**. That is what the existing
-implementation does: the table's primary key leads with `tenant_id` and its
-foreign key points at `installations`.
+**Settled: a role is either the application's or a tenant's, and both exist.**
 
-> **Open — should a role be tenant-scoped at all?** Permissions and scopes are
-> application-scoped: one shared catalog per application under Q-123. A role is a
-> named subset of that same application vocabulary, so per-tenant scoping is not
-> obviously right. Two readings, and the handbook settles neither:
->
-> - **Tenant-scoped** (what the code does): each tenant composes its own bundles
->   from the application's vocabulary. Two tenants can hold different
->   `R-PAYROLL-READER` bundles.
-> - **Application-scoped**: the application ships standard roles and every tenant
->   adopts the same ones, exactly as it ships permissions.
->
-> The second is more consistent with the catalog; the first is what exists and is
-> more flexible. **Needs your call** — it decides the boundary column, and
-> changing it later moves rows.
+| | Who owns it | The record |
+|---|---|---|
+| **application-managed** | the application ships it to every tenant, as it ships permissions and scope keys | no tenant — `boundary = application` |
+| **tenant-managed** | a tenant composed it from the application's vocabulary | its tenant — `boundary = tenant` |
+
+The reasoning is the distinction the whole domain turns on. **Permission and
+scope are vocabulary** — what words exist, what dimensions may bound. They change
+when the *software* changes, and Q-123 already gives one catalog per application.
+**A role is a composition** — which words travel together. Acme's payroll approver
+is not Globex's, even though both are built from one vocabulary. That is a
+customer decision.
+
+But an application also ships standard bundles — *Viewer*, *Admin* — and under
+pure tenant scoping it could not: every tenant would recreate them by hand with
+no way to say *this is the standard one*. So both exist.
+
+**The envelope gives this for free.** Same key path, same payload, same
+validation; the only difference is whether the record carries a tenant. One read
+returns both, which is what a tenant administrator wants: the shipped roles
+alongside its own.
+
+**They coexist and never shadow.** Each has its own issued id, and a grant adopts
+an exact id and revision, so there is nothing to resolve between them. A tenant
+that outgrows a shipped role composes its own; the shipped one does not
+disappear, and is not overridden. Shadowing by name would need precedence rules,
+which nothing in the handbook backs — coexistence needs none.
+
+**A tenant may not revise a shipped role.** `PublishRole` refuses an id that names
+an application role: it is the application's property. The safety that makes all
+of this sound is that a tenant's role can only name permissions the application
+registered — **the tenant composes, it cannot invent**.
 
 It is **not** authority, **not** a boundary, **not** a recipient, and — per
 revision — **not** mutable.
@@ -385,17 +400,28 @@ revision — **not** mutable.
 **Three functions.** One exists; two are the proposal.
 
 ```go
-PublishRole(ctx, area, identity, proposed)   (RoleContent, error)  // implemented
-GetRole    (ctx, area, identity, id, rev)    (RoleContent, error)  // proposed
-ListRoles  (ctx, area, identity, filter)     (RolePage, error)     // proposed
+PublishRole           (ctx, area, identity, proposed)  (RoleContent, error)  // tenant composes
+PublishApplicationRole(ctx, app,  identity, proposed)  (RoleContent, error)  // application ships
+GetRole               (ctx, area, identity, id, rev)   (RoleContent, error)
+ListRoles             (ctx, area, identity, filter)    (RolePage, error)
 ```
+
+**Two publication paths, because two authorities.** Shipping a role is the
+application platform acting; composing one is a tenant administrator acting. The
+record, the storage and the validation are identical — only the boundary and the
+gate change. One function taking a sometimes-empty tenant would let a caller
+publish application-wide by accident.
+
+The reads are `Area`-scoped and return **both kinds**, each labelled, because
+that is the catalog a tenant administrator actually reads.
 
 ```go
 type RoleContent struct {
     ID          string   // base-36 Snowflake
     Name        string   // human label, not unique
     Revision    int64    // an int64 here; rendered zero-padded into key5
-    Permissions []string // the bundle, in canonical identifier form
+    Permissions []string       // the bundle, in canonical identifier form
+    Managed     RoleManagement // application or tenant — derived, never supplied
 }
 ```
 
@@ -560,11 +586,12 @@ and the one that made `Inspect` the only way in.
 
 ```go
 type RoleFilter struct {
-    ID        string    // exact role id; empty lists every role
-    Name       string   // exact name; not unique, so may select several roles
-    Revisions  Revisions // AllRevisions (default) | LatestRevision
-    Offset     int
-    Limit      int       // server caps it
+    ID        string          // exact role id; empty lists every role
+    Name      string          // exact name; not unique, so may select several
+    Revisions Revisions       // AllRevisions (default) | LatestRevision
+    Managed   *RoleManagement // nil returns both kinds
+    Offset    int
+    Limit     int             // server caps it
 }
 
 type Revisions int
@@ -750,14 +777,21 @@ is, while the stored revision never changes.
 
 ## 5 · Open questions
 
-1. **Is a role tenant-scoped or application-scoped?** The code says tenant; the
-   catalog precedent says application. Decides the boundary column and moving it
-   later moves rows. **Blocks the storage fold.**
+1. ~~**Is a role tenant-scoped or application-scoped?**~~ **Settled: both.** The
+   application ships roles the way it ships permissions; a tenant composes its
+   own. The boundary says which, they coexist without shadowing, and a tenant
+   cannot revise a shipped role. See *Where it lives*.
 2. **Revision monotonicity.** The revision is caller-supplied and nothing requires
    it to follow the previous one — publishing revision 7 with no 1–6 succeeds.
    Grant contents have the same freedom. Deliberate, or an accident to close?
-3. **`Generation` for a tenant-scoped record** — move the counter, add one, or
-   drop the guarantee for role listings.
+3. **`Generation` spans both kinds.** A role listing returns shipped and composed
+   roles together, so its generation must move when either changes. One
+   per-application counter does that correctly and over-invalidates: one tenant's
+   publication invalidates every tenant's cached view. Over-invalidation costs a
+   retry where the alternative costs a missed row, so it is wrong in the cheap
+   direction. Narrowing it means a per-installation counter that an
+   application-role write must still touch — worth doing when the cost shows up,
+   not before.
 4. ~~**Latest-revision reads.**~~ **Settled:** `ListRoles` takes a `Revisions`
    selector — `AllRevisions` by default, `LatestRevision` on request. Computed as
    `MAX(key5)` per `key4`, never stored, administrative only. `GetRole` still

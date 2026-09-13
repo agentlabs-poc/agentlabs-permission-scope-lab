@@ -24,6 +24,15 @@ func (a *roleAPI) PublishRole(_ context.Context, area domain.Area, fixture domai
 	return role, nil
 }
 
+func (a *roleAPI) PublishApplicationRole(_ context.Context, _ domain.Application, fixture domain.FixtureContext, role domain.RoleContent) (domain.RoleContent, error) {
+	a.fixture, a.role = fixture, role
+	if a.err != nil {
+		return domain.RoleContent{}, a.err
+	}
+	role.Managed = domain.ApplicationManaged
+	return role, nil
+}
+
 func (a *roleAPI) GetRole(_ context.Context, area domain.Area, fixture domain.FixtureContext, id string, revision int64) (domain.RoleContent, error) {
 	a.area, a.fixture = area, fixture
 	if a.err != nil {
@@ -51,7 +60,7 @@ func TestRolePublishParsesAndForwardsProposal(t *testing.T) {
 	if api.role.ID != "" || api.role.Name != "payslip-reader" || api.role.Revision != 2 || strings.Join(api.role.Permissions, ",") != "hrms:payroll:payslip::read,hrms:payroll:payslip::write" || api.fixture.Name != "maya-role-publisher" {
 		t.Fatalf("proposal=%+v fixture=%+v", api.role, api.fixture)
 	}
-	want := "internal projection: role\nid  \nname  payslip-reader\nrevision  2\npermissions  hrms:payroll:payslip::read,hrms:payroll:payslip::write\n"
+	want := "internal projection: role\nid  \nname  payslip-reader\nmanaged  tenant\nrevision  2\npermissions  hrms:payroll:payslip::read,hrms:payroll:payslip::write\n"
 	if out.String() != want || !strings.Contains(diag.String(), "LAB ONLY") {
 		t.Fatalf("stdout=%q stderr=%q", out.String(), diag.String())
 	}

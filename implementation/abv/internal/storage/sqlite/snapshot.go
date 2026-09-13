@@ -251,17 +251,23 @@ func (r *snapshotReader) assignments(s *storage.Snapshot) error {
 // identity fields come back out of their key slots and the bundle out of the
 // value, each by the same codec that wrote them.
 func (r *snapshotReader) roles(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`
-		SELECT key4, key5, key6, value FROM abv_l1_records
-		 WHERE boundary='tenant' AND tenant_id=? AND application_id=?
-		   AND key1='abv' AND key2='role'
-		 ORDER BY key4, key5`)
+	// Both kinds, in one read: the roles this tenant composed and the roles the
+	// application ships to every tenant. They are the same record told apart by
+	// the boundary, and a tenant administrator reads its catalog as one list.
+	rows, err := r.conn.QueryContext(r.ctx, `
+		SELECT key4, key5, key6, boundary, value FROM abv_l1_records
+		 WHERE application_id=? AND key1='abv' AND key2='role'
+		   AND ((boundary='tenant' AND tenant_id=?) OR boundary='application')
+		 ORDER BY key4, key5`, r.area.ApplicationID(), r.area.TenantID())
+	if err != nil {
+		err = classify(err)
+	}
 	if err != nil {
 		return err
 	}
 	for rows.Next() {
-		var id, slot, name, payload string
-		if err = rows.Scan(&id, &slot, &name, &payload); err != nil {
+		var id, slot, name, boundary, payload string
+		if err = rows.Scan(&id, &slot, &name, &boundary, &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -277,8 +283,12 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 			rows.Close()
 			return domain.ErrMalformed
 		}
+		managed := domain.TenantManaged
+		if boundary == "application" {
+			managed = domain.ApplicationManaged
+		}
 		s.Roles[domain.RoleKey{ID: id, Revision: revision}] = domain.RoleContent{
-			ID: id, Name: name, Revision: revision, Permissions: content.Permissions,
+			ID: id, Name: name, Revision: revision, Permissions: content.Permissions, Managed: managed,
 		}
 	}
 	return finishRows(rows)

@@ -270,3 +270,66 @@ func TestRoleReadsReturnCopies(t *testing.T) {
 		t.Fatalf("a caller reached into stored content: %#v err=%v", again, err)
 	}
 }
+
+// A tenant may not revise a role the application ships: the shipped role is the
+// application's property, and a tenant wanting a different bundle composes its
+// own rather than editing someone else's.
+func TestATenantCannotReviseAnApplicationRole(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	read := "hrms:payroll:payslip::read"
+	snap := storage.Snapshot{
+		Area:    area,
+		Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{read: {ID: read, Active: true}}},
+		Roles: map[domain.RoleKey]domain.RoleContent{
+			{ID: "aaaaaaaaaaaa", Revision: 1}: {ID: "aaaaaaaaaaaa", Name: "Viewer", Revision: 1, Permissions: []string{read}, Managed: domain.ApplicationManaged},
+			{ID: "bbbbbbbbbbbb", Revision: 1}: {ID: "bbbbbbbbbbbb", Name: "own", Revision: 1, Permissions: []string{read}, Managed: domain.TenantManaged},
+		},
+	}
+	p := &roleProvider{snapshot: snap}
+	s, _ := New(p, roleAdmin{}, fixedClock{})
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+
+	shipped := domain.RoleContent{ID: "aaaaaaaaaaaa", Name: "Viewer", Revision: 2, Permissions: []string{read}}
+	if _, err := s.PublishRole(t.Context(), area, identity, shipped); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("a tenant revised an application role: %v", err)
+	}
+	if p.writes != 0 {
+		t.Fatalf("a refused revision wrote %d times", p.writes)
+	}
+	// Its own role it may revise.
+	own := domain.RoleContent{ID: "bbbbbbbbbbbb", Name: "own", Revision: 2, Permissions: []string{read}}
+	if _, err := s.PublishRole(t.Context(), area, identity, own); err != nil {
+		t.Fatalf("a tenant could not revise its own role: %v", err)
+	}
+}
+
+// A listing returns both kinds by default, and Managed narrows to one.
+func TestListRolesReturnsBothKindsAndNarrows(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	read := "hrms:payroll:payslip::read"
+	snap := storage.Snapshot{
+		Area:    area,
+		Catalog: domain.Catalog{ApplicationID: "hrms", Generation: 3},
+		Roles: map[domain.RoleKey]domain.RoleContent{
+			{ID: "aaaaaaaaaaaa", Revision: 1}: {ID: "aaaaaaaaaaaa", Name: "Viewer", Revision: 1, Permissions: []string{read}, Managed: domain.ApplicationManaged},
+			{ID: "bbbbbbbbbbbb", Revision: 1}: {ID: "bbbbbbbbbbbb", Name: "own", Revision: 1, Permissions: []string{read}, Managed: domain.TenantManaged},
+		},
+	}
+	s, _ := New(&roleReader{snapshot: snap}, roleAdmin{}, fixedClock{})
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+
+	both, err := s.ListRoles(t.Context(), area, identity, domain.RoleFilter{})
+	if err != nil || both.Total != 2 {
+		t.Fatalf("a tenant sees %d roles, want both kinds err=%v", both.Total, err)
+	}
+	shipped := domain.ApplicationManaged
+	only, err := s.ListRoles(t.Context(), area, identity, domain.RoleFilter{Managed: &shipped})
+	if err != nil || only.Total != 1 || only.Roles[0].Name != "Viewer" {
+		t.Fatalf("narrowing to shipped gave %#v err=%v", only.Roles, err)
+	}
+	composed := domain.TenantManaged
+	mine, err := s.ListRoles(t.Context(), area, identity, domain.RoleFilter{Managed: &composed})
+	if err != nil || mine.Total != 1 || mine.Roles[0].Name != "own" {
+		t.Fatalf("narrowing to composed gave %#v err=%v", mine.Roles, err)
+	}
+}

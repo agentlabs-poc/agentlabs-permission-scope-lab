@@ -59,6 +59,24 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 		case "publish":
 			revision, _ := strconv.ParseInt(flags["--revision"], 10, 64)
 			proposed := domain.RoleContent{ID: flags["--id"], Name: flags["--name"], Revision: revision, Permissions: strings.Split(flags["--permissions"], ",")}
+			if has(flags, "--application") {
+				roleAPI, ok := api.(application.RoleAPI)
+				if !ok || nilCapability(roleAPI) {
+					return report(diag, domain.ErrUnsupported)
+				}
+				app, appErr := domain.NewApplication(area.ApplicationID())
+				if appErr != nil {
+					return report(diag, appErr)
+				}
+				role, err := roleAPI.PublishApplicationRole(ctx, app, domain.FixtureContext{Name: flags["--fixture-context"]}, proposed)
+				if err != nil {
+					return report(diag, err)
+				}
+				if err := renderRole(out, diag, role); err != nil {
+					return 4
+				}
+				break
+			}
 			if err := publishRole(ctx, api, area, flags["--fixture-context"], proposed, out, diag); err != nil {
 				return report(diag, err)
 			}
@@ -81,6 +99,13 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 				return report(diag, domain.ErrUnsupported)
 			}
 			filter := domain.RoleFilter{ID: flags["--id"], Name: flags["--name"]}
+			if has(flags, "--managed") {
+				managed := domain.TenantManaged
+				if flags["--managed"] == "application" {
+					managed = domain.ApplicationManaged
+				}
+				filter.Managed = &managed
+			}
 			if has(flags, "--latest") {
 				filter.Revisions = domain.LatestRevision
 			}

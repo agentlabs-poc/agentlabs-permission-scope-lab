@@ -57,6 +57,37 @@ type RoleContent struct {
 	Name        string
 	Revision    int64
 	Permissions []string
+	// Managed says who owns this role. It is derived from the record's
+	// boundary and never supplied by a caller: which operation published it
+	// decides. A reader needs it to know what it may change — a tenant
+	// administrator may revise its own roles and not the application's.
+	Managed RoleManagement
+}
+
+// RoleManagement distinguishes a role the application ships from one a tenant
+// composed.
+//
+// Both are the same record type in the same store, told apart by whether the
+// record carries a tenant. They coexist and never shadow each other: each has
+// its own issued id, and a grant adopts an exact id and revision, so there is
+// nothing to resolve between them. A tenant that outgrows a shipped role
+// composes its own; the shipped one does not disappear.
+type RoleManagement int
+
+const (
+	// TenantManaged is a role a tenant composed from the application's
+	// vocabulary. It is the common case, and the zero value.
+	TenantManaged RoleManagement = iota
+	// ApplicationManaged is a role the application ships to every tenant, the
+	// way it ships permissions and scope keys.
+	ApplicationManaged
+)
+
+func (m RoleManagement) String() string {
+	if m == ApplicationManaged {
+		return "application"
+	}
+	return "tenant"
 }
 
 // Revisions selects which revisions of a role a listing returns.
@@ -78,8 +109,12 @@ type RoleFilter struct {
 	ID        string
 	Name      string
 	Revisions Revisions
-	Offset    int
-	Limit     int
+	// Managed narrows to one kind. Nil returns both, which is what a tenant
+	// administrator reading its catalog wants: the roles the application ships
+	// alongside the ones the tenant composed.
+	Managed *RoleManagement
+	Offset  int
+	Limit   int
 }
 
 // RolePage is one page of a role listing, ordered by id then revision.

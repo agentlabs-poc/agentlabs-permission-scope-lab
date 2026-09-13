@@ -113,6 +113,16 @@ func (a *labApplication) PublishRole(ctx context.Context, area domain.Area, fixt
 	return a.facade.PublishRole(ctx, area, TeamFINC17(area).Issuer, proposed)
 }
 
+func (a *labApplication) PublishApplicationRole(ctx context.Context, app domain.Application, fixtureContext domain.FixtureContext, proposed domain.RoleContent) (domain.RoleContent, error) {
+	if app.ID() != a.area.ApplicationID() || fixtureContext.Name != roleFixtureContext {
+		return domain.RoleContent{}, domain.ErrRejected
+	}
+	if err := verifyMarker(ctx, a.path, a.area); err != nil {
+		return domain.RoleContent{}, err
+	}
+	return a.facade.PublishApplicationRole(ctx, app, TeamFINC17(a.area).Issuer, proposed)
+}
+
 func (a *labApplication) GetRole(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, id string, revision int64) (domain.RoleContent, error) {
 	if area != a.area || fixtureContext.Name != roleFixtureContext {
 		return domain.RoleContent{}, domain.ErrRejected

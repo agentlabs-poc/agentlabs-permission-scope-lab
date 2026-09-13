@@ -123,7 +123,11 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 		}
 		// Through the same writer the contract uses: a fixture that wrote rows
 		// its own way could seed a shape the contract cannot produce.
-		if err := insertRole(ctx, conn, s.Area, r); err != nil {
+		tenant := s.Area.TenantID()
+		if r.Managed == domain.ApplicationManaged {
+			tenant = ""
+		}
+		if err := insertRole(ctx, conn, s.Area.ApplicationID(), tenant, r); err != nil {
 			return err
 		}
 	}
