@@ -30,7 +30,7 @@ func (a catalogAdministration) CheckScopeRegistration(context.Context, domain.Ap
 
 func TestFacadeForwardsProtectedCatalogRegistration(t *testing.T) {
 	app, _ := domain.NewApplication("hrms")
-	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
+	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvksg0"}, HumanID: "fi7io4lvksg0"}
 	provider := &catalogMemoryProvider{catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}}}
 	facade, err := abv.New(provider, catalogAdministration{allow: true}, clock{})
 	if err != nil {

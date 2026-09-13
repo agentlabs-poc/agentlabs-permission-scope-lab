@@ -321,7 +321,12 @@ func (p *provider) writeAssignments(ctx context.Context, conn *sql.Conn, area do
 			return classify(err)
 		}
 		if a.Recipient.Type == "group" {
-			err = conn.QueryRowContext(ctx, `SELECT 1 FROM teams WHERE tenant_id=? AND application_id=? AND team_id=?`, area.TenantID(), area.ApplicationID(), a.Recipient.ID).Scan(&exists)
+			// A team is tenant-scoped and carries no application, so this asks
+			// the record store rather than a table, and does not name one.
+			err = conn.QueryRowContext(ctx, `
+				SELECT 1 FROM abv_l1_records
+				 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='team' AND key3=?`,
+				area.TenantID(), a.Recipient.ID).Scan(&exists)
 			if errors.Is(err, sql.ErrNoRows) {
 				return domain.ErrRejected
 			}

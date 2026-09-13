@@ -33,7 +33,7 @@ func TestResolveParentTeamBaseline(t *testing.T) {
 		t.Fatalf("wrong parent support route: %#v", got)
 	}
 	fixture.Snapshot.Memberships = nil // resolution must never depend on Maya
-	if _, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{}); err != nil {
+	if _, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{}); err != nil {
 		t.Fatalf("issuer membership became a permanent lineage dependency: %v", err)
 	}
 }
@@ -46,7 +46,7 @@ func TestResolveParentTeamRejectsIneligibleOrInferredSupport(t *testing.T) {
 		want error
 	}{
 		{"G1 only at TeamX", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["TeamX"] = domain.Team{ID: "TeamX", ParentID: "RootTeam"}
+			f.Snapshot.Teams["TeamX"] = domain.Team{Name: "team",ID: "TeamX", ParentID: "fibggi2jur5s"}
 			a := f.Snapshot.Assignments["A1"]
 			a.Recipient.ID = "TeamX"
 			f.Snapshot.Assignments["A1"] = a
@@ -62,22 +62,22 @@ func TestResolveParentTeamRejectsIneligibleOrInferredSupport(t *testing.T) {
 			f.Snapshot.Assignments["A1"] = a
 		}, domain.ErrRejected},
 		{"Team2 parent missing", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["Team2"] = domain.Team{ID: "Team2"}
+			f.Snapshot.Teams["fibggi2juxhc"] = domain.Team{ID: "fibggi2juxhc", Name: "Team2"}
 		}, domain.ErrRejected},
 		{"cyclic team graph with disabled edge", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["Team1"] = domain.Team{ID: "Team1", ParentID: "Team2"}
+			f.Snapshot.Teams["fibggi2juubk"] = domain.Team{ID: "fibggi2juubk", Name: "Team1", ParentID: "fibggi2juxhc"}
 			a := f.Snapshot.Assignments["A1"]
 			a.Status = "disabled"
 			f.Snapshot.Assignments["A1"] = a
 		}, domain.ErrRejected},
 		{"duplicate source binding", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Assignments["A1-copy"] = domain.Assignment{Version: "1", ID: "A1-copy", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team1"}, Status: "disabled"}
+			f.Snapshot.Assignments["A1-copy"] = domain.Assignment{Version: "1", ID: "A1-copy", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "disabled"}
 		}, domain.ErrRejected},
 		{"assignment map disagrees with record", func(f *lab.TeamFINC17Case) {
 			f.Snapshot.Assignments["wrong-key"] = f.Snapshot.Assignments["A1"]
 		}, domain.ErrRejected},
 		{"selected child differs from stored revision", func(f *lab.TeamFINC17Case) {
-			f.Child.Scope["cert"] = "other"
+			f.Child.Scope["cert"] = "fi7io4lvkfsw"
 		}, domain.ErrRejected},
 		{"child self changes recipient binding", func(f *lab.TeamFINC17Case) {
 			f.Child.Scope = map[string]string{"user": "$self"}
@@ -87,7 +87,7 @@ func TestResolveParentTeamRejectsIneligibleOrInferredSupport(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
 			tc.edit(&fixture)
-			got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 			if !errors.Is(err, tc.want) || !reflect.DeepEqual(got, domain.Route{}) {
 				t.Fatalf("got %#v, %v; want empty route, %v", got, err, tc.want)
 			}
@@ -98,14 +98,14 @@ func TestResolveParentTeamRejectsIneligibleOrInferredSupport(t *testing.T) {
 func TestResolveParentTeamUsesOnlyActualTeam1Revision(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Teams["TeamX"] = domain.Team{ID: "TeamX", ParentID: "RootTeam"}
+	fixture.Snapshot.Teams["TeamX"] = domain.Team{Name: "team",ID: "TeamX", ParentID: "fibggi2jur5s"}
 	broader := fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
 	broader.Revision = 2
 	broader.Permissions = []string{lab.PayslipRead, lab.PayslipWrite, lab.PayslipDelete}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 2}] = broader
 	fixture.Snapshot.Assignments["AX"] = domain.Assignment{Version: "1", ID: "AX", GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "TeamX"}, Status: "enabled"}
 
-	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 	if err != nil || !reflect.DeepEqual(got.Permissions, []string{lab.PayslipRead, lab.PayslipWrite}) || !reflect.DeepEqual(got.AssignmentIDs, []string{"A0", "A1"}) {
 		t.Fatalf("unrelated broader holding changed route: %#v, %v", got, err)
 	}
@@ -123,7 +123,7 @@ func TestResolveParentTeamValidityBoundaryAndCopies(t *testing.T) {
 	g1.Validity = &domain.Validity{ExpiresAt: &expiry}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g1
 
-	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", start)
+	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", start)
 	if err != nil || len(got.Validities) != 2 || got.Validities[0].NotBefore == nil || got.Validities[1].ExpiresAt == nil {
 		t.Fatalf("inclusive start or inherited validity failed: %#v, %v", got, err)
 	}
@@ -132,7 +132,7 @@ func TestResolveParentTeamValidityBoundaryAndCopies(t *testing.T) {
 	if start.IsZero() || expiry.IsZero() || g0.Validity.NotBefore.IsZero() || g1.Validity.ExpiresAt.IsZero() {
 		t.Fatal("route aliases inherited validity")
 	}
-	if _, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", expiry); !errors.Is(err, domain.ErrRejected) {
+	if _, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", expiry); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("exact expiry remained eligible: %v", err)
 	}
 }
@@ -147,7 +147,7 @@ func TestResolveParentTeamPreservesExactRootRoleRevision(t *testing.T) {
 	fixture.Snapshot.Roles[domain.RoleKey{ID: "root-role", Revision: 1}] = domain.RoleContent{Name: "payslip-reader", ID: "root-role", Revision: 1, Permissions: []string{lab.PayslipRead, lab.PayslipWrite, lab.PayslipDelete}}
 	fixture.Snapshot.Roles[domain.RoleKey{ID: "root-role", Revision: 2}] = domain.RoleContent{Name: "payslip-reader", ID: "root-role", Revision: 2, Permissions: []string{lab.PayslipRead}}
 
-	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 	if err != nil || !reflect.DeepEqual(got.Permissions, []string{lab.PayslipRead, lab.PayslipWrite}) {
 		t.Fatalf("lost exact root role permissions: %#v, %v", got, err)
 	}
@@ -156,15 +156,15 @@ func TestResolveParentTeamPreservesExactRootRoleRevision(t *testing.T) {
 func TestResolveParentTeamDoesNotUseTrustedRootToSkipTeamCeiling(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Teams["Team3"] = domain.Team{ID: "Team3", ParentID: "Team2"}
+	fixture.Snapshot.Teams["fidfcosw0iyo"] = domain.Team{Name: "team",ID: "fidfcosw0iyo", ParentID: "fibggi2juxhc"}
 	rootAssignment := fixture.Snapshot.Assignments["A0"]
-	rootAssignment.Recipient.ID = "Team2"
+	rootAssignment.Recipient.ID = "fibggi2juxhc"
 	fixture.Snapshot.Assignments["A0"] = rootAssignment
 	child := domain.GrantContent{Version: "1", GrantID: "G3", Revision: 1, ParentGrantID: "G0", Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "G3", Revision: 1}] = child
 	fixture.Snapshot.Controls["G3"] = domain.GrantControl{Version: "1", ID: "G3", Status: "enabled"}
 
-	if _, err := lineage.ResolveParentTeam(fixture.Snapshot, child, "Team3", time.Time{}); !errors.Is(err, domain.ErrRejected) {
+	if _, err := lineage.ResolveParentTeam(fixture.Snapshot, child, "fidfcosw0iyo", time.Time{}); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("trusted root on non-root team skipped the team ceiling: %v", err)
 	}
 }
@@ -172,14 +172,14 @@ func TestResolveParentTeamDoesNotUseTrustedRootToSkipTeamCeiling(t *testing.T) {
 func TestResolveParentTeamBoundsTraversalWithoutReturningPartialProof(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	parent := "Team2"
+	parent := "fibggi2juxhc"
 	for i := 0; i < 256; i++ {
 		id := "deep-" + strconv.Itoa(i)
-		fixture.Snapshot.Teams[parent] = domain.Team{ID: parent, ParentID: id}
-		fixture.Snapshot.Teams[id] = domain.Team{ID: id}
+		fixture.Snapshot.Teams[parent] = domain.Team{Name: "team",ID: parent, ParentID: id}
+		fixture.Snapshot.Teams[id] = domain.Team{Name: "team",ID: id}
 		parent = id
 	}
-	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 	if !errors.Is(err, domain.ErrUnavailable) || !reflect.DeepEqual(got, domain.Route{}) {
 		t.Fatalf("unbounded or partial traversal: %#v, %v", got, err)
 	}

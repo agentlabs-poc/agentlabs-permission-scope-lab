@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-const a2JSON = `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}`
+const a2JSON = `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`
 
 func TestConnectDoesNotCreateMissingDatabase(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "missing.db")
@@ -75,14 +75,14 @@ func TestAssignmentStatusRequiresFixtureAndLeavesRecordUntouched(t *testing.T) {
 		t.Fatalf("refusal = %+v, %v", got, err)
 	}
 	record, err := api.Inspect(t.Context(), area, "assignment", "A1")
-	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"Team1"},"status":"enabled"}` {
+	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"enabled"}` {
 		t.Fatalf("A1 changed: %s %v", record.CanonicalJSON, err)
 	}
 }
 
 func TestMarkerBindsExactAreaAndFixtureContext(t *testing.T) {
 	seedArea, _ := domain.NewArea("acme", "hrms")
-	wrongArea, _ := domain.NewArea("other", "hrms")
+	wrongArea, _ := domain.NewArea("fi7io4lvkfsw", "hrms")
 	path := filepath.Join(t.TempDir(), "lab.db")
 	if err := (Scenarios{}).Seed(t.Context(), seedArea, "team-fin-c17", path); err != nil {
 		t.Fatal(err)
@@ -91,7 +91,7 @@ func TestMarkerBindsExactAreaAndFixtureContext(t *testing.T) {
 		area    domain.Area
 		fixture string
 	}{
-		{seedArea, "maya"}, {wrongArea, "maya-team1"},
+		{seedArea, "fi7io4lvjqio"}, {wrongArea, "maya-team1"},
 	} {
 		api, closeConnection, err := Connect(t.Context(), tc.area, path)
 		if err != nil {

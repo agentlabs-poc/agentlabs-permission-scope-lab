@@ -2,7 +2,7 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE abv_metadata (
     marker TEXT PRIMARY KEY CHECK (marker = 'agentlabs-abv'),
-    schema_version INTEGER NOT NULL CHECK (schema_version = 7)
+    schema_version INTEGER NOT NULL CHECK (schema_version = 8)
 );
 
 -- The ABV-123 L1 record store. Permissions and scopes live here; the remaining
@@ -80,22 +80,6 @@ CREATE TABLE grant_contents (
     PRIMARY KEY (tenant_id, application_id, grant_id, revision),
     FOREIGN KEY (tenant_id, application_id) REFERENCES installations(tenant_id, application_id)
 );
-CREATE TABLE teams (
-    tenant_id TEXT NOT NULL,
-    application_id TEXT NOT NULL,
-    team_id TEXT NOT NULL,
-    parent_id TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, application_id, team_id),
-    FOREIGN KEY (tenant_id, application_id) REFERENCES installations(tenant_id, application_id)
-);
-CREATE TABLE memberships (
-    tenant_id TEXT NOT NULL,
-    application_id TEXT NOT NULL,
-    team_id TEXT NOT NULL,
-    human_id TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, application_id, team_id, human_id),
-    FOREIGN KEY (tenant_id, application_id, team_id) REFERENCES teams(tenant_id, application_id, team_id)
-);
 CREATE TABLE trusted_roots (
     tenant_id TEXT NOT NULL,
     application_id TEXT NOT NULL,
@@ -122,4 +106,4 @@ CREATE TABLE assignments (
 
 -- The ownership marker is written last, so an incomplete initialization is
 -- never accepted as an ABV database on a later open.
-INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 7);
+INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 8);

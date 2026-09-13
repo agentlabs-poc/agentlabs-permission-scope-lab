@@ -22,7 +22,7 @@ func TestRunEvaluatesSQLiteAndRejectsMalformedMaterial(t *testing.T) {
 	if err := provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	base := []string{"--db", dbPath, "--tenant", "acme", "--application", "hrms", "--human", "nutan", "--permission", lab.PayslipRead}
+	base := []string{"--db", dbPath, "--tenant", "acme", "--application", "hrms", "--human", "fi7io4lvjwu8", "--permission", lab.PayslipRead}
 
 	var stdout, stderr strings.Builder
 	args := append(append([]string{}, base...), "--boundary", "dept=FIN", "--boundary", "cert=C17")
@@ -54,7 +54,7 @@ func TestRunDenyAndMissingDatabaseHaveDistinctExitCodes(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = provider.Close()
-	args := []string{"--db", dbPath, "--tenant", "acme", "--application", "hrms", "--human", "nutan", "--permission", lab.PayslipRead, "--boundary", "dept=FIN", "--boundary", "cert=C17"}
+	args := []string{"--db", dbPath, "--tenant", "acme", "--application", "hrms", "--human", "fi7io4lvjwu8", "--permission", lab.PayslipRead, "--boundary", "dept=FIN", "--boundary", "cert=C17"}
 	var out, diag strings.Builder
 	if code := run(args, &out, &diag); code != 3 || !strings.Contains(out.String(), `"decision":"deny"`) || diag.Len() != 0 {
 		t.Fatalf("deny code=%d stdout=%q stderr=%q", code, out.String(), diag.String())

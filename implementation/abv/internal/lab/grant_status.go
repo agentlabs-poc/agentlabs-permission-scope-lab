@@ -21,11 +21,11 @@ func (a *GrantStatusAdministration) CheckGrantStatus(ctx context.Context, snapsh
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity.HumanID != "maya" || identity.Actor != (domain.Actor{Type: "user", ID: "maya"}) || proposed.ID != "G2" || proposed.Version != "1" || (proposed.Status != "enabled" && proposed.Status != "disabled") {
+	if snapshot.Area != a.area || identity.HumanID != "fi7io4lvjqio" || identity.Actor != (domain.Actor{Type: "user", ID: "fi7io4lvjqio"}) || proposed.ID != "G2" || proposed.Version != "1" || (proposed.Status != "enabled" && proposed.Status != "disabled") {
 		return domain.ErrRejected
 	}
 	for _, membership := range snapshot.Memberships {
-		if membership == (domain.Membership{TeamID: "AssignmentAdmins", HumanID: "maya"}) {
+		if membership == (domain.Membership{TeamID: "fibggi2jv0n4", HumanID: "fi7io4lvjqio"}) {
 			return nil
 		}
 	}

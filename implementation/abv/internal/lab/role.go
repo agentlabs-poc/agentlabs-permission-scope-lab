@@ -21,7 +21,7 @@ func (a *RoleAdministration) CheckRolePublication(ctx context.Context, snapshot 
 	// exist when a new role is proposed — a policy that keyed on one could only
 	// ever admit roles that already exist. It gates the name, the bundle and the
 	// publisher's membership, which are the things a proposal actually carries.
-	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) {
 		return domain.ErrRejected
 	}
 	if proposed.Name == "" {
@@ -33,7 +33,7 @@ func (a *RoleAdministration) CheckRolePublication(ctx context.Context, snapshot 
 		}
 	}
 	for _, membership := range snapshot.Memberships {
-		if membership == (domain.Membership{TeamID: "AssignmentAdmins", HumanID: "maya"}) {
+		if membership == (domain.Membership{TeamID: "fibggi2jv0n4", HumanID: "fi7io4lvjqio"}) {
 			return nil
 		}
 	}
@@ -47,7 +47,7 @@ func (a *RoleAdministration) CheckRoleRead(ctx context.Context, area domain.Area
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+	if area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) {
 		return domain.ErrRejected
 	}
 	return nil
@@ -64,10 +64,22 @@ func (a *RoleAdministration) CheckApplicationRolePublication(ctx context.Context
 	if app.ID() != a.area.ApplicationID() || catalog.ApplicationID != app.ID() {
 		return domain.ErrRejected
 	}
-	if identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) {
+	if identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) {
 		return domain.ErrRejected
 	}
 	if proposed.Name == "" {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+// CheckTeamRead gates the team and membership reads. Reading who is in a team is
+// weaker than publishing into one, so it admits the same fixture publisher.
+func (a *RoleAdministration) CheckTeamRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) {
 		return domain.ErrRejected
 	}
 	return nil

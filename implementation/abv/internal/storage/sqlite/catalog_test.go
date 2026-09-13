@@ -14,7 +14,7 @@ func TestCatalogProviderPersistsAndIsolatesApplicationCatalog(t *testing.T) {
 	path := t.TempDir() + "/authority.db"
 	hrms := contractFixture(t)
 	hrms.Catalog.CompatibilityEnabled = true
-	secondTenantArea, _ := domain.NewArea("other", "hrms")
+	secondTenantArea, _ := domain.NewArea("fi7io4lvkfsw", "hrms")
 	secondTenant := minimalFixture(secondTenantArea)
 	secondTenant.Catalog = hrms.Catalog
 	otherArea, _ := domain.NewArea("acme", "accounting")

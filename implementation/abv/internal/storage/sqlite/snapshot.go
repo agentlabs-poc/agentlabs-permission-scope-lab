@@ -302,13 +302,18 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 }
 
 func (r *snapshotReader) teams(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`SELECT team_id,parent_id FROM teams WHERE tenant_id=? AND application_id=? ORDER BY team_id`)
+	// Teams are tenant-scoped L1 records and carry no application: the tenant is
+	// the whole of the scoping, so this read is not area-bound on an application.
+	rows, err := r.conn.QueryContext(r.ctx, `
+		SELECT key3, key4, value FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='team'
+		 ORDER BY key3`, r.area.TenantID())
 	if err != nil {
-		return err
+		return classify(err)
 	}
 	for rows.Next() {
-		var id, parent string
-		if err = rows.Scan(&id, &parent); err != nil {
+		var id, name, payload string
+		if err = rows.Scan(&id, &name, &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -316,18 +321,27 @@ func (r *snapshotReader) teams(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		if id == "" {
+		var content teamPayload
+		if !codec.ValidRoleID(id) || name == "" || json.Unmarshal([]byte(payload), &content) != nil {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		s.Teams[id] = domain.Team{ID: id, ParentID: parent}
+		// A root's parent is empty; any other parent must be a real id.
+		if content.ParentID != "" && !codec.ValidRoleID(content.ParentID) {
+			rows.Close()
+			return domain.ErrMalformed
+		}
+		s.Teams[id] = domain.Team{ID: id, Name: name, ParentID: content.ParentID}
 	}
 	return finishRows(rows)
 }
 func (r *snapshotReader) memberships(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`SELECT team_id,human_id FROM memberships WHERE tenant_id=? AND application_id=? ORDER BY team_id,human_id`)
+	rows, err := r.conn.QueryContext(r.ctx, `
+		SELECT key3, key4 FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='membership'
+		 ORDER BY key3, key4`, r.area.TenantID())
 	if err != nil {
-		return err
+		return classify(err)
 	}
 	for rows.Next() {
 		var team, human string
@@ -339,7 +353,9 @@ func (r *snapshotReader) memberships(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		if team == "" || human == "" {
+		// Both halves are ids: the team's is issued here, the human's by the auth
+		// service, and both render base 36 so one spelling serves the system.
+		if !codec.ValidRoleID(team) || !codec.ValidHumanID(human) {
 			rows.Close()
 			return domain.ErrMalformed
 		}

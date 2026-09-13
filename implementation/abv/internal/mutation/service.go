@@ -48,6 +48,11 @@ type PlatformAdministration interface {
 	CheckPlatformPermissionRegistration(context.Context, string, domain.Identity, domain.PermissionDefinition, time.Time) error
 }
 
+// TeamReadAdministration gates reads of a tenant's teams and memberships.
+type TeamReadAdministration interface {
+	CheckTeamRead(context.Context, domain.Area, domain.Identity, time.Time) error
+}
+
 type RoleReadAdministration interface {
 	CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error
 }

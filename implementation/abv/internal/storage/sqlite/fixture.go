@@ -167,16 +167,20 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 		if invalid(id) || team.ID != id || (team.ParentID != "" && invalid(team.ParentID)) {
 			return domain.ErrMalformed
 		}
-		if _, err := conn.ExecContext(ctx, `INSERT INTO teams(tenant_id,application_id,team_id,parent_id) VALUES(?,?,?,?)`, tenant, app, id, team.ParentID); err != nil {
-			return classify(err)
+		// A tenant's teams exist once, not once per application. A fixture that
+		// seeds two snapshots for the same tenant — one per application — names
+		// the same teams twice, and the second naming is the same team rather
+		// than a conflict.
+		if err := seedTeam(ctx, conn, tenant, team); err != nil {
+			return err
 		}
 	}
 	for _, m := range s.Memberships {
 		if invalid(m.TeamID) || invalid(m.HumanID) {
 			return domain.ErrMalformed
 		}
-		if _, err := conn.ExecContext(ctx, `INSERT INTO memberships(tenant_id,application_id,team_id,human_id) VALUES(?,?,?,?)`, tenant, app, m.TeamID, m.HumanID); err != nil {
-			return classify(err)
+		if err := seedMembership(ctx, conn, tenant, m); err != nil {
+			return err
 		}
 	}
 	for _, id := range sortedKeys(s.TrustedRoots) {

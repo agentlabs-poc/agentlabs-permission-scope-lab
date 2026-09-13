@@ -15,6 +15,7 @@ directly. Only the layout is reconstructed, for legibility.
 | `demo-7-storage-table.svg` | The record store itself: permissions and scopes in one table, told apart by `key2`, the application in `key3` for both, and an empty scope payload |
 | `demo-8-role-publish-and-get.svg` | The two publication paths side by side — the platform administrator shipping a role with `--application`, a tenant administrator composing one without it, a new revision of each, and the boundary enforced rather than merely recorded |
 | `demo-9-role-list-revisions.svg` | One listing carrying both kinds each labelled, `--managed` narrowing to either, and `--latest` taking the highest revision of each across both |
+| `demo-12-team-membership.svg` | Teams and membership as tenant-scoped L1 records: both directions of the roster question, ids rather than names, the parent as an id, and both tables folded away |
 | `demo-11-envelope-drift-correction.svg` | The envelope before and after: `boundary`, `application_id` and `revision` removed, every record type sharing one shape, and `key3` holding the application in all of them — which is what let `application_id` go |
 | `demo-10-role-storage-table.svg` | The role rows: an application role carrying no tenant beside tenant roles that do, the revision zero-padded in `key5`, the name in `key6`, and the drifted `revision` column left at `0` |
 

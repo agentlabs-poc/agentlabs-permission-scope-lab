@@ -31,7 +31,7 @@ func seeded(t *testing.T, allow bool, active []string, retired []string) (*abv.F
 		t.Fatal(err)
 	}
 	app, _ := domain.NewApplication("hrms")
-	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "admin"}, HumanID: "admin"}
+	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvlbeo"}, HumanID: "fi7io4lvlbeo"}
 	return facade, app, id
 }
 
@@ -249,7 +249,7 @@ func TestPermissionOperationsRequireCatalogSupport(t *testing.T) {
 		t.Fatal(err)
 	}
 	app, _ := domain.NewApplication("hrms")
-	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "admin"}, HumanID: "admin"}
+	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvlbeo"}, HumanID: "fi7io4lvlbeo"}
 
 	if _, err := facade.GetPermission(t.Context(), app, id, "hrms:a::read"); !errors.Is(err, domain.ErrUnsupported) {
 		t.Fatalf("get err=%v, want ErrUnsupported", err)

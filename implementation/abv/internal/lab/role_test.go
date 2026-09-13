@@ -33,7 +33,7 @@ func TestRoleAdministrationRequiresExactBoundedPremiseAndMembership(t *testing.T
 		func(_ *abv.Evidence, _ *domain.Identity, r *domain.RoleContent) {
 			r.Permissions = []string{PayslipDelete}
 		},
-		func(_ *abv.Evidence, i *domain.Identity, _ *domain.RoleContent) { i.Actor.ID = "other" },
+		func(_ *abv.Evidence, i *domain.Identity, _ *domain.RoleContent) { i.Actor.ID = "fi7io4lvkfsw" },
 		func(s *abv.Evidence, _ *domain.Identity, _ *domain.RoleContent) { s.Memberships = nil },
 	} {
 		snapshot, gotIdentity, gotRole := TeamFINC17(area).Snapshot, identity, role
@@ -73,7 +73,7 @@ func TestRolePublicationUsesMarkedFixtureAndPreservesRevisions(t *testing.T) {
 		t.Fatalf("reopened role=%+v, %v", record.Rows, err)
 	}
 	for _, proposed := range []domain.RoleContent{
-		{Name: "payslip-reader", ID: "other", Revision: 2, Permissions: []string{PayslipRead}},
+		{Name: "payslip-reader", ID: "fi7io4lvkfsw", Revision: 2, Permissions: []string{PayslipRead}},
 		{ID: "fi9jvxobqsxs", Revision: 3, Permissions: []string{PayslipDelete}},
 		{ID: "fi9jvxobqsxs", Revision: 3, Permissions: []string{"hrms:payroll:payslip::export"}},
 		role,
@@ -103,7 +103,7 @@ func TestRolePublicationRequiresCurrentAdminMembership(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = db.Exec(`DELETE FROM memberships WHERE team_id='AssignmentAdmins' AND human_id='maya'`); err != nil {
+	if _, err = db.Exec(`DELETE FROM abv_l1_records WHERE key2='membership' AND key3='fibggi2jv0n4' AND key4='fi7io4lvjqio'`); err != nil {
 		t.Fatal(err)
 	}
 	if err = db.Close(); err != nil {

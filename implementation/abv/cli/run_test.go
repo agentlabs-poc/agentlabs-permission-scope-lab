@@ -32,7 +32,7 @@ type assignmentStatusAPI struct {
 
 func (s *assignmentStatusAPI) SetAssignmentStatus(_ context.Context, area domain.Area, fixture domain.FixtureContext, id, status string) (domain.Assignment, error) {
 	s.area, s.fixture, s.id, s.status, s.calls = area, fixture, id, status, s.calls+1
-	return domain.Assignment{Version: "1", ID: id, GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team2"}, Status: status}, nil
+	return domain.Assignment{Version: "1", ID: id, GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: status}, nil
 }
 
 type nilMapAPI map[string]string
@@ -113,15 +113,15 @@ func TestInvalidCommandNeverDispatches(t *testing.T) {
 		{"inspect", "grant", "G1", "--tenant"},
 		{"inspect", "grant", "G1", "--tenant", "*", "--app", "hrms"},
 		{"inspect", "grant", "G1", "--tenant", "acme", "--app", "hrms", "--skip-abv"},
-		{"inspect", "grant", "G1", "--tenant", "acme", "--tenant", "other", "--app", "hrms"},
+		{"inspect", "grant", "G1", "--tenant", "acme", "--tenant", "fi7io4lvkfsw", "--app", "hrms"},
 		{"inspect", "unknown", "G1", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"inspect", "grant", "", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"inspect", "grant", "G1", "--db=", "--tenant", "acme", "--app", "hrms"},
 		{"check", "assignment", "--file=", "--db", "x", "--tenant", "acme", "--app", "hrms"},
-		{"assign", "--file", "a.json", "--db", "", "--fixture-context", "maya", "--tenant", "acme", "--app", "hrms"},
+		{"assign", "--file", "a.json", "--db", "", "--fixture-context", "fi7io4lvjqio", "--tenant", "acme", "--app", "hrms"},
 		{"inspect", "grant", "G1", "--file", "a.json", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"check", "assignment", "--file", "a.json", "--db", "x", "--case", "bad", "--tenant", "acme", "--app", "hrms"},
-		{"assign", "--file", "a.json", "--db", "x", "--fixture-context", "maya", "--case", "bad", "--tenant", "acme", "--app", "hrms"},
+		{"assign", "--file", "a.json", "--db", "x", "--fixture-context", "fi7io4lvjqio", "--case", "bad", "--tenant", "acme", "--app", "hrms"},
 		{"scenario", "seed", "team-fin-c17", "--file", "a.json", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"scenario", "run", "team-fin-c17", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"scenario", "seed", "team-fin-c17", "--case", "bad", "--db", "x", "--tenant", "acme", "--app", "hrms"},
@@ -129,11 +129,11 @@ func TestInvalidCommandNeverDispatches(t *testing.T) {
 		{"grant", "pause", "G2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"grant", "disable", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"grant", "disable", "G2", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
-		{"grant", "disable", "G2", "--recipient", "Team2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "disable", "G2", "--recipient", "fibggi2juxhc", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"assignment", "pause", "A2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"assignment", "disable", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"assignment", "disable", "A2", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
-		{"assignment", "disable", "A2", "--recipient", "Team2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "disable", "A2", "--recipient", "fibggi2juxhc", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 	}
 	for _, args := range cases {
 		var out, diag bytes.Buffer
@@ -158,7 +158,7 @@ func TestAssignmentStatusForwardsExactRequestAndClosesOnce(t *testing.T) {
 		if api.id != "A2" || api.status != tc.status || api.fixture.Name != "maya-team1" || api.area.TenantID() != "acme" || api.area.ApplicationID() != "hrms" || connector.path != "relative.db" || connector.closes != 1 || api.calls != 1 {
 			t.Fatalf("wrong forwarding: api=%+v connector=%+v", api, connector)
 		}
-		if out.String() != `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"`+tc.status+`"}`+"\n" {
+		if out.String() != `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"`+tc.status+`"}`+"\n" {
 			t.Fatalf("output = %q", out.String())
 		}
 	}
@@ -258,7 +258,7 @@ func TestConnectorAndCloseFailuresAreUnavailable(t *testing.T) {
 		{api: &apiSpy{}, closeErr: errors.New("close failed")},
 	} {
 		var out, diag bytes.Buffer
-		got := Run(context.Background(), []string{"inspect", "team", "Team1", "--db", "x", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), &out, &diag, connector.connect, nil)
+		got := Run(context.Background(), []string{"inspect", "team", "fibggi2juubk", "--db", "x", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), &out, &diag, connector.connect, nil)
 		if got != 4 || diag.Len() == 0 {
 			t.Fatalf("exit %d, stderr %q", got, diag.String())
 		}
@@ -268,7 +268,7 @@ func TestConnectorAndCloseFailuresAreUnavailable(t *testing.T) {
 func TestNilAPIFromSuccessfulConnectorStillClosesExactlyOnce(t *testing.T) {
 	connector := &connectorSpy{}
 	var out, diag bytes.Buffer
-	got := Run(context.Background(), []string{"inspect", "team", "Team1", "--db", "x", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), &out, &diag, connector.connect, nil)
+	got := Run(context.Background(), []string{"inspect", "team", "fibggi2juubk", "--db", "x", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), &out, &diag, connector.connect, nil)
 	if got != 4 || connector.calls != 1 || connector.closes != 1 {
 		t.Fatalf("exit=%d calls=%d closes=%d", got, connector.calls, connector.closes)
 	}
@@ -277,7 +277,7 @@ func TestNilAPIFromSuccessfulConnectorStillClosesExactlyOnce(t *testing.T) {
 func TestRecordOutputFailureIsUnavailableAndStillCloses(t *testing.T) {
 	connector := &connectorSpy{api: &apiSpy{}}
 	var diag bytes.Buffer
-	got := Run(context.Background(), []string{"inspect", "team", "Team1", "--db", "x", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), failingWriter{}, &diag, connector.connect, nil)
+	got := Run(context.Background(), []string{"inspect", "team", "fibggi2juubk", "--db", "x", "--tenant", "acme", "--app", "hrms"}, strings.NewReader(""), failingWriter{}, &diag, connector.connect, nil)
 	if got != 4 || connector.closes != 1 || diag.Len() == 0 {
 		t.Fatalf("exit=%d closes=%d stderr=%q", got, connector.closes, diag.String())
 	}

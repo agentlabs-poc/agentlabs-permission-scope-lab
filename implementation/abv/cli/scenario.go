@@ -54,6 +54,54 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			return report(diag, err)
 		}
 		return 0
+	case "team":
+		teamAPI, ok := api.(application.TeamAPI)
+		if !ok || nilCapability(teamAPI) {
+			return report(diag, domain.ErrUnsupported)
+		}
+		fixture := domain.FixtureContext{Name: flags["--fixture-context"]}
+		switch positional[0] {
+		case "get":
+			team, err := teamAPI.GetTeam(ctx, area, fixture, positional[1])
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderTeam(out, diag, team); err != nil {
+				return 4
+			}
+		case "list":
+			filter := domain.TeamFilter{Name: flags["--name"]}
+			if has(flags, "--roots") {
+				root := ""
+				filter.ParentID = &root
+			} else if has(flags, "--parent") {
+				parent := flags["--parent"]
+				filter.ParentID = &parent
+			}
+			if code := teamBounds(flags, &filter.Offset, &filter.Limit, diag); code != 0 {
+				return code
+			}
+			page, err := teamAPI.ListTeams(ctx, area, fixture, filter)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderTeamPage(out, diag, page); err != nil {
+				return 4
+			}
+		case "members":
+			filter := domain.MemberFilter{TeamID: flags["--id"], HumanID: flags["--human"]}
+			if code := teamBounds(flags, &filter.Offset, &filter.Limit, diag); code != 0 {
+				return code
+			}
+			page, err := teamAPI.ListMembers(ctx, area, fixture, filter)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderMemberPage(out, diag, page); err != nil {
+				return 4
+			}
+		}
+		return 0
 	case "role":
 		switch positional[0] {
 		case "publish":

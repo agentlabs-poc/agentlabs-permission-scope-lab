@@ -22,7 +22,7 @@ func TestRunWalksHTTPDemoWithoutListening(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, diag strings.Builder
-	code := run([]string{"--db", dbPath, "--tenant", "acme", "--application", "hrms", "--human", "maya"}, &out, &diag)
+	code := run([]string{"--db", dbPath, "--tenant", "acme", "--application", "hrms", "--human", "fi7io4lvjqio"}, &out, &diag)
 	if code != 0 || diag.Len() != 0 {
 		t.Fatalf("code=%d stdout=%q stderr=%q", code, out.String(), diag.String())
 	}

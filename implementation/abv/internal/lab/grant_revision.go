@@ -17,11 +17,11 @@ func (a *GrantRevisionAdministration) CheckGrantRevisionPublication(ctx context.
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) || sourceAssignmentID != "A1" || proposed.GrantID != "G2" {
+	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) || sourceAssignmentID != "A1" || proposed.GrantID != "G2" {
 		return domain.ErrRejected
 	}
 	for _, membership := range snapshot.Memberships {
-		if membership == (domain.Membership{TeamID: "AssignmentAdmins", HumanID: "maya"}) {
+		if membership == (domain.Membership{TeamID: "fibggi2jv0n4", HumanID: "fi7io4lvjqio"}) {
 			return nil
 		}
 	}

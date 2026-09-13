@@ -73,11 +73,11 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 			"cert": {Kind: authmiddleware.SelectionExact, Value: cert},
 		}
 	}
-	allowed, err := request("acme", "hrms", "nutan", exact("FIN", "C17"))
+	allowed, err := request("acme", "hrms", "fi7io4lvjwu8", exact("FIN", "C17"))
 	if err != nil || allowed.Decision != authmiddleware.Allow || !reflect.DeepEqual(allowed.GrantIDs, []string{"G0", "G1", "G2"}) {
 		t.Fatalf("allowed=%+v err=%v", allowed, err)
 	}
-	authority, err := source.Load(t.Context(), authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "nutan"}, HumanID: "nutan"}}, Permission: lab.PayslipRead})
+	authority, err := source.Load(t.Context(), authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}}, Permission: lab.PayslipRead})
 	if err != nil || len(authority.Routes) != 1 {
 		t.Fatalf("authority=%+v err=%v", authority, err)
 	}
@@ -88,10 +88,10 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 		human    string
 		material authmiddleware.Material
 	}{
-		"wrong department":   {"nutan", exact("ENG", "C17")},
-		"wrong certificate":  {"nutan", exact("FIN", "C18")},
-		"all department":     {"nutan", authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionAll}, "cert": {Kind: authmiddleware.SelectionExact, Value: "C17"}}},
-		"missing membership": {"other", exact("FIN", "C17")},
+		"wrong department":   {"fi7io4lvjwu8", exact("ENG", "C17")},
+		"wrong certificate":  {"fi7io4lvjwu8", exact("FIN", "C18")},
+		"all department":     {"fi7io4lvjwu8", authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionAll}, "cert": {Kind: authmiddleware.SelectionExact, Value: "C17"}}},
+		"missing membership": {"fi7io4lvkfsw", exact("FIN", "C17")},
 	} {
 		t.Run(name, func(t *testing.T) {
 			got, err := request("acme", "hrms", tc.human, tc.material)
@@ -100,8 +100,8 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 			}
 		})
 	}
-	for _, boundary := range [][2]string{{"other", "hrms"}, {"acme", "other"}} {
-		got, err := request(boundary[0], boundary[1], "nutan", exact("FIN", "C17"))
+	for _, boundary := range [][2]string{{"fi7io4lvkfsw", "hrms"}, {"acme", "fi7io4lvkfsw"}} {
+		got, err := request(boundary[0], boundary[1], "fi7io4lvjwu8", exact("FIN", "C17"))
 		if err == nil || !reflect.DeepEqual(got, authmiddleware.Result{}) {
 			t.Fatalf("boundary %v: got=%+v err=%v", boundary, got, err)
 		}
@@ -128,7 +128,7 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	defer source.Close()
 	evaluator, _ := authmiddleware.New(source, &fixedClock{now})
 	request := authmiddleware.Request{
-		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "nutan"}, HumanID: "nutan"}},
+		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}},
 		Permission: lab.PayslipRead,
 		Material:   authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionExact, Value: "FIN"}, "cert": {Kind: authmiddleware.SelectionExact, Value: "C17"}},
 	}
@@ -146,7 +146,7 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	}
 	setAssignment := func(status string) {
 		t.Helper()
-		raw := `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"Team1"},"status":"` + status + `"}`
+		raw := `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"` + status + `"}`
 		if _, err := db.Exec(`UPDATE assignments SET status=?,canonical_json=? WHERE assignment_id='A1'`, status, raw); err != nil {
 			t.Fatal(err)
 		}
@@ -202,7 +202,7 @@ func TestSQLiteAuthoritySourceSeesProtectedDescendantStatusChanges(t *testing.T)
 	defer source.Close()
 	evaluator, _ := authmiddleware.New(source, &fixedClock{now})
 	request := authmiddleware.Request{
-		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "nutan"}, HumanID: "nutan"}},
+		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}},
 		Permission: lab.PayslipRead,
 		Material:   authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionExact, Value: "FIN"}, "cert": {Kind: authmiddleware.SelectionExact, Value: "C17"}},
 	}
@@ -262,7 +262,7 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 		t.Fatal(err)
 	}
 	_ = db.Close()
-	query := authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "nutan"}, HumanID: "nutan"}}, Permission: lab.PayslipRead}
+	query := authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}}, Permission: lab.PayslipRead}
 	got, err := source.Load(t.Context(), query)
 	if err == nil || !reflect.DeepEqual(got, authmiddleware.Authority{}) {
 		t.Fatalf("got=%+v err=%v", got, err)

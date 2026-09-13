@@ -27,7 +27,7 @@ func TestResolveHumanFindsOnlyDirectTeamHoldings(t *testing.T) {
 		t.Fatalf("got %#v, %v; want %#v", got, err, want)
 	}
 
-	f.Snapshot.Memberships = []domain.Membership{{TeamID: "Team2", HumanID: "nutan"}}
+	f.Snapshot.Memberships = []domain.Membership{{TeamID: "fibggi2juxhc", HumanID: "fi7io4lvjwu8"}}
 	got, err = lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
 	if err != nil || len(got) != 0 {
 		t.Fatalf("nonmember got %#v, %v; want empty", got, err)
@@ -37,7 +37,7 @@ func TestResolveHumanFindsOnlyDirectTeamHoldings(t *testing.T) {
 func TestResolveHumanFiltersPermissionAndSortsByHoldingAssignment(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	f := lab.TeamFINC17(area)
-	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "RootTeam", HumanID: "maya"})
+	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "fibggi2jur5s", HumanID: "fi7io4lvjqio"})
 
 	got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
 	if err != nil || len(got) != 2 || got[0].AssignmentIDs[len(got[0].AssignmentIDs)-1] != "A0" || got[1].AssignmentIDs[len(got[1].AssignmentIDs)-1] != "A1" {
@@ -47,7 +47,7 @@ func TestResolveHumanFiltersPermissionAndSortsByHoldingAssignment(t *testing.T) 
 	if err != nil || len(got) != 1 || got[0].GrantID != "G0" {
 		t.Fatalf("permission selection got %#v, %v", got, err)
 	}
-	f.Snapshot.Memberships = []domain.Membership{{TeamID: "Team1", HumanID: "maya"}}
+	f.Snapshot.Memberships = []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}
 	got, err = lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipDelete, time.Time{})
 	if err != nil || len(got) != 0 {
 		t.Fatalf("mismatched permission got %#v, %v; want empty", got, err)
@@ -98,7 +98,7 @@ func TestResolveHumanSkipsOnlyInactiveRoutes(t *testing.T) {
 func TestResolveHumanKeepsValidRouteWhenAnotherIsInactive(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	f := lab.TeamFINC17(area)
-	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "RootTeam", HumanID: "maya"})
+	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "fibggi2jur5s", HumanID: "fi7io4lvjqio"})
 	a := f.Snapshot.Assignments["A1"]
 	a.Status = "disabled"
 	f.Snapshot.Assignments["A1"] = a
@@ -122,7 +122,7 @@ func TestResolveHumanFailsClosedForInvalidEvidence(t *testing.T) {
 			f.Snapshot.Assignments["A1"] = a
 		}, domain.ErrRejected},
 		{"cycle", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["RootTeam"] = domain.Team{ID: "RootTeam", ParentID: "Team1"}
+			f.Snapshot.Teams["fibggi2jur5s"] = domain.Team{ID: "fibggi2jur5s", Name: "RootTeam", ParentID: "fibggi2juubk"}
 		}, domain.ErrRejected},
 		{"duplicate support", func(f *lab.TeamFINC17Case) {
 			a := f.Snapshot.Assignments["A1"]
@@ -154,7 +154,7 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 	wrongArea := f.Snapshot
 	wrongArea.Area = otherArea
 	badIdentity := f.Issuer
-	badIdentity.Actor.ID = "other"
+	badIdentity.Actor.ID = "fi7io4lvkfsw"
 
 	for _, tc := range []struct {
 		name       string
@@ -181,11 +181,11 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 		})
 	}
 
-	f.Snapshot.Assignments["AU"] = domain.Assignment{Version: "1", ID: "AU", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "maya"}, Status: "enabled"}
+	f.Snapshot.Assignments["AU"] = domain.Assignment{Version: "1", ID: "AU", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}, Status: "enabled"}
 	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); !errors.Is(err, domain.ErrUnsupported) || len(got) != 0 {
 		t.Fatalf("direct assignment got %#v, %v", got, err)
 	}
-	f.Snapshot.Assignments["AU"] = domain.Assignment{Version: "1", ID: "AU", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "other"}, Status: "enabled"}
+	f.Snapshot.Assignments["AU"] = domain.Assignment{Version: "1", ID: "AU", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvkfsw"}, Status: "enabled"}
 	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); err != nil || len(got) != 1 {
 		t.Fatalf("other user's assignment became a candidate: %#v, %v", got, err)
 	}
@@ -277,7 +277,7 @@ func TestResolveHumanCancellationWinsOverEmptySuccess(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	t.Run("inactive final candidate", func(t *testing.T) {
 		f := lab.TeamFINC17(area)
-		f.Snapshot.Memberships = []domain.Membership{{TeamID: "Team1", HumanID: "maya"}}
+		f.Snapshot.Memberships = []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}
 		delete(f.Snapshot.Assignments, "A0")
 		ctx := &cancelOnErrCall{Context: context.Background(), cancelAt: 4}
 		got, err := lineage.ResolveHuman(ctx, f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})

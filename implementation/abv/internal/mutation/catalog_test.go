@@ -32,7 +32,7 @@ func (c fixedClock) Now() time.Time { return c.now }
 func TestRegisterCatalogDefinitionsPersistsHostileAdminCannotForgeEvidence(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	app, _ := domain.NewApplication("hrms")
-	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvksg0"}, HumanID: "fi7io4lvksg0"}
 	snapshot := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 	path := t.TempDir() + "/authority.db"
 	provider, err := sqlite.CreateFixture(t.Context(), path, []storage.Snapshot{snapshot})
@@ -93,7 +93,7 @@ func TestRegisterCatalogDefinitionsPersistsHostileAdminCannotForgeEvidence(t *te
 
 func TestRegisterScopeDoesNotMutateItsInput(t *testing.T) {
 	app, _ := domain.NewApplication("hrms")
-	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvksg0"}, HumanID: "fi7io4lvksg0"}
 	provider := &catalogFake{catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}}}
 	admin := catalogAdmin{
 		scope: func(_ context.Context, _ domain.Application, _ domain.Catalog, _ domain.Identity, d domain.ScopeDefinition, _ time.Time) error {
@@ -133,7 +133,7 @@ func (p *catalogFake) ReadCatalog(_ context.Context, _ domain.Application, cb fu
 func (p *catalogFake) UpdateCatalog(_ context.Context, _ domain.Application, cb func(domain.Catalog) (storage.CatalogWriteSet, error)) error {
 	c := cloneCatalog(p.catalog)
 	if p.wrongApp {
-		c.ApplicationID = "other"
+		c.ApplicationID = "fi7io4lvkfsw"
 	}
 	w, err := cb(c)
 	if err != nil {
@@ -169,7 +169,7 @@ func (*noCatalogProvider) Close() error { return nil }
 
 func TestRegisterPermissionRejectsFailuresWithoutResultOrWrite(t *testing.T) {
 	app, _ := domain.NewApplication("hrms")
-	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "publisher"}, HumanID: "publisher"}
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvksg0"}, HumanID: "fi7io4lvksg0"}
 	definition := domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true}
 	base := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"dept": {Key: "dept"}}}
 	approve := catalogAdmin{permission: func(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, time.Time) error {
@@ -196,7 +196,7 @@ func TestRegisterPermissionRejectsFailuresWithoutResultOrWrite(t *testing.T) {
 		{"no catalog provider", &noCatalogProvider{}, approve, t.Context(), app, identity, definition, domain.ErrUnsupported},
 		{"invalid application", &catalogFake{catalog: cloneCatalog(base)}, approve, t.Context(), domain.Application{}, identity, definition, domain.ErrMalformed},
 		{"malformed identity", &catalogFake{catalog: cloneCatalog(base)}, approve, t.Context(), app, domain.Identity{}, definition, domain.ErrMalformed},
-		{"unsupported identity", &catalogFake{catalog: cloneCatalog(base)}, approve, t.Context(), app, domain.Identity{Version: "1", Actor: domain.Actor{Type: "service", ID: "publisher"}, HumanID: "publisher"}, definition, domain.ErrUnsupported},
+		{"unsupported identity", &catalogFake{catalog: cloneCatalog(base)}, approve, t.Context(), app, domain.Identity{Version: "1", Actor: domain.Actor{Type: "service", ID: "fi7io4lvksg0"}, HumanID: "fi7io4lvksg0"}, definition, domain.ErrUnsupported},
 		{"wrong application evidence", &catalogFake{catalog: cloneCatalog(base), wrongApp: true}, approve, t.Context(), app, identity, definition, domain.ErrRejected},
 		{"wrong publisher", &catalogFake{catalog: cloneCatalog(base)}, catalogAdmin{permission: func(context.Context, domain.Application, domain.Catalog, domain.Identity, domain.PermissionDefinition, time.Time) error {
 			return domain.ErrRejected

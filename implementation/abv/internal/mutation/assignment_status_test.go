@@ -92,16 +92,16 @@ func TestSetAssignmentStatusSQLiteInspectsEveryForkAndDisabledBridge(t *testing.
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
 	add := func(id, grant, parentGrant, team, parentTeam, status string) {
-		fixture.Snapshot.Teams[team] = domain.Team{ID: team, ParentID: parentTeam}
+		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
 		fixture.Snapshot.Controls[grant] = domain.GrantControl{Version: "1", ID: grant, Status: "enabled"}
 		fixture.Snapshot.Contents[domain.GrantKey{ID: grant, Revision: 1}] = domain.GrantContent{Version: "1", GrantID: grant, Revision: 1, ParentGrantID: parentGrant, Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 		fixture.Snapshot.Assignments[id] = domain.Assignment{Version: "1", ID: id, GrantID: grant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: team}, Status: status}
 	}
-	add("A2", "G2", "G1", "Team2", "Team1", "disabled")
-	add("A3", "G3", "G2", "Team3", "Team2", "enabled")
-	add("A4", "G4", "G1", "Team4", "Team1", "enabled")
+	add("A2", "G2", "G1", "fibggi2juxhc", "fibggi2juubk", "disabled")
+	add("A3", "G3", "G2", "fidfcosw0iyo", "fibggi2juxhc", "enabled")
+	add("A4", "G4", "G1", "fidfcosw0m4g", "fibggi2juubk", "enabled")
 	// Same grant, but no parent-team holding relationship to A1.
-	add("A5", "G2", "G1", "OtherTeam", "RootTeam", "enabled")
+	add("A5", "G2", "G1", "ficfwlfpxlhc", "fibggi2jur5s", "enabled")
 	provider, _ := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
 	defer provider.Close()
 	service, _ := mutation.New(provider, assignmentStatusAdministration{}, &fixedClock{now: time.Now()})
@@ -147,7 +147,7 @@ func TestSetAssignmentStatusRestoreUsesAdoptedRevisionAndCurrentHolding(t *testi
 			f.Snapshot.Assignments["A1"] = a
 		}, want: domain.ErrRejected},
 		{name: "changed parent without holding", mutate: func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["Team2"] = domain.Team{ID: "Team2", ParentID: "RootTeam"}
+			f.Snapshot.Teams["fibggi2juxhc"] = domain.Team{ID: "fibggi2juxhc", Name: "Team2", ParentID: "fibggi2jur5s"}
 		}, want: domain.ErrRejected},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -187,7 +187,7 @@ func TestSetAssignmentStatusRestoreUsesAdoptedRevisionAndCurrentHolding(t *testi
 
 func TestSetAssignmentStatusGateCancellationConflictAndBoundaries(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
-	other, _ := domain.NewArea("other", "hrms")
+	other, _ := domain.NewArea("fi7io4lvkfsw", "hrms")
 	fixture := lab.TeamFINC17(area)
 	provider := &failingCommitProvider{snapshot: fixture.Snapshot}
 	rejecting, _ := mutation.New(provider, assignmentStatusAdministration{check: func(storage.Snapshot, domain.Identity, domain.Assignment) error { return domain.ErrRejected }}, &fixedClock{now: time.Now()})
@@ -220,7 +220,7 @@ func TestSetAssignmentStatusGateCancellationConflictAndBoundaries(t *testing.T) 
 	}
 	userFixture := lab.TeamFINC17(area)
 	user := userFixture.Snapshot.Assignments["A1"]
-	user.Recipient = domain.Recipient{Type: "user", ID: "maya"}
+	user.Recipient = domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}
 	userFixture.Snapshot.Assignments["A1"] = user
 	service, _ = mutation.New(&failingCommitProvider{snapshot: userFixture.Snapshot}, assignmentStatusAdministration{}, &fixedClock{now: time.Now()})
 	if got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A1", "disabled"); !errors.Is(err, domain.ErrUnsupported) || got != (domain.Assignment{}) {
@@ -300,10 +300,10 @@ func TestSetAssignmentStatusRestoreRechecksParentAndChildExpiry(t *testing.T) {
 func TestSetAssignmentStatusRejectsDepthAndSnapshotOverflowWithoutWrite(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	parentTeam, parentGrant := "Team1", "G1"
+	parentTeam, parentGrant := "fibggi2juubk", "G1"
 	for i := 2; i <= 258; i++ {
 		team, grant, assignment := fmt.Sprintf("Team%d", i), fmt.Sprintf("G%d", i), fmt.Sprintf("A%d", i)
-		fixture.Snapshot.Teams[team] = domain.Team{ID: team, ParentID: parentTeam}
+		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
 		fixture.Snapshot.Controls[grant] = domain.GrantControl{Version: "1", ID: grant, Status: "enabled"}
 		fixture.Snapshot.Contents[domain.GrantKey{ID: grant, Revision: 1}] = domain.GrantContent{Version: "1", GrantID: grant, Revision: 1, ParentGrantID: parentGrant, Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 		fixture.Snapshot.Assignments[assignment] = domain.Assignment{Version: "1", ID: assignment, GrantID: grant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: team}, Status: "disabled"}

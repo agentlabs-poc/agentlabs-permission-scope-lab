@@ -40,7 +40,7 @@ func TestGrantRevisionAdministrationRequiresExactBoundedPremiseAndMembership(t *
 	}
 	for _, mutate := range []func(*abv.Evidence, *domain.Identity, *string, *domain.GrantContent){
 		func(s *abv.Evidence, _ *domain.Identity, _ *string, _ *domain.GrantContent) {
-			other, _ := domain.NewArea("other", "hrms")
+			other, _ := domain.NewArea("fi7io4lvkfsw", "hrms")
 			s.Area = other
 		},
 		func(_ *abv.Evidence, i *domain.Identity, _ *string, _ *domain.GrantContent) { i.Version = "2" },
@@ -72,7 +72,7 @@ func TestGrantPublicationUsesMarkedFixtureAndPreservesAssignment(t *testing.T) {
 		t.Fatal(err)
 	}
 	assignment := TeamFINC17(area).Proposed
-	raw := []byte(`{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}`)
+	raw := []byte(`{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`)
 	if _, err = api.Assign(t.Context(), area, domain.FixtureContext{Name: labFixtureContext}, raw); err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestGrantPublicationUsesMarkedFixtureAndPreservesAssignment(t *testing.T) {
 			t.Fatalf("unexpected publish: %+v", tc)
 		}
 	}
-	if _, err := publication.PublishGrantRevision(t.Context(), area, domain.FixtureContext{Name: grantRevisionFixtureContext}, "A1", []byte(`{"version":"1","grant_id":"G2","grant_id":"other","revision":3,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`)); !errors.Is(err, domain.ErrMalformed) {
+	if _, err := publication.PublishGrantRevision(t.Context(), area, domain.FixtureContext{Name: grantRevisionFixtureContext}, "A1", []byte(`{"version":"1","grant_id":"G2","grant_id":"fi7io4lvkfsw","revision":3,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`)); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatalf("malformed publication error=%v", err)
 	}
 }
@@ -139,7 +139,7 @@ func TestGrantPublicationRejectsMissingMembershipAndUnmarkedDatabase(t *testing.
 				t.Fatal(err)
 			}
 			db, _ := sql.Open("sqlite", "file:"+path)
-			_, err := db.Exec(`DELETE FROM memberships WHERE team_id='AssignmentAdmins' AND human_id='maya'`)
+			_, err := db.Exec(`DELETE FROM abv_l1_records WHERE key2='membership' AND key3='fibggi2jv0n4' AND key4='fi7io4lvjqio'`)
 			_ = db.Close()
 			if err != nil {
 				t.Fatal(err)

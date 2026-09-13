@@ -21,10 +21,10 @@ func (a *AssignmentStatusAdministration) CheckAssignmentStatus(ctx context.Conte
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}) || (proposed.Status != "enabled" && proposed.Status != "disabled") {
+	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) || (proposed.Status != "enabled" && proposed.Status != "disabled") {
 		return domain.ErrRejected
 	}
-	wanted := proposed.ID == "A1" && proposed.GrantID == "G1" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "Team1"}) || proposed.ID == "A2" && proposed.GrantID == "G2" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "Team2"})
+	wanted := proposed.ID == "A1" && proposed.GrantID == "G1" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "fibggi2juubk"}) || proposed.ID == "A2" && proposed.GrantID == "G2" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "fibggi2juxhc"})
 	if !wanted {
 		return domain.ErrRejected
 	}
@@ -37,7 +37,7 @@ func (a *AssignmentStatusAdministration) CheckAssignmentStatus(ctx context.Conte
 		return domain.ErrRejected
 	}
 	for _, membership := range snapshot.Memberships {
-		if membership == (domain.Membership{TeamID: "AssignmentAdmins", HumanID: "maya"}) {
+		if membership == (domain.Membership{TeamID: "fibggi2jv0n4", HumanID: "fi7io4lvjqio"}) {
 			return nil
 		}
 	}

@@ -20,7 +20,7 @@ func (c clock) Now() time.Time { return c.now }
 type externalAdministration struct{ area domain.Area }
 
 func (a externalAdministration) CheckAssignment(_ context.Context, evidence abv.Evidence, identity domain.Identity, proposed domain.Assignment, _ time.Time) error {
-	if evidence.Area == a.area && identity.Actor.Type == "user" && identity.Actor.ID == "maya" && identity.HumanID == "maya" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "Team2"}) {
+	if evidence.Area == a.area && identity.Actor.Type == "user" && identity.Actor.ID == "fi7io4lvjqio" && identity.HumanID == "fi7io4lvjqio" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "fibggi2juxhc"}) {
 		return nil
 	}
 	return domain.ErrRejected
@@ -119,8 +119,8 @@ func TestInspectCarriesAreaForEverySupportedKind(t *testing.T) {
 		{kind: "role", id: "fi9jvxobqsxs"},
 		{kind: "grant", id: "G1", canonical: true},
 		{kind: "assignment", id: "A1", canonical: true},
-		{kind: "team", id: "Team1"},
-		{kind: "membership", id: "maya"},
+		{kind: "team", id: "fibggi2juubk"},
+		{kind: "membership", id: "fi7io4lvjqio"},
 	} {
 		t.Run(test.kind, func(t *testing.T) {
 			record, err := facade.Inspect(t.Context(), area, test.kind, test.id)

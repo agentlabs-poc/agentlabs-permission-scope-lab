@@ -51,7 +51,7 @@ func (p *roleProvider) Update(_ context.Context, _ domain.Area, cb func(storage.
 
 func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
-	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 	role := domain.RoleContent{Name: "payslip-reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
 	snap := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
 	p := &roleProvider{snapshot: snap}
@@ -75,7 +75,7 @@ func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 
 func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
-	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 	role := domain.RoleContent{Name: "payslip-reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
 	// A supplied id is only legal when it names a role that already exists.
 	existing := domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
@@ -93,7 +93,7 @@ func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 			x := base
 			x.Roles = map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 2}: existing}
 			return x
-		}(), roleAdmin{}, id, existing, nil, domain.ErrConflict}, {"invented id", base, roleAdmin{}, id, existing, nil, domain.ErrNotFound}, {"wrong area", func() storage.Snapshot { x := base; x.Area, _ = domain.NewArea("other", "hrms"); return x }(), roleAdmin{}, id, role, nil, domain.ErrRejected}, {"commit", base, roleAdmin{}, id, role, domain.ErrUnavailable, domain.ErrUnavailable},
+		}(), roleAdmin{}, id, existing, nil, domain.ErrConflict}, {"invented id", base, roleAdmin{}, id, existing, nil, domain.ErrNotFound}, {"wrong area", func() storage.Snapshot { x := base; x.Area, _ = domain.NewArea("fi7io4lvkfsw", "hrms"); return x }(), roleAdmin{}, id, role, nil, domain.ErrRejected}, {"commit", base, roleAdmin{}, id, role, domain.ErrUnavailable, domain.ErrUnavailable},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			p := &roleProvider{snapshot: tc.snap, err: tc.perr}
@@ -108,7 +108,7 @@ func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 
 func TestPublishRoleCancellationInsideAdministrationDoesNotWrite(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
-	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 	p := &roleProvider{snapshot: storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}}
 	ctx, cancel := context.WithCancel(t.Context())
 	admin := roleAdmin{check: func(storage.Snapshot, domain.Identity, domain.RoleContent) error { cancel(); return nil }}
@@ -162,7 +162,7 @@ func roleReadFixture(t *testing.T, readErr error) (*Service, domain.Area, domain
 	if err != nil {
 		t.Fatal(err)
 	}
-	return service, area, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	return service, area, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 }
 
 // A role is a family of revisions, and the default listing says so.
@@ -287,7 +287,7 @@ func TestATenantCannotReviseAnApplicationRole(t *testing.T) {
 	}
 	p := &roleProvider{snapshot: snap}
 	s, _ := New(p, roleAdmin{}, fixedClock{})
-	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 
 	shipped := domain.RoleContent{ID: "aaaaaaaaaaaa", Name: "Viewer", Revision: 2, Permissions: []string{read}}
 	if _, err := s.PublishRole(t.Context(), area, identity, shipped); !errors.Is(err, domain.ErrRejected) {
@@ -316,7 +316,7 @@ func TestListRolesReturnsBothKindsAndNarrows(t *testing.T) {
 		},
 	}
 	s, _ := New(&roleReader{snapshot: snap}, roleAdmin{}, fixedClock{})
-	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 
 	both, err := s.ListRoles(t.Context(), area, identity, domain.RoleFilter{})
 	if err != nil || both.Total != 2 {

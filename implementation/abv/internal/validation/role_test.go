@@ -24,7 +24,7 @@ func TestCheckRolePublication(t *testing.T) {
 		want    error
 	}{
 		{"area", domain.Area{}, catalog, valid, domain.ErrMalformed},
-		{"catalog", area, domain.Catalog{ApplicationID: "other", Permissions: catalog.Permissions}, valid, domain.ErrRejected},
+		{"catalog", area, domain.Catalog{ApplicationID: "fi7io4lvkfsw", Permissions: catalog.Permissions}, valid, domain.ErrRejected},
 		{"blank id", area, catalog, domain.RoleContent{Name: "payslip-reader", ID: " ", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}, domain.ErrMalformed},
 		{"wildcard id", area, catalog, domain.RoleContent{Name: "payslip-reader", ID: "r*", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}, domain.ErrMalformed},
 		{"utf8 id", area, catalog, domain.RoleContent{Name: "payslip-reader", ID: badUTF8, Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}, domain.ErrMalformed},

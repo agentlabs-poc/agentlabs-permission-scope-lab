@@ -41,7 +41,7 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 		t.Fatal(err)
 	}
 	store := NewStore(DefaultRecords())
-	handler, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "maya"))
+	handler, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/departments/FIN/certificates", "", http.StatusOK, `"certificate_id":"C17"`, `"certificate_id":"C19"`)
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/departments/FIN/certificates", "", http.StatusOK, `!"department_id":"ENG"`, `!"title":"ENG confidential"`)
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/certificates", "", http.StatusForbidden, `"decision":"deny"`)
-	nutan, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "nutan"))
+	nutan, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "fi7io4lvjwu8"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,7 +113,7 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = source.Close() })
-	handler, err := NewHandler(NewStore(DefaultRecords()), evaluatorFor(t, source), TrustedIdentity("acme", "hrms", "nutan"))
+	handler, err := NewHandler(NewStore(DefaultRecords()), evaluatorFor(t, source), TrustedIdentity("acme", "hrms", "fi7io4lvjwu8"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,19 +148,19 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 	store := NewStore(DefaultRecords())
 	evaluator := evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
-		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "maya", Permission: lab.PayslipWrite,
+		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipWrite,
 		GrantIDs: []string{"G1"}, Predicates: []authmiddleware.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}},
 	}}})
-	handler, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "maya"))
+	handler, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertResponse(t, handler, http.MethodPut, "/api/v1/acme/certificates/C18", `{"department_id":"FIN","title":"stolen"}`, http.StatusNotFound, `!stolen`)
 	assertResponse(t, handler, http.MethodPut, "/api/v1/acme/certificates/C17", `{"department_id":"FIN","title":9}`, http.StatusBadRequest, `!FIN annual`)
 	assertResponse(t, handler, http.MethodPut, "/api/v1/acme/certificates/C17?department_id=FIN", `{"title":"query fallback"}`, http.StatusBadRequest, `!query fallback`)
-	assertResponse(t, handler, http.MethodPut, "/api/v1/acme/certificates/C17", `{"department_id":"FIN","title":"forged identity","human_id":"maya"}`, http.StatusBadRequest, `!forged identity`)
+	assertResponse(t, handler, http.MethodPut, "/api/v1/acme/certificates/C17", `{"department_id":"FIN","title":"forged identity","human_id":"fi7io4lvjqio"}`, http.StatusBadRequest, `!forged identity`)
 
-	wrong, err := NewHandler(store, evaluator, TrustedIdentity("other", "hrms", "maya"))
+	wrong, err := NewHandler(store, evaluator, TrustedIdentity("fi7io4lvkfsw", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,17 +173,17 @@ func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 	store := NewStore(DefaultRecords())
 	self := staticSource{routes: []authmiddleware.Route{{
-		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "maya", Permission: lab.PayslipRead,
+		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipRead,
 		GrantIDs: []string{"self"}, Predicates: []authmiddleware.Predicate{{Key: "user", Value: "$self", SourceGrantID: "self"}},
 	}}}
-	handler, err := NewHandler(store, evaluatorFor(t, self), TrustedIdentity("acme", "hrms", "maya"))
+	handler, err := NewHandler(store, evaluatorFor(t, self), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C17", "", http.StatusOK, `"employee_id":"maya"`)
-	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C19", "", http.StatusForbidden, `!"employee_id":"nutan"`)
+	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C17", "", http.StatusOK, `"employee_id":"fi7io4lvjqio"`)
+	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C19", "", http.StatusForbidden, `!"employee_id":"fi7io4lvjwu8"`)
 
-	timedOut, err := NewHandler(store, evaluatorFor(t, staticSource{err: context.DeadlineExceeded}), TrustedIdentity("acme", "hrms", "maya"))
+	timedOut, err := NewHandler(store, evaluatorFor(t, staticSource{err: context.DeadlineExceeded}), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 
 	evaluationFailure, err := NewHandler(store, evaluatorFor(t, staticSource{err: &authmiddleware.EvaluationError{
 		Version: "1", Code: "AUTHORITY_UNAVAILABLE", Message: "Authorization is unavailable.", MessageReason: "Authority could not be loaded.",
-	}}), TrustedIdentity("acme", "hrms", "maya"))
+	}}), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,8 +207,8 @@ func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 func TestHTTPDemoAllDepartmentGrantReturnsWholeTenantCollection(t *testing.T) {
 	store := NewStore(DefaultRecords())
 	handler, err := NewHandler(store, evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
-		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "maya", Permission: lab.PayslipRead, GrantIDs: []string{"all"},
-	}}}), TrustedIdentity("acme", "hrms", "maya"))
+		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipRead, GrantIDs: []string{"all"},
+	}}}), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
