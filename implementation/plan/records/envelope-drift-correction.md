@@ -232,6 +232,33 @@ PR #3 recommended *against* this change, on the grounds that it bought only
 tidiness and cost a noun slot. That reasoning was correct at the time and is now
 superseded: it buys correctness.
 
+### And the duplication is gone, because the rule is now enforced
+
+The layout above stored `hrms` in both `key3` and `key4` — the application, and
+the identifier's first noun — because nothing *required* those to agree. The
+permission document had called it settled from the start, but the code accepted
+anything, so storage had to keep both in case an author disagreed.
+
+**Registration now rejects an identifier whose first noun is not the
+application.** That makes them one fact, stored once:
+
+```
+application hrms:
+  hrms:employee:certificate::read   ->  key3=hrms key4=employee key5=certificate key10=read
+  billing:invoice::read             ->  rejected
+  reporting:ledger:entry::export    ->  rejected
+```
+
+`key3` is segment one; `key4`…`key9` are segments two to seven. **The seventh
+noun slot comes back** — the earlier loss was a consequence of the duplication,
+not of the decision.
+
+The cost, recorded: identifier naming becomes a rule, and the `agentlabs-auth`
+registry's `<namespace>:<resource-path>:<action>` has no requirement that its
+namespace equals an application id. Adopting there means the two matching, or
+renaming identifiers — permanent under Q-126. Accepted, because the alternative
+is the same fact in two slots, explained to every reader of the store forever.
+
 ---
 
 ## 7 · Shape of the work

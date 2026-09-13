@@ -390,7 +390,7 @@ func TestPermissionsAreL1Records(t *testing.T) {
 		SELECT tenant_id, key1, key2, key3, key4, key5, key6, key7, key10, value
 		  FROM abv_l1_records
 		 WHERE tenant_id='' AND key1='abv' AND key2='permission' AND key3='hrms'
-		   AND key4='hrms' AND key5='employee'`).
+		   AND key4='employee' AND key5='certificate'`).
 		Scan(&tenant, &k1, &k2, &k3, &k4, &k5, &k6, &k7, &k10, &value); err != nil {
 		t.Fatalf("record not found in abv_l1_records: %v", err)
 	}
@@ -401,13 +401,13 @@ func TestPermissionsAreL1Records(t *testing.T) {
 		want := map[string]string{
 			"tenant_id": "", // '' not NULL, so the identity key stays usable
 			"key1": "abv", "key2": "permission",
-			// key3 is the application, written from the application id, in every
-			// record type. Without it the envelope could not drop application_id:
-			// two applications registering one identifier would collide.
+			// key3 is the application AND the identifier's first segment — the
+			// same fact, stored once. A permission whose first noun is not the
+			// application is rejected at registration, which is what makes that
+			// true rather than merely hoped for.
 			"key3": "hrms",
-			// The noun path starts at key4 and keeps its leading noun, so the
-			// identifier renders exactly as its author wrote it.
-			"key4": "hrms", "key5": "employee", "key6": "certificate",
+			// Segments two onward. The first is not repeated here.
+			"key4": "employee", "key5": "certificate", "key6": "",
 			"key7": "",      // padding is contiguous
 			"key10": "read", // the verb is pinned to the last slot, never floating
 			"value": `{"active":true}`,

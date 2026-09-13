@@ -63,3 +63,26 @@ func TestScopeRegistrationRejectsAnyWildcard(t *testing.T) {
 		t.Fatalf("valid key rejected: %v", err)
 	}
 }
+
+// A permission's first noun IS the application. An identifier starting with
+// anything else is canonically incorrect: key3 holds that one fact for every
+// record type, and an identifier disagreeing with it would mean the row and the
+// string it renders to say different things.
+func TestPermissionMustStartWithItsApplication(t *testing.T) {
+	catalog := domain.Catalog{
+		ApplicationID: "hrms",
+		Permissions:   map[string]domain.PermissionDefinition{},
+		Scopes:        map[string]domain.ScopeDefinition{},
+	}
+	for _, id := range []string{"hrms::read", "hrms:payroll::read", "hrms:payroll:payslip::write"} {
+		if err := CheckPermissionRegistration(catalog, domain.PermissionDefinition{ID: id, Active: true}); err != nil {
+			t.Fatalf("rejected an identifier that starts with its application: %q -> %v", id, err)
+		}
+	}
+	for _, id := range []string{"billing:invoice::read", "reporting:ledger:entry::export", "HRMS:payroll::read"} {
+		err := CheckPermissionRegistration(catalog, domain.PermissionDefinition{ID: id, Active: true})
+		if !errors.Is(err, domain.ErrRejected) {
+			t.Fatalf("accepted an identifier that does not start with its application: %q -> %v", id, err)
+		}
+	}
+}

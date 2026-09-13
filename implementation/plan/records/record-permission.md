@@ -45,8 +45,8 @@ abv.permission:hrms:employee:certificate::read
  │      └─ record type · key2                └─ verb · key10
  └──────── domain namespace · key1
 
-                 key3 holds the application, written from the
-                 application id — it is not part of the identifier
+                 key3 holds segment 1, which IS the application —
+                 enforced at registration, so the two never disagree
 ```
 
 `.` separates the domain namespace from the record type. `:` separates the
@@ -60,64 +60,76 @@ escaping — see `20-storage-encoding.md`.
 ### Canonical key layout
 
 The identifier is **decomposed across key slots**, never stored as one string.
-The application occupies `key3`. The noun path runs left to right from `key4`; the
-verb is pinned to `key10` so it never moves regardless of how deep the path is.
+The noun path runs left to right from `key3`, whose first segment is the
+application; the verb is pinned to `key10` so it never moves regardless of how
+deep the path is.
 
 | Slot | Holds | Example |
 |---|---|---|
 | `key1` | domain namespace | `abv` |
 | `key2` | record type | `permission` |
-| `key3` | **the application**, written from the application id | `hrms` |
-| `key4` | noun 1 | `hrms` |
-| `key5` | noun 2 | `employee` |
-| `key6` | noun 3 | `certificate` |
-| `key7` … `key9` | nouns 4 – 6, unused → `''` | `''` |
+| `key3` | **the application — and noun 1**, the same fact stored once | `hrms` |
+| `key4` | noun 2 | `employee` |
+| `key5` | noun 3 | `certificate` |
+| `key6` … `key9` | nouns 4 – 7, unused → `''` | `''` |
 | `key10` | **verb — always this slot** | `read` |
 
 
-**Six slots for nouns.** Four of ten are spoken for: two by the canonical type
-path, one by the application, one reserved for the verb.
+**Seven noun segments.** `key3` carries the first — which is the application —
+and `key4`…`key9` carry the rest. Three of ten slots are spoken for: two by the
+canonical type path, one reserved for the verb.
 
-**`key3` is the application, written from the application id — settled.** It is
-no longer the leading noun, and no longer a convention.
+**`key3` is the application, and it is also the identifier's first noun.** Those
+are the same fact, and it is stored once.
 
 The envelope dropped its `application_id` column, and that forced the question:
 without it, two applications registering `billing:invoice::read` would produce an
 identical key path and collide. Scope and role already wrote the application into
 `key3`; permissions now do the same, and the noun path starts at `key4`.
 
-**The leading noun stays in the noun path.** `hrms:employee:certificate::read`
-becomes `key3=hrms | key4=hrms | key5=employee | key6=certificate | key10=read`.
-The application appears twice, deliberately: the identifier renders exactly as its
-author wrote it, and nothing assumes the two agree.
+**A permission's first noun IS the application, and registration enforces it.**
+An identifier that starts with anything else is canonically incorrect and is
+rejected:
 
-**Six noun slots, down from seven.** Ten slots less the namespace, the record
-type, the application and the reserved verb. The deepest identifier in this
-document uses five.
+```
+application hrms:
+  hrms:employee:certificate::read      registered
+  billing:invoice::read                rejected
+  reporting:ledger:entry::export       rejected
+```
 
-*Previously, and no longer true:* `key3` held the leading noun, and nothing
-checked that it was the application. A scope record writes `application_id` into `key3` by
+So `hrms:employee:certificate::read` becomes
+`key3=hrms | key4=employee | key5=certificate | key10=read`. Nothing is
+duplicated: `key3` is both the application and segment one. Rendering prefixes
+`key3`; parsing checks the first segment against the application.
+
+The document said this was settled from the start — *the leading noun is the
+application name* — but nothing enforced it, so storage had to keep the segment
+twice in case an author disagreed. Enforcing the rule removes the duplication and
+returns the seventh noun slot. A scope record writes `application_id` into `key3` by
 construction; a permission puts whatever noun its author wrote first, so the two
 record types do not give the slot one meaning:
 
 ```
-key2         key3   key4     key5      key6         key10
-permission   hrms   hrms     employee  certificate  read
-permission   hrms   billing  invoice                read     ← same application,
-                                                               different namespace
+key2         key3  key4      key5         key10
+permission   hrms  employee  certificate  read
+permission   hrms  payroll   payslip      write
+role         hrms  …
+scope        hrms  dept
 ```
 
 `key3` answers *which application owns this row* for every record type, by
-construction rather than by convention. That is what the envelope needs now that
-`application_id` is gone, and it is what makes a canonical path render complete
-without consulting a column.
+construction. That is what the envelope needs now that `application_id` is gone,
+and it is what makes a canonical path render complete without consulting a
+column.
 
-> **The leading noun is still not required to be the application.** Writing
-> `application_id` into `key3` settled *where the application lives*; it did not
-> make an identifier's first segment mean anything. `billing:invoice::read` is a
-> perfectly good identifier in application `hrms`. Requiring otherwise is policy
-> about an application's own namespace, which belongs to Gate 1 if the platform
-> wants it. Auth-AL enforces that an identifier is *parseable*, which it does.
+> **The cost of the rule, recorded.** It makes identifier naming a requirement.
+> The `agentlabs-auth` registry's `<namespace>:<resource-path>:<action>` has no
+> rule that its namespace equals an application id, so adopting Auth-AL there
+> means either the two matching or renaming identifiers — and Q-126 makes an
+> identifier's meaning permanent, so renaming is not free. Accepted: the
+> alternative was storing the same fact in two slots and explaining it to every
+> reader of the store forever.
 
 Why decomposed rather than one string: a query over a whole string slot is a
 lexical prefix match, which on PostgreSQL uses an index only under a special
@@ -139,19 +151,18 @@ hrms:employee:certificate::read
 tenant_id       = ''               ← not NULL: a NULL is distinct in a unique index
 key1            = abv
 key2            = permission
-key3            = hrms             ← the application, from the application id
-key4            = hrms             ← noun 1, as the author wrote it
-key5            = employee
-key6            = certificate
-key7 … key9     = ''
+key3            = hrms             ← the application, and noun 1: one fact
+key4            = employee         ← noun 2
+key5            = certificate      ← noun 3
+key6 … key9     = ''
 key10           = read
 value           = {"active": true}
 state           = enabled
 ```
 
 A deeper identifier, `codehost:repository:branch:protection:rule::write`, fills
-`key4` through `key8` and still lands its verb in `key10` — five of the six noun
-slots used.
+`key3` through `key7` and still lands its verb in `key10` — five of the seven noun
+segments used.
 
 **Settled — the leading noun is the application name, and that duplicates
 `application_id`.** Accepted. Dropping it would free a slot but would assume an
@@ -353,19 +364,19 @@ tenant is itself the statement that the record is application-wide.
 get     tenant_id = ''
         AND application_id = $1
         AND key1 = 'abv' AND key2 = 'permission' AND key3 = $1
-        AND key4 = $2 AND key5 = $3 AND key6 = $4
-        AND key7 = '' AND key8 = '' AND key9 = ''
-        AND key10 = $5
+        AND key4 = $2 AND key5 = $3
+        AND key6 = '' AND key7 = '' AND key8 = '' AND key9 = ''
+        AND key10 = $4
 
 -- every permission in an application
 list    ... AND key1 = 'abv' AND key2 = 'permission' AND key3 = $1
         ORDER BY key4, key5, key6, key7, key8, key9, key10
 
 -- one domain: hrms:employee:  → two whole noun segments
-        ... AND key4 = 'hrms' AND key5 = 'employee'
+        ... AND key3 = 'hrms' AND key4 = 'employee'
 
 -- one resource: hrms:employee:certificate:
-        ... AND key4 = 'hrms' AND key5 = 'employee' AND key6 = 'certificate'
+        ... AND key3 = 'hrms' AND key4 = 'employee' AND key6 = 'certificate'
 
 -- every write verb in an application
         ... AND key10 = 'write'
@@ -383,9 +394,9 @@ have to think in slots. The wrapper splits it on segment boundaries and emits
 slot equality:
 
 ```
-Prefix "hrms:employee:"            →  key4 = 'hrms' AND key5 = 'employee'
-Prefix "hrms:employee:certificate" →  key4 = 'hrms' AND key5 = 'employee'
-                                      AND key6 = 'certificate'
+Prefix "hrms:employee:"            →  key3 = 'hrms' AND key4 = 'employee'
+Prefix "hrms:employee:certificate" →  key3 = 'hrms' AND key4 = 'employee'
+                                      AND key5 = 'certificate'
 ```
 
 > **Open — partial segments.** A prefix ending mid-segment, `"hrms:emp"`, has no
@@ -474,11 +485,9 @@ functions above are unaffected: registration does not take supported keys, and
 3. **Prefix index** — `C` collation or `text_pattern_ops`, at checkpoint 2.
 4. **P-11 — relationship representation.** The feature is canonical, its shape
    is not. Until it is decided, no permission-side field or record exists.
-5. ~~**Must the leading noun be the application?**~~ **Settled by the envelope
-   correction:** `key3` is the application in every record type, written from the
-   application id. Whether an identifier's *leading noun* must also be the
-   application is unchanged and still open — it is naming policy, and belongs to
-   Gate 1.
+5. ~~**Must the leading noun be the application?**~~ **Settled: yes, and
+   registration enforces it.** `key3` holds that one fact for every record type.
+   An identifier starting with anything else is rejected.
 
 **Settled:** retirement is reversible, so status is one operation. The contract
 is four functions.

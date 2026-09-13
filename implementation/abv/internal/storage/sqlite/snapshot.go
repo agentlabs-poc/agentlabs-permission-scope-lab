@@ -107,7 +107,7 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 			rows.Close()
 			return err
 		}
-		id, keyErr := codec.PermissionFromSlots(slots)
+		id, keyErr := codec.PermissionFromSlots(applicationID, slots)
 		if keyErr != nil {
 			rows.Close()
 			return keyErr

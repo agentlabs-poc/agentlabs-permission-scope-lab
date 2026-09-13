@@ -16,8 +16,17 @@ func CheckPermissionRegistration(c domain.Catalog, definition domain.PermissionD
 	// storage representation, so the shape is enforced here rather than left to
 	// convention. This is also the only parser: nothing splits the string
 	// itself.
-	if _, err := codec.ParsePermission(definition.ID); err != nil {
+	key, err := codec.ParsePermission(definition.ID)
+	if err != nil {
 		return err
+	}
+	// The first noun segment IS the application. An identifier that starts with
+	// anything else is canonically incorrect: key3 carries the application for
+	// every record type, and the identifier would then disagree with the row
+	// that stores it. The rule is what removes the duplication — the segment is
+	// stored once, in key3, and the noun path holds only what follows.
+	if key.Nouns[0] != c.ApplicationID {
+		return domain.ErrRejected
 	}
 	if _, exists := c.Permissions[definition.ID]; exists {
 		return domain.ErrConflict

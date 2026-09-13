@@ -19,17 +19,21 @@ import (
 // This is the single encoder and parser for the form. Storage never splits the
 // string itself, and the contract never assembles one by hand.
 const (
-	// MaxNounSegments is what the envelope leaves for the noun path: ten slots,
-	// less the domain namespace, the record type, the application and the
-	// reserved verb slot.
+	// MaxNounSegments is how many noun segments an identifier may carry.
 	//
-	// key3 holds the application for every record type, written from the
-	// application id rather than taken from the identifier. That is what lets
-	// the envelope drop its application_id column: without it, two applications
-	// registering the same identifier would produce the same key path and
-	// collide. The leading noun stays in the noun path, so an identifier still
-	// renders exactly as its author wrote it and nothing assumes the two agree.
-	MaxNounSegments = 6
+	// The first is the application, and it lives in key3 — written once, not
+	// twice. Segments two onward occupy key4…key9, which is six slots, so the
+	// identifier may carry seven noun segments in total.
+	//
+	// That the first segment IS the application is a rule, enforced at
+	// registration, not a convention: it is what lets key3 answer "which
+	// application owns this row" for every record type, which in turn is what
+	// let the envelope drop its application_id column.
+	MaxNounSegments = 7
+
+	// slotNouns is how many noun segments the key slots hold: every segment
+	// except the first, which key3 already carries.
+	slotNouns = MaxNounSegments - 1
 
 	verbSeparator = "::"
 	nounSeparator = ":"
@@ -107,39 +111,45 @@ func NounPrefix(prefix string) ([]string, error) {
 	return segments, nil
 }
 
-// PermissionSlots is the key-slot representation of an identifier: the noun
-// path in key4…key9 padded with empty strings, and the verb in key10. The
-// application in key3 is not part of this — storage writes it from the
-// application id, because it is not the identifier's to carry.
-type PermissionSlots [7]string
+// PermissionSlots is the key-slot representation of an identifier: noun
+// segments two onward in key4…key9 padded with empty strings, and the verb in
+// key10.
+//
+// Segment one is absent by design. It is the application, and key3 holds it —
+// storing it here as well would be the same fact in two columns.
+type PermissionSlots [slotNouns + 1]string
 
-// Slots lays the key out for storage. Storage writes these columns verbatim and
-// never parses the identifier itself.
+// Slots lays the key out for storage, dropping the leading noun: key3 carries
+// it as the application. Storage writes these columns verbatim and never parses
+// the identifier itself.
 func (k PermissionKey) Slots() PermissionSlots {
 	var slots PermissionSlots
-	copy(slots[:MaxNounSegments], k.Nouns)
-	slots[MaxNounSegments] = k.Verb
+	if len(k.Nouns) > 0 {
+		copy(slots[:slotNouns], k.Nouns[1:])
+	}
+	slots[slotNouns] = k.Verb
 	return slots
 }
 
-// PermissionFromSlots rebuilds the identifier a row holds. It is the inverse of
-// Slots, and the round-trip is what keeps storage and the contract from drifting:
-// a layout that cannot rebuild its identifier has silently changed its meaning.
-func PermissionFromSlots(slots PermissionSlots) (string, error) {
-	verb := slots[MaxNounSegments]
-	var nouns []string
-	for _, noun := range slots[:MaxNounSegments] {
+// PermissionFromSlots rebuilds the identifier a row holds, prefixing the
+// application that key3 carries. It is the inverse of Slots, and the round-trip
+// is what keeps storage and the contract from drifting: a layout that cannot
+// rebuild its identifier has silently changed its meaning.
+func PermissionFromSlots(application string, slots PermissionSlots) (string, error) {
+	verb := slots[slotNouns]
+	if invalidString(application) || invalidString(verb) {
+		return "", domain.ErrMalformed
+	}
+	nouns := []string{application}
+	for _, noun := range slots[:slotNouns] {
 		if noun == "" {
 			break
 		}
 		nouns = append(nouns, noun)
 	}
-	if len(nouns) == 0 || invalidString(verb) {
-		return "", domain.ErrMalformed
-	}
 	// Padding must be contiguous: a gap means the row was not written by this
 	// encoder and its identifier cannot be trusted.
-	for _, noun := range slots[len(nouns):MaxNounSegments] {
+	for _, noun := range slots[len(nouns)-1 : slotNouns] {
 		if noun != "" {
 			return "", domain.ErrMalformed
 		}

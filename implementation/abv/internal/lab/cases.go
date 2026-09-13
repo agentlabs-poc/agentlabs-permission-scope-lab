@@ -28,9 +28,19 @@ type TeamFINC17Case struct {
 	Administration AdministrationPremise
 }
 
+// payslip builds the fixture's three identifiers for one application. A
+// permission's leading noun is its application, so a fixture cannot use the
+// hrms spelling inside some other application and still be coherent — for the
+// hrms area these are exactly the PayslipRead/Write/Delete constants.
+func payslip(applicationID string) (read, write, remove string) {
+	base := applicationID + ":payroll:payslip::"
+	return base + "read", base + "write", base + "delete"
+}
+
 // TeamFINC17 returns the worked FIN/C17 business records and the absent,
 // proposed A2 assignment. Callers may mutate the returned fixture freely.
 func TeamFINC17(area domain.Area) TeamFINC17Case {
+	PayslipRead, PayslipWrite, PayslipDelete := payslip(area.ApplicationID())
 	g0 := domain.GrantContent{Version: "1", GrantID: "G0", Revision: 1, Permissions: []string{PayslipRead, PayslipWrite, PayslipDelete}, Scope: map[string]string{}}
 	g1 := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, ParentGrantID: "G0", Permissions: []string{PayslipRead, PayslipWrite}, Scope: map[string]string{"dept": "FIN"}}
 	g2 := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{PayslipRead}, Scope: map[string]string{"cert": "C17"}}
