@@ -1,18 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 610" width="900" height="610" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12.5" role="img" aria-label="Control flow from bootstrapped platform root binding through platform administration establishing the tenant Auth root, to tenant administration installing an application, establishing its root and narrowing authority down to a human">
 <defs>
 <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
-<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#c2410c"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
 </defs>
 <style>
  .lane{fill:none;stroke:currentColor;stroke-opacity:.18}
  .lbl{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;fill:currentColor;fill-opacity:.55}
  .box{fill:none;stroke:currentColor;stroke-opacity:.5;rx:4}
- .est{stroke:#c2410c;stroke-width:1.7}
+ .est{stroke:currentColor;stroke-width:1.8;color:#c2410c}
  .t{fill:currentColor}
  .m{fill:currentColor;fill-opacity:.6;font-size:11px}
- .hand{fill:#c2410c;font-size:11px;font-weight:600}
+ .hand{fill:currentColor;font-size:11px;font-weight:600;color:#c2410c}
  .ln{stroke:currentColor;stroke-opacity:.45;fill:none}
+ .ln.accent{stroke-opacity:1}
+ svg{color:#1f2328}
+ .ground{fill:#fbfbfc}
+ .accent{color:#c2410c}
+ @media (prefers-color-scheme: dark){
+   svg{color:#d6dce4}
+   .ground{fill:#12151a}
+   .accent,.est,.hand{color:#ff9e6b}
+ }
 </style>
+<rect class="ground" x="0" y="0" width="900" height="610" rx="6"/>
 
 <text class="lbl" x="14" y="20">phase 0 · bootstrapped</text>
 <line class="lane" x1="0" y1="30" x2="900" y2="30"/>
@@ -42,7 +52,7 @@
 
 <line class="ln" x1="210" y1="165" x2="230" y2="165" marker-end="url(#a)"/>
 <line class="ln" x1="430" y1="165" x2="450" y2="165" marker-end="url(#a)"/>
-<line class="ln" x1="666" y1="165" x2="686" y2="165" marker-end="url(#ah)" stroke="#c2410c"/>
+<line class="ln accent" x1="666" y1="165" x2="686" y2="165" marker-end="url(#ah)" stroke="currentColor"/>
 
 <text class="lbl" x="14" y="222">phase 1 · application platform administration</text>
 <line class="lane" x1="0" y1="232" x2="900" y2="232"/>
@@ -56,7 +66,7 @@
 <text class="m" x="486" y="265">any time — before the tenant exists, or years after.</text>
 <text class="m" x="486" y="281">a later addition reaches every root with no revision.</text>
 
-<path class="ln" d="M788 190 788 316" stroke="#c2410c" stroke-dasharray="5 3" marker-end="url(#ah)"/>
+<path class="ln accent" d="M788 190 788 316" stroke="currentColor" stroke-dasharray="5 3" marker-end="url(#ah)"/>
 <text class="hand" x="700" y="330">authority changes hands ⇥</text>
 <text class="m" x="700" y="345">the human now holds every auth:*</text>
 
@@ -79,12 +89,12 @@
 <text class="t" x="654" y="421">13 · AddMember</text>
 <text class="m" x="654" y="437">the human joins Team2</text>
 
-<line class="ln" x1="194" y1="427" x2="214" y2="427" marker-end="url(#ah)" stroke="#c2410c"/>
+<line class="ln accent" x1="194" y1="427" x2="214" y2="427" marker-end="url(#ah)" stroke="currentColor"/>
 <line class="ln" x1="414" y1="427" x2="434" y2="427" marker-end="url(#a)"/>
 <line class="ln" x1="618" y1="427" x2="638" y2="427" marker-end="url(#a)"/>
 
-<path class="ln" d="M300 296 300 340 C300 370 316 368 316 396" stroke-dasharray="3 3" marker-end="url(#ah)" stroke="#c2410c"/>
-<text class="m" x="330" y="352" fill="#c2410c">catalog → what the root computes from</text>
+<path class="ln accent" d="M300 296 300 340 C300 370 316 368 316 396" stroke-dasharray="3 3" marker-end="url(#ah)" stroke="currentColor"/>
+<text class="m accent" x="330" y="352" fill-opacity=".85">catalog → what the root computes from</text>
 
 <text class="hand" x="642" y="478">authority changes hands ⇥</text>
 <text class="m" x="642" y="493">a non-administrator can act in HRMS</text>
