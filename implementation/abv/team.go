@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+// TeamAdministration gates the three operations the handbook names: team
+// create, team write and team delete.
+type TeamAdministration interface {
+	CheckTeamCreate(context.Context, domain.Area, domain.Identity, domain.Team, time.Time) error
+	CheckTeamWrite(context.Context, domain.Area, domain.Identity, string, time.Time) error
+	CheckTeamDelete(context.Context, domain.Area, domain.Identity, string, time.Time) error
+}
+
 // TeamReadAdministration gates reads of a tenant's teams and memberships.
 type TeamReadAdministration interface {
 	CheckTeamRead(context.Context, domain.Area, domain.Identity, time.Time) error
@@ -21,4 +29,24 @@ func (f *Facade) ListTeams(ctx context.Context, area domain.Area, identity domai
 
 func (f *Facade) ListMembers(ctx context.Context, area domain.Area, identity domain.Identity, filter domain.MemberFilter) (domain.MemberPage, error) {
 	return f.service.ListMembers(ctx, area, identity, filter)
+}
+
+func (f *Facade) CreateTeam(ctx context.Context, area domain.Area, identity domain.Identity, name, parentID string) (domain.Team, error) {
+	return f.service.CreateTeam(ctx, area, identity, name, parentID)
+}
+
+func (f *Facade) SetTeamParent(ctx context.Context, area domain.Area, identity domain.Identity, id, parentID string) (domain.Team, error) {
+	return f.service.SetTeamParent(ctx, area, identity, id, parentID)
+}
+
+func (f *Facade) DeleteTeam(ctx context.Context, area domain.Area, identity domain.Identity, id string) error {
+	return f.service.DeleteTeam(ctx, area, identity, id)
+}
+
+func (f *Facade) AddMember(ctx context.Context, area domain.Area, identity domain.Identity, teamID, humanID string) error {
+	return f.service.AddMember(ctx, area, identity, teamID, humanID)
+}
+
+func (f *Facade) RemoveMember(ctx context.Context, area domain.Area, identity domain.Identity, teamID, humanID string) error {
+	return f.service.RemoveMember(ctx, area, identity, teamID, humanID)
 }

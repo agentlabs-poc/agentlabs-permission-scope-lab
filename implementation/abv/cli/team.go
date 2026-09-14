@@ -72,3 +72,19 @@ func renderMemberPage(out, diag io.Writer, page domain.MemberPage) error {
 	_, err := out.Write(rendered.Bytes())
 	return err
 }
+
+func renderRemoved(out, diag io.Writer, kind, id string) error {
+	if _, err := fmt.Fprintln(diag, "LAB ONLY: fixed fixture identity; not authenticated administration"); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintf(out, "internal projection: %s\nremoved  %s\n", kind, id)
+	return err
+}
+
+func renderMembershipChange(out, diag io.Writer, verb, teamID, humanID string) error {
+	if _, err := fmt.Fprintln(diag, "LAB ONLY: fixed fixture identity; not authenticated administration"); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintf(out, "internal projection: membership\n%s  team=%s  human=%s\n", verb, teamID, humanID)
+	return err
+}

@@ -17,4 +17,9 @@ type TeamAPI interface {
 	GetTeam(context.Context, domain.Area, domain.FixtureContext, string) (domain.Team, error)
 	ListTeams(context.Context, domain.Area, domain.FixtureContext, domain.TeamFilter) (domain.TeamPage, error)
 	ListMembers(context.Context, domain.Area, domain.FixtureContext, domain.MemberFilter) (domain.MemberPage, error)
+	CreateTeam(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Team, error)
+	SetTeamParent(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Team, error)
+	DeleteTeam(context.Context, domain.Area, domain.FixtureContext, string) error
+	AddMember(context.Context, domain.Area, domain.FixtureContext, string, string) error
+	RemoveMember(context.Context, domain.Area, domain.FixtureContext, string, string) error
 }

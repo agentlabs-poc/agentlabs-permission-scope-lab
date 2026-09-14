@@ -133,6 +133,63 @@ func (a *labApplication) PublishApplicationRole(ctx context.Context, app domain.
 	return a.facade.PublishApplicationRole(ctx, app, TeamFINC17(a.area).Issuer, proposed)
 }
 
+func (a *labApplication) teamArea(area domain.Area, fixtureContext domain.FixtureContext) error {
+	if area != a.area || fixtureContext.Name != roleFixtureContext {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+func (a *labApplication) CreateTeam(ctx context.Context, area domain.Area, fc domain.FixtureContext, name, parentID string) (domain.Team, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Team{}, err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.Team{}, err
+	}
+	return a.facade.CreateTeam(ctx, area, TeamFINC17(area).Issuer, name, parentID)
+}
+
+func (a *labApplication) SetTeamParent(ctx context.Context, area domain.Area, fc domain.FixtureContext, id, parentID string) (domain.Team, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Team{}, err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.Team{}, err
+	}
+	return a.facade.SetTeamParent(ctx, area, TeamFINC17(area).Issuer, id, parentID)
+}
+
+func (a *labApplication) DeleteTeam(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string) error {
+	if err := a.teamArea(area, fc); err != nil {
+		return err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return err
+	}
+	return a.facade.DeleteTeam(ctx, area, TeamFINC17(area).Issuer, id)
+}
+
+func (a *labApplication) AddMember(ctx context.Context, area domain.Area, fc domain.FixtureContext, teamID, humanID string) error {
+	if err := a.teamArea(area, fc); err != nil {
+		return err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return err
+	}
+	return a.facade.AddMember(ctx, area, TeamFINC17(area).Issuer, teamID, humanID)
+}
+
+func (a *labApplication) RemoveMember(ctx context.Context, area domain.Area, fc domain.FixtureContext, teamID, humanID string) error {
+	if err := a.teamArea(area, fc); err != nil {
+		return err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return err
+	}
+	return a.facade.RemoveMember(ctx, area, TeamFINC17(area).Issuer, teamID, humanID)
+}
+
 func (a *labApplication) GetTeam(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, id string) (domain.Team, error) {
 	if area != a.area || fixtureContext.Name != roleFixtureContext {
 		return domain.Team{}, domain.ErrRejected

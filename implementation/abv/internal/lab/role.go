@@ -84,3 +84,34 @@ func (a *RoleAdministration) CheckTeamRead(ctx context.Context, area domain.Area
 	}
 	return nil
 }
+
+// The three team operations. The lab admits the same fixture administrator for
+// all three; a real deployment would hold three separate authorities, which is
+// why they are three methods rather than one.
+func (a *RoleAdministration) CheckTeamCreate(ctx context.Context, area domain.Area, identity domain.Identity, proposed domain.Team, _ time.Time) error {
+	if err := a.teamGate(ctx, area, identity); err != nil {
+		return err
+	}
+	if proposed.Name == "" {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+func (a *RoleAdministration) CheckTeamWrite(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
+
+func (a *RoleAdministration) CheckTeamDelete(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
+
+func (a *RoleAdministration) teamGate(ctx context.Context, area domain.Area, identity domain.Identity) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) {
+		return domain.ErrRejected
+	}
+	return nil
+}

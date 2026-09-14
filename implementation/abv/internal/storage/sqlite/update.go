@@ -87,8 +87,32 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.NewGrantRevision != nil {
 			categories++
 		}
+		for _, set := range []bool{writes.NewTeam != nil, writes.TeamParent != nil, writes.RemovedTeam != "",
+			writes.AddedMembership != nil, writes.RemovedMembership != nil} {
+			if set {
+				categories++
+			}
+		}
 		if categories > 1 {
 			return domain.ErrMalformed
+		}
+		// Team and membership writes. Validation already ran against the
+		// authoritative snapshot inside this transaction, so each of these is one
+		// row and nothing else: no cascade, and no second record touched.
+		if writes.NewTeam != nil {
+			return insertTeam(ctx, conn, area.TenantID(), *writes.NewTeam)
+		}
+		if writes.TeamParent != nil {
+			return updateTeamParent(ctx, conn, area.TenantID(), *writes.TeamParent)
+		}
+		if writes.RemovedTeam != "" {
+			return deleteTeam(ctx, conn, area.TenantID(), writes.RemovedTeam)
+		}
+		if writes.AddedMembership != nil {
+			return insertMembership(ctx, conn, area.TenantID(), *writes.AddedMembership)
+		}
+		if writes.RemovedMembership != nil {
+			return deleteMembership(ctx, conn, area.TenantID(), *writes.RemovedMembership)
 		}
 		if writes.GrantStatusChange != nil {
 			return p.writeGrantStatus(ctx, conn, area, s, *writes.GrantStatusChange)

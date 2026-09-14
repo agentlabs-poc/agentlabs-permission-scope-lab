@@ -88,6 +88,47 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			if err := renderTeamPage(out, diag, page); err != nil {
 				return 4
 			}
+		case "create":
+			team, err := teamAPI.CreateTeam(ctx, area, fixture, flags["--name"], flags["--parent"])
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderTeam(out, diag, team); err != nil {
+				return 4
+			}
+		case "reparent":
+			parent := flags["--parent"]
+			if has(flags, "--roots") {
+				parent = ""
+			}
+			team, err := teamAPI.SetTeamParent(ctx, area, fixture, positional[1], parent)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderTeam(out, diag, team); err != nil {
+				return 4
+			}
+		case "delete":
+			if err := teamAPI.DeleteTeam(ctx, area, fixture, positional[1]); err != nil {
+				return report(diag, err)
+			}
+			if err := renderRemoved(out, diag, "team", positional[1]); err != nil {
+				return 4
+			}
+		case "add-member":
+			if err := teamAPI.AddMember(ctx, area, fixture, flags["--id"], flags["--human"]); err != nil {
+				return report(diag, err)
+			}
+			if err := renderMembershipChange(out, diag, "added", flags["--id"], flags["--human"]); err != nil {
+				return 4
+			}
+		case "remove-member":
+			if err := teamAPI.RemoveMember(ctx, area, fixture, flags["--id"], flags["--human"]); err != nil {
+				return report(diag, err)
+			}
+			if err := renderMembershipChange(out, diag, "removed", flags["--id"], flags["--human"]); err != nil {
+				return 4
+			}
 		case "members":
 			filter := domain.MemberFilter{TeamID: flags["--id"], HumanID: flags["--human"]}
 			if code := teamBounds(flags, &filter.Offset, &filter.Limit, diag); code != 0 {

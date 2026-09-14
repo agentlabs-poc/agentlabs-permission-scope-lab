@@ -101,3 +101,60 @@ func teamExists(ctx context.Context, conn *sql.Conn, tenantID, id string) (bool,
 	}
 	return false, classify(err)
 }
+
+// updateTeamParent re-parents a team. The parent is state in the value, so this
+// is one update of one record rather than a delete and an insert — which is the
+// reason the parent is not in a key slot.
+func updateTeamParent(ctx context.Context, conn *sql.Conn, tenantID string, team domain.Team) error {
+	raw, err := json.Marshal(teamPayload{ParentID: team.ParentID})
+	if err != nil {
+		return domain.ErrMalformed
+	}
+	result, err := conn.ExecContext(ctx, `
+		UPDATE abv_l1_records SET value=?
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='team' AND key3=?`,
+		string(raw), tenantID, team.ID)
+	if err != nil {
+		return classify(err)
+	}
+	return exactlyOne(result)
+}
+
+// deleteTeam removes a team row. Validation has already refused the delete if
+// anything depends on it, so this removes one row and nothing else: no cascade.
+func deleteTeam(ctx context.Context, conn *sql.Conn, tenantID, id string) error {
+	result, err := conn.ExecContext(ctx, `
+		DELETE FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='team' AND key3=?`,
+		tenantID, id)
+	if err != nil {
+		return classify(err)
+	}
+	return exactlyOne(result)
+}
+
+// deleteMembership removes one human from one team.
+func deleteMembership(ctx context.Context, conn *sql.Conn, tenantID string, m domain.Membership) error {
+	result, err := conn.ExecContext(ctx, `
+		DELETE FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='membership'
+		   AND key3=? AND key4=?`,
+		tenantID, m.TeamID, m.HumanID)
+	if err != nil {
+		return classify(err)
+	}
+	return exactlyOne(result)
+}
+
+// exactlyOne turns "the row was not there" into ErrNotFound rather than a silent
+// success, so a caller learns its write did nothing.
+func exactlyOne(result sql.Result) error {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return classify(err)
+	}
+	if affected != 1 {
+		return domain.ErrNotFound
+	}
+	return nil
+}

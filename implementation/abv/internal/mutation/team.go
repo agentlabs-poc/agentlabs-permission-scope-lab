@@ -4,6 +4,7 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/internal/validation"
 	"context"
 	"slices"
 	"sort"
@@ -203,6 +204,181 @@ func (s *Service) teamCatalog(ctx context.Context, area domain.Area, identity do
 		return nil, err
 	}
 	admin, ok := s.administration.(TeamReadAdministration)
+	if !ok || nilInterface(admin) {
+		return nil, domain.ErrUnsupported
+	}
+	return admin, nil
+}
+
+// CreateTeam creates a team, optionally inside another. The handbook's *team
+// create* covers "creating teams and subteams", which is why one operation does
+// both rather than two.
+//
+// The id is issued, never supplied — the same rule roles hold. The caller names
+// the team; Auth-AL names the record.
+func (s *Service) CreateTeam(ctx context.Context, area domain.Area, identity domain.Identity, name, parentID string) (domain.Team, error) {
+	fail := func(err error) (domain.Team, error) { return domain.Team{}, err }
+	admin, err := s.teamAdministration(ctx, area, identity)
+	if err != nil {
+		return fail(err)
+	}
+	proposed := domain.Team{ID: s.ids.Next(), Name: name, ParentID: parentID}
+	err = s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+		if snapshot.Area != area {
+			return storage.WriteSet{}, domain.ErrRejected
+		}
+		if err := admin.CheckTeamCreate(ctx, area, identity, proposed, s.clock.Now()); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := validation.CheckTeamCreation(snapshot.Teams, proposed); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.WriteSet{}, err
+		}
+		created := proposed
+		return storage.WriteSet{NewTeam: &created}, nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return proposed, nil
+}
+
+// SetTeamParent moves a team, and refuses a move that would put it inside its
+// own subtree. The handbook's *team write* covers this: it "includes human
+// membership management", which makes it broader than membership, and a
+// re-parent is a change to the team.
+func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity domain.Identity, id, parentID string) (domain.Team, error) {
+	fail := func(err error) (domain.Team, error) { return domain.Team{}, err }
+	admin, err := s.teamAdministration(ctx, area, identity)
+	if err != nil {
+		return fail(err)
+	}
+	var result domain.Team
+	err = s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+		if snapshot.Area != area {
+			return storage.WriteSet{}, domain.ErrRejected
+		}
+		if err := admin.CheckTeamWrite(ctx, area, identity, id, s.clock.Now()); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := validation.CheckTeamReparent(snapshot.Teams, id, parentID); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.WriteSet{}, err
+		}
+		result = snapshot.Teams[id]
+		result.ParentID = parentID
+		changed := result
+		return storage.WriteSet{TeamParent: &changed}, nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return result, nil
+}
+
+// DeleteTeam removes a team, and refuses while anything depends on it: a child
+// team, a membership, or an assignment naming it.
+//
+// Nothing cascades. A delete that quietly removed memberships would make one
+// administrative act perform another, and the handbook keeps team
+// administration, membership administration and assignment authority distinct.
+// The caller empties the team first, deliberately.
+func (s *Service) DeleteTeam(ctx context.Context, area domain.Area, identity domain.Identity, id string) error {
+	admin, err := s.teamAdministration(ctx, area, identity)
+	if err != nil {
+		return err
+	}
+	return s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+		if snapshot.Area != area {
+			return storage.WriteSet{}, domain.ErrRejected
+		}
+		if err := admin.CheckTeamDelete(ctx, area, identity, id, s.clock.Now()); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := validation.CheckTeamDeletion(snapshot.Teams, snapshot.Memberships, snapshot.Assignments, id); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.WriteSet{}, err
+		}
+		return storage.WriteSet{RemovedTeam: id}, nil
+	})
+}
+
+// AddMember puts one human in one team. Identity is the pair, so adding someone
+// already in the team is ErrConflict rather than a silent second row.
+//
+// The administrator need not hold the team's permissions personally: the
+// handbook is explicit that "the approved rule does not invent an additional
+// requirement that this membership administrator personally possess each of the
+// team's business permissions".
+func (s *Service) AddMember(ctx context.Context, area domain.Area, identity domain.Identity, teamID, humanID string) error {
+	return s.membership(ctx, area, identity, teamID, humanID, true)
+}
+
+// RemoveMember takes one human out of one team.
+func (s *Service) RemoveMember(ctx context.Context, area domain.Area, identity domain.Identity, teamID, humanID string) error {
+	return s.membership(ctx, area, identity, teamID, humanID, false)
+}
+
+func (s *Service) membership(ctx context.Context, area domain.Area, identity domain.Identity, teamID, humanID string, add bool) error {
+	admin, err := s.teamAdministration(ctx, area, identity)
+	if err != nil {
+		return err
+	}
+	m := domain.Membership{TeamID: teamID, HumanID: humanID}
+	return s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+		if snapshot.Area != area {
+			return storage.WriteSet{}, domain.ErrRejected
+		}
+		if err := admin.CheckTeamWrite(ctx, area, identity, teamID, s.clock.Now()); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := validation.CheckMembership(snapshot.Teams, m); err != nil {
+			return storage.WriteSet{}, err
+		}
+		present := false
+		for _, held := range snapshot.Memberships {
+			if held == m {
+				present = true
+				break
+			}
+		}
+		if add && present {
+			return storage.WriteSet{}, domain.ErrConflict
+		}
+		if !add && !present {
+			return storage.WriteSet{}, domain.ErrNotFound
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.WriteSet{}, err
+		}
+		proposed := m
+		if add {
+			return storage.WriteSet{AddedMembership: &proposed}, nil
+		}
+		return storage.WriteSet{RemovedMembership: &proposed}, nil
+	})
+}
+
+// teamAdministration resolves the write seam. It is separate from the read seam
+// because creating, changing and deleting a team are the handbook's three named
+// operations, and reading one is none of them.
+func (s *Service) teamAdministration(ctx context.Context, area domain.Area, identity domain.Identity) (TeamAdministration, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := area.Validate(); err != nil {
+		return nil, err
+	}
+	if err := validateSupportedIdentity(identity); err != nil {
+		return nil, err
+	}
+	admin, ok := s.administration.(TeamAdministration)
 	if !ok || nilInterface(admin) {
 		return nil, domain.ErrUnsupported
 	}

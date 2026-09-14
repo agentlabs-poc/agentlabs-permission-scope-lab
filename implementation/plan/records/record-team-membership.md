@@ -394,45 +394,106 @@ holds — so it cannot double as *unset*. `nil` means unset, `&""` means roots o
 Paging, `Total` and `Generation` carry the same meanings as the three merged
 pages.
 
-### 2.4 · Writes — **the part that needs your decision**
+### 2.4 · Writes *(implemented)*
 
-The handbook names three operations as *permissions*: **team create**, **team
-write** (which includes membership management), **team delete**. It does not
-publish a record format for any of them, and P-05 lists the complete contracts as
-pending.
-
-The minimal shape that matches the named operations:
+The handbook names three operations, and the contract is those three:
 
 ```go
-CreateTeam  (ctx, area, identity, id, parentID) (Team, error)      // team create
-SetTeamParent(ctx, area, identity, id, parentID) (Team, error)     // team write
-DeleteTeam  (ctx, area, identity, id)            error             // team delete
-AddMember   (ctx, area, identity, teamID, humanID) error           // team write
-RemoveMember(ctx, area, identity, teamID, humanID) error           // team write
+CreateTeam   (ctx, area, identity, name, parentID)   (Team, error)   // team create
+SetTeamParent(ctx, area, identity, id, parentID)     (Team, error)   // team write
+DeleteTeam   (ctx, area, identity, id)               error           // team delete
+AddMember    (ctx, area, identity, teamID, humanID)  error           // team write
+RemoveMember (ctx, area, identity, teamID, humanID)  error           // team write
 ```
 
-Three questions I will not answer alone:
+> **Team create** covers creating teams and subteams; **team write** includes
+> human membership management; **team delete** removes teams.
 
-**1 · Does `DeleteTeam` cascade?** A team with members, or with assignments held
-against it, is not obviously deletable. Three answers: refuse while anything
-references it, delete memberships and refuse if assignments exist, or delete
-nothing and mark the team disabled using the envelope's `state` column. The last
-fits the envelope but introduces a lifecycle no other record here has.
+That sentence settles two things without a decision being needed. *Create* covers
+subteams, so there is no separate operation for one. And *team write* **includes**
+membership management — "includes" makes it broader, so a re-parent is a team
+write rather than a new authority. Inventing one would have been the addition P-05
+excludes.
 
-**2 · Is `SetTeamParent` one operation or two?** Re-parenting moves a subtree,
-which changes what every member of that subtree can reach — the handbook's *child
-ceilings* apply to the new parent. It may deserve its own permission rather than
-riding on *team write*.
+**`CreateTeam` takes a name, not an id.** The id is issued, the same rule roles
+hold: the caller names the team, Auth-AL names the record.
 
-**3 · May a team be re-parented into its own descendant?** `validateTeamChain`
-already refuses a cycle at resolution time. Whether the *write* refuses it, or
-lets it through to fail later, is a contract decision.
+**One rule underneath all five: validate at the write, refuse rather than defer.**
 
-**Recommendation: build §2.2 and §2.3 now, and the storage fold; leave §2.4 until
-these three are settled.** The reads and the fold need no new shape, and neither
-becomes wrong whichever way the writes go.
+#### Delete refuses while anything depends on the team
 
----
+Not just a child team — anything:
+
+| Blocks a delete | |
+|---|---|
+| a child team | the hierarchy would break |
+| a membership | someone is in it |
+| an assignment naming it | authority is held against it |
+
+```
+$ abv team delete fibggi2juubk      # has a child
+    operation conflict                                  rc=4
+$ abv team delete fibggi2juxhc      # has a member
+    operation conflict                                  rc=4
+$ abv team delete fy6x64fvfnk0      # a leaf nobody is in
+    removed  fy6x64fvfnk0                               rc=0
+```
+
+**Nothing cascades and nothing is soft-deleted.** A delete that quietly removed
+memberships would make one administrative act perform another, and the handbook
+keeps team administration, membership administration and assignment authority
+distinct. The caller empties the team first, deliberately.
+
+That also leaves the envelope's `state` column unused, which is the right
+outcome: no record uses it, so nothing invents a lifecycle here.
+
+#### Re-parent refuses a cycle at the write
+
+```
+$ abv team reparent fibggi2jur5s --parent fibggi2juxhc   # under its own grandchild
+    operation rejected or record not found               rc=3
+$ abv team reparent fibggi2juxhc --roots                 # promoting to a root
+    parent  (root)                                       rc=0
+```
+
+`validateTeamChain` already catches a cycle at resolution. Refusing it at the
+write as well is not redundant: accepting one would leave the store holding a
+state that can never resolve — the same defect a cascading delete produces, one
+step later. The walk is bounded, so a hierarchy corrupted by some other route
+cannot make a write loop.
+
+#### A membership's identity is the pair
+
+```
+$ abv team add-member --id fibggi2juxhc --human fi7io4lvjqio
+    added                                                rc=0
+$ abv team add-member --id fibggi2juxhc --human fi7io4lvjqio
+    operation conflict                                   rc=4
+$ abv team remove-member --id fibggi2juxhc --human fi7io4lvjqio
+    removed                                              rc=0
+$ abv team remove-member --id fibggi2juxhc --human fi7io4lvjqio
+    operation rejected or record not found               rc=3
+```
+
+Adding someone already in the team is a conflict rather than a silent second row,
+and removing someone who is not in it is `ErrNotFound` rather than a silent
+success. A caller always learns whether its write did anything.
+
+**The administrator need not hold the team's permissions personally.** The
+handbook is explicit: *"the approved rule does not invent an additional
+requirement that this membership administrator personally possess each of the
+team's business permissions."*
+
+#### The lost foreign keys are now rules
+
+```
+$ abv team add-member --id fy6x28qcdrxx --human fi7io4lvjqio
+    operation rejected or record not found               rc=3
+```
+
+`memberships → teams` and `teams → installations` both went with the fold.
+`CheckMembership` and `CheckTeamCreation` refuse the same things the database
+used to, and a test asserts each.
 
 ## 3 · Storage
 
@@ -519,11 +580,15 @@ decides who may publish a role, change a grant, or create an assignment.
 
 ## 5 · Open questions
 
-1. **The three write questions** in §2.4 — cascade, re-parent authority, cycles.
-2. **Root filtering** — `ParentID: ""` is ambiguous; recommend `*string`.
-3. **The lost `memberships → teams` foreign key**, above.
-4. **Does a team have a state?** The envelope has `state`; no record uses it yet.
-   A disabled team is the obvious first use, and it interacts with question 1.
+1. ~~**The three write questions.**~~ **Settled** — see §2.4 and §6.
+2. ~~**Root filtering.**~~ **Settled:** `ParentID` is a `*string` — nil is unset,
+   a pointer to `""` is roots only.
+3. ~~**The lost foreign keys.**~~ **Now validation rules**, with a test asserting
+   each refuses what the database used to.
+4. **Does a team have a state?** The envelope has `state` and no record uses it.
+   Delete refusing rather than disabling leaves it unused, which is consistent —
+   but a *disabled* team may still be wanted, and that is a lifecycle question
+   for every record type rather than this one.
 5. **Owner records.** P-05 lists ownership contracts as pending alongside
    membership. This proposal deliberately does not touch them — *owner* is a
    third relationship, and the handbook is explicit that membership, assignment
@@ -544,10 +609,21 @@ wire schema.
 |---|---|
 | `abv.team` | id, name, parent — the parent as an id, in the value |
 | `abv.membership` | the pair; presence is the fact |
-| `GetTeam`, `ListTeams`, `ListMembers` | reads only |
+| `GetTeam`, `ListTeams`, `ListMembers` | the reads, where there was no path at all |
+| `CreateTeam`, `SetTeamParent`, `DeleteTeam`, `AddMember`, `RemoveMember` | the handbook's three operations |
 | the storage fold | both tables dropped, **10 → 8** |
 
-**Not the writes** — §2.4's three questions are unsettled.
+**The three open write questions are settled**, two of them by one rule and the
+third by the handbook:
+
+| | Answer |
+|---|---|
+| Does delete cascade? | **No.** It refuses while a child, a membership or an assignment depends on the team. |
+| Is re-parenting its own authority? | **No** — *team write* "includes human membership management", so it is broader, and a re-parent is a team change. |
+| Who refuses a cycle? | **The write**, not resolution. Accepting one would store a state that can never resolve. |
+
+The rule underneath the first and third: **validate at the write, refuse rather
+than defer.**
 
 ---
 

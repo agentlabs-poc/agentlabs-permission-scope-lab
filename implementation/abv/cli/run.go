@@ -208,8 +208,27 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			if empty(flags["--id"]) == empty(flags["--human"]) {
 				return fail(2, "team members requires exactly one of --id and --human")
 			}
+		case "create":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--name", "--parent") || empty(flags["--name"]) {
+				return fail(2, "team create requires --name, and --parent for a subteam")
+			}
+		case "reparent":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--parent", "--roots") {
+				return fail(2, "team reparent requires ID and either --parent or --roots")
+			}
+			if empty(flags["--parent"]) == !has(flags, "--roots") {
+				return fail(2, "team reparent requires exactly one of --parent and --roots")
+			}
+		case "delete":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") {
+				return fail(2, "team delete requires ID")
+			}
+		case "add-member", "remove-member":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--id", "--human") || empty(flags["--id"]) || empty(flags["--human"]) {
+				return fail(2, "team "+positional[0]+" requires --id and --human")
+			}
 		default:
-			return fail(2, "team requires get, list or members")
+			return fail(2, "team requires get, list, members, create, reparent, delete, add-member or remove-member")
 		}
 	case "scenario":
 		if len(positional) != 2 || empty(positional[1]) || (positional[0] != "seed" && positional[0] != "run") || flags["--db"] == "" {
