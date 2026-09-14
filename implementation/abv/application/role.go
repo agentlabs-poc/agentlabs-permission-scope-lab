@@ -12,6 +12,21 @@ type RoleAPI interface {
 	PublishApplicationRole(context.Context, domain.Application, domain.FixtureContext, domain.RoleContent) (domain.RoleContent, error)
 }
 
+// GrantAPI is the grant record's own surface: creating a grant, reading one,
+// listing them, and ending one. Publishing a revision and changing a status are
+// older operations with their own entry points.
+//
+// Establishing a root is not here, and its absence is the contract: Q-113
+// requires that grant administration cannot confer root authority, and nothing
+// reachable through this interface writes trust evidence.
+type GrantAPI interface {
+	CreateGrant(context.Context, domain.Area, domain.FixtureContext, string, domain.GrantContent) (domain.Grant, domain.GrantContent, error)
+	DeleteGrant(context.Context, domain.Area, domain.FixtureContext, string) error
+	GetGrant(context.Context, domain.Area, domain.FixtureContext, string, int64) (domain.Grant, domain.GrantContent, error)
+	ListGrants(context.Context, domain.Area, domain.FixtureContext, domain.GrantFilter) (domain.GrantPage, error)
+	ListGrantRevisions(context.Context, domain.Area, domain.FixtureContext, string, int, int) (domain.GrantRevisionPage, error)
+}
+
 // TeamAPI reads a tenant's teams and memberships.
 type TeamAPI interface {
 	GetTeam(context.Context, domain.Area, domain.FixtureContext, string) (domain.Team, error)

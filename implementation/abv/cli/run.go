@@ -32,7 +32,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "grant", "assignment", "role", "team", "scenario", "catalog":
+	case "inspect", "check", "assign", "grant", "grants", "assignment", "role", "team", "scenario", "catalog":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -47,7 +47,8 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
-			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace", "--parent", "--roots", "--human":
+			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace", "--parent", "--roots", "--human",
+			"--status", "--children", "--role", "--role-revision", "--scope":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -56,7 +57,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		// --active-only is a presence flag: it carries no value and must not
 		// consume the next argument.
-		if name == "--active-only" || name == "--latest" || name == "--application" || name == "--roots" {
+		if name == "--active-only" || name == "--latest" || name == "--application" || name == "--roots" || name == "--children" {
 			if inline {
 				return fail(2, "flag takes no value")
 			}
@@ -229,6 +230,43 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			}
 		default:
 			return fail(2, "team requires get, list, members, create, reparent, delete, add-member or remove-member")
+		}
+	case "grants":
+		if len(positional) == 0 || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "grants requires a verb, database and fixture context")
+		}
+		switch positional[0] {
+		case "get":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--revision") {
+				return fail(2, "grants get requires ID, and accepts --revision")
+			}
+		case "list":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--status", "--roots", "--children", "--offset", "--limit") {
+				return fail(2, "grants list accepts status, roots, children, offset and limit only")
+			}
+			if has(flags, "--roots") && has(flags, "--children") {
+				return fail(2, "grants list accepts at most one of --roots and --children")
+			}
+		case "revisions":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--offset", "--limit") {
+				return fail(2, "grants revisions requires ID")
+			}
+		case "create":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--parent", "--permissions", "--role", "--role-revision", "--scope") {
+				return fail(2, "grants create accepts parent, permissions or role, and scope")
+			}
+			if empty(flags["--parent"]) {
+				return fail(2, "grants create requires --parent: a parentless grant is not a root, and establishing one is not a grant operation")
+			}
+			if empty(flags["--permissions"]) == empty(flags["--role"]) {
+				return fail(2, "grants create requires exactly one of --permissions and --role")
+			}
+		case "delete":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") {
+				return fail(2, "grants delete requires ID")
+			}
+		default:
+			return fail(2, "grants requires get, list, revisions, create or delete")
 		}
 	case "scenario":
 		if len(positional) != 2 || empty(positional[1]) || (positional[0] != "seed" && positional[0] != "run") || flags["--db"] == "" {

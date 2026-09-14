@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/domain"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -52,6 +53,92 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 	case "assignment":
 		if err := assignmentStatus(ctx, api, area, flags["--fixture-context"], positional[0], positional[1], out); err != nil {
 			return report(diag, err)
+		}
+		return 0
+	case "grants":
+		grantAPI, ok := api.(application.GrantAPI)
+		if !ok || nilCapability(grantAPI) {
+			return report(diag, domain.ErrUnsupported)
+		}
+		fixture := domain.FixtureContext{Name: flags["--fixture-context"]}
+		switch positional[0] {
+		case "get":
+			var revision int64
+			if has(flags, "--revision") {
+				parsed, err := strconv.ParseInt(flags["--revision"], 10, 64)
+				if err != nil {
+					return report(diag, domain.ErrMalformed)
+				}
+				revision = parsed
+			}
+			grant, content, err := grantAPI.GetGrant(ctx, area, fixture, positional[1], revision)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderGrant(out, diag, grant, content); err != nil {
+				return 4
+			}
+		case "list":
+			filter := domain.GrantFilter{Status: flags["--status"]}
+			if has(flags, "--roots") {
+				root := true
+				filter.Root = &root
+			} else if has(flags, "--children") {
+				child := false
+				filter.Root = &child
+			}
+			if code := teamBounds(flags, &filter.Offset, &filter.Limit, diag); code != 0 {
+				return code
+			}
+			page, err := grantAPI.ListGrants(ctx, area, fixture, filter)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderGrantPage(out, diag, page); err != nil {
+				return 4
+			}
+		case "revisions":
+			offset, limit := 0, 0
+			if code := teamBounds(flags, &offset, &limit, diag); code != 0 {
+				return code
+			}
+			page, err := grantAPI.ListGrantRevisions(ctx, area, fixture, positional[1], offset, limit)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderRevisionPage(out, diag, positional[1], page); err != nil {
+				return 4
+			}
+		case "create":
+			scope, err := grantScope(flags["--scope"])
+			if err != nil {
+				return report(diag, err)
+			}
+			proposed := domain.GrantContent{Scope: scope}
+			if flags["--permissions"] != "" {
+				proposed.Permissions = strings.Split(flags["--permissions"], ",")
+			} else {
+				proposed.RoleID = flags["--role"]
+				parsed, parseErr := strconv.ParseInt(flags["--role-revision"], 10, 64)
+				if parseErr != nil {
+					return report(diag, domain.ErrMalformed)
+				}
+				proposed.RoleRevision = parsed
+			}
+			grant, content, err := grantAPI.CreateGrant(ctx, area, fixture, flags["--parent"], proposed)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderGrant(out, diag, grant, content); err != nil {
+				return 4
+			}
+		case "delete":
+			if err := grantAPI.DeleteGrant(ctx, area, fixture, positional[1]); err != nil {
+				return report(diag, err)
+			}
+			if _, err := fmt.Fprintf(out, "internal projection: grant\ndeleted  %s\n", positional[1]); err != nil {
+				return 4
+			}
 		}
 		return 0
 	case "team":
