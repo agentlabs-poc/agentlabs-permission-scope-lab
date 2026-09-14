@@ -2,7 +2,7 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE abv_metadata (
     marker TEXT PRIMARY KEY CHECK (marker = 'agentlabs-abv'),
-    schema_version INTEGER NOT NULL CHECK (schema_version = 8)
+    schema_version INTEGER NOT NULL CHECK (schema_version = 9)
 );
 
 -- The ABV-123 L1 record store. Permissions and scopes live here; the remaining
@@ -61,32 +61,6 @@ CREATE TABLE installations (
     PRIMARY KEY (tenant_id, application_id),
     FOREIGN KEY (application_id) REFERENCES applications(application_id)
 );
-CREATE TABLE grant_controls (
-    tenant_id TEXT NOT NULL,
-    application_id TEXT NOT NULL,
-    grant_id TEXT NOT NULL,
-    version TEXT NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('enabled', 'disabled')),
-    canonical_json BLOB NOT NULL,
-    PRIMARY KEY (tenant_id, application_id, grant_id),
-    FOREIGN KEY (tenant_id, application_id) REFERENCES installations(tenant_id, application_id)
-);
-CREATE TABLE grant_contents (
-    tenant_id TEXT NOT NULL,
-    application_id TEXT NOT NULL,
-    grant_id TEXT NOT NULL,
-    revision INTEGER NOT NULL CHECK (revision > 0),
-    canonical_json BLOB NOT NULL,
-    PRIMARY KEY (tenant_id, application_id, grant_id, revision),
-    FOREIGN KEY (tenant_id, application_id) REFERENCES installations(tenant_id, application_id)
-);
-CREATE TABLE trusted_roots (
-    tenant_id TEXT NOT NULL,
-    application_id TEXT NOT NULL,
-    grant_id TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, application_id, grant_id),
-    FOREIGN KEY (tenant_id, application_id) REFERENCES installations(tenant_id, application_id)
-);
 CREATE TABLE assignments (
     tenant_id TEXT NOT NULL,
     application_id TEXT NOT NULL,
@@ -99,11 +73,14 @@ CREATE TABLE assignments (
     canonical_json BLOB NOT NULL,
     PRIMARY KEY (tenant_id, application_id, assignment_id),
     UNIQUE (tenant_id, application_id, grant_id, recipient_type, recipient_id),
-    FOREIGN KEY (tenant_id, application_id, grant_id, grant_revision)
-        REFERENCES grant_contents(tenant_id, application_id, grant_id, revision),
+    -- The adopted revision had a foreign key into grant_contents. That table is
+    -- now abv_l1_records rows, which no key can reference: one table holds every
+    -- record type, so a constraint would have to name the key path. The rule is
+    -- unchanged and moves into the writer, the way the registry fold moved the
+    -- installation check into Install.
     FOREIGN KEY (tenant_id, application_id) REFERENCES installations(tenant_id, application_id)
 );
 
 -- The ownership marker is written last, so an incomplete initialization is
 -- never accepted as an ABV database on a later open.
-INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 8);
+INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 9);

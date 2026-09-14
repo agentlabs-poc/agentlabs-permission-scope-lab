@@ -7,7 +7,6 @@ import (
 	"agentlabs.local/abv/internal/storage"
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"sync/atomic"
 	"testing"
@@ -52,8 +51,7 @@ func TestParentDisablementBeforeMutationAcquisitionConflictsThenIsSeen(t *testin
 		if _, err = conn.ExecContext(t.Context(), "BEGIN IMMEDIATE"); err == nil {
 			control := fixture.Snapshot.Controls["G1"]
 			control.Status = "disabled"
-			raw, _ := json.Marshal(control)
-			_, err = conn.ExecContext(t.Context(), `UPDATE grant_controls SET status=?, canonical_json=? WHERE tenant_id=? AND application_id=? AND grant_id=?`, control.Status, raw, area.TenantID(), area.ApplicationID(), control.ID)
+			_, err = conn.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant' AND key3=? AND key4=?`, `{"status":"disabled","trusted_root":false}`, area.TenantID(), area.ApplicationID(), control.ID)
 		}
 		ready <- err
 		if err != nil {
@@ -144,8 +142,7 @@ func TestParentDisablementAfterAssignmentCommitIsNotRetroactive(t *testing.T) {
 		<-allowDisable
 		control := fixture.Snapshot.Controls["G1"]
 		control.Status = "disabled"
-		raw, _ := json.Marshal(control)
-		_, err = db.ExecContext(t.Context(), `UPDATE grant_controls SET status=?, canonical_json=? WHERE tenant_id=? AND application_id=? AND grant_id=?`, control.Status, raw, area.TenantID(), area.ApplicationID(), control.ID)
+		_, err = db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant' AND key3=? AND key4=?`, `{"status":"disabled","trusted_root":false}`, area.TenantID(), area.ApplicationID(), control.ID)
 		disabled <- err
 	}()
 

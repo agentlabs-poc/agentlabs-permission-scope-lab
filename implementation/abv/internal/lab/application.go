@@ -306,3 +306,44 @@ func loadMarker(ctx context.Context, path string) (labMarker, error) {
 	}
 	return labMarker{tenant: tenant, applicationID: applicationID}, nil
 }
+
+func (a *labApplication) CreateGrant(ctx context.Context, area domain.Area, fc domain.FixtureContext, parentGrantID string, proposed domain.GrantContent) (domain.Grant, domain.GrantContent, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Grant{}, domain.GrantContent{}, err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.Grant{}, domain.GrantContent{}, err
+	}
+	return a.facade.CreateGrant(ctx, area, TeamFINC17(area).Issuer, parentGrantID, proposed)
+}
+
+func (a *labApplication) DeleteGrant(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string) error {
+	if err := a.teamArea(area, fc); err != nil {
+		return err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return err
+	}
+	return a.facade.DeleteGrant(ctx, area, TeamFINC17(area).Issuer, id)
+}
+
+func (a *labApplication) GetGrant(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string, revision int64) (domain.Grant, domain.GrantContent, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Grant{}, domain.GrantContent{}, err
+	}
+	return a.facade.GetGrant(ctx, area, TeamFINC17(area).Issuer, id, revision)
+}
+
+func (a *labApplication) ListGrants(ctx context.Context, area domain.Area, fc domain.FixtureContext, filter domain.GrantFilter) (domain.GrantPage, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.GrantPage{}, err
+	}
+	return a.facade.ListGrants(ctx, area, TeamFINC17(area).Issuer, filter)
+}
+
+func (a *labApplication) ListGrantRevisions(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string, offset, limit int) (domain.GrantRevisionPage, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.GrantRevisionPage{}, err
+	}
+	return a.facade.ListGrantRevisions(ctx, area, TeamFINC17(area).Issuer, id, offset, limit)
+}

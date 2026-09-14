@@ -15,6 +15,24 @@ type Recipient struct {
 	Type string `json:"type"`
 	ID   string `json:"id"`
 }
+
+// Grant is a grant's head as it is stored: its live status, plus whether
+// trusted establishment recorded it as a root.
+//
+// GrantControl below is the *wire* form Q-107 approves — version, id, status,
+// and nothing else. TrustedRoot is deliberately not in it: Q-119 refuses a root
+// flag in submitted content, and this is what Auth recorded rather than what a
+// caller said.
+type Grant struct {
+	ID          string
+	Status      string
+	TrustedRoot bool
+}
+
+func (g Grant) Control() GrantControl {
+	return GrantControl{Version: "1", ID: g.ID, Status: g.Status}
+}
+
 type GrantControl struct {
 	Version string `json:"version"`
 	ID      string `json:"id"`
@@ -154,6 +172,7 @@ type RolePage struct {
 	Total      int
 	Generation int64
 }
+
 // Team is an Auth-owned collection of explicit human members, optionally inside
 // another team. It belongs to a tenant and to no application: the handbook is
 // explicit that "a different application may have no department concept at all",
@@ -186,6 +205,25 @@ type Membership struct {
 // TeamFilter bounds a team listing. ParentID is a pointer because "" is a real
 // value — the parent a root team holds — so it cannot double as "unset": nil
 // lists every team, and a pointer to "" lists roots only.
+// GrantFilter narrows a grant listing. Root is a tri-state: nil means every
+// grant, so "which grant is this area's root" is one call rather than a scan.
+type GrantFilter struct {
+	Status string
+	Root   *bool
+	Offset int
+	Limit  int
+}
+
+type GrantPage struct {
+	Grants []Grant
+	Total  int
+}
+
+type GrantRevisionPage struct {
+	Revisions []GrantContent
+	Total     int
+}
+
 type TeamFilter struct {
 	ParentID *string
 	Name     string
@@ -250,6 +288,7 @@ type PermissionPage struct {
 	Total       int
 	Generation  int64
 }
+
 // The two implicit boundaries. Neither is ever a registered scope key: an empty
 // scope is already a complete scope, and $self is resolved by the evaluator
 // rather than declared by a definition.

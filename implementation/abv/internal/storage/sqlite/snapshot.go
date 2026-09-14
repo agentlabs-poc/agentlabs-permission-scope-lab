@@ -186,15 +186,20 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	return nil
 }
 
+// controls reads the grant heads. One row now carries both the live status and
+// the trust evidence that used to need its own three-column table, so roots()
+// below is fed from here rather than from a second read.
 func (r *snapshotReader) controls(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`SELECT grant_id,version,status,canonical_json FROM grant_controls WHERE tenant_id=? AND application_id=? ORDER BY grant_id`)
+	rows, err := r.areaRows(`
+		SELECT key4,value FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant' AND key3=?
+		 ORDER BY key4`)
 	if err != nil {
 		return err
 	}
 	for rows.Next() {
-		var id, version, status string
-		var raw []byte
-		if err = rows.Scan(&id, &version, &status, &raw); err != nil {
+		var id, raw string
+		if err = rows.Scan(&id, &raw); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -202,30 +207,31 @@ func (r *snapshotReader) controls(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		var control domain.GrantControl
-		if id == "" || version != "1" || (status != "enabled" && status != "disabled") || json.Unmarshal(raw, &control) != nil {
+		var payload grantHeadPayload
+		if id == "" || json.Unmarshal([]byte(raw), &payload) != nil ||
+			(payload.Status != "enabled" && payload.Status != "disabled") {
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		canonical, marshalErr := json.Marshal(control)
-		if marshalErr != nil || !bytes.Equal(canonical, raw) || control.Version != version || control.ID != id || control.Status != status {
-			rows.Close()
-			return domain.ErrMalformed
+		s.Controls[id] = domain.GrantControl{Version: "1", ID: id, Status: payload.Status}
+		if payload.TrustedRoot {
+			s.TrustedRoots[id] = true
 		}
-		s.Controls[id] = control
 	}
 	return finishRows(rows)
 }
+
 func (r *snapshotReader) contents(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`SELECT grant_id,revision,canonical_json FROM grant_contents WHERE tenant_id=? AND application_id=? ORDER BY grant_id,revision`)
+	rows, err := r.areaRows(`
+		SELECT key4,key5,value FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant_revision' AND key3=?
+		 ORDER BY key4,key5`)
 	if err != nil {
 		return err
 	}
 	for rows.Next() {
-		var id string
-		var revision int64
-		var raw []byte
-		if err = rows.Scan(&id, &revision, &raw); err != nil {
+		var id, slot, raw string
+		if err = rows.Scan(&id, &slot, &raw); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -233,14 +239,15 @@ func (r *snapshotReader) contents(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		content, e := codec.DecodeContent(raw)
-		canonical, marshalErr := json.Marshal(content)
-		if e != nil || marshalErr != nil || !bytes.Equal(canonical, raw) || content.GrantID != id || content.Revision != revision {
+		revision, e := codec.ParseRevision(slot)
+		if e != nil {
 			rows.Close()
-			if e != nil {
-				return e
-			}
-			return domain.ErrMalformed
+			return e
+		}
+		content, e := decodeRevision(id, revision, []byte(raw))
+		if e != nil {
+			rows.Close()
+			return e
 		}
 		s.Contents[domain.GrantKey{ID: id, Revision: revision}] = content
 	}
@@ -387,29 +394,10 @@ func (r *snapshotReader) memberships(s *storage.Snapshot) error {
 	}
 	return finishRows(rows)
 }
-func (r *snapshotReader) roots(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`SELECT grant_id FROM trusted_roots WHERE tenant_id=? AND application_id=? ORDER BY grant_id`)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			rows.Close()
-			return classify(err)
-		}
-		if err = r.add(); err != nil {
-			rows.Close()
-			return err
-		}
-		if id == "" {
-			rows.Close()
-			return domain.ErrMalformed
-		}
-		s.TrustedRoots[id] = true
-	}
-	return finishRows(rows)
-}
+// roots is satisfied by controls: the trusted-root marker is a field on the
+// grant head, not a separate table. It stays as a named step so the snapshot's
+// reading order still says what it loads.
+func (r *snapshotReader) roots(_ *storage.Snapshot) error { return nil }
 func (r *snapshotReader) areaRows(query string) (*sql.Rows, error) {
 	rows, err := r.conn.QueryContext(r.ctx, query, r.area.TenantID(), r.area.ApplicationID())
 	if err != nil {

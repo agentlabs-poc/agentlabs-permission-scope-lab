@@ -115,3 +115,28 @@ func (a *RoleAdministration) teamGate(ctx context.Context, area domain.Area, ide
 	}
 	return nil
 }
+
+// The grant operations. As with teams, the lab admits the same fixture
+// administrator for all of them; a real deployment holds these as separate
+// authorities, which is why they are separate methods.
+//
+// There is no root establishment here, and that is the point rather than an
+// omission: Q-113 requires that ordinary grant administration cannot confer root
+// authority, and no method on this interface writes trust evidence.
+func (a *RoleAdministration) CheckGrantCreate(ctx context.Context, area domain.Area, identity domain.Identity, proposed domain.GrantContent, _ time.Time) error {
+	if err := a.teamGate(ctx, area, identity); err != nil {
+		return err
+	}
+	if proposed.ParentGrantID == "" {
+		return domain.ErrRejected
+	}
+	return nil
+}
+
+func (a *RoleAdministration) CheckGrantDelete(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
+
+func (a *RoleAdministration) CheckGrantRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}

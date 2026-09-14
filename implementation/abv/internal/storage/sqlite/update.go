@@ -87,6 +87,12 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.NewGrantRevision != nil {
 			categories++
 		}
+		if writes.NewGrant != nil {
+			categories++
+		}
+		if writes.RemovedGrant != "" {
+			categories++
+		}
 		for _, set := range []bool{writes.NewTeam != nil, writes.TeamParent != nil, writes.RemovedTeam != "",
 			writes.AddedMembership != nil, writes.RemovedMembership != nil} {
 			if set {
@@ -145,6 +151,12 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		}
 		if writes.NewGrantRevision != nil {
 			return p.insertGrantRevision(ctx, conn, area, *writes.NewGrantRevision)
+		}
+		if writes.NewGrant != nil {
+			return p.insertGrant(ctx, conn, area, *writes.NewGrant)
+		}
+		if writes.RemovedGrant != "" {
+			return deleteGrant(ctx, conn, area, writes.RemovedGrant)
 		}
 		return p.writeAssignments(ctx, conn, area, writes.NewAssignments)
 	})
@@ -232,11 +244,22 @@ func (p *provider) writeGrantStatus(ctx context.Context, conn *sql.Conn, area do
 	if current != before {
 		return domain.ErrConflict
 	}
-	raw, err := json.Marshal(after)
+	// The compare-and-set is on the stored status, which now lives inside the
+	// head's value rather than in a column of its own. json_extract keeps the
+	// conditional update one statement, so a concurrent change still loses.
+	head, err := readGrantHead(ctx, conn, area, before.ID)
+	if err != nil {
+		return err
+	}
+	raw, err := json.Marshal(grantHeadPayload{Status: after.Status, TrustedRoot: head.TrustedRoot})
 	if err != nil {
 		return domain.ErrMalformed
 	}
-	result, err := conn.ExecContext(ctx, `UPDATE grant_controls SET status=?, canonical_json=? WHERE tenant_id=? AND application_id=? AND grant_id=? AND status=?`, after.Status, raw, area.TenantID(), area.ApplicationID(), before.ID, before.Status)
+	result, err := conn.ExecContext(ctx, `
+		UPDATE abv_l1_records SET value=?
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant'
+		   AND key3=? AND key4=? AND json_extract(value,'$.status')=?`,
+		string(raw), area.TenantID(), area.ApplicationID(), before.ID, before.Status)
 	if err != nil {
 		return classify(err)
 	}
@@ -337,7 +360,18 @@ func (p *provider) writeAssignments(ctx context.Context, conn *sql.Conn, area do
 		}
 		ids[a.ID], recipients[key] = true, true
 		var exists int
-		err = conn.QueryRowContext(ctx, `SELECT 1 FROM grant_contents WHERE tenant_id=? AND application_id=? AND grant_id=? AND revision=?`, area.TenantID(), area.ApplicationID(), a.GrantID, a.GrantRevision).Scan(&exists)
+		// The adopted revision used to be a foreign key. One table holding every
+		// record type cannot carry that constraint, so the check is explicit
+		// here — the same move the registry fold made for installations.
+		slot, slotErr := codec.RenderRevision(a.GrantRevision)
+		if slotErr != nil {
+			return slotErr
+		}
+		err = conn.QueryRowContext(ctx, `
+			SELECT 1 FROM abv_l1_records
+			 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant_revision'
+			   AND key3=? AND key4=? AND key5=?`,
+			area.TenantID(), area.ApplicationID(), a.GrantID, slot).Scan(&exists)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrRejected
 		}

@@ -131,17 +131,32 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 			return err
 		}
 	}
+	// The trusted-root marker is a field on the grant head rather than its own
+	// table, so the set has to be known before any head is written.
+	roots := map[string]bool{}
+	for _, id := range sortedKeys(s.TrustedRoots) {
+		if !s.TrustedRoots[id] || invalid(id) {
+			return domain.ErrMalformed
+		}
+		found := false
+		for key := range s.Contents {
+			if key.ID == id {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return domain.ErrMalformed
+		}
+		roots[id] = true
+	}
 	for _, id := range sortedKeys(s.Controls) {
 		c := s.Controls[id]
 		if invalid(id) || c.ID != id || c.Version != "1" || (c.Status != "enabled" && c.Status != "disabled") {
 			return domain.ErrMalformed
 		}
-		raw, err := json.Marshal(c)
-		if err != nil {
-			return domain.ErrMalformed
-		}
-		if _, err := conn.ExecContext(ctx, `INSERT INTO grant_controls(tenant_id,application_id,grant_id,version,status,canonical_json) VALUES(?,?,?,?,?,?)`, tenant, app, id, c.Version, c.Status, raw); err != nil {
-			return classify(err)
+		if err := insertGrantHead(ctx, conn, s.Area, domain.Grant{ID: id, Status: c.Status, TrustedRoot: roots[id]}); err != nil {
+			return err
 		}
 	}
 	for _, key := range sortedGrantKeys(s.Contents) {
@@ -158,8 +173,8 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 		if err != nil || marshalErr != nil || !bytes.Equal(canonical, raw) {
 			return domain.ErrMalformed
 		}
-		if _, err = conn.ExecContext(ctx, `INSERT INTO grant_contents(tenant_id,application_id,grant_id,revision,canonical_json) VALUES(?,?,?,?,?)`, tenant, app, g.GrantID, g.Revision, raw); err != nil {
-			return classify(err)
+		if err = insertGrantRevisionRow(ctx, conn, s.Area, decoded); err != nil {
+			return err
 		}
 	}
 	for _, id := range sortedKeys(s.Teams) {
@@ -181,24 +196,6 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 		}
 		if err := seedMembership(ctx, conn, tenant, m); err != nil {
 			return err
-		}
-	}
-	for _, id := range sortedKeys(s.TrustedRoots) {
-		if !s.TrustedRoots[id] || invalid(id) {
-			return domain.ErrMalformed
-		}
-		found := false
-		for key := range s.Contents {
-			if key.ID == id {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return domain.ErrMalformed
-		}
-		if _, err := conn.ExecContext(ctx, `INSERT INTO trusted_roots(tenant_id,application_id,grant_id) VALUES(?,?,?)`, tenant, app, id); err != nil {
-			return classify(err)
 		}
 	}
 	for _, id := range sortedKeys(s.Assignments) {

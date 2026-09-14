@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 610" width="900" height="610" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12.5" role="img" aria-label="Control flow from bootstrapped platform root binding through platform administration establishing the tenant Auth root, to tenant administration installing an application, establishing its root and narrowing authority down to a human">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
+</defs>
+<style>
+ .lane{fill:none;stroke:currentColor;stroke-opacity:.18}
+ .lbl{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;fill:currentColor;fill-opacity:.55}
+ .box{fill:none;stroke:currentColor;stroke-opacity:.5;rx:4}
+ .est{stroke:currentColor;stroke-width:1.8;color:#c2410c}
+ .t{fill:currentColor}
+ .m{fill:currentColor;fill-opacity:.6;font-size:11px}
+ .hand{fill:currentColor;font-size:11px;font-weight:600;color:#c2410c}
+ .ln{stroke:currentColor;stroke-opacity:.45;fill:none}
+ .ln.accent{stroke-opacity:1}
+ svg{color:#1f2328}
+ .ground{fill:#fbfbfc}
+ .accent{color:#c2410c}
+ @media (prefers-color-scheme: dark){
+   svg{color:#d6dce4}
+   .ground{fill:#12151a}
+   .accent,.est,.hand{color:#ff9e6b}
+ }
+</style>
+<rect class="ground" x="0" y="0" width="900" height="610" rx="6"/>
+
+<text class="lbl" x="14" y="20">phase 0 · bootstrapped</text>
+<line class="lane" x1="0" y1="30" x2="900" y2="30"/>
+<rect class="box" x="14" y="42" width="252" height="38" rx="4" stroke-dasharray="4 3"/>
+<text class="t" x="26" y="60">platform root binding</text>
+<text class="m" x="26" y="74">not a grant — assumed, never created</text>
+<text class="m" x="286" y="66">the only thing not created by someone who already holds authority</text>
+
+<text class="lbl" x="14" y="116">phase 1 · auth platform administration</text>
+<line class="lane" x1="0" y1="126" x2="900" y2="126"/>
+
+<rect class="box" x="14" y="140" width="196" height="50"/>
+<text class="t" x="26" y="159">1 · register auth:*</text>
+<text class="m" x="26" y="175">platform-boundary permissions</text>
+
+<rect class="box" x="234" y="140" width="196" height="50"/>
+<text class="t" x="246" y="159">4 · create the tenant</text>
+<text class="m" x="246" y="175">acme</text>
+
+<rect class="box" x="454" y="140" width="212" height="50"/>
+<text class="t" x="466" y="159">5 · Administrators + member</text>
+<text class="m" x="466" y="175">top-level team, one human</text>
+
+<rect class="box est" x="690" y="140" width="196" height="50"/>
+<text class="t" x="702" y="159" font-weight="600">6 · EstablishAuthRoot</text>
+<text class="m" x="702" y="175">A1 — atomic, 4 writes</text>
+
+<line class="ln" x1="210" y1="165" x2="230" y2="165" marker-end="url(#a)"/>
+<line class="ln" x1="430" y1="165" x2="450" y2="165" marker-end="url(#a)"/>
+<line class="ln accent" x1="666" y1="165" x2="686" y2="165" marker-end="url(#ah)" stroke="currentColor"/>
+
+<text class="lbl" x="14" y="222">phase 1 · application platform administration</text>
+<line class="lane" x1="0" y1="232" x2="900" y2="232"/>
+<rect class="box" x="14" y="246" width="196" height="50"/>
+<text class="t" x="26" y="265">2 · register hrms</text>
+<text class="m" x="26" y="281">the application, in the registry</text>
+<rect class="box" x="234" y="246" width="232" height="50"/>
+<text class="t" x="246" y="265">3 · register its catalog</text>
+<text class="m" x="246" y="281">application-boundary permissions</text>
+<line class="ln" x1="210" y1="271" x2="230" y2="271" marker-end="url(#a)"/>
+<text class="m" x="486" y="265">any time — before the tenant exists, or years after.</text>
+<text class="m" x="486" y="281">a later addition reaches every root with no revision.</text>
+
+<path class="ln accent" d="M788 190 788 316" stroke="currentColor" stroke-dasharray="5 3" marker-end="url(#ah)"/>
+<text class="hand" x="700" y="330">authority changes hands ⇥</text>
+<text class="m" x="700" y="345">the human now holds every auth:*</text>
+
+<text class="lbl" x="14" y="378">phase 2 · tenant administration</text>
+<line class="lane" x1="0" y1="388" x2="900" y2="388"/>
+
+<rect class="box" x="14" y="402" width="180" height="50"/>
+<text class="t" x="26" y="421">7 · Install hrms</text>
+<text class="m" x="26" y="437">registry domain, via the port</text>
+
+<rect class="box est" x="218" y="402" width="196" height="50"/>
+<text class="t" x="230" y="421" font-weight="600">8 · EstablishRoot</text>
+<text class="m" x="230" y="437">B1 — atomic, 4 writes</text>
+
+<rect class="box" x="438" y="402" width="180" height="50"/>
+<text class="t" x="450" y="421">9–12 · teams + grants</text>
+<text class="m" x="450" y="437">B2 dept=FIN, B3 +cert=C17</text>
+
+<rect class="box" x="642" y="402" width="180" height="50"/>
+<text class="t" x="654" y="421">13 · AddMember</text>
+<text class="m" x="654" y="437">the human joins Team2</text>
+
+<line class="ln accent" x1="194" y1="427" x2="214" y2="427" marker-end="url(#ah)" stroke="currentColor"/>
+<line class="ln" x1="414" y1="427" x2="434" y2="427" marker-end="url(#a)"/>
+<line class="ln" x1="618" y1="427" x2="638" y2="427" marker-end="url(#a)"/>
+
+<path class="ln accent" d="M300 296 300 340 C300 370 316 368 316 396" stroke-dasharray="3 3" marker-end="url(#ah)" stroke="currentColor"/>
+<text class="m accent" x="330" y="352" fill-opacity=".85">catalog → what the root computes from</text>
+
+<text class="hand" x="642" y="478">authority changes hands ⇥</text>
+<text class="m" x="642" y="493">a non-administrator can act in HRMS</text>
+
+<line class="lane" x1="0" y1="516" x2="900" y2="516"/>
+<text class="lbl" x="14" y="538">the result</text>
+<text class="t" x="14" y="562">read only · dept = FIN AND cert = C17 · and still not an allow until the endpoint enforces it</text>
+<rect class="box est" x="14" y="576" width="14" height="14"/>
+<text class="m" x="36" y="588">establishment — the only operations that write trust evidence, and neither is reachable from grant administration</text>
+</svg>

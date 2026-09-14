@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 700" width="920" height="700" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12.5" role="img" aria-label="Two authority lineages side by side: the Auth lineage computes from the platform catalog and is established by the platform administrator at tenant creation; the application lineage computes from the application catalog and is established by the tenant administrator after installation. The tenant administrator is the bottom of the first lineage and the actor at the top of the second.">
+<defs>
+<marker id="d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
+<marker id="dh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
+</defs>
+<style>
+ .t{fill:currentColor}
+ .m{fill:currentColor;fill-opacity:.6;font-size:11px}
+ .k{font-size:10.5px;letter-spacing:.09em;fill:currentColor;fill-opacity:.5}
+ .box{fill:none;stroke:currentColor;stroke-opacity:.45;rx:5}
+ .root{fill:none;stroke:currentColor;stroke-width:1.8;rx:5;color:#c2410c}
+ .cat{fill:none;stroke:currentColor;stroke-opacity:.3;stroke-dasharray:4 3;rx:5}
+ .ln{stroke:currentColor;stroke-opacity:.45;fill:none}
+ .hand{fill:currentColor;font-size:11.5px;font-weight:600;color:#c2410c}
+ .col{fill:currentColor;fill-opacity:.035}
+ svg{color:#1f2328}
+ .ground{fill:#fbfbfc}
+ .accent{color:#c2410c}
+ @media (prefers-color-scheme: dark){
+   svg{color:#d6dce4}
+   .ground{fill:#12151a}
+   .accent,.root,.hand{color:#ff9e6b}
+ }
+</style>
+<rect class="ground" x="0" y="0" width="920" height="700" rx="6"/>
+
+<rect class="col" x="14" y="46" width="410" height="500" rx="8"/>
+<rect class="col" x="496" y="46" width="410" height="500" rx="8"/>
+
+<text class="t" x="26" y="30" font-size="14" font-weight="600">Lineage A · Auth</text>
+<text class="m" x="200" y="30">key3 = auth</text>
+<text class="t" x="508" y="30" font-size="14" font-weight="600">Lineage B · an application</text>
+<text class="m" x="722" y="30">key3 = hrms</text>
+
+<text class="k" x="26" y="72">CATALOG — where the permissions come from</text>
+<rect class="cat" x="26" y="82" width="386" height="44"/>
+<text class="t" x="38" y="100">platform-boundary permissions</text>
+<text class="m" x="38" y="116">auth:tenant:member::write, …:application::install</text>
+
+<text class="k" x="508" y="72">CATALOG — where the permissions come from</text>
+<rect class="cat" x="508" y="82" width="386" height="44"/>
+<text class="t" x="520" y="100">hrms application-boundary permissions</text>
+<text class="m" x="520" y="116">hrms:payroll:payslip::read / ::write / ::delete</text>
+
+<line class="ln" x1="120" y1="126" x2="120" y2="158" marker-end="url(#d)"/>
+<text class="m" x="130" y="148">computed, not stored</text>
+<line class="ln" x1="602" y1="126" x2="602" y2="158" marker-end="url(#d)"/>
+<text class="m" x="612" y="148">computed, not stored</text>
+
+<rect class="root" x="26" y="162" width="386" height="52"/>
+<text class="t" x="38" y="182" font-weight="600">the tenant's Auth root</text>
+<text class="m" x="38" y="198">no parent · no permissions stored · scope {}</text>
+<text class="m accent" x="300" y="182" fill-opacity="1">A1</text>
+
+<rect class="root" x="508" y="162" width="386" height="52"/>
+<text class="t" x="520" y="182" font-weight="600">the tenant's HRMS root</text>
+<text class="m" x="520" y="198">no parent · no permissions stored · scope {}</text>
+<text class="m accent" x="782" y="182" fill-opacity="1">B1</text>
+
+<text class="k" x="26" y="238">ESTABLISHED BY</text>
+<text class="t" x="150" y="238">platform administrator</text>
+<text class="k" x="26" y="256">WHEN</text>
+<text class="t" x="150" y="256">the tenant is created</text>
+<text class="k" x="508" y="238">ESTABLISHED BY</text>
+<text class="t accent" x="632" y="238">the tenant administrator</text>
+<text class="k" x="508" y="256">WHEN</text>
+<text class="t" x="632" y="256">the application is installed</text>
+
+<line class="ln" x1="120" y1="272" x2="120" y2="300" marker-end="url(#d)"/>
+<line class="ln" x1="602" y1="272" x2="602" y2="300" marker-end="url(#d)"/>
+
+<rect class="box" x="26" y="304" width="386" height="52"/>
+<text class="t" x="38" y="324">child grant — member administration</text>
+<text class="m" x="38" y="340">permissions STATED · scope {} inherits the root's</text>
+
+<rect class="box" x="508" y="304" width="386" height="52"/>
+<text class="t" x="520" y="324">child grant — Finance</text>
+<text class="m" x="520" y="340">permissions STATED (2 of 3) · scope dept=FIN</text>
+
+<line class="ln" x1="602" y1="356" x2="602" y2="384" marker-end="url(#d)"/>
+<rect class="box" x="508" y="388" width="386" height="52"/>
+<text class="t" x="520" y="408">grandchild — certificate C17</text>
+<text class="m" x="520" y="424">read only · scope dept=FIN AND cert=C17</text>
+
+<line class="ln" x1="120" y1="356" x2="120" y2="452" marker-end="url(#d)"/>
+<line class="ln" x1="602" y1="440" x2="602" y2="452" marker-end="url(#d)"/>
+
+<rect class="box" x="26" y="456" width="386" height="44"/>
+<text class="t" x="38" y="476">a human, by team membership</text>
+<text class="m" x="38" y="492">the tenant administrator</text>
+<rect class="box" x="508" y="456" width="386" height="44"/>
+<text class="t" x="520" y="476">a human, by team membership</text>
+<text class="m" x="520" y="492">not an administrator at all</text>
+
+<path class="ln accent" d="M412 478 C450 478 450 200 500 190" stroke-width="1.6" stroke-opacity="1" marker-end="url(#dh)"/>
+<text class="hand" x="352" y="560">the only thing joining them ⇗</text>
+<text class="m" x="352" y="576">the human at the bottom of A is the actor who establishes B.</text>
+<text class="m" x="352" y="591">No grant in B has a parent in A — the ceilings never merge.</text>
+
+<line x1="14" y1="612" x2="906" y2="612" stroke="currentColor" stroke-opacity=".18"/>
+<text class="k" x="26" y="634">THE SAME IN BOTH</text>
+<text class="m" x="26" y="654">every row is boundary=tenant, tenant_id=acme · one resolver, one validator, one record shape</text>
+<text class="k" x="26" y="676">DIFFERENT IN BOTH</text>
+<text class="m" x="26" y="696">only key3 — which names the catalog — and who may establish the root. Nothing below the root differs at all.</text>
+</svg>

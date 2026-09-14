@@ -9,46 +9,34 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 )
 
 func (p *provider) insertGrantRevision(ctx context.Context, conn *sql.Conn, area domain.Area, proposed domain.GrantContent) error {
-	var controlRaw []byte
-	if err := conn.QueryRowContext(ctx, `SELECT canonical_json FROM grant_controls WHERE tenant_id=? AND application_id=? AND grant_id=?`, area.TenantID(), area.ApplicationID(), proposed.GrantID).Scan(&controlRaw); errors.Is(err, sql.ErrNoRows) {
-		return domain.ErrNotFound
-	} else if err != nil {
-		return classify(err)
+	// The head must exist: publishing a revision amends a grant, it never
+	// originates one. CreateGrant writes the head and revision 1 together.
+	head, err := readGrantHead(ctx, conn, area, proposed.GrantID)
+	if err != nil {
+		return err
 	}
-	var control domain.GrantControl
-	if err := json.Unmarshal(controlRaw, &control); err != nil || control.Version != "1" || control.ID != proposed.GrantID || (control.Status != "enabled" && control.Status != "disabled") {
-		return domain.ErrMalformed
-	}
-	var trusted int
-	if err := conn.QueryRowContext(ctx, `SELECT 1 FROM trusted_roots WHERE tenant_id=? AND application_id=? AND grant_id=?`, area.TenantID(), area.ApplicationID(), proposed.GrantID).Scan(&trusted); err == nil {
+	// A root's content is computed from the catalog at resolution, so there is
+	// nothing to amend and a published revision would be ignored.
+	if head.TrustedRoot {
 		return domain.ErrRejected
-	} else if !errors.Is(err, sql.ErrNoRows) {
-		return classify(err)
 	}
-	var latestRevision int64
-	var latestRaw []byte
-	if err := conn.QueryRowContext(ctx, `SELECT revision,canonical_json FROM grant_contents WHERE tenant_id=? AND application_id=? AND grant_id=? ORDER BY revision DESC LIMIT 1`, area.TenantID(), area.ApplicationID(), proposed.GrantID).Scan(&latestRevision, &latestRaw); errors.Is(err, sql.ErrNoRows) {
-		return domain.ErrNotFound
-	} else if err != nil {
-		return classify(err)
+	latest, err := latestGrantRevision(ctx, conn, area, proposed.GrantID)
+	if err != nil {
+		return err
 	}
-	latest, err := codec.DecodeContent(latestRaw)
-	if err != nil || latest.GrantID != proposed.GrantID || latest.Revision != latestRevision {
-		if err != nil {
-			return err
-		}
-		return domain.ErrMalformed
-	}
+	latestRevision := latest.Revision
 	if proposed.Revision <= latestRevision {
 		return domain.ErrConflict
 	}
 	if proposed.ParentGrantID != latest.ParentGrantID {
 		return domain.ErrRejected
 	}
+	// The submitted content must be exactly canonical: decoding and re-encoding
+	// it has to reproduce the bytes, so a caller cannot smuggle an unknown field
+	// or a reordering past the record.
 	raw, err := json.Marshal(proposed)
 	if err != nil {
 		return domain.ErrMalformed
@@ -72,6 +60,5 @@ func (p *provider) insertGrantRevision(ctx context.Context, conn *sql.Conn, area
 	if err = validation.CheckContent(area, authoritative.Catalog, decoded, authoritative.Roles); err != nil {
 		return err
 	}
-	_, err = conn.ExecContext(ctx, `INSERT INTO grant_contents(tenant_id,application_id,grant_id,revision,canonical_json) VALUES(?,?,?,?,?)`, area.TenantID(), area.ApplicationID(), decoded.GrantID, decoded.Revision, canonical)
-	return classify(err)
+	return insertGrantRevisionRow(ctx, conn, area, decoded)
 }

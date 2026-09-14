@@ -39,9 +39,21 @@ type WriteSet struct {
 	RemovedTeam       string
 	AddedMembership   *domain.Membership
 	RemovedMembership *domain.Membership
+	// NewGrant creates a grant whole: its head and its first revision, in one
+	// transaction. Revision 1 cannot go through NewGrantRevision, which amends
+	// an existing grant and requires a predecessor. RemovedGrant destroys one
+	// whole, head and every revision — add-only's mirror.
+	NewGrant               *NewGrant
+	RemovedGrant           string
 	NewGrantRevision       *domain.GrantContent
 	GrantStatusChange      *GrantStatusChange
 	AssignmentStatusChange *AssignmentStatusChange
+}
+
+// NewGrant is a grant's two records, written together or not at all.
+type NewGrant struct {
+	Grant   domain.Grant
+	Content domain.GrantContent
 }
 
 type Provider interface {

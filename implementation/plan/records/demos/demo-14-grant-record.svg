@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 924 2812" width="924" height="2812" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
+<rect width="924" height="2812" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h910a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<circle cx="20" cy="17" r="5" fill="#e0787c"/><circle cx="38" cy="17" r="5" fill="#d9a441"/><circle cx="56" cy="17" r="5" fill="#6cc292"/>
+<text x="462.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">the grant record — head and revision, one table</text>
+<text x="18" y="60" fill="#d9a441" xml:space="preserve">══ WHAT IS HERE — the root is told apart from its children ══</text>
+<text x="18" y="80" fill="#4fb8e8" xml:space="preserve">$ abv grants list</text>
+<text x="18" y="100" fill="#9aa4b4" xml:space="preserve">    internal projection: grants</text>
+<text x="18" y="120" fill="#9aa4b4" xml:space="preserve">    count  3</text>
+<text x="18" y="140" fill="#9aa4b4" xml:space="preserve">    total  3</text>
+<text x="18" y="160" fill="#9aa4b4" xml:space="preserve">    G0             enabled   root</text>
+<text x="18" y="180" fill="#9aa4b4" xml:space="preserve">    G1             enabled   child</text>
+<text x="18" y="200" fill="#9aa4b4" xml:space="preserve">    G2             enabled   child</text>
+<text x="18" y="220" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="240" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="260" fill="#4fb8e8" xml:space="preserve">$ abv grants list --roots</text>
+<text x="18" y="280" fill="#9aa4b4" xml:space="preserve">    internal projection: grants</text>
+<text x="18" y="300" fill="#9aa4b4" xml:space="preserve">    count  1</text>
+<text x="18" y="320" fill="#9aa4b4" xml:space="preserve">    total  1</text>
+<text x="18" y="340" fill="#9aa4b4" xml:space="preserve">    G0             enabled   root</text>
+<text x="18" y="360" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="380" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="400" fill="#4fb8e8" xml:space="preserve">$ abv grants list --children</text>
+<text x="18" y="420" fill="#9aa4b4" xml:space="preserve">    internal projection: grants</text>
+<text x="18" y="440" fill="#9aa4b4" xml:space="preserve">    count  2</text>
+<text x="18" y="460" fill="#9aa4b4" xml:space="preserve">    total  2</text>
+<text x="18" y="480" fill="#9aa4b4" xml:space="preserve">    G1             enabled   child</text>
+<text x="18" y="500" fill="#9aa4b4" xml:space="preserve">    G2             enabled   child</text>
+<text x="18" y="520" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="540" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="560" fill="#d9a441" xml:space="preserve">══ THE ROOT — no parent, and no narrowing ══</text>
+<text x="18" y="580" fill="#6b7687" xml:space="preserve">   (the list below is what the fixture seeded. rootRoute ignores it and</text>
+<text x="18" y="600" fill="#6b7687" xml:space="preserve">    computes from the catalog; new root content omits the field entirely.)</text>
+<text x="18" y="620" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="640" fill="#4fb8e8" xml:space="preserve">$ abv grants get G0 --revision 1</text>
+<text x="18" y="660" fill="#9aa4b4" xml:space="preserve">    internal projection: grant</text>
+<text x="18" y="680" fill="#9aa4b4" xml:space="preserve">    id  G0</text>
+<text x="18" y="700" fill="#9aa4b4" xml:space="preserve">    status  enabled</text>
+<text x="18" y="720" fill="#9aa4b4" xml:space="preserve">    kind  root</text>
+<text x="18" y="740" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
+<text x="18" y="760" fill="#9aa4b4" xml:space="preserve">    parent  (none — root)</text>
+<text x="18" y="780" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read, hrms:payroll:payslip::write, hrms:payroll:payslip::delete</text>
+<text x="18" y="800" fill="#9aa4b4" xml:space="preserve">    scope  {} (adds no narrowing)</text>
+<text x="18" y="820" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="840" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="860" fill="#d9a441" xml:space="preserve">══ A CHILD — it states its own, and narrows ══</text>
+<text x="18" y="880" fill="#4fb8e8" xml:space="preserve">$ abv grants get G1 --revision 1</text>
+<text x="18" y="900" fill="#9aa4b4" xml:space="preserve">    internal projection: grant</text>
+<text x="18" y="920" fill="#9aa4b4" xml:space="preserve">    id  G1</text>
+<text x="18" y="940" fill="#9aa4b4" xml:space="preserve">    status  enabled</text>
+<text x="18" y="960" fill="#9aa4b4" xml:space="preserve">    kind  child</text>
+<text x="18" y="980" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
+<text x="18" y="1000" fill="#9aa4b4" xml:space="preserve">    parent  G0</text>
+<text x="18" y="1020" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read, hrms:payroll:payslip::write</text>
+<text x="18" y="1040" fill="#9aa4b4" xml:space="preserve">    scope  dept=FIN</text>
+<text x="18" y="1060" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1080" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1100" fill="#4fb8e8" xml:space="preserve">$ abv grants get G2 --revision 1</text>
+<text x="18" y="1120" fill="#9aa4b4" xml:space="preserve">    internal projection: grant</text>
+<text x="18" y="1140" fill="#9aa4b4" xml:space="preserve">    id  G2</text>
+<text x="18" y="1160" fill="#9aa4b4" xml:space="preserve">    status  enabled</text>
+<text x="18" y="1180" fill="#9aa4b4" xml:space="preserve">    kind  child</text>
+<text x="18" y="1200" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
+<text x="18" y="1220" fill="#9aa4b4" xml:space="preserve">    parent  G1</text>
+<text x="18" y="1240" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read</text>
+<text x="18" y="1260" fill="#9aa4b4" xml:space="preserve">    scope  cert=C17</text>
+<text x="18" y="1280" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1300" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1320" fill="#d9a441" xml:space="preserve">══ CREATE — head and revision 1 in one act, the id issued ══</text>
+<text x="18" y="1340" fill="#4fb8e8" xml:space="preserve">$ abv grants create --parent G1 --permissions hrms:payroll:payslip::read --scope cert=C99</text>
+<text x="18" y="1360" fill="#9aa4b4" xml:space="preserve">    internal projection: grant</text>
+<text x="18" y="1380" fill="#9aa4b4" xml:space="preserve">    id  fy85p22i8glc</text>
+<text x="18" y="1400" fill="#9aa4b4" xml:space="preserve">    status  enabled</text>
+<text x="18" y="1420" fill="#9aa4b4" xml:space="preserve">    kind  child</text>
+<text x="18" y="1440" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
+<text x="18" y="1460" fill="#9aa4b4" xml:space="preserve">    parent  G1</text>
+<text x="18" y="1480" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read</text>
+<text x="18" y="1500" fill="#9aa4b4" xml:space="preserve">    scope  cert=C99</text>
+<text x="18" y="1520" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1540" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1560" fill="#4fb8e8" xml:space="preserve">$ abv grants create --parent G1 --permissions hrms:payroll:payslip::read --scope dept=FIN</text>
+<text x="18" y="1580" fill="#9aa4b4" xml:space="preserve">    internal projection: grant</text>
+<text x="18" y="1600" fill="#9aa4b4" xml:space="preserve">    id  fy85p243o4jk</text>
+<text x="18" y="1620" fill="#9aa4b4" xml:space="preserve">    status  enabled</text>
+<text x="18" y="1640" fill="#9aa4b4" xml:space="preserve">    kind  child</text>
+<text x="18" y="1660" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
+<text x="18" y="1680" fill="#9aa4b4" xml:space="preserve">    parent  G1</text>
+<text x="18" y="1700" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read</text>
+<text x="18" y="1720" fill="#9aa4b4" xml:space="preserve">    scope  dept=FIN</text>
+<text x="18" y="1740" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1760" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1780" fill="#d9a441" xml:space="preserve">══ CREATE REFUSES — and each refusal is its own answer ══</text>
+<text x="18" y="1800" fill="#4fb8e8" xml:space="preserve">$ abv grants create --permissions hrms:payroll:payslip::read</text>
+<text x="18" y="1820" fill="#9aa4b4" xml:space="preserve">    grants create requires --parent: a parentless grant is not a root, and establishing one is not a grant operation</text>
+<text x="18" y="1840" fill="#e0787c" xml:space="preserve">    rc=2</text>
+<text x="18" y="1860" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1880" fill="#4fb8e8" xml:space="preserve">$ abv grants create --parent absent --permissions hrms:payroll:payslip::read</text>
+<text x="18" y="1900" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="1920" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="1940" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1960" fill="#4fb8e8" xml:space="preserve">$ abv grants create --parent G1 --permissions hrms:payroll:payslip::export</text>
+<text x="18" y="1980" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="2000" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="2020" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="2040" fill="#4fb8e8" xml:space="preserve">$ abv grants create --parent G1 --permissions hrms:payroll:payslip::read --scope branch=B1</text>
+<text x="18" y="2060" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="2080" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="2100" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="2120" fill="#d9a441" xml:space="preserve">══ DELETE — refuses while anything depends on it ══</text>
+<text x="18" y="2140" fill="#4fb8e8" xml:space="preserve">$ abv grants delete G1</text>
+<text x="18" y="2160" fill="#9aa4b4" xml:space="preserve">    operation conflict</text>
+<text x="18" y="2180" fill="#e0787c" xml:space="preserve">    rc=4</text>
+<text x="18" y="2200" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="2220" fill="#4fb8e8" xml:space="preserve">$ abv grants delete absent</text>
+<text x="18" y="2240" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="2260" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="2280" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="2300" fill="#d9a441" xml:space="preserve">══ REVISIONS — newest first ══</text>
+<text x="18" y="2320" fill="#4fb8e8" xml:space="preserve">$ abv grants revisions G1</text>
+<text x="18" y="2340" fill="#9aa4b4" xml:space="preserve">    internal projection: grant revisions</text>
+<text x="18" y="2360" fill="#9aa4b4" xml:space="preserve">    grant  G1</text>
+<text x="18" y="2380" fill="#9aa4b4" xml:space="preserve">    count  1</text>
+<text x="18" y="2400" fill="#9aa4b4" xml:space="preserve">    total  1</text>
+<text x="18" y="2420" fill="#9aa4b4" xml:space="preserve">    revision 1    2 permissions</text>
+<text x="18" y="2440" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="2460" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="2480" fill="#d9a441" xml:space="preserve">══ THE ROWS — one table, two record types, told apart by key2 ══</text>
+<text x="18" y="2500" fill="#8899ab" xml:space="preserve">╭────────────────┬──────┬──────────────┬────────────┬────────────────────────────────────────────────╮</text>
+<text x="18" y="2520" fill="#8899ab" xml:space="preserve">│      key2      │ key3 │     key4     │    key5    │                     value                      │</text>
+<text x="18" y="2540" fill="#8899ab" xml:space="preserve">╞════════════════╪══════╪══════════════╪════════════╪════════════════════════════════════════════════╡</text>
+<text x="18" y="2560" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ G0           │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:true}       │</text>
+<text x="18" y="2580" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ G0           │ 0000000001 │ {&quot;permissions&quot;:[&quot;hrms:payroll:payslip::read&quot;,&quot; │</text>
+<text x="18" y="2600" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ G1           │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
+<text x="18" y="2620" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ G1           │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;G0&quot;,&quot;permissions&quot;:[&quot;hrms:p │</text>
+<text x="18" y="2640" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ G2           │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
+<text x="18" y="2660" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ G2           │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;G1&quot;,&quot;permissions&quot;:[&quot;hrms:p │</text>
+<text x="18" y="2680" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ fy85p22i8glc │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
+<text x="18" y="2700" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fy85p22i8glc │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;G1&quot;,&quot;permissions&quot;:[&quot;hrms:p │</text>
+<text x="18" y="2720" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ fy85p243o4jk │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
+<text x="18" y="2740" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fy85p243o4jk │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;G1&quot;,&quot;permissions&quot;:[&quot;hrms:p │</text>
+<text x="18" y="2760" fill="#8899ab" xml:space="preserve">╰────────────────┴──────┴──────────────┴────────────┴────────────────────────────────────────────────╯</text>
+<text x="18" y="2780" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="2800" fill="#9aa4b4" xml:space="preserve">  tables: abv_metadata abv_l1_records applications installations assignments abv_lab_metadata</text>
+</svg>
