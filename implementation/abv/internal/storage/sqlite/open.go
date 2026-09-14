@@ -19,10 +19,21 @@ import (
 
 const defaultMaxSnapshotRecords = 10_000
 
-type Options struct{ MaxSnapshotRecords int }
+type Options struct {
+	MaxSnapshotRecords int
+	// Registry routes the two questions about applications and installations to
+	// the application registry domain. Absent, the provider answers them from
+	// its own tables, which is what the lab fixtures do.
+	Registry Registry
+}
 
 type provider struct {
 	db                 *sql.DB
+	// registry answers whether an application exists and whether a tenant holds
+	// it. Both facts belong to the application registry domain, not here. When
+	// it is absent the provider falls back to its own tables, which is what a
+	// lab fixture and the existing tests use.
+	registry Registry
 	maxSnapshotRecords int
 	// afterCatalog is an internal deterministic test seam for proving that one
 	// read transaction pins all cross-query evidence to the same DB version.
@@ -80,7 +91,7 @@ func open(ctx context.Context, path string, options Options, fixtureCreated bool
 	if err != nil {
 		return nil, classify(err)
 	}
-	p := &provider{db: db, maxSnapshotRecords: limit}
+	p := &provider{db: db, maxSnapshotRecords: limit, registry: options.Registry}
 	fail := func(err error) (storage.Provider, error) { _ = db.Close(); return nil, err }
 	conn, err := p.connection(ctx)
 	if err != nil {
