@@ -29,50 +29,72 @@ func (r *snapshotReader) add() error {
 
 func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Area) (storage.Snapshot, error) {
 	r := snapshotReader{conn: conn, ctx: ctx, area: area, limit: p.maxSnapshotRecords}
-	var installed int
-	err := conn.QueryRowContext(ctx, `SELECT 1 FROM installations WHERE tenant_id=? AND application_id=?`, area.TenantID(), area.ApplicationID()).Scan(&installed)
-	if errors.Is(err, sql.ErrNoRows) {
-		return storage.Snapshot{}, domain.ErrNotFound
-	}
-	if err != nil {
-		return storage.Snapshot{}, classify(err)
+	// Does this tenant hold this application? That is the registry's fact. It
+	// gates every read of a tenant's authority, which is why it runs first.
+	if p.registry != nil {
+		held, err := p.registry.Installed(ctx, area.TenantID(), area.ApplicationID())
+		if err != nil {
+			return storage.Snapshot{}, err
+		}
+		if !held {
+			return storage.Snapshot{}, domain.ErrNotFound
+		}
+	} else {
+		var installed int
+		err := conn.QueryRowContext(ctx, `SELECT 1 FROM installations WHERE tenant_id=? AND application_id=?`, area.TenantID(), area.ApplicationID()).Scan(&installed)
+		if errors.Is(err, sql.ErrNoRows) {
+			return storage.Snapshot{}, domain.ErrNotFound
+		}
+		if err != nil {
+			return storage.Snapshot{}, classify(err)
+		}
 	}
 	s := storage.Snapshot{Area: area, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
-	if err = r.catalog(area.ApplicationID(), &s.Catalog); err != nil {
+	if err := r.catalog(area.ApplicationID(), &s.Catalog); err != nil {
 		return storage.Snapshot{}, err
 	}
 	if p.afterCatalog != nil {
-		if err = p.afterCatalog(ctx); err != nil {
+		if err := p.afterCatalog(ctx); err != nil {
 			return storage.Snapshot{}, err
 		}
 	}
-	if err = r.controls(&s); err != nil {
+	if err := r.controls(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
-	if err = r.contents(&s); err != nil {
+	if err := r.contents(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
-	if err = r.assignments(&s); err != nil {
+	if err := r.assignments(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
-	if err = r.roles(&s); err != nil {
+	if err := r.roles(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
-	if err = r.teams(&s); err != nil {
+	if err := r.teams(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
-	if err = r.memberships(&s); err != nil {
+	if err := r.memberships(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
-	if err = r.roots(&s); err != nil {
+	if err := r.roots(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
 	return s, nil
 }
 
 func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) error {
+	// compatibility_enabled and generation are Auth-AL's own state about an
+	// application, not the application itself — whether it exists is the
+	// registry's answer, given before this runs.
+	//
+	// So an absent row is not "no such application"; it is "no state recorded
+	// yet", and the defaults are the honest reading: relationship validation off
+	// under Q-041, generation zero. The row appears on the first catalog write.
 	var compat int
-	if err := r.conn.QueryRowContext(r.ctx, `SELECT compatibility_enabled FROM applications WHERE application_id=?`, applicationID).Scan(&compat); err != nil {
+	err := r.conn.QueryRowContext(r.ctx, `SELECT compatibility_enabled FROM applications WHERE application_id=?`, applicationID).Scan(&compat)
+	if errors.Is(err, sql.ErrNoRows) {
+		compat = 0
+	} else if err != nil {
 		return corruptOrDB(err)
 	}
 	if err := r.add(); err != nil {
@@ -82,7 +104,9 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 		return domain.ErrMalformed
 	}
 	var generation int64
-	if err := r.conn.QueryRowContext(r.ctx, `SELECT generation FROM applications WHERE application_id=?`, applicationID).Scan(&generation); err != nil {
+	if err := r.conn.QueryRowContext(r.ctx, `SELECT generation FROM applications WHERE application_id=?`, applicationID).Scan(&generation); errors.Is(err, sql.ErrNoRows) {
+		generation = 0
+	} else if err != nil {
 		return classify(err)
 	}
 	*catalog = domain.Catalog{ApplicationID: applicationID, Generation: generation, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1}

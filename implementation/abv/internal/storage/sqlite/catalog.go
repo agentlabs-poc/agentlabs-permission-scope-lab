@@ -173,11 +173,24 @@ func (p *provider) UpdateCatalog(ctx context.Context, app domain.Application, ca
 }
 
 func (p *provider) readCatalog(ctx context.Context, conn *sql.Conn, applicationID string) (domain.Catalog, error) {
-	var exists int
-	if err := conn.QueryRowContext(ctx, `SELECT 1 FROM applications WHERE application_id=?`, applicationID).Scan(&exists); errors.Is(err, sql.ErrNoRows) {
-		return domain.Catalog{}, domain.ErrNotFound
-	} else if err != nil {
-		return domain.Catalog{}, classify(err)
+	// Does this application exist? The application registry domain owns that
+	// fact. Without a registry the provider answers from its own table, which is
+	// what a lab fixture does.
+	if p.registry != nil {
+		exists, err := p.registry.ApplicationExists(ctx, applicationID)
+		if err != nil {
+			return domain.Catalog{}, err
+		}
+		if !exists {
+			return domain.Catalog{}, domain.ErrNotFound
+		}
+	} else {
+		var exists int
+		if err := conn.QueryRowContext(ctx, `SELECT 1 FROM applications WHERE application_id=?`, applicationID).Scan(&exists); errors.Is(err, sql.ErrNoRows) {
+			return domain.Catalog{}, domain.ErrNotFound
+		} else if err != nil {
+			return domain.Catalog{}, classify(err)
+		}
 	}
 	r := snapshotReader{conn: conn, ctx: ctx, limit: p.maxSnapshotRecords}
 	var catalog domain.Catalog
