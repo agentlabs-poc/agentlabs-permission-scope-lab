@@ -104,7 +104,7 @@ func TestGrantPublicationUsesMarkedFixtureAndPreservesAssignment(t *testing.T) {
 	}
 	defer db.Close()
 	var count int
-	if err = db.QueryRow(`SELECT count(*) FROM grant_contents WHERE grant_id='G2'`).Scan(&count); err != nil || count != 2 {
+	if err = db.QueryRow(`SELECT count(*) FROM abv_l1_records WHERE key2='grant_revision' AND key4='G2'`).Scan(&count); err != nil || count != 2 {
 		t.Fatalf("revisions=%d err=%v", count, err)
 	}
 	for _, tc := range []struct {

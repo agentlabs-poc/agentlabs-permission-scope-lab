@@ -134,7 +134,7 @@ func TestReaderConnectionIsReadOnlyAndSeesLaterCommits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = conn.ExecContext(t.Context(), `UPDATE grant_controls SET status='disabled'`); err == nil {
+	if _, err = conn.ExecContext(t.Context(), `UPDATE abv_l1_records SET value='{"status":"disabled","trusted_root":false}' WHERE key2='grant'`); err == nil {
 		t.Fatal("reader connection accepted a write")
 	}
 	if err = conn.Close(); err != nil {
@@ -182,8 +182,10 @@ func TestOpenReadOnlyCancellationAndMalformedRowFail(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := fixture.(*provider)
-	bad := []byte(`{"version":"1","grant_id":"different","revision":1,"permissions":["read"],"scope":{}}`)
-	if _, err = p.db.ExecContext(t.Context(), `UPDATE grant_contents SET canonical_json=? WHERE tenant_id=? AND application_id=?`, bad, base.Area.TenantID(), base.Area.ApplicationID()); err != nil {
+	// A payload whose permission list is not a permission list: the row survives
+	// the write, and the reader has to refuse it rather than carry it forward.
+	bad := []byte(`{"permissions":[""],"scope":{}}`)
+	if _, err = p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE key2='grant_revision' AND tenant_id=? AND key3=?`, bad, base.Area.TenantID(), base.Area.ApplicationID()); err != nil {
 		t.Fatal(err)
 	}
 	if err = fixture.Close(); err != nil {

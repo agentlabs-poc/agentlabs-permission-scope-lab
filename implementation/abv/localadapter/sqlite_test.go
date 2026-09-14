@@ -153,8 +153,7 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	}
 	setGrant := func(status string) {
 		t.Helper()
-		raw := `{"version":"1","id":"G1","status":"` + status + `"}`
-		if _, err := db.Exec(`UPDATE grant_controls SET status=?,canonical_json=? WHERE grant_id='G1'`, status, raw); err != nil {
+		if _, err := db.Exec(`UPDATE abv_l1_records SET value=? WHERE key2='grant' AND key4='G1'`, `{"status":"`+status+`","trusted_root":false}`); err != nil {
 			t.Fatal(err)
 		}
 	}

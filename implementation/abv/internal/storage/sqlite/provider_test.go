@@ -284,8 +284,14 @@ func TestReadRejectsCanonicalPayloadAndIndexDisagreement(t *testing.T) {
 	}
 	p := opened.(*provider)
 	defer p.Close()
-	bad := []byte(`{"version":"1","grant_id":"different","revision":1,"permissions":["read"],"scope":{}}`)
-	if _, err := p.db.ExecContext(t.Context(), `UPDATE grant_contents SET canonical_json=? WHERE tenant_id=? AND application_id=? AND grant_id='G1'`, bad, base.Area.TenantID(), base.Area.ApplicationID()); err != nil {
+	// Before the fold this injected a payload whose grant_id disagreed with its
+	// index column. That disagreement is now unrepresentable: identity lives in
+	// the key slots and is stored exactly once, so the payload has nothing to
+	// disagree with. What remains testable — and is what this guards — is that a
+	// payload the codec refuses never reaches a caller. A blank permission is
+	// one PermissionList rejects.
+	bad := []byte(`{"permissions":[""],"scope":{}}`)
+	if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE key2='grant_revision' AND tenant_id=? AND key3=? AND key4='G1'`, bad, base.Area.TenantID(), base.Area.ApplicationID()); err != nil {
 		t.Fatal(err)
 	}
 	var calls atomic.Int32
