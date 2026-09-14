@@ -1,5 +1,58 @@
 # ABV implementation progress
 
+## The grant record — two record types, and tables 8 → 5
+
+[Record](records/record-grant.md) · [root proposal](records/proposal-root-source.md) ·
+[demonstration](records/demos/demo-14-grant-record.md).
+
+A grant is two things that change at different rates, so it is two record types:
+`abv.grant` holds the status and the trusted-root marker, `abv.grant_revision`
+holds content that never changes. The status cannot live on a revision — two
+revisions of one grant would be able to disagree about whether it is enabled —
+and the revision cannot live in a value, because record identity is the whole key
+path and revision 2 would collide with revision 1. `key5` is zero-padded, the
+rule roles already hold.
+
+`grant_controls`, `grant_contents` and `trusted_roots` are gone. The trusted-root
+marker becomes a field on the head rather than a three-column table pointing at a
+table that no longer exists, and it is deliberately absent from the canonical
+JSON: Q-119 refuses a root flag in submitted content, and this is what Auth
+recorded rather than what a caller claimed. `version` is not stored either — it
+is always `"1"`, so a column would persist a constant; it is rebuilt on the way
+out the way a permission identifier is rebuilt from its slots.
+
+Two constraints the schema can no longer express moved into the writers, exactly
+as the registry fold moved the installation check into `Install`: the assignment's
+foreign key into `grant_contents`, and the control lookup guarding publication.
+
+**`CreateGrant` writes the head and revision 1 in one transaction**, because
+revision 1 cannot go through `PublishGrantRevision` — that path amends a grant and
+demands a predecessor, so a create-then-publish pair would leave a window where a
+grant exists, can be enabled, and supplies nothing. The identifier is issued,
+never accepted. A parentless create is `ErrRejected` rather than a root: the
+guarantee Q-113 asks for is not a check inside creation, it is that **no grant
+operation writes trust evidence at all**.
+
+`ValidateContent` gains a third permission source — root-shaped content names
+none, because a root's coverage is computed from the catalog (Q-122) and a stored
+list on a root is never read. It cannot check that such content *is* a trusted
+root, since Q-119 is explicit that omitting a field proves nothing and the
+evidence is on the head; what it checks is that root-shaped content is shaped like
+one completely: no parent, and no local scope.
+
+**Carried deliberately.** A trusted root still cannot be created by any operation,
+because establishment writes four things and the fourth is a holder assignment —
+three-now-four-later would destroy the atomicity Q-117 depends on. Grant
+identifiers are still accepted as the corpus holds them (`G0`/`G1`/`G2`) while
+issuance is strict, pending the base-36 sweep. `DeleteGrant`'s dependency refusal
+errs conservative and is loosened when assignments can be consulted, never
+tightened.
+
+**Four decisions in the proposal are not approved yet**: the root omitting
+`permissions`, a root's scope forced to `{}`, a boundary filter on the root
+computation, and the tenant administrator establishing an application root. Only
+the first two are exercised here.
+
 ## `application_registry` — a second 123 domain, and the seam to it
 
 [Charter](registry/charter.md). Applications are not Auth-AL's business, so they
