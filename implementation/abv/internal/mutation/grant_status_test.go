@@ -85,16 +85,16 @@ func TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes(t *te
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			fixture.Snapshot.Teams["BrokenTeam"] = domain.Team{ID: "BrokenTeam", ParentID: "RootTeam"}
+			fixture.Snapshot.Teams["ficfwlfpxibk"] = domain.Team{Name: "team",ID: "ficfwlfpxibk", ParentID: "fibggi2jur5s"}
 			control := fixture.Snapshot.Controls["G2"]
 			control.Status = "disabled"
 			fixture.Snapshot.Controls["G2"] = control
 			if test.brokenMode != "" && test.brokenMode != "upstream" {
 				fixture.Snapshot.Assignments["A2"] = fixture.Proposed
 				broken := fixture.Proposed
-				broken.ID, broken.Recipient.ID, broken.Status = "A3", "BrokenTeam", test.brokenMode
+				broken.ID, broken.Recipient.ID, broken.Status = "A3", "ficfwlfpxibk", test.brokenMode
 				if test.brokenMode == "user" {
-					broken.Recipient = domain.Recipient{Type: "user", ID: "maya"}
+					broken.Recipient = domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}
 					broken.Status = "enabled"
 				}
 				fixture.Snapshot.Assignments[broken.ID] = broken
@@ -224,10 +224,10 @@ func TestSetGrantStatusCancellationAndCompetingWriterReturnNoControl(t *testing.
 func TestSetGrantStatusRejectsDepthOverflow(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	parentTeam, parentGrant := "RootTeam", "G0"
+	parentTeam, parentGrant := "fibggi2jur5s", "G0"
 	for i := 1; i <= 258; i++ {
 		team, grant, assignment := fmt.Sprintf("DeepTeam%d", i), fmt.Sprintf("DeepGrant%d", i), fmt.Sprintf("DeepAssignment%d", i)
-		fixture.Snapshot.Teams[team] = domain.Team{ID: team, ParentID: parentTeam}
+		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
 		fixture.Snapshot.Controls[grant] = domain.GrantControl{Version: "1", ID: grant, Status: "enabled"}
 		fixture.Snapshot.Contents[domain.GrantKey{ID: grant, Revision: 1}] = domain.GrantContent{Version: "1", GrantID: grant, Revision: 1, ParentGrantID: parentGrant, Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 		fixture.Snapshot.Assignments[assignment] = domain.Assignment{Version: "1", ID: assignment, GrantID: grant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: team}, Status: "enabled"}
@@ -245,7 +245,7 @@ func TestSetGrantStatusRejectsDepthOverflow(t *testing.T) {
 
 func TestSetGrantStatusBoundaryValidationAndTypedNil(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
-	other, _ := domain.NewArea("other", "hrms")
+	other, _ := domain.NewArea("fi7io4lvkfsw", "hrms")
 	fixture := lab.TeamFINC17(area)
 	provider := &failingCommitProvider{snapshot: fixture.Snapshot}
 	service, _ := mutation.New(provider, grantAdministration{}, &fixedClock{now: time.Now()})
@@ -322,7 +322,7 @@ func TestSetGrantStatusPreservesDescendantStateAndEffectiveness(t *testing.T) {
 			descendant := fixture.Snapshot.Controls["G2"]
 			descendant.Status = descendantStatus
 			fixture.Snapshot.Controls["G2"] = descendant
-			if _, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Now()); !errors.Is(err, domain.ErrRejected) {
+			if _, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Now()); !errors.Is(err, domain.ErrRejected) {
 				t.Fatalf("descendant effective before restore: %v", err)
 			}
 			provider, _ := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
@@ -336,7 +336,7 @@ func TestSetGrantStatusPreservesDescendantStateAndEffectiveness(t *testing.T) {
 				if snapshot.Controls["G2"].Status != descendantStatus || snapshot.Assignments["A2"].Status != "enabled" {
 					t.Fatal("descendant state changed")
 				}
-				_, err := lineage.ResolveParentTeam(snapshot, fixture.Child, "Team2", time.Now())
+				_, err := lineage.ResolveParentTeam(snapshot, fixture.Child, "fibggi2juxhc", time.Now())
 				if descendantStatus == "enabled" && err != nil || descendantStatus == "disabled" && !errors.Is(err, domain.ErrRejected) {
 					t.Fatalf("descendant effectiveness error = %v", err)
 				}

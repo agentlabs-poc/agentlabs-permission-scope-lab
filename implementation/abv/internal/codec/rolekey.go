@@ -66,3 +66,17 @@ func ParseRevision(slot string) (int64, error) {
 	}
 	return revision, nil
 }
+
+// ValidHumanID reports whether a human identifier is a base-36 Snowflake.
+//
+// A human id is issued by the auth service rather than here, so this is Auth-AL
+// insisting on the scheme it shares with that service rather than generating the
+// value. It is the same alphabet and ceiling as a record id: one spelling for
+// every identifier in the system, whoever issued it.
+//
+// Deliberately the same function body as ValidRoleID, under its own name: a
+// human id and a record id are different things that happen to share a format,
+// and a later decision to relax one should not silently relax the other.
+func ValidHumanID(id string) bool {
+	return ValidRoleID(id)
+}

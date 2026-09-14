@@ -32,7 +32,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "grant", "assignment", "role", "scenario", "catalog":
+	case "inspect", "check", "assign", "grant", "assignment", "role", "team", "scenario", "catalog":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -47,7 +47,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		name, value, inline := strings.Cut(arg, "=")
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
-			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace":
+			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace", "--parent", "--roots", "--human":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -56,7 +56,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		}
 		// --active-only is a presence flag: it carries no value and must not
 		// consume the next argument.
-		if name == "--active-only" || name == "--latest" || name == "--application" {
+		if name == "--active-only" || name == "--latest" || name == "--application" || name == "--roots" {
 			if inline {
 				return fail(2, "flag takes no value")
 			}
@@ -187,6 +187,48 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			}
 		default:
 			return fail(2, "role requires publish, get or list")
+		}
+	case "team":
+		if len(positional) == 0 || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "team requires a verb, database and fixture context")
+		}
+		switch positional[0] {
+		case "get":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") {
+				return fail(2, "team get requires ID, database and fixture context")
+			}
+		case "list":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--parent", "--roots", "--name", "--offset", "--limit") {
+				return fail(2, "team list accepts parent, roots, name, offset and limit only")
+			}
+		case "members":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--id", "--human", "--offset", "--limit") {
+				return fail(2, "team members accepts id, human, offset and limit only")
+			}
+			if empty(flags["--id"]) == empty(flags["--human"]) {
+				return fail(2, "team members requires exactly one of --id and --human")
+			}
+		case "create":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--name", "--parent") || empty(flags["--name"]) {
+				return fail(2, "team create requires --name, and --parent for a subteam")
+			}
+		case "reparent":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--parent", "--roots") {
+				return fail(2, "team reparent requires ID and either --parent or --roots")
+			}
+			if empty(flags["--parent"]) == !has(flags, "--roots") {
+				return fail(2, "team reparent requires exactly one of --parent and --roots")
+			}
+		case "delete":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") {
+				return fail(2, "team delete requires ID")
+			}
+		case "add-member", "remove-member":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--id", "--human") || empty(flags["--id"]) || empty(flags["--human"]) {
+				return fail(2, "team "+positional[0]+" requires --id and --human")
+			}
+		default:
+			return fail(2, "team requires get, list, members, create, reparent, delete, add-member or remove-member")
 		}
 	case "scenario":
 		if len(positional) != 2 || empty(positional[1]) || (positional[0] != "seed" && positional[0] != "run") || flags["--db"] == "" {

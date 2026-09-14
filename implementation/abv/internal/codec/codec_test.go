@@ -11,7 +11,7 @@ import (
 )
 
 const goodContent = `{"version":"1","grant_id":"G2","revision":1,"parent_grant_id":"G1","permissions":["hrms:employee:certificate::read"],"scope":{"cert":"C17"}}`
-const goodAssignment = `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}`
+const goodAssignment = `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`
 
 func TestCanonicalFixturesRoundTrip(t *testing.T) {
 	for _, name := range []string{"g1", "g2", "a1", "a2"} {
@@ -62,7 +62,7 @@ func TestContentRejectsAmbiguousOrUnsupportedJSON(t *testing.T) {
 		"numeric value":        strings.Replace(goodContent, `"C17"`, "17", 1),
 		"empty value":          strings.Replace(goodContent, `"C17"`, `""`, 1),
 		"wildcard":             strings.Replace(goodContent, `"C17"`, `"*"`, 1),
-		"recipient on content": strings.Replace(goodContent, `"version":"1"`, `"version":"1","recipient":{"type":"group","id":"Team2"}`, 1),
+		"recipient on content": strings.Replace(goodContent, `"version":"1"`, `"version":"1","recipient":{"type":"group","id":"fibggi2juxhc"}`, 1),
 		"role half":            strings.Replace(goodContent, `"permissions":["hrms:employee:certificate::read"]`, `"role_id":"reader"`, 1),
 		"mixed sources":        strings.Replace(goodContent, `"revision":1`, `"revision":1,"role_id":"reader","role_revision":1`, 1),
 		"present empty role":   strings.Replace(goodContent, `"revision":1`, `"revision":1,"role_id":""`, 1),
@@ -145,13 +145,13 @@ func TestValidateContentRejectsMalformedTypedValues(t *testing.T) {
 }
 func TestAssignmentRejectsMalformedAndIndependentProxyRecords(t *testing.T) {
 	for name, raw := range map[string]string{
-		"duplicate recipient":   strings.Replace(goodAssignment, `"id":"Team2"`, `"id":"Team2","id":"Team1"`, 1),
-		"missing recipient":     strings.Replace(goodAssignment, `"recipient":{"type":"group","id":"Team2"},`, "", 1),
+		"duplicate recipient":   strings.Replace(goodAssignment, `"id":"fibggi2juxhc"`, `"id":"fibggi2juxhc","id":"fibggi2juubk"`, 1),
+		"missing recipient":     strings.Replace(goodAssignment, `"recipient":{"type":"group","id":"fibggi2juxhc"},`, "", 1),
 		"proxy":                 strings.Replace(goodAssignment, `"group"`, `"agent"`, 1),
 		"unknown status":        strings.Replace(goodAssignment, `"enabled"`, `"orphan"`, 1),
 		"no grant revision":     strings.Replace(goodAssignment, `"grant_revision":1,`, "", 1),
 		"assignment validity":   strings.Replace(goodAssignment, `"version":"1"`, `"version":"1","validity":{"expires_at":"2026-09-30T00:00:00Z"}`, 1),
-		"extra recipient field": strings.Replace(goodAssignment, `"id":"Team2"`, `"id":"Team2","owner":"maya"`, 1),
+		"extra recipient field": strings.Replace(goodAssignment, `"id":"fibggi2juxhc"`, `"id":"fibggi2juxhc","owner":"fi7io4lvjqio"`, 1),
 		"case alias":            strings.Replace(goodAssignment, `"id":"A2"`, `"ID":"A2"`, 1),
 		"null status":           strings.Replace(goodAssignment, `"status":"enabled"`, `"status":null`, 1),
 	} {

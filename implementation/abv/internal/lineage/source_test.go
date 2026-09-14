@@ -18,19 +18,19 @@ func TestHasSourceRequiresActingHumanMembershipInActualHolder(t *testing.T) {
 	}{
 		{"Maya is an explicit Team1 member", func(*lab.TeamFINC17Case) {}, nil},
 		{"Nutan cannot substitute for Maya", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Memberships = []domain.Membership{{TeamID: "Team2", HumanID: "nutan"}}
+			f.Snapshot.Memberships = []domain.Membership{{TeamID: "fibggi2juxhc", HumanID: "fi7io4lvjwu8"}}
 		}, domain.ErrRejected},
 		{"ancestor membership cannot substitute", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Memberships = []domain.Membership{{TeamID: "RootTeam", HumanID: "maya"}}
+			f.Snapshot.Memberships = []domain.Membership{{TeamID: "fibggi2jur5s", HumanID: "fi7io4lvjqio"}}
 		}, domain.ErrRejected},
 		{"differently scoped holder cannot substitute", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["TeamX"] = domain.Team{ID: "TeamX", ParentID: "RootTeam"}
-			f.Snapshot.Memberships = []domain.Membership{{TeamID: "TeamX", HumanID: "maya"}}
+			f.Snapshot.Teams["TeamX"] = domain.Team{Name: "team",ID: "TeamX", ParentID: "fibggi2jur5s"}
+			f.Snapshot.Memberships = []domain.Membership{{TeamID: "TeamX", HumanID: "fi7io4lvjqio"}}
 		}, domain.ErrRejected},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -72,7 +72,7 @@ func TestHasSourceRevalidatesRouteAndIdentity(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -97,7 +97,7 @@ func TestHasSourceRejectsDuplicateFinalSourceBinding(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+			parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -121,7 +121,7 @@ func TestHasSourceRechecksExactExpiry(t *testing.T) {
 	g1 := fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
 	g1.Validity = &domain.Validity{ExpiresAt: &expiry}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g1
-	parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", expiry.Add(-time.Nanosecond))
+	parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", expiry.Add(-time.Nanosecond))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,11 +133,11 @@ func TestHasSourceRechecksExactExpiry(t *testing.T) {
 func TestHasSourceLeavesDirectHumanAndSelfBindingExplicitlyUnsupported(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+	parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	direct := domain.Assignment{Version: "1", ID: "AU", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "maya"}, Status: "enabled"}
+	direct := domain.Assignment{Version: "1", ID: "AU", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}, Status: "enabled"}
 	directContent := fixture.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
 	directContent.Revision = 2
 	directContent.Permissions = []string{lab.PayslipRead}
@@ -153,7 +153,7 @@ func TestHasSourceLeavesDirectHumanAndSelfBindingExplicitlyUnsupported(t *testin
 	}
 
 	fixture = lab.TeamFINC17(area)
-	parent, err = lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "Team2", time.Time{})
+	parent, err = lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
 	if err != nil {
 		t.Fatal(err)
 	}

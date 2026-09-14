@@ -65,11 +65,11 @@ func revisionFixture(area domain.Area) (storage.Snapshot, domain.Identity) {
 		Catalog:     domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::delete": {ID: "hrms:payroll:payslip::delete", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"}}},
 		Controls:    map[string]domain.GrantControl{"G0": {Version: "1", ID: "G0", Status: "enabled"}, "G1": {Version: "1", ID: "G1", Status: "enabled"}, "G2": {Version: "1", ID: "G2", Status: "enabled"}},
 		Contents:    map[domain.GrantKey]domain.GrantContent{{ID: "G0", Revision: 1}: g0, {ID: "G1", Revision: 1}: g1, {ID: "G2", Revision: 1}: g2},
-		Assignments: map[string]domain.Assignment{"A0": {Version: "1", ID: "A0", GrantID: "G0", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Root"}, Status: "enabled"}, "A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team1"}, Status: "enabled"}},
+		Assignments: map[string]domain.Assignment{"A0": {Version: "1", ID: "A0", GrantID: "G0", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Root"}, Status: "enabled"}, "A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"}},
 		Roles:       map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}},
-		Teams:       map[string]domain.Team{"Root": {ID: "Root"}, "Team1": {ID: "Team1", ParentID: "Root"}},
-		Memberships: []domain.Membership{{TeamID: "Team1", HumanID: "maya"}}, TrustedRoots: map[string]bool{"G0": true},
-	}, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"}
+		Teams:       map[string]domain.Team{"Root": {ID: "Root"}, "fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "Root"}},
+		Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}, TrustedRoots: map[string]bool{"G0": true},
+	}, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}
 }
 
 func TestPublishGrantRevisionUsesSeparateAdministrationAndActualSource(t *testing.T) {
@@ -97,7 +97,7 @@ func TestPublishGrantRevisionUsesSeparateAdministrationAndActualSource(t *testin
 
 func TestPublishGrantRevisionRejectsInvalidAuthorityAndContentWithoutWrite(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
-	wrongArea, _ := domain.NewArea("other", "hrms")
+	wrongArea, _ := domain.NewArea("fi7io4lvkfsw", "hrms")
 	valid := revisionCandidate()
 	for _, tc := range []struct {
 		name     string

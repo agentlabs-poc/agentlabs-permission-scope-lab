@@ -31,6 +31,14 @@ type AssignmentStatusChange struct {
 type WriteSet struct {
 	NewAssignments         []domain.Assignment
 	NewRoleRevision        *domain.RoleContent
+	// NewTeam creates a team; TeamParent re-parents one; RemovedTeam deletes
+	// one. AddedMembership and RemovedMembership move one human in or out.
+	// Exactly one is set per write.
+	NewTeam           *domain.Team
+	TeamParent        *domain.Team
+	RemovedTeam       string
+	AddedMembership   *domain.Membership
+	RemovedMembership *domain.Membership
 	NewGrantRevision       *domain.GrantContent
 	GrantStatusChange      *GrantStatusChange
 	AssignmentStatusChange *AssignmentStatusChange

@@ -24,7 +24,7 @@ func TestRootCatalogComputesActiveApplicationPermissions(t *testing.T) {
 			f.Snapshot.Catalog.Permissions["hrms:payroll:payslip::inactive"] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::inactive"}
 			before := cloneRootSnapshot(f.Snapshot)
 
-			root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "Team1", now)
+			root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "fibggi2juubk", now)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -32,7 +32,7 @@ func TestRootCatalogComputesActiveApplicationPermissions(t *testing.T) {
 			if !reflect.DeepEqual(root.Permissions, want) || !slices.Contains(root.Permissions, payslipExport) {
 				t.Fatalf("root permissions = %v, want %v", root.Permissions, want)
 			}
-			ordinary, err := lineage.ResolveParentTeam(f.Snapshot, f.Child, "Team2", now)
+			ordinary, err := lineage.ResolveParentTeam(f.Snapshot, f.Child, "fibggi2juxhc", now)
 			if err != nil || !reflect.DeepEqual(ordinary.Permissions, []string{lab.PayslipRead, lab.PayslipWrite}) {
 				t.Fatalf("ordinary route = %#v, %v", ordinary, err)
 			}
@@ -44,7 +44,7 @@ func TestRootCatalogComputesActiveApplicationPermissions(t *testing.T) {
 
 	crmArea, _ := domain.NewArea("acme", "crm")
 	crm := lab.TeamFINC17(crmArea)
-	root, err := lineage.ResolveParentTeam(crm.Snapshot, crm.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "Team1", now)
+	root, err := lineage.ResolveParentTeam(crm.Snapshot, crm.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "fibggi2juubk", now)
 	if err != nil || slices.Contains(root.Permissions, payslipExport) {
 		t.Fatalf("separate application inherited export: %#v, %v", root, err)
 	}
@@ -61,9 +61,9 @@ func TestRootCatalogPreservesScopeValidityAndRevalidatesSource(t *testing.T) {
 	g0.Scope = map[string]string{"dept": "FIN"}
 	g0.Validity = &domain.Validity{ExpiresAt: &expires}
 	f.Snapshot.Contents[domain.GrantKey{ID: "G0", Revision: 1}] = g0
-	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "RootTeam", HumanID: "root-user"})
+	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "fibggi2jur5s", HumanID: "root-user"})
 
-	root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "Team1", now)
+	root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "fibggi2juubk", now)
 	if err != nil || !reflect.DeepEqual(root.Predicates, []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G0"}}) || len(root.Validities) != 1 || root.Validities[0].ExpiresAt == nil || !root.Validities[0].ExpiresAt.Equal(expires) {
 		t.Fatalf("root shape not preserved: %#v, %v", root, err)
 	}
@@ -114,7 +114,7 @@ func TestRootCatalogRejectsInvalidOrIneligibleRoot(t *testing.T) {
 				f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true}
 			}
 			tc.edit(&f)
-			if _, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "Team1", now); err == nil {
+			if _, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "fibggi2juubk", now); err == nil {
 				t.Fatal("invalid root was accepted")
 			}
 		})

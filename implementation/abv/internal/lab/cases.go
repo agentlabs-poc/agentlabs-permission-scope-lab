@@ -63,21 +63,21 @@ func TeamFINC17(area domain.Area) TeamFINC17Case {
 				{ID: "G0", Revision: 1}: g0, {ID: "G1", Revision: 1}: g1, {ID: "G2", Revision: 1}: g2,
 			},
 			Assignments: map[string]domain.Assignment{
-				"A0": {Version: "1", ID: "A0", GrantID: "G0", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "RootTeam"}, Status: "enabled"},
-				"A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team1"}, Status: "enabled"},
+				"A0": {Version: "1", ID: "A0", GrantID: "G0", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2jur5s"}, Status: "enabled"},
+				"A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"},
 			},
 			Roles: map[domain.RoleKey]domain.RoleContent{
 				{ID: "fi9jvxobqsxs", Revision: 1}: {ID: "fi9jvxobqsxs", Name: "payslip-reader", Revision: 1, Permissions: []string{PayslipRead}},
 			},
 			Teams: map[string]domain.Team{
-				"RootTeam": {ID: "RootTeam"}, "Team1": {ID: "Team1", ParentID: "RootTeam"}, "Team2": {ID: "Team2", ParentID: "Team1"}, "AssignmentAdmins": {ID: "AssignmentAdmins"},
+				"fibggi2jur5s": {ID: "fibggi2jur5s", Name: "RootTeam"}, "fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "fibggi2jur5s"}, "fibggi2juxhc": {ID: "fibggi2juxhc", Name: "Team2", ParentID: "fibggi2juubk"}, "fibggi2jv0n4": {ID: "fibggi2jv0n4", Name: "AssignmentAdmins"},
 			},
-			Memberships:  []domain.Membership{{TeamID: "Team1", HumanID: "maya"}, {TeamID: "Team2", HumanID: "nutan"}, {TeamID: "AssignmentAdmins", HumanID: "maya"}},
+			Memberships:  []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}, {TeamID: "fibggi2juxhc", HumanID: "fi7io4lvjwu8"}, {TeamID: "fibggi2jv0n4", HumanID: "fi7io4lvjqio"}},
 			TrustedRoots: map[string]bool{"G0": true},
 		},
 		Child:          domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{PayslipRead}, Scope: map[string]string{"cert": "C17"}},
-		Proposed:       domain.Assignment{Version: "1", ID: "A2", GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team2"}, Status: "enabled"},
-		Issuer:         domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "maya"}, HumanID: "maya"},
-		Administration: AdministrationPremise{HumanID: "maya", PermissionID: AssignmentCreate, RecipientTeamID: "Team2"},
+		Proposed:       domain.Assignment{Version: "1", ID: "A2", GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: "enabled"},
+		Issuer:         domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"},
+		Administration: AdministrationPremise{HumanID: "fi7io4lvjqio", PermissionID: AssignmentCreate, RecipientTeamID: "fibggi2juxhc"},
 	}
 }

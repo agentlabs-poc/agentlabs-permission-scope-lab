@@ -78,7 +78,7 @@ func TestRoleUsesExactAdoptedRevision(t *testing.T) {
 		t.Fatal("silently adopted latest role", err)
 	}
 	for name, role := range map[string]domain.RoleContent{
-		"mismatched ID":        {Name: "payslip-reader", ID: "other", Revision: 1, Permissions: []string{read}},
+		"mismatched ID":        {Name: "payslip-reader", ID: "fi7io4lvkfsw", Revision: 1, Permissions: []string{read}},
 		"mismatched revision":  {ID: "reader", Revision: 2, Permissions: []string{read}},
 		"duplicate permission": {ID: "reader", Revision: 1, Permissions: []string{read, read}},
 	} {
@@ -97,7 +97,7 @@ func TestContentChecksSelectedDefinitionIntegrityAndTokens(t *testing.T) {
 			c.Permissions[read] = domain.PermissionDefinition{ID: write, Active: true}
 		},
 		"scope identity mismatch": func(c *domain.Catalog, _ *domain.GrantContent) {
-			c.Scopes["cert"] = domain.ScopeDefinition{Key: "other"}
+			c.Scopes["cert"] = domain.ScopeDefinition{Key: "fi7io4lvkfsw"}
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -167,7 +167,7 @@ func TestNarrowRejectsPermissionAndOuterBoundaryEscape(t *testing.T) {
 	if _, err := Narrow(domain.Area{}, parent, g, nil); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatal("zero context", err)
 	}
-	for _, ids := range [][2]string{{"other", "hrms"}, {"acme", "accounting"}} {
+	for _, ids := range [][2]string{{"fi7io4lvkfsw", "hrms"}, {"acme", "accounting"}} {
 		other, e := domain.NewArea(ids[0], ids[1])
 		if e != nil {
 			t.Fatal(e)
@@ -222,7 +222,7 @@ func TestNarrowRejectsIncompleteOrCorruptPermissionSources(t *testing.T) {
 			{ID: "reader", Revision: 2}: {ID: "reader", Name: "payslip-reader", Revision: 2, Permissions: []string{read}},
 		}},
 		{"mismatched role record", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
-			{ID: "reader", Revision: 1}: {ID: "other", Revision: 1, Permissions: []string{read}},
+			{ID: "reader", Revision: 1}: {ID: "fi7io4lvkfsw", Revision: 1, Permissions: []string{read}},
 		}},
 		{"role cannot be partially trimmed", []string{read}, roleChild, map[domain.RoleKey]domain.RoleContent{
 			{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{read, write}},

@@ -123,13 +123,13 @@ func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testin
 	run(3, "assignment", "enable", "A2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(0, "assignment", "enable", "A1", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	a2Disabled, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if a2Disabled != `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"disabled"}`+"\n" {
+	if a2Disabled != `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"disabled"}`+"\n" {
 		t.Fatalf("A2 was changed by A1 enable: %q", a2Disabled)
 	}
 	run(0, "assignment", "enable", "A2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	a1Final, _ := run(0, "inspect", "assignment", "A1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	a2Final, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if a1Final != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"Team1"},"status":"enabled"}`+"\n" || a2Final != after {
+	if a1Final != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"enabled"}`+"\n" || a2Final != after {
 		t.Fatalf("assignments not restored: A1=%q A2=%q", a1Final, a2Final)
 	}
 	g1Final, _ := run(0, "inspect", "grant", "G1", "--db", database, "--tenant", "acme", "--app", "hrms")
@@ -186,11 +186,11 @@ func testCompiledBinaryNegativeCases(t *testing.T, binary, root string) {
 	run(0, "scenario", "run", "team-fin-c17", "--case", "unsupported-permission", "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(4, "assign", "--file", filepath.Join(dir, "missing.json"), "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(3, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(3, "inspect", "grant", "G1", "--db", database, "--tenant", "acme", "--app", "other")
-	run(3, "inspect", "grant", "G1", "--db", database, "--tenant", "other", "--app", "hrms")
+	run(3, "inspect", "grant", "G1", "--db", database, "--tenant", "acme", "--app", "fi7io4lvkfsw")
+	run(3, "inspect", "grant", "G1", "--db", database, "--tenant", "fi7io4lvkfsw", "--app", "hrms")
 	run(4, "scenario", "seed", "team-fin-c17", "--db", database, "--tenant", "acme", "--app", "hrms")
 	duplicate := filepath.Join(dir, "duplicate.json")
-	if err := os.WriteFile(duplicate, []byte(`{"version":"1","id":"A2","id":"other","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}`), 0600); err != nil {
+	if err := os.WriteFile(duplicate, []byte(`{"version":"1","id":"A2","id":"fi7io4lvkfsw","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	run(2, "check", "assignment", "--file", duplicate, "--db", database, "--tenant", "acme", "--app", "hrms")

@@ -23,7 +23,7 @@ func seededScopes(t *testing.T, allow bool, keys ...string) (*abv.Facade, domain
 		t.Fatal(err)
 	}
 	app, _ := domain.NewApplication("hrms")
-	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "admin"}, HumanID: "admin"}
+	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvlbeo"}, HumanID: "fi7io4lvlbeo"}
 	return facade, app, id
 }
 

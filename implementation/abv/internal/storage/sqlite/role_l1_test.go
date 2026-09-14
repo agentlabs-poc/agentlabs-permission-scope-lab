@@ -129,8 +129,11 @@ func roleSeed(t *testing.T) storage.Snapshot {
 		Controls:     map[string]domain.GrantControl{},
 		Contents:     map[domain.GrantKey]domain.GrantContent{},
 		Assignments:  map[string]domain.Assignment{},
-		Teams:        map[string]domain.Team{},
-		Memberships:  []domain.Membership{},
+		Teams: map[string]domain.Team{
+			"fibggi2jur5s": {ID: "fibggi2jur5s", Name: "RootTeam"},
+			"fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "fibggi2jur5s"},
+		},
+		Memberships:  []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}},
 		TrustedRoots: map[string]bool{},
 	}
 }
@@ -182,4 +185,19 @@ func TestApplicationAndTenantRolesDifferOnlyInTheBoundary(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// Teams and memberships are L1 records, tenant-scoped, and carry no application:
+// a team is Auth's own collection of this tenant's humans, and an application's
+// groupings are a separate thing it keeps itself.
+func TestTeamsAndMembershipsAreTenantOnlyL1Records(t *testing.T) {
+	provider, area := seededRoleArea(t)
+	defer provider.Close()
+
+	for _, table := range []string{"teams", "memberships"} {
+		if _, err := provider.db.Exec(`SELECT 1 FROM ` + table + ` LIMIT 1`); err == nil {
+			t.Fatalf("the %s table still exists; it should be folded away", table)
+		}
+	}
+	_ = area
 }

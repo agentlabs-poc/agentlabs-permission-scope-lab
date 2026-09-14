@@ -48,6 +48,21 @@ type PlatformAdministration interface {
 	CheckPlatformPermissionRegistration(context.Context, string, domain.Identity, domain.PermissionDefinition, time.Time) error
 }
 
+// TeamReadAdministration gates reads of a tenant's teams and memberships.
+type TeamReadAdministration interface {
+	CheckTeamRead(context.Context, domain.Area, domain.Identity, time.Time) error
+}
+
+// TeamAdministration gates the three operations the handbook names: team
+// create, team write and team delete. They are separate methods because they are
+// separate authorities — "these do not by themselves authorize assigning
+// business grants".
+type TeamAdministration interface {
+	CheckTeamCreate(context.Context, domain.Area, domain.Identity, domain.Team, time.Time) error
+	CheckTeamWrite(context.Context, domain.Area, domain.Identity, string, time.Time) error
+	CheckTeamDelete(context.Context, domain.Area, domain.Identity, string, time.Time) error
+}
+
 type RoleReadAdministration interface {
 	CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error
 }

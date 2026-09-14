@@ -15,7 +15,7 @@ func TestInspectGrantControlRejectsMissingAndMalformedStoredControls(t *testing.
 		want     error
 	}{
 		{"missing", map[string]domain.GrantControl{}, domain.ErrNotFound},
-		{"identity mismatch", map[string]domain.GrantControl{"G2": {Version: "1", ID: "other", Status: "enabled"}}, domain.ErrMalformed},
+		{"identity mismatch", map[string]domain.GrantControl{"G2": {Version: "1", ID: "fi7io4lvkfsw", Status: "enabled"}}, domain.ErrMalformed},
 		{"version", map[string]domain.GrantControl{"G2": {Version: "2", ID: "G2", Status: "enabled"}}, domain.ErrMalformed},
 		{"status", map[string]domain.GrantControl{"G2": {Version: "1", ID: "G2", Status: "paused"}}, domain.ErrMalformed},
 	} {

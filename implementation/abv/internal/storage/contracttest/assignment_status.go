@@ -65,7 +65,7 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 			"changed grant":              {func(c *storage.AssignmentStatusChange) { c.After.GrantID = "G2" }, false, false, domain.ErrMalformed},
 			"changed revision":           {func(c *storage.AssignmentStatusChange) { c.After.GrantRevision++ }, false, false, domain.ErrMalformed},
 			"changed recipient type":     {func(c *storage.AssignmentStatusChange) { c.After.Recipient.Type = "user" }, false, false, domain.ErrMalformed},
-			"changed recipient ID":       {func(c *storage.AssignmentStatusChange) { c.After.Recipient.ID = "other" }, false, false, domain.ErrMalformed},
+			"changed recipient ID":       {func(c *storage.AssignmentStatusChange) { c.After.Recipient.ID = "fi7io4lvkfsw" }, false, false, domain.ErrMalformed},
 			"mixed assignment creation":  {func(*storage.AssignmentStatusChange) {}, true, false, domain.ErrMalformed},
 			"mixed grant status":         {func(*storage.AssignmentStatusChange) {}, false, true, domain.ErrMalformed},
 			"all three write categories": {func(*storage.AssignmentStatusChange) {}, true, true, domain.ErrMalformed},

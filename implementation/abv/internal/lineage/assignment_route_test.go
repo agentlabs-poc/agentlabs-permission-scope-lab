@@ -36,10 +36,10 @@ func TestResolveTeamAssignmentRejectsInvalidEvidence(t *testing.T) {
 	}{
 		{"blank id", "", func(*lab.TeamFINC17Case) {}, domain.ErrMalformed},
 		{"missing id", "missing", func(*lab.TeamFINC17Case) {}, domain.ErrRejected},
-		{"area mismatch", "A1", func(f *lab.TeamFINC17Case) { f.Snapshot.Catalog.ApplicationID = "other" }, domain.ErrRejected},
+		{"area mismatch", "A1", func(f *lab.TeamFINC17Case) { f.Snapshot.Catalog.ApplicationID = "fi7io4lvkfsw" }, domain.ErrRejected},
 		{"malformed projection", "A1", func(f *lab.TeamFINC17Case) {
 			a := f.Snapshot.Assignments["A1"]
-			a.ID = "other"
+			a.ID = "fi7io4lvkfsw"
 			f.Snapshot.Assignments["A1"] = a
 		}, domain.ErrRejected},
 		{"disabled assignment", "A1", func(f *lab.TeamFINC17Case) {
@@ -53,7 +53,7 @@ func TestResolveTeamAssignmentRejectsInvalidEvidence(t *testing.T) {
 			f.Snapshot.Controls["G1"] = c
 		}, domain.ErrRejected},
 		{"cycle", "A1", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["RootTeam"] = domain.Team{ID: "RootTeam", ParentID: "Team1"}
+			f.Snapshot.Teams["fibggi2jur5s"] = domain.Team{ID: "fibggi2jur5s", Name: "RootTeam", ParentID: "fibggi2juubk"}
 		}, domain.ErrRejected},
 		{"untrusted root", "A1", func(f *lab.TeamFINC17Case) { delete(f.Snapshot.TrustedRoots, "G0") }, domain.ErrRejected},
 		{"user recipient", "A1", func(f *lab.TeamFINC17Case) {

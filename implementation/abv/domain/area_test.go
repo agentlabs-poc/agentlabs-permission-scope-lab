@@ -18,7 +18,7 @@ func TestAreaRequiresBothBoundaries(t *testing.T) {
 }
 func TestAreaPreservesExactIsolationKeys(t *testing.T) {
 	keys := map[Area]bool{}
-	for _, ids := range [][2]string{{"acme", "hrms"}, {"acme", "accounting"}, {"other", "hrms"}, {"Acme", "hrms"}, {" acme", "hrms"}, {"租户", "人事"}} {
+	for _, ids := range [][2]string{{"acme", "hrms"}, {"acme", "accounting"}, {"fi7io4lvkfsw", "hrms"}, {"Acme", "hrms"}, {" acme", "hrms"}, {"租户", "人事"}} {
 		a, err := NewArea(ids[0], ids[1])
 		if err != nil {
 			t.Fatal(err)

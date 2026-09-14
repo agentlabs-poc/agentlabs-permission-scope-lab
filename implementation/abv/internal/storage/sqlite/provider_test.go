@@ -264,7 +264,7 @@ func TestEveryAcquiredConnectionHasForeignKeysAndFileUsesWAL(t *testing.T) {
 
 func TestFixtureRejectsConflictingCopiesOfSharedCatalog(t *testing.T) {
 	first := contractFixture(t)
-	area, err := domain.NewArea("other", first.Area.ApplicationID())
+	area, err := domain.NewArea("fi7io4lvkfsw", first.Area.ApplicationID())
 	if err != nil {
 		t.Fatal(err)
 	}

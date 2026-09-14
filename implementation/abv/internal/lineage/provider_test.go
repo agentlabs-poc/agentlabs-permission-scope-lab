@@ -27,14 +27,14 @@ func TestTeamFINC17RoundTripsAndTenantCannotSupplyMissingSupport(t *testing.T) {
 	t.Cleanup(func() { _ = provider.Close() })
 
 	err = provider.Read(context.Background(), acme, func(snapshot storage.Snapshot) error {
-		_, resolveErr := lineage.ResolveParentTeam(snapshot, missing.Child, "Team2", time.Time{})
+		_, resolveErr := lineage.ResolveParentTeam(snapshot, missing.Child, "fibggi2juxhc", time.Time{})
 		return resolveErr
 	})
 	if !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("other tenant supplied absent A1: %v", err)
 	}
 	err = provider.Read(context.Background(), globex, func(snapshot storage.Snapshot) error {
-		got, resolveErr := lineage.ResolveParentTeam(snapshot, complete.Child, "Team2", time.Time{})
+		got, resolveErr := lineage.ResolveParentTeam(snapshot, complete.Child, "fibggi2juxhc", time.Time{})
 		if resolveErr == nil && len(got.AssignmentIDs) != 2 {
 			t.Fatalf("fixture route did not roundtrip: %#v", got)
 		}
@@ -44,7 +44,7 @@ func TestTeamFINC17RoundTripsAndTenantCannotSupplyMissingSupport(t *testing.T) {
 		t.Fatalf("complete tenant fixture did not resolve: %v", err)
 	}
 	err = provider.Read(context.Background(), accounting, func(snapshot storage.Snapshot) error {
-		_, resolveErr := lineage.ResolveParentTeam(snapshot, otherApplication.Child, "Team2", time.Time{})
+		_, resolveErr := lineage.ResolveParentTeam(snapshot, otherApplication.Child, "fibggi2juxhc", time.Time{})
 		return resolveErr
 	})
 	if err != nil {

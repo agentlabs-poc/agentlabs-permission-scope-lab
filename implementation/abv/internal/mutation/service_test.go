@@ -71,7 +71,7 @@ func TestCreateAssignmentFailuresDoNotWrite(t *testing.T) {
 			c.Snapshot.Memberships = c.Snapshot.Memberships[:2]
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "source absent while administration present", change: func(c *lab.TeamFINC17Case) {
-			c.Snapshot.Memberships[0] = domain.Membership{TeamID: "Team1", HumanID: "someone-else"}
+			c.Snapshot.Memberships[0] = domain.Membership{TeamID: "fibggi2juubk", HumanID: "fi7io4lvyzcg"}
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "malformed proposal", change: func(c *lab.TeamFINC17Case) {
 			c.Proposed.ID = ""
@@ -107,7 +107,7 @@ func TestCreateAssignmentFailuresDoNotWrite(t *testing.T) {
 			c.Snapshot.Contents[key], c.Child = g, g
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "wrong recipient", change: func(c *lab.TeamFINC17Case) {
-			c.Proposed.Recipient.ID = "Team1"
+			c.Proposed.Recipient.ID = "fibggi2juubk"
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "definition validation cannot establish permission", change: func(c *lab.TeamFINC17Case) {
 			definition := c.Snapshot.Catalog.Permissions[lab.PayslipRead]
@@ -120,7 +120,7 @@ func TestCreateAssignmentFailuresDoNotWrite(t *testing.T) {
 			c.Snapshot.Contents[domain.GrantKey{ID: "G2", Revision: 2}] = newer
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "disabled duplicate still occupies binding", change: func(c *lab.TeamFINC17Case) {
-			c.Snapshot.Assignments["old-A2"] = domain.Assignment{Version: "1", ID: "old-A2", GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Team2"}, Status: "disabled"}
+			c.Snapshot.Assignments["old-A2"] = domain.Assignment{Version: "1", ID: "old-A2", GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: "disabled"}
 		}, want: domain.ErrConflict, wantCount: 3},
 	}
 	for _, test := range tests {
@@ -174,9 +174,9 @@ func TestLabAdministrationRejectsAnyChangedTrustedPremise(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
 	for name, change := range map[string]func(*lab.AdministrationPremise){
-		"human":      func(p *lab.AdministrationPremise) { p.HumanID = "nutan" },
+		"human":      func(p *lab.AdministrationPremise) { p.HumanID = "fi7io4lvjwu8" },
 		"permission": func(p *lab.AdministrationPremise) { p.PermissionID = lab.PayslipRead },
-		"recipient":  func(p *lab.AdministrationPremise) { p.RecipientTeamID = "Team1" },
+		"recipient":  func(p *lab.AdministrationPremise) { p.RecipientTeamID = "fibggi2juubk" },
 	} {
 		t.Run(name, func(t *testing.T) {
 			premise := fixture.Administration

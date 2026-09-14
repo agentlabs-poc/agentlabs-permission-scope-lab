@@ -261,7 +261,7 @@ func Run(t *testing.T, factory Factory) {
 			t.Run(name, func(t *testing.T) {
 				err := p.Update(t.Context(), seeded.Area, func(s storage.Snapshot) (storage.WriteSet, error) {
 					s.Contents[domain.GrantKey{ID: proposed.GrantID, Revision: proposed.GrantRevision}] = seeded.Contents[domain.GrantKey{ID: "G1", Revision: 2}]
-					s.Teams[proposed.Recipient.ID] = domain.Team{ID: proposed.Recipient.ID}
+					s.Teams[proposed.Recipient.ID] = domain.Team{Name: "team",ID: proposed.Recipient.ID}
 					return storage.WriteSet{NewAssignments: []domain.Assignment{proposed}}, nil
 				})
 				if err == nil {
@@ -355,14 +355,22 @@ func fixtures(t *testing.T) []storage.Snapshot {
 	ex := time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)
 	makeSnapshot := func(area domain.Area, catalog domain.Catalog, human string) storage.Snapshot {
 		content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 2, Permissions: []string{hrmsRead}, Scope: map[string]string{"部門": "財務"}, Validity: &domain.Validity{NotBefore: &nb, ExpiresAt: &ex}}
-		assignment := domain.Assignment{Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "Team1"}, Status: "disabled"}
+		assignment := domain.Assignment{Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "disabled"}
 		return storage.Snapshot{Area: area, Catalog: catalog,
 			Controls: map[string]domain.GrantControl{"G1": {Version: "1", ID: "G1", Status: "enabled"}},
 			Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 2}: content}, Assignments: map[string]domain.Assignment{"A1": assignment},
 			Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 3}: {ID: "reader", Name: "payslip-reader", Revision: 3, Permissions: []string{hrmsRead}}},
-			Teams: map[string]domain.Team{"Team1": {ID: "Team1", ParentID: "preserved-orphan-parent"}}, Memberships: []domain.Membership{{TeamID: "Team1", HumanID: human}}, TrustedRoots: map[string]bool{"G1": true}}
+			Teams: map[string]domain.Team{"fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "fibggi2jv3sw"}}, Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: human}}, TrustedRoots: map[string]bool{"G1": true}}
 	}
-	return []storage.Snapshot{makeSnapshot(a1, hrms, "人間🚀"), makeSnapshot(a2, hrms, "other"), makeSnapshot(a3, crm, "third")}
+	// a1 and a3 are the same tenant in two applications. Teams and memberships
+	// belong to the tenant and not to an application, so the two snapshots must
+	// agree about them: a tenant's people are the same people whichever
+	// application is being read. Giving them different members would seed a
+	// contradiction rather than test isolation.
+	//
+	// a2 is a different tenant, which is where the isolation this suite checks
+	// actually lives.
+	return []storage.Snapshot{makeSnapshot(a1, hrms, "fi7io4lvk9hc"), makeSnapshot(a2, hrms, "fi7io4lvkfsw"), makeSnapshot(a3, crm, "fi7io4lvk9hc")}
 }
 
 func newAssignment(id string) domain.Assignment {

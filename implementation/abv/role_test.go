@@ -39,7 +39,7 @@ func TestFacadePublishRole(t *testing.T) {
 	// No id: a new role is issued one, and the issued id comes back in the
 	// returned record. A caller cannot choose an identifier.
 	role := domain.RoleContent{Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
-	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "p"}, HumanID: "p"}
+	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 	got, err := f.PublishRole(t.Context(), area, identity, role)
 	if err != nil || got.ID == "" || got.Name != "payslip-reader" {
 		t.Fatalf("got=%#v err=%v", got, err)

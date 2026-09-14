@@ -17,7 +17,7 @@ func NewAdministration(area domain.Area, premise AdministrationPremise) (*Admini
 	if err := area.Validate(); err != nil {
 		return nil, err
 	}
-	if premise.HumanID != "maya" || premise.PermissionID != AssignmentCreate || premise.RecipientTeamID != "Team2" {
+	if premise.HumanID != "fi7io4lvjqio" || premise.PermissionID != AssignmentCreate || premise.RecipientTeamID != "fibggi2juxhc" {
 		return nil, domain.ErrRejected
 	}
 	return &Administration{area: area, premise: premise}, nil
@@ -30,12 +30,12 @@ func (a *Administration) CheckAssignment(ctx context.Context, snapshot storage.S
 	if snapshot.Area != a.area || identity.HumanID != a.premise.HumanID || identity.Actor.Type != "user" || identity.Actor.ID != identity.HumanID || proposed.Recipient.Type != "group" || proposed.Recipient.ID != a.premise.RecipientTeamID {
 		return domain.ErrRejected
 	}
-	team, ok := snapshot.Teams["AssignmentAdmins"]
-	if !ok || team.ID != "AssignmentAdmins" {
+	team, ok := snapshot.Teams["fibggi2jv0n4"]
+	if !ok || team.ID != "fibggi2jv0n4" {
 		return domain.ErrRejected
 	}
 	for _, membership := range snapshot.Memberships {
-		if membership.TeamID == "AssignmentAdmins" && membership.HumanID == a.premise.HumanID {
+		if membership.TeamID == "fibggi2jv0n4" && membership.HumanID == a.premise.HumanID {
 			return nil
 		}
 	}

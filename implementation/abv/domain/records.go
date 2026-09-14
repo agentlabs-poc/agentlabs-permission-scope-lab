@@ -154,8 +154,67 @@ type RolePage struct {
 	Total      int
 	Generation int64
 }
-type Team struct{ ID, ParentID string }
-type Membership struct{ TeamID, HumanID string }
+// Team is an Auth-owned collection of explicit human members, optionally inside
+// another team. It belongs to a tenant and to no application: the handbook is
+// explicit that "a different application may have no department concept at all",
+// and that applications keep their own business groupings separately.
+//
+// ID is a base-36 Snowflake. Name is a human label and is deliberately NOT
+// unique. ParentID is an id rather than a name, because a name is editable and a
+// hierarchy built on one would break when a team is renamed. A root team's
+// ParentID is "" — the real value, not an omission.
+//
+// This is an internal projection, not a canonical JSON contract: P-05 lists the
+// complete team and membership records as pending, and the handbook forbids
+// encoding the team-parent relationship by inventing a field.
+type Team struct {
+	ID       string
+	Name     string
+	ParentID string
+}
+
+// Membership is one human's place in one team. Its identity is the pair, which
+// is what makes it add-only and idempotent by construction.
+//
+// HumanID is issued by the auth service rather than here, and is required to be
+// a base-36 Snowflake so one spelling serves every identifier in the system.
+type Membership struct {
+	TeamID  string
+	HumanID string
+}
+
+// TeamFilter bounds a team listing. ParentID is a pointer because "" is a real
+// value — the parent a root team holds — so it cannot double as "unset": nil
+// lists every team, and a pointer to "" lists roots only.
+type TeamFilter struct {
+	ParentID *string
+	Name     string
+	Offset   int
+	Limit    int
+}
+
+type TeamPage struct {
+	Teams      []Team
+	Total      int
+	Generation int64
+}
+
+// MemberFilter bounds a membership listing, and answers in both directions: a
+// team's roster, or one human's teams. Exactly one of TeamID and HumanID is
+// required — an unfiltered listing of every membership is not a question anyone
+// asks, and would be unbounded in the dimension that grows fastest.
+type MemberFilter struct {
+	TeamID  string
+	HumanID string
+	Offset  int
+	Limit   int
+}
+
+type MemberPage struct {
+	Members    []Membership
+	Total      int
+	Generation int64
+}
 type PermissionDefinition struct {
 	ID     string
 	Active bool

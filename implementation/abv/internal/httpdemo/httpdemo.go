@@ -41,9 +41,9 @@ func NewStore(records []Record) *Store {
 
 func DefaultRecords() []Record {
 	return []Record{
-		{TenantID: "acme", DepartmentID: "FIN", CertificateID: "C17", EmployeeID: "maya", OwnerID: "maya", Title: "FIN annual"},
-		{TenantID: "acme", DepartmentID: "FIN", CertificateID: "C19", EmployeeID: "nutan", OwnerID: "maya", Title: "FIN supplemental"},
-		{TenantID: "acme", DepartmentID: "ENG", CertificateID: "C18", EmployeeID: "ravi", OwnerID: "ravi", Title: "ENG confidential"},
+		{TenantID: "acme", DepartmentID: "FIN", CertificateID: "C17", EmployeeID: "fi7io4lvjqio", OwnerID: "fi7io4lvjqio", Title: "FIN annual"},
+		{TenantID: "acme", DepartmentID: "FIN", CertificateID: "C19", EmployeeID: "fi7io4lvjwu8", OwnerID: "fi7io4lvjqio", Title: "FIN supplemental"},
+		{TenantID: "acme", DepartmentID: "ENG", CertificateID: "C18", EmployeeID: "fi7io4lvk35s", OwnerID: "fi7io4lvk35s", Title: "ENG confidential"},
 	}
 }
 
