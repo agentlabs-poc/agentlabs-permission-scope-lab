@@ -153,26 +153,6 @@ func readGrantHead(ctx context.Context, conn *sql.Conn, area domain.Area, id str
 	return domain.Grant{ID: id, Status: payload.Status, TrustedRoot: payload.TrustedRoot}, nil
 }
 
-func readGrantRevision(ctx context.Context, conn *sql.Conn, area domain.Area, id string, revision int64) (domain.GrantContent, error) {
-	slot, err := codec.RenderRevision(revision)
-	if err != nil {
-		return domain.GrantContent{}, err
-	}
-	var raw string
-	err = conn.QueryRowContext(ctx, `
-		SELECT value FROM abv_l1_records
-		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant_revision'
-		   AND key3=? AND key4=? AND key5=?`,
-		area.TenantID(), area.ApplicationID(), id, slot).Scan(&raw)
-	if errors.Is(err, sql.ErrNoRows) {
-		return domain.GrantContent{}, domain.ErrNotFound
-	}
-	if err != nil {
-		return domain.GrantContent{}, classify(err)
-	}
-	return decodeRevision(id, revision, []byte(raw))
-}
-
 // latestGrantRevision returns the highest revision of one grant. key5 is
 // zero-padded, so ORDER BY key5 DESC is the numeric order.
 func latestGrantRevision(ctx context.Context, conn *sql.Conn, area domain.Area, id string) (domain.GrantContent, error) {
@@ -215,26 +195,6 @@ func deleteGrant(ctx context.Context, conn *sql.Conn, area domain.Area, id strin
 		return domain.ErrNotFound
 	}
 	return nil
-}
-
-func setGrantHeadStatus(ctx context.Context, conn *sql.Conn, area domain.Area, id, status string) error {
-	grant, err := readGrantHead(ctx, conn, area, id)
-	if err != nil {
-		return err
-	}
-	if status != "enabled" && status != "disabled" {
-		return domain.ErrMalformed
-	}
-	raw, err := json.Marshal(grantHeadPayload{Status: status, TrustedRoot: grant.TrustedRoot})
-	if err != nil {
-		return domain.ErrMalformed
-	}
-	_, err = conn.ExecContext(ctx, `
-		UPDATE abv_l1_records SET value=?
-		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant'
-		   AND key3=? AND key4=?`,
-		string(raw), area.TenantID(), area.ApplicationID(), id)
-	return classify(err)
 }
 
 // insertGrant writes a grant whole: the head and revision 1, in the caller's
