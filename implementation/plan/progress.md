@@ -1,5 +1,43 @@
 # ABV implementation progress
 
+## `application_registry` — a second 123 domain, and the seam to it
+
+[Charter](registry/charter.md). Applications are not Auth-AL's business, so they
+move out of it rather than being tidied inside it. `application_registry` is its
+own module, its own store, its own CLI and its own error vocabulary, holding two
+record types in `application_registry_l1_records` — `application` keyed by slug at
+the application boundary, and `installation` keyed by the tenant/slug pair at the
+tenant boundary. Ten operations, deliberately no more: the domain starts at the
+size of the dependency and grows when it is built out for its own sake.
+
+Auth-AL's entire coupling to applications was two reads — `snapshot.go:33` for the
+installation and `catalog.go:177` for existence — so the seam is a two-method
+`Registry` port. Go interfaces are structural, so Auth-AL declares it, the
+registry satisfies it without knowing, and `implementation/wiring` is the only
+package importing both. Measured both ways: `abv -> registry` 0 imports,
+`registry -> abv` 0 imports. Both policy mappings live at the seam where they are
+visible — a suspended application reads as absent, and `Installed` is true only
+when the application is active **and** the installation enabled.
+
+The tenant-side status was a wrong cut and is recorded as one in the charter.
+Without it a tenant could only stop an application by uninstalling it, which is
+destructive; `enabled | disabled` pairs the platform's `active | suspended`, and
+installing over an existing installation stays `ErrConflict` rather than becoming
+a quiet re-enable.
+
+Auth-AL's own `applications` and `installations` tables are **not** dropped: the
+first still carries its compatibility and generation columns, and the second is
+the fallback when no port is wired. The count stays at eight tables; moving
+Auth-AL's own facts into `abv_l1_records` is separate work. The composed
+demonstration paid for itself twice — its first version matched on an error string
+and blamed the registry for Auth-AL's own missing record, and once rewritten it
+found that the cutover had left Auth-AL still requiring an `applications` row.
+
+One question is left open rather than answered: whether `Uninstall` should refuse
+while the tenant still holds live authority in that application. The dependants
+are in Auth-AL's domain and this one cannot see them, so it is either a third port
+method or nothing. It is the one place the two domains genuinely interlock.
+
 ## CP4-C complete — publication without adoption
 
 [Three bounded tasks](abv-cp4c-publication-plan.md) implement immutable grant
