@@ -164,12 +164,13 @@ inside it:
 | Slot | Holds | Example |
 |---|---|---|
 | `key4` | **the id** — base-36 Snowflake | `fi8c8111kow0` |
-| `key5` | **the name** — human-chosen, free text | `R-PAYROLL-ADMIN` |
+| `key5` | **the revision**, zero-padded | `0000000003` |
+| `key6` | **the name** — human-chosen, free text | `R-PAYROLL-ADMIN` |
 
 | Query | Cost |
 |---|---|
 | by **id** | index hit — left-anchored on the identity key |
-| by **name** | bounded scan of that tenant's roles — `key5` without `key4` is not left-anchored |
+| by **name** | bounded scan of that tenant's roles — `key6` without `key4` and `key5` is not left-anchored |
 
 Both work. They are not equally cheap, and that is fine for the same reason the
 verb sits in `key10`: lookup by name is the interactive question, and a tenant
@@ -266,25 +267,27 @@ in `key5`, so `UNIQUE(tenant, key1…key10)` admits both.
 ### The complete canonical path
 
 ```
-abv.role:hrms:fi8c8111kow0 @ revision 3
-└┬┘ └┬─┘ └─┬┘ └─────┬──────┘      └─┬─┘
+abv.role:hrms:fi8c8111kow0:0000000003
+└┬┘ └┬─┘ └─┬┘ └─────┬──────┘ └────┬────┘
+ │   │     │        │             └─ the revision · key5, zero-padded
  │   │     │        └─ the role id · key4
  │   │     └────────── the application · key3
  │   └──────────────── record type · key2
  └──────────────────── domain namespace · key1
-                                             └─ the revision column,
-                                                not a key slot
+
+              the name rides in key6 and is not part of the path —
+              it is a label, not a handle
 ```
 
 The path carries the **id**, not the name — the id is what never changes. The
-name rides in `key5` and is rendered separately when a human needs it:
+name rides in `key6` and is rendered separately when a human needs it:
 
 ```
-abv.role:hrms:fi8c8111kow0 @ revision 3     "R-PAYROLL-ADMIN"
+abv.role:hrms:fi8c8111kow0:0000000003     "R-PAYROLL-ADMIN"
 ```
 
 A role id is a **single flat token**, like a scope key — it occupies `key4` whole,
-the name takes `key5`, and `key6`…`key10` stay empty.
+the revision takes `key5`, the name takes `key6`, and `key7`…`key10` stay empty.
 
 ### Canonical key layout
 
