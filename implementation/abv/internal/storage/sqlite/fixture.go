@@ -219,8 +219,8 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 		if _, ok := s.Contents[domain.GrantKey{ID: a.GrantID, Revision: a.GrantRevision}]; !ok {
 			return domain.ErrMalformed
 		}
-		if _, err = conn.ExecContext(ctx, `INSERT INTO assignments(tenant_id,application_id,assignment_id,grant_id,grant_revision,recipient_type,recipient_id,status,canonical_json) VALUES(?,?,?,?,?,?,?,?,?)`, tenant, app, a.ID, a.GrantID, a.GrantRevision, a.Recipient.Type, a.Recipient.ID, a.Status, raw); err != nil {
-			return classify(err)
+		if err = insertAssignment(ctx, conn, s.Area, a); err != nil {
+			return err
 		}
 	}
 	return nil

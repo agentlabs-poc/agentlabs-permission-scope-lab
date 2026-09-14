@@ -146,8 +146,8 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	}
 	setAssignment := func(status string) {
 		t.Helper()
-		raw := `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"` + status + `"}`
-		if _, err := db.Exec(`UPDATE assignments SET status=?,canonical_json=? WHERE assignment_id='A1'`, status, raw); err != nil {
+		if _, err := db.Exec(`UPDATE abv_l1_records SET value=? WHERE key2='assignment' AND json_extract(value,'$.id')='A1'`,
+			`{"id":"A1","grant_revision":1,"status":"`+status+`"}`); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -257,7 +257,7 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = db.Exec(`UPDATE assignments SET canonical_json='{}' WHERE assignment_id='A2'`); err != nil {
+	if _, err = db.Exec(`UPDATE abv_l1_records SET value='{}' WHERE key2='assignment' AND json_extract(value,'$.id')='A2'`); err != nil {
 		t.Fatal(err)
 	}
 	_ = db.Close()

@@ -363,10 +363,13 @@ func TestFailureAfterFirstInsertRollsBackWholeWriteSetAndPersistsAfterReopen(t *
 		t.Fatal(err)
 	}
 	p := opened.(*provider)
+	// The trigger fires on the second assignment's recipient, because the row's
+	// identity is now the binding rather than the assignment id — the id lives in
+	// the value, which a BEFORE INSERT trigger would have to reach into.
 	if _, err := p.db.ExecContext(t.Context(), `
 		CREATE TRIGGER reject_second_assignment
-		BEFORE INSERT ON assignments
-		WHEN NEW.assignment_id = 'blocked-second'
+		BEFORE INSERT ON abv_l1_records
+		WHEN NEW.key2 = 'assignment' AND NEW.key6 = 'second-user'
 		BEGIN
 			SELECT RAISE(ABORT, 'forced second-row rejection');
 		END`); err != nil {

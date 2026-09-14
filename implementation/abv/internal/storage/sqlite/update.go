@@ -163,62 +163,31 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 }
 
 func (p *provider) writeAssignmentStatus(ctx context.Context, conn *sql.Conn, area domain.Area, change storage.AssignmentStatusChange) error {
-	encode := func(a domain.Assignment) ([]byte, error) {
-		raw, err := json.Marshal(a)
-		if err != nil {
-			return nil, domain.ErrMalformed
+	// Both sides must be records this store could have written. encodeAssignment
+	// is the same check the insert path runs, so a status change cannot smuggle
+	// in a shape creation would have refused.
+	for _, side := range []domain.Assignment{change.Before, change.After} {
+		if _, err := encodeAssignment(side); err != nil {
+			return err
 		}
-		decoded, err := codec.DecodeAssignment(raw)
-		if err != nil {
-			return nil, err
-		}
-		if decoded != a {
-			return nil, domain.ErrMalformed
-		}
-		return raw, nil
-	}
-	if _, err := encode(change.Before); err != nil {
-		return err
-	}
-	afterRaw, err := encode(change.After)
-	if err != nil {
-		return err
 	}
 	before, after := change.Before, change.After
 	before.Status = after.Status
 	if before != after {
 		return domain.ErrMalformed
 	}
-	var currentRaw []byte
-	err = conn.QueryRowContext(ctx, `SELECT canonical_json FROM assignments WHERE tenant_id=? AND application_id=? AND assignment_id=?`, area.TenantID(), area.ApplicationID(), change.Before.ID).Scan(&currentRaw)
-	if errors.Is(err, sql.ErrNoRows) {
-		return domain.ErrNotFound
-	}
-	if err != nil {
-		return classify(err)
-	}
-	current, err := codec.DecodeAssignment(currentRaw)
+	// The caller names an assignment by id, which the key path does not carry —
+	// so this is the scan the layout trades for Q-104 being structural. It reads
+	// the whole record back and requires it to equal what the caller saw, so a
+	// concurrent change to any field, not only the status, loses.
+	current, err := readAssignmentByID(ctx, conn, area, change.Before.ID)
 	if err != nil {
 		return err
 	}
 	if current != change.Before {
 		return domain.ErrConflict
 	}
-	result, err := conn.ExecContext(ctx, `UPDATE assignments SET status=?, canonical_json=?
-WHERE tenant_id=? AND application_id=? AND assignment_id=?
-  AND grant_id=? AND grant_revision=? AND recipient_type=? AND recipient_id=?
-  AND status=?`, change.After.Status, afterRaw, area.TenantID(), area.ApplicationID(), change.Before.ID, change.Before.GrantID, change.Before.GrantRevision, change.Before.Recipient.Type, change.Before.Recipient.ID, change.Before.Status)
-	if err != nil {
-		return classify(err)
-	}
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return classify(err)
-	}
-	if rows != 1 {
-		return domain.ErrConflict
-	}
-	return nil
+	return updateAssignmentValue(ctx, conn, area, change.After)
 }
 
 func (p *provider) writeGrantStatus(ctx context.Context, conn *sql.Conn, area domain.Area, snapshot storage.Snapshot, change storage.GrantStatusChange) error {
@@ -392,19 +361,29 @@ func (p *provider) writeAssignments(ctx context.Context, conn *sql.Conn, area do
 				return classify(err)
 			}
 		}
-		err = conn.QueryRowContext(ctx, `SELECT 1 FROM assignments WHERE tenant_id=? AND application_id=? AND (assignment_id=? OR (grant_id=? AND recipient_type=? AND recipient_id=?)) LIMIT 1`, area.TenantID(), area.ApplicationID(), a.ID, a.GrantID, a.Recipient.Type, a.Recipient.ID).Scan(&exists)
-		if err == nil {
+		// Two separate questions now, because the key path answers only one of
+		// them. Q-104's duplicate binding is a primary-key collision the insert
+		// would refuse anyway; checking it here turns that into ErrConflict
+		// before anything is written, and keeps the message honest.
+		if _, err := readAssignmentByBinding(ctx, conn, area, a.GrantID, a.Recipient); err == nil {
 			return domain.ErrConflict
+		} else if !errors.Is(err, domain.ErrNotFound) {
+			return err
 		}
-		if !errors.Is(err, sql.ErrNoRows) {
-			return classify(err)
+		// A repeated id is not a Q-104 duplicate — it is two different bindings
+		// claiming one handle, which the key path cannot forbid because the id
+		// lives in the value. It is refused here instead.
+		if _, err := readAssignmentByID(ctx, conn, area, a.ID); err == nil {
+			return domain.ErrConflict
+		} else if !errors.Is(err, domain.ErrNotFound) {
+			return err
 		}
 		ready = append(ready, prepared{assignment: a, canonical: raw})
 	}
 	for _, item := range ready {
 		a := item.assignment
-		if _, err := conn.ExecContext(ctx, `INSERT INTO assignments(tenant_id,application_id,assignment_id,grant_id,grant_revision,recipient_type,recipient_id,status,canonical_json) VALUES(?,?,?,?,?,?,?,?,?)`, area.TenantID(), area.ApplicationID(), a.ID, a.GrantID, a.GrantRevision, a.Recipient.Type, a.Recipient.ID, a.Status, item.canonical); err != nil {
-			return classify(err)
+		if err := insertAssignment(ctx, conn, area, a); err != nil {
+			return err
 		}
 	}
 	return nil
