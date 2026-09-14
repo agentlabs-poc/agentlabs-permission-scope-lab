@@ -347,3 +347,37 @@ func (a *labApplication) ListGrantRevisions(ctx context.Context, area domain.Are
 	}
 	return a.facade.ListGrantRevisions(ctx, area, TeamFINC17(area).Issuer, id, offset, limit)
 }
+
+func (a *labApplication) GetAssignment(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string) (domain.Assignment, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Assignment{}, err
+	}
+	return a.facade.GetAssignment(ctx, area, TeamFINC17(area).Issuer, id)
+}
+
+func (a *labApplication) ListAssignments(ctx context.Context, area domain.Area, fc domain.FixtureContext, filter domain.AssignmentFilter) (domain.AssignmentPage, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.AssignmentPage{}, err
+	}
+	return a.facade.ListAssignments(ctx, area, TeamFINC17(area).Issuer, filter)
+}
+
+func (a *labApplication) DeleteAssignment(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string) error {
+	if err := a.teamArea(area, fc); err != nil {
+		return err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return err
+	}
+	return a.facade.DeleteAssignment(ctx, area, TeamFINC17(area).Issuer, id)
+}
+
+func (a *labApplication) UpgradeAssignment(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string) (domain.Assignment, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Assignment{}, err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.Assignment{}, err
+	}
+	return a.facade.UpgradeAssignment(ctx, area, TeamFINC17(area).Issuer, id)
+}

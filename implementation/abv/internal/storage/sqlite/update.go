@@ -93,6 +93,12 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.RemovedGrant != "" {
 			categories++
 		}
+		if writes.RemovedAssignment != "" {
+			categories++
+		}
+		if writes.AssignmentRevisionChange != nil {
+			categories++
+		}
 		for _, set := range []bool{writes.NewTeam != nil, writes.TeamParent != nil, writes.RemovedTeam != "",
 			writes.AddedMembership != nil, writes.RemovedMembership != nil} {
 			if set {
@@ -158,6 +164,12 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.RemovedGrant != "" {
 			return deleteGrant(ctx, conn, area, writes.RemovedGrant)
 		}
+		if writes.RemovedAssignment != "" {
+			return deleteAssignmentByID(ctx, conn, area, writes.RemovedAssignment)
+		}
+		if writes.AssignmentRevisionChange != nil {
+			return p.writeAssignmentRevision(ctx, conn, area, *writes.AssignmentRevisionChange)
+		}
 		return p.writeAssignments(ctx, conn, area, writes.NewAssignments)
 	})
 }
@@ -180,6 +192,31 @@ func (p *provider) writeAssignmentStatus(ctx context.Context, conn *sql.Conn, ar
 	// so this is the scan the layout trades for Q-104 being structural. It reads
 	// the whole record back and requires it to equal what the caller saw, so a
 	// concurrent change to any field, not only the status, loses.
+	current, err := readAssignmentByID(ctx, conn, area, change.Before.ID)
+	if err != nil {
+		return err
+	}
+	if current != change.Before {
+		return domain.ErrConflict
+	}
+	return updateAssignmentValue(ctx, conn, area, change.After)
+}
+
+// writeAssignmentRevision applies an explicit adoption. It is the status
+// writer's shape with the roles of the two fields swapped: everything but the
+// adopted revision must be unchanged, where a status change requires everything
+// but the status to be.
+func (p *provider) writeAssignmentRevision(ctx context.Context, conn *sql.Conn, area domain.Area, change storage.AssignmentStatusChange) error {
+	for _, side := range []domain.Assignment{change.Before, change.After} {
+		if _, err := encodeAssignment(side); err != nil {
+			return err
+		}
+	}
+	before, after := change.Before, change.After
+	before.GrantRevision = after.GrantRevision
+	if before != after {
+		return domain.ErrMalformed
+	}
 	current, err := readAssignmentByID(ctx, conn, area, change.Before.ID)
 	if err != nil {
 		return err

@@ -140,3 +140,19 @@ func (a *RoleAdministration) CheckGrantDelete(ctx context.Context, area domain.A
 func (a *RoleAdministration) CheckGrantRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
 	return a.teamGate(ctx, area, identity)
 }
+
+// The assignment record operations. As elsewhere, the lab admits the same
+// fixture administrator for all of them.
+func (a *RoleAdministration) CheckAssignmentRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
+
+func (a *RoleAdministration) CheckAssignmentDelete(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
+
+// Adoption is gated separately from deletion because Q-105 makes an upgrade a
+// fresh selection that must pass current checks, not a lifecycle toggle.
+func (a *RoleAdministration) CheckAssignmentAdoption(ctx context.Context, area domain.Area, identity domain.Identity, _ domain.Assignment, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}

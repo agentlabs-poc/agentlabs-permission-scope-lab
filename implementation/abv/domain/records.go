@@ -224,6 +224,23 @@ type GrantRevisionPage struct {
 	Total     int
 }
 
+// AssignmentFilter answers in both directions: a grant's recipients, or a
+// recipient's grants. Exactly one is required, the rule ListMembers and
+// ListInstallations already hold — an unfiltered listing is unbounded in the
+// dimension that grows fastest.
+type AssignmentFilter struct {
+	GrantID   string
+	Recipient *Recipient
+	Status    string
+	Offset    int
+	Limit     int
+}
+
+type AssignmentPage struct {
+	Assignments []Assignment
+	Total       int
+}
+
 type TeamFilter struct {
 	ParentID *string
 	Name     string
