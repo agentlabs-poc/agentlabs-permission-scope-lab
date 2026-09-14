@@ -58,19 +58,24 @@ boundary, which is why there is no escaping.
 | `key4` | the key — whole, never split | `dept` |
 | `key5` … `key10` | unused → `''` | `''` |
 
-**For a scope, `key3` is the application** — written from `application_id`
+**For a scope, `key3` is the application** — written from the operation's area
 directly, so it holds it by construction.
 
-> **Not a cross-type guarantee.** A permission puts its *leading noun* in `key3`
-> instead, and nothing checks that the noun is the application:
-> `register-permission 'billing:invoice::read' --app hrms` is accepted and leaves
-> `billing` in the slot. A reader who needs to know which application owns a row
-> uses the `application_id` column, which is authoritative. See
-> `record-permission.md` — whether to close that gap is open.
+> **Since corrected — this now IS a cross-type guarantee.** When this was
+> written, a permission put its *leading noun* in `key3` and nothing checked that
+> the noun was the application, so `register-permission 'billing:invoice::read'
+> --app hrms` was accepted and left `billing` in the slot. A reader had to consult
+> the `application_id` column instead.
+>
+> Both halves have changed. `CheckPermissionRegistrationAt` now rejects a leading
+> noun that is not the application, **at the application boundary** — at the
+> platform boundary `key3` is a namespace the platform defines and there is
+> nothing to compare against. And the `application_id` column is **gone**,
+> removed by the envelope drift correction: `key3` is the only place the
+> application lives, for every record type.
 
-That duplicates `application_id`, and it is a deliberate choice: a canonical path
-then renders complete on its own, with no column to consult and nothing to
-reconstruct.
+`key3` carrying the application is what makes a canonical path render complete on
+its own, with no column to consult and nothing to reconstruct.
 
 **Six slots stay empty.** A permission needs seven for its noun path; a scope key
 needs one. Nothing is planned for the rest — leaving them empty is what keeps the
@@ -278,9 +283,8 @@ list    ... AND key1 = 'abv' AND key2 = 'scope' AND key3 = $1
         ORDER BY key4
 ```
 
-Both are left-anchored on the identity index — `boundary, tenant_id,
-application_id, key1, key2, key3, key4` is a strict prefix of it — so neither
-needs an index of its own. There is no third query, because there is no third
+Both are left-anchored on the identity index — `boundary, tenant_id, key1, key2,
+key3, key4, key5` — so neither needs an index of its own. There is no third query, because there is no third
 way to ask.
 
 **Nothing here is a string match.** That is the whole point of the layout: the

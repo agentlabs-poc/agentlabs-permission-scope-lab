@@ -164,12 +164,13 @@ inside it:
 | Slot | Holds | Example |
 |---|---|---|
 | `key4` | **the id** — base-36 Snowflake | `fi8c8111kow0` |
-| `key5` | **the name** — human-chosen, free text | `R-PAYROLL-ADMIN` |
+| `key5` | **the revision**, zero-padded | `0000000003` |
+| `key6` | **the name** — human-chosen, free text | `R-PAYROLL-ADMIN` |
 
 | Query | Cost |
 |---|---|
 | by **id** | index hit — left-anchored on the identity key |
-| by **name** | bounded scan of that tenant's roles — `key5` without `key4` is not left-anchored |
+| by **name** | bounded scan of that tenant's roles — `key6` without `key4` and `key5` is not left-anchored |
 
 Both work. They are not equally cheap, and that is fine for the same reason the
 verb sits in `key10`: lookup by name is the interactive question, and a tenant
@@ -224,7 +225,6 @@ surgery — the wrapper maps field to column and back:
 ─────────────────────────────      ─────────────────────────────
   (the operation's Area)      ──▶   boundary       = tenant
                                     tenant_id      = acme
-                                    application_id = hrms
                               ──▶   key1           = abv
                               ──▶   key2           = role
                                     key3           = hrms
@@ -238,11 +238,11 @@ surgery — the wrapper maps field to column and back:
 And the two reader revisions, as rows — same everything, different `revision`:
 
 ```
-boundary tenant app  key1 key2 key3 key4          key5        key6              value
-──────────────────────────────────────────────────────────────────────────────────────────────
-tenant   acme   hrms abv  role hrms fi8c8111kow0  0000000003  R-PAYROLL-ADMIN   {"permissions":[7]}
-tenant   acme   hrms abv  role hrms fi9jvxobqsxs  0000000001  R-PAYROLL-READER  {"permissions":[2]}
-tenant   acme   hrms abv  role hrms fi9jvxobqsxs  0000000002  R-PAYROLL-READER  {"permissions":[3]}
+boundary  tenant_id  key1  key2  key3  key4          key5        key6              value
+──────────────────────────────────────────────────────────────────────────────────────────────────
+tenant    acme       abv   role  hrms  fi8c8111kow0  0000000003  R-PAYROLL-ADMIN   {"permissions":[7]}
+tenant    acme       abv   role  hrms  fi9jvxobqsxs  0000000001  R-PAYROLL-READER  {"permissions":[2]}
+tenant    acme       abv   role  hrms  fi9jvxobqsxs  0000000002  R-PAYROLL-READER  {"permissions":[3]}
 ```
 
 **Two things to notice.** The identity fields climb *out* of the payload into key
@@ -267,25 +267,27 @@ in `key5`, so `UNIQUE(tenant, key1…key10)` admits both.
 ### The complete canonical path
 
 ```
-abv.role:hrms:fi8c8111kow0 @ revision 3
-└┬┘ └┬─┘ └─┬┘ └─────┬──────┘      └─┬─┘
+abv.role:hrms:fi8c8111kow0:0000000003
+└┬┘ └┬─┘ └─┬┘ └─────┬──────┘ └────┬────┘
+ │   │     │        │             └─ the revision · key5, zero-padded
  │   │     │        └─ the role id · key4
  │   │     └────────── the application · key3
  │   └──────────────── record type · key2
  └──────────────────── domain namespace · key1
-                                             └─ the revision column,
-                                                not a key slot
+
+              the name rides in key6 and is not part of the path —
+              it is a label, not a handle
 ```
 
 The path carries the **id**, not the name — the id is what never changes. The
-name rides in `key5` and is rendered separately when a human needs it:
+name rides in `key6` and is rendered separately when a human needs it:
 
 ```
-abv.role:hrms:fi8c8111kow0 @ revision 3     "R-PAYROLL-ADMIN"
+abv.role:hrms:fi8c8111kow0:0000000003     "R-PAYROLL-ADMIN"
 ```
 
 A role id is a **single flat token**, like a scope key — it occupies `key4` whole,
-the name takes `key5`, and `key6`…`key10` stay empty.
+the revision takes `key5`, the name takes `key6`, and `key7`…`key10` stay empty.
 
 ### Canonical key layout
 
@@ -293,7 +295,7 @@ the name takes `key5`, and `key6`…`key10` stay empty.
 |---|---|---|
 | `key1` | domain namespace | `abv` |
 | `key2` | record type | `role` |
-| `key3` | the application, from `application_id` | `hrms` |
+| `key3` | the application, from the operation's area | `hrms` |
 | `key4` | the role id — base-36 Snowflake | `fi8c8111kow0` |
 | `key5` | **the revision**, zero-padded | `0000000003` |
 | `key6` | the name — human label, **not unique** | `R-PAYROLL-ADMIN` |
@@ -315,10 +317,10 @@ with revision 1 on an identical key.
 > on the way in and strips on the way out, the same single-entrance rule the
 > permission identifier follows.
 
-`key3` is written from `application_id`, the way a scope record writes it, rather
+`key3` is written from the operation's area, the way a scope record writes it, rather
 than inherited from a caller-supplied string. PR #3 recorded that `key3` is *not*
 uniformly the application across record types; for a new record type we choose,
-and choosing `application_id` is the consistent choice.
+and taking it from the area is the consistent choice.
 
 ### Three dormant mechanisms this record is the first to use
 
