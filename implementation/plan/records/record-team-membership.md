@@ -631,6 +631,26 @@ than defer.**
 
 ![Teams and membership as tenant-scoped L1 records: both directions of the roster question, ids rather than names, and both tables folded away](demos/demo-12-team-membership.svg)
 
+![The three team operations: create issuing an id, delete refusing while anything depends on the team, a cycle refused at the write, and membership writes that say whether they did anything](demos/demo-13-team-writes.svg)
+
+### What is tested
+
+| | |
+|---|---|
+| **the records** | a team carries an id and a separate name · the parent is an id not a name · one human in two teams is two records · every id in both records is base-36 |
+| **the fold** | a tenant's teams are visible in every application and invisible to other tenants · both tables are gone |
+| **the reads** | both directions of the roster question · `--roots` · a name refused where an id is required · the missing-filter refusal |
+| **create** | an id is issued · two creates differ · a subteam is the same operation · an absent parent is refused |
+| **delete** | a child blocks it · a member blocks it · an assignment naming it blocks it · **a refused delete removes nothing** · an empty leaf goes · deleting it again is `ErrNotFound` |
+| **re-parent** | it persists and leaves the name alone · a cycle is refused · **a refused re-parent changes no row** |
+| **membership** | adding an existing member is `ErrConflict` · removing an absent one is `ErrNotFound` · **one write moves one row** and leaves the roster intact |
+| **the gates** | all five writes refuse a wrong fixture context |
+| **the lost foreign keys** | each refuses what the database used to |
+
+The write tests run against a real SQLite store rather than a validation
+function, because what they are checking is that the write *persists* and that a
+refused write persists nothing.
+
 ```
 14 packages green · race clean · vet clean · authmiddleware untouched
 tables 10 -> 8   teams and memberships both folded away
@@ -662,6 +682,12 @@ reach them and no test was lost.
 - The contract suite gave the same tenant different members in two applications,
   which is now a contradiction rather than an isolation test. Its two snapshots
   for one tenant agree; the isolation it checks lives between *tenants*.
+
+**The writes had no automated coverage when first written.** They were
+implemented and demonstrated through the CLI, which proves the path works once
+but catches no regression. The gap was found by asking what covered them rather
+than by a failure — every write operation had zero test references — and closed
+before merge.
 
 **One query moved off a table.** `CreateAssignment` asked
 `SELECT 1 FROM teams WHERE tenant_id=? AND application_id=? AND team_id=?`. It now
