@@ -224,7 +224,6 @@ surgery — the wrapper maps field to column and back:
 ─────────────────────────────      ─────────────────────────────
   (the operation's Area)      ──▶   boundary       = tenant
                                     tenant_id      = acme
-                                    application_id = hrms
                               ──▶   key1           = abv
                               ──▶   key2           = role
                                     key3           = hrms
@@ -238,11 +237,11 @@ surgery — the wrapper maps field to column and back:
 And the two reader revisions, as rows — same everything, different `revision`:
 
 ```
-boundary tenant app  key1 key2 key3 key4          key5        key6              value
-──────────────────────────────────────────────────────────────────────────────────────────────
-tenant   acme   hrms abv  role hrms fi8c8111kow0  0000000003  R-PAYROLL-ADMIN   {"permissions":[7]}
-tenant   acme   hrms abv  role hrms fi9jvxobqsxs  0000000001  R-PAYROLL-READER  {"permissions":[2]}
-tenant   acme   hrms abv  role hrms fi9jvxobqsxs  0000000002  R-PAYROLL-READER  {"permissions":[3]}
+boundary  tenant_id  key1  key2  key3  key4          key5        key6              value
+──────────────────────────────────────────────────────────────────────────────────────────────────
+tenant    acme       abv   role  hrms  fi8c8111kow0  0000000003  R-PAYROLL-ADMIN   {"permissions":[7]}
+tenant    acme       abv   role  hrms  fi9jvxobqsxs  0000000001  R-PAYROLL-READER  {"permissions":[2]}
+tenant    acme       abv   role  hrms  fi9jvxobqsxs  0000000002  R-PAYROLL-READER  {"permissions":[3]}
 ```
 
 **Two things to notice.** The identity fields climb *out* of the payload into key
@@ -293,7 +292,7 @@ the name takes `key5`, and `key6`…`key10` stay empty.
 |---|---|---|
 | `key1` | domain namespace | `abv` |
 | `key2` | record type | `role` |
-| `key3` | the application, from `application_id` | `hrms` |
+| `key3` | the application, from the operation's area | `hrms` |
 | `key4` | the role id — base-36 Snowflake | `fi8c8111kow0` |
 | `key5` | **the revision**, zero-padded | `0000000003` |
 | `key6` | the name — human label, **not unique** | `R-PAYROLL-ADMIN` |
@@ -315,10 +314,10 @@ with revision 1 on an identical key.
 > on the way in and strips on the way out, the same single-entrance rule the
 > permission identifier follows.
 
-`key3` is written from `application_id`, the way a scope record writes it, rather
+`key3` is written from the operation's area, the way a scope record writes it, rather
 than inherited from a caller-supplied string. PR #3 recorded that `key3` is *not*
 uniformly the application across record types; for a new record type we choose,
-and choosing `application_id` is the consistent choice.
+and taking it from the area is the consistent choice.
 
 ### Three dormant mechanisms this record is the first to use
 

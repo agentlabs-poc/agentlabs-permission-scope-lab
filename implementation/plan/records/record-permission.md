@@ -406,7 +406,6 @@ tenant is itself the statement that the record is application-wide.
 ```sql
 -- fetch one: every slot constrained, a unique hit
 get     tenant_id = ''
-        AND application_id = $1
         AND key1 = 'abv' AND key2 = 'permission' AND key3 = $1
         AND key4 = $2 AND key5 = $3
         AND key6 = '' AND key7 = '' AND key8 = '' AND key9 = ''

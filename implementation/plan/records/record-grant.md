@@ -199,11 +199,11 @@ so `0000000010` must sort after `0000000009`.
 ### The rows
 
 ```
-boundary tenant app  key1 key2           key3 key4          key5        value
+boundary  tenant_id  key1  key2            key3  key4          key5        value
 ─────────────────────────────────────────────────────────────────────────────────────────────────
-tenant   acme   hrms abv  grant          hrms fi8c8111kow0              {"status":"enabled","trusted_root":false}
-tenant   acme   hrms abv  grant_revision hrms fi8c8111kow0  0000000001  {"parent_grant_id":"…","permissions":[1],"scope":{}}
-tenant   acme   hrms abv  grant_revision hrms fi8c8111kow0  0000000002  {"permissions":[2],"scope":{"dept":"FIN"}}
+tenant    acme       abv   grant           hrms  fi8c8111kow0              {"status":"enabled","trusted_root":false}
+tenant    acme       abv   grant_revision  hrms  fi8c8111kow0  0000000001  {"parent_grant_id":"…","permissions":[1],"scope":{}}
+tenant    acme       abv   grant_revision  hrms  fi8c8111kow0  0000000002  {"permissions":[2],"scope":{"dept":"FIN"}}
 ```
 
 The head has an empty `key5` while its revisions fill it — which the contiguity
