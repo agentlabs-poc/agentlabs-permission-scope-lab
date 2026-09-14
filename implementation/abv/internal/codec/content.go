@@ -64,15 +64,36 @@ func ValidateContent(g domain.GrantContent) error {
 	if g.ParentGrantID != "" && invalidString(g.ParentGrantID) {
 		return domain.ErrMalformed
 	}
-	if g.Permissions != nil {
+	// Three permission sources, and exactly one applies.
+	//
+	// Q-118: a direct list, or the complete role pair, never a mixture. Root
+	// content is the third — it names neither, because its coverage is computed
+	// from the registered catalog at resolution rather than stored (Q-122). A
+	// stored list on a root is never read, so storing one can only go stale and
+	// mislead whoever reads the row.
+	//
+	// This cannot check that the grant *is* a trusted root: Q-119 is explicit
+	// that omitting a field proves nothing, and the evidence lives on the head
+	// rather than in the content. What it can check is that content shaped like
+	// a root is shaped like one completely — no parent, and no local narrowing,
+	// because a root is the ceiling for its whole area and a pre-narrowed root
+	// is a ceiling lower than the region it bounds.
+	switch {
+	case g.Permissions != nil:
 		if g.RoleID != "" || g.RoleRevision != 0 {
 			return domain.ErrMalformed
 		}
 		if err := PermissionList(g.Permissions); err != nil {
 			return err
 		}
-	} else if invalidString(g.RoleID) || g.RoleRevision <= 0 {
-		return domain.ErrMalformed
+	case g.RoleID != "" || g.RoleRevision != 0:
+		if invalidString(g.RoleID) || g.RoleRevision <= 0 {
+			return domain.ErrMalformed
+		}
+	default:
+		if g.ParentGrantID != "" || len(g.Scope) != 0 {
+			return domain.ErrMalformed
+		}
 	}
 	for key, value := range g.Scope {
 		if invalidString(key) || invalidString(value) || key == "*" || value == "*" {

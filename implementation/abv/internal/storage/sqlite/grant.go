@@ -3,6 +3,8 @@ package sqlite
 import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/codec"
+	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/internal/validation"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -233,4 +235,52 @@ func setGrantHeadStatus(ctx context.Context, conn *sql.Conn, area domain.Area, i
 		   AND key3=? AND key4=?`,
 		string(raw), area.TenantID(), area.ApplicationID(), id)
 	return classify(err)
+}
+
+// insertGrant writes a grant whole: the head and revision 1, in the caller's
+// transaction. The two are never written apart — a head with no content is a
+// grant that can be enabled and supplies nothing, and content with no head is
+// authority with no live switch.
+//
+// The content is validated against the catalog here rather than by the caller,
+// because the catalog has to be read inside the same transaction that writes:
+// a permission retired between the check and the write would otherwise be
+// admitted.
+func (p *provider) insertGrant(ctx context.Context, conn *sql.Conn, area domain.Area, proposed storage.NewGrant) error {
+	if proposed.Content.GrantID != proposed.Grant.ID || proposed.Content.Revision != 1 {
+		return domain.ErrMalformed
+	}
+	if err := codec.ValidateContent(proposed.Content); err != nil {
+		return err
+	}
+	// A parent is required. Establishment writes the parentless kind, and it is
+	// deliberately not this operation: a root needs trust evidence, and no grant
+	// operation may write that.
+	if proposed.Content.ParentGrantID == "" {
+		return domain.ErrRejected
+	}
+	if _, err := readGrantHead(ctx, conn, area, proposed.Content.ParentGrantID); err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return domain.ErrRejected
+		}
+		return err
+	}
+	// Both reads are inside the caller's transaction, which is the point: a
+	// permission retired or a role revision published between a check outside
+	// and the write would otherwise be admitted.
+	authoritative := storage.Snapshot{Roles: map[domain.RoleKey]domain.RoleContent{}}
+	r := snapshotReader{conn: conn, ctx: ctx, area: area, limit: p.maxSnapshotRecords}
+	if err := r.catalog(area.ApplicationID(), &authoritative.Catalog); err != nil {
+		return err
+	}
+	if err := r.roles(&authoritative); err != nil {
+		return err
+	}
+	if err := validation.CheckContent(area, authoritative.Catalog, proposed.Content, authoritative.Roles); err != nil {
+		return err
+	}
+	if err := insertGrantHead(ctx, conn, area, proposed.Grant); err != nil {
+		return err
+	}
+	return insertGrantRevisionRow(ctx, conn, area, proposed.Content)
 }

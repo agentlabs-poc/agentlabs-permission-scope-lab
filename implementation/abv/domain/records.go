@@ -205,6 +205,25 @@ type Membership struct {
 // TeamFilter bounds a team listing. ParentID is a pointer because "" is a real
 // value — the parent a root team holds — so it cannot double as "unset": nil
 // lists every team, and a pointer to "" lists roots only.
+// GrantFilter narrows a grant listing. Root is a tri-state: nil means every
+// grant, so "which grant is this area's root" is one call rather than a scan.
+type GrantFilter struct {
+	Status string
+	Root   *bool
+	Offset int
+	Limit  int
+}
+
+type GrantPage struct {
+	Grants []Grant
+	Total  int
+}
+
+type GrantRevisionPage struct {
+	Revisions []GrantContent
+	Total     int
+}
+
 type TeamFilter struct {
 	ParentID *string
 	Name     string

@@ -87,6 +87,12 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.NewGrantRevision != nil {
 			categories++
 		}
+		if writes.NewGrant != nil {
+			categories++
+		}
+		if writes.RemovedGrant != "" {
+			categories++
+		}
 		for _, set := range []bool{writes.NewTeam != nil, writes.TeamParent != nil, writes.RemovedTeam != "",
 			writes.AddedMembership != nil, writes.RemovedMembership != nil} {
 			if set {
@@ -145,6 +151,12 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		}
 		if writes.NewGrantRevision != nil {
 			return p.insertGrantRevision(ctx, conn, area, *writes.NewGrantRevision)
+		}
+		if writes.NewGrant != nil {
+			return p.insertGrant(ctx, conn, area, *writes.NewGrant)
+		}
+		if writes.RemovedGrant != "" {
+			return deleteGrant(ctx, conn, area, writes.RemovedGrant)
 		}
 		return p.writeAssignments(ctx, conn, area, writes.NewAssignments)
 	})

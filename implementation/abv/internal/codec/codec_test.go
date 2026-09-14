@@ -223,3 +223,40 @@ func FuzzContentNeverReturnsPartialOnFailure(f *testing.F) {
 		}
 	})
 }
+
+// Root content names no permission source at all, because a root's coverage is
+// computed from the catalog rather than stored. The shape rules that go with it
+// are the ones a pure check can actually make: no parent, and no local scope.
+func TestRootShapedContentOmitsItsPermissionSourceAndNarrowing(t *testing.T) {
+	root := domain.GrantContent{Version: "1", GrantID: "G0", Revision: 1, Scope: map[string]string{}}
+	if err := ValidateContent(root); err != nil {
+		t.Fatalf("root content rejected: %v", err)
+	}
+
+	// A root is the ceiling for its whole area; narrowing is a child's job, and
+	// a pre-narrowed root would be a ceiling lower than the region it bounds.
+	narrowed := root
+	narrowed.Scope = map[string]string{"dept": "FIN"}
+	if err := ValidateContent(narrowed); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("a narrowed root gave %v, want ErrMalformed", err)
+	}
+
+	// Omission is only the root's privilege. A child that names no source has
+	// selected nothing, which is not the same as selecting everything.
+	child := root
+	child.ParentGrantID = "G0"
+	if err := ValidateContent(child); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("a sourceless child gave %v, want ErrMalformed", err)
+	}
+
+	// The mixture rule is unchanged, in both directions.
+	for _, mixed := range []domain.GrantContent{
+		{Version: "1", GrantID: "G0", Revision: 1, Permissions: []string{"hrms:a::read"}, RoleID: "r", RoleRevision: 1, Scope: map[string]string{}},
+		{Version: "1", GrantID: "G0", Revision: 1, RoleID: "r", RoleRevision: 0, Scope: map[string]string{}},
+		{Version: "1", GrantID: "G0", Revision: 1, RoleID: "", RoleRevision: 2, Scope: map[string]string{}},
+	} {
+		if err := ValidateContent(mixed); !errors.Is(err, domain.ErrMalformed) {
+			t.Fatalf("%#v gave %v, want ErrMalformed", mixed, err)
+		}
+	}
+}
