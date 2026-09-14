@@ -297,3 +297,89 @@ func TestPortRequiresBothActiveAndEnabled(t *testing.T) {
 	}
 	check(true, false, "disabled installation")
 }
+
+// ListApplications had never successfully listed one: its only test asserted the
+// gate refused, so the storage read behind it ran zero times. Ordering, the
+// status filter, paging and the total are all contract, so all four are asserted
+// here rather than assumed from the installation listing that shares the helper.
+func TestListApplicationsOrdersFiltersAndPages(t *testing.T) {
+	f := open(t, false)
+	for _, slug := range []string{"payroll", "hrms", "crm"} {
+		if _, err := f.RegisterApplication(t.Context(), platform, slug, slug); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := f.SetApplicationStatus(t.Context(), platform, "crm", domain.StatusSuspended); err != nil {
+		t.Fatal(err)
+	}
+	slugs := func(p domain.ApplicationPage) []string {
+		got := make([]string, 0, len(p.Applications))
+		for _, a := range p.Applications {
+			got = append(got, a.Slug)
+		}
+		return got
+	}
+	equal := func(got, want []string) bool {
+		if len(got) != len(want) {
+			return false
+		}
+		for i := range got {
+			if got[i] != want[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	all, err := f.ListApplications(t.Context(), platform, domain.ApplicationFilter{})
+	if err != nil || !equal(slugs(all), []string{"crm", "hrms", "payroll"}) || all.Total != 3 {
+		t.Fatalf("unfiltered gave %v total=%d err=%v, want crm/hrms/payroll total=3", slugs(all), all.Total, err)
+	}
+
+	// The filter narrows the total too — a total that counted everything would
+	// make paging through a filtered listing walk off the end.
+	active, err := f.ListApplications(t.Context(), platform, domain.ApplicationFilter{Status: domain.StatusActive})
+	if err != nil || !equal(slugs(active), []string{"hrms", "payroll"}) || active.Total != 2 {
+		t.Fatalf("active gave %v total=%d err=%v, want hrms/payroll total=2", slugs(active), active.Total, err)
+	}
+	suspended, err := f.ListApplications(t.Context(), platform, domain.ApplicationFilter{Status: domain.StatusSuspended})
+	if err != nil || !equal(slugs(suspended), []string{"crm"}) || suspended.Total != 1 {
+		t.Fatalf("suspended gave %v total=%d err=%v, want crm total=1", slugs(suspended), suspended.Total, err)
+	}
+
+	middle, err := f.ListApplications(t.Context(), platform, domain.ApplicationFilter{Offset: 1, Limit: 1})
+	if err != nil || !equal(slugs(middle), []string{"hrms"}) || middle.Total != 3 {
+		t.Fatalf("offset 1 limit 1 gave %v total=%d err=%v, want hrms total=3", slugs(middle), middle.Total, err)
+	}
+	// Past the end is an empty page, never a fallback to the first one.
+	past, err := f.ListApplications(t.Context(), platform, domain.ApplicationFilter{Offset: 99})
+	if err != nil || len(past.Applications) != 0 || past.Total != 3 {
+		t.Fatalf("offset 99 gave %v total=%d err=%v, want empty total=3", slugs(past), past.Total, err)
+	}
+
+	for _, bad := range []domain.ApplicationFilter{{Offset: -1}, {Limit: -1}, {Limit: 9999}, {Status: "retired"}} {
+		if _, err := f.ListApplications(t.Context(), platform, bad); !errors.Is(err, domain.ErrMalformed) {
+			t.Fatalf("filter %#v gave %v, want ErrMalformed", bad, err)
+		}
+	}
+}
+
+// GetApplication's only test passed a malformed identity, so it had never
+// returned a record either.
+func TestGetApplicationReturnsTheWholeRecordOrNotFound(t *testing.T) {
+	f := open(t, false)
+	if _, err := f.RegisterApplication(t.Context(), platform, "hrms", "HRMS"); err != nil {
+		t.Fatal(err)
+	}
+	got, err := f.GetApplication(t.Context(), platform, "hrms")
+	if err != nil || got.Slug != "hrms" || got.Name != "HRMS" || got.Status != domain.StatusActive {
+		t.Fatalf("got %#v err=%v, want the complete record", got, err)
+	}
+	if _, err := f.GetApplication(t.Context(), platform, "absent"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("absent gave %v, want ErrNotFound", err)
+	}
+	// A slug that cannot exist is malformed, not merely missing.
+	if _, err := f.GetApplication(t.Context(), platform, "HRMS"); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("uppercase gave %v, want ErrMalformed", err)
+	}
+}

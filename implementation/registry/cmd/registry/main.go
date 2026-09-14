@@ -8,6 +8,7 @@ import (
 	"agentlabs.local/registry"
 	"agentlabs.local/registry/domain"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -60,6 +61,12 @@ func run(args []string, out, diag *os.File) int {
 			continue
 		}
 		positional = append(positional, args[i])
+	}
+	// Both checks precede Open: a run with no verb used to index positional[0]
+	// and panic, after having already created the database file.
+	if len(positional) == 0 {
+		fmt.Fprintln(diag, "usage: registry <verb> [args] --db PATH")
+		return 2
 	}
 	path := flags["--db"]
 	if path == "" {
@@ -168,15 +175,25 @@ func run(args []string, out, diag *os.File) int {
 
 // report maps this domain's errors to exit codes, the same scheme the abv CLI
 // uses so a demonstration reads the same way.
+//
+// It matches on the sentinel, never on the rendered message. Reading an exit
+// code out of error text makes the wording load-bearing: rephrasing a message
+// silently changes what the shell sees, and any wrapped error that happens to
+// contain "not found" is miscoded. The same mistake, made in the composition
+// demonstration, reported Auth-AL's own missing record as the registry refusing.
 func report(diag *os.File, err error) int {
+	// The message is the error's own, so "rejected" and "not found" stay
+	// distinguishable on screen even though they share an exit code.
 	fmt.Fprintln(diag, err)
 	switch {
-	case strings.Contains(err.Error(), "malformed"):
+	case errors.Is(err, domain.ErrMalformed):
 		return 2
-	case strings.Contains(err.Error(), "not found"), strings.Contains(err.Error(), "rejected"):
+	case errors.Is(err, domain.ErrRejected), errors.Is(err, domain.ErrNotFound):
 		return 3
-	case strings.Contains(err.Error(), "conflict"):
+	case errors.Is(err, domain.ErrConflict):
 		return 4
+	case errors.Is(err, domain.ErrUnsupported):
+		return 5
 	}
-	return 5
+	return 4
 }
