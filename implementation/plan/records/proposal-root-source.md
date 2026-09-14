@@ -60,10 +60,20 @@ omission is not a new field.
 
 ### The cost, stated plainly
 
-`codec/content.go:67` requires either `permissions` or the role pair; omitting
-both is `ErrMalformed` today. **That rule relaxes for trusted roots only** — the
-same shape, in the same place, as the parent-omission rule it sits beside. A
-non-root content omitting `permissions` stays malformed.
+`codec/content.go` required either `permissions` or the role pair; omitting both
+was `ErrMalformed`.
+
+**The relaxation cannot be "for trusted roots only", and what shipped is not.**
+`ValidateContent` is pure — it sees content and nothing else — and Q-119 is
+explicit that parent omission does not prove a root. The evidence lives on the
+head, which this check cannot read. So the rule attaches to **root-shaped**
+content instead: content naming no permission source must also omit
+`parent_grant_id` and carry an empty scope. A child that names no source is still
+`ErrMalformed`, which is the part that matters — naming nothing selects nothing,
+not everything the parent has.
+
+That the content *is* a trusted root remains checked where the evidence is: the
+head, at resolution.
 
 > **The role alternative, and why not.** A role holding the complete catalog and
 > referenced by the root was considered and rejected. Role adoption is pinned
@@ -212,8 +222,9 @@ Four rules carry the weight, and two of them are the asymmetry:
 | child scope may be `{}` | **works** — `Narrow` clones the parent's predicates first |
 | root omits `parent_grant_id` | **enforced** — `rootRoute`, plus the trust check |
 | root permissions computed | **enforced** — `rootRoute` discards the stored list |
-| root **omits** `permissions` | **new** — `ValidateContent` rejects it today |
-| root scope **must be** `{}` | **new** — nothing checks it today |
+| root-shaped content **omits** `permissions` | **shipped** — `ValidateContent`'s third branch |
+| root-shaped content's scope is `{}` | **shipped** — same branch |
+| that such content *is* a trusted root | **not checkable here** — the evidence is on the head |
 
 ---
 
@@ -915,6 +926,13 @@ for refusing the root role.
 
 ## 10 · Implementation plan — the grant slice only
 
+> **Shipped.** Every step in the first table below is built, tested and merged
+> into the branch this document sits on; see
+> [progress.md](../progress.md) and the
+> [demonstration](demos/demo-14-grant-record.md). The deferred table is still
+> deferred. This section is kept as the record of where the line was drawn and
+> why, not as outstanding work.
+
 **Scope: the grant record and its operations. Nothing that needs a route.**
 
 Assignments are a separate record and come next; resolution, establishment and
@@ -938,7 +956,7 @@ compromise cut — **it is the seam the code already has.**
 | 4 | `CreateGrant` — issues the id, writes head **and revision 1** atomically, requires a parent | facade + storage |
 | 5 | `GetGrant`, `ListGrants`, `ListGrantRevisions` — typed reads, offset paging, the usual cap | facade + storage |
 | 6 | `DeleteGrant` — **head and all revisions, add-only's mirror**; the dependency refusal is deferred (see below) | facade + storage |
-| 7 | Fold `grant_controls` and `grant_contents` into `abv_l1_records`; assert both stay gone | storage + a test |
+| 7 | Fold `grant_controls`, `grant_contents` and `trusted_roots` into `abv_l1_records`; assert they stay gone | storage + a test |
 | 8 | CLI verbs for 4–6, with a Go test against the compiled binary | `cli/`, `cmd/` |
 | 9 | One demonstration: create → publish → list revisions → status → delete, and the rows | captured SVG |
 
@@ -1026,7 +1044,7 @@ the slice writes no trust evidence and resolves no routes.
 ## 11 · What is being asked
 
 1. **Shape** — does a root omit `permissions` as it omits `parent_grant_id`, with
-   `ValidateContent` relaxed for trusted roots only?
+   `ValidateContent` relaxed for root-*shaped* content — it cannot see trust?
 2. **Source** — confirm Q-122 computation is the answer and §1 merely stops the
    record from implying otherwise.
 3. **Scope** — must a root's scope be `{}`, refused otherwise?

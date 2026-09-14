@@ -108,17 +108,25 @@ fields, never a mixture.
 
 ---
 
-## 3 · The id becomes a base-36 Snowflake
+## 3 · The id — issuance is strict, acceptance is not yet
 
 `G1`, `G0`, `G-17` are the handbook's *illustrative* ids, the way `maya` and
 `Team1` were before the sweep. Every id Auth-AL issues is a base-36 Snowflake —
 settled for roles, teams and human ids — and a grant id is issued by Auth-AL.
 
 ```
-"id": "G1"   ──▶   "id": "fi8c8111kow0"
+CreateGrant issues   "id": "fy85p22i8glc"
+the corpus holds     "id": "G0"
 ```
 
-**This is a sweep, not a rename.** `G0`/`G1` appear across fixtures, scenarios,
+**What shipped splits the two.** `CreateGrant` issues a Snowflake and never
+accepts a caller's identifier. But `insertGrantHead` admits any non-blank
+identifier, deliberately: the fixtures and the handbook's worked examples use
+`G0`/`G1`/`G2`, and enforcing the alphabet in storage would reject the corpus
+before the sweep that converts it. **Issuance strict, acceptance after the
+sweep** — and the sweep is not done.
+
+**It is a sweep, not a rename.** `G0`/`G1` appear across fixtures, scenarios,
 tests and demo scripts, and the last such sweep touched 69 files rather than the
 23 estimated. Two specific traps from that one, recorded here so they are not
 rediscovered:
@@ -203,13 +211,12 @@ CHECK permits, because the head occupies a **prefix** of the slots and stops.
 
 ---
 
-## 5 · The trusted root becomes a flag, and `trusted_roots` folds away
+## 5 · The trusted root is a flag on the head
 
-`trusted_roots` is a three-column table — `(tenant_id, application_id, grant_id)`
-— and its job is **trust evidence**, not encoding. Q-119 is explicit that the two
-are different things: a root is encoded by *omitting* `parent_grant_id`, and
-"omitting a field proves nothing." The table is what says the omission is
-legitimate.
+`trusted_roots` was a three-column table — `(tenant_id, application_id, grant_id)`
+— whose job is **trust evidence**, not encoding. Q-119 is explicit that the two
+differ: a root is encoded by *omitting* `parent_grant_id`, and "omitting a field
+proves nothing." The table said the omission was legitimate.
 
 Being a trusted root does not make it a different grant, so by §1's test it is
 value on the head, not a key slot:
@@ -218,123 +225,116 @@ value on the head, not a key slot:
 {"status": "enabled", "trusted_root": true}
 ```
 
-> **Open — does this collide with Q-119's "no root flag"?** Q-119 refuses a root
-> flag *in the revision content*, because the content is the thing a caller
-> submits and a self-asserted flag would be a parentless escape. The head is not
-> submitted content; it is what Auth records about the grant, which is where trust
-> evidence belongs. **I read the two as compatible and the fold as legitimate** —
-> but it is close enough to the line to settle deliberately rather than by
-> assumption, and the answer decides whether `trusted_roots` folds or survives.
+It is **not** in the canonical JSON. Q-119 refuses a root flag in submitted
+*content*, because content is what a caller sends and a self-asserted flag would
+be a parentless escape. The head is what Auth recorded, which is where evidence
+belongs — `domain.Grant` carries it, `domain.GrantControl` (the wire form) does
+not.
 
-> **Finding — nothing creates a trusted root today.** The only
-> `INSERT INTO trusted_roots` in the tree is in `internal/storage/sqlite/fixture.go`.
-> There is no facade operation, no CLI verb, and no administrative gate. A root
-> can be *seeded* by a lab scenario and can never be *established*. That is a
-> gap in the contract, not something the fold introduces — but the fold must not
-> quietly preserve it by making `trusted_root` a field nothing can ever set.
-> **Decide with this record**, because `false` is a defensible default only if
-> something can eventually make it `true`.
+> Whether that reading of Q-119 is right is [the proposal's question](proposal-root-source.md),
+> not this document's. This records what was built on it.
 
----
+**Nothing establishes a trusted root.** The only writer is
+`internal/storage/sqlite/fixture.go`; there is no operation, no CLI verb and no
+gate. A root can be *seeded* and never *established*. That gap is unchanged by
+this record and is the first thing the assignment slice closes — establishment
+writes four things and the fourth is a holder assignment.
 
 ## 6 · The contract
 
-### What exists today
+### What exists
 
-| Operation | State |
+| Operation | |
 |---|---|
-| `PublishGrantRevision` | **implemented** — writes `grant_contents` |
-| `SetGrantStatus` | **implemented** — writes `grant_controls` |
+| `CreateGrant` | head **and revision 1**, one transaction, id issued |
+| `GetGrant` | head alone at `revision=0`, or head plus one revision |
+| `ListGrants` | status filter, tri-state root filter, offset paging |
+| `ListGrantRevisions` | one grant's revisions, newest first |
+| `DeleteGrant` | head and every revision, refusing while depended on |
+| `PublishGrantRevision` | pre-existing — amends a grant |
+| `SetGrantStatus` | pre-existing — `enabled \| disabled`, reversible |
+
+Q-082 names create, enable, disable and delete. All four now exist.
 
 ### `PublishGrantRevision` is amendment-only
 
-Reading `insertGrantRevision` rather than its name: before it writes anything it
-requires **all** of
+Reading `insertGrantRevision` rather than its name, it requires **all** of:
 
 | Precondition | else |
 |---|---|
-| the control row exists | `ErrNotFound` |
+| the head exists | `ErrNotFound` |
 | the grant is **not** a trusted root | `ErrRejected` |
 | **at least one prior revision exists** | `ErrNotFound` |
 | `proposed.Revision > latest` | `ErrConflict` |
 | `parent_grant_id` identical to the latest revision | `ErrRejected` |
 
-Two consequences follow, and neither is visible from the operation's name.
+Two consequences follow, and neither is visible from the name. **Revision 1 can
+never be published** — the third precondition asks for a predecessor. **A root's
+revisions can never be published at all**, deliberately: a root's coverage is
+computed from the catalog, so there is nothing to amend.
 
-**Revision 1 can never be published.** The third precondition asks for a
-predecessor, so the first revision of any grant has to arrive some other way.
-**A root's revisions can never be published at all** — the second precondition
-refuses them outright, deliberately.
+### Which is why `CreateGrant` writes both records
 
-So `PublishGrantRevision` amends grants; it does not originate them. Combined
-with the only `INSERT INTO grant_controls` in the tree living in `fixture.go`,
-**every grant in the system traces back to a seeded fixture.** Q-082 approves
-create / enable / disable / delete; of the four, only enable and disable exist.
+One operation, not a head followed by a publish. A create-then-publish pair would
+leave a window where a grant exists, can be enabled, and supplies nothing.
 
-### Seeding is right for the root and wrong for everything else
+**The id is issued, never accepted** — `fy85p22i8glc`, not a name the caller
+chose. A caller who can name a grant is one step from naming a root.
 
-The distinction matters, because "seed it" is the obvious answer and it is half
-correct.
+**A parentless create is `ErrRejected`, not a root.** The guarantee Q-113 asks
+for is not a check inside creation; it is that **no grant operation writes trust
+evidence at all**, and nothing in `GrantAdministration` can. The CLI refuses it
+at the command line with a message that says so, rather than reporting a missing
+flag.
 
-**A root must be seeded.** It has no parent by definition, so it cannot be
-derived from anything that already exists — it is established by trusted setup,
-which is what bootstrap means. The handbook says so and says the trusted-setup
-evidence is unfinished (Q-117/Q-124). The code agrees with the handbook here:
-refusing to publish revisions of a root is the right refusal. **Nothing in this
-record changes that** — `trusted_root` becomes a seeded flag, and establishing a
-root stays the bootstrap question it already is.
+**The catalog and role reads happen inside the writing transaction**, so a
+permission retired between check and write cannot be admitted.
 
-**An ordinary grant must not be.** A seed is a *starting* state; it cannot be the
-only way to *reach* a state. The model exists to show an administrator delegating
-narrower authority downward from a root — and today you can amend a grant a
-fixture wrote, but never create one. That is the gap, and it is not a lab
-convenience issue: `CreateGrant` is a contract operation with an authority gate,
-and no gate can be exercised by a fixture.
+### `DeleteGrant`
 
-> **Design consequence.** `CreateGrant` writes the head **and revision 1 in one
-> transaction**, because revision 1 cannot go through the publish path. It is one
-> operation, not a head followed by a publish — and its parent check is the
-> ordinary one, since a child's first revision still needs real upstream support.
+Q-082 folded revoke into delete, so this is the one permanent removal. It
+destroys the grant whole — head and every revision — because a head with no
+content is a grant that can be enabled and supplies nothing, and content with no
+head is authority with no live switch.
 
-| Operation | Why it is needed |
-|---|---|
-| `CreateGrant` | Q-082's `create`. Issues the Snowflake id, writes the head at `status=enabled`, `trusted_root=false`, **and revision 1**, atomically. Add-only. |
-| `GetGrant` | The head plus, on request, one revision. Every other record type has a typed read. |
-| `ListGrants` | Offset paging, the bound and the cap the other listings already carry. |
-| `ListGrantRevisions` | The role's `--latest` precedent: revisions of one grant, newest first. |
-| `DeleteGrant` | Q-082's `delete`, which supersedes revoke. **Must refuse while an assignment adopts any of its revisions** — the rule teams settled. |
-
-**`CreateGrant` before `PublishGrantRevision`, always.** A revision of a grant
-that does not exist is the same error as an installation of an application that
-does not exist, and gets the same answer.
+It refuses while a child grant or an assignment depends on it, the rule teams
+settled. That refusal is deliberately the conservative direction: it is loosened
+when assignments are their own record, never tightened.
 
 ### Not in this contract
 
-Assignments. They adopt a grant revision and are the next record after this one;
-nothing here changes `assignments`, and it keeps its table until then.
+Assignments, and root establishment. Both are the next slice.
 
----
+## 7 · One question settled, one left open
 
-## 7 · Two open questions this record forces
+**`version` is settled: wire-only.** `record-role.md` raised it and left it open —
+the envelope has no version column, and `abv_metadata.schema_version` versions the
+schema rather than a record's format. The role could defer it because nothing
+stored `version`; `grant_controls` had a column, so the fold had to answer.
 
-**`version` has nowhere to go — and the grant is where it stops being deferrable.**
-`record-role.md` raised it and left it open: the envelope has no version column,
-and `abv_metadata.schema_version` versions the schema, not a record's format. The
-role could defer it because nothing stored `version`. **`grant_controls` has a
-`version` column today**, so folding the table either finds the field a home or
-drops something that is currently persisted. The three options are unchanged —
-inside the value, a new envelope column, or wire-only in the codec — and the
-answer binds every record type with a canonical JSON, not just this one.
+Of the three options — inside the value, a new envelope column, or wire-only in
+the codec — **wire-only** is what shipped. `version` is always `"1"`
+(`ValidateContent` returns `ErrUnsupported` for anything else), so a column or a
+value field would persist a constant. It is rebuilt on the way out by
+`decodeRevision`, exactly as `grant_id` and `revision` are rebuilt from their key
+slots.
 
-**What is the head's `state`, given the value also has a `status`?** The envelope
-carries `state ∈ enabled|disabled|deleted`, and the grant's own contract carries
-`status ∈ enabled|disabled`. Two switches with one meaning is drift of exactly
-the kind the envelope correction removed. Either the head's `status` leaves the
-value and *is* `state` — with `deleted` then serving Q-082's delete — or the
-value keeps `status` and `state` stays permanently `enabled`, which makes the
-envelope column a lie. **The first is right**, and it is worth saying out loud
-because it is the first time a record's own lifecycle and the envelope's have
-been the same lifecycle.
+The cost is real and worth naming: **a stored row cannot say which format wrote
+it.** That is acceptable while there is one format and the codec refuses every
+other, and it stops being acceptable the day a second one exists. The answer
+binds every record type with a canonical JSON, not just this one.
+
+**Still open: the head's `state` against the value's `status`.** The envelope
+carries `state ∈ enabled|disabled|deleted`; the grant's contract carries
+`status ∈ enabled|disabled`. Two switches with one meaning is drift of the kind
+the envelope correction removed.
+
+**What shipped keeps both**: `status` lives in the head's value and `state` is
+left at its `enabled` default, unread. So the envelope column is currently a lie
+for this record type. The better answer is that the head's `status` leaves the
+value and *is* `state`, with `deleted` serving Q-082's delete — but that touches
+every record type's relationship to `state`, not just this one, so it is recorded
+here rather than decided here.
 
 ---
 
