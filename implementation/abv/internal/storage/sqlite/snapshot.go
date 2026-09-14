@@ -83,8 +83,18 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 }
 
 func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) error {
+	// compatibility_enabled and generation are Auth-AL's own state about an
+	// application, not the application itself — whether it exists is the
+	// registry's answer, given before this runs.
+	//
+	// So an absent row is not "no such application"; it is "no state recorded
+	// yet", and the defaults are the honest reading: relationship validation off
+	// under Q-041, generation zero. The row appears on the first catalog write.
 	var compat int
-	if err := r.conn.QueryRowContext(r.ctx, `SELECT compatibility_enabled FROM applications WHERE application_id=?`, applicationID).Scan(&compat); err != nil {
+	err := r.conn.QueryRowContext(r.ctx, `SELECT compatibility_enabled FROM applications WHERE application_id=?`, applicationID).Scan(&compat)
+	if errors.Is(err, sql.ErrNoRows) {
+		compat = 0
+	} else if err != nil {
 		return corruptOrDB(err)
 	}
 	if err := r.add(); err != nil {
@@ -94,7 +104,9 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 		return domain.ErrMalformed
 	}
 	var generation int64
-	if err := r.conn.QueryRowContext(r.ctx, `SELECT generation FROM applications WHERE application_id=?`, applicationID).Scan(&generation); err != nil {
+	if err := r.conn.QueryRowContext(r.ctx, `SELECT generation FROM applications WHERE application_id=?`, applicationID).Scan(&generation); errors.Is(err, sql.ErrNoRows) {
+		generation = 0
+	} else if err != nil {
 		return classify(err)
 	}
 	*catalog = domain.Catalog{ApplicationID: applicationID, Generation: generation, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1}
