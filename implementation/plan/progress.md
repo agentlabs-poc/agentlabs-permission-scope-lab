@@ -1,5 +1,48 @@
 # ABV implementation progress
 
+## The assignment record — tables 5 → 4, and the envelope holds every record type
+
+[Record](records/record-assignment.md) · [demonstration](records/demos/demo-15-assignment-record.md).
+
+Keyed by what it binds, not by its own identifier:
+
+```
+key1=abv  key2=assignment  key3=<application>
+key4=<grant id>  key5=<recipient type>  key6=<recipient id>
+```
+
+**That is forced rather than preferred.** Q-104 says a grant has at most one
+current assignment to a given recipient, with retained disabled ones counting.
+The old table enforced it with a `UNIQUE` of its own; `abv_l1_records` is shared
+by every record type and cannot carry a per-type constraint. So the pair either
+occupies the key path — where the envelope's existing primary key enforces it for
+nothing — or the rule stops being enforced by storage at all. Nothing was added
+to the shared schema.
+
+The identifier therefore stays in the value, and there is no layout carrying
+both: the primary key is all ten slots, so adding the id would widen uniqueness
+to `(grant, recipient, id)` and admit exactly the duplicate Q-104 forbids.
+Operations keep their id-taking signatures and those lookups scan, which keeps
+the layout reversible inside one storage file.
+
+Four operations that the handbook had already approved and nobody had built:
+`GetAssignment`, `ListAssignments`, `DeleteAssignment`, and Q-104's *"authorized
+adoption operation"* — `UpgradeAssignment`. The last selects the **latest**
+published revision, never an intermediate, and rejects unchanged when the latest
+cannot be supported; falling back is the specific behaviour Q-105 forbids.
+
+`DeleteAssignment` refuses while a dependent route rests on this one. Removal
+differs from disablement exactly as Q-104 needs: a removed assignment stops being
+current, so the binding is free again, where a disabled one still blocks it.
+
+**Tables 5 → 4.** `abv_l1_records` now holds all eight canonical record types —
+permission, scope, role, team, membership, grant, grant_revision, assignment.
+`applications` and `installations` are the only tables beside it, and they leave
+when Auth-AL's compatibility and generation move into the envelope.
+
+`ts` and `state` remain written-by-default and read by nothing, kept by decision
+rather than oversight.
+
 ## The grant record — two record types, and tables 8 → 5
 
 [Record](records/record-grant.md) · [root proposal](records/proposal-root-source.md) ·

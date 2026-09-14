@@ -32,7 +32,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "grant", "grants", "assignment", "role", "team", "scenario", "catalog":
+	case "inspect", "check", "assign", "grant", "grants", "assignment", "assignments", "role", "team", "scenario", "catalog":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -48,7 +48,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
 			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace", "--parent", "--roots", "--human",
-			"--status", "--children", "--role", "--role-revision", "--scope":
+			"--status", "--children", "--role", "--role-revision", "--scope", "--grant", "--recipient", "--recipient-type":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -230,6 +230,28 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			}
 		default:
 			return fail(2, "team requires get, list, members, create, reparent, delete, add-member or remove-member")
+		}
+	case "assignments":
+		if len(positional) == 0 || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "assignments requires a verb, database and fixture context")
+		}
+		switch positional[0] {
+		case "get", "delete", "upgrade":
+			if len(positional) != 2 || empty(positional[1]) || !only(flags, "--tenant", "--app", "--db", "--fixture-context") {
+				return fail(2, "assignments "+positional[0]+" requires an ID")
+			}
+		case "list":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--grant", "--recipient", "--recipient-type", "--status", "--offset", "--limit") {
+				return fail(2, "assignments list accepts grant, recipient, status, offset and limit only")
+			}
+			if empty(flags["--grant"]) == empty(flags["--recipient"]) {
+				return fail(2, "assignments list requires exactly one of --grant and --recipient: a listing of every assignment is unbounded in the dimension that grows fastest")
+			}
+			if !empty(flags["--recipient"]) && empty(flags["--recipient-type"]) {
+				return fail(2, "assignments list requires --recipient-type with --recipient")
+			}
+		default:
+			return fail(2, "assignments requires get, list, delete or upgrade")
 		}
 	case "grants":
 		if len(positional) == 0 || flags["--db"] == "" || flags["--fixture-context"] == "" {

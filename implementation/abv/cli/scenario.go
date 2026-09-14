@@ -55,6 +55,54 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			return report(diag, err)
 		}
 		return 0
+	case "assignments":
+		assignmentAPI, ok := api.(application.AssignmentAPI)
+		if !ok || nilCapability(assignmentAPI) {
+			return report(diag, domain.ErrUnsupported)
+		}
+		fixture := domain.FixtureContext{Name: flags["--fixture-context"]}
+		switch positional[0] {
+		case "get":
+			found, err := assignmentAPI.GetAssignment(ctx, area, fixture, positional[1])
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderAssignmentRecord(out, diag, found); err != nil {
+				return 4
+			}
+		case "list":
+			filter := domain.AssignmentFilter{GrantID: flags["--grant"], Status: flags["--status"]}
+			if !empty(flags["--recipient"]) {
+				recipient := domain.Recipient{Type: flags["--recipient-type"], ID: flags["--recipient"]}
+				filter.Recipient = &recipient
+			}
+			if code := teamBounds(flags, &filter.Offset, &filter.Limit, diag); code != 0 {
+				return code
+			}
+			page, err := assignmentAPI.ListAssignments(ctx, area, fixture, filter)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderAssignmentPage(out, diag, page); err != nil {
+				return 4
+			}
+		case "delete":
+			if err := assignmentAPI.DeleteAssignment(ctx, area, fixture, positional[1]); err != nil {
+				return report(diag, err)
+			}
+			if _, err := fmt.Fprintf(out, "internal projection: assignment\ndeleted  %s\n", positional[1]); err != nil {
+				return 4
+			}
+		case "upgrade":
+			after, err := assignmentAPI.UpgradeAssignment(ctx, area, fixture, positional[1])
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderAssignmentRecord(out, diag, after); err != nil {
+				return 4
+			}
+		}
+		return 0
 	case "grants":
 		grantAPI, ok := api.(application.GrantAPI)
 		if !ok || nilCapability(grantAPI) {

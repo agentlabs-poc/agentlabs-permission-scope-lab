@@ -27,6 +27,15 @@ type GrantAPI interface {
 	ListGrantRevisions(context.Context, domain.Area, domain.FixtureContext, string, int, int) (domain.GrantRevisionPage, error)
 }
 
+// AssignmentAPI is the assignment record's own surface. Creating one and
+// changing its status are older operations with their own entry points.
+type AssignmentAPI interface {
+	GetAssignment(context.Context, domain.Area, domain.FixtureContext, string) (domain.Assignment, error)
+	ListAssignments(context.Context, domain.Area, domain.FixtureContext, domain.AssignmentFilter) (domain.AssignmentPage, error)
+	DeleteAssignment(context.Context, domain.Area, domain.FixtureContext, string) error
+	UpgradeAssignment(context.Context, domain.Area, domain.FixtureContext, string) (domain.Assignment, error)
+}
+
 // TeamAPI reads a tenant's teams and memberships.
 type TeamAPI interface {
 	GetTeam(context.Context, domain.Area, domain.FixtureContext, string) (domain.Team, error)
