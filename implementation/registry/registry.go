@@ -155,7 +155,11 @@ func (f *Facade) Install(ctx context.Context, identity domain.Identity, tenantID
 	if _, err := f.store.Application(ctx, slug); err != nil {
 		return err
 	}
-	return f.store.InsertInstallation(ctx, domain.Installation{TenantID: tenantID, Slug: slug})
+	// An installation is created enabled. Installing over one that exists —
+	// enabled or disabled — is a conflict rather than a quiet re-enable: install
+	// means "create the relationship", and reviving a disabled one is
+	// SetInstallationStatus. One operation, one meaning.
+	return f.store.InsertInstallation(ctx, domain.Installation{TenantID: tenantID, Slug: slug, Status: domain.StatusEnabled})
 }
 
 // Uninstall removes one tenant's hold on one application, and says whether it
@@ -173,20 +177,53 @@ func (f *Facade) Uninstall(ctx context.Context, identity domain.Identity, tenant
 	return f.store.DeleteInstallation(ctx, domain.Installation{TenantID: tenantID, Slug: slug})
 }
 
-func (f *Facade) IsInstalled(ctx context.Context, identity domain.Identity, tenantID, slug string) (bool, error) {
+// SetInstallationStatus enables or disables one tenant's installation.
+//
+// It is reversible and it never creates. Disabling is not uninstalling: the
+// record survives, which is what lets a tenant pause an application without
+// losing it. Gated as a tenant write, because disabling your own installation is
+// the tenant administrator acting — the same authority as installing.
+func (f *Facade) SetInstallationStatus(ctx context.Context, identity domain.Identity, tenantID, slug, status string) (domain.Installation, error) {
+	fail := func(err error) (domain.Installation, error) { return domain.Installation{}, err }
+	if !domain.ValidInstallationStatus(status) {
+		return fail(domain.ErrMalformed)
+	}
+	if err := f.installationPrecondition(ctx, identity, tenantID, slug); err != nil {
+		return fail(err)
+	}
+	return f.store.UpdateInstallationStatus(ctx, tenantID, slug, status)
+}
+
+// GetInstallation returns one tenant's hold on one application, with its status.
+func (f *Facade) GetInstallation(ctx context.Context, identity domain.Identity, tenantID, slug string) (domain.Installation, error) {
+	fail := func(err error) (domain.Installation, error) { return domain.Installation{}, err }
 	if err := ctx.Err(); err != nil {
-		return false, err
+		return fail(err)
 	}
 	if !identity.Valid() {
-		return false, domain.ErrUnsupported
+		return fail(domain.ErrUnsupported)
 	}
 	if !domain.ValidTenant(tenantID) || !domain.ValidSlug(slug) {
-		return false, domain.ErrMalformed
+		return fail(domain.ErrMalformed)
 	}
 	if err := f.admin.CheckApplicationRead(ctx, identity, f.clock.Now()); err != nil {
+		return fail(err)
+	}
+	return f.store.Installation(ctx, tenantID, slug)
+}
+
+// IsInstalled reports whether the tenant holds the application AND has it
+// enabled. Two facts, one bit — the caller's question is whether the tenant may
+// use it, and a disabled installation answers no as surely as an absent one.
+func (f *Facade) IsInstalled(ctx context.Context, identity domain.Identity, tenantID, slug string) (bool, error) {
+	installation, err := f.GetInstallation(ctx, identity, tenantID, slug)
+	if errorIs(err, domain.ErrNotFound) {
+		return false, nil
+	}
+	if err != nil {
 		return false, err
 	}
-	return f.store.Installed(ctx, tenantID, slug)
+	return installation.Status == domain.StatusEnabled, nil
 }
 
 // ListInstallations answers in both directions and requires exactly one filter.

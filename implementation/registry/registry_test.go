@@ -202,3 +202,98 @@ func TestPortAnswersTheTwoQuestionsAndMapsSuspended(t *testing.T) {
 		t.Fatalf("another tenant reported installed: %v err=%v", held, err)
 	}
 }
+
+// Disabled and uninstalled are different things: disable is reversible and keeps
+// the record, uninstall destroys it. That distinction is the reason tenant status
+// exists at all.
+func TestDisableIsReversibleAndNotUninstall(t *testing.T) {
+	f := open(t, false)
+	if _, err := f.RegisterApplication(t.Context(), platform, "hrms", "HRMS"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Install(t.Context(), platform, "acme", "hrms"); err != nil {
+		t.Fatal(err)
+	}
+	// Created enabled.
+	held, err := f.IsInstalled(t.Context(), platform, "acme", "hrms")
+	if err != nil || !held {
+		t.Fatalf("a new installation is not enabled: %v err=%v", held, err)
+	}
+	// Disabled: the tenant may not use it, but the record survives.
+	if _, err := f.SetInstallationStatus(t.Context(), platform, "acme", "hrms", domain.StatusDisabled); err != nil {
+		t.Fatal(err)
+	}
+	held, err = f.IsInstalled(t.Context(), platform, "acme", "hrms")
+	if err != nil || held {
+		t.Fatalf("a disabled installation still reports usable: %v err=%v", held, err)
+	}
+	got, err := f.GetInstallation(t.Context(), platform, "acme", "hrms")
+	if err != nil || got.Status != domain.StatusDisabled {
+		t.Fatalf("the record did not survive disabling: %#v err=%v", got, err)
+	}
+	// And it comes back.
+	if _, err := f.SetInstallationStatus(t.Context(), platform, "acme", "hrms", domain.StatusEnabled); err != nil {
+		t.Fatal(err)
+	}
+	if held, _ := f.IsInstalled(t.Context(), platform, "acme", "hrms"); !held {
+		t.Fatal("re-enabling did not restore it")
+	}
+	// Install over an existing installation is a conflict, not a quiet
+	// re-enable: install creates the relationship, status changes it.
+	if _, err := f.SetInstallationStatus(t.Context(), platform, "acme", "hrms", domain.StatusDisabled); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Install(t.Context(), platform, "acme", "hrms"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("install over a disabled installation gave %v, want ErrConflict", err)
+	}
+	// Status never creates.
+	if _, err := f.SetInstallationStatus(t.Context(), platform, "globex", "hrms", domain.StatusEnabled); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("a status change created an installation: %v", err)
+	}
+	if _, err := f.SetInstallationStatus(t.Context(), platform, "acme", "hrms", "paused"); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("an unknown installation status was accepted: %v", err)
+	}
+}
+
+// The port maps two facts to one bit: the application must be active AND the
+// installation enabled. Auth-AL never learns there are two ways to answer no.
+func TestPortRequiresBothActiveAndEnabled(t *testing.T) {
+	f := open(t, false)
+	if _, err := f.RegisterApplication(t.Context(), platform, "hrms", "HRMS"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Install(t.Context(), platform, "acme", "hrms"); err != nil {
+		t.Fatal(err)
+	}
+	port, err := registry.NewPort(f, platform)
+	if err != nil {
+		t.Fatal(err)
+	}
+	check := func(wantExists, wantHeld bool, why string) {
+		t.Helper()
+		exists, err := port.ApplicationExists(t.Context(), "hrms")
+		if err != nil || exists != wantExists {
+			t.Fatalf("%s: exists=%v want %v err=%v", why, exists, wantExists, err)
+		}
+		held, err := port.Installed(t.Context(), "acme", "hrms")
+		if err != nil || held != wantHeld {
+			t.Fatalf("%s: installed=%v want %v err=%v", why, held, wantHeld, err)
+		}
+	}
+	check(true, true, "active and enabled")
+
+	// Platform-wide suspension: every tenant loses it.
+	if _, err := f.SetApplicationStatus(t.Context(), platform, "hrms", domain.StatusSuspended); err != nil {
+		t.Fatal(err)
+	}
+	check(false, true, "suspended application")
+
+	// Tenant-side disable: only this tenant, and the application is fine.
+	if _, err := f.SetApplicationStatus(t.Context(), platform, "hrms", domain.StatusActive); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.SetInstallationStatus(t.Context(), platform, "acme", "hrms", domain.StatusDisabled); err != nil {
+		t.Fatal(err)
+	}
+	check(true, false, "disabled installation")
+}

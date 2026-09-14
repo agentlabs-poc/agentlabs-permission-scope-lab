@@ -126,6 +126,20 @@ func run(args []string, out, diag *os.File) int {
 			return report(diag, err)
 		}
 		fmt.Fprintf(out, "installation\n%s  tenant=%s  slug=%s\n", positional[0]+"ed", flags["--tenant"], positional[1])
+	case "enable", "disable":
+		if len(positional) != 2 || flags["--tenant"] == "" {
+			fmt.Fprintf(diag, "%s requires a slug and --tenant\n", positional[0])
+			return 2
+		}
+		status := domain.StatusEnabled
+		if positional[0] == "disable" {
+			status = domain.StatusDisabled
+		}
+		i, err := f.SetInstallationStatus(ctx, operator, flags["--tenant"], positional[1], status)
+		if err != nil {
+			return report(diag, err)
+		}
+		fmt.Fprintf(out, "installation\ntenant  %s\nslug  %s\nstatus  %s\n", i.TenantID, i.Slug, i.Status)
 	case "installed":
 		if len(positional) != 2 || flags["--tenant"] == "" {
 			fmt.Fprintln(diag, "installed requires a slug and --tenant")
@@ -143,7 +157,7 @@ func run(args []string, out, diag *os.File) int {
 		}
 		fmt.Fprintf(out, "installations\ncount  %d\ntotal  %d\n", len(page.Installations), page.Total)
 		for _, i := range page.Installations {
-			fmt.Fprintf(out, "tenant=%-10s slug=%s\n", i.TenantID, i.Slug)
+			fmt.Fprintf(out, "tenant=%-10s slug=%-10s %s\n", i.TenantID, i.Slug, i.Status)
 		}
 	default:
 		fmt.Fprintln(diag, "unknown verb")

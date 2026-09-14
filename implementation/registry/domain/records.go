@@ -14,12 +14,23 @@ import (
 // holding a copy would mean this domain drifting out of step with it.
 var slugPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,63}$`)
 
-// Application statuses. The real registry has five; the other three describe a
-// publishing lifecycle this domain does not yet have, and inventing them here
-// would be designing ahead of need.
+// Application statuses, platform-wide. The real registry has five; the other
+// three describe a publishing lifecycle this domain does not yet have, and
+// inventing them here would be designing ahead of need.
 const (
 	StatusActive    = "active"
 	StatusSuspended = "suspended"
+)
+
+// Installation statuses, per tenant.
+//
+// Disabled and uninstalled are different things, and keeping them apart is the
+// point: disable is reversible and keeps the record — with whatever configuration
+// a fuller registry later holds — while uninstall destroys it. A tenant pausing
+// an application should not lose its setup.
+const (
+	StatusEnabled  = "enabled"
+	StatusDisabled = "disabled"
 )
 
 // Application is a registered capability surface: the thing that owns a
@@ -41,6 +52,7 @@ type Application struct {
 type Installation struct {
 	TenantID string
 	Slug     string
+	Status   string
 }
 
 type ApplicationFilter struct {
@@ -85,6 +97,10 @@ func ValidName(name string) bool {
 
 func ValidStatus(status string) bool {
 	return status == StatusActive || status == StatusSuspended
+}
+
+func ValidInstallationStatus(status string) bool {
+	return status == StatusEnabled || status == StatusDisabled
 }
 
 func ValidTenant(tenantID string) bool {
