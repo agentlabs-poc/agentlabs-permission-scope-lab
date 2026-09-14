@@ -233,6 +233,13 @@ thing. There are two, and only one of them is circular.
 
 ### The two lineages
 
+![Two lineages side by side: each computes its root from its own catalog, the roots differ only in which catalog key3 names and who may establish them, and the single thing joining the two is that the human at the bottom of the Auth lineage is the actor who establishes the application root](assets/two-lineages.svg)
+
+Read the diagram bottom-up on the left and top-down on the right: the tenant
+administrator is the **result** of lineage A and the **actor** of lineage B.
+That one person is the entire connection — no grant in B has a parent in A, so
+the two ceilings never merge.
+
 ```
 platform admin
   └── the tenant's Auth root                      platform-established, once
