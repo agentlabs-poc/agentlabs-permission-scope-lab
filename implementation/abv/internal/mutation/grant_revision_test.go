@@ -138,7 +138,9 @@ func TestPublishGrantRevisionRejectsInvalidAuthorityAndContentWithoutWrite(t *te
 		}, want: domain.ErrRejected},
 		{name: "unknown permission", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Permissions = []string{"unknown"} }, want: domain.ErrRejected},
 		{name: "unknown scope", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Scope = map[string]string{"unknown": "x"} }, want: domain.ErrRejected},
-		{name: "amplified permissions", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Permissions = []string{"hrms:payroll:payslip::delete"} }, want: domain.ErrRejected},
+		{name: "amplified permissions", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) {
+			g.Permissions = []string{"hrms:payroll:payslip::delete"}
+		}, want: domain.ErrRejected},
 		{name: "self scope", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Scope = map[string]string{"user": "$self"} }, want: domain.ErrUnsupported},
 		{name: "unknown role", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) {
 			g.Permissions, g.RoleID, g.RoleRevision = nil, "unknown", 1

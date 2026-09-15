@@ -12,17 +12,17 @@ import (
 )
 
 type catalogSpy struct {
-	app        domain.Application
-	fixture    domain.FixtureContext
-	permission domain.PermissionDefinition
-	scope      domain.ScopeDefinition
+	app         domain.Application
+	fixture     domain.FixtureContext
+	permission  domain.PermissionDefinition
+	scope       domain.ScopeDefinition
 	filter      domain.PermissionFilter
 	scopeFilter domain.ScopeFilter
-	page       domain.PermissionPage
-	id         string
-	namespace  string
-	active     bool
-	err        error
+	page        domain.PermissionPage
+	id          string
+	namespace   string
+	active      bool
+	err         error
 }
 
 func (s *catalogSpy) GetScope(_ context.Context, app domain.Application, fixture domain.FixtureContext, key string) (domain.ScopeDefinition, error) {

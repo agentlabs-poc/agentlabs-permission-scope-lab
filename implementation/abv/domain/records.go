@@ -389,10 +389,10 @@ type ScopePage struct {
 	Generation int64
 }
 type Catalog struct {
-	ApplicationID        string
-	Generation           int64
-	Permissions          map[string]PermissionDefinition
-	Scopes               map[string]ScopeDefinition
+	ApplicationID string
+	Generation    int64
+	Permissions   map[string]PermissionDefinition
+	Scopes        map[string]ScopeDefinition
 	// CompatibilityEnabled is the application's declared choice under Q-041.
 	// Nothing enforces it yet: permission/scope relationship validation has no
 	// approved representation (P-11), so the declaration is stored and the check

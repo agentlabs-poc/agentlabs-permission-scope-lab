@@ -21,7 +21,7 @@ import (
 // application's, identical for every tenant — the same reason a permission
 // definition sits there.
 type catalogPayload struct {
-	CompatibilityEnabled bool  `json:"compatibility_enabled"`
+	CompatibilityEnabled bool `json:"compatibility_enabled"`
 	// Generation is a counter, not a fact about the catalog anyone addresses. It
 	// is here because a record store was the only place left to put it, and that
 	// is worth saying plainly rather than dressing it up: it exists so a reader

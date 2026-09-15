@@ -90,5 +90,3 @@ func SelectedPermissions(g domain.GrantContent, roles map[domain.RoleKey]domain.
 	}
 	return slices.Clone(permissions), nil
 }
-
-

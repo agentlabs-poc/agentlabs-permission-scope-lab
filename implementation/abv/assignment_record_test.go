@@ -161,8 +161,8 @@ func TestDeleteAssignmentRefusesWhileADependentRouteRestsOnIt(t *testing.T) {
 	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrUnsupported) {
 		t.Fatalf("deleting the root's assignment gave %v, want ErrUnsupported", err)
 	}
-	// With the dependent gone the support can go too, which is what makes the
-	// refusal above a dependency and not a prohibition.
+	// Clear the dependent, so the support can go too a few lines below — which
+	// is what makes the refusal above a dependency and not a prohibition.
 	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4pan0d"); err != nil {
 		t.Fatal(err)
 	}

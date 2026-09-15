@@ -81,9 +81,12 @@ func decodeRevision(id string, revision int64, raw []byte) (domain.GrantContent,
 		Scope:         payload.Scope,
 		Validity:      payload.Validity,
 	}
-	if content.Scope == nil {
-		content.Scope = map[string]string{}
-	}
+	// No missing-scope default here either. The same rule that forbids it on the
+	// write path — "must not silently turn malformed or omitted scope into {}" —
+	// forbids it on the way back out: a row that somehow holds no scope is a
+	// malformed record, and reporting it is the only way anyone finds out. This
+	// substitution would have turned every such row into the widest child its
+	// parent allows, silently, at read time.
 	if err := codec.ValidateContent(content); err != nil {
 		return domain.GrantContent{}, err
 	}

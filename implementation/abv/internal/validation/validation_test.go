@@ -21,8 +21,8 @@ func area(t *testing.T) domain.Area {
 }
 func catalog() domain.Catalog {
 	return domain.Catalog{ApplicationID: "hrms",
-		Permissions:   map[string]domain.PermissionDefinition{read: {ID: read, Active: true, Boundary: domain.ApplicationBoundary}, write: {ID: write, Active: true, Boundary: domain.ApplicationBoundary}},
-		Scopes:        map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"}},
+		Permissions: map[string]domain.PermissionDefinition{read: {ID: read, Active: true, Boundary: domain.ApplicationBoundary}, write: {ID: write, Active: true, Boundary: domain.ApplicationBoundary}},
+		Scopes:      map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"}},
 	}
 }
 func content() domain.GrantContent {

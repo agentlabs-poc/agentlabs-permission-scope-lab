@@ -7,8 +7,8 @@ import (
 	"agentlabs.local/abv/internal/validation"
 	"context"
 	"sort"
-	"unicode/utf8"
 	"strings"
+	"unicode/utf8"
 )
 
 func (s *Service) RegisterPermission(ctx context.Context, app domain.Application, identity domain.Identity, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
@@ -292,7 +292,6 @@ func validateFilter(filter domain.PermissionFilter) error {
 	}
 	return nil
 }
-
 
 // matchesPrefix reports whether an identifier's noun path starts with the given
 // whole segments. Comparison is segment by segment, never a string prefix: only
