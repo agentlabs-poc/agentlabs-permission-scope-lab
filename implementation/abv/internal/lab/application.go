@@ -412,3 +412,13 @@ func (a *labApplication) ListOwners(ctx context.Context, area domain.Area, fc do
 	}
 	return a.facade.ListOwners(ctx, area, TeamFINC17(area).Issuer, filter)
 }
+
+func (a *labApplication) EstablishRoot(ctx context.Context, area domain.Area, fc domain.FixtureContext, holderTeamID string) (domain.Grant, domain.GrantContent, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Grant{}, domain.GrantContent{}, err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.Grant{}, domain.GrantContent{}, err
+	}
+	return a.facade.EstablishRoot(ctx, area, TeamFINC17(area).Issuer, holderTeamID)
+}

@@ -90,6 +90,9 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		if writes.NewGrant != nil {
 			categories++
 		}
+		if writes.NewRoot != nil {
+			categories++
+		}
 		if writes.RemovedGrant != "" {
 			categories++
 		}
@@ -167,6 +170,9 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		}
 		if writes.NewGrant != nil {
 			return p.insertGrant(ctx, conn, area, *writes.NewGrant)
+		}
+		if writes.NewRoot != nil {
+			return p.establishRoot(ctx, conn, area, *writes.NewRoot)
 		}
 		if writes.RemovedGrant != "" {
 			return deleteGrant(ctx, conn, area, writes.RemovedGrant)
