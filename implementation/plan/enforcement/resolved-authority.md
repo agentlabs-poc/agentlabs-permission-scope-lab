@@ -21,7 +21,8 @@ differ in kind rather than in polish.
 | `source` and its lineage, and `OmitSource` | **built** |
 | the `permissions` filter | **built** |
 | `authority_epoch` and `resolved_at` | **not emitted.** The envelope below shows them because the freshness design needs a place to land; nothing computes an epoch yet |
-| `POST authority.resolve`, `GET authority.epoch` | **not built.** There is no HTTP surface at all — the call today is the Go method and the `abv resolve` verb, whose `--client` flag supplies the credential in place of a token |
+| `POST authority.resolve` | **built** — served by `wiring`, called by the `authclient` module, at exactly the path §2 prints |
+| `GET authority.epoch` | **not built** — nothing computes an epoch |
 | a caller who is not the subject | **built** — `--client`, and §2's identity rules |
 | `expand_roles: false` and `permissions_ref` | **not built**, deliberately — §6 |
 
@@ -85,10 +86,11 @@ This is the form Auth's own gate uses in-process, and the form the HTTP handler
 wraps. It is the only new read on the Facade; every other exported method is
 administrative.
 
-### As an endpoint — proposed, not built
+### As an endpoint — built
 
-There is no HTTP surface yet. The shape below is what the Go form becomes when
-there is one.
+Served by `wiring.Service.Handler`, called by `authclient`. The path is the
+module's rather than a deployment's, so a client needs a base URL and nothing
+else and no deployment can move a route and silently break every agent.
 
 ```http
 POST /api/v1/{tenant}/abv/applications/{application}/authority.resolve
@@ -126,6 +128,12 @@ read.
 a rule for resolving it. One copy in the path, echoed once in the response, has
 neither.
 
+**What the server does with it.** The actor is taken from the caller's own
+credentials, established by the deployment; the body's `actor` is decoded and
+discarded, because a submitted identity block is not proof of anything. The
+subject is the body's. So the block travels whole and only half of it is
+believed.
+
 **Why the whole identity block and not just `human_id`.** A request may be an
 agent acting for a human. AUTHORITY-002 bounds the answer by *"both the human's
 applicable authority and delegation limits"*, and the delegation is Auth's fact.
@@ -134,11 +142,15 @@ already bounded — the client never has to narrow it further.
 
 ### Options, all defaulting to the complete answer
 
-| option | default | effect |
+| option | on the wire | effect |
 |---|---|---|
-| `include_source` | `true` | omit to drop the explanation. Not for the hot path — see below |
-| `expand_roles` | `true` | see §6 — `false` is a designed-in future option, not built |
-| `permissions` | `null` | a filter, not a requirement. `null` means everything the human holds |
+| `omit_source` | **built**, absent means false | drop the explanation. Not for the hot path — see below |
+| `permissions` | **built**, absent means everything | a filter, not a requirement |
+| `expand_roles` | **not accepted** | §6 — and the server decodes strictly, so naming it is refused rather than ignored |
+
+The polarity is `omit_source` rather than `include_source`, so a request that
+says nothing gets the complete answer. An earlier revision of this document
+printed the opposite name and a request body the built server rejects.
 
 On the CLI the same three boundaries appear as `--tenant`, `--app` and `--human`,
 and `--client` names the credential asking. Without it the caller is the subject
@@ -278,8 +290,8 @@ set, not a winner.
 | field | rule |
 |---|---|
 | `version` | required string, rejected if missing or unsupported — CONTRACT-010 |
-| `authority_epoch` | **not emitted yet.** The tenant's epoch this was resolved at; a cached document may be used only while it still matches — Q-128 |
-| `resolved_at` | **not emitted yet.** Evidence, not a validity input — time is decided by `validity` |
+| `authority_epoch` | **not emitted yet, and not addable without a version bump.** A client now exists and decodes strictly, so a new field fails every deployed one closed. The tenant's epoch this was resolved at; a cached document may be used only while it still matches — Q-128 |
+| `resolved_at` | **not emitted yet**, same constraint. Evidence, not a validity input — time is decided by `validity` |
 | `permissions` | expanded, never a role reference. Non-empty |
 | `scope` | effective. `{}` means the whole area, which is a complete scope, not an absent one |
 | `validity` | effective — the narrowest window in the chain. `null` bounds mean unbounded |
@@ -348,7 +360,9 @@ error, and the same separation applies here.
 | the tenant has not installed the application | **not found**. There is no area to resolve in. |
 | the caller may not ask about this human | **rejected**. |
 | the identity block is missing a part, or names a wildcard | **malformed**. Never a partial document. |
-| the version is not `"1"`, or the actor type is outside Q-086, or a `user` actor names another human | **unsupported** — "we do not do that", decided before any gate runs |
+| the version is not `"1"` | **unsupported** — 501 on the wire, "we do not speak that" |
+| the actor type is outside Q-086, or a `user` actor names another human | **unsupported**, decided before any gate runs |
+| the caller is not established in the area asked about | **rejected** — 403, and deliberately the same answer as an area that does not exist, so one credential cannot map the deployment |
 | authority could not be established — store unavailable, snapshot ceiling exceeded | **evaluation error**. Not a deny, and the client must not treat it as one — Q-128. |
 
 **An empty document is the most important row.** It is the normal answer for most
