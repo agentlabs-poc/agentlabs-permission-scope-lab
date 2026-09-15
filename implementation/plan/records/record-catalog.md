@@ -51,9 +51,9 @@ the fallback for an Auth-AL opened without a registry.
 > that two stores can disagree about whether a tenant has an application — with
 > Auth-AL believing its own.
 
-**What it takes:** make the port mandatory. `OpenSQLite` without a registry
-either becomes an error, or keeps working with `Installed` always false, which is
-fail-closed and honest. Then delete the table.
+**What it took:** the port became mandatory, and structurally rather than by a
+runtime check — `OpenSQLiteWithRegistry` is now `OpenSQLite`, so there is one way
+to open a store and it takes a registry. The table is gone.
 
 ---
 
@@ -145,26 +145,32 @@ flip on a fixed number of rows.
 > (`RegisterApplication` invalidates a cached listing exactly as a catalog write
 > does).
 >
-> **Recommendation: A, with the reason recorded.** Take the counter into the
-> `catalog` record, note plainly that it is a counter in a record store
-> and why, and revisit it when `ts` earns a finer stamp — which the deferred audit
-> question will force anyway. C is better and cannot be adopted honestly until
-> `ts` can distinguish two writes in the same second.
+> **Decided: A, and the reason lives in the code rather than only here.**
+> `catalogPayload.Generation` carries the note: it is a counter in a record store
+> because there was nowhere else, C is better, and C cannot be adopted while `ts`
+> has one-second resolution. Revisit when `ts` earns a finer stamp — which the
+> deferred audit question will force anyway.
 
 ---
 
-## 4 · What this actually costs
+## 4 · What it cost
 
 | # | Step | |
 |---|---|---|
-| 1 | `abv.catalog` record + storage | small — a two-field value, the shape `abv.grant`'s head already has |
-| 2 | `readCatalog`'s compat and generation reads re-pointed | two queries |
-| 3 | `bumpGeneration` becomes a value update | the per-application one is direct; the **all-applications** one at `catalog.go:72` becomes an `UPDATE … WHERE key2='catalog'` |
-| 4 | Make the `Registry` port mandatory | the decision, not the code |
-| 5 | Drop both tables, assert they stay gone | one migration, one test |
-| 6 | Re-capture the demonstrations | tables 4 → 2 is visible in every one |
+| 1 | `abv.catalog` record + storage | `internal/storage/sqlite/catalog_record.go` |
+| 2 | `readCatalog`'s compat and generation reads re-pointed | `snapshotReader.catalog` now calls `readCatalogState` |
+| 3 | `bumpGeneration` became a value update | `bumpCatalogGeneration`, and `bumpEveryCatalogGeneration` for the platform-permission case |
+| 4 | The `Registry` port became mandatory | one signature, not a runtime check |
+| 5 | Both tables dropped, asserted gone | `TestCatalogStateIsARecordAndTheLastTwoTablesAreGone` asserts the table list is **exactly** two |
+| 6 | Four demonstrations re-captured | every one prints the table list |
 
-**Step 4 is the only one that is a judgement call.** The rest follows.
+**Step 4 was the only judgement call**, and it cost more than the others
+together: `OpenSQLite` without a registry was what the *lab* used, so the lab had
+to compose one. Two stubs carry it — `lab.FixedRegistry` for one area, and
+`CreateFixture` answering for exactly the areas it seeded. Both refuse everything
+else, and that mattered: **three tests turned out to be asserting the installation
+gate**, which a say-yes-to-everything stub hid. They passed while proving less
+than before, and the wrong-boundary cases were what exposed it.
 
 ---
 
