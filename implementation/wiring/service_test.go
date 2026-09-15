@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -224,5 +225,35 @@ func TestOpenRefusesATypedNilAdministration(t *testing.T) {
 				t.Fatal("assembled with a typed-nil administration")
 			}
 		})
+	}
+}
+
+// The claim the split exists to make, checked rather than trusted: an
+// application's binary links the gate and the client, and no part of the
+// authority domain.
+//
+// Before this, the only AuthoritySource held an *abv.Facade, so feeding an
+// 879-line gate meant compiling 13,674 lines of record store, schema and writes
+// into the application.
+func TestAnApplicationBinaryLinksNoAuthorityDomain(t *testing.T) {
+	for _, target := range []struct{ dir, pkg string }{
+		{"../apps/hrms", "./cmd/hrms"},
+		{"../authclient", "./..."},
+	} {
+		listed := exec.Command("go", "list", "-deps", target.pkg)
+		listed.Dir = target.dir
+		out, err := listed.Output()
+		if err != nil {
+			t.Skipf("go list unavailable here: %v", err)
+		}
+		deps := strings.Split(strings.TrimSpace(string(out)), "\n")
+		if len(deps) < 2 {
+			t.Fatalf("%s listed nothing — this check would pass for any rule", target.dir)
+		}
+		for _, dep := range deps {
+			if strings.HasPrefix(dep, "agentlabs.local/abv") || strings.HasPrefix(dep, "agentlabs.local/registry") {
+				t.Fatalf("%s %s links %s", target.dir, target.pkg, dep)
+			}
+		}
 	}
 }
