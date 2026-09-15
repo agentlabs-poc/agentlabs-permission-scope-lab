@@ -277,6 +277,28 @@ func (s *Service) UpgradeAssignment(ctx context.Context, area domain.Area, ident
 		if err := lineage.HasSource(snapshot, identity, parent, now); err != nil {
 			return storage.WriteSet{}, err
 		}
+		// Q-102's other half. Adoption is "an explicit authorized operation with
+		// complete current boundary/**dependency** validation", and everything
+		// above is the boundary half: it validates the route being changed and
+		// nothing that rests on it. A parent's new revision reaches every team
+		// beneath it, which is exactly what grant-revisions.md warns about —
+		// "unchanged child JSON is not proof of unchanged effective reach".
+		//
+		// Validating is not freezing. A revision that moves a child's inherited
+		// scope is a legitimate act by someone with authority over the parent,
+		// and B22 asks that the resulting authority be validated, not that it be
+		// unchanged. What must not happen is adopting a revision a dependent
+		// cannot be supported under — selecting a permission the new revision no
+		// longer carries, say. Left to resolution that surfaces as a read
+		// failure for the whole human, long after the write that caused it.
+		//
+		// Q-105 gives the answer for a revision that cannot be supported:
+		// "reject the upgrade and leave the assignment unchanged". It says that
+		// of the boundary; a dependent that cannot be supported is the same
+		// sentence one level down.
+		if err := dependentsStillResolve(ctx, snapshot, proposed, now); err != nil {
+			return storage.WriteSet{}, err
+		}
 		if err := ctx.Err(); err != nil {
 			return storage.WriteSet{}, err
 		}
@@ -288,4 +310,44 @@ func (s *Service) UpgradeAssignment(ctx context.Context, area domain.Area, ident
 		return fail(err)
 	}
 	return after, nil
+}
+
+// dependentsStillResolve checks every enabled binding beneath this one against
+// the snapshot as it would be after the adoption.
+//
+// The staged snapshot is the point: each dependent is revalidated through the
+// parent route it would actually have, not the one it has now, which is the only
+// way "the complete resulting authority" can be read.
+func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, proposed domain.Assignment, now time.Time) error {
+	dependents, err := lineage.DependentTeamAssignments(ctx, snapshot, proposed.ID)
+	if err != nil {
+		return err
+	}
+	if len(dependents) == 0 {
+		return nil
+	}
+	staged := cloneSnapshot(snapshot)
+	staged.Assignments[proposed.ID] = proposed
+	for _, dependent := range dependents {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		// A disabled binding holds nothing, so nothing of its can stop working.
+		// It is revalidated when it is enabled, which is where that check lives.
+		if dependent.Status != "enabled" {
+			continue
+		}
+		content, ok := staged.Contents[domain.GrantKey{ID: dependent.GrantID, Revision: dependent.GrantRevision}]
+		if !ok || content.GrantID != dependent.GrantID || content.Revision != dependent.GrantRevision {
+			return domain.ErrRejected
+		}
+		parent, err := lineage.ResolveParentTeam(staged, content, dependent.Recipient.ID, now)
+		if err != nil {
+			return domain.ErrRejected
+		}
+		if _, err := validation.Narrow(staged.Area, parent, content, staged.Roles); err != nil {
+			return domain.ErrRejected
+		}
+	}
+	return nil
 }
