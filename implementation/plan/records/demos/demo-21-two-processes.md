@@ -259,6 +259,9 @@ A capture proves something ran once. These hold it:
 | `wiring.TestARedirectNeverReachesTheAttacker` | a `Location` header takes the credential and authors the answer |
 | `wiring.TestThePathCannotChooseTheTenant` | the path moves the area the question is about |
 | `wiring.TestOneRequestAsksExactlyOneQuestion` | a silent cache, or a doubled question |
+| `wiring.TestWithdrawingAnAssignmentChangesTheNextAnswer` | authority is a snapshot the application took at startup rather than a live question |
+| `wiring.TestSelfResolvesPerHumanOverTheWire` | `$self` stops meaning the person asking — SELF-001 and GROUP-004, over the wire |
+| `wiring.TestAHumanWithNoAuthorityIsDeniedRatherThanFailed` | holding nothing is reported as an outage rather than a denial |
 | `wiring.TestTheStackIsCorrectUnderConcurrency` | the shared evaluator and store race |
 | `apps/hrms.TestTheApplicationLinksNoAuthorityDomain` | `abv` re-enters the application's dependency closure — two lines in a `go.mod` were enough, and every other test stayed green |
 | `auth-service.TestNothingIsLoggedForAQuestionTheServiceRefused` | an unauthenticated caller writes lines into the record this demonstration reads |

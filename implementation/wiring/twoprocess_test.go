@@ -28,6 +28,14 @@ const (
 // grant at all" — the same hazard a review caught in demonstration 21.
 func authService(t *testing.T) *httptest.Server {
 	t.Helper()
+	server, _, _ := authServiceWithStore(t)
+	return server
+}
+
+// authServiceWithStore also hands back the service behind it, for the tests that
+// change authority while an application is running against it.
+func authServiceWithStore(t *testing.T) (*httptest.Server, *wiring.Service, domain.Area) {
+	t.Helper()
 	dir := t.TempDir()
 	area, err := domain.NewArea("acme", "hrms")
 	if err != nil {
@@ -70,7 +78,7 @@ func authService(t *testing.T) *httptest.Server {
 	}
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
-	return server
+	return server, service, area
 }
 
 // application is the client side: the gate, an HTTP authority source, and a
@@ -361,5 +369,83 @@ func TestARedirectNeverReachesTheAttacker(t *testing.T) {
 	}
 	if reached.Load() != 0 {
 		t.Fatalf("the application called the redirect target %d times, sending %v", reached.Load(), credential.Load())
+	}
+}
+
+// Authority is live, not a snapshot the application took at startup. Withdrawing
+// a grant on the Auth side changes the very next answer the application gives —
+// which is the whole reason nothing caches yet, and the property an epoch would
+// have to preserve if anything ever did.
+func TestWithdrawingAnAssignmentChangesTheNextAnswer(t *testing.T) {
+	auth, service, area := authServiceWithStore(t)
+	app := application(t, auth.URL, auth.Client(), nutan)
+	if status, body := call(t, app, http.MethodGet, "/api/v1/acme/FIN/C17", ""); status != http.StatusOK {
+		t.Fatalf("status = %d before withdrawal, want 200 — %s", status, body)
+	}
+	// The assignment is what binds Team2 to the grant. Disabling it takes
+	// nutan's route away at the source, and nothing tells the application.
+	if _, err := service.Authority().SetAssignmentStatus(t.Context(), area, lab.TeamFINC17(area).Issuer,
+		lab.TeamFINC17(area).Proposed.ID, "disabled"); err != nil {
+		t.Fatal(err)
+	}
+	status, body := call(t, app, http.MethodGet, "/api/v1/acme/FIN/C17", "")
+	if status == http.StatusOK {
+		t.Fatalf("a withdrawn assignment still authorized the request — %s", body)
+	}
+	if status != http.StatusForbidden {
+		t.Fatalf("status = %d after withdrawal, want 403 — %s", status, body)
+	}
+}
+
+// $self resolves per human, across the wire, in a grant held by a group.
+//
+// SELF-001 settles it and GROUP-004 makes it the preferred practice: one
+// self-scoped grant to a team instead of one grant per employee. It reaches the
+// application as ordinary material — the record's own employee — and the answer
+// is different for each person who asks through the same grant.
+func TestSelfResolvesPerHumanOverTheWire(t *testing.T) {
+	auth, service, area := authServiceWithStore(t)
+	issuer := lab.TeamFINC17(area).Issuer
+	nutansApp := application(t, auth.URL, auth.Client(), nutan)
+
+	// C19's employee is nutan, and her only route is narrowed to cert=C17, so
+	// today she cannot read it. That refusal is what the self grant changes.
+	if status, body := call(t, nutansApp, http.MethodGet, "/api/v1/acme/FIN/C19", ""); status != http.StatusForbidden {
+		t.Fatalf("status = %d before the self grant, want 403 — %s", status, body)
+	}
+	grant, content, err := service.Authority().CreateGrant(t.Context(), area, issuer, "fk3x9r2m5iv8",
+		domain.GrantContent{Version: "1", Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"user": "$self"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// To the group, not to the person: the grant says "yourself", and who that
+	// is depends on who is asking.
+	if _, err := service.Authority().CreateAssignment(t.Context(), area, issuer, domain.Assignment{
+		Version: "1", ID: "fm5b7t4pslf1", GrantID: grant.ID, GrantRevision: content.Revision,
+		Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: "enabled",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	// Her own record, now reachable through a grant that never names her.
+	if status, body := call(t, nutansApp, http.MethodGet, "/api/v1/acme/FIN/C19", ""); status != http.StatusOK {
+		t.Fatalf("status = %d after the self grant, want 200 — %s", status, body)
+	}
+	// And the token did not widen into "any user": C18 is ENG and belongs to a
+	// third person, and the same grant does not reach it.
+	if status, body := call(t, nutansApp, http.MethodGet, "/api/v1/acme/ENG/C18", ""); status != http.StatusForbidden {
+		t.Fatalf("the self grant reached another person's record: %d — %s", status, body)
+	}
+}
+
+// A human the deployment knows nothing about is answered, not errored: an empty
+// authority is a denial, and a denial is a decision. An evaluation error here
+// would tell an operator something is broken when nothing is.
+func TestAHumanWithNoAuthorityIsDeniedRatherThanFailed(t *testing.T) {
+	auth := authService(t)
+	status, body := call(t, application(t, auth.URL, auth.Client(), "fi7io4lvk35s"),
+		http.MethodGet, "/api/v1/acme/FIN/C17", "")
+	if status != http.StatusForbidden {
+		t.Fatalf("status = %d, want 403 — a human with nothing is denied, not an outage: %s", status, body)
 	}
 }
