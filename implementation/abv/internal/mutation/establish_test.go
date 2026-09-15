@@ -10,8 +10,9 @@ import (
 	"time"
 )
 
-// The holder rules can only be reached in an area that has no root yet — in the
-// worked fixture, "one root per area" refuses first, which is the right order.
+// The holder rules can only be reached in an area that has no root yet, which is
+// what TenantGenesis is — in the worked fixture, "one root per area" refuses
+// first, which is the right order.
 func establishFixture(t *testing.T) (*mutation.Service, domain.Area) {
 	t.Helper()
 	area, err := domain.NewArea("acme", "hrms")
@@ -19,14 +20,7 @@ func establishFixture(t *testing.T) (*mutation.Service, domain.Area) {
 		t.Fatal(err)
 	}
 	fixture := lab.TeamFINC17(area)
-	// Strip the seeded root and everything resting on it, so establishment has
-	// somewhere to land.
-	fixture.Snapshot.TrustedRoots = map[string]bool{}
-	fixture.Snapshot.Contents = map[domain.GrantKey]domain.GrantContent{}
-	fixture.Snapshot.Controls = map[string]domain.GrantControl{}
-	fixture.Snapshot.Assignments = map[string]domain.Assignment{}
-
-	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
+	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{lab.TenantGenesis(area)})
 	if err != nil {
 		t.Fatal(err)
 	}

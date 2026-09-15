@@ -15,7 +15,12 @@ import (
 )
 
 const (
-	labScenario       = "team-fin-c17"
+	labScenario     = "team-fin-c17"
+	genesisScenario = "tenant-genesis"
+	// PlatformNamespace is the namespace Auth's own permissions live in, and the
+	// application id of a tenant's Auth area. It is a deployment constant, not
+	// an application: Auth is never installed.
+	PlatformNamespace = "auth"
 	labFixtureContext = "maya-team1"
 )
 
@@ -275,7 +280,12 @@ func verifyMarker(ctx context.Context, path string, area domain.Area) error {
 	if err != nil {
 		return err
 	}
-	if marker.tenant != area.TenantID() || marker.applicationID != area.ApplicationID() {
+	// A tenant's Auth area shares the database with the application area the
+	// scenario marked, because it is one tenant's authority in two areas rather
+	// than two deployments. The marker pins the application; the platform
+	// namespace is admitted beside it, and no other application is.
+	if marker.tenant != area.TenantID() ||
+		(marker.applicationID != area.ApplicationID() && area.ApplicationID() != PlatformNamespace) {
 		return domain.ErrRejected
 	}
 	return nil
@@ -421,4 +431,17 @@ func (a *labApplication) EstablishRoot(ctx context.Context, area domain.Area, fc
 		return domain.Grant{}, domain.GrantContent{}, err
 	}
 	return a.facade.EstablishRoot(ctx, area, TeamFINC17(area).Issuer, holderTeamID)
+}
+
+// EstablishAuthRoot is the tenant's first authority, and the lab reaches it with
+// the same fixture administrator as everything else. In a deployment the actor
+// is Auth platform administration; see RoleAdministration's two gates.
+func (a *labApplication) EstablishAuthRoot(ctx context.Context, area domain.Area, fc domain.FixtureContext, holderTeamID string) (domain.Grant, domain.GrantContent, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.Grant{}, domain.GrantContent{}, err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return domain.Grant{}, domain.GrantContent{}, err
+	}
+	return a.facade.EstablishAuthRoot(ctx, area, TeamFINC17(area).Issuer, holderTeamID)
 }

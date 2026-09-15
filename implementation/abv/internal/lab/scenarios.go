@@ -15,10 +15,13 @@ type Scenarios struct{}
 var _ application.ScenarioRunner = Scenarios{}
 
 func (Scenarios) Seed(ctx context.Context, area domain.Area, scenario, path string) error {
-	if scenario != labScenario {
-		return domain.ErrUnsupported
+	switch scenario {
+	case labScenario:
+		return seedScenario(ctx, area, path, TeamFINC17(area).Snapshot)
+	case genesisScenario:
+		return seedScenario(ctx, area, path, TenantGenesis(area))
 	}
-	return seedScenario(ctx, area, path, TeamFINC17(area).Snapshot)
+	return domain.ErrUnsupported
 }
 
 func (Scenarios) Run(ctx context.Context, area domain.Area, scenario, caseName, path string) error {

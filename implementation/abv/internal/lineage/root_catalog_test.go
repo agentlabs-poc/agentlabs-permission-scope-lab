@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/lineage"
 	"agentlabs.local/abv/internal/storage"
+	"errors"
 	"reflect"
 	"slices"
 	"strings"
@@ -52,25 +53,45 @@ func TestRootCatalogComputesActiveApplicationPermissions(t *testing.T) {
 	_ = area
 }
 
-func TestRootCatalogPreservesScopeValidityAndRevalidatesSource(t *testing.T) {
+// A root bounds its whole area, so it carries a validity and no narrowing. The
+// two halves are one rule seen from either side: time may bound a ceiling,
+// because an expired ceiling still describes the whole area while it lasts; a
+// predicate may not, because a ceiling lower than the region it bounds is not a
+// ceiling. Grant record, Q-118 — content naming no permission source is
+// admitted only with no parent and no local scope.
+func TestRootCarriesValidityButNeverNarrowing(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	now := time.Date(2026, 9, 9, 0, 0, 0, 0, time.UTC)
 	expires := now.Add(time.Hour)
 	f := lab.TeamFINC17(area)
 	f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 	g0 := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}]
-	g0.Scope = map[string]string{"dept": "FIN"}
 	g0.Validity = &domain.Validity{ExpiresAt: &expires}
 	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}] = g0
 	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "fibggi2jur5s", HumanID: "fn2q6v8sbo1e"})
 
-	root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}], "fibggi2juubk", now)
-	if err != nil || !reflect.DeepEqual(root.Predicates, []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m0dq3"}}) || len(root.Validities) != 1 || root.Validities[0].ExpiresAt == nil || !root.Validities[0].ExpiresAt.Equal(expires) {
-		t.Fatalf("root shape not preserved: %#v, %v", root, err)
+	child := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
+	root, err := lineage.ResolveParentTeam(f.Snapshot, child, "fibggi2juubk", now)
+	if err != nil || len(root.Validities) != 1 || root.Validities[0].ExpiresAt == nil || !root.Validities[0].ExpiresAt.Equal(expires) {
+		t.Fatalf("root validity not preserved: %#v, %v", root, err)
+	}
+	// The route of a root carries no predicate at all — that is what "the
+	// ceiling is the whole area" means once it is a result rather than a rule.
+	// Narrowing enters below, from the children.
+	if len(root.Predicates) != 0 {
+		t.Fatalf("root contributed a predicate: %#v", root.Predicates)
 	}
 	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fn2q6v8sbo1e"}, HumanID: "fn2q6v8sbo1e"}
 	if err := lineage.HasSource(f.Snapshot, identity, root, now); err != nil {
 		t.Fatalf("computed root source did not revalidate: %v", err)
+	}
+
+	// And a root that does narrow is refused, not silently honoured.
+	narrowed := g0
+	narrowed.Scope = map[string]string{"dept": "FIN"}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}] = narrowed
+	if _, err := lineage.ResolveParentTeam(f.Snapshot, child, "fibggi2juubk", now); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("a narrowed root gave %v, want ErrMalformed", err)
 	}
 }
 

@@ -4,8 +4,10 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/lab"
 	"context"
+	"encoding/json"
 	"errors"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -15,16 +17,18 @@ type establisher interface {
 	ListGrants(context.Context, domain.Area, domain.FixtureContext, domain.GrantFilter) (domain.GrantPage, error)
 	ListAssignments(context.Context, domain.Area, domain.FixtureContext, domain.AssignmentFilter) (domain.AssignmentPage, error)
 	CreateTeam(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Team, error)
+	CreateGrant(context.Context, domain.Area, domain.FixtureContext, string, domain.GrantContent) (domain.Grant, domain.GrantContent, error)
+	CheckAssignment(context.Context, domain.Area, []byte) (domain.Diagnostic, error)
 }
 
-func openEstablishLab(t *testing.T) (establisher, domain.Area) {
+func openEstablishLab(t *testing.T, scenario string) (establisher, domain.Area) {
 	t.Helper()
 	area, err := domain.NewArea("acme", "hrms")
 	if err != nil {
 		t.Fatal(err)
 	}
 	path := filepath.Join(t.TempDir(), "establish.db")
-	if err := (lab.Scenarios{}).Seed(context.Background(), area, "team-fin-c17", path); err != nil {
+	if err := (lab.Scenarios{}).Seed(context.Background(), area, scenario, path); err != nil {
 		t.Fatal(err)
 	}
 	api, closeConnection, err := lab.Connect(t.Context(), area, path)
@@ -43,11 +47,68 @@ func openEstablishLab(t *testing.T) (establisher, domain.Area) {
 // TrustedRoot was a lab fixture, so every grant traced back to seeded data and
 // the creation lifecycle had no beginning. This is that gap closing.
 func TestEstablishRootCreatesARootNothingElseCould(t *testing.T) {
-	api, area := openEstablishLab(t)
+	api, area := openEstablishLab(t, "team-fin-c17")
 
 	// The fixture already has a root, and a root is the ceiling for its whole
 	// area — exactly one may exist.
 	if _, _, err := api.EstablishRoot(t.Context(), area, teamFixture, "fibggi2jur5s"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("establishing a second root gave %v, want ErrConflict", err)
 	}
+}
+
+// Establishing a root is only half the claim. The other half is that the root
+// supports authority afterwards — that a child hung from it resolves, all the
+// way back to the assignment written in the same transaction.
+//
+// This is the test that would have caught the hole. Root content names no
+// permission source, and selectedPermissions looked the empty role key up in
+// the role map, missed, and returned ErrRejected: every established root was
+// written correctly and supported nothing at all.
+func TestAnEstablishedRootSupportsAChild(t *testing.T) {
+	api, area := openEstablishLab(t, "tenant-genesis")
+
+	root, content, err := api.EstablishRoot(t.Context(), area, teamFixture, "fibggi2jur5s")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !root.TrustedRoot || content.Permissions != nil || content.ParentGrantID != "" {
+		t.Fatalf("established root = %#v / %#v", root, content)
+	}
+	child, childContent, err := api.CreateGrant(t.Context(), area, teamFixture, root.ID, domain.GrantContent{
+		Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"dept": "FIN"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	proposal := domain.Assignment{
+		Version: "1", ID: "fm5b7t4pan0d", GrantID: child.ID, GrantRevision: childContent.Revision,
+		// Team1 is a child of the root's holder, which is what makes the chain
+		// climb from the recipient to the root.
+		Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled",
+	}
+	raw, err := json.Marshal(proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	diagnostic, err := api.CheckAssignment(t.Context(), area, raw)
+	if err != nil {
+		t.Fatalf("a child of an established root did not resolve: %v", err)
+	}
+	// The ceiling came from the catalog, and the route reaches the root's own
+	// assignment — the one establishment wrote beside the grant.
+	if !slices.Contains(diagnostic.Route.Permissions, lab.PayslipRead) {
+		t.Fatalf("route lost the selected permission: %#v", diagnostic.Route)
+	}
+	holder, err := api.ListAssignments(t.Context(), area, teamFixture, domain.AssignmentFilter{GrantID: root.ID})
+	if err != nil || holder.Total != 1 {
+		t.Fatalf("root assignment = %#v total=%d err=%v", holder.Assignments, holder.Total, err)
+	}
+	if !slices.Contains(diagnostic.Route.AssignmentIDs, holder.Assignments[0].ID) {
+		t.Fatalf("route %v did not trace to the root assignment %s", diagnostic.Route.AssignmentIDs, holder.Assignments[0].ID)
+	}
+
+	// That the ceiling is the catalog *sliced by namespace* is the lineage
+	// package's claim, and TestAnApplicationRootDoesNotCarryPlatformPermissions
+	// makes it against a planted platform permission. Here the point is only
+	// that an established root supports anything at all.
 }

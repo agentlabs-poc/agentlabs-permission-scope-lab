@@ -57,6 +57,17 @@ func selectedPermissions(g domain.GrantContent, roles map[domain.RoleKey]domain.
 	if g.Permissions != nil {
 		return g.Permissions, nil
 	}
+	// Root content names neither source, and selects nothing here: its coverage
+	// is the registered catalog, computed at resolution by rootRoute (Q-122).
+	// Nothing was named, so there is nothing to check the catalog against — and
+	// a root is the only shape that may say so, because ValidateContent admits a
+	// sourceless content only with no parent and no local narrowing.
+	//
+	// Without this, an established root resolved to ErrRejected: the empty role
+	// key missed, and the root that every lineage hangs from supported nothing.
+	if g.RoleID == "" && g.RoleRevision == 0 {
+		return nil, nil
+	}
 	role, ok := roles[domain.RoleKey{ID: g.RoleID, Revision: g.RoleRevision}]
 	if !ok || role.ID != g.RoleID || role.Revision != g.RoleRevision {
 		return nil, domain.ErrRejected

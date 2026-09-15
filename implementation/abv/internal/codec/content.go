@@ -24,10 +24,19 @@ func DecodeContent(raw []byte) (domain.GrantContent, error) {
 			return domain.GrantContent{}, domain.ErrMalformed
 		}
 	}
+	// Three permission sources and exactly one applies (Q-118): a direct list,
+	// the complete role pair, or neither — root content, whose coverage is
+	// computed from the catalog at resolution rather than stored (Q-122).
+	//
+	// The earlier rule demanded one of the first two, which made a root's own
+	// content undecodable: it could be written and resolved but not read back,
+	// so `inspect grant` on a root returned malformed. What belongs here is the
+	// mixtures; ValidateContent then checks that content naming neither source
+	// is shaped like a root throughout — no parent and no local narrowing.
 	_, direct := obj["permissions"]
 	_, role := obj["role_id"]
 	_, revision := obj["role_revision"]
-	if (direct && (role || revision)) || (!direct && (!role || !revision)) {
+	if (direct && (role || revision)) || role != revision {
 		return domain.GrantContent{}, domain.ErrMalformed
 	}
 	if rawValidity, exists := obj["validity"]; exists {
