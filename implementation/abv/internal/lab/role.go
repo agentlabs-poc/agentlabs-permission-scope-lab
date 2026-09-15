@@ -181,3 +181,11 @@ func (a *RoleAdministration) CheckAuthRootEstablishment(ctx context.Context, are
 func (a *RoleAdministration) CheckRootEstablishment(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
 	return a.teamGate(ctx, area, identity)
 }
+
+// CheckAuthorityRead gates asking what a human is entitled to. The lab admits
+// the same fixture administrator as every other read; in a deployment the caller
+// is the application enforcing its own endpoints, which is a different actor
+// from a tenant administrator browsing records.
+func (a *RoleAdministration) CheckAuthorityRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}

@@ -430,3 +430,82 @@ type Receipt struct{ AssignmentID string }
 
 // FixtureContext selects a lab fixture only; it is never authenticated identity.
 type FixtureContext struct{ Name string }
+
+// ResolvedAuthority is what one human is entitled to inside one area: every
+// grant that reaches them, already folded.
+//
+// It is the only read the enforcement side needs, and the shape is deliberately
+// the canonical grant block rather than a parallel vocabulary — `scope` is
+// `scope`, `permissions` is `permissions`. Two things differ from a stored
+// grant, and the name says which way: these are *resolved*.
+//
+//   - Permissions are expanded. A grant that adopted a role arrives carrying the
+//     adopted revision's permissions, because a client must not have to fetch a
+//     role or pin a revision.
+//   - Scope and validity are effective — folded down the whole chain — because a
+//     client must never fold a chain itself. That is what keeps the root's
+//     namespace slice, selected-versus-inherited permissions and
+//     inherited-and-ANDed scope on this side of the boundary.
+type ResolvedAuthority struct {
+	Area    Area
+	HumanID string
+	Grants  []ResolvedGrant
+}
+
+// ResolvedGrant is one grant as it reaches a human, with the evidence of how.
+type ResolvedGrant struct {
+	Version       string
+	GrantID       string
+	Revision      int64
+	ParentGrantID string
+	// Permissions and Scope are effective, not stored. See ResolvedAuthority.
+	Permissions []string
+	Scope       map[string]string
+	// Validity is the narrowest window across the chain, or nil when unbounded.
+	Validity *Validity
+	Source   Source
+}
+
+// Source is why a human holds a grant. It is annotation and never a decision
+// input: a gate matches Permissions, Scope and Validity and nothing else. An
+// application that reasons over a lineage takes on every rule the lineage
+// follows, which is the whole reason resolution stays on this side.
+type Source struct {
+	AssignmentID string
+	TeamID       string
+	// Via is how the human reaches the holding team. Groups-only is deliberate:
+	// a direct human assignment is refused at both write and read.
+	Via string
+	// AdoptedRole is set only when the grant adopted one. Explanation, not
+	// authority — Permissions above is already the resolved list.
+	AdoptedRole *AdoptedRole
+	// Lineage is ordered root-first, one step per contributing assignment.
+	Lineage []LineageStep
+}
+
+type AdoptedRole struct {
+	RoleID   string
+	Revision int64
+}
+
+// LineageStep is one grant in the chain, and the assignment and team that
+// carried it to the next.
+type LineageStep struct {
+	GrantID      string
+	Revision     int64
+	AssignmentID string
+	TeamID       string
+	Root         bool
+}
+
+// ResolveOptions narrow what a resolve returns. Every zero value asks for the
+// complete answer, because the complete answer is the cacheable one.
+type ResolveOptions struct {
+	// Permissions filters to grants carrying at least one of these. Empty means
+	// everything the human holds — a gate deciding one request wants a filter, a
+	// menu wants all of them, and one call serves both.
+	Permissions []string
+	// OmitSource drops the explanation. A gate ignores it; an audit path asks
+	// for it; a bearer token must not carry it.
+	OmitSource bool
+}
