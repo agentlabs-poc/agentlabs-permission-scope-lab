@@ -2,11 +2,11 @@ package mutation_test
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/lineage"
 	"agentlabs.local/abv/internal/mutation"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/storage/sqlite"
+	"agentlabs.local/abv/lab"
 	"context"
 	"errors"
 	"fmt"
@@ -85,7 +85,7 @@ func TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes(t *te
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			fixture.Snapshot.Teams["ficfwlfpxibk"] = domain.Team{Name: "team",ID: "ficfwlfpxibk", ParentID: "fibggi2jur5s"}
+			fixture.Snapshot.Teams["ficfwlfpxibk"] = domain.Team{Name: "team", ID: "ficfwlfpxibk", ParentID: "fibggi2jur5s"}
 			control := fixture.Snapshot.Controls["fk3x9r2man0d"]
 			control.Status = "disabled"
 			fixture.Snapshot.Controls["fk3x9r2man0d"] = control
@@ -227,7 +227,7 @@ func TestSetGrantStatusRejectsDepthOverflow(t *testing.T) {
 	parentTeam, parentGrant := "fibggi2jur5s", "fk3x9r2m0dq3"
 	for i := 1; i <= 258; i++ {
 		team, grant, assignment := fmt.Sprintf("DeepTeam%d", i), fmt.Sprintf("DeepGrant%d", i), fmt.Sprintf("DeepAssignment%d", i)
-		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
+		fixture.Snapshot.Teams[team] = domain.Team{Name: "team", ID: team, ParentID: parentTeam}
 		fixture.Snapshot.Controls[grant] = domain.GrantControl{Version: "1", ID: grant, Status: "enabled"}
 		fixture.Snapshot.Contents[domain.GrantKey{ID: grant, Revision: 1}] = domain.GrantContent{Version: "1", GrantID: grant, Revision: 1, ParentGrantID: parentGrant, Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 		fixture.Snapshot.Assignments[assignment] = domain.Assignment{Version: "1", ID: assignment, GrantID: grant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: team}, Status: "enabled"}

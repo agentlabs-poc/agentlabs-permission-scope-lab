@@ -1,11 +1,12 @@
-package localadapter
+package appdemo_test
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/storage"
 	storageSQLite "agentlabs.local/abv/internal/storage/sqlite"
+	"agentlabs.local/abv/lab"
 	"agentlabs.local/authmiddleware"
+	"agentlabs.local/wiring/localsource"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -48,7 +49,7 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	source, err := Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
+	source, err := localsource.Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,7 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	if err := provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	source, err := Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
+	source, err := localsource.Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +195,7 @@ func TestSQLiteAuthoritySourceSeesProtectedDescendantStatusChanges(t *testing.T)
 		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
 	})
 	fixtureContext := domain.FixtureContext{Name: "maya-team1"}
-	source, err := Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
+	source, err := localsource.Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,11 +240,11 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 	// administration performs an ungated read — which is what this path used to
 	// be.
 	var nilClock *fixedClock
-	if source, err := Open(t.Context(), "unused", agentCredential, labGate(t, area), nilClock, labRegistry{}); err == nil || source != nil {
+	if source, err := localsource.Open(t.Context(), "unused", agentCredential, labGate(t, area), nilClock, labRegistry{}); err == nil || source != nil {
 		t.Fatalf("nil clock: source=%v err=%v", source, err)
 	}
 	var nilGate *lab.RoleAdministration
-	if source, err := Open(t.Context(), "unused", agentCredential, nilGate, &fixedClock{now}, labRegistry{}); err == nil || source != nil {
+	if source, err := localsource.Open(t.Context(), "unused", agentCredential, nilGate, &fixedClock{now}, labRegistry{}); err == nil || source != nil {
 		t.Fatalf("nil administration: source=%v err=%v", source, err)
 	}
 	fixture := lab.TeamFINC17(area)
@@ -256,7 +257,7 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 	if err := provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	source, err := Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
+	source, err := localsource.Open(t.Context(), dbPath, agentCredential, labGate(t, fixture.Snapshot.Area), &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,47 +280,6 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 	got, err = source.Load(cancelled, query)
 	if !errors.Is(err, context.Canceled) || !reflect.DeepEqual(got, authmiddleware.Authority{}) {
 		t.Fatalf("cancel got=%+v err=%v", got, err)
-	}
-}
-
-// The route describes where it came from, not where it was asked for. They
-// cannot disagree — the area asked for is the area read — but the conversion
-// takes the answer's echo rather than copying the query back at itself.
-func TestConvertGrantUsesTheResolvedBoundaries(t *testing.T) {
-	resolved := domain.ResolvedAuthority{
-		Version: "1", TenantID: "resolved-tenant", ApplicationID: "resolved-app", HumanID: "fi7io4lvjqio",
-	}
-	grant := domain.ResolvedGrant{GrantID: "fk3x9r2m0dq3", Scope: map[string]string{"dept": "FIN"}}
-	query := authmiddleware.AuthorityQuery{
-		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "query-tenant", ApplicationID: "query-app"}},
-		Permission: "hrms:payroll:payslip::read",
-	}
-	got := convertGrant(resolved, grant, query)
-	if got.Area != (authmiddleware.Area{TenantID: "resolved-tenant", ApplicationID: "resolved-app"}) {
-		t.Fatalf("area=%+v", got.Area)
-	}
-	if got.HumanID != "fi7io4lvjqio" || got.Permission != query.Permission {
-		t.Fatalf("route=%+v", got)
-	}
-	if len(got.Predicates) != 1 || got.Predicates[0] != (authmiddleware.Predicate{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m0dq3"}) {
-		t.Fatalf("predicates=%+v", got.Predicates)
-	}
-}
-
-// Without the explanation there is one grant to name: the one that reaches the
-// human. The mapping from contributing assignments to their grants used to live
-// here and is Auth-AL's now, which is why the old test for it is gone rather
-// than rewritten.
-func TestGrantChainNamesTheReachingGrantWithoutSource(t *testing.T) {
-	bare := domain.ResolvedGrant{GrantID: "fk3x9r2man0d"}
-	if got := grantChain(bare); len(got) != 1 || got[0] != "fk3x9r2man0d" {
-		t.Fatalf("chain=%v", got)
-	}
-	explained := domain.ResolvedGrant{GrantID: "fk3x9r2man0d", Source: &domain.Source{
-		Lineage: []domain.LineageStep{{GrantID: "fk3x9r2m0dq3"}, {GrantID: "fk3x9r2man0d"}},
-	}}
-	if got := grantChain(explained); !reflect.DeepEqual(got, []string{"fk3x9r2m0dq3", "fk3x9r2man0d"}) {
-		t.Fatalf("chain=%v", got)
 	}
 }
 

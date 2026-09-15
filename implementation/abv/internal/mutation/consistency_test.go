@@ -2,9 +2,9 @@ package mutation_test
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/mutation"
 	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/lab"
 	"context"
 	"database/sql"
 	"errors"

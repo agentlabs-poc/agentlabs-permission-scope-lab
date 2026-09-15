@@ -1,9 +1,10 @@
 module agentlabs.local/wiring
 
-go 1.25.0
+go 1.25.1
 
 require (
 	agentlabs.local/abv v0.0.0
+	agentlabs.local/authmiddleware v0.0.0
 	agentlabs.local/registry v0.0.0-00010101000000-000000000000
 )
 

@@ -3,8 +3,8 @@ package abv_test
 import (
 	"agentlabs.local/abv"
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/lab"
 	"bytes"
 	"context"
 	"encoding/json"

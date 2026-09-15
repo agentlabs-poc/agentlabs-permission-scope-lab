@@ -2,9 +2,9 @@ package lineage_test
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/lineage"
 	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/lab"
 	"errors"
 	"reflect"
 	"slices"

@@ -2,10 +2,10 @@ package main
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/httpdemo"
-	"agentlabs.local/abv/internal/lab"
-	"agentlabs.local/abv/localadapter"
+	"agentlabs.local/abv/lab"
+	"agentlabs.local/apps/hrms"
 	"agentlabs.local/authmiddleware"
+	"agentlabs.local/wiring/localsource"
 	"bytes"
 	"context"
 	"flag"
@@ -66,7 +66,7 @@ func run(args []string, out, diag io.Writer) int {
 	admin := &lab.RoleAdministration{AssignmentStatusAdministration: status}
 	// The agent asks as itself. The human it asks about arrives on the request.
 	credential := domain.Actor{Type: "service_account", ID: lab.WorkloadClient}
-	source, err := localadapter.Open(context.Background(), db, credential, admin, clock{}, registry)
+	source, err := localsource.Open(context.Background(), db, credential, admin, clock{}, registry)
 	if err != nil {
 		fmt.Fprintln(diag, err)
 		return 4
@@ -77,7 +77,7 @@ func run(args []string, out, diag io.Writer) int {
 		fmt.Fprintln(diag, err)
 		return 4
 	}
-	handler, err := httpdemo.NewHandler(httpdemo.NewStore(httpdemo.DefaultRecords()), evaluator, httpdemo.TrustedIdentity(tenant, application, human))
+	handler, err := hrms.NewHandler(hrms.NewStore(hrms.DefaultRecords()), evaluator, hrms.TrustedIdentity(tenant, application, human))
 	if err != nil {
 		fmt.Fprintln(diag, err)
 		return 4

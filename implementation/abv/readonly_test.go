@@ -3,7 +3,7 @@ package abv_test
 import (
 	"agentlabs.local/abv"
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
+	"agentlabs.local/abv/lab"
 	"context"
 	"errors"
 	"path/filepath"

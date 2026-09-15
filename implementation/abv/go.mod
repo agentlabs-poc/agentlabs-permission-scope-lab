@@ -1,6 +1,6 @@
 module agentlabs.local/abv
 
-go 1.25.0
+go 1.25.1
 
 require (
 	agentlabs.local/authmiddleware v0.0.0
@@ -10,6 +10,8 @@ require (
 replace agentlabs.local/authmiddleware => ../authmiddleware
 
 require (
+	agentlabs.local/apps/hrms v0.0.0
+	agentlabs.local/wiring v0.0.0
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
@@ -20,3 +22,7 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
 )
+
+replace agentlabs.local/apps/hrms => ../apps/hrms
+
+replace agentlabs.local/wiring => ../wiring

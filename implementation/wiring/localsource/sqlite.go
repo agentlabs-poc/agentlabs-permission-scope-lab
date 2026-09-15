@@ -1,6 +1,12 @@
-// Package localadapter connects the middleware evaluator to the bounded ABV
-// SQLite prototype for local, in-process testing.
-package localadapter
+// Package localsource answers the gate's authority question from Auth-AL's own
+// store, in the same process.
+//
+// It sits on the Auth service's side of the boundary, with the composition root,
+// because that is where its dependencies are: it holds an *abv.Facade and opens
+// Auth's database. It lived inside abv and was mistaken for the client — an
+// application can never use it, whatever directory it is in. What an application
+// imports is the HTTP source, which needs none of this.
+package localsource
 
 import (
 	"agentlabs.local/abv"

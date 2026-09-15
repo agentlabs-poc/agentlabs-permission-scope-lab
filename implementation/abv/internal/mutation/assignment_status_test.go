@@ -2,10 +2,10 @@ package mutation_test
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/mutation"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/storage/sqlite"
+	"agentlabs.local/abv/lab"
 	"context"
 	"errors"
 	"fmt"
@@ -92,7 +92,7 @@ func TestSetAssignmentStatusSQLiteInspectsEveryForkAndDisabledBridge(t *testing.
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
 	add := func(id, grant, parentGrant, team, parentTeam, status string) {
-		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
+		fixture.Snapshot.Teams[team] = domain.Team{Name: "team", ID: team, ParentID: parentTeam}
 		fixture.Snapshot.Controls[grant] = domain.GrantControl{Version: "1", ID: grant, Status: "enabled"}
 		fixture.Snapshot.Contents[domain.GrantKey{ID: grant, Revision: 1}] = domain.GrantContent{Version: "1", GrantID: grant, Revision: 1, ParentGrantID: parentGrant, Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 		fixture.Snapshot.Assignments[id] = domain.Assignment{Version: "1", ID: id, GrantID: grant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: team}, Status: status}
@@ -303,7 +303,7 @@ func TestSetAssignmentStatusRejectsDepthAndSnapshotOverflowWithoutWrite(t *testi
 	parentTeam, parentGrant := "fibggi2juubk", "fk3x9r2m5iv8"
 	for i := 2; i <= 258; i++ {
 		team, grant, assignment := fmt.Sprintf("Team%d", i), fmt.Sprintf("G%d", i), fmt.Sprintf("A%d", i)
-		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
+		fixture.Snapshot.Teams[team] = domain.Team{Name: "team", ID: team, ParentID: parentTeam}
 		fixture.Snapshot.Controls[grant] = domain.GrantControl{Version: "1", ID: grant, Status: "enabled"}
 		fixture.Snapshot.Contents[domain.GrantKey{ID: grant, Revision: 1}] = domain.GrantContent{Version: "1", GrantID: grant, Revision: 1, ParentGrantID: parentGrant, Permissions: []string{lab.PayslipRead}, Scope: map[string]string{}}
 		fixture.Snapshot.Assignments[assignment] = domain.Assignment{Version: "1", ID: assignment, GrantID: grant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: team}, Status: "disabled"}

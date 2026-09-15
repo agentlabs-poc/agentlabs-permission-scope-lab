@@ -2,9 +2,9 @@ package main
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/storage"
 	storageSQLite "agentlabs.local/abv/internal/storage/sqlite"
+	"agentlabs.local/abv/lab"
 	"path/filepath"
 	"strings"
 	"testing"
