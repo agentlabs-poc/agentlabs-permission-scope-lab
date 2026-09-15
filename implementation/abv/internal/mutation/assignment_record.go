@@ -174,6 +174,14 @@ func (s *Service) DeleteAssignment(ctx context.Context, area domain.Area, identi
 		if !ok || target.ID != id {
 			return storage.WriteSet{}, domain.ErrNotFound
 		}
+		// The root's own assignment is part of the root, written beside it in
+		// the same transaction that established it. Disabling it is already
+		// refused (SetAssignmentStatus), and deleting it takes the root's
+		// holder away, which leaves a ceiling nobody holds — the same
+		// irrecoverable state as deleting the root itself.
+		if snapshot.TrustedRoots[target.GrantID] {
+			return storage.WriteSet{}, domain.ErrUnsupported
+		}
 		for _, other := range snapshot.Assignments {
 			if other.ID == id {
 				continue

@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -143,10 +144,27 @@ func TestUpgradeAssignmentTakesTheLatestAndNeverAnIntermediate(t *testing.T) {
 func TestDeleteAssignmentRefusesWhileADependentRouteRestsOnIt(t *testing.T) {
 	api, area := openAssignmentLab(t)
 
-	// fm5b7t4p0dq3 carries fk3x9r2m0dq3, the root. fm5b7t4p5iv8's grant fk3x9r2m5iv8 has fk3x9r2m0dq3 as its parent, so fm5b7t4p0dq3 is the
-	// support underneath fm5b7t4p5iv8 — removing it would cut the route from below.
-	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrConflict) {
+	// The vehicle used to be fm5b7t4p0dq3, the root's own assignment, which is
+	// now refused categorically — a root and its holder cannot be deleted at
+	// all. That refusal would have masked this rule, so the dependency is built
+	// one level down instead, where it is the only thing doing the refusing.
+	//
+	// fm5b7t4pan0d carries fk3x9r2man0d, whose parent is fk3x9r2m5iv8. So once
+	// it exists, fm5b7t4p5iv8 is the support underneath it and removing that
+	// would cut the route from below.
+	if _, err := api.Assign(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, a2Proposal(t)); err != nil {
+		t.Fatal(err)
+	}
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p5iv8"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("deleting the supporting assignment gave %v, want ErrConflict", err)
+	}
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("deleting the root's assignment gave %v, want ErrUnsupported", err)
+	}
+	// With the dependent gone the support can go too, which is what makes the
+	// refusal above a dependency and not a prohibition.
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4pan0d"); err != nil {
+		t.Fatal(err)
 	}
 	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "absent"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("deleting an absent assignment gave %v, want ErrNotFound", err)
@@ -166,4 +184,16 @@ func TestDeleteAssignmentRefusesWhileADependentRouteRestsOnIt(t *testing.T) {
 	if err != nil || page.Total != 0 {
 		t.Fatalf("after deletion the recipient still holds %#v err=%v", page.Assignments, err)
 	}
+}
+
+// a2Proposal is Team2's binding as the fixture files it, so the dependency this
+// test needs is the one the rest of the corpus uses rather than a shape invented
+// here.
+func a2Proposal(t *testing.T) []byte {
+	t.Helper()
+	raw, err := os.ReadFile("testdata/a2.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
 }

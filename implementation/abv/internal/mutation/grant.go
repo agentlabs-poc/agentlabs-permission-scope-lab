@@ -93,9 +93,12 @@ func (s *Service) CreateGrant(ctx context.Context, area domain.Area, identity do
 	content := proposed
 	content.Version, content.GrantID, content.Revision = "1", grant.ID, 1
 	content.ParentGrantID = parentGrantID
-	if content.Scope == nil {
-		content.Scope = map[string]string{}
-	}
+	// No missing-scope default. The handbook forbids it by name — "omitting
+	// scope or supplying null remains invalid; no missing-scope default to {}
+	// is permitted" — and codec.ValidateContent one line below already refuses a
+	// nil scope, which is how PublishGrantRevision answers the same input. This
+	// substitution stood between the two, so a caller that failed to populate
+	// scope was given the widest child its parent permits instead of a refusal.
 	if err := codec.ValidateContent(content); err != nil {
 		return fail(err)
 	}
@@ -142,6 +145,19 @@ func (s *Service) DeleteGrant(ctx context.Context, area domain.Area, identity do
 		}
 		if _, ok := snapshot.Controls[id]; !ok {
 			return storage.WriteSet{}, domain.ErrNotFound
+		}
+		// A root is not an ordinary grant and ordinary administration cannot
+		// remove one. Establishing a root has its own gate that grant
+		// administration cannot reach, and the handbook is explicit that
+		// "ordinary bounded operations cannot manufacture root authority" — so
+		// they must not be able to destroy it either, which is the same rule
+		// read in the direction that matters more. Disablement already refuses
+		// here (SetGrantStatus), and deletion is the harsher act with no way
+		// back: bootstrap "cannot reset intentionally changed root authority"
+		// and "recovery must not be achieved by replaying completed initial
+		// setup". An area whose root is gone has no ceiling and no repair.
+		if snapshot.TrustedRoots[id] {
+			return storage.WriteSet{}, domain.ErrUnsupported
 		}
 		for _, content := range snapshot.Contents {
 			if content.ParentGrantID == id {

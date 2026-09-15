@@ -18,6 +18,7 @@ type grantWriter interface {
 	GetGrant(context.Context, domain.Area, domain.FixtureContext, string, int64) (domain.Grant, domain.GrantContent, error)
 	ListGrants(context.Context, domain.Area, domain.FixtureContext, domain.GrantFilter) (domain.GrantPage, error)
 	ListGrantRevisions(context.Context, domain.Area, domain.FixtureContext, string, int, int) (domain.GrantRevisionPage, error)
+	DeleteAssignment(context.Context, domain.Area, domain.FixtureContext, string) error
 }
 
 func openGrantLab(t *testing.T) (grantWriter, domain.Area) {
@@ -125,6 +126,50 @@ func TestCreateGrantRefusesParentlessUnregisteredAndUnknownParent(t *testing.T) 
 	mixed := domain.GrantContent{Permissions: []string{payslipRead}, RoleID: "fi9jvxobqsxs", RoleRevision: 1, Scope: map[string]string{}}
 	if _, _, err := api.CreateGrant(t.Context(), area, teamFixture, "fk3x9r2m5iv8", mixed); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatalf("a mixed source gave %v, want ErrMalformed", err)
+	}
+	// An absent scope is not an empty one. The handbook forbids the default by
+	// name — "omitting scope or supplying null remains invalid; no missing-scope
+	// default to {} is permitted" — because a caller that failed to populate it
+	// would otherwise be handed the widest child its parent allows. CreateGrant
+	// substituted {} here, one line before a validator that already refuses nil,
+	// which is how PublishGrantRevision answers the same input.
+	absentScope := domain.GrantContent{Permissions: []string{payslipRead}}
+	if _, _, err := api.CreateGrant(t.Context(), area, teamFixture, "fk3x9r2m5iv8", absentScope); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("an absent scope gave %v, want ErrMalformed", err)
+	}
+	// And the empty scope it was being turned into is still perfectly valid when
+	// a caller means it, so this is a refusal to guess rather than a new limit.
+	if _, _, err := api.CreateGrant(t.Context(), area, teamFixture, "fk3x9r2m5iv8", good); err != nil {
+		t.Fatalf("an explicit empty scope was refused: %v", err)
+	}
+}
+
+// A root is not an ordinary grant, and ordinary administration cannot remove
+// one. Establishment has its own gate that grant administration cannot reach,
+// and disablement already refuses here — but deletion did not, which made the
+// harsher act the available one. There is no repair: bootstrap "cannot reset
+// intentionally changed root authority", and an area whose root is gone has no
+// ceiling for anything.
+func TestDeletingATrustedRootIsNotAnOrdinaryOperation(t *testing.T) {
+	api, area := openGrantLab(t)
+	if err := api.DeleteGrant(t.Context(), area, teamFixture, "fk3x9r2m0dq3"); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("deleting the trusted root gave %v, want ErrUnsupported", err)
+	}
+	// Still there, and still a root.
+	grant, _, err := api.GetGrant(t.Context(), area, teamFixture, "fk3x9r2m0dq3", 1)
+	if err != nil || !grant.TrustedRoot {
+		t.Fatalf("root after the refusal = %#v err=%v", grant, err)
+	}
+	// And the answer is Unsupported rather than Conflict, which is the whole
+	// point: a child does rest on this root, so a dependency refusal would have
+	// masked the categorical one and gone on masking it until the day nothing
+	// depended on the root. TestAnEstablishedRootCannotBeDeleted takes that day.
+	//
+	// The root's own assignment is refused the same way, and for the same
+	// reason: it was written beside the root in the transaction that
+	// established it, and deleting it leaves a ceiling nobody holds.
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("deleting the root's assignment gave %v, want ErrUnsupported", err)
 	}
 }
 
