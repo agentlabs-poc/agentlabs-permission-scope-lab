@@ -260,3 +260,44 @@ func TestRootShapedContentOmitsItsPermissionSourceAndNarrowing(t *testing.T) {
 		}
 	}
 }
+
+// Root content names neither a permission list nor a role, because its coverage
+// is computed from the catalog at resolution (Q-122). It must survive the JSON
+// round trip, or a root can be written and resolved but never read: the earlier
+// rule demanded one of the two sources, and `inspect grant` on an established
+// root answered malformed.
+func TestRootContentDecodesWithNeitherPermissionSource(t *testing.T) {
+	const established = `{"version":"1","grant_id":"fk3x9r2m0dq3","revision":1,"scope":{}}`
+	got, err := DecodeContent([]byte(established))
+	if err != nil {
+		t.Fatalf("root content rejected: %v", err)
+	}
+	if got.Permissions != nil || got.RoleID != "" || got.RoleRevision != 0 || got.ParentGrantID != "" || len(got.Scope) != 0 {
+		t.Fatalf("root content = %#v, want no source, no parent and an empty scope", got)
+	}
+	raw, err := json.Marshal(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	again, err := DecodeContent(raw)
+	if err != nil || !reflect.DeepEqual(again, got) {
+		t.Fatalf("round trip gave %#v %v", again, err)
+	}
+
+	// Naming neither source is only permitted in a shape that is a root
+	// throughout. A parent, or any local narrowing, makes it a child that
+	// forgot to say what it carries.
+	parented := `{"version":"1","grant_id":"fk3x9r2m0dq3","revision":1,"parent_grant_id":"fk3x9r2m5iv8","scope":{}}`
+	if _, err := DecodeContent([]byte(parented)); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("parented sourceless content gave %v, want ErrMalformed", err)
+	}
+	narrowed := `{"version":"1","grant_id":"fk3x9r2m0dq3","revision":1,"scope":{"cert":"C17"}}`
+	if _, err := DecodeContent([]byte(narrowed)); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("narrowed sourceless content gave %v, want ErrMalformed", err)
+	}
+	// A half role pair is still a mixture, not a root.
+	half := `{"version":"1","grant_id":"fk3x9r2m0dq3","revision":1,"role_id":"fi9jvxobqsxs","scope":{}}`
+	if _, err := DecodeContent([]byte(half)); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("half role pair gave %v, want ErrMalformed", err)
+	}
+}

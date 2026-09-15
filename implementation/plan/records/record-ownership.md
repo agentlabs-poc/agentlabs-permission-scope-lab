@@ -1,8 +1,8 @@
 # `abv.ownership` — canonical record
 
-**Implemented.** The last record type the handbook has settled for Auth-AL. After it,
-what remains is root establishment, which is blocked on decisions rather than
-work.
+**Implemented.** The last record type the handbook has settled for Auth-AL. What
+followed it was not another record but root establishment — the operation that
+writes the first grant of a lineage. See `root-establishment.md`.
 
 ---
 

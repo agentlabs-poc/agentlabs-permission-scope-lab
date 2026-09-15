@@ -21,7 +21,7 @@ func area(t *testing.T) domain.Area {
 }
 func catalog() domain.Catalog {
 	return domain.Catalog{ApplicationID: "hrms",
-		Permissions:   map[string]domain.PermissionDefinition{read: {ID: read, Active: true}, write: {ID: write, Active: true}},
+		Permissions:   map[string]domain.PermissionDefinition{read: {ID: read, Active: true, Boundary: domain.ApplicationBoundary}, write: {ID: write, Active: true, Boundary: domain.ApplicationBoundary}},
 		Scopes:        map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"}},
 	}
 }
@@ -39,7 +39,7 @@ func TestContentRequiresRegisteredDefinitionsAndContext(t *testing.T) {
 			g.Permissions = []string{"hrms:employee:certificate::delete"}
 		}, domain.ErrRejected},
 		{"retired", func(c *domain.Catalog, g *domain.GrantContent) {
-			c.Permissions[read] = domain.PermissionDefinition{ID: read, Active: false}
+			c.Permissions[read] = domain.PermissionDefinition{ID: read, Active: false, Boundary: domain.ApplicationBoundary}
 		}, domain.ErrRejected},
 		{"unknown key", func(c *domain.Catalog, g *domain.GrantContent) { g.Scope["secret"] = "x" }, domain.ErrRejected},
 		{"unknown token", func(c *domain.Catalog, g *domain.GrantContent) { g.Scope["user"] = "$owner" }, domain.ErrRejected},
@@ -94,7 +94,7 @@ func TestRoleUsesExactAdoptedRevision(t *testing.T) {
 func TestContentChecksSelectedDefinitionIntegrityAndTokens(t *testing.T) {
 	for name, edit := range map[string]func(*domain.Catalog, *domain.GrantContent){
 		"permission identity mismatch": func(c *domain.Catalog, _ *domain.GrantContent) {
-			c.Permissions[read] = domain.PermissionDefinition{ID: write, Active: true}
+			c.Permissions[read] = domain.PermissionDefinition{ID: write, Active: true, Boundary: domain.ApplicationBoundary}
 		},
 		"scope identity mismatch": func(c *domain.Catalog, _ *domain.GrantContent) {
 			c.Scopes["cert"] = domain.ScopeDefinition{Key: "fi7io4lvkfsw"}

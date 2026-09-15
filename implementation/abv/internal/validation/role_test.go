@@ -9,7 +9,7 @@ import (
 func TestCheckRolePublication(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	catalog := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{
-		"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::write": {ID: "hrms:payroll:payslip::write", Active: true}, "hrms:payroll:payslip::old": {ID: "hrms:payroll:payslip::old"},
+		"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}, "hrms:payroll:payslip::write": {ID: "hrms:payroll:payslip::write", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}, "hrms:payroll:payslip::old": {ID: "hrms:payroll:payslip::old"},
 	}}
 	valid := domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::write"}}
 	if err := CheckRolePublication(area, catalog, valid); err != nil {

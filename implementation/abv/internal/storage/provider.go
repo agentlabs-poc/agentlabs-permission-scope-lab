@@ -52,11 +52,25 @@ type WriteSet struct {
 	// explicit adoption: the same binding, a different adopted revision.
 	RemovedAssignment        string
 	AssignmentRevisionChange *AssignmentStatusChange
+	// NewRoot is establishment: a head, its first revision and the holder's
+	// assignment, written together or not at all.
+	NewRoot                  *NewRoot
 	NewGrant                 *NewGrant
 	RemovedGrant           string
 	NewGrantRevision       *domain.GrantContent
 	GrantStatusChange      *GrantStatusChange
 	AssignmentStatusChange *AssignmentStatusChange
+}
+
+// NewRoot is everything a root is: the head carrying its trust evidence, the
+// content computed coverage will be read against, and the assignment that makes
+// it reachable. Q-117 requires that incomplete setup supply no authority, so
+// these are one write or none.
+type NewRoot struct {
+	Grant        domain.Grant
+	Content      domain.GrantContent
+	Assignment   domain.Assignment
+	HolderTeamID string
 }
 
 // NewGrant is a grant's two records, written together or not at all.

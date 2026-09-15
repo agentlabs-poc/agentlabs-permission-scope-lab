@@ -46,7 +46,7 @@ func (s *catalogSpy) GetPermission(_ context.Context, app domain.Application, fi
 		return domain.PermissionDefinition{}, s.err
 	}
 	s.app, s.fixture, s.id = app, fixture, id
-	return domain.PermissionDefinition{ID: id, Active: true}, nil
+	return domain.PermissionDefinition{ID: id, Active: true, Boundary: domain.ApplicationBoundary}, nil
 }
 
 func (s *catalogSpy) ListPermissions(_ context.Context, app domain.Application, fixture domain.FixtureContext, filter domain.PermissionFilter) (domain.PermissionPage, error) {

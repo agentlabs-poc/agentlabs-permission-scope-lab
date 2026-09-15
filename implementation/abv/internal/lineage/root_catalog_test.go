@@ -5,8 +5,10 @@ import (
 	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/lineage"
 	"agentlabs.local/abv/internal/storage"
+	"errors"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 )
@@ -20,8 +22,8 @@ func TestRootCatalogComputesActiveApplicationPermissions(t *testing.T) {
 		t.Run(tenant, func(t *testing.T) {
 			tenantArea, _ := domain.NewArea(tenant, "hrms")
 			f := lab.TeamFINC17(tenantArea)
-			f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true}
-			f.Snapshot.Catalog.Permissions["hrms:payroll:payslip::inactive"] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::inactive"}
+			f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
+			f.Snapshot.Catalog.Permissions["hrms:payroll:payslip::inactive"] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::inactive", Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 			before := cloneRootSnapshot(f.Snapshot)
 
 			root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}], "fibggi2juubk", now)
@@ -51,25 +53,45 @@ func TestRootCatalogComputesActiveApplicationPermissions(t *testing.T) {
 	_ = area
 }
 
-func TestRootCatalogPreservesScopeValidityAndRevalidatesSource(t *testing.T) {
+// A root bounds its whole area, so it carries a validity and no narrowing. The
+// two halves are one rule seen from either side: time may bound a ceiling,
+// because an expired ceiling still describes the whole area while it lasts; a
+// predicate may not, because a ceiling lower than the region it bounds is not a
+// ceiling. Grant record, Q-118 — content naming no permission source is
+// admitted only with no parent and no local scope.
+func TestRootCarriesValidityButNeverNarrowing(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	now := time.Date(2026, 9, 9, 0, 0, 0, 0, time.UTC)
 	expires := now.Add(time.Hour)
 	f := lab.TeamFINC17(area)
-	f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true}
+	f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 	g0 := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}]
-	g0.Scope = map[string]string{"dept": "FIN"}
 	g0.Validity = &domain.Validity{ExpiresAt: &expires}
 	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}] = g0
 	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "fibggi2jur5s", HumanID: "fn2q6v8sbo1e"})
 
-	root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}], "fibggi2juubk", now)
-	if err != nil || !reflect.DeepEqual(root.Predicates, []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m0dq3"}}) || len(root.Validities) != 1 || root.Validities[0].ExpiresAt == nil || !root.Validities[0].ExpiresAt.Equal(expires) {
-		t.Fatalf("root shape not preserved: %#v, %v", root, err)
+	child := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
+	root, err := lineage.ResolveParentTeam(f.Snapshot, child, "fibggi2juubk", now)
+	if err != nil || len(root.Validities) != 1 || root.Validities[0].ExpiresAt == nil || !root.Validities[0].ExpiresAt.Equal(expires) {
+		t.Fatalf("root validity not preserved: %#v, %v", root, err)
+	}
+	// The route of a root carries no predicate at all — that is what "the
+	// ceiling is the whole area" means once it is a result rather than a rule.
+	// Narrowing enters below, from the children.
+	if len(root.Predicates) != 0 {
+		t.Fatalf("root contributed a predicate: %#v", root.Predicates)
 	}
 	identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fn2q6v8sbo1e"}, HumanID: "fn2q6v8sbo1e"}
 	if err := lineage.HasSource(f.Snapshot, identity, root, now); err != nil {
 		t.Fatalf("computed root source did not revalidate: %v", err)
+	}
+
+	// And a root that does narrow is refused, not silently honoured.
+	narrowed := g0
+	narrowed.Scope = map[string]string{"dept": "FIN"}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}] = narrowed
+	if _, err := lineage.ResolveParentTeam(f.Snapshot, child, "fibggi2juubk", now); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("a narrowed root gave %v, want ErrMalformed", err)
 	}
 }
 
@@ -81,7 +103,7 @@ func TestRootCatalogRejectsInvalidOrIneligibleRoot(t *testing.T) {
 		edit func(*lab.TeamFINC17Case)
 	}{
 		{"catalog key mismatch", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::other", Active: true}
+			f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::other", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 		}},
 		{"untrusted", func(f *lab.TeamFINC17Case) { delete(f.Snapshot.TrustedRoots, "fk3x9r2m0dq3") }},
 		{"disabled grant", func(f *lab.TeamFINC17Case) {
@@ -111,7 +133,7 @@ func TestRootCatalogRejectsInvalidOrIneligibleRoot(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			f := lab.TeamFINC17(area)
 			if tc.name != "catalog key mismatch" && tc.name != "empty effective catalog" {
-				f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true}
+				f.Snapshot.Catalog.Permissions[payslipExport] = domain.PermissionDefinition{ID: payslipExport, Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 			}
 			tc.edit(&f)
 			if _, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}], "fibggi2juubk", now); err == nil {
@@ -159,4 +181,63 @@ func cloneRootMap[K comparable, V any](source map[K]V) map[K]V {
 		result[key] = value
 	}
 	return result
+}
+
+// A root's ceiling is the permissions registered under its OWN namespace, and
+// this is the reason that matters: an application's catalog is its own
+// permissions union every platform one, which is right for evaluation and wrong
+// for a ceiling.
+//
+// Without the slice an application root would carry every auth:* permission —
+// including whichever one authorises establishing an application root. The thing
+// created by the authority could then create more of that authority.
+func TestAnApplicationRootDoesNotCarryPlatformPermissions(t *testing.T) {
+	now := time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)
+	area, _ := domain.NewArea("acme", "hrms")
+	f := lab.TeamFINC17(area)
+
+	// A platform permission is in every application's catalog. This one is the
+	// dangerous shape on purpose: the authority to administer applications.
+	const platformAdmin = "auth:tenant:application::admin"
+	f.Snapshot.Catalog.Permissions[platformAdmin] = domain.PermissionDefinition{
+		ID: platformAdmin, Active: true, Boundary: domain.PlatformBoundary, Namespace: "auth",
+	}
+
+	root, err := lineage.ResolveParentTeam(f.Snapshot, f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}], "fibggi2juubk", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if slices.Contains(root.Permissions, platformAdmin) {
+		t.Fatalf("the HRMS root carries %q — holding this root would confer the authority that creates roots", platformAdmin)
+	}
+	for _, p := range root.Permissions {
+		if !strings.HasPrefix(p, "hrms:") {
+			t.Fatalf("the HRMS root carries %q, which is not HRMS's", p)
+		}
+	}
+
+	// And the same catalog, read as the platform's own namespace, yields the
+	// other half — the two ceilings are disjoint, which is what keeps the two
+	// lineages from becoming one.
+	// The Auth root's area names the platform's namespace, not an application —
+	// its catalog and its area move together, as they do for any area.
+	authArea, err := domain.NewArea("acme", "auth")
+	if err != nil {
+		t.Fatal(err)
+	}
+	platform := f.Snapshot
+	platform.Area = authArea
+	platform.Catalog.ApplicationID = "auth"
+	authRoot, err := lineage.ResolveParentTeam(platform, platform.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}], "fibggi2juubk", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(authRoot.Permissions, platformAdmin) {
+		t.Fatalf("the Auth root does not carry %q; its ceiling is the platform catalog", platformAdmin)
+	}
+	for _, p := range authRoot.Permissions {
+		if slices.Contains(root.Permissions, p) {
+			t.Fatalf("%q is in both ceilings; they must be disjoint", p)
+		}
+	}
 }

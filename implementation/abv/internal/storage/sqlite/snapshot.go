@@ -128,7 +128,14 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 			rows.Close()
 			return domain.ErrMalformed
 		}
-		catalog.Permissions[id] = domain.PermissionDefinition{ID: id, Active: *value.Active}
+		// The boundary is kept rather than discarded: a root's ceiling is sliced
+		// by it, even though evaluation uses the whole union.
+		where := domain.Boundary(boundary)
+		if !where.Valid() {
+			rows.Close()
+			return domain.ErrMalformed
+		}
+		catalog.Permissions[id] = domain.PermissionDefinition{ID: id, Active: *value.Active, Boundary: where, Namespace: namespace}
 	}
 	if err = finishRows(rows); err != nil {
 		return err

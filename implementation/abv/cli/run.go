@@ -15,7 +15,7 @@ import (
 func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	connect application.Connect, scenarios application.ScenarioRunner, catalogConnect ...application.CatalogConnect) int {
 	if len(args) == 1 && (args[0] == "help" || args[0] == "--help" || args[0] == "-h") {
-		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, grant, assignment, role, catalog, scenario\nTenant operations require --tenant ID --app ID; catalog operations require --app ID. No default context."); err != nil {
+		if _, err := fmt.Fprintln(out, "ABV local testing CLI\nCommands: inspect, check, assign, grant, assignment, role, catalog, root, scenario\nTenant operations require --tenant ID --app ID; catalog operations require --app ID. No default context."); err != nil {
 			return 4
 		}
 		return 0
@@ -32,7 +32,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "grant", "grants", "assignment", "assignments", "role", "team", "owners", "scenario", "catalog":
+	case "inspect", "check", "assign", "grant", "grants", "assignment", "assignments", "role", "team", "owners", "root", "scenario", "catalog":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -308,6 +308,15 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			}
 		default:
 			return fail(2, "grants requires get, list, revisions, create or delete")
+		}
+	case "root":
+		// Establishing a root is not a grant verb, and it is reached under its
+		// own command for the same reason it has its own interface: a caller
+		// working the grant vocabulary must not arrive here by accident.
+		if len(positional) != 1 || (positional[0] != "establish" && positional[0] != "establish-auth") ||
+			!only(flags, "--tenant", "--app", "--db", "--fixture-context", "--team") ||
+			flags["--db"] == "" || flags["--fixture-context"] == "" || empty(flags["--team"]) {
+			return fail(2, "root requires establish or establish-auth, a database, a fixture context and --team for the holder")
 		}
 	case "scenario":
 		if len(positional) != 2 || empty(positional[1]) || (positional[0] != "seed" && positional[0] != "run") || flags["--db"] == "" {

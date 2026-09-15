@@ -167,3 +167,17 @@ func (a *RoleAdministration) CheckOwnershipWrite(ctx context.Context, area domai
 func (a *RoleAdministration) CheckOwnershipRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
 	return a.teamGate(ctx, area, identity)
 }
+
+// Root establishment. The lab admits the same fixture administrator for both,
+// and they are separate methods because their actors are different in a real
+// deployment: Auth platform administration for the Auth root, the tenant
+// administrator for an application's.
+//
+// Neither names a permission, because the handbook has not chosen one.
+func (a *RoleAdministration) CheckAuthRootEstablishment(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
+
+func (a *RoleAdministration) CheckRootEstablishment(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}

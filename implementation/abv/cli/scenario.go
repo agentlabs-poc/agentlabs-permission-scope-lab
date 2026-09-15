@@ -135,6 +135,24 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			}
 		}
 		return 0
+	case "root":
+		rootAPI, ok := api.(application.RootAPI)
+		if !ok || nilCapability(rootAPI) {
+			return report(diag, domain.ErrUnsupported)
+		}
+		fixture := domain.FixtureContext{Name: flags["--fixture-context"]}
+		establish := rootAPI.EstablishRoot
+		if positional[0] == "establish-auth" {
+			establish = rootAPI.EstablishAuthRoot
+		}
+		grant, content, err := establish(ctx, area, fixture, flags["--team"])
+		if err != nil {
+			return report(diag, err)
+		}
+		if err := renderGrant(out, diag, grant, content); err != nil {
+			return 4
+		}
+		return 0
 	case "grants":
 		grantAPI, ok := api.(application.GrantAPI)
 		if !ok || nilCapability(grantAPI) {

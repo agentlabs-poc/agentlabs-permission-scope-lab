@@ -117,8 +117,8 @@ func roleSeed(t *testing.T) storage.Snapshot {
 		Catalog: domain.Catalog{
 			ApplicationID: "hrms",
 			Permissions: map[string]domain.PermissionDefinition{
-				read:  {ID: read, Active: true},
-				write: {ID: write, Active: true},
+				read:  {ID: read, Active: true, Boundary: domain.ApplicationBoundary},
+				write: {ID: write, Active: true, Boundary: domain.ApplicationBoundary},
 			},
 			Scopes: map[string]domain.ScopeDefinition{},
 		},
