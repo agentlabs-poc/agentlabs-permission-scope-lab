@@ -1,0 +1,256 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 674 5356" width="674" height="5356" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+<rect width="674" height="5356" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h660a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<circle cx="20" cy="17.0" r="5.5" fill="#e0787c"/>
+<circle cx="37" cy="17.0" r="5.5" fill="#d9a441"/>
+<circle cx="54" cy="17.0" r="5.5" fill="#6cc292"/>
+<text x="337.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">resolve — what one human is entitled to, and why</text>
+<text x="22" y="62" fill="#d9a441" xml:space="preserve">══ ONE GRANT — and the chain that carries it ══</text>
+<text x="22" y="83" fill="#6b7687" xml:space="preserve">   (maya is a member of Team1, which holds the FIN grant. The lineage runs</text>
+<text x="22" y="104" fill="#9aa4b4" xml:space="preserve">    root-first: the trusted root, then Team1&#x27;s narrowing to dept=FIN.)</text>
+<text x="22" y="146" fill="#4fb8e8">$</text>
+<text x="38.8" y="146" fill="#e8ecf2" xml:space="preserve">abv resolve --human fi7io4lvjqio</text>
+<text x="22" y="167" fill="#9aa4b4" xml:space="preserve">    {</text>
+<text x="22" y="188" fill="#9aa4b4" xml:space="preserve">      &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="209" fill="#9aa4b4" xml:space="preserve">      &quot;tenant_id&quot;: &quot;acme&quot;,</text>
+<text x="22" y="230" fill="#9aa4b4" xml:space="preserve">      &quot;application_id&quot;: &quot;hrms&quot;,</text>
+<text x="22" y="251" fill="#9aa4b4" xml:space="preserve">      &quot;human_id&quot;: &quot;fi7io4lvjqio&quot;,</text>
+<text x="22" y="272" fill="#9aa4b4" xml:space="preserve">      &quot;resolved_grants&quot;: [</text>
+<text x="22" y="293" fill="#9aa4b4" xml:space="preserve">        {</text>
+<text x="22" y="314" fill="#9aa4b4" xml:space="preserve">          &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="335" fill="#9aa4b4" xml:space="preserve">          &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="356" fill="#9aa4b4" xml:space="preserve">          &quot;revision&quot;: 1,</text>
+<text x="22" y="377" fill="#9aa4b4" xml:space="preserve">          &quot;parent_grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="398" fill="#9aa4b4" xml:space="preserve">          &quot;permissions&quot;: [</text>
+<text x="22" y="419" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::read&quot;,</text>
+<text x="22" y="440" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::write&quot;</text>
+<text x="22" y="461" fill="#9aa4b4" xml:space="preserve">          ],</text>
+<text x="22" y="482" fill="#9aa4b4" xml:space="preserve">          &quot;scope&quot;: {</text>
+<text x="22" y="503" fill="#9aa4b4" xml:space="preserve">            &quot;dept&quot;: &quot;FIN&quot;</text>
+<text x="22" y="524" fill="#9aa4b4" xml:space="preserve">          },</text>
+<text x="22" y="545" fill="#9aa4b4" xml:space="preserve">          &quot;source&quot;: {</text>
+<text x="22" y="566" fill="#9aa4b4" xml:space="preserve">            &quot;assignment_id&quot;: &quot;fm5b7t4p5iv8&quot;,</text>
+<text x="22" y="587" fill="#9aa4b4" xml:space="preserve">            &quot;team_id&quot;: &quot;fibggi2juubk&quot;,</text>
+<text x="22" y="608" fill="#9aa4b4" xml:space="preserve">            &quot;via&quot;: &quot;membership&quot;,</text>
+<text x="22" y="629" fill="#9aa4b4" xml:space="preserve">            &quot;lineage&quot;: [</text>
+<text x="22" y="650" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="671" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="692" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="713" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p0dq3&quot;,</text>
+<text x="22" y="734" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2jur5s&quot;,</text>
+<text x="22" y="755" fill="#9aa4b4" xml:space="preserve">                &quot;root&quot;: true</text>
+<text x="22" y="776" fill="#9aa4b4" xml:space="preserve">              },</text>
+<text x="22" y="797" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="818" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="839" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="860" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p5iv8&quot;,</text>
+<text x="22" y="881" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2juubk&quot;</text>
+<text x="22" y="902" fill="#9aa4b4" xml:space="preserve">              }</text>
+<text x="22" y="923" fill="#9aa4b4" xml:space="preserve">            ]</text>
+<text x="22" y="944" fill="#9aa4b4" xml:space="preserve">          }</text>
+<text x="22" y="965" fill="#9aa4b4" xml:space="preserve">        }</text>
+<text x="22" y="986" fill="#9aa4b4" xml:space="preserve">      ]</text>
+<text x="22" y="1007" fill="#9aa4b4" xml:space="preserve">    }</text>
+<text x="22" y="1028" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="22" y="1070" fill="#d9a441" xml:space="preserve">══ A SECOND ROUTE, ONE STEP DEEPER ══</text>
+<text x="22" y="1091" fill="#6b7687" xml:space="preserve">   (Team2 sits under Team1 and narrows further to cert=C17. Adding maya to</text>
+<text x="22" y="1112" fill="#9aa4b4" xml:space="preserve">    Team2 and assigning its grant gives her a second, three-step route.)</text>
+<text x="22" y="1154" fill="#4fb8e8">$</text>
+<text x="38.8" y="1154" fill="#e8ecf2" xml:space="preserve">abv team add-member --id fibggi2juxhc --human fi7io4lvjqio</text>
+<text x="22" y="1175" fill="#9aa4b4" xml:space="preserve">    internal projection: membership</text>
+<text x="22" y="1196" fill="#9aa4b4" xml:space="preserve">    added  team=fibggi2juxhc  human=fi7io4lvjqio</text>
+<text x="22" y="1238" fill="#4fb8e8">$</text>
+<text x="38.8" y="1238" fill="#e8ecf2" xml:space="preserve">abv assign --file a2.json  (Team2 grant → Team2)</text>
+<text x="22" y="1259" fill="#9aa4b4" xml:space="preserve">    assignment fm5b7t4pan0d created</text>
+<text x="22" y="1301" fill="#d9a441" xml:space="preserve">══ TWO GRANTS, TWO LINEAGES, ONE DOCUMENT ══</text>
+<text x="22" y="1322" fill="#6b7687" xml:space="preserve">   (the second grant&#x27;s scope is dept=FIN AND cert=C17 — folded down the</text>
+<text x="22" y="1343" fill="#9aa4b4" xml:space="preserve">    chain, so the client never folds one itself)</text>
+<text x="22" y="1385" fill="#4fb8e8">$</text>
+<text x="38.8" y="1385" fill="#e8ecf2" xml:space="preserve">abv resolve --human fi7io4lvjqio</text>
+<text x="22" y="1406" fill="#9aa4b4" xml:space="preserve">    {</text>
+<text x="22" y="1427" fill="#9aa4b4" xml:space="preserve">      &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="1448" fill="#9aa4b4" xml:space="preserve">      &quot;tenant_id&quot;: &quot;acme&quot;,</text>
+<text x="22" y="1469" fill="#9aa4b4" xml:space="preserve">      &quot;application_id&quot;: &quot;hrms&quot;,</text>
+<text x="22" y="1490" fill="#9aa4b4" xml:space="preserve">      &quot;human_id&quot;: &quot;fi7io4lvjqio&quot;,</text>
+<text x="22" y="1511" fill="#9aa4b4" xml:space="preserve">      &quot;resolved_grants&quot;: [</text>
+<text x="22" y="1532" fill="#9aa4b4" xml:space="preserve">        {</text>
+<text x="22" y="1553" fill="#9aa4b4" xml:space="preserve">          &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="1574" fill="#9aa4b4" xml:space="preserve">          &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="1595" fill="#9aa4b4" xml:space="preserve">          &quot;revision&quot;: 1,</text>
+<text x="22" y="1616" fill="#9aa4b4" xml:space="preserve">          &quot;parent_grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="1637" fill="#9aa4b4" xml:space="preserve">          &quot;permissions&quot;: [</text>
+<text x="22" y="1658" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::read&quot;,</text>
+<text x="22" y="1679" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::write&quot;</text>
+<text x="22" y="1700" fill="#9aa4b4" xml:space="preserve">          ],</text>
+<text x="22" y="1721" fill="#9aa4b4" xml:space="preserve">          &quot;scope&quot;: {</text>
+<text x="22" y="1742" fill="#9aa4b4" xml:space="preserve">            &quot;dept&quot;: &quot;FIN&quot;</text>
+<text x="22" y="1763" fill="#9aa4b4" xml:space="preserve">          },</text>
+<text x="22" y="1784" fill="#9aa4b4" xml:space="preserve">          &quot;source&quot;: {</text>
+<text x="22" y="1805" fill="#9aa4b4" xml:space="preserve">            &quot;assignment_id&quot;: &quot;fm5b7t4p5iv8&quot;,</text>
+<text x="22" y="1826" fill="#9aa4b4" xml:space="preserve">            &quot;team_id&quot;: &quot;fibggi2juubk&quot;,</text>
+<text x="22" y="1847" fill="#9aa4b4" xml:space="preserve">            &quot;via&quot;: &quot;membership&quot;,</text>
+<text x="22" y="1868" fill="#9aa4b4" xml:space="preserve">            &quot;lineage&quot;: [</text>
+<text x="22" y="1889" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="1910" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="1931" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="1952" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p0dq3&quot;,</text>
+<text x="22" y="1973" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2jur5s&quot;,</text>
+<text x="22" y="1994" fill="#9aa4b4" xml:space="preserve">                &quot;root&quot;: true</text>
+<text x="22" y="2015" fill="#9aa4b4" xml:space="preserve">              },</text>
+<text x="22" y="2036" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="2057" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="2078" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="2099" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p5iv8&quot;,</text>
+<text x="22" y="2120" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2juubk&quot;</text>
+<text x="22" y="2141" fill="#9aa4b4" xml:space="preserve">              }</text>
+<text x="22" y="2162" fill="#9aa4b4" xml:space="preserve">            ]</text>
+<text x="22" y="2183" fill="#9aa4b4" xml:space="preserve">          }</text>
+<text x="22" y="2204" fill="#9aa4b4" xml:space="preserve">        },</text>
+<text x="22" y="2225" fill="#9aa4b4" xml:space="preserve">        {</text>
+<text x="22" y="2246" fill="#9aa4b4" xml:space="preserve">          &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="2267" fill="#9aa4b4" xml:space="preserve">          &quot;grant_id&quot;: &quot;fk3x9r2man0d&quot;,</text>
+<text x="22" y="2288" fill="#9aa4b4" xml:space="preserve">          &quot;revision&quot;: 1,</text>
+<text x="22" y="2309" fill="#9aa4b4" xml:space="preserve">          &quot;parent_grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="2330" fill="#9aa4b4" xml:space="preserve">          &quot;permissions&quot;: [</text>
+<text x="22" y="2351" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::read&quot;</text>
+<text x="22" y="2372" fill="#9aa4b4" xml:space="preserve">          ],</text>
+<text x="22" y="2393" fill="#9aa4b4" xml:space="preserve">          &quot;scope&quot;: {</text>
+<text x="22" y="2414" fill="#9aa4b4" xml:space="preserve">            &quot;cert&quot;: &quot;C17&quot;,</text>
+<text x="22" y="2435" fill="#9aa4b4" xml:space="preserve">            &quot;dept&quot;: &quot;FIN&quot;</text>
+<text x="22" y="2456" fill="#9aa4b4" xml:space="preserve">          },</text>
+<text x="22" y="2477" fill="#9aa4b4" xml:space="preserve">          &quot;source&quot;: {</text>
+<text x="22" y="2498" fill="#9aa4b4" xml:space="preserve">            &quot;assignment_id&quot;: &quot;fm5b7t4pan0d&quot;,</text>
+<text x="22" y="2519" fill="#9aa4b4" xml:space="preserve">            &quot;team_id&quot;: &quot;fibggi2juxhc&quot;,</text>
+<text x="22" y="2540" fill="#9aa4b4" xml:space="preserve">            &quot;via&quot;: &quot;membership&quot;,</text>
+<text x="22" y="2561" fill="#9aa4b4" xml:space="preserve">            &quot;lineage&quot;: [</text>
+<text x="22" y="2582" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="2603" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="2624" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="2645" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p0dq3&quot;,</text>
+<text x="22" y="2666" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2jur5s&quot;,</text>
+<text x="22" y="2687" fill="#9aa4b4" xml:space="preserve">                &quot;root&quot;: true</text>
+<text x="22" y="2708" fill="#9aa4b4" xml:space="preserve">              },</text>
+<text x="22" y="2729" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="2750" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="2771" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="2792" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p5iv8&quot;,</text>
+<text x="22" y="2813" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2juubk&quot;</text>
+<text x="22" y="2834" fill="#9aa4b4" xml:space="preserve">              },</text>
+<text x="22" y="2855" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="2876" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2man0d&quot;,</text>
+<text x="22" y="2897" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="2918" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4pan0d&quot;,</text>
+<text x="22" y="2939" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2juxhc&quot;</text>
+<text x="22" y="2960" fill="#9aa4b4" xml:space="preserve">              }</text>
+<text x="22" y="2981" fill="#9aa4b4" xml:space="preserve">            ]</text>
+<text x="22" y="3002" fill="#9aa4b4" xml:space="preserve">          }</text>
+<text x="22" y="3023" fill="#9aa4b4" xml:space="preserve">        }</text>
+<text x="22" y="3044" fill="#9aa4b4" xml:space="preserve">      ]</text>
+<text x="22" y="3065" fill="#9aa4b4" xml:space="preserve">    }</text>
+<text x="22" y="3086" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="22" y="3128" fill="#d9a441" xml:space="preserve">══ THE SAME CALL, FILTERED TO ONE PERMISSION ══</text>
+<text x="22" y="3149" fill="#6b7687" xml:space="preserve">   (a gate deciding one request passes a filter; a menu passes none)</text>
+<text x="22" y="3191" fill="#4fb8e8">$</text>
+<text x="38.8" y="3191" fill="#e8ecf2" xml:space="preserve">abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::write</text>
+<text x="22" y="3212" fill="#9aa4b4" xml:space="preserve">    {</text>
+<text x="22" y="3233" fill="#9aa4b4" xml:space="preserve">      &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="3254" fill="#9aa4b4" xml:space="preserve">      &quot;tenant_id&quot;: &quot;acme&quot;,</text>
+<text x="22" y="3275" fill="#9aa4b4" xml:space="preserve">      &quot;application_id&quot;: &quot;hrms&quot;,</text>
+<text x="22" y="3296" fill="#9aa4b4" xml:space="preserve">      &quot;human_id&quot;: &quot;fi7io4lvjqio&quot;,</text>
+<text x="22" y="3317" fill="#9aa4b4" xml:space="preserve">      &quot;resolved_grants&quot;: [</text>
+<text x="22" y="3338" fill="#9aa4b4" xml:space="preserve">        {</text>
+<text x="22" y="3359" fill="#9aa4b4" xml:space="preserve">          &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="3380" fill="#9aa4b4" xml:space="preserve">          &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="3401" fill="#9aa4b4" xml:space="preserve">          &quot;revision&quot;: 1,</text>
+<text x="22" y="3422" fill="#9aa4b4" xml:space="preserve">          &quot;parent_grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="3443" fill="#9aa4b4" xml:space="preserve">          &quot;permissions&quot;: [</text>
+<text x="22" y="3464" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::read&quot;,</text>
+<text x="22" y="3485" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::write&quot;</text>
+<text x="22" y="3506" fill="#9aa4b4" xml:space="preserve">          ],</text>
+<text x="22" y="3527" fill="#9aa4b4" xml:space="preserve">          &quot;scope&quot;: {</text>
+<text x="22" y="3548" fill="#9aa4b4" xml:space="preserve">            &quot;dept&quot;: &quot;FIN&quot;</text>
+<text x="22" y="3569" fill="#9aa4b4" xml:space="preserve">          },</text>
+<text x="22" y="3590" fill="#9aa4b4" xml:space="preserve">          &quot;source&quot;: {</text>
+<text x="22" y="3611" fill="#9aa4b4" xml:space="preserve">            &quot;assignment_id&quot;: &quot;fm5b7t4p5iv8&quot;,</text>
+<text x="22" y="3632" fill="#9aa4b4" xml:space="preserve">            &quot;team_id&quot;: &quot;fibggi2juubk&quot;,</text>
+<text x="22" y="3653" fill="#9aa4b4" xml:space="preserve">            &quot;via&quot;: &quot;membership&quot;,</text>
+<text x="22" y="3674" fill="#9aa4b4" xml:space="preserve">            &quot;lineage&quot;: [</text>
+<text x="22" y="3695" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="3716" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="3737" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="3758" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p0dq3&quot;,</text>
+<text x="22" y="3779" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2jur5s&quot;,</text>
+<text x="22" y="3800" fill="#9aa4b4" xml:space="preserve">                &quot;root&quot;: true</text>
+<text x="22" y="3821" fill="#9aa4b4" xml:space="preserve">              },</text>
+<text x="22" y="3842" fill="#9aa4b4" xml:space="preserve">              {</text>
+<text x="22" y="3863" fill="#9aa4b4" xml:space="preserve">                &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="3884" fill="#9aa4b4" xml:space="preserve">                &quot;revision&quot;: 1,</text>
+<text x="22" y="3905" fill="#9aa4b4" xml:space="preserve">                &quot;assignment_id&quot;: &quot;fm5b7t4p5iv8&quot;,</text>
+<text x="22" y="3926" fill="#9aa4b4" xml:space="preserve">                &quot;team_id&quot;: &quot;fibggi2juubk&quot;</text>
+<text x="22" y="3947" fill="#9aa4b4" xml:space="preserve">              }</text>
+<text x="22" y="3968" fill="#9aa4b4" xml:space="preserve">            ]</text>
+<text x="22" y="3989" fill="#9aa4b4" xml:space="preserve">          }</text>
+<text x="22" y="4010" fill="#9aa4b4" xml:space="preserve">        }</text>
+<text x="22" y="4031" fill="#9aa4b4" xml:space="preserve">      ]</text>
+<text x="22" y="4052" fill="#9aa4b4" xml:space="preserve">    }</text>
+<text x="22" y="4073" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="22" y="4115" fill="#d9a441" xml:space="preserve">══ WITHOUT THE EXPLANATION — what a bearer token would carry ══</text>
+<text x="22" y="4136" fill="#4fb8e8">$</text>
+<text x="38.8" y="4136" fill="#e8ecf2" xml:space="preserve">abv resolve --human fi7io4lvjqio --no-source</text>
+<text x="22" y="4157" fill="#9aa4b4" xml:space="preserve">    {</text>
+<text x="22" y="4178" fill="#9aa4b4" xml:space="preserve">      &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="4199" fill="#9aa4b4" xml:space="preserve">      &quot;tenant_id&quot;: &quot;acme&quot;,</text>
+<text x="22" y="4220" fill="#9aa4b4" xml:space="preserve">      &quot;application_id&quot;: &quot;hrms&quot;,</text>
+<text x="22" y="4241" fill="#9aa4b4" xml:space="preserve">      &quot;human_id&quot;: &quot;fi7io4lvjqio&quot;,</text>
+<text x="22" y="4262" fill="#9aa4b4" xml:space="preserve">      &quot;resolved_grants&quot;: [</text>
+<text x="22" y="4283" fill="#9aa4b4" xml:space="preserve">        {</text>
+<text x="22" y="4304" fill="#9aa4b4" xml:space="preserve">          &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="4325" fill="#9aa4b4" xml:space="preserve">          &quot;grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="4346" fill="#9aa4b4" xml:space="preserve">          &quot;revision&quot;: 1,</text>
+<text x="22" y="4367" fill="#9aa4b4" xml:space="preserve">          &quot;parent_grant_id&quot;: &quot;fk3x9r2m0dq3&quot;,</text>
+<text x="22" y="4388" fill="#9aa4b4" xml:space="preserve">          &quot;permissions&quot;: [</text>
+<text x="22" y="4409" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::read&quot;,</text>
+<text x="22" y="4430" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::write&quot;</text>
+<text x="22" y="4451" fill="#9aa4b4" xml:space="preserve">          ],</text>
+<text x="22" y="4472" fill="#9aa4b4" xml:space="preserve">          &quot;scope&quot;: {</text>
+<text x="22" y="4493" fill="#9aa4b4" xml:space="preserve">            &quot;dept&quot;: &quot;FIN&quot;</text>
+<text x="22" y="4514" fill="#9aa4b4" xml:space="preserve">          }</text>
+<text x="22" y="4535" fill="#9aa4b4" xml:space="preserve">        },</text>
+<text x="22" y="4556" fill="#9aa4b4" xml:space="preserve">        {</text>
+<text x="22" y="4577" fill="#9aa4b4" xml:space="preserve">          &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="4598" fill="#9aa4b4" xml:space="preserve">          &quot;grant_id&quot;: &quot;fk3x9r2man0d&quot;,</text>
+<text x="22" y="4619" fill="#9aa4b4" xml:space="preserve">          &quot;revision&quot;: 1,</text>
+<text x="22" y="4640" fill="#9aa4b4" xml:space="preserve">          &quot;parent_grant_id&quot;: &quot;fk3x9r2m5iv8&quot;,</text>
+<text x="22" y="4661" fill="#9aa4b4" xml:space="preserve">          &quot;permissions&quot;: [</text>
+<text x="22" y="4682" fill="#9aa4b4" xml:space="preserve">            &quot;hrms:payroll:payslip::read&quot;</text>
+<text x="22" y="4703" fill="#9aa4b4" xml:space="preserve">          ],</text>
+<text x="22" y="4724" fill="#9aa4b4" xml:space="preserve">          &quot;scope&quot;: {</text>
+<text x="22" y="4745" fill="#9aa4b4" xml:space="preserve">            &quot;cert&quot;: &quot;C17&quot;,</text>
+<text x="22" y="4766" fill="#9aa4b4" xml:space="preserve">            &quot;dept&quot;: &quot;FIN&quot;</text>
+<text x="22" y="4787" fill="#9aa4b4" xml:space="preserve">          }</text>
+<text x="22" y="4808" fill="#9aa4b4" xml:space="preserve">        }</text>
+<text x="22" y="4829" fill="#9aa4b4" xml:space="preserve">      ]</text>
+<text x="22" y="4850" fill="#9aa4b4" xml:space="preserve">    }</text>
+<text x="22" y="4871" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="22" y="4913" fill="#d9a441" xml:space="preserve">══ REFUSALS AND EMPTY ANSWERS ══</text>
+<text x="22" y="4934" fill="#6b7687" xml:space="preserve">   (an unregistered permission is a caller mistake, not an empty answer;</text>
+<text x="22" y="4955" fill="#9aa4b4" xml:space="preserve">    a permission she does not hold IS an empty answer, and rc=0)</text>
+<text x="22" y="4997" fill="#4fb8e8">$</text>
+<text x="38.8" y="4997" fill="#e8ecf2" xml:space="preserve">abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::export</text>
+<text x="22" y="5018" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="22" y="5039" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="22" y="5081" fill="#4fb8e8">$</text>
+<text x="38.8" y="5081" fill="#e8ecf2" xml:space="preserve">abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::delete</text>
+<text x="22" y="5102" fill="#9aa4b4" xml:space="preserve">    {</text>
+<text x="22" y="5123" fill="#9aa4b4" xml:space="preserve">      &quot;version&quot;: &quot;1&quot;,</text>
+<text x="22" y="5144" fill="#9aa4b4" xml:space="preserve">      &quot;tenant_id&quot;: &quot;acme&quot;,</text>
+<text x="22" y="5165" fill="#9aa4b4" xml:space="preserve">      &quot;application_id&quot;: &quot;hrms&quot;,</text>
+<text x="22" y="5186" fill="#9aa4b4" xml:space="preserve">      &quot;human_id&quot;: &quot;fi7io4lvjqio&quot;,</text>
+<text x="22" y="5207" fill="#9aa4b4" xml:space="preserve">      &quot;resolved_grants&quot;: []</text>
+<text x="22" y="5228" fill="#9aa4b4" xml:space="preserve">    }</text>
+<text x="22" y="5249" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="22" y="5291" fill="#4fb8e8">$</text>
+<text x="38.8" y="5291" fill="#e8ecf2" xml:space="preserve">abv resolve --human fn2q6v8sbo1e</text>
+<text x="22" y="5312" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="22" y="5333" fill="#e0787c" xml:space="preserve">    rc=3</text>
+</svg>

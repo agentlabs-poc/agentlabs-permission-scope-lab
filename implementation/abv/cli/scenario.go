@@ -135,6 +135,26 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			}
 		}
 		return 0
+	case "resolve":
+		authorityAPI, ok := api.(application.AuthorityAPI)
+		if !ok || nilCapability(authorityAPI) {
+			return report(diag, domain.ErrUnsupported)
+		}
+		human := flags["--human"]
+		// Caller and subject are one identity today, so the actor is the human.
+		identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: human}, HumanID: human}
+		opts := domain.ResolveOptions{OmitSource: has(flags, "--no-source")}
+		if !empty(flags["--permissions"]) {
+			opts.Permissions = strings.Split(flags["--permissions"], ",")
+		}
+		resolved, err := authorityAPI.ResolveAuthority(ctx, area, domain.FixtureContext{Name: flags["--fixture-context"]}, identity, opts)
+		if err != nil {
+			return report(diag, err)
+		}
+		if err := renderResolved(out, diag, resolved); err != nil {
+			return 4
+		}
+		return 0
 	case "root":
 		rootAPI, ok := api.(application.RootAPI)
 		if !ok || nilCapability(rootAPI) {
