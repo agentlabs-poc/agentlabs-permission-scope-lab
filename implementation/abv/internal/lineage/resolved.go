@@ -24,7 +24,7 @@ func ResolveAuthority(ctx context.Context, s storage.Snapshot, identity domain.I
 		return fail(err)
 	}
 	result := domain.ResolvedAuthority{
-		Version: "1", Area: s.Area, HumanID: identity.HumanID,
+		Version: "1", HumanID: identity.HumanID,
 		TenantID: s.Area.TenantID(), ApplicationID: s.Area.ApplicationID(),
 		ResolvedGrants: make([]domain.ResolvedGrant, 0, len(held)),
 	}

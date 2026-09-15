@@ -453,7 +453,6 @@ type ResolvedAuthority struct {
 	TenantID       string          `json:"tenant_id"`
 	ApplicationID  string          `json:"application_id"`
 	HumanID        string          `json:"human_id"`
-	Area           Area            `json:"-"`
 	ResolvedGrants []ResolvedGrant `json:"resolved_grants"`
 }
 

@@ -46,7 +46,7 @@ func TestResolveAuthorityAnswersWhatAHumanHolds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resolved.Area != area || resolved.HumanID != maya.HumanID {
+	if resolved.TenantID != area.TenantID() || resolved.ApplicationID != area.ApplicationID() || resolved.HumanID != maya.HumanID {
 		t.Fatalf("answered about the wrong subject: %#v", resolved)
 	}
 	if len(resolved.ResolvedGrants) == 0 {
@@ -161,7 +161,7 @@ func TestResolveAuthorityAnswersEmptyRatherThanFailing(t *testing.T) {
 	}
 	// The envelope still answers about the right subject and area, so a client
 	// can tell "nothing here" from "answered about someone else".
-	if resolved.HumanID != maya.HumanID || resolved.Area != area {
+	if resolved.HumanID != maya.HumanID || resolved.ApplicationID != area.ApplicationID() {
 		t.Fatalf("empty answer lost its subject: %#v", resolved)
 	}
 }

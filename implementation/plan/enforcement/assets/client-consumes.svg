@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 600" width="980" height="600" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="12.5" role="img" aria-label="Four inputs converge on one decision: identity from the client's own authentication, permission and declared inputs from its own endpoint policy, material from the request and its own business facts, and authority routes from Auth. Only the last crosses the boundary.">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
+<style>
+ .t{fill:currentColor}
+ .m{fill:currentColor;fill-opacity:.6;font-size:11px}
+ .k{fill:currentColor;fill-opacity:.55;font-size:10.5px;letter-spacing:.09em;font-weight:600}
+ .bx{fill:none;stroke:currentColor;stroke-width:1.4;rx:6}
+ .hot{fill:none;stroke:currentColor;stroke-width:2.2;rx:8;color:#c2410c}
+ .band{fill:currentColor;fill-opacity:.035;rx:8}
+ .ln{stroke:currentColor;stroke-opacity:.5;fill:none}
+ .wire{stroke:currentColor;stroke-width:2.2;fill:none;color:#c2410c}
+ .accent{fill:currentColor;color:#c2410c;font-weight:600}
+ .mono{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:11px;fill:currentColor;fill-opacity:.85}
+ svg{color:#1f2328}
+ .ground{fill:#fbfbfc}
+ @media (prefers-color-scheme: dark){
+   svg{color:#d6dce4}
+   .ground{fill:#12151a}
+   .hot,.wire,.accent{color:#ff9e6b}
+ }
+</style>
+</defs>
+<rect class="ground" x="0" y="0" width="980" height="600" rx="6"/>
+
+<text class="k" x="24" y="26">FOUR INPUTS MAKE ONE DECISION — THREE ARE THE CLIENT'S OWN</text>
+
+<rect class="band" x="18" y="44" width="620" height="436"/>
+<text class="m" x="32" y="66">the client's world — it already has all of this</text>
+
+<rect class="bx" x="36" y="84" width="264" height="86"/>
+<text class="t" x="50" y="106">1 · identity</text>
+<text class="m" x="50" y="126">its own authN, from the token</text>
+<text class="mono" x="50" y="146">actor{type,id} + human_id</text>
+<text class="m" x="50" y="162">Auth's human id, mapped at login — Q-087</text>
+
+<rect class="bx" x="36" y="192" width="264" height="86"/>
+<text class="t" x="50" y="214">2 · permission</text>
+<text class="m" x="50" y="234">from its own endpoint policy</text>
+<text class="mono" x="50" y="254">hrms:payroll:payslip::read</text>
+<text class="m" x="50" y="270">exactly one per endpoint — CONTRACT-008</text>
+
+<rect class="bx" x="36" y="300" width="264" height="104"/>
+<text class="t" x="50" y="322">3 · material</text>
+<text class="m" x="50" y="342">from the request, and its own</text>
+<text class="m" x="50" y="358">business facts when completion needs them</text>
+<text class="mono" x="50" y="380">dept=FIN · cert=C17</text>
+<text class="m" x="50" y="396">exact selections only — Q-071</text>
+
+<rect class="hot" x="352" y="192" width="264" height="104"/>
+<text class="accent" x="366" y="214" font-size="13">4 · authority</text>
+<text class="m" x="366" y="234">the ONLY thing it must ask Auth for</text>
+<text class="mono" x="366" y="256">routes[] — predicates, validity,</text>
+<text class="mono" x="366" y="274">grant_ids</text>
+<text class="m" x="366" y="290">resolved once, held for the request</text>
+
+<rect class="bx" x="352" y="84" width="264" height="86"/>
+<text class="t" x="366" y="106">freshness gate</text>
+<text class="m" x="366" y="126">is this authority still current?</text>
+<text class="mono" x="366" y="146">authority.epoch — per tenant</text>
+<text class="m" x="366" y="162">cannot establish it → evaluation error</text>
+
+<rect class="hot" x="352" y="318" width="264" height="86"/>
+<text class="accent" x="366" y="340" font-size="13">decide</text>
+<text class="m" x="366" y="360">every predicate in some route matched</text>
+<text class="m" x="366" y="376">by the material, and still in validity</text>
+<text class="mono" x="366" y="396">allow + grant_ids · deny · error</text>
+
+<rect class="bx" x="36" y="424" width="580" height="40"/>
+<text class="t" x="50" y="448">enforce — the handler binds actual use to that decision · ENFORCEMENT-001</text>
+
+<line x1="668" y1="44" x2="668" y2="480" stroke="currentColor" stroke-opacity=".45" stroke-dasharray="6 5"/>
+<text class="k" x="676" y="66">AUTH SERVICE</text>
+
+<rect class="hot" x="700" y="84" width="256" height="86"/>
+<text class="accent" x="714" y="106">GET authority.epoch</text>
+<text class="m" x="714" y="126">one value per tenant, advanced</text>
+<text class="m" x="714" y="142">inside any reducing write</text>
+<text class="m" x="714" y="162">cheap — this is the per-check call</text>
+
+<rect class="hot" x="700" y="192" width="256" height="104"/>
+<text class="accent" x="714" y="214">POST authority.resolve</text>
+<text class="m" x="714" y="234">identity + permission → routes</text>
+<text class="m" x="714" y="252">the lineage walk happens HERE:</text>
+<text class="m" x="714" y="268">root ceiling, narrowing, adopted</text>
+<text class="m" x="714" y="284">revisions, teams, validity</text>
+
+<rect class="bx" x="700" y="318" width="256" height="86"/>
+<text class="t" x="714" y="340">everything else</text>
+<text class="m" x="714" y="360">grants, teams, memberships, roles,</text>
+<text class="m" x="714" y="376">assignments, roots — administration.</text>
+<text class="m" x="714" y="394">A human's story, not a client's.</text>
+
+<path class="ln" d="M300 127 H352" marker-end="url(#a)"/>
+<path class="ln" d="M300 235 H352" marker-end="url(#a)"/>
+<path class="ln" d="M300 352 H352" marker-end="url(#a)"/>
+<path class="ln" d="M484 170 V192" marker-end="url(#a)"/>
+<path class="ln" d="M484 296 V318" marker-end="url(#a)"/>
+<path class="ln" d="M326 404 V444 H352" marker-end="url(#a)"/>
+<path class="wire" d="M700 127 H616" marker-end="url(#a)"/>
+<path class="wire" d="M700 244 H616" marker-end="url(#a)"/>
+
+<text class="m" x="24" y="512">A background job has no request and no endpoint policy, and still needs inputs 1, 3 and 4 — so this is a library call, not middleware. Q-075.</text>
+<text class="m" x="24" y="534">The client never learns why it may: no grant, no team, no role. It learns that it may, within which boundary, and on whose authority — the grant ids.</text>
+<text class="m" x="24" y="560">One deploy-time call exists too: confirm the permissions and scope keys its policies declare are registered. Not per request, and not shown here.</text>
+</svg>
