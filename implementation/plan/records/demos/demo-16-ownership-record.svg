@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 766 1992" width="766" height="1992" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
+<rect width="766" height="1992" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h752a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<circle cx="20" cy="17" r="5" fill="#e0787c"/><circle cx="38" cy="17" r="5" fill="#d9a441"/><circle cx="56" cy="17" r="5" fill="#6cc292"/>
+<text x="383.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">ownership — authority to administer a team, and nothing else</text>
+<text x="18" y="60" fill="#d9a441" xml:space="preserve">══ OWNERS ARE PLURAL — a team has several, a human owns several ══</text>
+<text x="18" y="80" fill="#4fb8e8" xml:space="preserve">$ abv owners add --team fibggi2juubk --human fi7io4lvjqio</text>
+<text x="18" y="100" fill="#9aa4b4" xml:space="preserve">    internal projection: ownership</text>
+<text x="18" y="120" fill="#9aa4b4" xml:space="preserve">    fi7io4lvjqio owns fibggi2juubk</text>
+<text x="18" y="140" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="160" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="180" fill="#4fb8e8" xml:space="preserve">$ abv owners add --team fibggi2juubk --human fi7io4lvjwu8</text>
+<text x="18" y="200" fill="#9aa4b4" xml:space="preserve">    internal projection: ownership</text>
+<text x="18" y="220" fill="#9aa4b4" xml:space="preserve">    fi7io4lvjwu8 owns fibggi2juubk</text>
+<text x="18" y="240" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="260" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="280" fill="#4fb8e8" xml:space="preserve">$ abv owners add --team fibggi2juxhc --human fi7io4lvjqio</text>
+<text x="18" y="300" fill="#9aa4b4" xml:space="preserve">    internal projection: ownership</text>
+<text x="18" y="320" fill="#9aa4b4" xml:space="preserve">    fi7io4lvjqio owns fibggi2juxhc</text>
+<text x="18" y="340" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="360" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="380" fill="#4fb8e8" xml:space="preserve">$ abv owners list --team fibggi2juubk</text>
+<text x="18" y="400" fill="#9aa4b4" xml:space="preserve">    internal projection: owners</text>
+<text x="18" y="420" fill="#9aa4b4" xml:space="preserve">    count  2</text>
+<text x="18" y="440" fill="#9aa4b4" xml:space="preserve">    total  2</text>
+<text x="18" y="460" fill="#9aa4b4" xml:space="preserve">    team=fibggi2juubk   human=fi7io4lvjqio</text>
+<text x="18" y="480" fill="#9aa4b4" xml:space="preserve">    team=fibggi2juubk   human=fi7io4lvjwu8</text>
+<text x="18" y="500" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="520" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="540" fill="#4fb8e8" xml:space="preserve">$ abv owners list --human fi7io4lvjqio</text>
+<text x="18" y="560" fill="#9aa4b4" xml:space="preserve">    internal projection: owners</text>
+<text x="18" y="580" fill="#9aa4b4" xml:space="preserve">    count  2</text>
+<text x="18" y="600" fill="#9aa4b4" xml:space="preserve">    total  2</text>
+<text x="18" y="620" fill="#9aa4b4" xml:space="preserve">    team=fibggi2juubk   human=fi7io4lvjqio</text>
+<text x="18" y="640" fill="#9aa4b4" xml:space="preserve">    team=fibggi2juxhc   human=fi7io4lvjqio</text>
+<text x="18" y="660" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="680" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="700" fill="#d9a441" xml:space="preserve">══ ADD IS ADD-ONLY, REMOVE SAYS WHETHER IT DID ANYTHING ══</text>
+<text x="18" y="720" fill="#4fb8e8" xml:space="preserve">$ abv owners add --team fibggi2juubk --human fi7io4lvjqio</text>
+<text x="18" y="740" fill="#9aa4b4" xml:space="preserve">    operation conflict</text>
+<text x="18" y="760" fill="#e0787c" xml:space="preserve">    rc=4</text>
+<text x="18" y="780" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="800" fill="#4fb8e8" xml:space="preserve">$ abv owners remove --team fibggi2juubk --human fi7io4lvjwu8</text>
+<text x="18" y="820" fill="#9aa4b4" xml:space="preserve">    internal projection: ownership</text>
+<text x="18" y="840" fill="#9aa4b4" xml:space="preserve">    fi7io4lvjwu8 no longer owns fibggi2juubk</text>
+<text x="18" y="860" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="880" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="900" fill="#4fb8e8" xml:space="preserve">$ abv owners remove --team fibggi2juubk --human fi7io4lvjwu8</text>
+<text x="18" y="920" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="940" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="960" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="980" fill="#d9a441" xml:space="preserve">══ BOTH HALVES MUST EXIST, AND NEITHER DIRECTION IS OPTIONAL ══</text>
+<text x="18" y="1000" fill="#4fb8e8" xml:space="preserve">$ abv owners add --team fp8h2w6yzzzz --human fi7io4lvjqio</text>
+<text x="18" y="1020" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="1040" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="1060" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1080" fill="#4fb8e8" xml:space="preserve">$ abv owners add --team fibggi2juubk --human not-a-snowflake</text>
+<text x="18" y="1100" fill="#9aa4b4" xml:space="preserve">    malformed input</text>
+<text x="18" y="1120" fill="#e0787c" xml:space="preserve">    rc=2</text>
+<text x="18" y="1140" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1160" fill="#4fb8e8" xml:space="preserve">$ abv owners list</text>
+<text x="18" y="1180" fill="#9aa4b4" xml:space="preserve">    owners list requires exactly one of --team and --human: a team&#x27;s owners, or a human&#x27;s teams</text>
+<text x="18" y="1200" fill="#e0787c" xml:space="preserve">    rc=2</text>
+<text x="18" y="1220" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1240" fill="#d9a441" xml:space="preserve">══ OWNING IS NOT MEMBERSHIP — Q-099, the whole point ══</text>
+<text x="18" y="1260" fill="#6b7687" xml:space="preserve">   (maya owns Team2 without being one of its members, and nutan is a member</text>
+<text x="18" y="1280" fill="#9aa4b4" xml:space="preserve">    of Team2 while owning nothing at all. Neither relationship implies the</text>
+<text x="18" y="1300" fill="#9aa4b4" xml:space="preserve">    other, which is what Q-099 exists to say.)</text>
+<text x="18" y="1320" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1340" fill="#4fb8e8" xml:space="preserve">$ abv owners list --team fibggi2juxhc</text>
+<text x="18" y="1360" fill="#9aa4b4" xml:space="preserve">    internal projection: owners</text>
+<text x="18" y="1380" fill="#9aa4b4" xml:space="preserve">    count  1</text>
+<text x="18" y="1400" fill="#9aa4b4" xml:space="preserve">    total  1</text>
+<text x="18" y="1420" fill="#9aa4b4" xml:space="preserve">    team=fibggi2juxhc   human=fi7io4lvjqio</text>
+<text x="18" y="1440" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1460" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1480" fill="#4fb8e8" xml:space="preserve">$ abv team members --id fibggi2juxhc</text>
+<text x="18" y="1500" fill="#9aa4b4" xml:space="preserve">    internal projection: members</text>
+<text x="18" y="1520" fill="#9aa4b4" xml:space="preserve">    count  1</text>
+<text x="18" y="1540" fill="#9aa4b4" xml:space="preserve">    total  1</text>
+<text x="18" y="1560" fill="#9aa4b4" xml:space="preserve">    generation  0</text>
+<text x="18" y="1580" fill="#9aa4b4" xml:space="preserve">    team=fibggi2juxhc  human=fi7io4lvjwu8</text>
+<text x="18" y="1600" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1620" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1640" fill="#4fb8e8" xml:space="preserve">$ abv owners list --human fi7io4lvjwu8</text>
+<text x="18" y="1660" fill="#9aa4b4" xml:space="preserve">    internal projection: owners</text>
+<text x="18" y="1680" fill="#9aa4b4" xml:space="preserve">    count  0</text>
+<text x="18" y="1700" fill="#9aa4b4" xml:space="preserve">    total  0</text>
+<text x="18" y="1720" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1740" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1760" fill="#d9a441" xml:space="preserve">══ THE ROWS — membership and ownership differ only in key2 ══</text>
+<text x="18" y="1780" fill="#8899ab" xml:space="preserve">╭────────────┬──────────────┬──────────────┬───────╮</text>
+<text x="18" y="1800" fill="#8899ab" xml:space="preserve">│ key2 type  │  key3 team   │  key4 human  │ value │</text>
+<text x="18" y="1820" fill="#8899ab" xml:space="preserve">╞════════════╪══════════════╪══════════════╪═══════╡</text>
+<text x="18" y="1840" fill="#8899ab" xml:space="preserve">│ membership │ fibggi2juubk │ fi7io4lvjqio │ {}    │</text>
+<text x="18" y="1860" fill="#8899ab" xml:space="preserve">│ membership │ fibggi2juxhc │ fi7io4lvjwu8 │ {}    │</text>
+<text x="18" y="1880" fill="#8899ab" xml:space="preserve">│ membership │ fibggi2jv0n4 │ fi7io4lvjqio │ {}    │</text>
+<text x="18" y="1900" fill="#8899ab" xml:space="preserve">│ ownership  │ fibggi2juubk │ fi7io4lvjqio │ {}    │</text>
+<text x="18" y="1920" fill="#8899ab" xml:space="preserve">│ ownership  │ fibggi2juxhc │ fi7io4lvjqio │ {}    │</text>
+<text x="18" y="1940" fill="#8899ab" xml:space="preserve">╰────────────┴──────────────┴──────────────┴───────╯</text>
+<text x="18" y="1960" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1980" fill="#9aa4b4" xml:space="preserve">  tables: abv_metadata abv_l1_records abv_lab_metadata</text>
+</svg>

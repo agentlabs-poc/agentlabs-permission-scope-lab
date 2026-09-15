@@ -1,65 +1,75 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 1291" width="820" height="1291" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
-<rect width="820" height="1291" rx="7" fill="#12161d"/>
-<path d="M0 7a7 7 0 0 1 7-7h806a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 1432" width="751" height="1432" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
+<rect width="751" height="1432" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h737a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
 <circle cx="20" cy="17" r="5" fill="#e0787c"/><circle cx="38" cy="17" r="5" fill="#d9a441"/><circle cx="56" cy="17" r="5" fill="#6cc292"/>
-<text x="410.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">auth-al — team · membership</text>
-<text x="22" y="62" fill="#d9a441" xml:space="preserve">THE TENANT'S TEAMS   — no application anywhere</text>
-<text x="22" y="83" fill="#4fb8e8">$</text><text x="38.8" y="83" fill="#e8ecf2" xml:space="preserve">abv team list --tenant acme --app hrms ...</text>
-<text x="22" y="104" fill="#9aa4b4" xml:space="preserve">count  4     total  4</text>
-<text x="22" y="125" fill="#6cc292" xml:space="preserve">fibggi2jur5s  RootTeam           parent=(root)</text>
-<text x="22" y="146" fill="#6cc292" xml:space="preserve">fibggi2juubk  Team1              parent=fibggi2jur5s</text>
-<text x="22" y="167" fill="#6cc292" xml:space="preserve">fibggi2juxhc  Team2              parent=fibggi2juubk</text>
-<text x="22" y="188" fill="#6cc292" xml:space="preserve">fibggi2jv0n4  AssignmentAdmins   parent=(root)</text>
-<text x="22" y="209" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="230" fill="#6b7687" xml:space="preserve"># "" is a real parent value — the one a root holds — so it cannot also</text>
-<text x="22" y="251" fill="#6b7687" xml:space="preserve"># mean "unset". --roots is explicit rather than overloading the empty string.</text>
-<text x="22" y="272" fill="#4fb8e8">$</text><text x="38.8" y="272" fill="#e8ecf2" xml:space="preserve">abv team list --roots</text>
-<text x="22" y="293" fill="#6cc292" xml:space="preserve">fibggi2jur5s  RootTeam           parent=(root)</text>
-<text x="22" y="314" fill="#6cc292" xml:space="preserve">fibggi2jv0n4  AssignmentAdmins   parent=(root)</text>
-<text x="22" y="335" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="356" fill="#d9a441" xml:space="preserve">ONE TEAM   — id, name, and the parent as an id</text>
-<text x="22" y="377" fill="#4fb8e8">$</text><text x="38.8" y="377" fill="#e8ecf2" xml:space="preserve">abv team get fibggi2juubk</text>
-<text x="22" y="398" fill="#9aa4b4" xml:space="preserve">id      fibggi2juubk</text>
-<text x="22" y="419" fill="#9aa4b4" xml:space="preserve">name    Team1</text>
-<text x="22" y="440" fill="#9aa4b4" xml:space="preserve">parent  fibggi2jur5s     &lt;- an id, not a name: a name is editable</text>
-<text x="22" y="461" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="482" fill="#d9a441" xml:space="preserve">THE ROSTER, AND THE SAME QUESTION THE OTHER WAY ROUND</text>
-<text x="22" y="503" fill="#4fb8e8">$</text><text x="38.8" y="503" fill="#e8ecf2" xml:space="preserve">abv team members --id fibggi2juubk</text>
-<text x="22" y="524" fill="#6cc292" xml:space="preserve">team=fibggi2juubk  human=fi7io4lvjqio</text>
-<text x="22" y="545" fill="#4fb8e8">$</text><text x="38.8" y="545" fill="#e8ecf2" xml:space="preserve">abv team members --human fi7io4lvjqio</text>
-<text x="22" y="566" fill="#6cc292" xml:space="preserve">team=fibggi2juubk  human=fi7io4lvjqio</text>
-<text x="22" y="587" fill="#6cc292" xml:space="preserve">team=fibggi2jv0n4  human=fi7io4lvjqio</text>
-<text x="22" y="608" fill="#6b7687" xml:space="preserve"># one human, two teams, two rows — independent facts, not a list</text>
-<text x="22" y="629" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="650" fill="#d9a441" xml:space="preserve">BOTH HALVES ARE IDS</text>
-<text x="22" y="671" fill="#4fb8e8">$</text><text x="38.8" y="671" fill="#e8ecf2" xml:space="preserve">abv team members --human Team-One</text>
-<text x="22" y="692" fill="#e0787c" xml:space="preserve">malformed input                                          rc=2</text>
-<text x="22" y="713" fill="#4fb8e8">$</text><text x="38.8" y="713" fill="#e8ecf2" xml:space="preserve">abv team members</text>
-<text x="22" y="734" fill="#e0787c" xml:space="preserve">requires exactly one of --id and --human                  rc=2</text>
-<text x="22" y="755" fill="#6b7687" xml:space="preserve"># an unfiltered listing of every membership is not a question anyone</text>
-<text x="22" y="776" fill="#6b7687" xml:space="preserve"># asks, and is unbounded in the dimension that grows fastest.</text>
-<text x="22" y="797" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="818" fill="#d9a441" xml:space="preserve">THE ROWS</text>
-<text x="22" y="839" fill="#9aa4b4" xml:space="preserve">boundary tenant key1 key2        key3          key4              value</text>
-<text x="22" y="860" fill="#9aa4b4" xml:space="preserve">────────────────────────────────────────────────────────────────────────────────────</text>
-<text x="22" y="881" fill="#9b8cd8" xml:space="preserve">tenant   acme   abv  membership  fibggi2juubk  fi7io4lvjqio      {}</text>
-<text x="22" y="902" fill="#9b8cd8" xml:space="preserve">tenant   acme   abv  membership  fibggi2juxhc  fi7io4lvjwu8      {}</text>
-<text x="22" y="923" fill="#9b8cd8" xml:space="preserve">tenant   acme   abv  membership  fibggi2jv0n4  fi7io4lvjqio      {}</text>
-<text x="22" y="944" fill="#6cc292" xml:space="preserve">tenant   acme   abv  team        fibggi2jur5s  RootTeam          {"parent_id":""}</text>
-<text x="22" y="965" fill="#6cc292" xml:space="preserve">tenant   acme   abv  team        fibggi2juubk  Team1             {"parent_id":"fibggi2jur5s"}</text>
-<text x="22" y="986" fill="#6cc292" xml:space="preserve">tenant   acme   abv  team        fibggi2juxhc  Team2             {"parent_id":"fibggi2juubk"}</text>
-<text x="22" y="1007" fill="#6cc292" xml:space="preserve">tenant   acme   abv  team        fibggi2jv0n4  AssignmentAdmins  {"parent_id":""}</text>
-<text x="22" y="1028" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="1049" fill="#6b7687" xml:space="preserve"># key3 is the team in BOTH record types, so a team and its whole roster</text>
-<text x="22" y="1070" fill="#6b7687" xml:space="preserve"># share a prefix — a roster is one index-covered range.</text>
-<text x="22" y="1091" fill="#6b7687" xml:space="preserve">#</text>
-<text x="22" y="1112" fill="#6b7687" xml:space="preserve"># key4 is the name on a team row and the human on a membership row.</text>
-<text x="22" y="1133" fill="#6b7687" xml:space="preserve"># different record types, told apart by key2 — the same way key5 is a</text>
-<text x="22" y="1154" fill="#6b7687" xml:space="preserve"># revision for a role and empty for a scope.</text>
-<text x="22" y="1175" fill="#6b7687" xml:space="preserve">#</text>
-<text x="22" y="1196" fill="#6b7687" xml:space="preserve"># a membership value is {} — presence is the fact, as with a scope.</text>
-<text x="22" y="1217" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="1238" fill="#e0787c" xml:space="preserve">teams        folded away</text>
-<text x="22" y="1259" fill="#e0787c" xml:space="preserve">memberships  folded away</text>
-<text x="22" y="1280" fill="#9aa4b4" xml:space="preserve">remaining    8 from the migration</text>
+<text x="375.5" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">teams and membership</text>
+<text x="18" y="60" fill="#d9a441" xml:space="preserve">══ CREATE — the id is issued, the caller names the team ══</text>
+<text x="18" y="80" fill="#4fb8e8" xml:space="preserve">$ abv team create --name Finance</text>
+<text x="18" y="100" fill="#9aa4b4" xml:space="preserve">    internal projection: team</text>
+<text x="18" y="120" fill="#9aa4b4" xml:space="preserve">    id  fyb0tqwvmnls</text>
+<text x="18" y="140" fill="#9aa4b4" xml:space="preserve">    name  Finance</text>
+<text x="18" y="160" fill="#9aa4b4" xml:space="preserve">    parent  (root)</text>
+<text x="18" y="180" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="200" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="220" fill="#d9a441" xml:space="preserve">══ DELETE refuses while anything depends on the team ══</text>
+<text x="18" y="240" fill="#4fb8e8" xml:space="preserve">$ abv team delete fibggi2juubk</text>
+<text x="18" y="260" fill="#9aa4b4" xml:space="preserve">    operation conflict</text>
+<text x="18" y="280" fill="#e0787c" xml:space="preserve">    rc=4</text>
+<text x="18" y="300" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="320" fill="#4fb8e8" xml:space="preserve">$ abv team delete fibggi2juxhc</text>
+<text x="18" y="340" fill="#9aa4b4" xml:space="preserve">    operation conflict</text>
+<text x="18" y="360" fill="#e0787c" xml:space="preserve">    rc=4</text>
+<text x="18" y="380" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="400" fill="#d9a441" xml:space="preserve">══ …and succeeds on a leaf nobody is in ══</text>
+<text x="18" y="420" fill="#4fb8e8" xml:space="preserve">$ abv team delete fyb0tqwvmnls</text>
+<text x="18" y="440" fill="#9aa4b4" xml:space="preserve">    internal projection: team</text>
+<text x="18" y="460" fill="#9aa4b4" xml:space="preserve">    removed  fyb0tqwvmnls</text>
+<text x="18" y="480" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="500" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="520" fill="#d9a441" xml:space="preserve">══ REPARENT refuses a cycle at the write, not at resolution ══</text>
+<text x="18" y="540" fill="#4fb8e8" xml:space="preserve">$ abv team reparent fibggi2jur5s --parent fibggi2juxhc</text>
+<text x="18" y="560" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="580" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="600" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="620" fill="#4fb8e8" xml:space="preserve">$ abv team reparent fibggi2juxhc --roots</text>
+<text x="18" y="640" fill="#9aa4b4" xml:space="preserve">    internal projection: team</text>
+<text x="18" y="660" fill="#9aa4b4" xml:space="preserve">    id  fibggi2juxhc</text>
+<text x="18" y="680" fill="#9aa4b4" xml:space="preserve">    name  fp8h2w6yan0d</text>
+<text x="18" y="700" fill="#9aa4b4" xml:space="preserve">    parent  (root)</text>
+<text x="18" y="720" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="740" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="760" fill="#d9a441" xml:space="preserve">══ MEMBERSHIP — the pair is the identity, so a repeat is a conflict ══</text>
+<text x="18" y="780" fill="#4fb8e8" xml:space="preserve">$ abv team add-member --id fibggi2juxhc --human fi7io4lvjqio</text>
+<text x="18" y="800" fill="#9aa4b4" xml:space="preserve">    internal projection: membership</text>
+<text x="18" y="820" fill="#9aa4b4" xml:space="preserve">    added  team=fibggi2juxhc  human=fi7io4lvjqio</text>
+<text x="18" y="840" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="860" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="880" fill="#4fb8e8" xml:space="preserve">$ abv team add-member --id fibggi2juxhc --human fi7io4lvjqio</text>
+<text x="18" y="900" fill="#9aa4b4" xml:space="preserve">    operation conflict</text>
+<text x="18" y="920" fill="#e0787c" xml:space="preserve">    rc=4</text>
+<text x="18" y="940" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="960" fill="#4fb8e8" xml:space="preserve">$ abv team remove-member --id fibggi2juxhc --human fi7io4lvjqio</text>
+<text x="18" y="980" fill="#9aa4b4" xml:space="preserve">    internal projection: membership</text>
+<text x="18" y="1000" fill="#9aa4b4" xml:space="preserve">    removed  team=fibggi2juxhc  human=fi7io4lvjqio</text>
+<text x="18" y="1020" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1040" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1060" fill="#4fb8e8" xml:space="preserve">$ abv team remove-member --id fibggi2juxhc --human fi7io4lvjqio</text>
+<text x="18" y="1080" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="1100" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="1120" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1140" fill="#d9a441" xml:space="preserve">══ the lost foreign key is now a rule ══</text>
+<text x="18" y="1160" fill="#4fb8e8" xml:space="preserve">$ abv team add-member --id fy6x28qcdrxx --human fi7io4lvjqio</text>
+<text x="18" y="1180" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="1200" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="1220" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1240" fill="#d9a441" xml:space="preserve">══ THE ROWS ══</text>
+<text x="18" y="1260" fill="#9aa4b4" xml:space="preserve">boundary  tenant_id     key2         key3            key4                   value</text>
+<text x="18" y="1280" fill="#9aa4b4" xml:space="preserve">--------  ---------  ----------  ------------  ----------------  ----------------------------</text>
+<text x="18" y="1300" fill="#9aa4b4" xml:space="preserve">tenant    acme       membership  fibggi2juubk  fi7io4lvjqio      {}</text>
+<text x="18" y="1320" fill="#9aa4b4" xml:space="preserve">tenant    acme       membership  fibggi2juxhc  fi7io4lvjwu8      {}</text>
+<text x="18" y="1340" fill="#9aa4b4" xml:space="preserve">tenant    acme       membership  fibggi2jv0n4  fi7io4lvjqio      {}</text>
+<text x="18" y="1360" fill="#9aa4b4" xml:space="preserve">tenant    acme       team        fibggi2jur5s  fp8h2w6ykxan      {&quot;parent_id&quot;:&quot;&quot;}</text>
+<text x="18" y="1380" fill="#9aa4b4" xml:space="preserve">tenant    acme       team        fibggi2juubk  fp8h2w6y5iv8      {&quot;parent_id&quot;:&quot;fibggi2jur5s&quot;}</text>
+<text x="18" y="1400" fill="#9aa4b4" xml:space="preserve">tenant    acme       team        fibggi2juxhc  fp8h2w6yan0d      {&quot;parent_id&quot;:&quot;&quot;}</text>
+<text x="18" y="1420" fill="#9aa4b4" xml:space="preserve">tenant    acme       team        fibggi2jv0n4  AssignmentAdmins  {&quot;parent_id&quot;:&quot;&quot;}</text>
 </svg>
