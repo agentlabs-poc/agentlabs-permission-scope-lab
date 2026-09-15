@@ -299,7 +299,7 @@ func (s *Service) DeleteTeam(ctx context.Context, area domain.Area, identity dom
 		if err := admin.CheckTeamDelete(ctx, area, identity, id, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
-		if err := validation.CheckTeamDeletion(snapshot.Teams, snapshot.Memberships, snapshot.Assignments, id); err != nil {
+		if err := validation.CheckTeamDeletion(snapshot.Teams, snapshot.Memberships, snapshot.Ownerships, snapshot.Assignments, id); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := ctx.Err(); err != nil {

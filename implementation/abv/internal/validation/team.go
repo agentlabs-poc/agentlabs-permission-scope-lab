@@ -93,7 +93,7 @@ const maxTeamDepth = 64
 // memberships would make one administrative act perform another, and the
 // handbook keeps team administration, membership administration and assignment
 // authority distinct.
-func CheckTeamDeletion(teams map[string]domain.Team, memberships []domain.Membership, assignments map[string]domain.Assignment, id string) error {
+func CheckTeamDeletion(teams map[string]domain.Team, memberships []domain.Membership, ownerships []domain.Ownership, assignments map[string]domain.Assignment, id string) error {
 	if !codec.ValidRoleID(id) {
 		return domain.ErrMalformed
 	}
@@ -108,6 +108,15 @@ func CheckTeamDeletion(teams map[string]domain.Team, memberships []domain.Member
 	}
 	for _, m := range memberships {
 		if m.TeamID == id {
+			return domain.ErrConflict
+		}
+	}
+	// An ownership depends on its team exactly as a membership does: deleting
+	// the team without it would leave a row naming a team that no longer exists.
+	// Ownership grants no authority, but an orphan record is still a record
+	// nothing can resolve.
+	for _, o := range ownerships {
+		if o.TeamID == id {
 			return domain.ErrConflict
 		}
 	}

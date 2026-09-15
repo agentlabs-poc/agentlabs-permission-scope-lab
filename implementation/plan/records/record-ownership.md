@@ -143,6 +143,17 @@ grants no authority, so there is nothing to keep within anything. That makes it
 the lightest record in the model — and the reason is Q-099's rule, not an
 oversight.
 
+Verified structurally rather than asserted: `internal/lineage` and
+`validation.Narrow` never read `Ownerships`. Ownership cannot grant authority
+because nothing that grants authority can see it.
+
+### One thing ownership does bind: its team's deletion
+
+`CheckTeamDeletion` refuses while a child team, a membership **or an ownership**
+depends on the team. Ownership grants no authority, but an orphan record is still
+a record nothing can resolve — and without the check, deleting an owned team left
+a row naming a team that no longer existed. It did, until it was tested.
+
 ---
 
 ## 4 · Scope
