@@ -31,6 +31,8 @@ func (agents) Establish(*http.Request) (domain.Identity, error) {
 //
 // Everything before this ran in one process against a database handle. This is
 // the first time the gate's question leaves the application at all.
+func init() { authclient.AllowCleartext() } // httptest speaks http; a deployment must not
+
 func TestAnApplicationDecidesOverTheWire(t *testing.T) {
 	const (
 		maya  = "fi7io4lvjqio"
@@ -126,33 +128,26 @@ func TestAnUnreachableAuthIsNotADenial(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = source.Load(t.Context(), authmiddleware.AuthorityQuery{
-		Context: authmiddleware.RequestContext{
-			Area:     authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
-			Identity: authmiddleware.Identity{Version: "1", HumanID: "fi7io4lvjqio"},
-		},
-		Permission: "hrms:payroll:payslip::read",
-	})
-	if err == nil {
-		t.Fatal("a dead authority service answered")
+	// Asserted at the application's edge, which is where it matters and where an
+	// earlier version of this test did not look. Calling Load directly certified
+	// a property the assembled system did not have: authclient.Error was not an
+	// EvaluationError, so the application's 503 branch went unreached and every
+	// Auth outage was reported to the caller as its own bad request.
+	evaluator, err := authmiddleware.New(source, clock{})
+	if err != nil {
+		t.Fatal(err)
 	}
-	var failure *authclient.Error
-	if !asClientError(err, &failure) || failure.Code != "AUTH_UNREACHABLE" {
-		t.Fatalf("err = %v, want an AUTH_UNREACHABLE evaluation failure", err)
+	app, err := hrms.NewHandler(hrms.NewStore(hrms.DefaultRecords()), evaluator,
+		hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	if err != nil {
+		t.Fatal(err)
 	}
-}
-
-func asClientError(err error, target **authclient.Error) bool {
-	for err != nil {
-		if typed, ok := err.(*authclient.Error); ok {
-			*target = typed
-			return true
-		}
-		u, ok := err.(interface{ Unwrap() error })
-		if !ok {
-			return false
-		}
-		err = u.Unwrap()
+	recorder := httptest.NewRecorder()
+	app.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/acme/FIN/C17", nil))
+	if recorder.Code != http.StatusServiceUnavailable {
+		t.Fatalf("an unreachable authority answered %d, want 503 — %s", recorder.Code, recorder.Body.String())
 	}
-	return false
+	if recorder.Code == http.StatusForbidden {
+		t.Fatal("an outage was rendered as a denial")
+	}
 }

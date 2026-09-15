@@ -16,10 +16,19 @@ import (
 )
 
 var (
-	once      sync.Once
-	fuzzMux   http.Handler
-	fuzzSetup error
+	once         sync.Once
+	fuzzMux      http.Handler
+	fuzzService_ *wiring.Service
+	fuzzSetup    error
 )
+
+// fuzzService is the assembled service behind the shared handler, for tests that
+// need to mount a different agent identity on it.
+func fuzzService(t *testing.T) *wiring.Service {
+	t.Helper()
+	fuzzHandler(t)
+	return fuzzService_
+}
 
 func fuzzHandler(t *testing.T) http.Handler {
 	t.Helper()
@@ -60,6 +69,7 @@ func fuzzHandler(t *testing.T) http.Handler {
 			fuzzSetup = err
 			return
 		}
+		fuzzService_ = service
 		fuzzMux, fuzzSetup = service.Handler(agents{})
 	})
 	if fuzzSetup != nil {

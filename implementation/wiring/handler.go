@@ -2,11 +2,11 @@ package wiring
 
 import (
 	"agentlabs.local/abv/domain"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
-	"strings"
 )
 
 // maxRequestBytes bounds one question. A service that reads any length is one a
@@ -67,24 +67,38 @@ func (s *Service) resolve(agents AgentIdentity, w http.ResponseWriter, r *http.R
 		fail(w, http.StatusBadRequest, "MALFORMED_AREA")
 		return
 	}
+	// Authenticated before the body is parsed. An unauthenticated caller should
+	// not get schema feedback, nor make the service decode 64 KiB per request
+	// before being turned away.
+	caller, err := agents.Establish(r)
+	if err != nil {
+		fail(w, http.StatusUnauthorized, "UNAUTHENTICATED")
+		return
+	}
 	body, err := io.ReadAll(io.LimitReader(r.Body, maxRequestBytes+1))
 	if err != nil || len(body) > maxRequestBytes {
 		fail(w, http.StatusBadRequest, "MALFORMED_REQUEST")
 		return
 	}
-	decoder := json.NewDecoder(strings.NewReader(string(body)))
-	decoder.DisallowUnknownFields()
-	var asked wireRequest
-	if err := decoder.Decode(&asked); err != nil || asked.Version != "1" {
+	if err := rejectDuplicateKeys(body); err != nil {
 		fail(w, http.StatusBadRequest, "MALFORMED_REQUEST")
 		return
 	}
-	// The caller is whoever a deployment established from the credentials on the
-	// request, never whoever the body claims. A submitted identity block is not
-	// proof of anything.
-	caller, err := agents.Establish(r)
-	if err != nil {
-		fail(w, http.StatusUnauthorized, "UNAUTHENTICATED")
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.DisallowUnknownFields()
+	var asked wireRequest
+	if err := decoder.Decode(&asked); err != nil {
+		fail(w, http.StatusBadRequest, "MALFORMED_REQUEST")
+		return
+	}
+	if decoder.More() {
+		fail(w, http.StatusBadRequest, "MALFORMED_REQUEST")
+		return
+	}
+	// Unsupported rather than malformed: the document says so, and the two are
+	// different answers — "we do not speak that" against "that is not a request".
+	if asked.Version != "1" {
+		fail(w, http.StatusNotImplemented, "UNSUPPORTED_VERSION")
 		return
 	}
 	// The subject comes from the body; the actor comes from the credential. That
@@ -113,7 +127,11 @@ func statusFor(err error) int {
 	case errors.Is(err, domain.ErrRejected):
 		return http.StatusForbidden
 	case errors.Is(err, domain.ErrNotFound):
-		return http.StatusNotFound
+		// Not found and not entitled are one answer to a caller who is not
+		// established in this area. Splitting them let one valid credential
+		// enumerate which tenants exist and which applications each has
+		// installed — invisible in one process, a scanner on the wire.
+		return http.StatusForbidden
 	case errors.Is(err, domain.ErrUnsupported):
 		return http.StatusNotImplemented
 	default:
@@ -128,12 +146,70 @@ func codeFor(err error) string {
 	case errors.Is(err, domain.ErrRejected):
 		return "NOT_ENTITLED_TO_ASK"
 	case errors.Is(err, domain.ErrNotFound):
-		return "AREA_NOT_FOUND"
+		return "NOT_ENTITLED_TO_ASK"
 	case errors.Is(err, domain.ErrUnsupported):
 		return "UNSUPPORTED"
 	default:
 		return "AUTHORITY_UNAVAILABLE"
 	}
+}
+
+// rejectDuplicateKeys refuses a body that names a field twice, or that carries a
+// second document after the first.
+//
+// encoding/json takes the last occurrence silently, so a request naming human_id
+// twice was answered about the second while any log, proxy or audit reading the
+// first recorded the other. authmiddleware rejects both for its own two wire
+// contracts; this one sits beside them and was held to a weaker standard.
+func rejectDuplicateKeys(raw []byte) error {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	if err := scanValue(decoder); err != nil {
+		return err
+	}
+	if decoder.More() {
+		return errors.New("trailing JSON")
+	}
+	return nil
+}
+
+func scanValue(decoder *json.Decoder) error {
+	token, err := decoder.Token()
+	if err != nil {
+		return err
+	}
+	delim, ok := token.(json.Delim)
+	if !ok {
+		return nil
+	}
+	switch delim {
+	case '{':
+		seen := map[string]bool{}
+		for decoder.More() {
+			key, err := decoder.Token()
+			if err != nil {
+				return err
+			}
+			name, ok := key.(string)
+			if !ok {
+				return errors.New("malformed object key")
+			}
+			if seen[name] {
+				return errors.New("duplicate JSON field " + name)
+			}
+			seen[name] = true
+			if err := scanValue(decoder); err != nil {
+				return err
+			}
+		}
+	case '[':
+		for decoder.More() {
+			if err := scanValue(decoder); err != nil {
+				return err
+			}
+		}
+	}
+	_, err = decoder.Token()
+	return err
 }
 
 func fail(w http.ResponseWriter, status int, code string) {

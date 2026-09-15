@@ -57,9 +57,11 @@ func FuzzDecodeNeverReturnsRoutesWithAnError(f *testing.F) {
 			if route.HumanID != q.Context.Identity.HumanID {
 				t.Fatalf("accepted a route for another human: %q", route.HumanID)
 			}
-			if route.Permission != q.Permission {
-				t.Fatalf("accepted a route for another permission: %q", route.Permission)
-			}
+			// Not asserted here any more: decode assigns this field, so the
+			// check was vacuous by construction — and vacuous on precisely the
+			// dimension that was unchecked. TestTheAnswerIsCorroboratedAgainstTheQuestion
+			// asserts the real property, that a grant not carrying the queried
+			// permission is refused.
 			// grant_ids is the evidence an allow must carry.
 			if len(route.GrantIDs) == 0 {
 				t.Fatalf("accepted a route with no authorizing grant: %#v", route)

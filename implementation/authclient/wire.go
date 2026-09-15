@@ -9,6 +9,7 @@ package authclient
 
 import (
 	"agentlabs.local/authmiddleware"
+	"slices"
 	"time"
 )
 
@@ -100,18 +101,30 @@ type lineageStep struct {
 // folded down the chain — which is what keeps the lineage rules there.
 func (r resolveResponse) decode(query authmiddleware.AuthorityQuery) (authmiddleware.Authority, error) {
 	if r.Version != Version {
-		return authmiddleware.Authority{}, &Error{Code: "UNSUPPORTED_VERSION", Message: "unsupported contract version " + r.Version}
+		return authmiddleware.Authority{}, (&Error{Code: "UNSUPPORTED_VERSION", Message: "unsupported contract version " + r.Version}).evaluation()
 	}
 	// The three boundaries are echoed so a client can tell "nothing here" from
 	// "answered about someone else". Checking them is the only reason to echo.
 	if r.TenantID != query.Context.Area.TenantID || r.ApplicationID != query.Context.Area.ApplicationID {
-		return authmiddleware.Authority{}, &Error{Code: "WRONG_AREA", Message: "answered about a different area"}
+		return authmiddleware.Authority{}, (&Error{Code: "WRONG_AREA", Message: "answered about a different area"}).evaluation()
 	}
 	if r.HumanID != query.Context.Identity.HumanID {
-		return authmiddleware.Authority{}, &Error{Code: "WRONG_SUBJECT", Message: "answered about a different human"}
+		return authmiddleware.Authority{}, (&Error{Code: "WRONG_SUBJECT", Message: "answered about a different human"}).evaluation()
 	}
 	routes := make([]authmiddleware.Route, 0, len(r.ResolvedGrants))
 	for _, grant := range r.ResolvedGrants {
+		// The permission is checked, not assumed. Everything else the answer
+		// claims is corroborated against the question — tenant, application,
+		// human — and this was the exception: the one dimension that decides
+		// what may be done was stamped on from the query while the grant's own
+		// permissions were decoded and never read. A grant for reading the
+		// directory came back approved for reading payroll.
+		if !slices.Contains(grant.Permissions, query.Permission) {
+			return authmiddleware.Authority{}, (&Error{
+				Code:    "WRONG_PERMISSION",
+				Message: "a returned grant does not carry the permission that was asked about",
+			}).evaluation()
+		}
 		route := authmiddleware.Route{
 			Area:       authmiddleware.Area{TenantID: r.TenantID, ApplicationID: r.ApplicationID},
 			HumanID:    r.HumanID,
