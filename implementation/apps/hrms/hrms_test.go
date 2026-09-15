@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/authmiddleware"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -74,5 +75,88 @@ func TestTheApplicationDecidesWithoutAnAuthorityDatabase(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// failingAuthority stands in for an Auth service that cannot answer.
+type failingAuthority struct{ err error }
+
+func (f failingAuthority) Load(context.Context, authmiddleware.AuthorityQuery) (authmiddleware.Authority, error) {
+	return authmiddleware.Authority{}, f.err
+}
+
+// What the application answers when authority cannot be established, asserted in
+// the application's own module.
+//
+// Its suite passed while every evaluation failure rendered as a denial: the
+// branches were reached only by a test two modules away, so `go test ./...` here
+// was a false green on the distinction Q-128 exists to protect — an outage must
+// never be reported as "you may not".
+func TestAnOutageIsNotADenial(t *testing.T) {
+	for name, tc := range map[string]struct {
+		err    error
+		status int
+	}{
+		"the canonical evaluation block": {
+			&authmiddleware.EvaluationError{
+				Version: "1", Code: "AUTH_UNREACHABLE",
+				Message: "We could not check your access.", MessageReason: "the authority service did not answer",
+			},
+			http.StatusServiceUnavailable,
+		},
+		"an outage wrapped by any source": {
+			&authmiddleware.EvaluationError{
+				Version: "1", Code: "AUTHORITY_UNAVAILABLE",
+				Message: "We could not check your access.", MessageReason: "the authority store could not answer",
+				Cause: errors.New("dial tcp: connection refused"),
+			},
+			http.StatusServiceUnavailable,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			evaluator, err := authmiddleware.New(failingAuthority{err: tc.err}, clock{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			handler, err := hrms.NewHandler(hrms.NewStore(hrms.DefaultRecords()), evaluator,
+				hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/acme/FIN/C17", nil))
+			if recorder.Code == http.StatusForbidden {
+				t.Fatalf("an outage was rendered as a denial: %s", recorder.Body.String())
+			}
+			if recorder.Code != tc.status {
+				t.Fatalf("status = %d, want %d — %s", recorder.Code, tc.status, recorder.Body.String())
+			}
+		})
+	}
+}
+
+// And a denial is a denial, with the canonical block the client contract
+// requires rather than a bare status.
+func TestADenialCarriesTheCanonicalBlock(t *testing.T) {
+	evaluator, err := authmiddleware.New(stubAuthority{}, clock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := hrms.NewHandler(hrms.NewStore(hrms.DefaultRecords()), evaluator,
+		hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/acme/FIN/C17", nil))
+	if recorder.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want 403", recorder.Code)
+	}
+	var result authmiddleware.Result
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Decision != authmiddleware.Deny {
+		t.Fatalf("body = %s (%v)", recorder.Body.String(), err)
+	}
+	if result.ErrorCode == "" || result.ErrorMessage == "" {
+		t.Fatalf("a denial must carry both messages: %#v", result)
 	}
 }

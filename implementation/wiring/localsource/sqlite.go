@@ -90,7 +90,16 @@ func (s *SQLiteAuthoritySource) Load(ctx context.Context, query authmiddleware.A
 		Permissions: []string{query.Permission},
 	})
 	if err != nil {
-		return authmiddleware.Authority{}, err
+		// Reported as an evaluation failure, because that is what an
+		// AuthoritySource owes its caller. A bare error reaches the application
+		// as an unrecognised one and gets rendered as the caller's own bad
+		// request — no availability signal, and the blame in the wrong place.
+		return authmiddleware.Authority{}, &authmiddleware.EvaluationError{
+			Version: "1", Code: "AUTHORITY_UNAVAILABLE",
+			Message:       "We could not check your access.",
+			MessageReason: "the authority store could not answer",
+			Cause:         err,
+		}
 	}
 	routes := make([]authmiddleware.Route, len(resolved.ResolvedGrants))
 	for i, grant := range resolved.ResolvedGrants {

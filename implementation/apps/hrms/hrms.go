@@ -240,6 +240,13 @@ func renderFailure(w http.ResponseWriter, _ *http.Request, result authmiddleware
 		writeJSON(w, http.StatusServiceUnavailable, evaluationError)
 		return
 	}
+	// Everything left is either the caller's input or a source that failed, and
+	// the two are told apart by type rather than guessed at: an AuthoritySource
+	// reports failure as an EvaluationError, which the branch above catches.
+	//
+	// Making every error 503 was tempting and wrong — an existing test caught it
+	// immediately, because a body with a numeric title is a bad request however
+	// healthy Auth is. The fix belongs in the sources.
 	switch {
 	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
 		writeError(w, http.StatusServiceUnavailable, "request failed")
