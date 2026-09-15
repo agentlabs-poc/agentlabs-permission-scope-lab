@@ -23,7 +23,11 @@ func ResolveAuthority(ctx context.Context, s storage.Snapshot, identity domain.I
 	if err != nil {
 		return fail(err)
 	}
-	result := domain.ResolvedAuthority{Area: s.Area, HumanID: identity.HumanID, Grants: make([]domain.ResolvedGrant, 0, len(held))}
+	result := domain.ResolvedAuthority{
+		Version: "1", Area: s.Area, HumanID: identity.HumanID,
+		TenantID: s.Area.TenantID(), ApplicationID: s.Area.ApplicationID(),
+		ResolvedGrants: make([]domain.ResolvedGrant, 0, len(held)),
+	}
 	for _, entry := range held {
 		if err := ctx.Err(); err != nil {
 			return fail(err)
@@ -61,9 +65,9 @@ func ResolveAuthority(ctx context.Context, s storage.Snapshot, identity domain.I
 			if err != nil {
 				return fail(err)
 			}
-			grant.Source = source
+			grant.Source = &source
 		}
-		result.Grants = append(result.Grants, grant)
+		result.ResolvedGrants = append(result.ResolvedGrants, grant)
 	}
 	return result, nil
 }

@@ -49,10 +49,10 @@ func TestResolveAuthorityAnswersWhatAHumanHolds(t *testing.T) {
 	if resolved.Area != area || resolved.HumanID != maya.HumanID {
 		t.Fatalf("answered about the wrong subject: %#v", resolved)
 	}
-	if len(resolved.Grants) == 0 {
+	if len(resolved.ResolvedGrants) == 0 {
 		t.Fatal("maya holds Team1's FIN authority and none was resolved")
 	}
-	grant := resolved.Grants[0]
+	grant := resolved.ResolvedGrants[0]
 
 	// Effective, not stored. The scope is folded down the chain, so a client
 	// never has to fold one itself.
@@ -99,10 +99,10 @@ func TestResolveAuthorityFiltersAndOmitsOnRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(filtered.Grants) == 0 || len(filtered.Grants) > len(all.Grants) {
-		t.Fatalf("filter gave %d of %d", len(filtered.Grants), len(all.Grants))
+	if len(filtered.ResolvedGrants) == 0 || len(filtered.ResolvedGrants) > len(all.ResolvedGrants) {
+		t.Fatalf("filter gave %d of %d", len(filtered.ResolvedGrants), len(all.ResolvedGrants))
 	}
-	for _, grant := range filtered.Grants {
+	for _, grant := range filtered.ResolvedGrants {
 		found := false
 		for _, permission := range grant.Permissions {
 			if permission == lab.PayslipRead {
@@ -119,11 +119,11 @@ func TestResolveAuthorityFiltersAndOmitsOnRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(lean.Grants) != len(all.Grants) {
-		t.Fatalf("omitting the explanation changed the answer: %d vs %d", len(lean.Grants), len(all.Grants))
+	if len(lean.ResolvedGrants) != len(all.ResolvedGrants) {
+		t.Fatalf("omitting the explanation changed the answer: %d vs %d", len(lean.ResolvedGrants), len(all.ResolvedGrants))
 	}
-	for _, grant := range lean.Grants {
-		if len(grant.Source.Lineage) != 0 || grant.Source.AssignmentID != "" {
+	for _, grant := range lean.ResolvedGrants {
+		if grant.Source != nil {
 			t.Fatalf("source survived OmitSource: %#v", grant.Source)
 		}
 		// The decision inputs are untouched — omitting the explanation must not
@@ -156,8 +156,8 @@ func TestResolveAuthorityAnswersEmptyRatherThanFailing(t *testing.T) {
 	if err != nil {
 		t.Fatalf("a permission the human does not hold gave %v, want a complete empty answer", err)
 	}
-	if len(resolved.Grants) != 0 {
-		t.Fatalf("maya resolved delete authority: %#v", resolved.Grants)
+	if len(resolved.ResolvedGrants) != 0 {
+		t.Fatalf("maya resolved delete authority: %#v", resolved.ResolvedGrants)
 	}
 	// The envelope still answers about the right subject and area, so a client
 	// can tell "nothing here" from "answered about someone else".

@@ -447,23 +447,28 @@ type FixtureContext struct{ Name string }
 //     namespace slice, selected-versus-inherited permissions and
 //     inherited-and-ANDed scope on this side of the boundary.
 type ResolvedAuthority struct {
-	Area    Area
-	HumanID string
-	Grants  []ResolvedGrant
+	Version string `json:"version"`
+	// TenantID, ApplicationID and HumanID echo the three boundaries the caller
+	// named, so a client can confirm it was answered about what it asked about.
+	TenantID       string          `json:"tenant_id"`
+	ApplicationID  string          `json:"application_id"`
+	HumanID        string          `json:"human_id"`
+	Area           Area            `json:"-"`
+	ResolvedGrants []ResolvedGrant `json:"resolved_grants"`
 }
 
 // ResolvedGrant is one grant as it reaches a human, with the evidence of how.
 type ResolvedGrant struct {
-	Version       string
-	GrantID       string
-	Revision      int64
-	ParentGrantID string
+	Version       string `json:"version"`
+	GrantID       string `json:"grant_id"`
+	Revision      int64  `json:"revision"`
+	ParentGrantID string `json:"parent_grant_id,omitempty"`
 	// Permissions and Scope are effective, not stored. See ResolvedAuthority.
-	Permissions []string
-	Scope       map[string]string
+	Permissions []string          `json:"permissions"`
+	Scope       map[string]string `json:"scope"`
 	// Validity is the narrowest window across the chain, or nil when unbounded.
-	Validity *Validity
-	Source   Source
+	Validity *Validity `json:"validity,omitempty"`
+	Source   *Source   `json:"source,omitempty"`
 }
 
 // Source is why a human holds a grant. It is annotation and never a decision
@@ -471,31 +476,31 @@ type ResolvedGrant struct {
 // application that reasons over a lineage takes on every rule the lineage
 // follows, which is the whole reason resolution stays on this side.
 type Source struct {
-	AssignmentID string
-	TeamID       string
+	AssignmentID string `json:"assignment_id"`
+	TeamID       string `json:"team_id"`
 	// Via is how the human reaches the holding team. Groups-only is deliberate:
 	// a direct human assignment is refused at both write and read.
-	Via string
+	Via string `json:"via"`
 	// AdoptedRole is set only when the grant adopted one. Explanation, not
 	// authority — Permissions above is already the resolved list.
-	AdoptedRole *AdoptedRole
+	AdoptedRole *AdoptedRole `json:"adopted_role,omitempty"`
 	// Lineage is ordered root-first, one step per contributing assignment.
-	Lineage []LineageStep
+	Lineage []LineageStep `json:"lineage"`
 }
 
 type AdoptedRole struct {
-	RoleID   string
-	Revision int64
+	RoleID   string `json:"role_id"`
+	Revision int64  `json:"revision"`
 }
 
 // LineageStep is one grant in the chain, and the assignment and team that
 // carried it to the next.
 type LineageStep struct {
-	GrantID      string
-	Revision     int64
-	AssignmentID string
-	TeamID       string
-	Root         bool
+	GrantID      string `json:"grant_id"`
+	Revision     int64  `json:"revision"`
+	AssignmentID string `json:"assignment_id"`
+	TeamID       string `json:"team_id"`
+	Root         bool   `json:"root,omitempty"`
 }
 
 // ResolveOptions narrow what a resolve returns. Every zero value asks for the
