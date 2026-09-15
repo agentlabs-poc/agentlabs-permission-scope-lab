@@ -1,8 +1,8 @@
 package main
 
 import (
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/localadapter"
 	"agentlabs.local/authmiddleware"
 	"context"

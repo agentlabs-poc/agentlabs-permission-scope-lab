@@ -71,7 +71,6 @@ func OpenSQLite(ctx context.Context, path string, administration Administration,
 	return facade, nil
 }
 
-
 func (f *Facade) Close() error { return f.provider.Close() }
 
 func (f *Facade) CreateAssignment(ctx context.Context, area domain.Area, identity domain.Identity, proposed domain.Assignment) (domain.Receipt, error) {

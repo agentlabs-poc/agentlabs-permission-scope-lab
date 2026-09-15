@@ -1,9 +1,9 @@
 package main
 
 import (
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/httpdemo"
+	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/localadapter"
 	"agentlabs.local/authmiddleware"
 	"bytes"
