@@ -1,7 +1,6 @@
 # The four terms
 
-**For review. Settled in discussion; written down because everything else hangs
-on it.** These are the words we use for the parts of authorization, and the line
+**Settled.** Written down because everything else hangs on it. These are the words we use for the parts of authorization, and the line
 between the third and the fourth is where the architecture is decided.
 
 ![Four inputs make one decision](assets/client-consumes.svg)

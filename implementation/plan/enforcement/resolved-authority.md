@@ -1,11 +1,33 @@
 # Canonical format — resolved authority
 
-**Implemented.** The shape Auth delivers when a client asks what a human is
-entitled to. Agreed in discussion; written down to be argued with.
+**Partly implemented — read §0 before trusting a field.** The shape Auth
+delivers when a client asks what a human is entitled to.
 
-Companions: [93-the-four-terms.md](terms.md) for where this sits,
-[92-what-the-client-consumes.md](../../../docs/system-overview.md) for why it is
-the only thing that crosses.
+Companions: [terms.md](terms.md) for where this sits, and the handbook's
+[system overview](../../../docs/system-overview.md) for the request flow it
+serves.
+
+---
+
+## 0 · What exists, and what is written here ahead of itself
+
+This document describes the contract. Only part of it is built, and the parts
+differ in kind rather than in polish.
+
+| | state |
+|---|---|
+| `domain.ResolvedAuthority` and the grant shape | **built** — `Facade.ResolveAuthority`, demonstrated in [demo 18](../records/demos/demo-18-resolve.md) |
+| effective scope and validity, expanded permissions | **built**, including the contradiction rule in §4 |
+| `source` and its lineage, and `OmitSource` | **built** |
+| the `permissions` filter | **built** |
+| `authority_epoch` and `resolved_at` | **not emitted.** The envelope below shows them because the freshness design needs a place to land; nothing computes an epoch yet |
+| `POST authority.resolve`, `GET authority.epoch` | **not built.** There is no HTTP surface at all — the call today is the Go method and the `abv resolve` verb |
+| `expand_roles: false` and `permissions_ref` | **not built**, deliberately — §6 |
+
+The gap that matters most is not in this list. The caller and the subject are one
+identity block and must still agree, so a caller can resolve only its own
+authority — enough to prove the read, not enough to serve an application, which
+asks about many humans and is none of them.
 
 ---
 
@@ -54,7 +76,10 @@ This is the form Auth's own gate uses in-process, and the form the HTTP handler
 wraps. It is the only new read on the Facade; every other exported method is
 administrative.
 
-### As an endpoint
+### As an endpoint — proposed, not built
+
+There is no HTTP surface yet. The shape below is what the Go form becomes when
+there is one.
 
 ```http
 POST /api/v1/{tenant}/abv/applications/{application}/authority.resolve
@@ -110,7 +135,7 @@ already bounded — the client never has to narrow it further.
 and a menu needs all of them. The same call serves both; the default is the
 complete answer because that is the cacheable one.
 
-### The freshness companion
+### The freshness companion — proposed, not built
 
 ```http
 GET /api/v1/{tenant}/abv/authority.epoch
@@ -239,8 +264,8 @@ set, not a winner.
 | field | rule |
 |---|---|
 | `version` | required string, rejected if missing or unsupported — CONTRACT-010 |
-| `authority_epoch` | the tenant's epoch this was resolved at. A cached document may be used only while it still matches — Q-128 |
-| `resolved_at` | evidence, not a validity input. Time is decided by `validity` |
+| `authority_epoch` | **not emitted yet.** The tenant's epoch this was resolved at; a cached document may be used only while it still matches — Q-128 |
+| `resolved_at` | **not emitted yet.** Evidence, not a validity input — time is decided by `validity` |
 | `permissions` | expanded, never a role reference. Non-empty |
 | `scope` | effective. `{}` means the whole area, which is a complete scope, not an absent one |
 | `validity` | effective — the narrowest window in the chain. `null` bounds mean unbounded |

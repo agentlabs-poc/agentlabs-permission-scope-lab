@@ -1,6 +1,6 @@
 # The session surface, and two words we must not lose
 
-**For review. A thought, not a design.** Raised in discussion and recorded
+**A recorded decision, not a design.** Nothing here is built, and §6 says why that is safe. Raised in discussion and recorded
 because it is cheap to settle now and expensive to reconstruct later. Nothing is
 being built from this.
 

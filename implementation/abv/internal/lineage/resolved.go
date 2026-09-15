@@ -46,7 +46,10 @@ func ResolveAuthority(ctx context.Context, s storage.Snapshot, identity domain.I
 			continue
 		}
 		leaf, ok := s.Assignments[entry.assignmentID]
-		if !ok || leaf.ID != entry.assignmentID {
+		// The route and the assignment that holds it must name the same grant.
+		// Disagreeing means the snapshot contradicts itself, which is a refusal
+		// rather than a choice between two answers.
+		if !ok || leaf.ID != entry.assignmentID || leaf.GrantID != entry.route.GrantID {
 			return fail(domain.ErrRejected)
 		}
 		content, ok := s.Contents[domain.GrantKey{ID: leaf.GrantID, Revision: leaf.GrantRevision}]
