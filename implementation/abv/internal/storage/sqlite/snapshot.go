@@ -39,7 +39,7 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 	if !held {
 		return storage.Snapshot{}, domain.ErrNotFound
 	}
-	s := storage.Snapshot{Area: area, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
+	s := storage.Snapshot{Area: area, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, Ownerships: []domain.Ownership{}, TrustedRoots: map[string]bool{}}
 	if err := r.catalog(area.ApplicationID(), &s.Catalog); err != nil {
 		return storage.Snapshot{}, err
 	}
@@ -64,6 +64,9 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 		return storage.Snapshot{}, err
 	}
 	if err := r.memberships(&s); err != nil {
+		return storage.Snapshot{}, err
+	}
+	if err := r.ownerships(&s); err != nil {
 		return storage.Snapshot{}, err
 	}
 	if err := r.roots(&s); err != nil {
@@ -346,6 +349,36 @@ func (r *snapshotReader) teams(s *storage.Snapshot) error {
 	}
 	return finishRows(rows)
 }
+// ownerships reads who may administer each team. Q-099 keeps this separate from
+// membership: identical shape, different relationship, and neither implies the
+// other.
+func (r *snapshotReader) ownerships(s *storage.Snapshot) error {
+	rows, err := r.conn.QueryContext(r.ctx, `
+		SELECT key3, key4 FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='ownership'
+		 ORDER BY key3, key4`, r.area.TenantID())
+	if err != nil {
+		return classify(err)
+	}
+	for rows.Next() {
+		var team, human string
+		if err = rows.Scan(&team, &human); err != nil {
+			rows.Close()
+			return classify(err)
+		}
+		if err = r.add(); err != nil {
+			rows.Close()
+			return err
+		}
+		if team == "" || human == "" {
+			rows.Close()
+			return domain.ErrMalformed
+		}
+		s.Ownerships = append(s.Ownerships, domain.Ownership{TeamID: team, HumanID: human})
+	}
+	return finishRows(rows)
+}
+
 func (r *snapshotReader) memberships(s *storage.Snapshot) error {
 	rows, err := r.conn.QueryContext(r.ctx, `
 		SELECT key3, key4 FROM abv_l1_records

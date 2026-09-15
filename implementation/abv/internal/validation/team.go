@@ -130,3 +130,21 @@ func CheckMembership(teams map[string]domain.Team, m domain.Membership) error {
 	}
 	return nil
 }
+
+// CheckOwnership validates an ownership write. It is CheckMembership's shape
+// because ownership is membership's shape — and it checks nothing more, which is
+// the point rather than an omission.
+//
+// Ownership grants no authority (Q-099), so there is no ceiling to stay within
+// and no lineage to walk. A membership distributes the team's authority to a
+// human; an ownership lets a human administer the team and gives them none of
+// its business authority. The lighter check follows from the weaker fact.
+func CheckOwnership(teams map[string]domain.Team, o domain.Ownership) error {
+	if !codec.ValidRoleID(o.TeamID) || !codec.ValidHumanID(o.HumanID) {
+		return domain.ErrMalformed
+	}
+	if team, ok := teams[o.TeamID]; !ok || team.ID != o.TeamID {
+		return domain.ErrNotFound
+	}
+	return nil
+}
