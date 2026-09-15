@@ -24,10 +24,18 @@ differ in kind rather than in polish.
 | `POST authority.resolve`, `GET authority.epoch` | **not built.** There is no HTTP surface at all — the call today is the Go method and the `abv resolve` verb |
 | `expand_roles: false` and `permissions_ref` | **not built**, deliberately — §6 |
 
-The gap that matters most is not in this list. The caller and the subject are one
-identity block and must still agree, so a caller can resolve only its own
-authority — enough to prove the read, not enough to serve an application, which
-asks about many humans and is none of them.
+**The caller no longer has to be the subject.** That gap is closed: an
+application resolves other people through its own credential, modelled on the
+Auth service's workload client — an id and a secret exchanged for a token their
+contract describes as *"bound to `auth.registry.read` and one tenant
+application"*. The binding is the area, so the gate is a comparison rather than a
+policy, and nothing about the subject is checked because an application asks
+about many humans and is none of them. See [demo 19](../records/demos/demo-19-service-credential.md).
+
+The lab models the shape and not the issuance. This repository never becomes that
+service, so a real credential — the secret, its rotation, the token exchange —
+belongs to the migration. What must survive the migration is the rule: **who may
+ask is the gate's question, and who is asked about is the walk's.**
 
 ---
 
@@ -270,6 +278,7 @@ set, not a winner.
 | `scope` | effective. `{}` means the whole area, which is a complete scope, not an absent one |
 | `validity` | effective — the narrowest window in the chain. `null` bounds mean unbounded |
 | `source.via` | how the human reaches it. `membership` today; groups-only is deliberate, and a direct human assignment is refused at both write and read |
+| the caller's actor | `user` is held to itself — naming another human is impersonation. `agent` and `service_account` may name anyone the gate admits them to ask about (Q-086) |
 | `source.adopted_role` | present only when the grant adopted a role. Explanation, never authority |
 | `source.lineage` | ordered root-first. Every entry names the grant revision, the assignment that carried it, and the team it went to |
 

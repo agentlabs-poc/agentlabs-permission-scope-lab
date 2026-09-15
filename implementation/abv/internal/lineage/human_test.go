@@ -153,8 +153,13 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 	otherArea, _ := domain.NewArea("acme", "crm")
 	wrongArea := f.Snapshot
 	wrongArea.Area = otherArea
-	badIdentity := f.Issuer
-	badIdentity.Actor.ID = "fi7io4lvkfsw"
+	// The walk is about the subject, so a subject with no id is refused and an
+	// actor that differs from it is not — an application asking about someone
+	// reaches the same routes that person would.
+	noSubject := f.Issuer
+	noSubject.HumanID = " "
+	askedAbout := f.Issuer
+	askedAbout.Actor = domain.Actor{Type: "service_account", ID: "agent_hrms"}
 
 	for _, tc := range []struct {
 		name       string
@@ -165,7 +170,7 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 	}{
 		{"nil context", f.Snapshot, f.Issuer, lab.PayslipRead, domain.ErrMalformed},
 		{"wrong area", wrongArea, f.Issuer, lab.PayslipRead, domain.ErrRejected},
-		{"non-direct identity", f.Snapshot, badIdentity, lab.PayslipRead, domain.ErrUnsupported},
+		{"no subject", f.Snapshot, noSubject, lab.PayslipRead, domain.ErrMalformed},
 		{"noncanonical permission", f.Snapshot, f.Issuer, "*", domain.ErrMalformed},
 		{"unknown permission", f.Snapshot, f.Issuer, "hrms:missing::read", domain.ErrRejected},
 	} {
@@ -179,6 +184,12 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 				t.Fatalf("got %#v, %v; want %v", got, err, tc.want)
 			}
 		})
+	}
+
+	// An actor that is not the subject reaches the subject's routes. Who may ask
+	// is CheckAuthorityRead's question, not this walk's.
+	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, askedAbout, lab.PayslipRead, time.Time{}); err != nil || len(got) == 0 {
+		t.Fatalf("a service actor resolved %#v, %v; want the subject's routes", got, err)
 	}
 
 	f.Snapshot.Assignments["fm5b7t4pzcp2"] = domain.Assignment{Version: "1", ID: "fm5b7t4pzcp2", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}, Status: "enabled"}
@@ -214,7 +225,9 @@ func TestResolveTeamAssignmentDistinguishesOnlyInactiveEvidence(t *testing.T) {
 			c.Status = "retired"
 			f.Snapshot.Controls["fk3x9r2m5iv8"] = c
 		}, false},
-		{"missing adopted content", func(f *lab.TeamFINC17Case) { delete(f.Snapshot.Contents, domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}) }, false},
+		{"missing adopted content", func(f *lab.TeamFINC17Case) {
+			delete(f.Snapshot.Contents, domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1})
+		}, false},
 		{"untrusted root", func(f *lab.TeamFINC17Case) { delete(f.Snapshot.TrustedRoots, "fk3x9r2m0dq3") }, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

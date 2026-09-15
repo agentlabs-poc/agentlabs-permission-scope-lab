@@ -8,6 +8,41 @@ import (
 	"time"
 )
 
+// validateReadingIdentity admits the actor types Q-086 approves — `user`,
+// `agent` and `service_account` — where every write on this service still
+// requires the actor to be the human.
+//
+// That difference is the point rather than a relaxation. An application
+// enforcing its own endpoints asks about many humans and is none of them; a
+// caller that had to *be* the subject could resolve only itself, which is enough
+// to prove the read and useless to serve one. The Auth service already issues
+// exactly this: a workload credential bound to one tenant application, acting as
+// itself and naming the human it asks about.
+//
+// A `user` actor is still held to itself. A human acting is themselves, and a
+// user actor naming a different human is impersonation rather than delegation —
+// delegation arrives as an `agent` or `service_account`, whose right to ask is
+// the gate's question.
+func validateReadingIdentity(identity domain.Identity) error {
+	if invalidIdentityPart(identity.Version) || invalidIdentityPart(identity.Actor.Type) ||
+		invalidIdentityPart(identity.Actor.ID) || invalidIdentityPart(identity.HumanID) {
+		return domain.ErrMalformed
+	}
+	if identity.Version != "1" {
+		return domain.ErrUnsupported
+	}
+	switch identity.Actor.Type {
+	case "user":
+		if identity.Actor.ID != identity.HumanID {
+			return domain.ErrRejected
+		}
+	case "agent", "service_account":
+	default:
+		return domain.ErrUnsupported
+	}
+	return nil
+}
+
 // AuthorityRead gates reading what a human is entitled to.
 //
 // It is its own gate rather than a reuse of CheckGrantRead, because the question
@@ -44,7 +79,7 @@ func (s *Service) ResolveAuthority(ctx context.Context, area domain.Area, identi
 	if err := area.Validate(); err != nil {
 		return fail(err)
 	}
-	if err := validateSupportedIdentity(identity); err != nil {
+	if err := validateReadingIdentity(identity); err != nil {
 		return fail(err)
 	}
 	admin, ok := s.administration.(AuthorityRead)

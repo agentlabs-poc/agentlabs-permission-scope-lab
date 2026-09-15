@@ -53,7 +53,7 @@ func collectHumanRoutes(ctx context.Context, s storage.Snapshot, identity domain
 	if err := ctx.Err(); err != nil {
 		return fail(err)
 	}
-	if err := validateIdentity(identity); err != nil {
+	if err := validateSubject(identity); err != nil {
 		return fail(err)
 	}
 	if err := s.Area.Validate(); err != nil {

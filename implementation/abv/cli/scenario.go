@@ -141,8 +141,14 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			return report(diag, domain.ErrUnsupported)
 		}
 		human := flags["--human"]
-		// Caller and subject are one identity today, so the actor is the human.
-		identity := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: human}, HumanID: human}
+		// Without --client the caller is the subject: a human asking about their
+		// own authority. With it the caller is an application's own credential,
+		// which is how an enforcing client asks about somebody else.
+		actor := domain.Actor{Type: "user", ID: human}
+		if !empty(flags["--client"]) {
+			actor = domain.Actor{Type: "service_account", ID: flags["--client"]}
+		}
+		identity := domain.Identity{Version: "1", Actor: actor, HumanID: human}
 		opts := domain.ResolveOptions{OmitSource: has(flags, "--no-source")}
 		if !empty(flags["--permissions"]) {
 			opts.Permissions = strings.Split(flags["--permissions"], ",")

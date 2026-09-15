@@ -182,10 +182,42 @@ func (a *RoleAdministration) CheckRootEstablishment(ctx context.Context, area do
 	return a.teamGate(ctx, area, identity)
 }
 
-// CheckAuthorityRead gates asking what a human is entitled to. The lab admits
-// the same fixture administrator as every other read; in a deployment the caller
-// is the application enforcing its own endpoints, which is a different actor
-// from a tenant administrator browsing records.
+// WorkloadClient is the lab's stand-in for an application's own credential.
+//
+// The Auth service already issues these: a workload client with an id and a
+// secret, exchanged for a token the contract describes as *"bound to
+// auth.registry.read and one tenant application"*. The lab models the shape and
+// not the issuance — this repository never becomes that service, so a real
+// credential belongs to the migration rather than here.
+const WorkloadClient = "agent_hrms"
+
+// CheckAuthorityRead gates asking what a human is entitled to, and it is the one
+// gate here that answers differently for different actors — because it is the
+// only read whose caller need not be a person.
+//
+// For a service the question is a comparison rather than a policy: **is this
+// credential bound to the area being asked about?** In the lab the binding is
+// a.area, which is exactly what "bound to one tenant application" means. Nothing
+// about the subject is checked, and that is the point — an application enforcing
+// its own endpoints asks about many humans and is none of them.
+//
+// A human may still ask about their own authority, and only their own: the
+// fixture gate holds a user actor to the fixture administrator.
 func (a *RoleAdministration) CheckAuthorityRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
-	return a.teamGate(ctx, area, identity)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if area != a.area {
+		return domain.ErrRejected
+	}
+	switch identity.Actor.Type {
+	case "service_account":
+		if identity.Actor.ID != WorkloadClient {
+			return domain.ErrRejected
+		}
+		return nil
+	case "user":
+		return a.teamGate(ctx, area, identity)
+	}
+	return domain.ErrRejected
 }

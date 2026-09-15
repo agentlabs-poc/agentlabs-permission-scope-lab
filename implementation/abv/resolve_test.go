@@ -165,3 +165,72 @@ func TestResolveAuthorityAnswersEmptyRatherThanFailing(t *testing.T) {
 		t.Fatalf("empty answer lost its subject: %#v", resolved)
 	}
 }
+
+// An application asks about many humans and is none of them. Until this, a
+// caller had to *be* the subject, so the read existed and no application could
+// use it — the whole enforcement path was blocked on one validation rule.
+//
+// The shape is the Auth service's own: a workload credential bound to one tenant
+// application, acting as itself and naming the human it asks about.
+func TestAServiceCredentialResolvesOtherPeople(t *testing.T) {
+	api, area, maya := openResolveLab(t)
+	hrms := func(humanID string) domain.Identity {
+		return domain.Identity{
+			Version: "1",
+			Actor:   domain.Actor{Type: "service_account", ID: lab.WorkloadClient},
+			HumanID: humanID,
+		}
+	}
+
+	// The subject's own answer and the application's answer about them agree.
+	// Who asks does not change what is held.
+	own, err := api.ResolveAuthority(t.Context(), area, teamFixture, maya, domain.ResolveOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	asked, err := api.ResolveAuthority(t.Context(), area, teamFixture, hrms(maya.HumanID), domain.ResolveOptions{})
+	if err != nil {
+		t.Fatalf("a service credential was refused: %v", err)
+	}
+	if !reflect.DeepEqual(own, asked) {
+		t.Fatalf("the answer depended on who asked:\n own   %#v\n asked %#v", own, asked)
+	}
+
+	// And a second human, which is the thing that was impossible.
+	nutan, err := api.ResolveAuthority(t.Context(), area, teamFixture, hrms("fi7io4lvjwu8"), domain.ResolveOptions{})
+	if err != nil {
+		t.Fatalf("asking about a second human failed: %v", err)
+	}
+	if nutan.HumanID != "fi7io4lvjwu8" {
+		t.Fatalf("answered about the wrong subject: %#v", nutan)
+	}
+}
+
+// The credential is bound, and the binding is what the gate compares. A
+// credential the area does not know is refused before any authority is read.
+func TestAnUnboundCredentialIsRefused(t *testing.T) {
+	api, area, maya := openResolveLab(t)
+
+	stranger := domain.Identity{
+		Version: "1", Actor: domain.Actor{Type: "service_account", ID: "agent_crm"}, HumanID: maya.HumanID,
+	}
+	if _, err := api.ResolveAuthority(t.Context(), area, teamFixture, stranger, domain.ResolveOptions{}); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("an unbound credential gave %v, want ErrRejected", err)
+	}
+
+	// A human actor is still held to itself. Naming someone else is
+	// impersonation rather than delegation, and it is refused before the gate.
+	impersonating := maya
+	impersonating.HumanID = "fi7io4lvjwu8"
+	if _, err := api.ResolveAuthority(t.Context(), area, teamFixture, impersonating, domain.ResolveOptions{}); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("a user actor named someone else and got %v, want ErrRejected", err)
+	}
+
+	// An actor type outside Q-086 is unsupported rather than rejected: the
+	// difference is "we do not know what that is" against "you may not".
+	unknown := maya
+	unknown.Actor = domain.Actor{Type: "robot", ID: "r2"}
+	if _, err := api.ResolveAuthority(t.Context(), area, teamFixture, unknown, domain.ResolveOptions{}); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("an unknown actor type gave %v, want ErrUnsupported", err)
+	}
+}
