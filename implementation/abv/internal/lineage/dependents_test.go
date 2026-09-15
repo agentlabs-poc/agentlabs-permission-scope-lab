@@ -29,8 +29,8 @@ func TestDependentTeamAssignmentsFindsDirectChild(t *testing.T) {
 func TestDependentTeamAssignmentsUsesUnambiguousBindingKeys(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Teams["fp8h2w6y0dq3"] = domain.Team{Name: "team",ID: "fp8h2w6y0dq3"}
-	fixture.Snapshot.Teams["X\x00T"] = domain.Team{Name: "team",ID: "X\x00T"}
+	fixture.Snapshot.Teams["fp8h2w6y0dq3"] = domain.Team{Name: "team", ID: "fp8h2w6y0dq3"}
+	fixture.Snapshot.Teams["X\x00T"] = domain.Team{Name: "team", ID: "X\x00T"}
 	addBinding(&fixture.Snapshot, "fm5b7t4p4hu7", "G\x00X", "", "fp8h2w6y0dq3", "enabled")
 	addBinding(&fixture.Snapshot, "fm5b7t4p9mzc", "G", "", "X\x00T", "enabled")
 	before := snapshotEvidence(fixture.Snapshot)
@@ -51,14 +51,14 @@ func TestDependentTeamAssignmentsStructuralMatrix(t *testing.T) {
 	}{
 		{"three levels and sorted branches", func(s *storage.Snapshot) {
 			addBinding(s, "fm5b7t4pan0d", "fk3x9r2man0d", "fk3x9r2m5iv8", "fibggi2juxhc", "enabled")
-			s.Teams["fidfcosw0iyo"] = domain.Team{Name: "team",ID: "fidfcosw0iyo", ParentID: "fibggi2juxhc"}
+			s.Teams["fidfcosw0iyo"] = domain.Team{Name: "team", ID: "fidfcosw0iyo", ParentID: "fibggi2juxhc"}
 			addBinding(s, "fm5b7t4pkxan", "fk3x9r2mkxan", "fk3x9r2man0d", "fidfcosw0iyo", "enabled")
-			s.Teams["fp8h2w6yzcp2"] = domain.Team{Name: "team",ID: "fp8h2w6yzcp2", ParentID: "fibggi2juubk"}
+			s.Teams["fp8h2w6yzcp2"] = domain.Team{Name: "team", ID: "fp8h2w6yzcp2", ParentID: "fibggi2juubk"}
 			addBinding(s, "fm5b7t4pfs5i", "fk3x9r2mfs5i", "fk3x9r2m5iv8", "fp8h2w6yzcp2", "enabled")
 		}, []string{"fm5b7t4pan0d", "fm5b7t4pfs5i", "fm5b7t4pkxan"}, false},
 		{"unrelated holder is excluded", func(s *storage.Snapshot) {
-			s.Teams["fp8h2w6yer4h"] = domain.Team{Name: "team",ID: "fp8h2w6yer4h"}
-			s.Teams["fp8h2w6yu7kx"] = domain.Team{Name: "team",ID: "fp8h2w6yu7kx", ParentID: "fp8h2w6yer4h"}
+			s.Teams["fp8h2w6yer4h"] = domain.Team{Name: "team", ID: "fp8h2w6yer4h"}
+			s.Teams["fp8h2w6yu7kx"] = domain.Team{Name: "team", ID: "fp8h2w6yu7kx", ParentID: "fp8h2w6yer4h"}
 			s.Assignments["fm5b7t4p4hu7"] = domain.Assignment{Version: "1", ID: "fm5b7t4p4hu7", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fp8h2w6yer4h"}, Status: "enabled"}
 			addBinding(s, "fm5b7t4pan0d", "fk3x9r2man0d", "fk3x9r2m5iv8", "fibggi2juxhc", "enabled")
 		}, []string{"fm5b7t4pan0d"}, false},
@@ -73,7 +73,7 @@ func TestDependentTeamAssignmentsStructuralMatrix(t *testing.T) {
 		}, nil, false},
 		{"disabled bridge stays structural", func(s *storage.Snapshot) {
 			addBinding(s, "fm5b7t4pan0d", "fk3x9r2man0d", "fk3x9r2m5iv8", "fibggi2juxhc", "disabled")
-			s.Teams["fidfcosw0iyo"] = domain.Team{Name: "team",ID: "fidfcosw0iyo", ParentID: "fibggi2juxhc"}
+			s.Teams["fidfcosw0iyo"] = domain.Team{Name: "team", ID: "fidfcosw0iyo", ParentID: "fibggi2juxhc"}
 			addBinding(s, "fm5b7t4pfs5i", "fk3x9r2mfs5i", "fk3x9r2man0d", "fidfcosw0iyo", "enabled")
 		}, []string{"fm5b7t4pan0d", "fm5b7t4pfs5i"}, false},
 		{"missing upstream holding terminates ancestor proof", func(s *storage.Snapshot) {
@@ -139,7 +139,11 @@ func TestDependentTeamAssignmentsRejectsIncompleteOuterEvidence(t *testing.T) {
 		id   string
 	}{
 		{"missing requested assignment", func(*storage.Snapshot) {}, "missing"},
-		{"assignment map ID mismatch", func(s *storage.Snapshot) { a := s.Assignments["fm5b7t4p5iv8"]; a.ID = "wrong"; s.Assignments["fm5b7t4p5iv8"] = a }, "fm5b7t4p5iv8"},
+		{"assignment map ID mismatch", func(s *storage.Snapshot) {
+			a := s.Assignments["fm5b7t4p5iv8"]
+			a.ID = "wrong"
+			s.Assignments["fm5b7t4p5iv8"] = a
+		}, "fm5b7t4p5iv8"},
 		{"catalog outside area", func(s *storage.Snapshot) { s.Catalog.ApplicationID = "fi7io4lvkfsw" }, "fm5b7t4p5iv8"},
 	}
 	for _, test := range tests {
@@ -171,7 +175,7 @@ func TestDependentTeamAssignmentsRejectsCancellationAndOverflow(t *testing.T) {
 	parentGrant, parentTeam := "fk3x9r2m5iv8", "fibggi2juubk"
 	for i := 2; i <= 255; i++ {
 		grant, team, assignment := "G"+strconv.Itoa(i), "Team"+strconv.Itoa(i), "A"+strconv.Itoa(i)
-		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
+		fixture.Snapshot.Teams[team] = domain.Team{Name: "team", ID: team, ParentID: parentTeam}
 		addBinding(&fixture.Snapshot, assignment, grant, parentGrant, team, "enabled")
 		parentGrant, parentTeam = grant, team
 	}
@@ -181,7 +185,7 @@ func TestDependentTeamAssignmentsRejectsCancellationAndOverflow(t *testing.T) {
 		t.Fatalf("bounded lineage = %d records, %v", len(got), err)
 	}
 	assertSnapshotUnchanged(t, fixture.Snapshot, before)
-	fixture.Snapshot.Teams["fp8h2w6yfs5i"] = domain.Team{Name: "team",ID: "fp8h2w6yfs5i", ParentID: parentTeam}
+	fixture.Snapshot.Teams["fp8h2w6yfs5i"] = domain.Team{Name: "team", ID: "fp8h2w6yfs5i", ParentID: parentTeam}
 	addBinding(&fixture.Snapshot, "fm5b7t4pu7kx", "fk3x9r2mu7kx", parentGrant, "fp8h2w6yfs5i", "enabled")
 	before = snapshotEvidence(fixture.Snapshot)
 	got, err = lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "fm5b7t4p5iv8")

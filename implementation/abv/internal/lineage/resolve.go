@@ -12,6 +12,27 @@ import (
 	"time"
 )
 
+// $self travels the chain like any other scope value.
+//
+// It used to stop it. Two checks — one on the proposed child, one at every step
+// of the climb — refused any content whose scope carried the token, as
+// ErrUnsupported and without a comment. The effect was worse than refusing the
+// grant that used it: a $self grant anywhere in a chain killed every grant below
+// it too.
+//
+// SELF-001 settles the opposite, and GROUP-004 makes it the preferred practice:
+// "An Employees group may receive one self-scoped payslip-read grant. Vinay's
+// group membership makes that grant applicable to Vinay, and self resolves
+// through his trusted user-to-employee relationship. Maya's membership makes the
+// same grant applicable to Maya, with her own employee relationship." A single
+// self-service grant instead of one per employee is the recommended shape, and
+// it is exactly what those two checks refused.
+//
+// Nothing here resolves the token, and that is the division: Auth carries it to
+// the evaluator, which binds it to the authorizing human at match time, and what
+// the key *means* — the user-to-employee relationship — is the application's
+// under CHARTER-001.
+
 // maxChainSteps is a defensive traversal bound, not a canonical lineage limit.
 const maxChainSteps = 256
 
@@ -32,9 +53,6 @@ func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientT
 	}
 	if err := validateSelectedContent(s, child, now); err != nil {
 		return fail(err)
-	}
-	if containsSelf(child) {
-		return fail(domain.ErrUnsupported)
 	}
 	team, ok := s.Teams[recipientTeamID]
 	if !ok || team.ID != recipientTeamID {
@@ -81,9 +99,6 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	}
 	if err = validateSelectedContent(r.s, content, r.now); err != nil {
 		return fail(err)
-	}
-	if containsSelf(content) {
-		return fail(domain.ErrUnsupported)
 	}
 	team, ok := r.s.Teams[holderTeamID]
 	if !ok || team.ID != holderTeamID {
@@ -237,15 +252,6 @@ func validateTeamChain(s storage.Snapshot, start string) error {
 		id = team.ParentID
 	}
 	return nil
-}
-
-func containsSelf(content domain.GrantContent) bool {
-	for _, value := range content.Scope {
-		if value == "$self" {
-			return true
-		}
-	}
-	return false
 }
 
 func eligible(validity domain.Validity, now time.Time) bool {

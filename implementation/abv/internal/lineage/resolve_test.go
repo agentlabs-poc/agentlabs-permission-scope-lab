@@ -46,7 +46,7 @@ func TestResolveParentTeamRejectsIneligibleOrInferredSupport(t *testing.T) {
 		want error
 	}{
 		{"the grant is held only by an unrelated team", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["fp8h2w6y4hu7"] = domain.Team{Name: "team",ID: "fp8h2w6y4hu7", ParentID: "fibggi2jur5s"}
+			f.Snapshot.Teams["fp8h2w6y4hu7"] = domain.Team{Name: "team", ID: "fp8h2w6y4hu7", ParentID: "fibggi2jur5s"}
 			a := f.Snapshot.Assignments["fm5b7t4p5iv8"]
 			a.Recipient.ID = "fp8h2w6y4hu7"
 			f.Snapshot.Assignments["fm5b7t4p5iv8"] = a
@@ -79,10 +79,6 @@ func TestResolveParentTeamRejectsIneligibleOrInferredSupport(t *testing.T) {
 		{"selected child differs from stored revision", func(f *lab.TeamFINC17Case) {
 			f.Child.Scope["cert"] = "fi7io4lvkfsw"
 		}, domain.ErrRejected},
-		{"child self changes recipient binding", func(f *lab.TeamFINC17Case) {
-			f.Child.Scope = map[string]string{"user": "$self"}
-			f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}] = f.Child
-		}, domain.ErrUnsupported},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
@@ -98,7 +94,7 @@ func TestResolveParentTeamRejectsIneligibleOrInferredSupport(t *testing.T) {
 func TestResolveParentTeamUsesOnlyActualTeam1Revision(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Teams["fp8h2w6y4hu7"] = domain.Team{Name: "team",ID: "fp8h2w6y4hu7", ParentID: "fibggi2jur5s"}
+	fixture.Snapshot.Teams["fp8h2w6y4hu7"] = domain.Team{Name: "team", ID: "fp8h2w6y4hu7", ParentID: "fibggi2jur5s"}
 	broader := fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
 	broader.Revision = 2
 	broader.Permissions = []string{lab.PayslipRead, lab.PayslipWrite, lab.PayslipDelete}
@@ -156,7 +152,7 @@ func TestResolveParentTeamPreservesExactRootRoleRevision(t *testing.T) {
 func TestResolveParentTeamDoesNotUseTrustedRootToSkipTeamCeiling(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Teams["fidfcosw0iyo"] = domain.Team{Name: "team",ID: "fidfcosw0iyo", ParentID: "fibggi2juxhc"}
+	fixture.Snapshot.Teams["fidfcosw0iyo"] = domain.Team{Name: "team", ID: "fidfcosw0iyo", ParentID: "fibggi2juxhc"}
 	rootAssignment := fixture.Snapshot.Assignments["fm5b7t4p0dq3"]
 	rootAssignment.Recipient.ID = "fibggi2juxhc"
 	fixture.Snapshot.Assignments["fm5b7t4p0dq3"] = rootAssignment
@@ -175,8 +171,8 @@ func TestResolveParentTeamBoundsTraversalWithoutReturningPartialProof(t *testing
 	parent := "fibggi2juxhc"
 	for i := 0; i < 256; i++ {
 		id := "deep-" + strconv.Itoa(i)
-		fixture.Snapshot.Teams[parent] = domain.Team{Name: "team",ID: parent, ParentID: id}
-		fixture.Snapshot.Teams[id] = domain.Team{Name: "team",ID: id}
+		fixture.Snapshot.Teams[parent] = domain.Team{Name: "team", ID: parent, ParentID: id}
+		fixture.Snapshot.Teams[id] = domain.Team{Name: "team", ID: id}
 		parent = id
 	}
 	got, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})

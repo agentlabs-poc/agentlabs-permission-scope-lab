@@ -50,22 +50,43 @@ human hold?"** Which is why:
 
 ---
 
+## Captured
+
+[Demo 20](../records/demos/demo-20-a-decision.md) is the first capture of a
+decision: a human asks, and the answer returns with the chain of grants that
+authorized it. Everything above is visible in it — administration built the
+chain, authority loading supplied the routes, resolution matched them against the
+request's material, and the exit code is enforcement's to honour.
+
+It also found that `$self` had never been implemented past the chain walk, which
+refused any content carrying the token — and refused it at every step, so one
+self-scoped grant killed every grant below it too. SELF-001 settles the opposite
+and GROUP-004 calls it the preferred practice: *"An Employees group may receive
+one self-scoped payslip-read grant… The scope rule is shared; the resolved reach
+is specific to the human being authorized."* The refusal is gone and the demo now
+shows one grant reaching a different person for each member who asks.
+
 ## Resolution and enforcement do talk to each other
 
-Which direction depends on the endpoint's declared mode — CONTRACT-002, and the
-caller never chooses it.
+**There are not two modes, and there is no prepared state.** An earlier draft of
+this document said there were, on the strength of CONTRACT-002 in the
+authorization-flow chapter. `endpoint-authorization.md` carries a deprecation map
+that retires it:
 
-| mode | the conversation |
-|---|---|
-| **middleware-complete** | resolution finishes and hands enforcement a decision. One way. |
-| **endpoint-completion** | resolution cannot finish without application facts, so enforcement's fact-gathering feeds back into resolution, which then completes, and only then is execution bound. A loop. |
+> *"CONTRACT-002 and CONTRACT-003's two modes and mode validation — **Deprecated**;
+> there is one endpoint-owned authorization gate."*
+> *"ENFORCEMENT-001's prepared/middleware-allow wording — **Deprecated**;
+> ENFORCEMENT-002 retains the safety invariant without prepared."*
 
-The loop is the mode with no implementation today: `Policy` has no `mode` field,
-so the gate always completes and *"Middleware never returns allow for this mode"*
-is a rule with no code that can break it.
+So the conversation runs one way. Resolution decides; enforcement binds execution
+to that decision. Where an endpoint needs application facts to decide, it gathers
+them first — ENFORCEMENT-002 — and the safety rule survives the deprecation
+intact: *"Do not perform the protected mutation, disclose protected output, or
+trigger business side effects while gathering material."*
 
-**Prepared is not authorized** — ENFORCEMENT-001. The middle of that loop permits
-gathering facts. It permits no output and no mutation.
+The lesson for this document is worth keeping beside the rule: a chapter can
+describe a contract that a later chapter has retired, and the deprecation map is
+where that is recorded.
 
 ---
 
