@@ -61,11 +61,11 @@ Controller reran middleware full uncached tests, full race, vet and build: pass.
 
 C05/C08 added `TestSQLiteAuthoritySourceSeesProtectedDescendantStatusChanges`
 and `TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls`.
-Both create A2 through the protected lab API and observe Nutan's C17 access:
+Both create fm5b7t4pan0d through the protected lab API and observe Nutan's C17 access:
 allow → assignment disabled/deny → explicitly enabled/allow → grant disabled/deny
 → explicitly enabled/allow. HTTP denial must not disclose the protected title.
 This proves committed local reads through real controls, not a cached fixture.
-Original parent A1/G1 status tests remain: their direct database edits are
+Original parent fm5b7t4p5iv8/fk3x9r2m5iv8 status tests remain: their direct database edits are
 explicit test-state injection, not an authorized public mutation workflow.
 
 C14 added `authmiddleware/codec_fuzz_test.go` with

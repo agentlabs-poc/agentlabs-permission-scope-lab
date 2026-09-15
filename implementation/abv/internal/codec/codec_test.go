@@ -10,8 +10,8 @@ import (
 	"testing"
 )
 
-const goodContent = `{"version":"1","grant_id":"G2","revision":1,"parent_grant_id":"G1","permissions":["hrms:employee:certificate::read"],"scope":{"cert":"C17"}}`
-const goodAssignment = `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`
+const goodContent = `{"version":"1","grant_id":"fk3x9r2man0d","revision":1,"parent_grant_id":"fk3x9r2m5iv8","permissions":["hrms:employee:certificate::read"],"scope":{"cert":"C17"}}`
+const goodAssignment = `{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`
 
 func TestCanonicalFixturesRoundTrip(t *testing.T) {
 	for _, name := range []string{"g1", "g2", "a1", "a2"} {
@@ -89,9 +89,9 @@ func TestContentRejectsAmbiguousOrUnsupportedJSON(t *testing.T) {
 
 func TestDecoderRejectsUnpairedSurrogatesWithoutRepairingOpaqueIDs(t *testing.T) {
 	for name, raw := range map[string]string{
-		"high surrogate": strings.Replace(goodContent, `"G2"`, `"G\ud800"`, 1),
-		"low surrogate":  strings.Replace(goodContent, `"G2"`, `"G\udc00"`, 1),
-		"reversed pair":  strings.Replace(goodContent, `"G2"`, `"G\udc00\ud800"`, 1),
+		"high surrogate": strings.Replace(goodContent, `"fk3x9r2man0d"`, `"G\ud800"`, 1),
+		"low surrogate":  strings.Replace(goodContent, `"fk3x9r2man0d"`, `"G\udc00"`, 1),
+		"reversed pair":  strings.Replace(goodContent, `"fk3x9r2man0d"`, `"G\udc00\ud800"`, 1),
 	} {
 		t.Run(name, func(t *testing.T) {
 			got, err := DecodeContent([]byte(raw))
@@ -102,8 +102,8 @@ func TestDecoderRejectsUnpairedSurrogatesWithoutRepairingOpaqueIDs(t *testing.T)
 	}
 
 	for name, tc := range map[string][2]string{
-		"paired surrogate": {strings.Replace(goodContent, `"G2"`, `"G\ud83d\ude80"`, 1), "G🚀"},
-		"unicode literal":  {strings.Replace(goodContent, `"G2"`, `"許可🚀"`, 1), "許可🚀"},
+		"paired surrogate": {strings.Replace(goodContent, `"fk3x9r2man0d"`, `"G\ud83d\ude80"`, 1), "G🚀"},
+		"unicode literal":  {strings.Replace(goodContent, `"fk3x9r2man0d"`, `"許可🚀"`, 1), "許可🚀"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			got, err := DecodeContent([]byte(tc[0]))
@@ -115,18 +115,18 @@ func TestDecoderRejectsUnpairedSurrogatesWithoutRepairingOpaqueIDs(t *testing.T)
 }
 
 func TestContentDistinguishesAbsentParentFromPresentEmptyParent(t *testing.T) {
-	absent := strings.Replace(goodContent, `"parent_grant_id":"G1",`, "", 1)
+	absent := strings.Replace(goodContent, `"parent_grant_id":"fk3x9r2m5iv8",`, "", 1)
 	if got, err := DecodeContent([]byte(absent)); err != nil || got.ParentGrantID != "" {
 		t.Fatalf("root-shaped content must remain representable: %#v, %v", got, err)
 	}
-	presentEmpty := strings.Replace(goodContent, `"parent_grant_id":"G1"`, `"parent_grant_id":""`, 1)
+	presentEmpty := strings.Replace(goodContent, `"parent_grant_id":"fk3x9r2m5iv8"`, `"parent_grant_id":""`, 1)
 	if got, err := DecodeContent([]byte(presentEmpty)); !errors.Is(err, domain.ErrMalformed) || !reflect.DeepEqual(got, domain.GrantContent{}) {
 		t.Fatalf("accepted explicitly empty parent: %#v, %v", got, err)
 	}
 }
 
 func TestValidateContentRejectsMalformedTypedValues(t *testing.T) {
-	valid := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{}}
+	valid := domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 1, ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{}}
 	for name, edit := range map[string]func(*domain.GrantContent){
 		"invalid UTF-8 grant ID": func(g *domain.GrantContent) { g.GrantID = string([]byte{0xff}) },
 		"blank parent":           func(g *domain.GrantContent) { g.ParentGrantID = "  " },
@@ -152,7 +152,7 @@ func TestAssignmentRejectsMalformedAndIndependentProxyRecords(t *testing.T) {
 		"no grant revision":     strings.Replace(goodAssignment, `"grant_revision":1,`, "", 1),
 		"assignment validity":   strings.Replace(goodAssignment, `"version":"1"`, `"version":"1","validity":{"expires_at":"2026-09-30T00:00:00Z"}`, 1),
 		"extra recipient field": strings.Replace(goodAssignment, `"id":"fibggi2juxhc"`, `"id":"fibggi2juxhc","owner":"fi7io4lvjqio"`, 1),
-		"case alias":            strings.Replace(goodAssignment, `"id":"A2"`, `"ID":"A2"`, 1),
+		"case alias":            strings.Replace(goodAssignment, `"id":"fm5b7t4pan0d"`, `"ID":"fm5b7t4pan0d"`, 1),
 		"null status":           strings.Replace(goodAssignment, `"status":"enabled"`, `"status":null`, 1),
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -173,7 +173,7 @@ func TestRoleAndValidityAndRootShapeArePreserved(t *testing.T) {
 	if err != nil || got.RoleID != "reader" || got.RoleRevision != 2 || got.Permissions != nil || got.Validity == nil || got.Validity.ExpiresAt == nil {
 		t.Fatalf("%#v %v", got, err)
 	}
-	root := strings.Replace(goodContent, `"parent_grant_id":"G1",`, "", 1)
+	root := strings.Replace(goodContent, `"parent_grant_id":"fk3x9r2m5iv8",`, "", 1)
 	got, err = DecodeContent([]byte(root))
 	if err != nil || got.ParentGrantID != "" {
 		t.Fatal("root shape is representable, not trusted", err)
@@ -228,7 +228,7 @@ func FuzzContentNeverReturnsPartialOnFailure(f *testing.F) {
 // computed from the catalog rather than stored. The shape rules that go with it
 // are the ones a pure check can actually make: no parent, and no local scope.
 func TestRootShapedContentOmitsItsPermissionSourceAndNarrowing(t *testing.T) {
-	root := domain.GrantContent{Version: "1", GrantID: "G0", Revision: 1, Scope: map[string]string{}}
+	root := domain.GrantContent{Version: "1", GrantID: "fk3x9r2m0dq3", Revision: 1, Scope: map[string]string{}}
 	if err := ValidateContent(root); err != nil {
 		t.Fatalf("root content rejected: %v", err)
 	}
@@ -244,16 +244,16 @@ func TestRootShapedContentOmitsItsPermissionSourceAndNarrowing(t *testing.T) {
 	// Omission is only the root's privilege. A child that names no source has
 	// selected nothing, which is not the same as selecting everything.
 	child := root
-	child.ParentGrantID = "G0"
+	child.ParentGrantID = "fk3x9r2m0dq3"
 	if err := ValidateContent(child); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatalf("a sourceless child gave %v, want ErrMalformed", err)
 	}
 
 	// The mixture rule is unchanged, in both directions.
 	for _, mixed := range []domain.GrantContent{
-		{Version: "1", GrantID: "G0", Revision: 1, Permissions: []string{"hrms:a::read"}, RoleID: "r", RoleRevision: 1, Scope: map[string]string{}},
-		{Version: "1", GrantID: "G0", Revision: 1, RoleID: "r", RoleRevision: 0, Scope: map[string]string{}},
-		{Version: "1", GrantID: "G0", Revision: 1, RoleID: "", RoleRevision: 2, Scope: map[string]string{}},
+		{Version: "1", GrantID: "fk3x9r2m0dq3", Revision: 1, Permissions: []string{"hrms:a::read"}, RoleID: "r", RoleRevision: 1, Scope: map[string]string{}},
+		{Version: "1", GrantID: "fk3x9r2m0dq3", Revision: 1, RoleID: "r", RoleRevision: 0, Scope: map[string]string{}},
+		{Version: "1", GrantID: "fk3x9r2m0dq3", Revision: 1, RoleID: "", RoleRevision: 2, Scope: map[string]string{}},
 	} {
 		if err := ValidateContent(mixed); !errors.Is(err, domain.ErrMalformed) {
 			t.Fatalf("%#v gave %v, want ErrMalformed", mixed, err)

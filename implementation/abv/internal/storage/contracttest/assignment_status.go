@@ -14,9 +14,9 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 	for _, tc := range []struct{ name, before, after string }{{"disable", "enabled", "disabled"}, {"enable", "disabled", "enabled"}, {"same state", "disabled", "disabled"}} {
 		t.Run("assignment status "+tc.name+" persists after reopen", func(t *testing.T) {
 			seeded := fixtures(t)[0]
-			a := seeded.Assignments["A1"]
+			a := seeded.Assignments["fm5b7t4p5iv8"]
 			a.Status = tc.before
-			seeded.Assignments["A1"] = a
+			seeded.Assignments["fm5b7t4p5iv8"] = a
 			path := t.TempDir() + "/authority.db"
 			p, err := factory.Create(t.Context(), path, []storage.Snapshot{seeded})
 			if err != nil {
@@ -38,13 +38,13 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 				t.Fatal(err)
 			}
 			defer p.Close()
-			seeded.Assignments["A1"] = after
+			seeded.Assignments["fm5b7t4p5iv8"] = after
 			assertSnapshot(t, p, seeded)
 		})
 	}
 
 	t.Run("rejects malformed stale missing immutable and mixed changes without effects", func(t *testing.T) {
-		base := fixtures(t)[0].Assignments["A1"]
+		base := fixtures(t)[0].Assignments["fm5b7t4p5iv8"]
 		valid := func() storage.AssignmentStatusChange {
 			after := base
 			after.Status = "enabled"
@@ -61,8 +61,8 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 			"future version":             {func(c *storage.AssignmentStatusChange) { c.After.Version = "2" }, false, false, domain.ErrUnsupported},
 			"invalid status":             {func(c *storage.AssignmentStatusChange) { c.After.Status = "paused" }, false, false, domain.ErrMalformed},
 			"empty ID":                   {func(c *storage.AssignmentStatusChange) { c.Before.ID, c.After.ID = "", "" }, false, false, domain.ErrMalformed},
-			"changed ID":                 {func(c *storage.AssignmentStatusChange) { c.After.ID = "A2" }, false, false, domain.ErrMalformed},
-			"changed grant":              {func(c *storage.AssignmentStatusChange) { c.After.GrantID = "G2" }, false, false, domain.ErrMalformed},
+			"changed ID":                 {func(c *storage.AssignmentStatusChange) { c.After.ID = "fm5b7t4pan0d" }, false, false, domain.ErrMalformed},
+			"changed grant":              {func(c *storage.AssignmentStatusChange) { c.After.GrantID = "fk3x9r2man0d" }, false, false, domain.ErrMalformed},
 			"changed revision":           {func(c *storage.AssignmentStatusChange) { c.After.GrantRevision++ }, false, false, domain.ErrMalformed},
 			"changed recipient type":     {func(c *storage.AssignmentStatusChange) { c.After.Recipient.Type = "user" }, false, false, domain.ErrMalformed},
 			"changed recipient ID":       {func(c *storage.AssignmentStatusChange) { c.After.Recipient.ID = "fi7io4lvkfsw" }, false, false, domain.ErrMalformed},
@@ -86,7 +86,7 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 						w.NewAssignments = []domain.Assignment{newAssignment("must-not-persist")}
 					}
 					if tc.grant {
-						g := statusChange("G1", "enabled", "disabled")
+						g := statusChange("fk3x9r2m5iv8", "enabled", "disabled")
 						w.GrantStatusChange = &g
 					}
 					return w, nil
@@ -116,9 +116,9 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 		}
 		defer p.Close()
 		err = p.Update(t.Context(), seeded.Area, func(s storage.Snapshot) (storage.WriteSet, error) {
-			before := s.Assignments["A1"]
+			before := s.Assignments["fm5b7t4p5iv8"]
 			before.Status = "enabled"
-			s.Assignments["A1"] = before
+			s.Assignments["fm5b7t4p5iv8"] = before
 			after := before
 			after.Status = "disabled"
 			return storage.WriteSet{AssignmentStatusChange: &storage.AssignmentStatusChange{Before: before, After: after}}, nil
@@ -138,7 +138,7 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 		}
 		defer p.Close()
 		for i := range seeded {
-			before := seeded[i].Assignments["A1"]
+			before := seeded[i].Assignments["fm5b7t4p5iv8"]
 			after := before
 			after.Status = "enabled"
 			if err := p.Update(t.Context(), seeded[i].Area, func(storage.Snapshot) (storage.WriteSet, error) {
@@ -146,7 +146,7 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 			}); err != nil {
 				t.Fatal(err)
 			}
-			seeded[i].Assignments["A1"] = after
+			seeded[i].Assignments["fm5b7t4p5iv8"] = after
 			for j := range seeded {
 				assertSnapshot(t, p, seeded[j])
 			}
@@ -162,7 +162,7 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 		}
 		ctx, cancel := context.WithCancel(t.Context())
 		err = p.Update(ctx, seeded.Area, func(storage.Snapshot) (storage.WriteSet, error) {
-			before := seeded.Assignments["A1"]
+			before := seeded.Assignments["fm5b7t4p5iv8"]
 			after := before
 			after.Status = "enabled"
 			cancel()
@@ -209,7 +209,7 @@ func RunAssignmentStatus(t *testing.T, factory Factory) {
 		var calls atomic.Int32
 		err = second.Update(ctx, seeded.Area, func(storage.Snapshot) (storage.WriteSet, error) {
 			calls.Add(1)
-			before := seeded.Assignments["A1"]
+			before := seeded.Assignments["fm5b7t4p5iv8"]
 			after := before
 			after.Status = "enabled"
 			return storage.WriteSet{AssignmentStatusChange: &storage.AssignmentStatusChange{Before: before, After: after}}, nil

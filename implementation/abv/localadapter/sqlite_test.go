@@ -25,10 +25,10 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
 	fixture.Snapshot.Assignments[fixture.Proposed.ID] = fixture.Proposed
-	newer := fixture.Snapshot.Contents[domain.GrantKey{ID: "G2", Revision: 1}]
+	newer := fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}]
 	newer.Revision = 2
 	newer.Scope = map[string]string{"cert": "C18"}
-	fixture.Snapshot.Contents[domain.GrantKey{ID: "G2", Revision: 2}] = newer
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 2}] = newer
 	notBefore0, notBefore1 := now.Add(-2*time.Hour), now.Add(-time.Hour)
 	expires0, expires1 := now.Add(2*time.Hour), now.Add(time.Hour)
 	setValidity := func(id string, notBefore, expiresAt time.Time) {
@@ -37,8 +37,8 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 		content.Validity = &domain.Validity{NotBefore: &notBefore, ExpiresAt: &expiresAt}
 		fixture.Snapshot.Contents[key] = content
 	}
-	setValidity("G0", notBefore0, expires0)
-	setValidity("G1", notBefore1, expires1)
+	setValidity("fk3x9r2m0dq3", notBefore0, expires0)
+	setValidity("fk3x9r2m5iv8", notBefore1, expires1)
 	dbPath := filepath.Join(t.TempDir(), "authority.db")
 	provider, err := storageSQLite.CreateFixture(t.Context(), dbPath, []storage.Snapshot{fixture.Snapshot})
 	if err != nil {
@@ -74,7 +74,7 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 		}
 	}
 	allowed, err := request("acme", "hrms", "fi7io4lvjwu8", exact("FIN", "C17"))
-	if err != nil || allowed.Decision != authmiddleware.Allow || !reflect.DeepEqual(allowed.GrantIDs, []string{"G0", "G1", "G2"}) {
+	if err != nil || allowed.Decision != authmiddleware.Allow || !reflect.DeepEqual(allowed.GrantIDs, []string{"fk3x9r2m0dq3", "fk3x9r2m5iv8", "fk3x9r2man0d"}) {
 		t.Fatalf("allowed=%+v err=%v", allowed, err)
 	}
 	authority, err := source.Load(t.Context(), authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}}, Permission: lab.PayslipRead})
@@ -146,14 +146,14 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	}
 	setAssignment := func(status string) {
 		t.Helper()
-		if _, err := db.Exec(`UPDATE abv_l1_records SET value=? WHERE key2='assignment' AND json_extract(value,'$.id')='A1'`,
-			`{"id":"A1","grant_revision":1,"status":"`+status+`"}`); err != nil {
+		if _, err := db.Exec(`UPDATE abv_l1_records SET value=? WHERE key2='assignment' AND json_extract(value,'$.id')='fm5b7t4p5iv8'`,
+			`{"id":"fm5b7t4p5iv8","grant_revision":1,"status":"`+status+`"}`); err != nil {
 			t.Fatal(err)
 		}
 	}
 	setGrant := func(status string) {
 		t.Helper()
-		if _, err := db.Exec(`UPDATE abv_l1_records SET value=? WHERE key2='grant' AND key4='G1'`, `{"status":"`+status+`","trusted_root":false}`); err != nil {
+		if _, err := db.Exec(`UPDATE abv_l1_records SET value=? WHERE key2='grant' AND key4='fk3x9r2m5iv8'`, `{"status":"`+status+`","trusted_root":false}`); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -213,19 +213,19 @@ func TestSQLiteAuthoritySourceSeesProtectedDescendantStatusChanges(t *testing.T)
 		}
 	}
 	assertDecision(authmiddleware.Allow)
-	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "disabled"); err != nil {
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "fm5b7t4pan0d", "disabled"); err != nil {
 		t.Fatal(err)
 	}
 	assertDecision(authmiddleware.Deny)
-	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "enabled"); err != nil {
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "fm5b7t4pan0d", "enabled"); err != nil {
 		t.Fatal(err)
 	}
 	assertDecision(authmiddleware.Allow)
-	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}); err != nil {
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}); err != nil {
 		t.Fatal(err)
 	}
 	assertDecision(authmiddleware.Deny)
-	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "enabled"}); err != nil {
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "enabled"}); err != nil {
 		t.Fatal(err)
 	}
 	assertDecision(authmiddleware.Allow)
@@ -257,7 +257,7 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = db.Exec(`UPDATE abv_l1_records SET value='{}' WHERE key2='assignment' AND json_extract(value,'$.id')='A2'`); err != nil {
+	if _, err = db.Exec(`UPDATE abv_l1_records SET value='{}' WHERE key2='assignment' AND json_extract(value,'$.id')='fm5b7t4pan0d'`); err != nil {
 		t.Fatal(err)
 	}
 	_ = db.Close()
@@ -284,9 +284,9 @@ func TestConvertRouteRejectsMissingContributingAssignment(t *testing.T) {
 
 func TestConvertRouteUsesResolvedArea(t *testing.T) {
 	area, _ := domain.NewArea("resolved-tenant", "resolved-app")
-	route := domain.Route{Area: area, AssignmentIDs: []string{"A0"}}
+	route := domain.Route{Area: area, AssignmentIDs: []string{"fm5b7t4p0dq3"}}
 	query := authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "query-tenant", ApplicationID: "query-app"}}}
-	got, err := convertRoute(route, map[string]domain.Assignment{"A0": {ID: "A0", GrantID: "G0"}}, query)
+	got, err := convertRoute(route, map[string]domain.Assignment{"fm5b7t4p0dq3": {ID: "fm5b7t4p0dq3", GrantID: "fk3x9r2m0dq3"}}, query)
 	if err != nil {
 		t.Fatal(err)
 	}

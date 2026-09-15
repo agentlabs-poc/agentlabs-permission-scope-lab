@@ -19,10 +19,10 @@ func TestAssignmentRowsAreKeyedByTheBindingAndQ104IsThePrimaryKey(t *testing.T) 
 	base := contractFixture(t)
 	area := base.Area
 	base.Assignments = map[string]domain.Assignment{
-		"A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1,
+		"fm5b7t4p5iv8": {Version: "1", ID: "fm5b7t4p5iv8", GrantID: "fk3x9r2m5iv8", GrantRevision: 1,
 			Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"},
 	}
-	base.Teams = map[string]domain.Team{"fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1"}}
+	base.Teams = map[string]domain.Team{"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8"}}
 	path := t.TempDir() + "/authority.db"
 	opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
 	if err != nil {
@@ -75,7 +75,7 @@ func TestAssignmentRowsAreKeyedByTheBindingAndQ104IsThePrimaryKey(t *testing.T) 
 		t.Fatal(err)
 	}
 	defer conn.Close()
-	existing, err := readAssignmentByBinding(t.Context(), conn, area, "G1", domain.Recipient{Type: "group", ID: "fibggi2juubk"})
+	existing, err := readAssignmentByBinding(t.Context(), conn, area, "fk3x9r2m5iv8", domain.Recipient{Type: "group", ID: "fibggi2juubk"})
 	if err != nil {
 		t.Fatal(err)
 	}

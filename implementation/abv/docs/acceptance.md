@@ -38,12 +38,12 @@ are not implemented by this publication slice.
 Final controller checks passed on 9 September 2026 at 04:36 UTC:
 `go test ./... -count=1`, `go test -race ./... -count=1`, `go vet ./...`,
 `go build ./...` and `go mod verify`. Site build and all 10 site tests pass.
-A freshly compiled binary seeded a disposable SQLite database, created A2,
-published G2/revision2, then reopened both records in separate processes:
+A freshly compiled binary seeded a disposable SQLite database, created fm5b7t4pan0d,
+published fk3x9r2man0d/revision2, then reopened both records in separate processes:
 
 ```json
-{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}
-{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}
+{"version":"1","grant_id":"fk3x9r2man0d","revision":2,"parent_grant_id":"fk3x9r2m5iv8","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}
+{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fp8h2w6yan0d"},"status":"enabled"}
 ```
 
 These are two separate output records. The command and fixture restriction are
@@ -139,16 +139,16 @@ CLI pre-read—and prints the committed version-1 Assignment JSON.
 
 The lab capability is explicitly prototype-only, not production authentication.
 It binds the scenario marker and exact Area, direct Maya identity, current
-`AssignmentAdmins` membership, and only A1/G1/Team1 or A2/G2/Team2. ABV still
+`AssignmentAdmins` membership, and only fm5b7t4p5iv8/fk3x9r2m5iv8/fp8h2w6y5iv8 or fm5b7t4pan0d/fk3x9r2man0d/fp8h2w6yan0d. ABV still
 validates current support and adopted revision. Binary acceptance proves the
 bottom-up sequence, no cascade, exact record preservation after reopen, unchanged
-G1/G2 controls, and restored diagnosis. Existing snapshot and 256-step lineage
+fk3x9r2m5iv8/fk3x9r2man0d controls, and restored diagnosis. Existing snapshot and 256-step lineage
 bounds reject rather than truncate; no schema, fixture, canonical JSON or real
 Auth operation was added.
 
 Sol-medium implemented all four tasks; independent task reviews and Astra-medium
 whole-slice/scoped reviews approved the result. The final compiled-process test
-compares both G1 and G2 content, both grant controls and exact A1/A2 records after
+compares both fk3x9r2m5iv8 and fk3x9r2man0d content, both grant controls and exact fm5b7t4p5iv8/fm5b7t4pan0d records after
 the lifecycle sequence. The final controller run passed full Go tests, full race
 tests, vet and binary build. Module verification, import-boundary inspection,
 site build/all 10 site tests and local file-link checks also passed.
@@ -168,10 +168,10 @@ independent approval at `5b81b84`, with no findings. Other lifecycle and ABV
 definition-management operations remain future work; real Auth-service integration
 is out of scope. PostgreSQL is not delivered by this local SQLite prototype.
 
-CP4-A Task 3 provides the optional reusable `GrantStatusAPI`, bounded lab G2
+CP4-A Task 3 provides the optional reusable `GrantStatusAPI`, bounded lab fk3x9r2man0d
 enable/disable commands, and separate canonical `grant-control` inspection.
-Binary acceptance assigns A2, disables G2, observes dependent diagnosis fail,
-reenables G2, observes diagnosis recover, and proves A2 is byte-for-byte unchanged.
+Binary acceptance assigns fm5b7t4pan0d, disables fk3x9r2man0d, observes dependent diagnosis fail,
+reenables fk3x9r2man0d, observes diagnosis recover, and proves fm5b7t4pan0d is byte-for-byte unchanged.
 Missing optional adapters return status 5; marker, context, fixture and operation
 refusals do not write. This evidence does not mark full CP4 complete.
 
@@ -194,7 +194,7 @@ integration passed final review after one typed-nil CLI guard correction.
 | Parent/child validity, cancellation, conflict and bounded evidence | Direct SetGrantStatus expiry, cancellation/competing-writer, depth and snapshot-limit tests. |
 | Ancestor restoration preserves descendant administrative state | `TestSetGrantStatusPreservesDescendantStateAndEffectiveness`. |
 | Separate administration; old adapters do not acquire a new capability | `TestOldAdministrationCannotAuthorizeGrantStatus`, lab refusal and CLI absent/typed-nil tests. |
-| Commands persist across processes and preserve A2 | Compiled binary seed/assign/disable/inspect/check/enable/reopen test. |
+| Commands persist across processes and preserve fm5b7t4pan0d | Compiled binary seed/assign/disable/inspect/check/enable/reopen test. |
 
 Tests live in [provider conformance](../internal/storage/contracttest/grant_status.go),
 [coordinator tests](../internal/mutation/grant_status_test.go),
@@ -231,28 +231,28 @@ checks the error, empty receipt and unchanged assignment count.
 
 | Case | Evidence and supported result | Limit or remaining work |
 |---|---|---|
-| T01: FIN/C17 baseline | `TestCreateAssignmentPersistsExactProposalAfterBothChecks`; `TestSQLiteFacadeReopensCommittedAssignment` in `abv_test.go`. Exact A2 persists after both checks and survives reopen. | Lab administration only; real Auth-service integration is out of scope. |
+| T01: FIN/C17 baseline | `TestCreateAssignmentPersistsExactProposalAfterBothChecks`; `TestSQLiteFacadeReopensCommittedAssignment` in `abv_test.go`. Exact fm5b7t4pan0d persists after both checks and survives reopen. | Lab administration only; real Auth-service integration is out of scope. |
 | T02: source but no administration | Failure-table subtest `administration absent while source present`: no write. | Does not equate source membership with administration. |
 | T03: administration but no source | Failure-table subtest `source absent while administration present`: no write. | Administration supplies no business authority. |
-| T04: changed recipient | Failure-table subtest `wrong recipient`; `TestLabAdministrationRejectsAnyChangedTrustedPremise/recipient`. Both reject changed recipient premises. | Tests substitute Team1, not the source example's exact Team3 name; the bound recipient remains Team2. |
-| T05: excessive permission | Failure-table subtest `selected permissions exceed parent`; compiled negative CLI scenario. Registered delete cannot be taken from the broader root through Team1's read/write ceiling. | No trimming of the submitted selection. |
+| T04: changed recipient | Failure-table subtest `wrong recipient`; `TestLabAdministrationRejectsAnyChangedTrustedPremise/recipient`. Both reject changed recipient premises. | Tests substitute fp8h2w6y5iv8, not the source example's exact Team3 name; the bound recipient remains fp8h2w6yan0d. |
+| T05: excessive permission | Failure-table subtest `selected permissions exceed parent`; compiled negative CLI scenario. Registered delete cannot be taken from the broader root through fp8h2w6y5iv8's read/write ceiling. | No trimming of the submitted selection. |
 | T06: empty child scope | `TestNarrowKeepsAllRestrictionsAndCopiesInputs` and `TestEmptyChildScopeRetainsParentPredicateAndPersists` in `acceptance_test.go`: FIN is retained through diagnosis, assignment and reopen. | Empty additional scope is not tenant-wide authority. |
 | T07: FIN AND ENG | The same pure narrowing test preserves both predicates instead of overwriting FIN. | Contradictory-scope publication policy remains unresolved; no domain satisfiability claim. |
-| T08: definition without holding | Failure-table subtest `parent support missing` leaves G1 content stored but rejects issuance. | Stored definitions are not authority. |
-| T09: unrelated TeamX holding | `TestResolveParentTeamRejectsIneligibleOrInferredSupport/G1_only_at_TeamX` in `internal/lineage/resolve_test.go` returns an empty route and rejection. | TeamX cannot replace actual parent Team1. |
-| T10: unrelated broader revision | `TestResolveParentTeamUsesOnlyActualTeam1Revision` preserves Team1's adopted revision and read/write ceiling. | No union with TeamX's broader revision. |
+| T08: definition without holding | Failure-table subtest `parent support missing` leaves fk3x9r2m5iv8 content stored but rejects issuance. | Stored definitions are not authority. |
+| T09: unrelated TeamX holding | `TestResolveParentTeamRejectsIneligibleOrInferredSupport/G1_only_at_TeamX` in `internal/lineage/resolve_test.go` returns an empty route and rejection. | TeamX cannot replace actual parent fp8h2w6y5iv8. |
+| T10: unrelated broader revision | `TestResolveParentTeamUsesOnlyActualTeam1Revision` preserves fp8h2w6y5iv8's adopted revision and read/write ceiling. | No union with TeamX's broader revision. |
 | T11: stale new assignment | Failure-table subtest `older selected revision has no latest fallback` rejects creation. | Publication and explicit upgrades are CP4 operations. |
 | T12: disabled duplicate | Failure-table subtest `disabled duplicate still occupies binding`; provider conformance `grant recipient uniqueness spans revisions and disabled rows`. | Disablement does not free a current binding. |
-| T13: disabled grant | Failure-table subtest `child control disabled`; resolver subtest `G1 control disabled`. Disabled content cannot support new issuance. | Actual grant enable/disable API is CP4; this is supplied-state evidence. |
-| T14: disabled assignment | Resolver subtest `Team1 assignment disabled` and `TestHasSourceRevalidatesRouteAndIdentity/disabled_evidence_is_rechecked` reject the disabled support route. | Analogous parent-support proof, not an application access evaluator for A2; assignment lifecycle is CP4. |
+| T13: disabled grant | Failure-table subtest `child control disabled`; resolver subtest `fk3x9r2m5iv8 control disabled`. Disabled content cannot support new issuance. | Actual grant enable/disable API is CP4; this is supplied-state evidence. |
+| T14: disabled assignment | Resolver subtest `fp8h2w6y5iv8 assignment disabled` and `TestHasSourceRevalidatesRouteAndIdentity/disabled_evidence_is_rechecked` reject the disabled support route. | Analogous parent-support proof, not an application access evaluator for fm5b7t4pan0d; assignment lifecycle is CP4. |
 | T15: ancestor restoration | No delivered lifecycle operation. | CP4 must prove enabled descendants regain effectiveness without a state rewrite. |
 | T16: explicitly disabled descendant | No delivered lifecycle operation. | CP4 must prove restoring an ancestor does not enable an explicitly disabled child. |
 | T17: enabled binding blocks reparenting | No delivered structural-write operation. | CP4: bottom-up affected-binding guard. |
 | T18: reparent after binding removal/disablement | No delivered structural-write operation. | CP4: current-state validation and explicit re-enable, without automatic repair. |
 | T19: another shared branch enabled | No delivered structural-write operation. | CP4 must check every affected branch, not only one. |
 | T20: cycle with disabled bindings | Resolver subtest `cyclic team graph with disabled edge` rejects supplied cyclic team state. | Proposed grant-parent cycle rejection during structural writes remains CP4; the existing test does not prove that operation. |
-| T21: cross-tenant support | `TestTeamFINC17RoundTripsAndTenantCannotSupplyMissingSupport` includes both another tenant and another app holding the otherwise missing A1; local lookup cannot borrow it. Provider conformance isolates every snapshot family and writes by both dimensions. | `TestInspectCarriesAreaForEverySupportedKind` checks facade forwarding; provider conformance proves isolation beneath that shared read seam. |
-| T22: expired support | `TestResolveParentTeamValidityBoundaryAndCopies`, `TestHasSourceRechecksExactExpiry`, and `TestCreateAssignmentRechecksEligibilityImmediatelyBeforeWriteSet/G1` and `/G2` cover parent-only and child expiry crossing. | Current eligibility and pre-write recheck, not a production commit-time expiry guarantee. |
+| T21: cross-tenant support | `TestTeamFINC17RoundTripsAndTenantCannotSupplyMissingSupport` includes both another tenant and another app holding the otherwise missing fm5b7t4p5iv8; local lookup cannot borrow it. Provider conformance isolates every snapshot family and writes by both dimensions. | `TestInspectCarriesAreaForEverySupportedKind` checks facade forwarding; provider conformance proves isolation beneath that shared read seam. |
+| T22: expired support | `TestResolveParentTeamValidityBoundaryAndCopies`, `TestHasSourceRechecksExactExpiry`, and `TestCreateAssignmentRechecksEligibilityImmediatelyBeforeWriteSet/fk3x9r2m5iv8` and `/fk3x9r2man0d` cover parent-only and child expiry crossing. | Current eligibility and pre-write recheck, not a production commit-time expiry guarantee. |
 | T23: failed lookup | `TestCancellationDoesNotReplayMutationCallback`, `TestProviderFailureReturnsNoReceiptAndCallbackIsNotReplayed`, and provider cancellation/rollback tests preserve operational errors and no receipt. An expired deadline returns `context.DeadlineExceeded` before a callback. | This is local cancellation/deadline/conflict evidence, not a timeout injected midway through a remote Auth lookup; no network adapter exists. |
 | T24: stale checked state | `TestFacadeDiagnosticIsNotATicketForAssignment`; `TestParentDisablementBeforeMutationAcquisitionConflictsThenIsSeen`; `TestParentDisablementAfterAssignmentCommitIsNotRetroactive`. | Withdrawal ordering is tested; a racing new-revision publication operation remains CP4. |
 | T25: issuer later leaves | `TestResolveParentTeamBaseline` removes all membership evidence and still resolves otherwise valid team-held lineage; source-membership tests reject a fresh issuance attempt without Maya's source. | No permanent issuer field or dependency is invented; ownership lifecycle operations are not implemented. |
@@ -296,7 +296,7 @@ storage imports no CLI; the facade imports no CLI or lab. The facade's reviewed
 
 `TestSnapshotLimitReturnsNoReceiptAndNoWrite` deliberately opens the scenario
 with a 30-record limit, observes the explicit snapshot-limit error and empty
-receipt, then reopens at the normal limit and proves A2 absent. Provider
+receipt, then reopens at the normal limit and proves fm5b7t4pan0d absent. Provider
 conformance additionally proves no callback on overflow; bounded traversal
 returns no partial route.
 

@@ -130,8 +130,8 @@ func roleSeed(t *testing.T) storage.Snapshot {
 		Contents:     map[domain.GrantKey]domain.GrantContent{},
 		Assignments:  map[string]domain.Assignment{},
 		Teams: map[string]domain.Team{
-			"fibggi2jur5s": {ID: "fibggi2jur5s", Name: "RootTeam"},
-			"fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "fibggi2jur5s"},
+			"fibggi2jur5s": {ID: "fibggi2jur5s", Name: "fp8h2w6ykxan"},
+			"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fibggi2jur5s"},
 		},
 		Memberships:  []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}},
 		TrustedRoots: map[string]bool{},

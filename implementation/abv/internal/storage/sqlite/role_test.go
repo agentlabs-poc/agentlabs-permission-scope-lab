@@ -12,7 +12,7 @@ import (
 )
 
 func roleSnapshot(area domain.Area) storage.Snapshot {
-	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::write": {ID: "hrms:payroll:payslip::write", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "grant", Revision: 1}: {Version: "1", GrantID: "grant", Revision: 1, RoleID: "reader", RoleRevision: 1, Scope: map[string]string{}}}, Assignments: map[string]domain.Assignment{"assignment": {Version: "1", ID: "assignment", GrantID: "grant", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "u"}, Status: "enabled"}}, Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
+	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::write": {ID: "hrms:payroll:payslip::write", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "fk3x9r2mbo1e", Revision: 1}: {Version: "1", GrantID: "fk3x9r2mbo1e", Revision: 1, RoleID: "fr4j5x7z1bo1", RoleRevision: 1, Scope: map[string]string{}}}, Assignments: map[string]domain.Assignment{"fm5b7t4pbo1e": {Version: "1", ID: "fm5b7t4pbo1e", GrantID: "fk3x9r2mbo1e", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8s5iv8"}, Status: "enabled"}}, Roles: map[domain.RoleKey]domain.RoleContent{{ID: "fr4j5x7z1bo1", Revision: 1}: {ID: "fr4j5x7z1bo1", Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 }
 
 func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
@@ -23,7 +23,7 @@ func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	role := domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::write"}}
+	role := domain.RoleContent{Name: "payslip-reader", ID: "fr4j5x7z1bo1", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::write"}}
 	if err = p.Update(t.Context(), a1, func(s storage.Snapshot) (storage.WriteSet, error) {
 		return storage.WriteSet{NewRoleRevision: &role}, nil
 	}); err != nil {
@@ -54,14 +54,14 @@ func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
 		want []string
 	}{{a1, []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::write"}}, {a2, []string{"hrms:payroll:payslip::write"}}} {
 		if err := p.Read(t.Context(), tc.area, func(s storage.Snapshot) error {
-			if !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "reader", Revision: 1}].Permissions, []string{"hrms:payroll:payslip::read"}) || !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "reader", Revision: 2}].Permissions, tc.want) {
+			if !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "fr4j5x7z1bo1", Revision: 1}].Permissions, []string{"hrms:payroll:payslip::read"}) || !reflect.DeepEqual(s.Roles[domain.RoleKey{ID: "fr4j5x7z1bo1", Revision: 2}].Permissions, tc.want) {
 				t.Fatalf("roles=%#v", s.Roles)
 			}
-			permissions, err := validation.SelectedPermissions(s.Contents[domain.GrantKey{ID: "grant", Revision: 1}], s.Roles)
+			permissions, err := validation.SelectedPermissions(s.Contents[domain.GrantKey{ID: "fk3x9r2mbo1e", Revision: 1}], s.Roles)
 			if err != nil || !reflect.DeepEqual(permissions, []string{"hrms:payroll:payslip::read"}) {
 				t.Fatalf("adopted revision changed: permissions=%v err=%v", permissions, err)
 			}
-			if got := s.Assignments["assignment"]; got.GrantID != "grant" || got.GrantRevision != 1 || got.Status != "enabled" {
+			if got := s.Assignments["fm5b7t4pbo1e"]; got.GrantID != "fk3x9r2mbo1e" || got.GrantRevision != 1 || got.Status != "enabled" {
 				t.Fatalf("assignment changed: %#v", got)
 			}
 			return nil

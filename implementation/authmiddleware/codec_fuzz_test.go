@@ -40,7 +40,7 @@ func FuzzDecodePolicyPreservesBindings(f *testing.F) {
 // grant references and both messages through a wire round trip.
 func FuzzDecodeResultPreservesVariant(f *testing.F) {
 	for _, seed := range []string{
-		`{"version":"1","decision":"allow","grant_ids":["G0","G1"]}`,
+		`{"version":"1","decision":"allow","grant_ids":["fk3x9r2m0dq3","fk3x9r2m5iv8"]}`,
 		`{"version":"1","decision":"deny","error_code":"DENIED","error_message":"No access","error_message_reason":"Outside boundary"}`,
 		`{"version":"1","error_code":"UNAVAILABLE","error_message":"Try later","error_message_reason":"Authority unavailable"}`,
 		`{"version":"1","decision":"allow","error_code":"DENIED"}`, `[]`, `{"decision":null}`,

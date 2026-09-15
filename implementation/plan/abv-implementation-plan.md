@@ -97,7 +97,7 @@ T1 context + types + CLI seam
 ```
 
 The first visible demo is not an HTTP server. It is:
-seed a disposable scenario → inspect records → check A2 → assign A2 through
+seed a disposable scenario → inspect records → check fm5b7t4pan0d → assign fm5b7t4pan0d through
 both checks → reopen the database and inspect the saved result.
 
 ## Source layout
@@ -328,7 +328,7 @@ func TestAreaRequiresBothBoundaries(t *testing.T) {
 `codec.DecodeAssignment([]byte) (domain.Assignment, error)`,
 `codec.DecodeContent([]byte) (domain.GrantContent, error)`, `CheckContent`, `Narrow`.
 
-- [x] Copy G1/G2/A1/A2 from the Foundations reference as exact versioned fixtures,
+- [x] Copy fk3x9r2m5iv8/fk3x9r2man0d/fm5b7t4p5iv8/fm5b7t4pan0d from the Foundations reference as exact versioned fixtures,
   preserving revision fields. Include valid upstream premises in test setup.
 - [x] Add failing tests for duplicate JSON keys, missing version, null/missing
   scope, scope arrays, empty values, recipient on content, missing role half,
@@ -344,10 +344,10 @@ func TestAreaRequiresBothBoundaries(t *testing.T) {
 func TestNarrowPreservesConflictingPredicates(t *testing.T) {
     area, err := domain.NewArea("acme", "hrms")
     if err != nil { t.Fatal(err) }
-    parent := domain.Route{Area: area, GrantID: "G1", Permissions: []string{"read", "write"},
-        Predicates: []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}}}
-    child := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1,
-        ParentGrantID: "G1", Permissions: []string{"read"}, Scope: map[string]string{"dept": "ENG"}}
+    parent := domain.Route{Area: area, GrantID: "fk3x9r2m5iv8", Permissions: []string{"read", "write"},
+        Predicates: []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}}
+    child := domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 1,
+        ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{"read"}, Scope: map[string]string{"dept": "ENG"}}
     got, err := Narrow(area, parent, child, nil)
     if err != nil { t.Fatal(err) }
     if len(got.Predicates) != 2 || got.Predicates[0].Value != "FIN" {
@@ -410,7 +410,7 @@ on any error/panic/cancellation → ROLLBACK → release connection
   explicit permitted write set is committed.
 - [x] For each kind, round-trip full values (including roles, scope, validity,
   Unicode IDs and disabled assignments) with controlled fixtures. Catalogs must
-  not become per-tenant copies. Deliberately reuse G1/Team1/A1 IDs in a different
+  not become per-tenant copies. Deliberately reuse fk3x9r2m5iv8/Team1/fm5b7t4p5iv8 IDs in a different
   tenant and a different application; prove isolation for reads and writes.
 - [x] Open the same file using two provider instances. Hold one mutation with
   channels, issue a competing update and verify consistent ordering or explicit
@@ -432,21 +432,21 @@ extend `internal/lab/fixture.go` and add `internal/lab/cases.go`.
 **Consumes:** snapshot and pure validation. **Produces:** `ResolveParentTeam`
 and `HasSource` with no provider or CLI dependency.
 
-- [x] Seed the exact baseline internally: G0 legitimate fixture root; Team1
-  holding G1 through A1; Team2 child of Team1; G2 parent G1; Maya in Team1;
-  Nutan in Team2. A2 is proposed and absent initially. Role catalog, permission
+- [x] Seed the exact baseline internally: fk3x9r2m0dq3 legitimate fixture root; Team1
+  holding fk3x9r2m5iv8 through fm5b7t4p5iv8; Team2 child of Team1; fk3x9r2man0d parent fk3x9r2m5iv8; Maya in Team1;
+  Nutan in Team2. fm5b7t4pan0d is proposed and absent initially. Role catalog, permission
   registrations, controls and explicit administrative test premises are present.
-- [x] Write a baseline test resolving G2 support for Team2: find Team1, then
-  Team1's actual G1 assignment, then its selected content and G0 support.
+- [x] Write a baseline test resolving fk3x9r2man0d support for Team2: find Team1, then
+  Team1's actual fk3x9r2m5iv8 assignment, then its selected content and fk3x9r2m0dq3 support.
   Assert effective permissions include read/write at the parent and Finance
   predicates remain. Create no permanent dependency on issuer Maya.
 - [x] Write table cases before implementation:
 
 | Case | Expected result |
 |---|---|
-| G1 only at TeamX | Rejected missing eligible support; no substitution. |
+| fk3x9r2m5iv8 only at TeamX | Rejected missing eligible support; no substitution. |
 | TeamX holds broader content | Actual Team1-held content still determines the ceiling. |
-| G1 disabled, A1 enabled | Required support unusable. |
+| fk3x9r2m5iv8 disabled, fm5b7t4p5iv8 enabled | Required support unusable. |
 | Team1 assignment disabled | Required support unusable. |
 | Team2 parent relationship missing | Cannot infer it from names or scope. |
 | Parent graph cyclic, including disabled edges relevant to the proposal | Reject cycle; do not recurse indefinitely. |
@@ -630,8 +630,8 @@ Add typed operations for grant/assignment enable-disable, authorized deletion,
 parent changes, publication and explicit upgrades. Entry: CP3 passing and exact
 internal operation payloads reviewed. Extend provider writes without public raw CRUD.
 
-Required cases: G2 disable makes enabled G3 ineffective; re-enable restores only
-otherwise valid children; explicitly disabled G3 stays disabled; binding changes
+Required cases: fk3x9r2man0d disable makes enabled fk3x9r2mfs5i ineffective; re-enable restores only
+otherwise valid children; explicitly disabled fk3x9r2mfs5i stays disabled; binding changes
 require bottom-up removal/disablement across every shared branch; cycles are
 rejected even when disabled; orphaned routes cannot authorize; invalid re-enable
 does not partially enable a shared grant. Latest-only creation/upgrades and

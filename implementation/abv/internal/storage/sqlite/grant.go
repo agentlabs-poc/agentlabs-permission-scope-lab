@@ -9,8 +9,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"strings"
-	"unicode/utf8"
 )
 
 // A grant is two record types, because a grant is two things that change at
@@ -92,15 +90,12 @@ func decodeRevision(id string, revision int64, raw []byte) (domain.GrantContent,
 	return content, nil
 }
 
-// insertGrantHead accepts any non-blank identifier, deliberately.
-//
-// A grant id should be a base-36 Snowflake, as a role id and a team id already
-// are — and CreateGrant issues one, never accepting a caller's. But the stored
-// fixtures and the handbook's worked examples still use G0/G1/G2, so enforcing
-// the alphabet here would reject the corpus before the sweep that converts it.
-// Issuance is strict; acceptance follows when the sweep lands.
+// insertGrantHead requires a base-36 Snowflake, as every identifier Auth-AL
+// issues is. This was deliberately loose while the corpus still carried the
+// handbook's illustrative G0/G1/G2; the sweep converted them, so acceptance now
+// matches issuance.
 func insertGrantHead(ctx context.Context, conn *sql.Conn, area domain.Area, grant domain.Grant) error {
-	if strings.TrimSpace(grant.ID) == "" || !utf8.ValidString(grant.ID) ||
+	if !codec.ValidRoleID(grant.ID) ||
 		(grant.Status != "enabled" && grant.Status != "disabled") {
 		return domain.ErrMalformed
 	}

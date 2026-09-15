@@ -42,7 +42,7 @@ func (a *grantRecordAPI) GetGrant(_ context.Context, area domain.Area, fixture d
 
 func (a *grantRecordAPI) ListGrants(_ context.Context, area domain.Area, fixture domain.FixtureContext, filter domain.GrantFilter) (domain.GrantPage, error) {
 	a.area, a.fixture, a.filter, a.calls = area, fixture, filter, a.calls+1
-	return domain.GrantPage{Grants: []domain.Grant{{ID: "G0", Status: "enabled", TrustedRoot: true}}, Total: 1}, nil
+	return domain.GrantPage{Grants: []domain.Grant{{ID: "fk3x9r2m0dq3", Status: "enabled", TrustedRoot: true}}, Total: 1}, nil
 }
 
 func (a *grantRecordAPI) ListGrantRevisions(_ context.Context, area domain.Area, fixture domain.FixtureContext, id string, offset, limit int) (domain.GrantRevisionPage, error) {
@@ -62,12 +62,12 @@ func runGrant(t *testing.T, api *grantRecordAPI, args ...string) (int, string, s
 
 func TestGrantsCreateParsesPermissionsAndScope(t *testing.T) {
 	api := &grantRecordAPI{}
-	code, out, diag := runGrant(t, api, "grants", "create", "--parent", "G1",
+	code, out, diag := runGrant(t, api, "grants", "create", "--parent", "fk3x9r2m5iv8",
 		"--permissions", "hrms:payroll:payslip::read,hrms:payroll:payslip::write", "--scope", "dept=FIN,cert=C17")
 	if code != 0 {
 		t.Fatalf("exit=%d stderr=%q", code, diag)
 	}
-	if api.parent != "G1" || len(api.content.Permissions) != 2 || api.content.Scope["dept"] != "FIN" || api.content.Scope["cert"] != "C17" {
+	if api.parent != "fk3x9r2m5iv8" || len(api.content.Permissions) != 2 || api.content.Scope["dept"] != "FIN" || api.content.Scope["cert"] != "C17" {
 		t.Fatalf("parent=%q content=%#v", api.parent, api.content)
 	}
 	// Scope renders as an AND, because that is what it means: the constraints
@@ -84,7 +84,7 @@ func TestGrantsCreateParsesPermissionsAndScope(t *testing.T) {
 // list, which would read as "none".
 func TestGrantsGetRendersAComputedRootDistinctly(t *testing.T) {
 	api := &grantRecordAPI{}
-	code, out, _ := runGrant(t, api, "grants", "get", "G0", "--revision", "1")
+	code, out, _ := runGrant(t, api, "grants", "get", "fk3x9r2m0dq3", "--revision", "1")
 	if code != 0 {
 		t.Fatalf("exit=%d", code)
 	}
@@ -97,7 +97,7 @@ func TestGrantsGetRendersAComputedRootDistinctly(t *testing.T) {
 
 func TestGrantsListAndRevisionsRender(t *testing.T) {
 	api := &grantRecordAPI{}
-	if code, out, _ := runGrant(t, api, "grants", "list", "--roots"); code != 0 || !strings.Contains(out, "G0             enabled   root") {
+	if code, out, _ := runGrant(t, api, "grants", "list", "--roots"); code != 0 || !strings.Contains(out, "fk3x9r2m0dq3   enabled   root") {
 		t.Fatalf("exit=%d stdout=%q", code, out)
 	}
 	if api.filter.Root == nil || !*api.filter.Root {
@@ -109,7 +109,7 @@ func TestGrantsListAndRevisionsRender(t *testing.T) {
 	if api.filter.Root == nil || *api.filter.Root {
 		t.Fatalf("--children gave filter %#v", api.filter)
 	}
-	if code, out, _ := runGrant(t, api, "grants", "revisions", "G1"); code != 0 || !strings.Contains(out, "revision 2    2 permissions") {
+	if code, out, _ := runGrant(t, api, "grants", "revisions", "fk3x9r2m5iv8"); code != 0 || !strings.Contains(out, "revision 2    2 permissions") {
 		t.Fatalf("exit=%d stdout=%q", code, out)
 	}
 }
@@ -119,11 +119,11 @@ func TestGrantsListAndRevisionsRender(t *testing.T) {
 func TestGrantsRefusesMalformedInvocationsBeforeConnecting(t *testing.T) {
 	cases := map[string][]string{
 		"no verb":                 {"grants"},
-		"unknown verb":            {"grants", "explain", "G1"},
+		"unknown verb":            {"grants", "explain", "fk3x9r2m5iv8"},
 		"create without parent":   {"grants", "create", "--permissions", "hrms:a::read"},
-		"create with no source":   {"grants", "create", "--parent", "G1"},
-		"create with both":        {"grants", "create", "--parent", "G1", "--permissions", "hrms:a::read", "--role", "r", "--role-revision", "1"},
-		"create bad scope":        {"grants", "create", "--parent", "G1", "--permissions", "hrms:a::read", "--scope", "dept"},
+		"create with no source":   {"grants", "create", "--parent", "fk3x9r2m5iv8"},
+		"create with both":        {"grants", "create", "--parent", "fk3x9r2m5iv8", "--permissions", "hrms:a::read", "--role", "r", "--role-revision", "1"},
+		"create bad scope":        {"grants", "create", "--parent", "fk3x9r2m5iv8", "--permissions", "hrms:a::read", "--scope", "dept"},
 		"list roots and children": {"grants", "list", "--roots", "--children"},
 		"get without id":          {"grants", "get"},
 		"delete without id":       {"grants", "delete"},

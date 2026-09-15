@@ -32,9 +32,9 @@ func TestTeamCarriesAnIDAndASeparateName(t *testing.T) {
 	_, _, snapshot := seededTeams(t)
 	team, ok := snapshot.Teams[team1]
 	if !ok {
-		t.Fatalf("Team1 absent; have %v", snapshot.Teams)
+		t.Fatalf("fp8h2w6y5iv8 absent; have %v", snapshot.Teams)
 	}
-	if team.ID != team1 || team.Name != "Team1" || team.ParentID != rootTeam {
+	if team.ID != team1 || team.Name != "fp8h2w6y5iv8" || team.ParentID != rootTeam {
 		t.Fatalf("team = %#v", team)
 	}
 	// A root's parent is the empty string — the real value, not an omission.

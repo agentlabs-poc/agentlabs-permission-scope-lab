@@ -26,7 +26,7 @@ func (Scenarios) Run(ctx context.Context, area domain.Area, scenario, caseName, 
 		return domain.ErrUnsupported
 	}
 	fixture := TeamFINC17(area)
-	key := domain.GrantKey{ID: "G2", Revision: 1}
+	key := domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}
 	unsupported := fixture.Snapshot.Contents[key]
 	unsupported.Permissions = []string{PayslipDelete}
 	unsupported.Scope = map[string]string{}

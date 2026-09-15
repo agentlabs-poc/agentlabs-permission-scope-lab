@@ -14,7 +14,7 @@ func TestGrantStatusAdministrationRequiresCurrentDirectMembership(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	control := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	control := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
 	if err = admin.CheckGrantStatus(t.Context(), fixture.Snapshot, fixture.Issuer, control, time.Time{}); err != nil {
 		t.Fatal(err)
 	}
@@ -27,13 +27,13 @@ func TestGrantStatusAdministrationRequiresCurrentDirectMembership(t *testing.T) 
 func TestAssignmentStatusAdministrationIsSeparateAndExact(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := TeamFINC17(area)
-	fixture.Snapshot.Assignments["A2"] = fixture.Proposed
+	fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
 	admin, err := NewAssignmentStatusAdministration(area, fixture.Administration)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, assignment := range []domain.Assignment{
-		fixture.Snapshot.Assignments["A1"],
+		fixture.Snapshot.Assignments["fm5b7t4p5iv8"],
 		fixture.Proposed,
 	} {
 		assignment.Status = "disabled"

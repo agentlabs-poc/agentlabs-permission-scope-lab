@@ -21,6 +21,15 @@ func (s *Service) CreateAssignment(ctx context.Context, area domain.Area, identi
 	if err := area.Validate(); err != nil {
 		return fail(err)
 	}
+	// The id is issued, never accepted — the rule every other create already
+	// holds. It is the one field of an assignment a caller could otherwise
+	// choose, and a caller who can name a record can name one that collides.
+	// PublishRole's shape: issue when absent, reject when malformed.
+	if proposed.ID == "" {
+		proposed.ID = s.ids.Next()
+	} else if !codec.ValidRoleID(proposed.ID) {
+		return fail(domain.ErrMalformed)
+	}
 	if err := validateProposal(proposed); err != nil {
 		return fail(err)
 	}

@@ -42,11 +42,11 @@ func TestCreateAssignmentPersistsExactProposalAfterBothChecks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if receipt.AssignmentID != "A2" {
+	if receipt.AssignmentID != "fm5b7t4pan0d" {
 		t.Fatalf("receipt = %#v", receipt)
 	}
 	if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
-		got, ok := snapshot.Assignments["A2"]
+		got, ok := snapshot.Assignments["fm5b7t4pan0d"]
 		if !ok || got != fixture.Proposed {
 			t.Fatalf("persisted assignment = %#v, present=%v", got, ok)
 		}
@@ -73,8 +73,11 @@ func TestCreateAssignmentFailuresDoNotWrite(t *testing.T) {
 		{name: "source absent while administration present", change: func(c *lab.TeamFINC17Case) {
 			c.Snapshot.Memberships[0] = domain.Membership{TeamID: "fibggi2juubk", HumanID: "fi7io4lvyzcg"}
 		}, want: domain.ErrRejected, wantCount: 2},
-		{name: "malformed proposal", change: func(c *lab.TeamFINC17Case) {
-			c.Proposed.ID = ""
+		// An empty id is no longer malformed — it is the signal to issue one, the
+		// rule every other create already held. A supplied id that is not a
+		// base-36 Snowflake still is.
+		{name: "supplied id is not a snowflake", change: func(c *lab.TeamFINC17Case) {
+			c.Proposed.ID = "A-99"
 		}, want: domain.ErrMalformed, wantCount: 2},
 		{name: "unsupported user recipient", change: func(c *lab.TeamFINC17Case) {
 			c.Proposed.Recipient.Type = "user"
@@ -83,25 +86,25 @@ func TestCreateAssignmentFailuresDoNotWrite(t *testing.T) {
 			c.Proposed.Status = "disabled"
 		}, want: domain.ErrUnsupported, wantCount: 2},
 		{name: "selected content missing", change: func(c *lab.TeamFINC17Case) {
-			delete(c.Snapshot.Contents, domain.GrantKey{ID: "G2", Revision: 1})
+			delete(c.Snapshot.Contents, domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1})
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "parent support missing", change: func(c *lab.TeamFINC17Case) {
-			delete(c.Snapshot.Assignments, "A1")
+			delete(c.Snapshot.Assignments, "fm5b7t4p5iv8")
 		}, want: domain.ErrRejected, wantCount: 1},
 		{name: "child control disabled", change: func(c *lab.TeamFINC17Case) {
-			control := c.Snapshot.Controls["G2"]
+			control := c.Snapshot.Controls["fk3x9r2man0d"]
 			control.Status = "disabled"
-			c.Snapshot.Controls["G2"] = control
+			c.Snapshot.Controls["fk3x9r2man0d"] = control
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "child validity expired", change: func(c *lab.TeamFINC17Case) {
 			expires := now
-			key := domain.GrantKey{ID: "G2", Revision: 1}
+			key := domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}
 			content := c.Snapshot.Contents[key]
 			content.Validity = &domain.Validity{ExpiresAt: &expires}
 			c.Snapshot.Contents[key], c.Child = content, content
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "selected permissions exceed parent", change: func(c *lab.TeamFINC17Case) {
-			key := domain.GrantKey{ID: "G2", Revision: 1}
+			key := domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}
 			g := c.Snapshot.Contents[key]
 			g.Permissions = []string{lab.PayslipDelete}
 			c.Snapshot.Contents[key], c.Child = g, g
@@ -117,10 +120,10 @@ func TestCreateAssignmentFailuresDoNotWrite(t *testing.T) {
 		{name: "older selected revision has no latest fallback", change: func(c *lab.TeamFINC17Case) {
 			newer := c.Child
 			newer.Revision = 2
-			c.Snapshot.Contents[domain.GrantKey{ID: "G2", Revision: 2}] = newer
+			c.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 2}] = newer
 		}, want: domain.ErrRejected, wantCount: 2},
 		{name: "disabled duplicate still occupies binding", change: func(c *lab.TeamFINC17Case) {
-			c.Snapshot.Assignments["old-A2"] = domain.Assignment{Version: "1", ID: "old-A2", GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: "disabled"}
+			c.Snapshot.Assignments["fm5b7t4pdrs6"] = domain.Assignment{Version: "1", ID: "fm5b7t4pdrs6", GrantID: "fk3x9r2man0d", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: "disabled"}
 		}, want: domain.ErrConflict, wantCount: 3},
 	}
 	for _, test := range tests {
@@ -192,7 +195,7 @@ func TestAdministrativeSnapshotMutationCannotAlterBusinessEvidence(t *testing.T)
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
 	expires := time.Now().Add(time.Hour)
-	key := domain.GrantKey{ID: "G1", Revision: 1}
+	key := domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}
 	content := fixture.Snapshot.Contents[key]
 	content.Validity = &domain.Validity{ExpiresAt: &expires}
 	fixture.Snapshot.Contents[key] = content
@@ -209,11 +212,11 @@ func TestAdministrativeSnapshotMutationCannotAlterBusinessEvidence(t *testing.T)
 	}
 	provider.Close()
 	admin := mutatingAdministration{check: func(snapshot storage.Snapshot) error {
-		changed := snapshot.Controls["G1"]
+		changed := snapshot.Controls["fk3x9r2m5iv8"]
 		changed.Status = "disabled"
-		snapshot.Controls["G1"] = changed
+		snapshot.Controls["fk3x9r2m5iv8"] = changed
 		snapshot.Memberships[0].HumanID = "forged"
-		delete(snapshot.TrustedRoots, "G0")
+		delete(snapshot.TrustedRoots, "fk3x9r2m0dq3")
 		content := snapshot.Contents[key]
 		content.Permissions[0] = lab.PayslipDelete
 		*content.Validity.ExpiresAt = time.Time{}
@@ -232,7 +235,7 @@ func TestAdministrativeSnapshotMutationCannotAlterBusinessEvidence(t *testing.T)
 }
 
 func TestCreateAssignmentRechecksEligibilityImmediatelyBeforeWriteSet(t *testing.T) {
-	for _, grantID := range []string{"G2", "G1"} {
+	for _, grantID := range []string{"fk3x9r2man0d", "fk3x9r2m5iv8"} {
 		t.Run(grantID, func(t *testing.T) {
 			area, _ := domain.NewArea("tenant-fin", "hrms")
 			fixture := lab.TeamFINC17(area)

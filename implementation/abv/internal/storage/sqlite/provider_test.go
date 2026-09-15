@@ -291,7 +291,7 @@ func TestReadRejectsCanonicalPayloadAndIndexDisagreement(t *testing.T) {
 	// payload the codec refuses never reaches a caller. A blank permission is
 	// one PermissionList rejects.
 	bad := []byte(`{"permissions":[""],"scope":{}}`)
-	if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE key2='grant_revision' AND tenant_id=? AND key3=? AND key4='G1'`, bad, base.Area.TenantID(), base.Area.ApplicationID()); err != nil {
+	if _, err := p.db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE key2='grant_revision' AND tenant_id=? AND key3=? AND key4='fk3x9r2m5iv8'`, bad, base.Area.TenantID(), base.Area.ApplicationID()); err != nil {
 		t.Fatal(err)
 	}
 	var calls atomic.Int32
@@ -369,14 +369,14 @@ func TestFailureAfterFirstInsertRollsBackWholeWriteSetAndPersistsAfterReopen(t *
 	if _, err := p.db.ExecContext(t.Context(), `
 		CREATE TRIGGER reject_second_assignment
 		BEFORE INSERT ON abv_l1_records
-		WHEN NEW.key2 = 'assignment' AND NEW.key6 = 'second-user'
+		WHEN NEW.key2 = 'assignment' AND NEW.key6 = 'fn2q6v8sfs5i'
 		BEGIN
 			SELECT RAISE(ABORT, 'forced second-row rejection');
 		END`); err != nil {
 		t.Fatal(err)
 	}
-	first := domain.Assignment{Version: "1", ID: "inserted-first", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "first-user"}, Status: "enabled"}
-	second := domain.Assignment{Version: "1", ID: "blocked-second", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "second-user"}, Status: "enabled"}
+	first := domain.Assignment{Version: "1", ID: "fm5b7t4pgu6j", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8san0d"}, Status: "enabled"}
+	second := domain.Assignment{Version: "1", ID: "fm5b7t4phv7k", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8sfs5i"}, Status: "enabled"}
 	err = p.Update(t.Context(), base.Area, func(storage.Snapshot) (storage.WriteSet, error) {
 		return storage.WriteSet{NewAssignments: []domain.Assignment{first, second}}, nil
 	})
@@ -473,7 +473,7 @@ func TestReadTransactionPinsOneVersionAcrossCatalogAndAssignmentQueries(t *testi
 	callbackSawNew := make(chan bool, 1)
 	go func() {
 		readDone <- reader.Read(ctx, base.Area, func(snapshot storage.Snapshot) error {
-			_, exists := snapshot.Assignments["between-queries"]
+			_, exists := snapshot.Assignments["fm5b7t4piw8l"]
 			callbackSawNew <- exists
 			return nil
 		})
@@ -483,7 +483,7 @@ func TestReadTransactionPinsOneVersionAcrossCatalogAndAssignmentQueries(t *testi
 	case <-ctx.Done():
 		t.Fatalf("reader did not reach catalog boundary: %v", ctx.Err())
 	}
-	created := domain.Assignment{Version: "1", ID: "between-queries", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "between-user"}, Status: "enabled"}
+	created := domain.Assignment{Version: "1", ID: "fm5b7t4piw8l", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8siw8l"}, Status: "enabled"}
 	if err := writer.Update(ctx, base.Area, func(storage.Snapshot) (storage.WriteSet, error) {
 		return storage.WriteSet{NewAssignments: []domain.Assignment{created}}, nil
 	}); err != nil {
@@ -527,8 +527,8 @@ func contractFixture(t *testing.T) storage.Snapshot {
 }
 
 func minimalFixture(area domain.Area) storage.Snapshot {
-	content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{}}
-	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 1}: content}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
+	content := domain.GrantContent{Version: "1", GrantID: "fk3x9r2m5iv8", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{}}
+	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "fk3x9r2m5iv8", Revision: 1}: content}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 }
 
 func assertSQLiteAssignmentsAbsent(t *testing.T, p storage.Provider, area domain.Area, ids ...string) {

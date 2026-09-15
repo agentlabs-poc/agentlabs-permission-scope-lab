@@ -9,7 +9,7 @@ import (
 )
 
 // teamPayload is a team record's value column. The parent is state about the
-// team rather than part of its identity — Team2 moving from Team1 to RootTeam is
+// team rather than part of its identity — fp8h2w6yan0d moving from fp8h2w6y5iv8 to fp8h2w6ykxan is
 // the same team — so it lives here and not in a key slot. A slot would make a
 // re-parent a delete and an insert.
 //

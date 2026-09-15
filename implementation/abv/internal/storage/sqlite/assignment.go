@@ -2,12 +2,11 @@ package sqlite
 
 import (
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/codec"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"strings"
-	"unicode/utf8"
 )
 
 // An assignment is keyed by what it binds, not by its own identifier:
@@ -62,15 +61,22 @@ func decodeAssignment(grantID, recipientType, recipientID string, raw []byte) (d
 }
 
 func validAssignmentShape(a domain.Assignment) error {
-	blank := func(s string) bool { return strings.TrimSpace(s) == "" || !utf8.ValidString(s) }
 	if a.Version != "1" {
 		if a.Version == "" {
 			return domain.ErrMalformed
 		}
 		return domain.ErrUnsupported
 	}
-	if blank(a.ID) || blank(a.GrantID) || blank(a.Recipient.ID) || a.GrantRevision <= 0 {
+	if a.GrantRevision <= 0 {
 		return domain.ErrMalformed
+	}
+	// Every identifier here is a base-36 Snowflake: the assignment's own, the
+	// grant it binds, and the recipient — a team id or a human id, both already
+	// settled. Accepting anything else would let an illustrative id back in.
+	for _, id := range []string{a.ID, a.GrantID, a.Recipient.ID} {
+		if !codec.ValidRoleID(id) {
+			return domain.ErrMalformed
+		}
 	}
 	if a.Recipient.Type != "user" && a.Recipient.Type != "group" {
 		return domain.ErrMalformed

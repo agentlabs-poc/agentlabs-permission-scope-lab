@@ -21,7 +21,7 @@ func TestGrantRevisionInsertIsImmutableAndAreaBound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	next := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", RoleID: "fi9jvxobqsxs", RoleRevision: 1, Scope: map[string]string{"cert": "C17"}}
+	next := domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 2, ParentGrantID: "fk3x9r2m5iv8", RoleID: "fi9jvxobqsxs", RoleRevision: 1, Scope: map[string]string{"cert": "C17"}}
 	for _, area := range []domain.Area{a1, a2} {
 		candidate := next
 		if area == a2 {
@@ -42,7 +42,7 @@ func TestGrantRevisionInsertIsImmutableAndAreaBound(t *testing.T) {
 	}
 	defer p.Close()
 	if err = p.Read(t.Context(), a1, func(s storage.Snapshot) error {
-		if len(s.Contents) != 4 || s.Contents[domain.GrantKey{ID: "G2", Revision: 1}].Revision != 1 || !reflect.DeepEqual(s.Contents[domain.GrantKey{ID: "G2", Revision: 2}], next) || s.Controls["G2"].Status != "enabled" || len(s.Assignments) != 2 {
+		if len(s.Contents) != 4 || s.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}].Revision != 1 || !reflect.DeepEqual(s.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 2}], next) || s.Controls["fk3x9r2man0d"].Status != "enabled" || len(s.Assignments) != 2 {
 			t.Fatalf("unexpected snapshot: %#v", s)
 		}
 		return nil
@@ -59,7 +59,7 @@ func TestGrantRevisionRejectsInvalidOrForgedWritesAtomically(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer p.Close()
-	valid := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"cert": "C17"}}
+	valid := domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 2, ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"cert": "C17"}}
 	cases := []struct {
 		name string
 		make func(storage.Snapshot) storage.WriteSet
@@ -81,13 +81,13 @@ func TestGrantRevisionRejectsInvalidOrForgedWritesAtomically(t *testing.T) {
 		}},
 		{"root", func(storage.Snapshot) storage.WriteSet {
 			x := valid
-			x.GrantID = "G0"
+			x.GrantID = "fk3x9r2m0dq3"
 			x.ParentGrantID = ""
 			return storage.WriteSet{NewGrantRevision: &x}
 		}},
 		{"changed parent", func(storage.Snapshot) storage.WriteSet {
 			x := valid
-			x.ParentGrantID = "G0"
+			x.ParentGrantID = "fk3x9r2m0dq3"
 			return storage.WriteSet{NewGrantRevision: &x}
 		}},
 		{"unknown permission", func(s storage.Snapshot) storage.WriteSet {
@@ -134,7 +134,7 @@ func TestGrantRevisionRejectsInvalidOrForgedWritesAtomically(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := p.Read(t.Context(), area, func(s storage.Snapshot) error {
-		if _, ok := s.Contents[domain.GrantKey{ID: "G2", Revision: 2}]; ok {
+		if _, ok := s.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 2}]; ok {
 			t.Fatal("partial insert")
 		}
 		return nil
@@ -151,7 +151,7 @@ func TestGrantRevisionConcurrentDuplicateHasOneWinner(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer p.Close()
-	next := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"cert": "C17"}}
+	next := domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 2, ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"cert": "C17"}}
 	errs := make(chan error, 2)
 	var wg sync.WaitGroup
 	for range 2 {

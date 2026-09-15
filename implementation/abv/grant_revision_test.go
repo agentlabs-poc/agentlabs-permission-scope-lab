@@ -24,10 +24,10 @@ func (publicRevisionAdmin) CheckGrantRevisionPublication(context.Context, abv.Ev
 func TestFacadePublishGrantRevisionPersistsOnlyNewContent(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	f := lab.TeamFINC17(area)
-	g1 := f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
+	g1 := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
 	g1.Permissions, g1.RoleID, g1.RoleRevision = nil, "fi9jvxobqsxs", 1
-	f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g1
-	f.Snapshot.Controls["G2"] = domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = g1
+	f.Snapshot.Controls["fk3x9r2man0d"] = domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
 	before := f.Snapshot
 	path := t.TempDir() + "/authority.db"
 	p, err := sqlite.CreateFixture(t.Context(), path, []storage.Snapshot{f.Snapshot})
@@ -38,12 +38,12 @@ func TestFacadePublishGrantRevisionPersistsOnlyNewContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	candidate := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", RoleID: "fi9jvxobqsxs", RoleRevision: 1, Scope: map[string]string{"cert": "C17", "dept": "ENG"}}
-	got, err := facade.PublishGrantRevision(t.Context(), area, f.Issuer, "A1", candidate)
+	candidate := domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 2, ParentGrantID: "fk3x9r2m5iv8", RoleID: "fi9jvxobqsxs", RoleRevision: 1, Scope: map[string]string{"cert": "C17", "dept": "ENG"}}
+	got, err := facade.PublishGrantRevision(t.Context(), area, f.Issuer, "fm5b7t4p5iv8", candidate)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.GrantID != "G2" || got.Revision != 2 {
+	if got.GrantID != "fk3x9r2man0d" || got.Revision != 2 {
 		t.Fatalf("bad content: %#v", got)
 	}
 	if err = facade.Close(); err != nil {
@@ -56,12 +56,12 @@ func TestFacadePublishGrantRevisionPersistsOnlyNewContent(t *testing.T) {
 	}
 	defer reopened.Close()
 	err = reopened.Read(t.Context(), area, func(after storage.Snapshot) error {
-		if !reflect.DeepEqual(after.Contents[domain.GrantKey{ID: "G2", Revision: 1}], before.Contents[domain.GrantKey{ID: "G2", Revision: 1}]) ||
-			!reflect.DeepEqual(after.Contents[domain.GrantKey{ID: "G2", Revision: 2}], candidate) ||
+		if !reflect.DeepEqual(after.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}], before.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}]) ||
+			!reflect.DeepEqual(after.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 2}], candidate) ||
 			!reflect.DeepEqual(after.Assignments, before.Assignments) || !reflect.DeepEqual(after.Controls, before.Controls) {
 			t.Fatalf("publication changed established state: %#v", after)
 		}
-		if after.Assignments["A1"].GrantRevision != 1 || after.Controls["G2"].Status != "disabled" {
+		if after.Assignments["fm5b7t4p5iv8"].GrantRevision != 1 || after.Controls["fk3x9r2man0d"].Status != "disabled" {
 			t.Fatal("publication activated or adopted candidate")
 		}
 		return nil

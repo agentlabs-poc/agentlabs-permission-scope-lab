@@ -19,11 +19,11 @@ func TestATenantsTeamsAreVisibleInEveryApplication(t *testing.T) {
 		s.Area = area
 		s.Catalog.ApplicationID = area.ApplicationID()
 		s.Teams = map[string]domain.Team{
-			"fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1"},
+			"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8"},
 		}
 		s.Memberships = []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}
 		if area.TenantID() == "globex" {
-			s.Teams = map[string]domain.Team{"fibggi2juxhc": {ID: "fibggi2juxhc", Name: "OtherTeam"}}
+			s.Teams = map[string]domain.Team{"fibggi2juxhc": {ID: "fibggi2juxhc", Name: "fp8h2w6yp2fs"}}
 			s.Memberships = []domain.Membership{{TeamID: "fibggi2juxhc", HumanID: "fi7io4lvjwu8"}}
 		}
 		return s

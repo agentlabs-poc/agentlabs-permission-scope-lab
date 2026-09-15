@@ -39,7 +39,7 @@ The role fold settled a single immutable record: `key4`=id, `key5`=revision. The
 grant looks the same and is not.
 
 **A grant carries a mutable status that belongs to the grant, not to any
-revision.** Disabling G1 makes authority through G1 ineffective *across every
+revision.** Disabling fk3x9r2m5iv8 makes authority through fk3x9r2m5iv8 ineffective *across every
 revision and assignment* — so the status cannot live on a revision record, which
 is immutable by contract, and cannot be duplicated across revisions, which would
 let two revisions of one grant disagree about whether it is enabled.
@@ -65,6 +65,11 @@ different record?*
 
 ## 2 · Canonical JSON — the approved wire forms
 
+> **These are our records in the handbook's shape, not quotations of it.** The
+> handbook's own excerpts use illustrative identifiers — `G1`, `A1` — and `docs/`
+> keeps them. Every identifier Auth-AL issues is a base-36 Snowflake, so the
+> examples here carry real ones.
+
 Unchanged from `grant-record-reference.md`. Reproduced so the mapping below has
 something to map.
 
@@ -73,7 +78,7 @@ something to map.
 ```json
 {
   "version": "1",
-  "id": "G1",
+  "id": "fk3x9r2m5iv8",
   "status": "enabled"
 }
 ```
@@ -83,9 +88,9 @@ something to map.
 ```json
 {
   "version": "1",
-  "grant_id": "G1",
+  "grant_id": "fk3x9r2m5iv8",
   "revision": 2,
-  "parent_grant_id": "G0",
+  "parent_grant_id": "fk3x9r2m0dq3",
   "permissions": ["hrms:payroll:payslip::read", "hrms:payroll:payslip::write"],
   "scope": {"dept": "FIN"}
 }
@@ -97,9 +102,9 @@ fields, never a mixture.
 ```json
 {
   "version": "1",
-  "grant_id": "G2",
+  "grant_id": "fk3x9r2man0d",
   "revision": 1,
-  "parent_grant_id": "G1",
+  "parent_grant_id": "fk3x9r2m5iv8",
   "role_id": "fi8c8111kow0",
   "role_revision": 1,
   "scope": {"dept": "FIN"}
@@ -110,30 +115,30 @@ fields, never a mixture.
 
 ## 3 · The id — issuance is strict, acceptance is not yet
 
-`G1`, `G0`, `G-17` are the handbook's *illustrative* ids, the way `maya` and
+`fk3x9r2m5iv8`, `fk3x9r2m0dq3`, `G-17` are the handbook's *illustrative* ids, the way `maya` and
 `Team1` were before the sweep. Every id Auth-AL issues is a base-36 Snowflake —
 settled for roles, teams and human ids — and a grant id is issued by Auth-AL.
 
 ```
 CreateGrant issues   "id": "fy85p22i8glc"
-the corpus holds     "id": "G0"
+the corpus holds     "id": "fk3x9r2m0dq3"
 ```
 
 **What shipped splits the two.** `CreateGrant` issues a Snowflake and never
 accepts a caller's identifier. But `insertGrantHead` admits any non-blank
 identifier, deliberately: the fixtures and the handbook's worked examples use
-`G0`/`G1`/`G2`, and enforcing the alphabet in storage would reject the corpus
+`fk3x9r2m0dq3`/`fk3x9r2m5iv8`/`fk3x9r2man0d`, and enforcing the alphabet in storage would reject the corpus
 before the sweep that converts it. **Issuance strict, acceptance after the
 sweep** — and the sweep is not done.
 
-**It is a sweep, not a rename.** `G0`/`G1` appear across fixtures, scenarios,
+**It is a sweep, not a rename.** `fk3x9r2m0dq3`/`fk3x9r2m5iv8` appear across fixtures, scenarios,
 tests and demo scripts, and the last such sweep touched 69 files rather than the
 23 estimated. Two specific traps from that one, recorded here so they are not
 rediscovered:
 
-- **single-quoted SQL literals escaped the first pass**, so a `WHERE grant_id='G1'`
+- **single-quoted SQL literals escaped the first pass**, so a `WHERE grant_id='fk3x9r2m5iv8'`
   matched nothing and silently turned a negative test green;
-- the handbook's own prose keeps `G1` and must not be rewritten — `docs/` is
+- the handbook's own prose keeps `fk3x9r2m5iv8` and must not be rewritten — `docs/` is
   untouched, and the illustrative id there stays illustrative.
 
 The application slug stays a slug for the reason the registry charter gives: it
@@ -190,7 +195,7 @@ so `0000000010` must sort after `0000000009`.
                                     key3           = hrms
   "grant_id":  "fi8c81…"      ──▶   key4           = fi8c8111kow0
   "revision":  2              ──▶   key5           = 0000000002
-  "parent_grant_id": "G0"     ──▶   value.parent_grant_id
+  "parent_grant_id": "fk3x9r2m0dq3"     ──▶   value.parent_grant_id
   "permissions": [ 2 items ]  ──▶   value.permissions
   "scope":     {"dept":"FIN"} ──▶   value.scope
   "version":   "1"            ──▶   see §7 — the open question comes due here

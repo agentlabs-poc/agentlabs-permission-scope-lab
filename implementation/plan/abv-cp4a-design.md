@@ -13,8 +13,8 @@ facade, administrative adapter, ABV checks and transactional provider. The
 tenant/application pair remains mandatory outer context. Assignment controls,
 revision adoption, content and parentage remain unchanged by these operations.
 
-Disabling G2 makes dependent authority ineffective without writing disabled
-flags to descendants. Validly enabling G2 can restore still-enabled descendants
+Disabling fk3x9r2man0d makes dependent authority ineffective without writing disabled
+flags to descendants. Validly enabling fk3x9r2man0d can restore still-enabled descendants
 when their remaining requirements hold; explicitly disabled records stay
 disabled. A shared grant cannot be enabled only for recipients whose required
 checks happened to succeed. No automatic upgrades, parent replacement or repair.
@@ -86,42 +86,42 @@ above and is retained to preserve the reasoning trail.
 The records below use approved core formats. Tenant `acme` and application
 `hrms` are implied outer context here, not scope fields.
 
-G2 has immutable revision 1, derived from G1. Its current grant-wide control:
+fk3x9r2man0d has immutable revision 1, derived from fk3x9r2m5iv8. Its current grant-wide control:
 
 ```json
-{"version":"1","id":"G2","status":"disabled"}
+{"version":"1","id":"fk3x9r2man0d","status":"disabled"}
 ```
 
 Two assignments retain that same revision:
 
 ```json
-{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}
+{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}
 ```
 
 ```json
-{"version":"1","id":"A3","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team3"},"status":"disabled"}
+{"version":"1","id":"fm5b7t4pfs5i","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"Team3"},"status":"disabled"}
 ```
 
-- Team2 is under Team1. Team1 has valid assigned G1 support; A2's required route
-  would be valid if G2 were enabled.
-- Team3 is under TeamX. TeamX's required G1 assignment has been removed after
-  the applicable structural safeguards. A3 remains stored and explicitly disabled.
-- An otherwise authorized administrator requests global enablement of G2.
+- Team2 is under Team1. Team1 has valid assigned fk3x9r2m5iv8 support; fm5b7t4pan0d's required route
+  would be valid if fk3x9r2man0d were enabled.
+- Team3 is under TeamX. TeamX's required fk3x9r2m5iv8 assignment has been removed after
+  the applicable structural safeguards. fm5b7t4pfs5i remains stored and explicitly disabled.
+- An otherwise authorized administrator requests global enablement of fk3x9r2man0d.
 
-**Question:** must A3's missing parent support keep G2 disabled globally, even
-though A3 is explicitly disabled and the operation will not enable A3?
+**Question:** must fm5b7t4pfs5i's missing parent support keep fk3x9r2man0d disabled globally, even
+though fm5b7t4pfs5i is explicitly disabled and the operation will not enable fm5b7t4pfs5i?
 
-**Recommendation, not yet approved:** retain A3 in the inspected dependency
+**Recommendation, not yet approved:** retain fm5b7t4pfs5i in the inspected dependency
 inventory but do not require its inactive route to become eligible merely to
-enable G2. Validate every route required for this operation; A2 may resume only
-if all those checks pass. A3 stays disabled, and a later explicit enable of A3
+enable fk3x9r2man0d. Validate every route required for this operation; fm5b7t4pan0d may resume only
+if all those checks pass. fm5b7t4pfs5i stays disabled, and a later explicit enable of fm5b7t4pfs5i
 must fail until its actual parent support is valid. Do not treat an enabled
 assignment with broken support as equivalent to an explicitly disabled one.
 
-**Alternative:** every retained assignment, including A3, must pass current
-support validation before G2 can be enabled. This keeps the global enable check
+**Alternative:** every retained assignment, including fm5b7t4pfs5i, must pass current
+support validation before fk3x9r2man0d can be enabled. This keeps the global enable check
 stricter, but makes a deliberately disabled route block otherwise valid use of
-the shared grant. Neither option permits partial changes to G2's global status.
+the shared grant. Neither option permits partial changes to fk3x9r2man0d's global status.
 
 ### Why a decision is required
 
@@ -144,10 +144,10 @@ either silently.
 
 - Tenant/application isolation: unchanged; no support from another Area.
 - Non-expansion: permissions, scope and adopted revisions are not edited.
-- Explicit controls: A3 stays disabled; no automatic enablement or repair.
-- Parent lineage: later activation of A3 still requires its actual valid support.
+- Explicit controls: fm5b7t4pfs5i stays disabled; no automatic enablement or repair.
+- Parent lineage: later activation of fm5b7t4pfs5i still requires its actual valid support.
 - Two gates: administrative authority alone cannot bypass enablement validation.
-- Global status: G2 changes once or not at all; there is no per-recipient grant status.
+- Global status: fk3x9r2man0d changes once or not at all; there is no per-recipient grant status.
 - Canonical restraint: this is a proposed validation-set rule, not a new field,
   new status, permission name or grant format.
 
@@ -157,10 +157,10 @@ either silently.
 
 | Case | Required result |
 |---|---|
-| Disable G2 while G3 remains enabled | G3's dependent authority is ineffective; no descendant status rewrite. |
-| Restore G2 with valid required support | Otherwise eligible, still-enabled descendants may resume. |
-| Descendant grant or assignment explicitly disabled | Remains explicitly disabled after G2 restoration. |
-| Shared grant has a failing required enable check | Whole enable fails; G2 remains disabled for all recipients. |
+| Disable fk3x9r2man0d while fk3x9r2mfs5i remains enabled | fk3x9r2mfs5i's dependent authority is ineffective; no descendant status rewrite. |
+| Restore fk3x9r2man0d with valid required support | Otherwise eligible, still-enabled descendants may resume. |
+| Descendant grant or assignment explicitly disabled | Remains explicitly disabled after fk3x9r2man0d restoration. |
+| Shared grant has a failing required enable check | Whole enable fails; fk3x9r2man0d remains disabled for all recipients. |
 | Required support missing, expired, outside Area or unsupported | No successful enable from incomplete or invalid proof. |
 | Revision 2 published while an assignment adopts revision 1 | Enabling does not change that adoption. |
 | Administration missing | No control write, even if business source authority exists. |

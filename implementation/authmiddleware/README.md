@@ -37,7 +37,7 @@ go run ./cmd/abv assign --db /tmp/authority.db --tenant acme --app hrms --fixtur
 /tmp/auth-evaluate --db /tmp/authority.db --tenant acme --application hrms --human nutan --permission hrms:payroll:payslip::read --boundary dept=FIN --boundary cert=C17
 ```
 
-Expected allow: `{"version":"1","decision":"allow","grant_ids":["G0","G1","G2"]}`.
+Expected allow: `{"version":"1","decision":"allow","grant_ids":["fk3x9r2m0dq3","fk3x9r2m5iv8","fk3x9r2man0d"]}`.
 Changing FIN to ENG or C17 to C18 denies. `--all dept` also denies this route.
 Grant/assignment changes are observed on the next read; no allow cache is used.
 These decisions do not prove certificate ownership: the HTTP demo below shows

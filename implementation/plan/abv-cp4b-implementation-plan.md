@@ -70,14 +70,14 @@ path := t.TempDir() + "/authority.db"
 p, err := factory.Create(t.Context(), path, []storage.Snapshot{seeded})
 if err != nil { t.Fatal(err) }
 defer p.Close()
-before := seeded.Assignments["A1"]
+before := seeded.Assignments["fm5b7t4p5iv8"]
 after := before
 after.Status = "disabled"
 err = p.Update(t.Context(), seeded.Area, func(storage.Snapshot) (storage.WriteSet, error) {
     return storage.WriteSet{AssignmentStatusChange: &storage.AssignmentStatusChange{Before: before, After: after}}, nil
 })
 if err != nil { t.Fatal(err) }
-seeded.Assignments["A1"] = after
+seeded.Assignments["fm5b7t4p5iv8"] = after
 assertSnapshot(t, p, seeded)
 ```
 
@@ -114,12 +114,12 @@ existing private `validateTeamChain`, `assignmentContent`, `maxChainSteps`.
 **Produces:** DependentTeamAssignments; no mutation or administrative decision.
 
 - [x] Write a failing external `lineage_test` case using `lab.TeamFINC17(area)`
-  with A2 inserted, proving A1 discovers A2:
+  with fm5b7t4pan0d inserted, proving fm5b7t4p5iv8 discovers fm5b7t4pan0d:
 
 ```go
 fixture := lab.TeamFINC17(area)
-fixture.Snapshot.Assignments["A2"] = fixture.Proposed
-got, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "A1")
+fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
+got, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "fm5b7t4p5iv8")
 if err != nil || len(got) != 1 || got[0] != fixture.Proposed {
     t.Fatalf("dependents = %#v, %v", got, err)
 }
@@ -171,7 +171,7 @@ ResolveParentTeam, validation.Narrow and eligibleRoute.
 - [x] Add a failing public compatibility test using existing externalAdministration:
 
 ```go
-got, err := facade.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A1", "disabled")
+got, err := facade.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "fm5b7t4p5iv8", "disabled")
 if !errors.Is(err, domain.ErrUnsupported) || got != (domain.Assignment{}) {
     t.Fatalf("old adapter gained assignment control: %#v, %v", got, err)
 }
@@ -223,8 +223,8 @@ focused tests; modify `application/api.go`, `cli/run.go`, `cli/scenario.go`,
 **Produces:** optional AssignmentStatusAPI and commands:
 
 ```sh
-abv assignment disable A2 --db PATH --tenant acme --app hrms --fixture-context maya-team1
-abv assignment enable A2 --db PATH --tenant acme --app hrms --fixture-context maya-team1
+abv assignment disable fm5b7t4pan0d --db PATH --tenant acme --app hrms --fixture-context maya-team1
+abv assignment enable fm5b7t4pan0d --db PATH --tenant acme --app hrms --fixture-context maya-team1
 ```
 
 - [x] Write failing CLI tests for exact ID/status/context forwarding, missing
@@ -241,7 +241,7 @@ abv assignment enable A2 --db PATH --tenant acme --app hrms --fixture-context ma
   construct its embedded adapter through `NewGrantStatusAdministration` and wire
   the new wrapper in `lab.Connect`.
   Its separate assignment-status premise permits direct Maya, exact Area, current
-  AssignmentAdmins membership and only the existing A1/G1/Team1 or A2/G2/Team2
+  AssignmentAdmins membership and only the existing fm5b7t4p5iv8/fk3x9r2m5iv8/Team1 or fm5b7t4pan0d/fk3x9r2man0d/Team2
   identities, with unchanged adopted revision and enabled/disabled status. The
   stored current revision is validated by ABV, not pinned by the lab premise.
   This is a separately declared testing capability, not authority inherited from
@@ -251,11 +251,11 @@ abv assignment enable A2 --db PATH --tenant acme --app hrms --fixture-context ma
 - [x] Extend the existing compiled-process scenario without adding/resetting seeds:
 
 ```text
-seed → create A2 → disable A1 rejected
-disable A2 → disable A1 → enable A2 rejected
-enable A1 → inspect A2 still disabled → enable A2
-reopen A1/A2 and assert exact original fields except explicit status changes
-inspect G1/G2 controls and contents unchanged; diagnosis succeeds again
+seed → create fm5b7t4pan0d → disable fm5b7t4p5iv8 rejected
+disable fm5b7t4pan0d → disable fm5b7t4p5iv8 → enable fm5b7t4pan0d rejected
+enable fm5b7t4p5iv8 → inspect fm5b7t4pan0d still disabled → enable fm5b7t4pan0d
+reopen fm5b7t4p5iv8/fm5b7t4pan0d and assert exact original fields except explicit status changes
+inspect fk3x9r2m5iv8/fk3x9r2man0d controls and contents unchanged; diagnosis succeeds again
 ```
 
 - [x] Run full Go suite, full race suite, vet, binary build, import-boundary checks,
@@ -270,7 +270,7 @@ inspect G1/G2 controls and contents unchanged; diagnosis succeeds again
 Provider Before/After is consumed only by the coordinator. Structural discovery
 does not grant authority and does not use current eligibility to erase bindings.
 Facade/admin/application signatures match the spec; output reuses Assignment.
-The lab demonstrates bottom-up order with existing A1/A2, so no fixture migration
+The lab demonstrates bottom-up order with existing fm5b7t4p5iv8/fm5b7t4pan0d, so no fixture migration
 or unrelated source-selection subsystem is needed. The branch/failure matrix is
 spread across pure discovery, protected operations and real CLI persistence.
 

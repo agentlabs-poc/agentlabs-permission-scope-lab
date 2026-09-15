@@ -99,8 +99,8 @@ Request body reuses the approved Q-107 assignment shape, not a new envelope:
 ```json
 {
   "version": "1",
-  "id": "A2",
-  "grant_id": "G2",
+  "id": "fm5b7t4pan0d",
+  "grant_id": "fk3x9r2man0d",
   "grant_revision": 2,
   "recipient": {"type": "group", "id": "Team2"},
   "status": "enabled"
@@ -109,10 +109,10 @@ Request body reuses the approved Q-107 assignment shape, not a new envelope:
 
 `auth:assignment::create` is already illustrated in Q-093. Its administrative
 scope must permit assignment to Team2. The body does not establish Maya's identity
-or prove she has G2's underlying authority. The trusted adapter establishes Maya;
+or prove she has fk3x9r2man0d's underlying authority. The trusted adapter establishes Maya;
 Auth checks her administrative grant; ABV checks registration, latest selection,
 actual required supporting team route, her source authority and all relevant
-constraints in the protected transaction. It writes A2 only after all pass.
+constraints in the protected transaction. It writes fm5b7t4pan0d only after all pass.
 
 The body example does not settle nested endpoint-input notation or response JSON.
 Do not add unapproved `inputs` syntax for `recipient.id`: settle its exact binding

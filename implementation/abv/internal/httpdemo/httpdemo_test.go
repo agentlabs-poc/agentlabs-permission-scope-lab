@@ -71,7 +71,7 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 		t.Fatalf("ENG record changed: %#v, ok=%v", got, ok)
 	}
 
-	before := fixture.Snapshot.Controls["G1"]
+	before := fixture.Snapshot.Controls["fk3x9r2m5iv8"]
 	after := before
 	after.Status = "disabled"
 	if err := provider.Update(t.Context(), area, func(storage.Snapshot) (storage.WriteSet, error) {
@@ -127,19 +127,19 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 	}
 
 	assertAccess(http.StatusOK)
-	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "disabled"); err != nil {
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "fm5b7t4pan0d", "disabled"); err != nil {
 		t.Fatal(err)
 	}
 	assertAccess(http.StatusForbidden)
-	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "A2", "enabled"); err != nil {
+	if _, err := assignmentStatus.SetAssignmentStatus(t.Context(), area, fixtureContext, "fm5b7t4pan0d", "enabled"); err != nil {
 		t.Fatal(err)
 	}
 	assertAccess(http.StatusOK)
-	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}); err != nil {
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}); err != nil {
 		t.Fatal(err)
 	}
 	assertAccess(http.StatusForbidden)
-	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "G2", Status: "enabled"}); err != nil {
+	if _, err := grantStatus.SetGrantStatus(t.Context(), area, fixtureContext, domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "enabled"}); err != nil {
 		t.Fatal(err)
 	}
 	assertAccess(http.StatusOK)
@@ -149,7 +149,7 @@ func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 	store := NewStore(DefaultRecords())
 	evaluator := evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
 		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipWrite,
-		GrantIDs: []string{"G1"}, Predicates: []authmiddleware.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}},
+		GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []authmiddleware.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}},
 	}}})
 	handler, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {

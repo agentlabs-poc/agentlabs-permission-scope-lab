@@ -19,8 +19,8 @@ type assignmentAPI interface {
 	Assign(context.Context, domain.Area, domain.FixtureContext, []byte) (domain.Receipt, error)
 }
 
-// The lab's publication gate admits exactly one route — Maya publishing a G2
-// revision through A1 — so the upgrade test works on G2, which is also the
+// The lab's publication gate admits exactly one route — Maya publishing a fk3x9r2man0d
+// revision through fm5b7t4p5iv8 — so the upgrade test works on fk3x9r2man0d, which is also the
 // realistic shape: the grant being amended is the one below the publisher's own.
 var grantPublisher = domain.FixtureContext{Name: "maya-grant-publisher"}
 
@@ -46,27 +46,27 @@ func openAssignmentLab(t *testing.T) (assignmentAPI, domain.Area) {
 	return writer, area
 }
 
-// The fixture holds A0 (G0 to RootTeam) and A1 (G1 to Team1).
+// The fixture holds fm5b7t4p0dq3 (fk3x9r2m0dq3 to fp8h2w6ykxan) and fm5b7t4p5iv8 (fk3x9r2m5iv8 to fp8h2w6y5iv8).
 func TestGetAndListAssignmentsAnswerBothDirections(t *testing.T) {
 	api, area := openAssignmentLab(t)
 
-	got, err := api.GetAssignment(t.Context(), area, teamFixture, "A1")
-	if err != nil || got.GrantID != "G1" || got.Recipient.ID != "fibggi2juubk" || got.GrantRevision != 1 {
-		t.Fatalf("A1 = %#v err=%v", got, err)
+	got, err := api.GetAssignment(t.Context(), area, teamFixture, "fm5b7t4p5iv8")
+	if err != nil || got.GrantID != "fk3x9r2m5iv8" || got.Recipient.ID != "fibggi2juubk" || got.GrantRevision != 1 {
+		t.Fatalf("fm5b7t4p5iv8 = %#v err=%v", got, err)
 	}
 	if _, err := api.GetAssignment(t.Context(), area, teamFixture, "absent"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("absent gave %v, want ErrNotFound", err)
 	}
 
 	// Which recipients hold this grant.
-	byGrant, err := api.ListAssignments(t.Context(), area, teamFixture, domain.AssignmentFilter{GrantID: "G1"})
-	if err != nil || byGrant.Total != 1 || byGrant.Assignments[0].ID != "A1" {
+	byGrant, err := api.ListAssignments(t.Context(), area, teamFixture, domain.AssignmentFilter{GrantID: "fk3x9r2m5iv8"})
+	if err != nil || byGrant.Total != 1 || byGrant.Assignments[0].ID != "fm5b7t4p5iv8" {
 		t.Fatalf("by grant = %#v total=%d err=%v", byGrant.Assignments, byGrant.Total, err)
 	}
 	// Which grants this recipient holds.
 	team1 := domain.Recipient{Type: "group", ID: "fibggi2juubk"}
 	byRecipient, err := api.ListAssignments(t.Context(), area, teamFixture, domain.AssignmentFilter{Recipient: &team1})
-	if err != nil || byRecipient.Total != 1 || byRecipient.Assignments[0].GrantID != "G1" {
+	if err != nil || byRecipient.Total != 1 || byRecipient.Assignments[0].GrantID != "fk3x9r2m5iv8" {
 		t.Fatalf("by recipient = %#v total=%d err=%v", byRecipient.Assignments, byRecipient.Total, err)
 	}
 
@@ -74,7 +74,7 @@ func TestGetAndListAssignmentsAnswerBothDirections(t *testing.T) {
 	if _, err := api.ListAssignments(t.Context(), area, teamFixture, domain.AssignmentFilter{}); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatalf("unfiltered gave %v, want ErrMalformed", err)
 	}
-	if _, err := api.ListAssignments(t.Context(), area, teamFixture, domain.AssignmentFilter{GrantID: "G1", Recipient: &team1}); !errors.Is(err, domain.ErrMalformed) {
+	if _, err := api.ListAssignments(t.Context(), area, teamFixture, domain.AssignmentFilter{GrantID: "fk3x9r2m5iv8", Recipient: &team1}); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatalf("both filters gave %v, want ErrMalformed", err)
 	}
 }
@@ -85,34 +85,34 @@ func TestGetAndListAssignmentsAnswerBothDirections(t *testing.T) {
 func TestUpgradeAssignmentTakesTheLatestAndNeverAnIntermediate(t *testing.T) {
 	api, area := openAssignmentLab(t)
 
-	// Assign G2 revision 1 to Team2 first, so the assignment exists before the
+	// Assign fk3x9r2man0d revision 1 to fp8h2w6yan0d first, so the assignment exists before the
 	// revisions it will later be upgraded past. That is the real sequence.
 	if _, err := api.Assign(t.Context(), area, domain.FixtureContext{Name: "maya-team1"},
-		[]byte(`{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`)); err != nil {
+		[]byte(`{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`)); err != nil {
 		t.Fatal(err)
 	}
 
 	for _, revision := range []int64{2, 3} {
 		content, err := json.Marshal(domain.GrantContent{
-			Version: "1", GrantID: "G2", Revision: revision, ParentGrantID: "G1",
+			Version: "1", GrantID: "fk3x9r2man0d", Revision: revision, ParentGrantID: "fk3x9r2m5iv8",
 			Permissions: []string{payslipRead},
 			Scope:       map[string]string{"cert": "C17"},
 		})
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, err := api.PublishGrantRevision(t.Context(), area, grantPublisher, "A1", content); err != nil {
+		if _, err := api.PublishGrantRevision(t.Context(), area, grantPublisher, "fm5b7t4p5iv8", content); err != nil {
 			t.Fatalf("publishing revision %d: %v", revision, err)
 		}
 	}
 
 	// Publication alone does not move the assignment — Q-102.
-	before, err := api.GetAssignment(t.Context(), area, teamFixture, "A2")
+	before, err := api.GetAssignment(t.Context(), area, teamFixture, "fm5b7t4pan0d")
 	if err != nil || before.GrantRevision != 1 {
 		t.Fatalf("publication moved the adoption: %#v err=%v", before, err)
 	}
 
-	after, err := api.UpgradeAssignment(t.Context(), area, teamFixture, "A2")
+	after, err := api.UpgradeAssignment(t.Context(), area, teamFixture, "fm5b7t4pan0d")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,14 +123,14 @@ func TestUpgradeAssignmentTakesTheLatestAndNeverAnIntermediate(t *testing.T) {
 	if after.ID != before.ID || after.GrantID != before.GrantID || after.Recipient != before.Recipient || after.Status != before.Status {
 		t.Fatalf("the upgrade changed more than the revision: %#v -> %#v", before, after)
 	}
-	reread, err := api.GetAssignment(t.Context(), area, teamFixture, "A2")
+	reread, err := api.GetAssignment(t.Context(), area, teamFixture, "fm5b7t4pan0d")
 	if err != nil || reread.GrantRevision != 3 {
 		t.Fatalf("the upgrade did not persist: %#v err=%v", reread, err)
 	}
 
 	// Upgrading again is a no-op, not a conflict: the caller asked for the
 	// latest and the latest is what it has.
-	again, err := api.UpgradeAssignment(t.Context(), area, teamFixture, "A2")
+	again, err := api.UpgradeAssignment(t.Context(), area, teamFixture, "fm5b7t4pan0d")
 	if err != nil || again.GrantRevision != 3 {
 		t.Fatalf("re-upgrade gave %#v err=%v, want a no-op", again, err)
 	}
@@ -143,20 +143,20 @@ func TestUpgradeAssignmentTakesTheLatestAndNeverAnIntermediate(t *testing.T) {
 func TestDeleteAssignmentRefusesWhileADependentRouteRestsOnIt(t *testing.T) {
 	api, area := openAssignmentLab(t)
 
-	// A0 carries G0, the root. A1's grant G1 has G0 as its parent, so A0 is the
-	// support underneath A1 — removing it would cut the route from below.
-	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "A0"); !errors.Is(err, domain.ErrConflict) {
+	// fm5b7t4p0dq3 carries fk3x9r2m0dq3, the root. fm5b7t4p5iv8's grant fk3x9r2m5iv8 has fk3x9r2m0dq3 as its parent, so fm5b7t4p0dq3 is the
+	// support underneath fm5b7t4p5iv8 — removing it would cut the route from below.
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("deleting the supporting assignment gave %v, want ErrConflict", err)
 	}
 	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "absent"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("deleting an absent assignment gave %v, want ErrNotFound", err)
 	}
 
-	// A1 has nothing resting on it, so it can go — and it goes completely.
-	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "A1"); err != nil {
+	// fm5b7t4p5iv8 has nothing resting on it, so it can go — and it goes completely.
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p5iv8"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.GetAssignment(t.Context(), area, teamFixture, "A1"); !errors.Is(err, domain.ErrNotFound) {
+	if _, err := api.GetAssignment(t.Context(), area, teamFixture, "fm5b7t4p5iv8"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("the assignment survived deletion: %v", err)
 	}
 	// Q-104 counts only *current* assignments, so the binding is free again —

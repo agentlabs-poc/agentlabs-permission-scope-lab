@@ -42,15 +42,15 @@ operation boundaries, not a new canonical request envelope or grant field.
 ![Publication flow and unchanged adoption](../abv/docs/assets/grant-publication.svg)
 
 ```text
-grant publish: existing G2 + revision2 + source assignment A1
-  -> administrative publication gate for G2 and selected source context
-  -> A1 actually holds parent G1 in this Area
-  -> resolve A1 and ancestors; verify publisher's current source membership
-  -> validate complete G2/2 selection within resolved G1 scope/permissions
-  -> INSERT immutable G2/2 in same transaction
+grant publish: existing fk3x9r2man0d + revision2 + source assignment fm5b7t4p5iv8
+  -> administrative publication gate for fk3x9r2man0d and selected source context
+  -> fm5b7t4p5iv8 actually holds parent fk3x9r2m5iv8 in this Area
+  -> resolve fm5b7t4p5iv8 and ancestors; verify publisher's current source membership
+  -> validate complete fk3x9r2man0d/2 selection within resolved fk3x9r2m5iv8 scope/permissions
+  -> INSERT immutable fk3x9r2man0d/2 in same transaction
 
-A2 keeps G2/1. No assignment/control/parent is changed.
-Future adoption must validate A2's actual parent-team context again;
+fm5b7t4pan0d keeps fk3x9r2man0d/1. No assignment/control/parent is changed.
+Future adoption must validate fm5b7t4pan0d's actual parent-team context again;
 the publication source is not an adoption authorization or permanent dependency.
 ```
 
@@ -70,20 +70,20 @@ func ResolveTeamAssignment(storage.Snapshot, string, time.Time) (domain.Route, e
 NewGrantRevision *domain.GrantContent
 ```
 
-- [x] **1. RED:** expose existing route resolution through assignment ID (A1
-  resolves G1 read/write FIN). Test unique actual team holding, Area mismatch,
+- [x] **1. RED:** expose existing route resolution through assignment ID (fm5b7t4p5iv8
+  resolves fk3x9r2m5iv8 read/write FIN). Test unique actual team holding, Area mismatch,
   invalid/missing ID, malformed projection, disabled assignment/control, expiry,
   cycles, root trust, unsupported user recipient and input immutability.
-  Provider tests insert G2/2, reopen, retain G2/1 and all controls/assignments; reject
+  Provider tests insert fk3x9r2man0d/2, reopen, retain fk3x9r2man0d/1 and all controls/assignments; reject
   duplicate/lower revision, missing grant, root, changed parent, mixed categories,
   unknown permission/scope/role, malformed content and callback-forged registrations.
   Include concurrent duplicate insertion, callback error/cancellation, bounded
   snapshots and cross-tenant/app same-ID isolation. Assert no partial rows on errors.
 
 ```go
-route, err := lineage.ResolveTeamAssignment(f.Snapshot, "A1", now)
+route, err := lineage.ResolveTeamAssignment(f.Snapshot, "fm5b7t4p5iv8", now)
 if err != nil { t.Fatal(err) }
-if route.GrantID != "G1" || !slices.Equal(route.Permissions, []string{lab.PayslipRead, lab.PayslipWrite}) {
+if route.GrantID != "fk3x9r2m5iv8" || !slices.Equal(route.Permissions, []string{lab.PayslipRead, lab.PayslipWrite}) {
     t.Fatalf("wrong actual source: %#v", route)
 }
 ```
@@ -134,21 +134,21 @@ PublishGrantRevision(context.Context, domain.Area, domain.Identity, string,
     domain.GrantContent) (domain.GrantContent, error)
 ```
 
-- [x] **1. RED:** real SQLite successful publication using A1/G1 and Maya,
+- [x] **1. RED:** real SQLite successful publication using fm5b7t4p5iv8/fk3x9r2m5iv8 and Maya,
   both direct and exact role source. Assert old content and every assignment/control
   unchanged after reopen. Reject missing admin, wrong Area, bad identity/input,
   source ID pointing to unrelated grant/team holding, lost membership, disabled/
   expired source, oversized permission selection, cycle through own grant, unknown
   registrations/role revision, root, changed parent, lower/duplicate revision,
   cancellation/provider error and hostile admin map/slice mutation. Zero result
-  on failed write. Test disabled own G2 control stays disabled; candidate future
+  on failed write. Test disabled own fk3x9r2man0d control stays disabled; candidate future
   validity remains unchanged; contradictory scope predicates remain AND, not replaced.
 
 ```go
-got, err := svc.PublishGrantRevision(t.Context(), area, f.Issuer, "A1", candidate)
+got, err := svc.PublishGrantRevision(t.Context(), area, f.Issuer, "fm5b7t4p5iv8", candidate)
 if err != nil { t.Fatal(err) }
-if got.GrantID != "G2" || got.Revision != 2 { t.Fatalf("bad content: %#v", got) }
-// Independent persisted assertion: A2 still adopts revision1, G2/1 untouched.
+if got.GrantID != "fk3x9r2man0d" || got.Revision != 2 { t.Fatalf("bad content: %#v", got) }
+// Independent persisted assertion: fm5b7t4pan0d still adopts revision1, fk3x9r2man0d/1 untouched.
 ```
 
 - [x] **2. Run RED:** `go test ./internal/mutation . -run PublishGrantRevision -count=1`.
@@ -161,7 +161,7 @@ if got.GrantID != "G2" || got.Revision != 2 { t.Fatalf("bad content: %#v", got) 
   verifies publisher membership. Narrow complete candidate against source. Check
   source route eligibility at final clock and cancellation; return NewGrantRevision.
   Candidate own future validity is not current access and must not be mistaken for
-  unusable source. No staging candidate as an adopted assignment or enabling G2.
+  unusable source. No staging candidate as an adopted assignment or enabling fk3x9r2man0d.
 
 ```go
 // Parent/source must be eligible now. Candidate is merely published:
@@ -194,24 +194,24 @@ type GrantRevisionAPI interface {
 **CLI:**
 
 ```sh
-abv grant publish --file g2-v2.json --support-assignment A1 --tenant acme --app hrms --db lab.db --fixture-context maya-grant-publisher
+abv grant publish --file g2-v2.json --support-assignment fm5b7t4p5iv8 --tenant acme --app hrms --db lab.db --fixture-context maya-grant-publisher
 ```
 
-Input is existing version1 GrantContent JSON with G2/revision2/parentG1,
+Input is existing version1 GrantContent JSON with fk3x9r2man0d/revision2/parentG1,
 read+write permissions and cert C17 scope. No added JSON field. Use existing
 bounded file/stdin reading and strict DecodeContent; print committed canonical
 GrantContent JSON. Existing grant enable/disable syntax stays intact.
 
 Lab wrapper embeds existing RoleAdministration; new explicit publication premise
-permits only Maya's version1 direct identity, exact Area, G2, A1 and current direct
+permits only Maya's version1 direct identity, exact Area, fk3x9r2man0d, fm5b7t4p5iv8 and current direct
 AssignmentAdmins membership. Actual parent/source/permission ceiling is checked by
 ABV, not assumed by the fixture. Verify marker; require maya-grant-publisher, reject
 maya-team1/application-publisher/maya-role-publisher for this operation. No production
 permission names, root bootstrap or new ownership relationship. Publication does not
-need A2 to exist and does not create it.
+need fm5b7t4pan0d to exist and does not create it.
 
-- [x] **1. RED:** seed, create A2/revision1 using existing assign command, publish
-  G2/2 via compiled CLI, reopen and inspect G2/2 and unchanged A2/revision1. Include
+- [x] **1. RED:** seed, create fm5b7t4pan0d/revision1 using existing assign command, publish
+  fk3x9r2man0d/2 via compiled CLI, reopen and inspect fk3x9r2man0d/2 and unchanged fm5b7t4pan0d/revision1. Include
   missing/nil/typed-nil capability, malformed JSON/flags, missing Area/file/source,
   wrong fixture/marker, missing DB remaining absent, rejected source and permission
   overflow, duplicate revision, canceled operation, output/close error and no

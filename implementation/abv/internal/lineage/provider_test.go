@@ -17,7 +17,7 @@ func TestTeamFINC17RoundTripsAndTenantCannotSupplyMissingSupport(t *testing.T) {
 	globex, _ := domain.NewArea("globex", "hrms")
 	accounting, _ := domain.NewArea("acme", "accounting")
 	missing := lab.TeamFINC17(acme)
-	delete(missing.Snapshot.Assignments, "A1")
+	delete(missing.Snapshot.Assignments, "fm5b7t4p5iv8")
 	complete := lab.TeamFINC17(globex)
 	otherApplication := lab.TeamFINC17(accounting)
 	provider, err := lab.CreateSQLite(context.Background(), filepath.Join(t.TempDir(), "lineage.db"), []storage.Snapshot{missing.Snapshot, complete.Snapshot, otherApplication.Snapshot})
@@ -31,7 +31,7 @@ func TestTeamFINC17RoundTripsAndTenantCannotSupplyMissingSupport(t *testing.T) {
 		return resolveErr
 	})
 	if !errors.Is(err, domain.ErrRejected) {
-		t.Fatalf("other tenant supplied absent A1: %v", err)
+		t.Fatalf("other tenant supplied absent fm5b7t4p5iv8: %v", err)
 	}
 	err = provider.Read(context.Background(), globex, func(snapshot storage.Snapshot) error {
 		got, resolveErr := lineage.ResolveParentTeam(snapshot, complete.Child, "fibggi2juxhc", time.Time{})

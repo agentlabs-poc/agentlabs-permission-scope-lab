@@ -56,7 +56,7 @@ tests and independent review. Full CP4 remains incomplete afterward.
 The operation consumes and returns the existing versioned `domain.GrantControl`:
 
 ```json
-{"version":"1","id":"G2","status":"disabled"}
+{"version":"1","id":"fk3x9r2man0d","status":"disabled"}
 ```
 
 No separate revision, recipient, scope or optimistic-token field is added. Area
@@ -135,7 +135,7 @@ func RunGrantStatus(t *testing.T, factory Factory) {
         provider, err := factory.Create(t.Context(), path, []storage.Snapshot{seeded})
         if err != nil { t.Fatal(err) }
         err = provider.Update(t.Context(), seeded.Area, func(s storage.Snapshot) (storage.WriteSet, error) {
-            before := s.Controls["G1"]
+            before := s.Controls["fk3x9r2m5iv8"]
             after := before
             after.Status = "disabled"
             return storage.WriteSet{GrantStatusChange: &storage.GrantStatusChange{Before: before, After: after}}, nil
@@ -145,9 +145,9 @@ func RunGrantStatus(t *testing.T, factory Factory) {
         provider, err = factory.Open(t.Context(), path)
         if err != nil { t.Fatal(err) }
         defer provider.Close()
-        control := seeded.Controls["G1"]
+        control := seeded.Controls["fk3x9r2m5iv8"]
         control.Status = "disabled"
-        seeded.Controls["G1"] = control
+        seeded.Controls["fk3x9r2m5iv8"] = control
         assertSnapshot(t, provider, seeded)
     })
 }
@@ -195,12 +195,12 @@ func TestOldAdministrationCannotAuthorizeGrantStatus(t *testing.T) {
     p := &memoryProvider{snapshot: fixture.Snapshot}
     facade, err := abv.New(p, externalAdministration{area: area}, clock{now: time.Now()})
     if err != nil { t.Fatal(err) }
-    proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+    proposed := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
     got, err := facade.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed)
     if !errors.Is(err, domain.ErrUnsupported) || got != (domain.GrantControl{}) {
         t.Fatalf("old adapter acquired authority: %#v, %v", got, err)
     }
-    if p.snapshot.Controls["G2"].Status != "enabled" { t.Fatal("unauthorized write") }
+    if p.snapshot.Controls["fk3x9r2man0d"].Status != "enabled" { t.Fatal("unauthorized write") }
 }
 ```
 
@@ -238,9 +238,9 @@ func TestOldAdministrationCannotAuthorizeGrantStatus(t *testing.T) {
 
 | Test | Exact assertion |
 |---|---|
-| Valid disable and enable | Only G2 control changes; persistence after reopen. |
+| Valid disable and enable | Only fk3x9r2man0d control changes; persistence after reopen. |
 | Missing administration / malicious evidence edits | Zero result and no write, or validated result using untouched ABV evidence; never forged expansion. |
-| Two enabled group assignments, one broken | Enable rejected globally, G2 remains disabled. |
+| Two enabled group assignments, one broken | Enable rejected globally, fk3x9r2man0d remains disabled. |
 | Same broken assignment explicitly disabled | Enable may pass for the valid route; broken assignment remains disabled. |
 | No enabled assignments | Control may be enabled after administration/shape checks; no assignment or authority is created. |
 | Disabled required upstream support | Enabled child binding cannot use it; reject. |
@@ -266,9 +266,9 @@ and checkpoint progress with evidence, not new canonical rules.
 **Produces:** commands below and optional application capability.
 
 ```sh
-abv grant disable G2 --db PATH --tenant acme --app hrms --fixture-context maya-team1
-abv grant enable G2 --db PATH --tenant acme --app hrms --fixture-context maya-team1
-abv inspect grant-control G2 --db PATH --tenant acme --app hrms
+abv grant disable fk3x9r2man0d --db PATH --tenant acme --app hrms --fixture-context maya-team1
+abv grant enable fk3x9r2man0d --db PATH --tenant acme --app hrms --fixture-context maya-team1
+abv inspect grant-control fk3x9r2man0d --db PATH --tenant acme --app hrms
 ```
 
 - [ ] Write failing CLI-spy cases before parsing changes: missing context/ID,
@@ -281,7 +281,7 @@ abv inspect grant-control G2 --db PATH --tenant acme --app hrms
   prints existing canonical control JSON; typed errors retain existing statuses.
 - [ ] Implement an explicit lab wrapper around the existing Administration.
   Its independent CheckGrantStatus premise is limited to direct human Maya,
-  exact Area, G2, enable/disable and current membership in AssignmentAdmins.
+  exact Area, fk3x9r2man0d, enable/disable and current membership in AssignmentAdmins.
   This same fixture group can hold two separately declared testing capabilities;
   the assignment method does not confer the new method's authority. Plain old
   adapters remain incapable, as tested in Task 2. No HRMS permission-registration
@@ -293,9 +293,9 @@ abv inspect grant-control G2 --db PATH --tenant acme --app hrms
 - [ ] Add `inspect grant-control` using the existing control record. Verify
   identity/version/status and canonical JSON exactly; reject missing records and
   context mismatches. Never expose raw provider updates.
-- [ ] Compile and test independent processes: seed disposable DB, assign A2,
-  disable G2, inspect disabled control, verify G2-dependent diagnosis fails,
-  enable G2, reopen control and verify diagnosis succeeds. Show the original
+- [ ] Compile and test independent processes: seed disposable DB, assign fm5b7t4pan0d,
+  disable fk3x9r2man0d, inspect disabled control, verify G2-dependent diagnosis fails,
+  enable fk3x9r2man0d, reopen control and verify diagnosis succeeds. Show the original
   assignment revision/state unchanged. Also test unmarked/wrong-context DBs,
   operation-specific admin refusal and unsupported adapters without writes.
 - [ ] Run final `go test ./... -count=1`, `go test -race ./... -count=1`,

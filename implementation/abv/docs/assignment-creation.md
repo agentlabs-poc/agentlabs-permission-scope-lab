@@ -8,18 +8,18 @@ integration. The [design](../../plan/abv-design.md) and Task 5 in the
 
 ## Two different checks, one write
 
-Maya having G1's Finance read/write authority does not itself let her administer
-Team2. Conversely, assignment-administration permission for Team2 does not give
-her G1's business authority. Both checks must succeed for the exact proposed A2.
+Maya having fk3x9r2m5iv8's Finance read/write authority does not itself let her administer
+fp8h2w6yan0d. Conversely, assignment-administration permission for fp8h2w6yan0d does not give
+her fk3x9r2m5iv8's business authority. Both checks must succeed for the exact proposed fm5b7t4pan0d.
 
-The [lineage resolver](lineage-resolution.md) establishes Team2's actual parent
+The [lineage resolver](lineage-resolution.md) establishes fp8h2w6yan0d's actual parent
 holding and Maya's source access. The coordinator adds the administrative check,
 proposal/latest-revision checks and persistence ordering.
 
 ![Component responsibilities and transactional provider boundary](../../plan/assets/abv-provider-architecture.svg)
 
 ```text
-Exact A2 proposal + trusted identity + tenant/application
+Exact fm5b7t4pan0d proposal + trusted identity + tenant/application
   → provider acquires write protection and reads consistent evidence
   → administrative check on an isolated copy of that evidence
   → ABV checks the original evidence and the complete proposal
@@ -63,7 +63,7 @@ against different evidence.
 ## Lab administration versus production administration
 
 The lab scenario supplies a fixed, trusted **test premise** for Maya to perform
-`auth:assignment::create` for Team2, with explicit administration-group membership.
+`auth:assignment::create` for fp8h2w6yan0d, with explicit administration-group membership.
 The adapter must check its configured area, human, permission premise, recipient
 and current test prerequisites. It is not an always-allow evaluator.
 
@@ -74,7 +74,7 @@ grant resolution and external transactional integration are outside this ABV
 build. The earlier “remain CP5 work” requirement is superseded by the user's
 9 September 2026 scope correction; CP5 covers ABV definition operations only.
 
-Maya's Team1 source membership remains a separate check. Nutan's membership,
+Maya's fp8h2w6y5iv8 source membership remains a separate check. Nutan's membership,
 team ownership, arbitrary actor IDs or a remembered successful diagnostic cannot
 substitute for either gate. Unresolved direct-human/proxy/self issuance cases
 retain the explicit first-slice limits described in the lineage document.
@@ -82,7 +82,7 @@ retain the explicit first-slice limits described in the lineage document.
 ## Acceptance record
 
 Candidate `651bb2a` passes full Go tests, race checks, vet and build. Tests cover
-baseline A2 save/reopen; independent admin/source failure; exact recipient,
+baseline fm5b7t4pan0d save/reopen; independent admin/source failure; exact recipient,
 context and revision; overbroad/unsupported proposals; snapshot-edit isolation;
 disabled duplicate bindings; a stale diagnostic followed by withdrawal; two-handle
 ordering/conflicts; cancellation without replay; expiry during validation; no

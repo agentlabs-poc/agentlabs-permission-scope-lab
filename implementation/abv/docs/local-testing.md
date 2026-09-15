@@ -6,10 +6,10 @@ administration or completion of all ABV checkpoints.
 
 ## What the example proves
 
-Maya has source access through Team1 and a separately bounded lab premise for
-assignment administration. Team1 holds G1: Finance read/write. Team2 is Team1's
-child. G2 selects read and adds certificate C17. A2 assigns G2 to Team2; Nutan is
-a member of Team2. Membership is not ownership or administrative permission.
+Maya has source access through fp8h2w6y5iv8 and a separately bounded lab premise for
+assignment administration. fp8h2w6y5iv8 holds fk3x9r2m5iv8: Finance read/write. fp8h2w6yan0d is fp8h2w6y5iv8's
+child. fk3x9r2man0d selects read and adds certificate C17. fm5b7t4pan0d assigns fk3x9r2man0d to fp8h2w6yan0d; Nutan is
+a member of fp8h2w6yan0d. Membership is not ownership or administrative permission.
 
 ![Actual parent-team support and separate source/admin checks](assets/team-lineage-resolution.svg)
 
@@ -33,23 +33,23 @@ the seed command succeed.
 
 ```sh
 ./bin/abv scenario seed team-fin-c17 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv inspect grant G1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv inspect assignment A1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv inspect grant fk3x9r2m5iv8 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv inspect assignment fm5b7t4p5iv8 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv check assignment --file testdata/a2.json --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv assign --file testdata/a2.json --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv inspect assignment A2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv assignment disable A2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv assignment enable A2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv grant disable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv inspect grant-control G2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
-./bin/abv grant enable G2 --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv inspect assignment fm5b7t4pan0d --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv assignment disable fm5b7t4pan0d --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv assignment enable fm5b7t4pan0d --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv grant disable fk3x9r2man0d --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv inspect grant-control fk3x9r2man0d --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv grant enable fk3x9r2man0d --fixture-context maya-team1 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ./bin/abv catalog register-scope region --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
 ./bin/abv catalog register-scope owner --allowed-tokens '$self' --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
 ./bin/abv catalog register-permission hrms:payroll:payslip::export --supported-keys dept,region --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context application-publisher
 ./bin/abv role publish payslip-reader --revision 2 --permissions hrms:payroll:payslip::read,hrms:payroll:payslip::write --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context maya-role-publisher
 ./bin/abv inspect role payslip-reader --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db
-./bin/abv grant publish --file /tmp/g2-v2.json --support-assignment A1 --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context maya-grant-publisher
-./bin/abv inspect grant G2 --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
+./bin/abv grant publish --file /tmp/g2-v2.json --support-assignment fm5b7t4p5iv8 --tenant acme --app hrms --db /tmp/abv-fin-c17-demo.db --fixture-context maya-grant-publisher
+./bin/abv inspect grant fk3x9r2man0d --db /tmp/abv-fin-c17-demo.db --tenant acme --app hrms
 ```
 
 Each invocation opens the selected database independently. The final inspection
@@ -64,13 +64,13 @@ an added inner grant scope.
 For the publication command, `/tmp/g2-v2.json` is exactly:
 
 ```json
-{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}
+{"version":"1","grant_id":"fk3x9r2man0d","revision":2,"parent_grant_id":"fk3x9r2m5iv8","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}
 ```
 
-The command publishes only a new immutable revision of existing G2. `A1` is
+The command publishes only a new immutable revision of existing fk3x9r2man0d. `fm5b7t4p5iv8` is
 transient supporting request context: it is passed to both publication checks
-and is never added to canonical grant JSON. Publication does not adopt A2,
-create a grant, change G2's parent, or modify any assignment.
+and is never added to canonical grant JSON. Publication does not adopt fm5b7t4pan0d,
+create a grant, change fk3x9r2man0d's parent, or modify any assignment.
 
 `check assignment` is read-only boundary diagnosis. It neither establishes
 administrative authority nor issues a save ticket. `assign` rereads current
@@ -84,8 +84,8 @@ duplicate detection too.
 ./bin/abv scenario run team-fin-c17 --case unsupported-permission --db /tmp/abv-fin-c17-negative.db --tenant acme --app hrms
 ```
 
-This case requests the registered delete permission outside Team1's actual
-read/write ceiling. The expected result is a rejection with A2 absent. A scenario
+This case requests the registered delete permission outside fp8h2w6y5iv8's actual
+read/write ceiling. The expected result is a rejection with fm5b7t4pan0d absent. A scenario
 command may complete successfully because it observed that expected rejection;
 this does not mean the assignment succeeded.
 
@@ -100,7 +100,7 @@ access. `maya-team1` and `application-publisher` are not role publishers.
 
 Grant revision publication similarly uses only `maya-grant-publisher`. Its lab
 premise is limited to Maya's exact version-1 direct identity, this marked area,
-G2, support assignment A1, and Maya's current direct `AssignmentAdmins`
+fk3x9r2man0d, support assignment fm5b7t4p5iv8, and Maya's current direct `AssignmentAdmins`
 membership. ABV—not the fixture—checks the real source route, unchanged parent,
 and permission/scope ceiling. `maya-team1`, `application-publisher`, and
 `maya-role-publisher` are rejected for this operation.
@@ -113,9 +113,9 @@ expands only legitimate application roots; ordinary child grants retain their
 explicit permission selections.
 
 For tenant mutations, only the known `maya-team1` fixture context is supported. Assignment status is
-separately limited to the fixture's exact A1/G1/Team1 and A2/G2/Team2 bindings,
+separately limited to the fixture's exact fm5b7t4p5iv8/fk3x9r2m5iv8/fp8h2w6y5iv8 and fm5b7t4pan0d/fk3x9r2man0d/fp8h2w6yan0d bindings,
 with Maya's current direct `AssignmentAdmins` membership. Grant status is further
-limited to G2 and Maya's current direct membership in `AssignmentAdmins`; this
+limited to fk3x9r2man0d and Maya's current direct membership in `AssignmentAdmins`; this
 separate lab capability does not follow from assignment administration. A distinct internal
 scenario marker binds the lab database to its scenario and tenant/application.
 The generic ABV database marker alone is insufficient. Ordinary opening never
@@ -124,14 +124,14 @@ lab setup. Existing files are retained on error, not deleted or overwritten.
 
 The marker guards accidental use of an ordinary ABV database. It is not protection
 against a hostile database owner, authenticated identity, or a real Auth grant.
-The lab administrative premise is bounded to Maya, Team2 and the exact operation;
+The lab administrative premise is bounded to Maya, fp8h2w6yan0d and the exact operation;
 ABV separately checks her current source membership and complete grant lineage.
 Do not deploy this composition as a production administration interface.
 
 The compiled-process acceptance exercises bottom-up disablement and enablement:
-A1 cannot be disabled while enabled A2 depends on it; A2 then A1 can be disabled;
-A2 cannot be re-enabled before A1; and restoring A1 does not cascade a write to
-A2. Task 4 and final independent review of this CP4-B slice are pending.
+fm5b7t4p5iv8 cannot be disabled while enabled fm5b7t4pan0d depends on it; fm5b7t4pan0d then fm5b7t4p5iv8 can be disabled;
+fm5b7t4pan0d cannot be re-enabled before fm5b7t4p5iv8; and restoring fm5b7t4p5iv8 does not cascade a write to
+fm5b7t4pan0d. Task 4 and final independent review of this CP4-B slice are pending.
 
 CLI parsing is reusable through the application adapter. The reusable library
 does not import CLI or lab code. Real Auth-service integration is out of scope;
@@ -144,11 +144,11 @@ The compiled binary completed seed, inspect, check, assignment and independent
 reopen inspection against a new SQLite file. The final stored record was:
 
 ```json
-{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"enabled"}
+{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fp8h2w6yan0d"},"status":"enabled"}
 ```
 
 The negative scenario reported `observed expected rejection; assignment was not
-created`. A new inspection process then returned exit 3 with A2 absent. These
+created`. A new inspection process then returned exit 3 with fm5b7t4pan0d absent. These
 checks ran independently of the implementer's automated binary tests.
 
 Full Go tests, race checks, vet and build pass on `5815abf`. Tests additionally

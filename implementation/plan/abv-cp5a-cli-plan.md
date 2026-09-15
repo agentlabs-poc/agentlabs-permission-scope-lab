@@ -82,7 +82,7 @@ checks. Existing tenant verification still compares the actual tenant and app.
 - [x] **1. RED:** add real CLI/lab end-to-end tests that seed the current scenario,
   register scope then permission, close/reopen and inspect through existing tenant
   `inspect permission`/`inspect scope`. Assert literal persisted values, unchanged
-  G0/G1/G2 content and assignments, success output and lab warning.
+  fk3x9r2m0dq3/fk3x9r2m5iv8/fk3x9r2man0d content and assignments, success output and lab warning.
   Cover missing connector, nil/typed-nil API, unknown app, missing file (must stay
   absent), unmarked DB, wrong fixture `maya-team1`, rejected tenant flag, malformed
   lists, duplicate definition, unsupported key/token, canceled operation, output

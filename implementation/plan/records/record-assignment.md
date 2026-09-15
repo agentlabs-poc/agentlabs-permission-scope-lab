@@ -35,11 +35,16 @@ contract, evidence and error payloads. `grant-contract-closure.md` is the list.
 
 ## 1 · The record
 
+> **These are our records in the handbook's shape, not quotations of it.** The
+> handbook's own excerpts use illustrative identifiers — `G1`, `A1` — and `docs/`
+> keeps them. Every identifier Auth-AL issues is a base-36 Snowflake, so the
+> examples here carry real ones.
+
 ```json
 {
   "version": "1",
-  "id": "A1",
-  "grant_id": "G1",
+  "id": "fm5b7t4p5iv8",
+  "grant_id": "fk3x9r2m5iv8",
   "grant_revision": 2,
   "recipient": {"type": "group", "id": "fibggi2juubk"},
   "status": "enabled"
@@ -92,7 +97,7 @@ free.
 | `key7` … `key10` | unused → `''` | `''` |
 
 ```
-value    = {"id": "A1", "grant_revision": 2, "status": "enabled"}
+value    = {"id": "fm5b7t4p5iv8", "grant_revision": 2, "status": "enabled"}
 boundary = tenant     tenant_id = acme
 ```
 
@@ -142,7 +147,7 @@ same recipient is the same binding, whatever it is called.
 by the pair, an id lookup becomes a scan of the area's assignments. Two honest
 options: carry the id in `key7` too, which reintroduces two identities for one
 record, or have the operations take the pair. **The pair is right**, and it reads
-better: *disable Team1's access to G1*, not *disable A1*.
+better: *disable Team1's access to fk3x9r2m5iv8*, not *disable fm5b7t4p5iv8*.
 
 *Gain, and it is on the hot path:* `lineage.resolve` calls `uniqueAssignment`
 once per level of every route it walks, and that function **scans every
@@ -179,7 +184,7 @@ all change or be renamed without it becoming a different binding.
 The assignment id and the adopted revision ride in the value:
 
 ```
-abv.assignment:hrms:fi8c81r9v8w4:group:fibggi2juubk    "A1" @ revision 1, enabled
+abv.assignment:hrms:fi8c81r9v8w4:group:fibggi2juubk    "fm5b7t4p5iv8" @ revision 1, enabled
 ```
 
 Compare the three that came before, and the shape of the difference is the point:
@@ -211,7 +216,7 @@ surgery — the wrapper maps field to column and back:
       "type":      "group"      ──▶   key5       = group
       "id":        "fibggi2…"   ──▶   key6       = fibggi2juubk
   }
-  "id":            "A1"         ──▶   value.id
+  "id":            "fm5b7t4p5iv8"         ──▶   value.id
   "grant_revision": 1           ──▶   value.grant_revision
   "status":        "enabled"    ──▶   value.status
   "version":       "1"          ──▶   (wire-only — rebuilt by the codec, as the
@@ -232,8 +237,8 @@ application, for every record type, since the drift correction removed it.
 ```
 boundary  tenant_id  key1  key2        key3  key4          key5   key6          value
 ──────────────────────────────────────────────────────────────────────────────────────────────────────────
-tenant    acme       abv   assignment  hrms  fi8c8111kow0  group  fibggi2jur5s  {"id":"A0","grant_revision":1,"status":"enabled"}
-tenant    acme       abv   assignment  hrms  fi8c81r9v8w4  group  fibggi2juubk  {"id":"A1","grant_revision":1,"status":"enabled"}
+tenant    acme       abv   assignment  hrms  fi8c8111kow0  group  fibggi2jur5s  {"id":"fm5b7t4p0dq3","grant_revision":1,"status":"enabled"}
+tenant    acme       abv   assignment  hrms  fi8c81r9v8w4  group  fibggi2juubk  {"id":"fm5b7t4p5iv8","grant_revision":1,"status":"enabled"}
 ```
 
 The full envelope is `boundary | tenant_id | key1…key10 | value | ts | state`.

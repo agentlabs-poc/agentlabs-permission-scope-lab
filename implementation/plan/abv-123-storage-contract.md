@@ -56,9 +56,9 @@ Examples:
 ('',     'hrms', 'permission_support','payslip:read', 0)
 ('acme', 'hrms', 'installation',      'hrms',         0)
 ('acme', 'hrms', 'role_revision',     'reader',       12)
-('acme', 'hrms', 'grant_control',     'G1',            0)
-('acme', 'hrms', 'grant_revision',    'G1',            3)
-('acme', 'hrms', 'root_trust',        'G0',            0)
+('acme', 'hrms', 'grant_control',     'fk3x9r2m5iv8',            0)
+('acme', 'hrms', 'grant_revision',    'fk3x9r2m5iv8',            3)
+('acme', 'hrms', 'root_trust',        'fk3x9r2m0dq3',            0)
 ```
 
 ## 2. Candidate DDL

@@ -86,7 +86,7 @@ one completely: no parent, and no local scope.
 **Carried deliberately.** A trusted root still cannot be created by any operation,
 because establishment writes four things and the fourth is a holder assignment —
 three-now-four-later would destroy the atomicity Q-117 depends on. Grant
-identifiers are still accepted as the corpus holds them (`G0`/`G1`/`G2`) while
+identifiers are still accepted as the corpus holds them (`fk3x9r2m0dq3`/`fk3x9r2m5iv8`/`fk3x9r2man0d`) while
 issuance is strict, pending the base-36 sweep. `DeleteGrant`'s dependency refusal
 errs conservative and is loosened when assignments can be consulted, never
 tightened.
@@ -153,7 +153,7 @@ CLI/lab acceptance is the remaining task in CP4-C. No review passes were run.
 
 Task 3 now completes CLI/lab/process acceptance at `7624edf`. Final full Go,
 full race, vet, build and module checks pass; site build and all 10 tests pass.
-The compiled demo publishes G2/revision2 and reopens A2 still on revision1.
+The compiled demo publishes fk3x9r2man0d/revision2 and reopens fm5b7t4pan0d still on revision1.
 All three first attempts finished within their caps; one bounded Task2 interface
 correction restored the planned admin source-ID argument. No review was performed.
 See [evidence and SVG](../abv/docs/acceptance.md#cp4-c--immutable-grant-revision-publication).
@@ -410,7 +410,7 @@ spec and quality approved, ready for Task 5. Full tests/race/vet/build pass.
 
 The resolver now takes exact selected child content rather than implicitly
 choosing a revision from an ID; parent support follows actual adoptions. The lab
-fixture explicitly establishes RootTeam/A0/G0 so a stored root-shaped definition
+fixture explicitly establishes RootTeam/fm5b7t4p0dq3/fk3x9r2m0dq3 so a stored root-shaped definition
 does not manufacture trust. Direct-human discovery, proxies and cross-recipient
 self binding remain unsupported implementation cases, not new canonical bans.
 
@@ -444,8 +444,8 @@ to exercise file opening against a valid seeded database. Independent review
 and scoped fix review approve specification compliance and quality. Parent-run
 full Go tests, race checks, vet and build pass on the corrected source.
 
-The independent CLI demonstration saves A2 and reopens it in another process;
-the out-of-bound permission scenario rejects and independently proves A2 absent.
+The independent CLI demonstration saves fm5b7t4pan0d and reopens it in another process;
+the out-of-bound permission scenario rejects and independently proves fm5b7t4pan0d absent.
 The scenario marker guards accidental fixture use, not hostile database owners
 or real authentication. Read-only diagnosis is never a save ticket. An input-file
 close-error minor remains explicitly tracked in Task 7 alongside the source-case

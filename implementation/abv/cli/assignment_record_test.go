@@ -18,14 +18,14 @@ type assignmentRecordAPI struct {
 
 func (a *assignmentRecordAPI) GetAssignment(_ context.Context, area domain.Area, fixture domain.FixtureContext, id string) (domain.Assignment, error) {
 	a.area, a.fixture, a.acted, a.calls = area, fixture, id, a.calls+1
-	return domain.Assignment{Version: "1", ID: id, GrantID: "G1", GrantRevision: 2,
+	return domain.Assignment{Version: "1", ID: id, GrantID: "fk3x9r2m5iv8", GrantRevision: 2,
 		Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"}, nil
 }
 
 func (a *assignmentRecordAPI) ListAssignments(_ context.Context, area domain.Area, fixture domain.FixtureContext, filter domain.AssignmentFilter) (domain.AssignmentPage, error) {
 	a.area, a.fixture, a.filter, a.calls = area, fixture, filter, a.calls+1
 	return domain.AssignmentPage{Assignments: []domain.Assignment{{
-		Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1,
+		Version: "1", ID: "fm5b7t4p5iv8", GrantID: "fk3x9r2m5iv8", GrantRevision: 1,
 		Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"}}, Total: 1}, nil
 }
 
@@ -36,7 +36,7 @@ func (a *assignmentRecordAPI) DeleteAssignment(_ context.Context, area domain.Ar
 
 func (a *assignmentRecordAPI) UpgradeAssignment(_ context.Context, area domain.Area, fixture domain.FixtureContext, id string) (domain.Assignment, error) {
 	a.area, a.fixture, a.upgraded, a.calls = area, fixture, id, a.calls+1
-	return domain.Assignment{Version: "1", ID: id, GrantID: "G1", GrantRevision: 3,
+	return domain.Assignment{Version: "1", ID: id, GrantID: "fk3x9r2m5iv8", GrantRevision: 3,
 		Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"}, nil
 }
 
@@ -52,14 +52,14 @@ func runAssignment(t *testing.T, api *assignmentRecordAPI, args ...string) (int,
 // record — printing the id first would suggest otherwise.
 func TestAssignmentsGetRendersTheBindingBeforeTheHandle(t *testing.T) {
 	api := &assignmentRecordAPI{}
-	code, out, diag := runAssignment(t, api, "assignments", "get", "A1")
+	code, out, diag := runAssignment(t, api, "assignments", "get", "fm5b7t4p5iv8")
 	if code != 0 {
 		t.Fatalf("exit=%d stderr=%q", code, diag)
 	}
-	if strings.Index(out, "grant  G1") > strings.Index(out, "id  A1") {
+	if strings.Index(out, "grant  fk3x9r2m5iv8") > strings.Index(out, "id  fm5b7t4p5iv8") {
 		t.Fatalf("the id printed before the binding: %q", out)
 	}
-	for _, want := range []string{"grant  G1", "recipient  group fibggi2juubk", "adopted revision  2"} {
+	for _, want := range []string{"grant  fk3x9r2m5iv8", "recipient  group fibggi2juubk", "adopted revision  2"} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("stdout=%q missing %q", out, want)
 		}
@@ -71,10 +71,10 @@ func TestAssignmentsGetRendersTheBindingBeforeTheHandle(t *testing.T) {
 
 func TestAssignmentsListForwardsEitherDirection(t *testing.T) {
 	api := &assignmentRecordAPI{}
-	if code, out, _ := runAssignment(t, api, "assignments", "list", "--grant", "G1"); code != 0 || !strings.Contains(out, "total  1") {
+	if code, out, _ := runAssignment(t, api, "assignments", "list", "--grant", "fk3x9r2m5iv8"); code != 0 || !strings.Contains(out, "total  1") {
 		t.Fatalf("exit=%d stdout=%q", code, out)
 	}
-	if api.filter.GrantID != "G1" || api.filter.Recipient != nil {
+	if api.filter.GrantID != "fk3x9r2m5iv8" || api.filter.Recipient != nil {
 		t.Fatalf("by grant gave filter %#v", api.filter)
 	}
 	if code, _, _ := runAssignment(t, api, "assignments", "list", "--recipient", "fibggi2juubk", "--recipient-type", "group"); code != 0 {
@@ -87,8 +87,8 @@ func TestAssignmentsListForwardsEitherDirection(t *testing.T) {
 
 func TestAssignmentsUpgradeReportsTheAdoptedRevision(t *testing.T) {
 	api := &assignmentRecordAPI{}
-	code, out, _ := runAssignment(t, api, "assignments", "upgrade", "A1")
-	if code != 0 || api.upgraded != "A1" || !strings.Contains(out, "adopted revision  3") {
+	code, out, _ := runAssignment(t, api, "assignments", "upgrade", "fm5b7t4p5iv8")
+	if code != 0 || api.upgraded != "fm5b7t4p5iv8" || !strings.Contains(out, "adopted revision  3") {
 		t.Fatalf("exit=%d upgraded=%q stdout=%q", code, api.upgraded, out)
 	}
 }
@@ -97,12 +97,12 @@ func TestAssignmentsUpgradeReportsTheAdoptedRevision(t *testing.T) {
 func TestAssignmentsRefusesMalformedInvocationsBeforeConnecting(t *testing.T) {
 	cases := map[string][]string{
 		"no verb":            {"assignments"},
-		"unknown verb":       {"assignments", "explain", "A1"},
+		"unknown verb":       {"assignments", "explain", "fm5b7t4p5iv8"},
 		"get without id":     {"assignments", "get"},
 		"delete without id":  {"assignments", "delete"},
 		"upgrade without id": {"assignments", "upgrade"},
 		"list unfiltered":    {"assignments", "list"},
-		"list both filters":  {"assignments", "list", "--grant", "G1", "--recipient", "x", "--recipient-type", "group"},
+		"list both filters":  {"assignments", "list", "--grant", "fk3x9r2m5iv8", "--recipient", "x", "--recipient-type", "group"},
 		"recipient no type":  {"assignments", "list", "--recipient", "fibggi2juubk"},
 	}
 	for name, args := range cases {

@@ -50,11 +50,11 @@ func TestEvaluateDeniesWithoutAnIndependentlyMatchingRoute(t *testing.T) {
 	request := validRequest()
 	tests := map[string]Authority{
 		"empty complete evidence":    {},
-		"wrong boundary":             {Routes: []Route{route([]string{"G1"}, Predicate{Key: "department", Value: "ENG", SourceGrantID: "G1"})}},
-		"all does not match literal": {Routes: []Route{route([]string{"G1"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "G1"})}},
-		"parent predicates use AND": {Routes: []Route{route([]string{"G1", "G2"},
-			Predicate{Key: "department", Value: "FIN", SourceGrantID: "G1"},
-			Predicate{Key: "employee", Value: "someone-else", SourceGrantID: "G2"})}},
+		"wrong boundary":             {Routes: []Route{route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "ENG", SourceGrantID: "fk3x9r2m5iv8"})}},
+		"all does not match literal": {Routes: []Route{route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})}},
+		"parent predicates use AND": {Routes: []Route{route([]string{"fk3x9r2m5iv8", "fk3x9r2man0d"},
+			Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"},
+			Predicate{Key: "employee", Value: "someone-else", SourceGrantID: "fk3x9r2man0d"})}},
 		"routes cannot mix": {Routes: []Route{
 			route([]string{"G-read"}, Predicate{Key: "department", Value: "ENG", SourceGrantID: "G-read"}),
 			route([]string{"G-fin"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "G-fin"}, Predicate{Key: "employee", Value: "someone-else", SourceGrantID: "G-fin"}),
@@ -75,8 +75,8 @@ func TestEvaluateDeniesWithoutAnIndependentlyMatchingRoute(t *testing.T) {
 }
 
 func TestEvaluateAddingPredicateOnlyNarrowsRoute(t *testing.T) {
-	broad := route([]string{"G1"})
-	narrow := route([]string{"G1"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "G1"})
+	broad := route([]string{"fk3x9r2m5iv8"})
+	narrow := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
 	for name, test := range map[string]struct {
 		selection Selection
 		want      Decision
@@ -101,17 +101,17 @@ func TestEvaluateAddingPredicateOnlyNarrowsRoute(t *testing.T) {
 
 func TestEvaluateValidatesEveryRouteBeforeAllowing(t *testing.T) {
 	request := validRequest()
-	valid := route([]string{"G1"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "G1"})
+	valid := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
 	cases := map[string]Route{
 		"wrong area":        func() Route { r := valid; r.Area.TenantID = "other"; return r }(),
 		"wrong human":       func() Route { r := valid; r.HumanID = "other"; return r }(),
 		"wrong permission":  func() Route { r := valid; r.Permission = "certificate::write"; return r }(),
-		"duplicate grant":   func() Route { r := valid; r.GrantIDs = []string{"G1", "G1"}; return r }(),
+		"duplicate grant":   func() Route { r := valid; r.GrantIDs = []string{"fk3x9r2m5iv8", "fk3x9r2m5iv8"}; return r }(),
 		"missing grant":     func() Route { r := valid; r.GrantIDs = nil; return r }(),
-		"empty key":         route([]string{"G1"}, Predicate{Value: "FIN", SourceGrantID: "G1"}),
-		"empty value":       route([]string{"G1"}, Predicate{Key: "department", SourceGrantID: "G1"}),
-		"foreign source":    route([]string{"G1"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "G2"}),
-		"unsupported token": route([]string{"G1"}, Predicate{Key: "department", Value: "$manager", SourceGrantID: "G1"}),
+		"empty key":         route([]string{"fk3x9r2m5iv8"}, Predicate{Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}),
+		"empty value":       route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", SourceGrantID: "fk3x9r2m5iv8"}),
+		"foreign source":    route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2man0d"}),
+		"unsupported token": route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "$manager", SourceGrantID: "fk3x9r2m5iv8"}),
 	}
 	for name, malformed := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -140,7 +140,7 @@ func TestEvaluateExpiredRouteDoesNotSuppressValidRouteAndOrderingIsStable(t *tes
 func TestEvaluateRejectsInvertedValidityInterval(t *testing.T) {
 	now := time.Date(2026, 9, 9, 12, 0, 0, 0, time.UTC)
 	from, until := now.Add(time.Hour), now
-	malformed := route([]string{"G1"})
+	malformed := route([]string{"fk3x9r2m5iv8"})
 	malformed.ValidFrom, malformed.ValidUntil = &from, &until
 	if got, err := evaluate(t, validRequest(), Authority{Routes: []Route{malformed}}, now); err == nil || !reflect.DeepEqual(got, Result{}) {
 		t.Fatalf("accepted inverted validity: %#v, %v", got, err)

@@ -19,7 +19,7 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 			t.Fatal(err)
 		}
 		err = provider.Update(t.Context(), seeded.Area, func(s storage.Snapshot) (storage.WriteSet, error) {
-			before := s.Controls["G1"]
+			before := s.Controls["fk3x9r2m5iv8"]
 			after := before
 			after.Status = "disabled"
 			return storage.WriteSet{GrantStatusChange: &storage.GrantStatusChange{Before: before, After: after}}, nil
@@ -35,9 +35,9 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 			t.Fatal(err)
 		}
 		defer provider.Close()
-		control := seeded.Controls["G1"]
+		control := seeded.Controls["fk3x9r2m5iv8"]
 		control.Status = "disabled"
-		seeded.Controls["G1"] = control
+		seeded.Controls["fk3x9r2m5iv8"] = control
 		assertSnapshot(t, provider, seeded)
 	})
 
@@ -50,7 +50,7 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 		}
 		defer provider.Close()
 		for i := range seeded {
-			before := seeded[i].Controls["G1"]
+			before := seeded[i].Controls["fk3x9r2m5iv8"]
 			after := before
 			after.Status = "disabled"
 			if err := provider.Update(t.Context(), seeded[i].Area, func(storage.Snapshot) (storage.WriteSet, error) {
@@ -58,7 +58,7 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 			}); err != nil {
 				t.Fatalf("area %d: %v", i, err)
 			}
-			seeded[i].Controls["G1"] = after
+			seeded[i].Controls["fk3x9r2m5iv8"] = after
 			for j := range seeded {
 				assertSnapshot(t, provider, seeded[j])
 			}
@@ -72,14 +72,14 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 			want   error
 		}{
 			"missing":          {change: statusChange("missing", "enabled", "disabled"), want: domain.ErrNotFound},
-			"wrong before":     {change: statusChange("G1", "disabled", "enabled"), want: domain.ErrConflict},
-			"empty version":    {change: statusChange("G1", "enabled", "disabled"), want: domain.ErrMalformed},
-			"future version":   {change: statusChange("G1", "enabled", "disabled"), want: domain.ErrUnsupported},
-			"invalid status":   {change: statusChange("G1", "enabled", "paused"), want: domain.ErrMalformed},
-			"changed ID":       {change: statusChange("G1", "enabled", "disabled"), want: domain.ErrMalformed},
+			"wrong before":     {change: statusChange("fk3x9r2m5iv8", "disabled", "enabled"), want: domain.ErrConflict},
+			"empty version":    {change: statusChange("fk3x9r2m5iv8", "enabled", "disabled"), want: domain.ErrMalformed},
+			"future version":   {change: statusChange("fk3x9r2m5iv8", "enabled", "disabled"), want: domain.ErrUnsupported},
+			"invalid status":   {change: statusChange("fk3x9r2m5iv8", "enabled", "paused"), want: domain.ErrMalformed},
+			"changed ID":       {change: statusChange("fk3x9r2m5iv8", "enabled", "disabled"), want: domain.ErrMalformed},
 			"wildcard ID":      {change: statusChange("G*", "enabled", "disabled"), want: domain.ErrMalformed},
 			"invalid UTF-8 ID": {change: statusChange(string([]byte{0xff}), "enabled", "disabled"), want: domain.ErrMalformed},
-			"mixed":            {change: statusChange("G1", "enabled", "disabled"), mixed: true, want: domain.ErrMalformed},
+			"mixed":            {change: statusChange("fk3x9r2m5iv8", "enabled", "disabled"), mixed: true, want: domain.ErrMalformed},
 		}
 		invalid := cases["empty version"]
 		invalid.change.Before.Version = ""
@@ -88,7 +88,7 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 		future.change.After.Version = "2"
 		cases["future version"] = future
 		changed := cases["changed ID"]
-		changed.change.After.ID = "G2"
+		changed.change.After.ID = "fk3x9r2man0d"
 		cases["changed ID"] = changed
 		for name, tc := range cases {
 			t.Run(name, func(t *testing.T) {
@@ -132,7 +132,7 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 				}
 				ctx, cancel := context.WithCancel(t.Context())
 				err = provider.Update(ctx, seeded.Area, func(storage.Snapshot) (storage.WriteSet, error) {
-					change := statusChange("G1", "enabled", "disabled")
+					change := statusChange("fk3x9r2m5iv8", "enabled", "disabled")
 					if name == "cancel" {
 						cancel()
 						return storage.WriteSet{GrantStatusChange: &change}, nil
@@ -182,7 +182,7 @@ func RunGrantStatus(t *testing.T, factory Factory) {
 		var calls atomic.Int32
 		err = second.Update(ctx, seeded.Area, func(storage.Snapshot) (storage.WriteSet, error) {
 			calls.Add(1)
-			change := statusChange("G1", "enabled", "disabled")
+			change := statusChange("fk3x9r2m5iv8", "enabled", "disabled")
 			return storage.WriteSet{GrantStatusChange: &change}, nil
 		})
 		if err == nil || calls.Load() != 0 {

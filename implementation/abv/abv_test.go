@@ -47,12 +47,12 @@ func TestOldAdministrationCannotAuthorizeGrantStatus(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	proposed := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
 	got, err := facade.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed)
 	if !errors.Is(err, domain.ErrUnsupported) || got != (domain.GrantControl{}) {
 		t.Fatalf("old adapter acquired authority: %#v, %v", got, err)
 	}
-	if p.snapshot.Controls["G2"].Status != "enabled" {
+	if p.snapshot.Controls["fk3x9r2man0d"].Status != "enabled" {
 		t.Fatal("unauthorized write")
 	}
 }
@@ -65,7 +65,7 @@ func TestOldAdministrationCannotAuthorizeAssignmentStatus(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := facade.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "A1", "disabled")
+	got, err := facade.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "fm5b7t4p5iv8", "disabled")
 	if !errors.Is(err, domain.ErrUnsupported) || got != (domain.Assignment{}) {
 		t.Fatalf("old adapter gained assignment control: %#v, %v", got, err)
 	}
@@ -85,13 +85,13 @@ func TestFacadeInspectsCanonicalRecordsAndDiagnosesWithoutWriting(t *testing.T) 
 	}
 	defer facade.Close()
 
-	record, err := facade.Inspect(t.Context(), area, "assignment", "A1")
+	record, err := facade.Inspect(t.Context(), area, "assignment", "fm5b7t4p5iv8")
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantJSON, _ := json.Marshal(fixture.Snapshot.Assignments["A1"])
-	if record.Area != area || record.Kind != "assignment" || record.ID != "A1" || !bytes.Equal(record.CanonicalJSON, wantJSON) {
-		t.Fatalf("record = %#v, want exact area-bound canonical A1", record)
+	wantJSON, _ := json.Marshal(fixture.Snapshot.Assignments["fm5b7t4p5iv8"])
+	if record.Area != area || record.Kind != "assignment" || record.ID != "fm5b7t4p5iv8" || !bytes.Equal(record.CanonicalJSON, wantJSON) {
+		t.Fatalf("record = %#v, want exact area-bound canonical fm5b7t4p5iv8", record)
 	}
 
 	raw, _ := json.Marshal(fixture.Proposed)
@@ -99,7 +99,7 @@ func TestFacadeInspectsCanonicalRecordsAndDiagnosesWithoutWriting(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diagnostic.Route == nil || diagnostic.Route.GrantID != "G2" || diagnostic.Summary != "proposal is structurally and lineally valid; administrative and source authority are not established" {
+	if diagnostic.Route == nil || diagnostic.Route.GrantID != "fk3x9r2man0d" || diagnostic.Summary != "proposal is structurally and lineally valid; administrative and source authority are not established" {
 		t.Fatalf("diagnostic = %#v", diagnostic)
 	}
 	assertCount(t, provider, area, 2)
@@ -117,8 +117,8 @@ func TestInspectCarriesAreaForEverySupportedKind(t *testing.T) {
 	}{
 		{kind: "scope", id: "dept"},
 		{kind: "role", id: "fi9jvxobqsxs"},
-		{kind: "grant", id: "G1", canonical: true},
-		{kind: "assignment", id: "A1", canonical: true},
+		{kind: "grant", id: "fk3x9r2m5iv8", canonical: true},
+		{kind: "assignment", id: "fm5b7t4p5iv8", canonical: true},
 		{kind: "team", id: "fibggi2juubk"},
 		{kind: "membership", id: "fi7io4lvjqio"},
 	} {
@@ -162,8 +162,8 @@ func TestSQLiteFacadeReopensCommittedAssignment(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer reopened.Close()
-	record, err := reopened.Inspect(t.Context(), area, "assignment", "A2")
-	if err != nil || record.ID != "A2" || len(record.CanonicalJSON) == 0 {
+	record, err := reopened.Inspect(t.Context(), area, "assignment", "fm5b7t4pan0d")
+	if err != nil || record.ID != "fm5b7t4pan0d" || len(record.CanonicalJSON) == 0 {
 		t.Fatalf("reopened record=%#v err=%v", record, err)
 	}
 }
@@ -181,9 +181,9 @@ func TestFacadeDiagnosticIsNotATicketForAssignment(t *testing.T) {
 	if _, err := facade.CheckAssignment(t.Context(), area, raw); err != nil {
 		t.Fatal(err)
 	}
-	control := provider.snapshot.Controls["G1"]
+	control := provider.snapshot.Controls["fk3x9r2m5iv8"]
 	control.Status = "disabled"
-	provider.snapshot.Controls["G1"] = control
+	provider.snapshot.Controls["fk3x9r2m5iv8"] = control
 	if receipt, err := facade.CreateAssignment(t.Context(), area, fixture.Issuer, fixture.Proposed); !errors.Is(err, domain.ErrRejected) || receipt != (domain.Receipt{}) {
 		t.Fatalf("stale diagnosis yielded receipt=%#v err=%v", receipt, err)
 	}
