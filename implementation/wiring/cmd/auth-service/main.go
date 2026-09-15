@@ -8,8 +8,10 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/lab"
 	"agentlabs.local/wiring"
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -99,11 +101,17 @@ func run(args []string) int {
 	return 0
 }
 
-// logged prints one line per question, so a demonstration can show what actually
-// crossed the boundary rather than asserting it.
+// logged prints the route and the body of every question, so a demonstration can
+// show what actually crossed the boundary rather than asserting it. The body is
+// the claim worth checking: whether the application asked what a human holds, or
+// asked for a decision.
 func logged(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("  auth  <- %s %s\n", r.Method, r.URL.Path)
+		body, err := io.ReadAll(io.LimitReader(r.Body, 8<<10))
+		if err == nil {
+			r.Body = io.NopCloser(bytes.NewReader(body))
+			fmt.Printf("  auth  <- %s %s\n        %s\n", r.Method, r.URL.Path, bytes.TrimSpace(body))
+		}
 		next.ServeHTTP(w, r)
 	})
 }

@@ -11,10 +11,26 @@ decision is new — the chain walk is the same code demonstration 20 captured.
 What is new is *where it runs*: the question crosses a network, and the
 application that asks holds no authority records at all.
 
-`127` lines captured, 10 commands. Reproduce with:
+`160` lines captured, 13 commands. Reproduce with:
 
 ```sh
 $(sess path)/verify-two-processes.sh
+```
+
+## SETUP — BOTH WOMEN ARE GIVEN A ROUTE
+
+> (the seeded fixture leaves Team2's assignment proposed, so until this
+> runs nutan holds nothing at all. It is captured rather than assumed,
+> because otherwise her refusal below could not be told apart from
+> having no grant — and the requests are what say what her route selects.)
+
+```console
+$ abv scenario seed team-fin-c17
+LAB ONLY: fixed fixture identity; not authenticated administration
+scenario seeded
+$ abv assign --file a2.json   (Team2, so nutan has a route at all)
+LAB ONLY: fixture-context is not authenticated identity; both authority gates are rechecked
+assignment fm5b7t4pan0d created
 ```
 
 ## TWO PROCESSES
@@ -62,6 +78,16 @@ $ curl -X GET  /api/v1/acme/ENG/C18                             (outside it)
 > are chosen by each child; scope is inherited and narrowed.)
 
 ```console
+$ curl -X GET  /api/v1/acme/FIN/C17                             (nutan may read it)
+{
+    "tenant_id": "acme",
+    "department_id": "FIN",
+    "certificate_id": "C17",
+    "employee_id": "fi7io4lvjqio",
+    "owner_id": "fi7io4lvjqio",
+    "title": "FIN annual"
+}
+200
 $ curl -X PUT  /api/v1/acme/certificates/C17                    (maya may write)
 {
     "tenant_id": "acme",
@@ -123,15 +149,24 @@ $ curl -X GET  /api/v1/acme/departments/FIN/certificates        (maya, within FI
 
 ## WHAT CROSSED THE BOUNDARY
 
-> (one question per request, and it is always the same question)
+> (one question per request, and the body is the claim worth checking:
+> the application asks what a human holds — never whether to allow)
 
 ```console
 auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
+      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
 auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
+      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
 auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
+      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjwu8"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
 auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
+      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::write"]}}
 auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
+      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjwu8"},"options":{"permissions":["hrms:payroll:payslip::write"]}}
 auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
+      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
+auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
+      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
 ```
 
 ## WHAT THE APPLICATION LINKS
@@ -165,10 +200,10 @@ $ curl -X GET  /api/v1/acme/FIN/C17                             (auth service st
 
 | Claim | The evidence above |
 |---|---|
-| The gate runs on the client | `hrms` answers 200 and 403 itself; Auth only ever answers the same `authority.resolve` question |
+| The gate runs on the client | `hrms` answers 200 and 403 itself; Auth is never asked whether to allow |
 | The application links no authority domain | `go list -deps` names `authmiddleware`, `authclient` and `apps/hrms` — not `abv`, not `registry` |
-| The wire carries authority, not decisions | six requests, six identical questions; no request names an endpoint, a method or a resource |
-| Permissions are selected, scope is inherited | same endpoint, same policy, same certificate: maya writes, nutan is refused |
+| The wire carries authority, not decisions | the seven bodies are printed in full: each names a human and one permission to filter the answer to, and **no** endpoint, method, resource or verdict |
+| Permissions are selected, scope is inherited | nutan reads the certificate and cannot write it; maya writes the same one through the same endpoint and the same policy |
 | An all-values ask is a deny | the listing endpoint names no department, and Q-071 refuses rather than quietly narrowing to what maya could have seen |
 | An outage is not a denial | Auth stopped gives `503` `AUTH_UNREACHABLE`, never `403` — Q-128 |
 
@@ -176,13 +211,28 @@ The application's policy table declares **four** endpoints across **two**
 permissions (`hrms:payroll:payslip::read` and `…::write`), and all four appear
 above.
 
-## What it does not establish
+The seven bodies differ in exactly two fields — `human_id`, and the one
+permission in `options.permissions`. They are otherwise the same question, and
+it is a question about a person, not about a request. That is the architectural
+claim of the whole lab, and here it is the capture rather than the prose that
+makes it.
 
-**Where a policy comes from.** The four policies above are built by a Go helper
-at startup, in the application's own code. That is the honest state of the lab:
-a policy is a compile-time value beside the handler it guards. Whether it should
-instead be a record — registered with the application, versioned, and read at
-boot — is the question this demonstration forces and does not answer.
+## Where the policy comes from
+
+Each endpoint declares its own policy — method, path, the permission it requires,
+and where the material comes from — and hands it to the middleware as a
+parameter:
+
+```go
+authmiddleware.Wrap(policy, identity, evaluator, bind, renderFailure)
+```
+
+Ownership is the endpoint's, which is the property worth having: the permission
+that guards a route is edited in the same place as the route and the handler, and
+cannot drift from them. Nothing administers it remotely, so no record change can
+alter who gets through — only authority can.
+
+## What it does not establish
 
 **Who the caller is.** `hrms` sends `Authorization: Bearer agent_hrms`, and the
 lab's credential gate compares that string. A deployment issues credentials and
@@ -191,3 +241,8 @@ derives the calling application from one; this does not.
 **Freshness.** Nothing here carries an epoch, and nothing caches. Each request
 asks again from scratch, which is correct and says nothing about what a cache
 would have to invalidate.
+
+**That the policy is right.** The gate enforces the permission the policy names.
+Nothing checks that the permission exists in the application's catalog, so a
+typo would deny every request to that endpoint, permanently and without saying
+why.
