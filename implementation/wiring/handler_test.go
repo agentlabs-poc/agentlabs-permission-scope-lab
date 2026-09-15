@@ -2,11 +2,13 @@ package wiring_test
 
 import (
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/lab"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -19,7 +21,11 @@ func (refusingAgents) Establish(*http.Request) (domain.Identity, error) {
 func post(t *testing.T, handler http.Handler, path, body string) (int, string) {
 	t.Helper()
 	recorder := httptest.NewRecorder()
-	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, path, bytes.NewReader([]byte(body))))
+	request := httptest.NewRequest(http.MethodPost, path, bytes.NewReader([]byte(body)))
+	// The fixture gate verifies this now, so these tests ask as an established
+	// caller and the refusals they observe are the ones they name.
+	request.Header.Set("Authorization", "Bearer "+lab.WorkloadToken)
+	handler.ServeHTTP(recorder, request)
 	var answered map[string]any
 	if err := json.Unmarshal(recorder.Body.Bytes(), &answered); err != nil {
 		t.Fatalf("status %d was not JSON: %s", recorder.Code, recorder.Body.String())
@@ -112,5 +118,71 @@ func TestAnUnauthenticatedCallerIsRefusedBeforeParsing(t *testing.T) {
 func TestHandlerRequiresAnAgentIdentity(t *testing.T) {
 	if handler, err := fuzzService(t).Handler(nil); err == nil || handler != nil {
 		t.Fatal("mounted without a way to establish the caller")
+	}
+}
+
+// Only a question the service accepted, decoded and answered is ever observed.
+//
+// The record a demonstration reads is evidence, so a caller that cannot
+// authenticate must not be able to put anything into it — and must not be able
+// to make the service buffer its body first either. An earlier version of this
+// observed through a wrapper around the handler, which had to read the body to
+// see the question and so read it before the authentication below: an
+// unauthenticated caller could forge lines into the record, which a review
+// demonstrated by writing one.
+func TestOnlyAnAnsweredQuestionIsObserved(t *testing.T) {
+	service := fuzzService(t)
+	var observed []string
+	record := func(method, path string, question []byte) {
+		observed = append(observed, method+" "+path+" "+string(question))
+	}
+	refused, err := service.Handler(refusingAgents{}, record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, body := range map[string]string{
+		"a sound body":        goodBody,
+		"an unsound body":     "<html>\n  auth  <- POST /api/v1/victim/x/authority.resolve",
+		"an oversize body":    string(make([]byte, 1<<17)),
+		"a forged line break": `{"version":"1","identity":{"human_id":"a` + "\n" + `"}}`,
+	} {
+		t.Run("unauthenticated, "+name, func(t *testing.T) {
+			if status, _ := post(t, refused, "/api/v1/acme/abv/applications/hrms/authority.resolve", body); status != http.StatusUnauthorized {
+				t.Fatalf("status = %d, want 401", status)
+			}
+			if len(observed) != 0 {
+				t.Fatalf("an unauthenticated caller wrote into the record: %q", observed)
+			}
+		})
+	}
+
+	answering, err := service.Handler(agents{}, record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Refused for its own reasons, after authentication: still not an answer, so
+	// still not observed.
+	for name, tc := range map[string]struct{ path, body string }{
+		"malformed":       {"/api/v1/acme/abv/applications/hrms/authority.resolve", "<html>"},
+		"another version": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"9","identity":{"version":"1","human_id":"a"},"options":{}}`},
+		"another tenant":  {"/api/v1/globex/abv/applications/hrms/authority.resolve", goodBody},
+	} {
+		t.Run("refused, "+name, func(t *testing.T) {
+			post(t, answering, tc.path, tc.body)
+			if len(observed) != 0 {
+				t.Fatalf("a refused question was recorded: %q", observed)
+			}
+		})
+	}
+
+	// And an answered one is, or nothing above would mean anything.
+	if status, _ := post(t, answering, "/api/v1/acme/abv/applications/hrms/authority.resolve", goodBody); status != http.StatusOK {
+		t.Fatalf("the sound question was not answered: %d", status)
+	}
+	if len(observed) != 1 {
+		t.Fatalf("an answered question was recorded %d times, want 1: %q", len(observed), observed)
+	}
+	if !strings.Contains(observed[0], "fi7io4lvjqio") {
+		t.Fatalf("the record does not carry the question: %q", observed[0])
 	}
 }

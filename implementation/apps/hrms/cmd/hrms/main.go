@@ -25,16 +25,28 @@ func (clock) Now() time.Time { return time.Now().UTC() }
 func main() { os.Exit(run(os.Args[1:], os.Stdout, os.Stderr)) }
 
 func run(args []string, out, diag *os.File) int {
+	// A flag takes the next argument unless that argument is itself a flag, so a
+	// switch with no value is present rather than silently swallowing what
+	// follows it — and a flag in final position is not dropped.
 	flags := map[string]string{}
-	for i := 0; i+1 < len(args); i++ {
-		if strings.HasPrefix(args[i], "--") {
-			flags[args[i]] = args[i+1]
+	for i := 0; i < len(args); i++ {
+		if !strings.HasPrefix(args[i], "--") {
+			continue
 		}
+		if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+			flags[args[i]] = args[i+1]
+			i++
+			continue
+		}
+		flags[args[i]] = ""
 	}
 	auth, tenant, application := flags["--auth"], flags["--tenant"], flags["--app"]
 	human, listen, credential := flags["--human"], flags["--listen"], flags["--client"]
-	if auth == "" || tenant == "" || application == "" || human == "" || credential == "" {
-		fmt.Fprintln(diag, "usage: hrms --auth URL --tenant ID --app ID --human ID --client ID [--listen ADDR]")
+	// The secret is not a flag. A token on a command line is a token in ps and
+	// in shell history, and this is the shape the migration copies.
+	token := os.Getenv("HRMS_AUTH_TOKEN")
+	if auth == "" || tenant == "" || application == "" || human == "" || credential == "" || token == "" {
+		fmt.Fprintln(diag, "usage: HRMS_AUTH_TOKEN=... hrms --auth URL --tenant ID --app ID --human ID --client ID [--listen ADDR] [--allow-cleartext]")
 		return 2
 	}
 	if listen == "" {
@@ -43,7 +55,15 @@ func run(args []string, out, diag *os.File) int {
 	// The application asks as itself about whichever human the request carries.
 	// --human is the lab standing in for authentication, which is the
 	// application's own business and not Auth's.
-	source, err := authclient.New(auth, authclient.Credential{Type: "service_account", ID: credential}, nil)
+	// Cleartext is asked for, never inferred. Switching the guard off because
+	// the URL says http:// would mean a deployment could never hit the guard at
+	// all: a typo would silently downgrade, and the bearer and the authority
+	// answers would cross the network in the open with nothing said.
+	if _, asked := flags["--allow-cleartext"]; asked {
+		authclient.AllowCleartext()
+	}
+	source, err := authclient.New(auth,
+		authclient.Credential{Type: "service_account", ID: credential, Bearer: token}, nil)
 	if err != nil {
 		fmt.Fprintln(diag, err)
 		return 2
@@ -60,7 +80,13 @@ func run(args []string, out, diag *os.File) int {
 		return 4
 	}
 	fmt.Fprintf(out, "hrms listening on %s, asking %s as %s\n", listen, auth, credential)
-	server := &http.Server{Addr: listen, Handler: handler, ReadHeaderTimeout: 5 * time.Second}
+	server := &http.Server{
+		Addr: listen, Handler: handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
 	if err := server.ListenAndServe(); err != nil {
 		fmt.Fprintln(diag, err)
 		return 4

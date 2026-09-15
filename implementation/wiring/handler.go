@@ -9,9 +9,13 @@ import (
 	"net/http"
 )
 
-// maxRequestBytes bounds one question. A service that reads any length is one a
+// MaxRequestBytes bounds one question. A service that reads any length is one a
 // caller can exhaust.
-const maxRequestBytes = 1 << 16
+//
+// It is exported because anything wrapping this handler has to read to the same
+// limit: a wrapper that reads less and hands on what it read would make the
+// service reject a question it would otherwise have answered.
+const MaxRequestBytes = 1 << 16
 
 // AgentIdentity establishes which application is asking, from its own
 // credentials on the request.
@@ -27,15 +31,26 @@ type AgentIdentity interface {
 
 // Handler is the standard endpoint set: the routes are this package's, not a
 // deployment's, so a client needs a base URL and nothing else.
-func (s *Service) Handler(agents AgentIdentity) (http.Handler, error) {
+func (s *Service) Handler(agents AgentIdentity, observers ...Observer) (http.Handler, error) {
 	if agents == nil {
 		return nil, errors.New("an agent identity source is required")
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/v1/{tenant}/abv/applications/{application}/authority.resolve",
-		func(w http.ResponseWriter, r *http.Request) { s.resolve(agents, w, r) })
+		func(w http.ResponseWriter, r *http.Request) { s.resolve(agents, observers, w, r) })
 	return mux, nil
 }
+
+// Observer is told about a question this service accepted and answered, and is
+// how a demonstration shows what actually crossed the boundary.
+//
+// It is a hook here rather than a wrapper around the handler because a wrapper
+// has to read the body to see the question, and reading it outside this function
+// puts that read in front of the authentication below — which would let an
+// unauthenticated caller make the service buffer 64 KiB per request, and put
+// text of its choosing into the record a demonstration reads. The service calls
+// this only for a question it authenticated, decoded and answered.
+type Observer func(method, path string, question []byte)
 
 type wireIdentity struct {
 	Version string `json:"version"`
@@ -61,7 +76,7 @@ type wireRequest struct {
 // established as entitled to ask, which is CheckAuthorityRead's job inside the
 // facade, and the tenant's installation of the application is checked before any
 // record is read.
-func (s *Service) resolve(agents AgentIdentity, w http.ResponseWriter, r *http.Request) {
+func (s *Service) resolve(agents AgentIdentity, observers []Observer, w http.ResponseWriter, r *http.Request) {
 	area, err := domain.NewArea(r.PathValue("tenant"), r.PathValue("application"))
 	if err != nil {
 		fail(w, http.StatusBadRequest, "MALFORMED_AREA")
@@ -75,8 +90,8 @@ func (s *Service) resolve(agents AgentIdentity, w http.ResponseWriter, r *http.R
 		fail(w, http.StatusUnauthorized, "UNAUTHENTICATED")
 		return
 	}
-	body, err := io.ReadAll(io.LimitReader(r.Body, maxRequestBytes+1))
-	if err != nil || len(body) > maxRequestBytes {
+	body, err := io.ReadAll(io.LimitReader(r.Body, MaxRequestBytes+1))
+	if err != nil || len(body) > MaxRequestBytes {
 		fail(w, http.StatusBadRequest, "MALFORMED_REQUEST")
 		return
 	}
@@ -115,6 +130,9 @@ func (s *Service) resolve(agents AgentIdentity, w http.ResponseWriter, r *http.R
 	if err := json.NewEncoder(w).Encode(resolved); err != nil {
 		// The status is already written; nothing useful can be said now.
 		return
+	}
+	for _, observe := range observers {
+		observe(r.Method, r.URL.Path, body)
 	}
 }
 

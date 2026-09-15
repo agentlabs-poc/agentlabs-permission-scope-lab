@@ -249,7 +249,17 @@ func renderFailure(w http.ResponseWriter, _ *http.Request, result authmiddleware
 	// healthy Auth is. The fix belongs in the sources.
 	switch {
 	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
-		writeError(w, http.StatusServiceUnavailable, "request failed")
+		// The same canonical block every other evaluation failure carries. It
+		// used to answer {"error":"request failed"} with no code and neither
+		// message, so the one outcome a person most needs told apart from a
+		// denial arrived in a shape no consumer could read — while its sibling
+		// branch above carried all four fields.
+		writeJSON(w, http.StatusServiceUnavailable, &authmiddleware.EvaluationError{
+			Version:       "1",
+			Code:          "AUTHORITY_TIMEOUT",
+			Message:       "We could not check your access.",
+			MessageReason: "the authority question did not finish",
+		})
 	default:
 		writeError(w, http.StatusBadRequest, "request failed")
 	}

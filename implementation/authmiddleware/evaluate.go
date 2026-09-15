@@ -46,7 +46,7 @@ func (e *Evaluator) Evaluate(ctx context.Context, request Request) (Result, erro
 		return Result{}, err
 	}
 	if len(authority.Routes) > maxRoutes {
-		return Result{}, errors.New("authority exceeds route limit")
+		return Result{}, unusableAuthority(errors.New("authority exceeds route limit"))
 	}
 
 	now := e.clock.Now()
@@ -59,10 +59,10 @@ func (e *Evaluator) Evaluate(ctx context.Context, request Request) (Result, erro
 		route := &authority.Routes[i]
 		predicateCount += len(route.Predicates)
 		if predicateCount > maxTotalPredicates {
-			return Result{}, errors.New("authority exceeds predicate limit")
+			return Result{}, unusableAuthority(errors.New("authority exceeds predicate limit"))
 		}
 		if err := validateRoute(ctx, *route, request); err != nil {
-			return Result{}, fmt.Errorf("invalid authority route %d: %w", i, err)
+			return Result{}, unusableAuthority(fmt.Errorf("invalid authority route %d: %w", i, err))
 		}
 		if route.ValidFrom != nil && now.Before(*route.ValidFrom) || route.ValidUntil != nil && !now.Before(*route.ValidUntil) {
 			continue
@@ -132,6 +132,24 @@ func validateArea(area Area) error {
 		return errors.New("invalid area")
 	}
 	return nil
+}
+
+// unusableAuthority names an answer this gate cannot work with.
+//
+// It is an evaluation failure and never the caller's fault, which is the whole
+// distinction Q-128 draws. Returned as a plain error it reached the application
+// as "your request was bad": a person would retry a request that was never the
+// problem, and an operator would never learn that the authority service is
+// answering nonsense. The routes here came from the source, not from the
+// request — nothing the caller sent can produce one.
+func unusableAuthority(cause error) *EvaluationError {
+	return &EvaluationError{
+		Version:       "1",
+		Code:          "AUTHORITY_MALFORMED",
+		Message:       "We could not check your access.",
+		MessageReason: "the authority service returned an answer this gate cannot use",
+		Cause:         cause,
+	}
 }
 
 func validateRoute(ctx context.Context, route Route, request Request) error {

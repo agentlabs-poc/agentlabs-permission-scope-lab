@@ -191,6 +191,14 @@ func (a *RoleAdministration) CheckRootEstablishment(ctx context.Context, area do
 // credential belongs to the migration rather than here.
 const WorkloadClient = "agent_hrms"
 
+// WorkloadToken is the secret that credential authenticates with.
+//
+// It is deliberately not the id. An id names a credential and may be printed,
+// logged and passed on a command line; a token authenticates it and may not.
+// The lab issues neither, but it keeps them apart, because collapsing them is
+// precisely the habit the migration would inherit.
+const WorkloadToken = "shared_secret_fyd2k7x0q4nb"
+
 // CheckAuthorityRead gates asking what a human is entitled to, and it is the one
 // gate here that answers differently for different actors — because it is the
 // only read whose caller need not be a person.
