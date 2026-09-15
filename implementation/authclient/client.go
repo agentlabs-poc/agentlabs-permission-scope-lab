@@ -185,6 +185,13 @@ func (s *Source) Load(ctx context.Context, query authmiddleware.AuthorityQuery) 
 	if err := decoder.Decode(&answer); err != nil {
 		return authmiddleware.Authority{}, (&Error{Code: "AUTH_MALFORMED", Message: "the answer did not match the contract", Cause: err}).evaluation()
 	}
+	// After the decode, so that text which is not the contract at all is
+	// reported as malformed rather than as ambiguous — but before the answer is
+	// used for anything, because an answer that says two things has not been
+	// read yet.
+	if err := rejectAmbiguousJSON(raw); err != nil {
+		return authmiddleware.Authority{}, (&Error{Code: "AUTH_AMBIGUOUS", Message: "the answer did not mean exactly one thing", Cause: err}).evaluation()
+	}
 	return answer.decode(query)
 }
 

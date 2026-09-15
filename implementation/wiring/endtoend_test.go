@@ -8,6 +8,7 @@ import (
 	"agentlabs.local/authmiddleware"
 	"agentlabs.local/wiring"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -19,7 +20,13 @@ import (
 // a deployment verifies a real token here.
 type agents struct{}
 
-func (agents) Establish(*http.Request) (domain.Identity, error) {
+// It verifies the token, because a fixture that admits everyone leaves every
+// test below running against an Auth service that authenticates nothing — and
+// the credential gate then exists only in its own unit test, never in the loop.
+func (agents) Establish(r *http.Request) (domain.Identity, error) {
+	if r.Header.Get("Authorization") != "Bearer "+lab.WorkloadToken {
+		return domain.Identity{}, errors.New("unrecognised credential")
+	}
 	return domain.Identity{
 		Version: "1",
 		Actor:   domain.Actor{Type: "service_account", ID: lab.WorkloadClient},
@@ -80,7 +87,7 @@ func TestAnApplicationDecidesOverTheWire(t *testing.T) {
 	// The application side. It is given a URL where it used to be given a
 	// database path, and that is the whole difference it sees.
 	source, err := authclient.New(auth.URL,
-		authclient.Credential{Type: "service_account", ID: lab.WorkloadClient}, auth.Client())
+		authclient.Credential{Type: "service_account", ID: lab.WorkloadClient, Bearer: lab.WorkloadToken}, auth.Client())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +131,7 @@ func TestAnUnreachableAuthIsNotADenial(t *testing.T) {
 	down.Close()
 
 	source, err := authclient.New(down.URL,
-		authclient.Credential{Type: "service_account", ID: lab.WorkloadClient}, down.Client())
+		authclient.Credential{Type: "service_account", ID: lab.WorkloadClient, Bearer: lab.WorkloadToken}, down.Client())
 	if err != nil {
 		t.Fatal(err)
 	}

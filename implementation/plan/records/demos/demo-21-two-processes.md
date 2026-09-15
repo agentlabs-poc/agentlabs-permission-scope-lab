@@ -234,6 +234,13 @@ alter who gets through — only authority can.
 
 ## What it does not establish
 
+**That the policy's route parameters are bound.** The gate binds the path's
+tenant to the trusted area only when the route parameter is spelled exactly
+`tenant`. `hrms` spells it that way; a policy that says `tenantId` loses tenant
+isolation silently, and the gate cannot tell. That is a contract question — a
+policy would have to declare which of its inputs carries the tenant — and it is
+recorded rather than answered here.
+
 **Who the caller is.** `hrms` sends a bearer token it is given out of band, and
 the lab's credential gate compares it — in constant time, because that is the
 line a deployment replaces. Nothing here issues a credential, and the id the
@@ -264,5 +271,12 @@ A capture proves something ran once. These hold it:
 | `wiring.TestAHumanWithNoAuthorityIsDeniedRatherThanFailed` | holding nothing is reported as an outage rather than a denial |
 | `wiring.TestTheStackIsCorrectUnderConcurrency` | the shared evaluator and store race |
 | `apps/hrms.TestTheApplicationLinksNoAuthorityDomain` | `abv` re-enters the application's dependency closure — two lines in a `go.mod` were enough, and every other test stayed green |
-| `auth-service.TestNothingIsLoggedForAQuestionTheServiceRefused` | an unauthenticated caller writes lines into the record this demonstration reads |
+| `wiring.TestOnlyAnAnsweredQuestionIsObserved` | an unauthenticated caller writes lines into the record this demonstration reads, or makes the service buffer its body first |
 | `auth-service.TestAValidBodyCannotAddLinesToTheRecord` | a body chooses the shape of that record |
+| `auth-service.TestAPathCannotAddLinesToTheRecord` | a path does |
+| `wiring.TestTheApplicationAsksAsItselfAboutAHuman` | the application asks as the human instead of as itself — the architecture's central claim, and nothing held it |
+| `wiring.TestAnApplicationAuthDoesNotRecogniseDecidesNothing` | the application's own credential problem is rendered as the person's denial |
+| `wiring.TestAValidityWindowIsHonouredAcrossTheWire` | `validity` is dropped on the wire and grants never expire |
+| `wiring.TestTheWriteIsBoundToTheDepartmentTheBodyNames` | the only body-sourced material in the system is replaced by a constant |
+| `wiring.TestAMethodThePolicyDoesNotNameIsRefused` | `HEAD`, which Go routes to the `GET` handler, is authorized |
+| `wiring.TestTheFixtureAnswerOpensTheGate` | the fixture twenty refusals rest on could not have opened the gate anyway |

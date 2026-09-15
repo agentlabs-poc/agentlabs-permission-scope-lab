@@ -6,6 +6,7 @@ import (
 	regdomain "agentlabs.local/registry/domain"
 	"agentlabs.local/wiring"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -17,13 +18,18 @@ import (
 // listening somewhere the operator did not ask for.
 func TestIncompleteArgumentsAreRefused(t *testing.T) {
 	for name, args := range map[string][]string{
-		"nothing at all":   {},
-		"an odd number":    {"--authority", "a.db", "--registry"},
-		"no tenant":        {"--authority", "a.db", "--registry", "r.db"},
-		"no application":   {"--authority", "a.db", "--registry", "r.db", "--tenant", "acme"},
-		"a stray word":     {"authority", "a.db", "--registry", "r.db"},
-		"an empty tenant":  {"--authority", "a.db", "--registry", "r.db", "--tenant", "", "--app", "hrms"},
-		"a malformed area": {"--authority", "a.db", "--registry", "r.db", "--tenant", " ", "--app", "hrms"},
+		"nothing at all": {},
+		"an odd number":  {"--authority", "a.db", "--registry"},
+		// The hazard the pairing rule exists to rule out: an otherwise
+		// complete configuration with one flag left dangling. A parser that
+		// truncated rather than refusing would start a service listening
+		// wherever it liked, having been told exactly where not to.
+		"a trailing flag with no value": {"--authority", "a.db", "--registry", "r.db", "--tenant", "acme", "--app", "hrms", "--listen"},
+		"no tenant":                     {"--authority", "a.db", "--registry", "r.db"},
+		"no application":                {"--authority", "a.db", "--registry", "r.db", "--tenant", "acme"},
+		"a stray word":                  {"authority", "a.db", "--registry", "r.db"},
+		"an empty tenant":               {"--authority", "a.db", "--registry", "r.db", "--tenant", "", "--app", "hrms"},
+		"a malformed area":              {"--authority", "a.db", "--registry", "r.db", "--tenant", " ", "--app", "hrms"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if code := run(args); code != 2 {
@@ -38,7 +44,53 @@ func TestIncompleteArgumentsAreRefused(t *testing.T) {
 // is the only failure this may swallow: a service that starts without its
 // installation answers every question "not found", which is a service that
 // denies everything rather than an error an operator can see.
+// stubRegistry answers each call with what the test wants, so both branches of
+// install can be exercised for what they tolerate.
+type stubRegistry struct{ register, installed error }
+
+func (s stubRegistry) RegisterApplication(context.Context, regdomain.Identity, string, string) (regdomain.Application, error) {
+	return regdomain.Application{}, s.register
+}
+func (s stubRegistry) Install(context.Context, regdomain.Identity, string, string) error {
+	return s.installed
+}
+
 func TestInstallationToleratesOnlyAConflict(t *testing.T) {
+	area, err := domain.NewArea("acme", "hrms")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, tc := range map[string]struct {
+		registry stubRegistry
+		tolerate bool
+	}{
+		"a clean start":                {stubRegistry{}, true},
+		"a second run of the lab":      {stubRegistry{register: regdomain.ErrConflict, installed: regdomain.ErrConflict}, true},
+		"registered but not installed": {stubRegistry{register: regdomain.ErrConflict}, true},
+		// Anything that is not a conflict is fatal. A service that starts
+		// without its installation answers every question "not found", which is
+		// a service that denies everything rather than an error an operator can
+		// see — and both calls have to hold that, not just the first.
+		"registration refused": {stubRegistry{register: regdomain.ErrRejected}, false},
+		"installation refused": {stubRegistry{installed: regdomain.ErrRejected}, false},
+		"registration broken":  {stubRegistry{register: errors.New("disk")}, false},
+		"installation broken":  {stubRegistry{installed: errors.New("disk")}, false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			err := install(tc.registry, area, operatorIdentity())
+			if tc.tolerate && err != nil {
+				t.Fatalf("a start that should have proceeded failed: %v", err)
+			}
+			if !tc.tolerate && err == nil {
+				t.Fatal("a failure that is not a conflict was treated as success")
+			}
+		})
+	}
+}
+
+// And the real registry agrees with the stub about what a second run looks
+// like, so the stub above is not a fiction the production path never produces.
+func TestASecondStartReusesItsOwnInstallation(t *testing.T) {
 	dir := t.TempDir()
 	area, err := domain.NewArea("acme", "hrms")
 	if err != nil {
@@ -61,19 +113,15 @@ func TestInstallationToleratesOnlyAConflict(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer service.Close()
-
-	if err := install(service, area, operatorIdentity()); err != nil {
+	if err := install(service.Applications(), area, operatorIdentity()); err != nil {
 		t.Fatalf("the first installation failed: %v", err)
 	}
-	// The second run of the lab, which is where the conflict comes from.
-	if err := install(service, area, operatorIdentity()); err != nil {
+	if err := install(service.Applications(), area, operatorIdentity()); err != nil {
 		t.Fatalf("a second start refused to reuse its own installation: %v", err)
 	}
-	// And a failure that is not a conflict is fatal. The registry gate admits
-	// only the lab's operator, so asking as anyone else is refused — which is
-	// the shape every real installation failure arrives in.
-	if err := install(service, area, regdomain.Identity{Version: "1", HumanID: "fi7io4lvk35s"}); err == nil {
-		t.Fatal("an installation that was refused outright was treated as success")
+	// And a caller the registry does not admit cannot install anything.
+	if err := install(service.Applications(), area, regdomain.Identity{Version: "1", HumanID: "fi7io4lvk35s"}); err == nil {
+		t.Fatal("a stranger installed an application")
 	}
 }
 

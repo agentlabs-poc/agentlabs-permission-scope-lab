@@ -199,7 +199,15 @@ func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 		t.Fatal(err)
 	}
 	before, _ := store.Get("acme", "FIN", "C17")
-	assertResponse(t, timedOut, http.MethodPut, "/api/v1/acme/certificates/C17", `{"department_id":"FIN","title":"must not run"}`, http.StatusServiceUnavailable, `"error":"request failed"`, `!deadline`)
+	// The canonical evaluation-error block, the same four fields its sibling
+	// branch carries. This asserted {"error":"request failed"} until a review
+	// pointed out that it was pinning the one evaluation outcome that carried
+	// no error code and neither message — so the two failure paths disagreed
+	// with each other on the wire, and this test was what held them apart.
+	// `!deadline` stays: the operator's reason may say the question did not
+	// finish, and must not leak the Go error's own text.
+	assertResponse(t, timedOut, http.MethodPut, "/api/v1/acme/certificates/C17", `{"department_id":"FIN","title":"must not run"}`, http.StatusServiceUnavailable,
+		`"version":"1"`, `"error_code":"AUTHORITY_TIMEOUT"`, `"error_message":"We could not check your access."`, `"error_message_reason":`, `!deadline`, `!"decision"`)
 	after, _ := store.Get("acme", "FIN", "C17")
 	if after != before {
 		t.Fatalf("timeout executed update: before=%#v after=%#v", before, after)

@@ -24,6 +24,14 @@ import (
 	"time"
 )
 
+const (
+	readTimeout  = 10 * time.Second
+	writeTimeout = 15 * time.Second
+	// The drain has to outlast both, or a request still arriving when the signal
+	// lands turns an orderly stop into a reported failure.
+	shutdownGrace = readTimeout + writeTimeout + 5*time.Second
+)
+
 type clock struct{}
 
 func (clock) Now() time.Time { return time.Now().UTC() }
@@ -97,17 +105,17 @@ func run(args []string) int {
 	}
 	defer service.Close()
 
-	if err := install(service, area, operatorIdentity()); err != nil {
+	if err := install(service.Applications(), area, operatorIdentity()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 4
 	}
-	handler, err := service.Handler(labAgents{})
+	handler, err := service.Handler(labAgents{}, printQuestion(os.Stdout))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 4
 	}
 	fmt.Printf("auth-service listening on %s for %s/%s\n", listen, area.TenantID(), area.ApplicationID())
-	return serve(listen, logged(handler, os.Stdout))
+	return serve(listen, handler)
 }
 
 // install registers the application and installs it into the tenant, so the
@@ -118,13 +126,22 @@ func run(args []string) int {
 // and nothing else. Any other failure is fatal: a service that starts without
 // its installation answers every question ErrNotFound, which is a service that
 // denies everything rather than an error an operator can see.
-func install(service *wiring.Service, area domain.Area, as regdomain.Identity) error {
+// applications is the part of the registry startup uses. It is an interface so
+// each branch below can be tested for what it tolerates: through the real
+// facade, a caller the registry refuses is refused at registration and the
+// installation is never reached, which left the second branch unexercised.
+type applications interface {
+	RegisterApplication(context.Context, regdomain.Identity, string, string) (regdomain.Application, error)
+	Install(context.Context, regdomain.Identity, string, string) error
+}
+
+func install(registry applications, area domain.Area, as regdomain.Identity) error {
 	ctx := context.Background()
-	_, err := service.Applications().RegisterApplication(ctx, as, area.ApplicationID(), area.ApplicationID())
+	_, err := registry.RegisterApplication(ctx, as, area.ApplicationID(), area.ApplicationID())
 	if err != nil && !errors.Is(err, regdomain.ErrConflict) {
 		return fmt.Errorf("register %s: %w", area.ApplicationID(), err)
 	}
-	err = service.Applications().Install(ctx, as, area.TenantID(), area.ApplicationID())
+	err = registry.Install(ctx, as, area.TenantID(), area.ApplicationID())
 	if err != nil && !errors.Is(err, regdomain.ErrConflict) {
 		return fmt.Errorf("install %s into %s: %w", area.ApplicationID(), area.TenantID(), err)
 	}
@@ -142,8 +159,8 @@ func serve(listen string, handler http.Handler) int {
 		// A caller that completes its headers and then stalls its body holds a
 		// goroutine and a connection for as long as it likes. This service is
 		// the one every application's authorization depends on.
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
 		IdleTimeout:  60 * time.Second,
 	}
 	stopping := make(chan os.Signal, 1)
@@ -157,52 +174,53 @@ func serve(listen string, handler http.Handler) int {
 			return 4
 		}
 	case <-stopping:
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		// Longer than the read and write timeouts above, because a connection
+		// that is mid-body when the signal arrives is entitled to live until
+		// one of those fires. A grace shorter than they are made every shutdown
+		// with one stalled caller report failure — and any caller at all, even
+		// an unauthenticated one, could hold a connection open.
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownGrace)
 		defer cancel()
 		if err := server.Shutdown(ctx); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 4
+			// Not a failure exit: the service stopped accepting work and drained
+			// what it could. A supervisor reads a non-zero status as a crash,
+			// and a slow caller is not one.
+			fmt.Fprintln(os.Stderr, "stopped with requests still in flight:", err)
 		}
 	}
 	return 0
 }
 
-// status remembers what the service answered, so logged can refuse to write a
-// line for a question the service never accepted.
-type status struct {
-	http.ResponseWriter
-	code int
+// printQuestion records one question the service accepted and answered, so a
+// demonstration can show what crossed the boundary rather than asserting it. The
+// body is the claim worth checking: whether the application asked what a human
+// holds, or asked for a decision.
+//
+// It is an observer rather than a wrapper around the handler. A wrapper has to
+// read the body to see the question, which puts that read in front of the
+// service's authentication — an unauthenticated caller could then make the
+// service buffer every request, and write lines of its own choosing into the
+// record this log is.
+func printQuestion(to io.Writer) wiring.Observer {
+	return func(method, path string, question []byte) {
+		// Compacted rather than echoed: a body is caller-supplied text, and a
+		// line break inside one would otherwise forge a line of its own. The
+		// path is caller-supplied too, and carries no structure to preserve, so
+		// anything that could break the line is simply removed.
+		var compact bytes.Buffer
+		if json.Compact(&compact, question) != nil {
+			return
+		}
+		fmt.Fprintf(to, "  auth  <- %s %s\n        %s\n", method, oneLine(method + path)[len(method):], compact.Bytes())
+	}
 }
 
-func (s *status) WriteHeader(code int) { s.code = code; s.ResponseWriter.WriteHeader(code) }
-
-// logged prints the route and the body of every answered question, so a
-// demonstration can show what actually crossed the boundary rather than
-// asserting it. The body is the claim worth checking: whether the application
-// asked what a human holds, or asked for a decision.
-//
-// Two rules make the log evidence rather than decoration. It reads to the
-// service's own limit, so a question this wrapper can log is exactly a question
-// the service can answer. And it writes only after the service answered 200 —
-// an unauthenticated caller must not be able to put lines into the record a
-// demonstration reads.
-func logged(next http.Handler, to io.Writer) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, err := io.ReadAll(io.LimitReader(r.Body, wiring.MaxRequestBytes+1))
-		// Whatever was read is handed back whole, error or not: the service
-		// must see the request this wrapper saw.
-		r.Body = io.NopCloser(io.MultiReader(bytes.NewReader(body), r.Body))
-		answered := &status{ResponseWriter: w, code: http.StatusOK}
-		next.ServeHTTP(answered, r)
-		if err != nil || answered.code != http.StatusOK {
-			return
+// oneLine strips anything that could end a line or hide what follows it.
+func oneLine(text string) string {
+	return strings.Map(func(r rune) rune {
+		if r < 0x20 || r == 0x7f {
+			return -1
 		}
-		// Compacted rather than printed raw: a body is caller-supplied text, and
-		// a newline inside one would otherwise forge a line of its own.
-		var compact bytes.Buffer
-		if json.Compact(&compact, body) != nil {
-			return
-		}
-		fmt.Fprintf(to, "  auth  <- %s %s\n        %s\n", r.Method, r.URL.Path, compact.Bytes())
-	})
+		return r
+	}, text)
 }

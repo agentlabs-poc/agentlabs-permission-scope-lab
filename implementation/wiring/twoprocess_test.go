@@ -8,6 +8,8 @@ import (
 	"agentlabs.local/authmiddleware"
 	"agentlabs.local/wiring"
 	"context"
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -15,6 +17,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 )
 
 const (
@@ -84,6 +87,10 @@ func authServiceWithStore(t *testing.T) (*httptest.Server, *wiring.Service, doma
 // application is the client side: the gate, an HTTP authority source, and a
 // handler. It links no authority records, which is the whole point.
 func application(t *testing.T, authURL string, doer authclient.Doer, human string) http.Handler {
+	return applicationHolding(t, authURL, doer, human, hrms.DefaultRecords())
+}
+
+func applicationHolding(t *testing.T, authURL string, doer authclient.Doer, human string, records []hrms.Record) http.Handler {
 	t.Helper()
 	source, err := authclient.New(authURL,
 		authclient.Credential{Type: "service_account", ID: lab.WorkloadClient, Bearer: lab.WorkloadToken}, doer)
@@ -94,7 +101,7 @@ func application(t *testing.T, authURL string, doer authclient.Doer, human strin
 	if err != nil {
 		t.Fatal(err)
 	}
-	handler, err := hrms.NewHandler(hrms.NewStore(hrms.DefaultRecords()), evaluator,
+	handler, err := hrms.NewHandler(hrms.NewStore(records), evaluator,
 		hrms.TrustedIdentity("acme", "hrms", human))
 	if err != nil {
 		t.Fatal(err)
@@ -285,6 +292,21 @@ func answer(human, permission string) string {
 		`"permissions":["` + permission + `"],"scope":{}}]}`
 }
 
+// The control for every case below. `answer` is a fixture, and eleven
+// assertions of the form "this must not open the gate" say nothing at all if
+// the fixture could not open it anyway. A review made exactly that point by
+// misspelling a field in it: all eleven still passed.
+func TestTheFixtureAnswerOpensTheGate(t *testing.T) {
+	willing := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(answer(maya, "hrms:payroll:payslip::read")))
+	}))
+	defer willing.Close()
+	status, body := call(t, application(t, willing.URL, willing.Client(), maya), http.MethodGet, "/api/v1/acme/FIN/C17", "")
+	if status != http.StatusOK {
+		t.Fatalf("status = %d, want 200 — the fixture cannot open the gate, so every refusal below proves nothing: %s", status, body)
+	}
+}
+
 // An Auth that answers something other than the truth must not be able to open
 // the gate, and must not be able to close it either: every one of these is an
 // evaluation failure, which is 503 — never 200, and never the 403 that would
@@ -319,6 +341,50 @@ func TestAnAuthThatMisbehavesCannotDecideAnything(t *testing.T) {
 		},
 		"a field neither side agreed on": func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"scope":{}`, `"scope":{},"surprise":true`, 1)))
+		},
+		// These are the answers authclient accepts and the gate then refuses.
+		// They used to reach the caller as 400 "your request failed", which is
+		// a lie told to the one party who did nothing wrong — and a review
+		// found every case above happened to be caught a step earlier, so the
+		// invariant this test states was never actually tested here.
+		"a scope value that is empty": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"scope":{}`, `"scope":{"dept":""}`, 1)))
+		},
+		"a wildcard in a scope value": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"scope":{}`, `"scope":{"dept":"*"}`, 1)))
+		},
+		"a token that is not $self": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"scope":{}`, `"scope":{"user":"$other"}`, 1)))
+		},
+		"a wildcard in a scope key": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"scope":{}`, `"scope":{"de*pt":"FIN"}`, 1)))
+		},
+		// The answer direction used to be strict about unknown fields and lax
+		// about saying two things at once, which made the strictness
+		// decorative. The service refuses both of these in a question.
+		"a subject named twice": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read),
+				`"human_id":"`+maya+`"`, `"human_id":"`+nutan+`","human_id":"`+maya+`"`, 1)))
+		},
+		"a grant's permissions named twice": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read),
+				`"permissions":["`+read+`"]`, `"permissions":["x"],"permissions":["`+read+`"]`, 1)))
+		},
+		"a second document after the answer": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(answer(maya, read) + `{"version":"1","tenant_id":"acme"}`))
+		},
+		// Each grant states its own contract version, and it decides how that
+		// grant's scope and validity are to be read.
+		"a grant from another contract version": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read),
+				`"grant_id":"fk3x9r2m5iv8"`, `"grant_id":"fk3x9r2m5iv8","version":"9"`, 1)))
+		},
+		"a grant that states no version": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read),
+				`{"version":"1","grant_id":"fk3x9r2m5iv8"`, `{"grant_id":"fk3x9r2m5iv8"`, 1)))
+		},
+		"a grant with no id": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"grant_id":"fk3x9r2m5iv8"`, `"grant_id":""`, 1)))
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -406,12 +472,24 @@ func TestWithdrawingAnAssignmentChangesTheNextAnswer(t *testing.T) {
 func TestSelfResolvesPerHumanOverTheWire(t *testing.T) {
 	auth, service, area := authServiceWithStore(t)
 	issuer := lab.TeamFINC17(area).Issuer
-	nutansApp := application(t, auth.URL, auth.Client(), nutan)
 
-	// C19's employee is nutan, and her only route is narrowed to cert=C17, so
-	// today she cannot read it. That refusal is what the self grant changes.
-	if status, body := call(t, nutansApp, http.MethodGet, "/api/v1/acme/FIN/C19", ""); status != http.StatusForbidden {
-		t.Fatalf("status = %d before the self grant, want 403 — %s", status, body)
+	// C20 is the discriminating record: same department as C19, same
+	// certificate rule, and a different employee. Without it the only record
+	// nutan could not reach was in another department, so `dept=FIN` refused it
+	// on its own and the `user` predicate was never consulted — the test passed
+	// with $self matching anybody, which a review demonstrated.
+	records := append(hrms.DefaultRecords(), hrms.Record{
+		TenantID: "acme", DepartmentID: "FIN", CertificateID: "C20",
+		EmployeeID: "fi7io4lvk35s", OwnerID: "fi7io4lvk35s", Title: "FIN someone else's",
+	})
+	nutansApp := applicationHolding(t, auth.URL, auth.Client(), nutan, records)
+
+	// Her route is narrowed to cert=C17, so neither FIN record is hers to read
+	// yet. That refusal is what the self grant changes — for one of them.
+	for _, path := range []string{"/api/v1/acme/FIN/C19", "/api/v1/acme/FIN/C20"} {
+		if status, body := call(t, nutansApp, http.MethodGet, path, ""); status != http.StatusForbidden {
+			t.Fatalf("%s = %d before the self grant, want 403 — %s", path, status, body)
+		}
 	}
 	grant, content, err := service.Authority().CreateGrant(t.Context(), area, issuer, "fk3x9r2m5iv8",
 		domain.GrantContent{Version: "1", Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"user": "$self"}})
@@ -427,14 +505,21 @@ func TestSelfResolvesPerHumanOverTheWire(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Her own record, now reachable through a grant that never names her.
+	// C19's employee is nutan, so the grant that never names her now reaches it.
 	if status, body := call(t, nutansApp, http.MethodGet, "/api/v1/acme/FIN/C19", ""); status != http.StatusOK {
 		t.Fatalf("status = %d after the self grant, want 200 — %s", status, body)
 	}
-	// And the token did not widen into "any user": C18 is ENG and belongs to a
-	// third person, and the same grant does not reach it.
-	if status, body := call(t, nutansApp, http.MethodGet, "/api/v1/acme/ENG/C18", ""); status != http.StatusForbidden {
-		t.Fatalf("the self grant reached another person's record: %d — %s", status, body)
+	// C20's is not. Same department, same permission, same grant: the only
+	// thing that differs is whose record it is.
+	if status, body := call(t, nutansApp, http.MethodGet, "/api/v1/acme/FIN/C20", ""); status != http.StatusForbidden {
+		t.Fatalf("the self grant reached another person's record in the same department: %d — %s", status, body)
+	}
+	// And it did not widen for the person it does not belong to either: maya
+	// holds all of FIN through Team1, so she is the wrong control — the third
+	// human holds nothing, and the group grant must not reach her.
+	stranger := applicationHolding(t, auth.URL, auth.Client(), "fi7io4lvk35s", records)
+	if status, body := call(t, stranger, http.MethodGet, "/api/v1/acme/FIN/C20", ""); status != http.StatusForbidden {
+		t.Fatalf("a self grant assigned to Team2 reached a human outside it: %d — %s", status, body)
 	}
 }
 
@@ -447,5 +532,192 @@ func TestAHumanWithNoAuthorityIsDeniedRatherThanFailed(t *testing.T) {
 		http.MethodGet, "/api/v1/acme/FIN/C17", "")
 	if status != http.StatusForbidden {
 		t.Fatalf("status = %d, want 403 — a human with nothing is denied, not an outage: %s", status, body)
+	}
+}
+
+// asked records one question exactly as it left the application.
+type asked struct {
+	authorization string
+	body          map[string]any
+}
+
+// inspecting stands in for Auth and keeps the question, then answers it.
+func inspecting(t *testing.T, questions *[]asked, permission string) *httptest.Server {
+	t.Helper()
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		question := asked{authorization: r.Header.Get("Authorization")}
+		if err := json.Unmarshal(raw, &question.body); err != nil {
+			t.Error(err)
+			return
+		}
+		*questions = append(*questions, question)
+		_, _ = w.Write([]byte(answer(maya, permission)))
+	}))
+}
+
+// The application asks as *itself* about a human it is not.
+//
+// This is the architecture's central claim and nothing tested it: a review
+// changed the client to ask as the human instead of as the service account, and
+// every test in every module still passed. The actor is the application's own
+// credential; the subject is whoever the request carries; they differ, and a
+// deployment that collapsed them would have every application impersonating
+// every user it served.
+func TestTheApplicationAsksAsItselfAboutAHuman(t *testing.T) {
+	const read = "hrms:payroll:payslip::read"
+	var questions []asked
+	auth := inspecting(t, &questions, read)
+	defer auth.Close()
+
+	if status, body := call(t, application(t, auth.URL, auth.Client(), maya), http.MethodGet, "/api/v1/acme/FIN/C17", ""); status != http.StatusOK {
+		t.Fatalf("status = %d — %s", status, body)
+	}
+	if len(questions) != 1 {
+		t.Fatalf("%d questions asked, want 1", len(questions))
+	}
+	question := questions[0]
+
+	// The credential authenticates the application, and it is the token, never
+	// the id the application is known by.
+	if question.authorization != "Bearer "+lab.WorkloadToken {
+		t.Fatalf("authorization = %q", question.authorization)
+	}
+	if strings.Contains(question.authorization, lab.WorkloadClient) {
+		t.Fatal("the credential id was sent as the secret")
+	}
+
+	identity, ok := question.body["identity"].(map[string]any)
+	if !ok {
+		t.Fatalf("the question carries no identity block: %#v", question.body)
+	}
+	actor, ok := identity["actor"].(map[string]any)
+	if !ok {
+		t.Fatalf("the question names no actor: %#v", identity)
+	}
+	if actor["type"] != "service_account" || actor["id"] != lab.WorkloadClient {
+		t.Fatalf("actor = %#v, want the application's own credential", actor)
+	}
+	if identity["human_id"] != maya {
+		t.Fatalf("human_id = %v, want the subject of the request", identity["human_id"])
+	}
+	if actor["id"] == identity["human_id"] {
+		t.Fatal("the application asked as the human — the actor and the subject collapsed")
+	}
+
+	// And the question is about a person, not about a request. Nothing in it
+	// names the endpoint, the method, the resource, or asks for a verdict.
+	encoded, err := json.Marshal(question.body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, leaked := range []string{"GET", "/api/v1", "C17", "FIN", "decision", "allow", "deny", "certificate"} {
+		if strings.Contains(string(encoded), leaked) {
+			t.Fatalf("the question carries %q — it is about a request, not a person: %s", leaked, encoded)
+		}
+	}
+	// It does name the one permission the answer is filtered to, which is a
+	// narrowing of the reply and not a question about the request.
+	options, ok := question.body["options"].(map[string]any)
+	if !ok {
+		t.Fatalf("the question carries no options: %#v", question.body)
+	}
+	permissions, ok := options["permissions"].([]any)
+	if !ok || len(permissions) != 1 || permissions[0] != read {
+		t.Fatalf("options.permissions = %#v, want exactly the policy's permission", options["permissions"])
+	}
+}
+
+// The credential is enforced through the whole stack, not only in its own unit
+// test. An application whose token Auth does not recognise cannot decide
+// anything — and what it must not do is call that a denial, because the person
+// making the request is not the one who is unauthenticated.
+func TestAnApplicationAuthDoesNotRecogniseDecidesNothing(t *testing.T) {
+	auth := authService(t)
+	source, err := authclient.New(auth.URL,
+		authclient.Credential{Type: "service_account", ID: lab.WorkloadClient, Bearer: "not-the-issued-token"}, auth.Client())
+	if err != nil {
+		t.Fatal(err)
+	}
+	evaluator, err := authmiddleware.New(source, clock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app, err := hrms.NewHandler(hrms.NewStore(hrms.DefaultRecords()), evaluator, hrms.TrustedIdentity("acme", "hrms", maya))
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, body := call(t, app, http.MethodGet, "/api/v1/acme/FIN/C17", "")
+	if status == http.StatusOK {
+		t.Fatalf("an unrecognised credential still opened the gate — %s", body)
+	}
+	if status == http.StatusForbidden {
+		t.Fatalf("the application's own credential problem was rendered as the person's denial — %s", body)
+	}
+	if status != http.StatusServiceUnavailable {
+		t.Fatalf("status = %d, want 503 — %s", status, body)
+	}
+}
+
+// validity travels on the wire and is honoured. Expiry was unit-tested on a
+// hand-built Route and never once sent as JSON, so the client could have
+// dropped the block entirely — grants that never expire — with every test green.
+func TestAValidityWindowIsHonouredAcrossTheWire(t *testing.T) {
+	const read = "hrms:payroll:payslip::read"
+	// clock{} is frozen, so these windows are fixed relative to it rather than
+	// to the wall clock, and the test cannot rot.
+	now := clock{}.Now()
+	for name, tc := range map[string]struct {
+		validity string
+		want     int
+	}{
+		"a window that has closed":     {`{"expires_at":"` + now.Add(-time.Hour).Format(time.RFC3339Nano) + `"}`, http.StatusForbidden},
+		"a window not yet open":        {`{"not_before":"` + now.Add(time.Hour).Format(time.RFC3339Nano) + `"}`, http.StatusForbidden},
+		"a window that is open now":    {`{"not_before":"` + now.Add(-time.Hour).Format(time.RFC3339Nano) + `","expires_at":"` + now.Add(time.Hour).Format(time.RFC3339Nano) + `"}`, http.StatusOK},
+		"a window closing this moment": {`{"expires_at":"` + now.Format(time.RFC3339Nano) + `"}`, http.StatusForbidden},
+	} {
+		t.Run(name, func(t *testing.T) {
+			timed := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"scope":{}`, `"scope":{},"validity":`+tc.validity, 1)))
+			}))
+			defer timed.Close()
+			status, body := call(t, application(t, timed.URL, timed.Client(), maya), http.MethodGet, "/api/v1/acme/FIN/C17", "")
+			if status != tc.want {
+				t.Fatalf("status = %d, want %d — %s", status, tc.want, body)
+			}
+		})
+	}
+}
+
+// The policy's method is part of the policy. Go's ServeMux routes HEAD to the
+// GET handler, so the gate sees a method its policy does not name — and without
+// its own check it would authorize it.
+func TestAMethodThePolicyDoesNotNameIsRefused(t *testing.T) {
+	auth := authService(t)
+	status, body := call(t, application(t, auth.URL, auth.Client(), maya), http.MethodHead, "/api/v1/acme/FIN/C17", "")
+	if status == http.StatusOK {
+		t.Fatalf("HEAD reached a handler whose policy names GET — %s", body)
+	}
+}
+
+// The PUT's department comes from the request body, and it is the only material
+// in the system that does. A gate that bound a constant instead would authorize
+// every write against whichever department the constant named — which a review
+// demonstrated, undetected by any test.
+func TestTheWriteIsBoundToTheDepartmentTheBodyNames(t *testing.T) {
+	auth := authService(t)
+	app := application(t, auth.URL, auth.Client(), maya)
+	// maya holds write within dept=FIN and nowhere else.
+	if status, body := call(t, app, http.MethodPut, "/api/v1/acme/certificates/C17",
+		`{"department_id":"FIN","title":"revised"}`); status != http.StatusOK {
+		t.Fatalf("a write inside her boundary = %d — %s", status, body)
+	}
+	if status, body := call(t, app, http.MethodPut, "/api/v1/acme/certificates/C18",
+		`{"department_id":"ENG","title":"revised"}`); status != http.StatusForbidden {
+		t.Fatalf("a write naming another department = %d, want 403 — %s", status, body)
 	}
 }

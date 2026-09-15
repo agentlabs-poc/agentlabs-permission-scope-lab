@@ -113,6 +113,18 @@ func (r resolveResponse) decode(query authmiddleware.AuthorityQuery) (authmiddle
 	}
 	routes := make([]authmiddleware.Route, 0, len(r.ResolvedGrants))
 	for _, grant := range r.ResolvedGrants {
+		// Each grant states its own contract version, and it was decoded and
+		// never read — the same shape as the permission bug below, which was
+		// also a field carried for correctness and consulted by nobody. The
+		// envelope's version says how to read the envelope; a grant's says how
+		// to read its scope and its validity, which are the fields that decide
+		// a boundary.
+		if grant.Version != Version {
+			return authmiddleware.Authority{}, (&Error{
+				Code:    "UNSUPPORTED_VERSION",
+				Message: "a returned grant states contract version " + grant.Version,
+			}).evaluation()
+		}
 		// The permission is checked, not assumed. Everything else the answer
 		// claims is corroborated against the question — tenant, application,
 		// human — and this was the exception: the one dimension that decides
