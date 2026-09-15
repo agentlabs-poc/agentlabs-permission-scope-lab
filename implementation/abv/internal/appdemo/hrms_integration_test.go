@@ -1,12 +1,13 @@
-package httpdemo
+package appdemo_test
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/internal/storage"
 	storageSQLite "agentlabs.local/abv/internal/storage/sqlite"
-	"agentlabs.local/abv/localadapter"
+	"agentlabs.local/abv/lab"
+	"agentlabs.local/apps/hrms"
 	"agentlabs.local/authmiddleware"
+	"agentlabs.local/wiring/localsource"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -16,10 +17,6 @@ import (
 	"testing"
 	"time"
 )
-
-type fixedClock struct{}
-
-func (fixedClock) Now() time.Time { return time.Date(2026, 9, 9, 10, 0, 0, 0, time.UTC) }
 
 func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
@@ -36,19 +33,19 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 		t.Fatal(err)
 	}
 	// The agent asks as itself about whichever human the request carries.
-	source, err := localadapter.Open(t.Context(), dbPath,
+	source, err := localsource.Open(t.Context(), dbPath,
 		domain.Actor{Type: "service_account", ID: lab.WorkloadClient},
-		&lab.RoleAdministration{AssignmentStatusAdministration: status}, fixedClock{}, labRegistry{})
+		&lab.RoleAdministration{AssignmentStatusAdministration: status}, &fixedClock{now: time.Now()}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = source.Close() })
-	evaluator, err := authmiddleware.New(source, fixedClock{})
+	evaluator, err := authmiddleware.New(source, &fixedClock{now: time.Now()})
 	if err != nil {
 		t.Fatal(err)
 	}
-	store := NewStore(DefaultRecords())
-	handler, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	store := hrms.NewStore(hrms.DefaultRecords())
+	handler, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,13 +55,13 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/departments/FIN/certificates", "", http.StatusOK, `"certificate_id":"C17"`, `"certificate_id":"C19"`)
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/departments/FIN/certificates", "", http.StatusOK, `!"department_id":"ENG"`, `!"title":"ENG confidential"`)
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/certificates", "", http.StatusForbidden, `"decision":"deny"`)
-	nutan, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "fi7io4lvjwu8"))
+	nutan, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjwu8"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertResponse(t, nutan, http.MethodGet, "/api/v1/acme/FIN/C17", "", http.StatusOK, `"certificate_id":"C17"`)
 	assertResponse(t, nutan, http.MethodGet, "/api/v1/acme/departments/FIN/certificates", "", http.StatusForbidden, `"decision":"deny"`, `!"certificate_id":"C19"`)
-	outsider, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "outsider"))
+	outsider, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", "outsider"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,14 +117,14 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 		t.Fatal(err)
 	}
 	// The agent asks as itself about whichever human the request carries.
-	source, err := localadapter.Open(t.Context(), dbPath,
+	source, err := localsource.Open(t.Context(), dbPath,
 		domain.Actor{Type: "service_account", ID: lab.WorkloadClient},
-		&lab.RoleAdministration{AssignmentStatusAdministration: status}, fixedClock{}, labRegistry{})
+		&lab.RoleAdministration{AssignmentStatusAdministration: status}, &fixedClock{now: time.Now()}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = source.Close() })
-	handler, err := NewHandler(NewStore(DefaultRecords()), evaluatorFor(t, source), TrustedIdentity("acme", "hrms", "fi7io4lvjwu8"))
+	handler, err := hrms.NewHandler(hrms.NewStore(hrms.DefaultRecords()), evaluatorFor(t, source), hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjwu8"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,12 +157,12 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 }
 
 func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
-	store := NewStore(DefaultRecords())
+	store := hrms.NewStore(hrms.DefaultRecords())
 	evaluator := evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
 		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipWrite,
 		GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []authmiddleware.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}},
 	}}})
-	handler, err := NewHandler(store, evaluator, TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	handler, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,7 +171,7 @@ func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 	assertResponse(t, handler, http.MethodPut, "/api/v1/acme/certificates/C17?department_id=FIN", `{"title":"query fallback"}`, http.StatusBadRequest, `!query fallback`)
 	assertResponse(t, handler, http.MethodPut, "/api/v1/acme/certificates/C17", `{"department_id":"FIN","title":"forged identity","human_id":"fi7io4lvjqio"}`, http.StatusBadRequest, `!forged identity`)
 
-	wrong, err := NewHandler(store, evaluator, TrustedIdentity("fi7io4lvkfsw", "hrms", "fi7io4lvjqio"))
+	wrong, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("fi7io4lvkfsw", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,19 +182,19 @@ func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 }
 
 func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
-	store := NewStore(DefaultRecords())
+	store := hrms.NewStore(hrms.DefaultRecords())
 	self := staticSource{routes: []authmiddleware.Route{{
 		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipRead,
 		GrantIDs: []string{"self"}, Predicates: []authmiddleware.Predicate{{Key: "user", Value: "$self", SourceGrantID: "self"}},
 	}}}
-	handler, err := NewHandler(store, evaluatorFor(t, self), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	handler, err := hrms.NewHandler(store, evaluatorFor(t, self), hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C17", "", http.StatusOK, `"employee_id":"fi7io4lvjqio"`)
 	assertResponse(t, handler, http.MethodGet, "/api/v1/acme/FIN/C19", "", http.StatusForbidden, `!"employee_id":"fi7io4lvjwu8"`)
 
-	timedOut, err := NewHandler(store, evaluatorFor(t, staticSource{err: context.DeadlineExceeded}), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	timedOut, err := hrms.NewHandler(store, evaluatorFor(t, staticSource{err: context.DeadlineExceeded}), hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,9 +205,9 @@ func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 		t.Fatalf("timeout executed update: before=%#v after=%#v", before, after)
 	}
 
-	evaluationFailure, err := NewHandler(store, evaluatorFor(t, staticSource{err: &authmiddleware.EvaluationError{
+	evaluationFailure, err := hrms.NewHandler(store, evaluatorFor(t, staticSource{err: &authmiddleware.EvaluationError{
 		Version: "1", Code: "AUTHORITY_UNAVAILABLE", Message: "Authorization is unavailable.", MessageReason: "Authority could not be loaded.",
-	}}), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	}}), hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,10 +216,10 @@ func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 }
 
 func TestHTTPDemoAllDepartmentGrantReturnsWholeTenantCollection(t *testing.T) {
-	store := NewStore(DefaultRecords())
-	handler, err := NewHandler(store, evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
+	store := hrms.NewStore(hrms.DefaultRecords())
+	handler, err := hrms.NewHandler(store, evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
 		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipRead, GrantIDs: []string{"all"},
-	}}}), TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
+	}}}), hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -241,7 +238,7 @@ func (s staticSource) Load(context.Context, authmiddleware.AuthorityQuery) (auth
 
 func evaluatorFor(t *testing.T, source authmiddleware.AuthoritySource) *authmiddleware.Evaluator {
 	t.Helper()
-	evaluator, err := authmiddleware.New(source, fixedClock{})
+	evaluator, err := authmiddleware.New(source, &fixedClock{now: time.Now()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -275,16 +272,4 @@ func assertResponse(t *testing.T, handler http.Handler, method, target, body str
 			t.Fatalf("invalid deny body: %q, err=%v", response.Body.String(), err)
 		}
 	}
-}
-
-// labRegistry answers for the fixture's area and nothing else. A stub that said
-// yes to everything would hide the installation gate, which is exactly what the
-// wrong-boundary cases here assert.
-type labRegistry struct{}
-
-func (labRegistry) ApplicationExists(_ context.Context, applicationID string) (bool, error) {
-	return applicationID == "hrms", nil
-}
-func (labRegistry) Installed(_ context.Context, tenantID, applicationID string) (bool, error) {
-	return tenantID == "acme" && applicationID == "hrms", nil
 }

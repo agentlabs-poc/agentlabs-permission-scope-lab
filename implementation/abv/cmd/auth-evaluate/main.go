@@ -2,9 +2,9 @@ package main
 
 import (
 	"agentlabs.local/abv/domain"
-	"agentlabs.local/abv/internal/lab"
-	"agentlabs.local/abv/localadapter"
+	"agentlabs.local/abv/lab"
 	"agentlabs.local/authmiddleware"
+	"agentlabs.local/wiring/localsource"
 	"context"
 	"encoding/json"
 	"flag"
@@ -99,7 +99,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	admin := &lab.RoleAdministration{AssignmentStatusAdministration: status}
 	// The agent asks as itself. The human it asks about arrives on the request.
 	credential := domain.Actor{Type: "service_account", ID: lab.WorkloadClient}
-	source, err := localadapter.Open(context.Background(), db, credential, admin, now, registry)
+	source, err := localsource.Open(context.Background(), db, credential, admin, now, registry)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 4

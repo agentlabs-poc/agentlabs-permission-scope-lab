@@ -44,8 +44,12 @@ func TestGrantRevisionAdministrationRequiresExactBoundedPremiseAndMembership(t *
 			s.Area = other
 		},
 		func(_ *abv.Evidence, i *domain.Identity, _ *string, _ *domain.GrantContent) { i.Version = "2" },
-		func(_ *abv.Evidence, _ *domain.Identity, source *string, _ *domain.GrantContent) { *source = "fm5b7t4pan0d" },
-		func(_ *abv.Evidence, _ *domain.Identity, _ *string, g *domain.GrantContent) { g.GrantID = "fk3x9r2m5iv8" },
+		func(_ *abv.Evidence, _ *domain.Identity, source *string, _ *domain.GrantContent) {
+			*source = "fm5b7t4pan0d"
+		},
+		func(_ *abv.Evidence, _ *domain.Identity, _ *string, g *domain.GrantContent) {
+			g.GrantID = "fk3x9r2m5iv8"
+		},
 		func(s *abv.Evidence, _ *domain.Identity, _ *string, _ *domain.GrantContent) { s.Memberships = nil },
 	} {
 		gotSnapshot, gotIdentity, source, gotGrant := snapshot, identity, "fm5b7t4p5iv8", proposed

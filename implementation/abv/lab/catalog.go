@@ -88,6 +88,7 @@ func (a *catalogApplication) RegisterPermission(ctx context.Context, app domain.
 	}
 	return a.facade.RegisterPermission(ctx, app, catalogPublisher, definition)
 }
+
 // RegisterPlatformPermission registers into a namespace the platform owns. It
 // takes a namespace rather than an application, because a platform permission
 // belongs to no application — which is exactly why the leading-noun rule cannot

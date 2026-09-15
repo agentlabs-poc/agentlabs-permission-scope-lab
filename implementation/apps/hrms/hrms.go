@@ -1,6 +1,6 @@
 // Package httpdemo is a bounded in-process example of application handlers
 // protected by authmiddleware. It is not a production identity adapter.
-package httpdemo
+package hrms
 
 import (
 	"agentlabs.local/authmiddleware"

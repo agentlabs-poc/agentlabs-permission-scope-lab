@@ -2,7 +2,7 @@ package main
 
 import (
 	"agentlabs.local/abv/cli"
-	"agentlabs.local/abv/internal/lab"
+	"agentlabs.local/abv/lab"
 	"context"
 	"os"
 )

@@ -138,11 +138,26 @@ func TestNeitherDomainImportsTheOther(t *testing.T) {
 	for _, pair := range []struct{ domain, forbidden string }{
 		{"../abv", "agentlabs.local/registry"},
 		{"../registry", "agentlabs.local/abv"},
+		// The third pair. The authority domain's library code must not name the
+		// enforcement module: an application that wants the gate should not have
+		// to compile the record store, the schema and every write to get it.
+		//
+		// Its two demonstration commands and the integration tests beside them
+		// still do, and are skipped below — they seed a real store, which is
+		// Auth-side work by nature. Slice C removes even those, by putting the
+		// application on the wire instead of on a database handle.
+		{"../abv", "agentlabs.local/authmiddleware"},
+		{"../authmiddleware", "agentlabs.local/abv"},
 	} {
 		found, scanned := []string{}, 0
 		err := filepath.WalkDir(pair.domain, func(path string, entry os.DirEntry, err error) error {
 			if err != nil || entry.IsDir() || !strings.HasSuffix(path, ".go") {
 				return err
+			}
+			// Commands compose layers by definition, and tests may reach for a
+			// fixture. The rule is about library code.
+			if strings.Contains(path, "/cmd/") || strings.HasSuffix(path, "_test.go") {
+				return nil
 			}
 			scanned++
 			// Parsed, not grepped. These packages write prose doc comments about
