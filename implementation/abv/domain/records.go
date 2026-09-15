@@ -22,15 +22,12 @@ type Recipient struct {
 // GrantControl below is the *wire* form Q-107 approves — version, id, status,
 // and nothing else. TrustedRoot is deliberately not in it: Q-119 refuses a root
 // flag in submitted content, and this is what Auth recorded rather than what a
-// caller said.
+// caller said. The snapshot reader builds the wire form where it is needed, so
+// there is no conversion method here for callers that do not exist.
 type Grant struct {
 	ID          string
 	Status      string
 	TrustedRoot bool
-}
-
-func (g Grant) Control() GrantControl {
-	return GrantControl{Version: "1", ID: g.ID, Status: g.Status}
 }
 
 type GrantControl struct {

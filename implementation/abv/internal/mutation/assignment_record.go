@@ -2,7 +2,9 @@ package mutation
 
 import (
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/lineage"
 	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/internal/validation"
 	"context"
 	"sort"
 	"strings"
@@ -240,7 +242,31 @@ func (s *Service) UpgradeAssignment(ctx context.Context, area domain.Area, ident
 		}
 		proposed := before
 		proposed.GrantRevision = latest
-		if err := admin.CheckAssignmentAdoption(ctx, area, identity, proposed, s.clock.Now()); err != nil {
+		now := s.clock.Now()
+		if err := admin.CheckAssignmentAdoption(ctx, area, identity, proposed, now); err != nil {
+			return storage.WriteSet{}, err
+		}
+		// Q-105: an upgrade "must also select the latest, and pass current
+		// checks", and "if its permitted authority cannot support revision 3,
+		// reject the upgrade and leave the assignment unchanged". The gate above
+		// answers who may act; these answer whether the authority holds — and
+		// they are the same checks CreateAssignment runs, because adopting a
+		// revision is the same act as adopting it at creation.
+		content, err := exactLatestContent(snapshot, proposed)
+		if err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := validation.CheckContent(area, snapshot.Catalog, content, snapshot.Roles); err != nil {
+			return storage.WriteSet{}, err
+		}
+		if _, ok := snapshot.Teams[proposed.Recipient.ID]; !ok && proposed.Recipient.Type == "group" {
+			return storage.WriteSet{}, domain.ErrRejected
+		}
+		parent, err := lineage.ResolveParentTeam(snapshot, content, proposed.Recipient.ID, now)
+		if err != nil {
+			return storage.WriteSet{}, err
+		}
+		if err := lineage.HasSource(snapshot, identity, parent, now); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := ctx.Err(); err != nil {
