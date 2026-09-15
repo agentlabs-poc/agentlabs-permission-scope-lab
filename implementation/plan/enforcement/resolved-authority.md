@@ -136,7 +136,7 @@ already bounded — the client never has to narrow it further.
 
 | option | default | effect |
 |---|---|---|
-| `include_source` | `true` | omit to drop the explanation and keep the hot path lean |
+| `include_source` | `true` | omit to drop the explanation. Not for the hot path — see below |
 | `expand_roles` | `true` | see §6 — `false` is a designed-in future option, not built |
 | `permissions` | `null` | a filter, not a requirement. `null` means everything the human holds |
 
@@ -295,6 +295,19 @@ set, not a winner.
 | `user` | only when it names itself — naming another human is impersonation, refused before any gate | itself only, in the lab |
 | `service_account` | yes, naming anyone | yes, within the area its credential is bound to |
 | `agent` | yes, naming anyone | **no** — Q-086 admits the type and no gate in this repository implements delegation for it, which is unsupported rather than refused |
+
+### The explanation is not a decision input, and the result still needs part of it
+
+"Omit the source on the hot path" was written for the enforcing agent, and the
+enforcing agent is the one caller that cannot use it. The approved allow block
+requires `grant_ids`, `grant_ids` is the contributing chain, and the chain is
+carried by `source.lineage`. So a gate deciding one request asks for the source
+after all — not to decide, but to say on whose authority it decided.
+
+`OmitSource` remains right for a bearer token and for a menu, which need the
+grants and not the trail. It is wrong for the one path this document was written
+around, which is worth stating where the option is described rather than leaving
+the next reader to find it in an adapter.
 
 **`source` is annotation, never a decision input.** The gate matches
 `permissions`, `scope` and `validity` and nothing else. If an application starts
