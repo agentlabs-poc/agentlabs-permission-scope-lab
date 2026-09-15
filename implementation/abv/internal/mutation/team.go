@@ -266,6 +266,19 @@ func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity 
 		if err := validation.CheckTeamReparent(snapshot.Teams, id, parentID); err != nil {
 			return storage.WriteSet{}, err
 		}
+		// B13: "Change/remove team parent under an affected enabled binding |
+		// Reject; equivalent authority elsewhere is not an exemption."
+		//
+		// CheckTeamReparent above is a pure function over the teams map — ids,
+		// existence, cycles — so it cannot see what the move re-anchors. A team's
+		// position is how its bindings reach their parent support, and moving it
+		// changes the inherited scope of every binding at or beneath it without
+		// touching one grant, one assignment or one record anyone would think to
+		// review. DeleteTeam already refuses while an assignment names the team;
+		// the asymmetry between removing a team and moving it was the whole bug.
+		if err := refuseAffectedBindings(snapshot, id); err != nil {
+			return storage.WriteSet{}, err
+		}
 		if err := ctx.Err(); err != nil {
 			return storage.WriteSet{}, err
 		}
@@ -383,4 +396,36 @@ func (s *Service) teamAdministration(ctx context.Context, area domain.Area, iden
 		return nil, domain.ErrUnsupported
 	}
 	return admin, nil
+}
+
+// refuseAffectedBindings rejects while an enabled binding sits at or beneath
+// this team.
+//
+// Beneath, not just at: a subteam's authority is resolved through the chain
+// above it, so moving an ancestor moves the subteam's inherited scope too. The
+// set is grown rather than walked because a team records its parent and not its
+// children, and it settles after at most one pass per team.
+//
+// Disabled bindings are left out. They hold nothing to re-anchor, and enabling
+// one revalidates against the structure as it then is.
+func refuseAffectedBindings(snapshot storage.Snapshot, teamID string) error {
+	subtree := map[string]bool{teamID: true}
+	for changed := true; changed; {
+		changed = false
+		for id, team := range snapshot.Teams {
+			if !subtree[id] && team.ParentID != "" && subtree[team.ParentID] {
+				subtree[id] = true
+				changed = true
+			}
+		}
+	}
+	for _, assignment := range snapshot.Assignments {
+		if assignment.Status != "enabled" || assignment.Recipient.Type != "group" {
+			continue
+		}
+		if subtree[assignment.Recipient.ID] {
+			return domain.ErrConflict
+		}
+	}
+	return nil
 }

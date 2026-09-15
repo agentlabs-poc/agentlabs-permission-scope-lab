@@ -41,6 +41,7 @@ type teamWriter interface {
 	RemoveMember(context.Context, domain.Area, domain.FixtureContext, string, string) error
 	GetTeam(context.Context, domain.Area, domain.FixtureContext, string) (domain.Team, error)
 	ListMembers(context.Context, domain.Area, domain.FixtureContext, domain.MemberFilter) (domain.MemberPage, error)
+	Assign(context.Context, domain.Area, domain.FixtureContext, []byte) (domain.Receipt, error)
 }
 
 var teamFixture = domain.FixtureContext{Name: "maya-role-publisher"}
@@ -194,5 +195,44 @@ func TestTeamWritesAreProtected(t *testing.T) {
 	}
 	if err := api.RemoveMember(t.Context(), area, wrong, team2, "fi7io4lvjwu8"); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("remove-member past the gate: %v", err)
+	}
+}
+
+// B13: "Change/remove team parent under an affected enabled binding | Reject;
+// equivalent authority elsewhere is not an exemption."
+//
+// A team's position is how its bindings reach their parent support, so moving it
+// changes the inherited scope of everything it holds — without touching a grant,
+// an assignment, or any record a reviewer would think to look at. DeleteTeam
+// already refuses while an assignment names the team. Moving one did not, which
+// made the reversible act the guarded one and the silent act the open one.
+func TestSetTeamParentRefusesWhileAnEnabledBindingIsAffected(t *testing.T) {
+	api, area := openTeamLab(t)
+	const root, team1, team2 = "fibggi2jur5s", "fibggi2juubk", "fibggi2juxhc"
+
+	// Team1 holds fm5b7t4p5iv8, enabled. Its dept=FIN narrowing is inherited
+	// through this position.
+	if _, err := api.SetTeamParent(t.Context(), area, teamFixture, team1, ""); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("moving a team that holds an enabled binding gave %v, want ErrConflict", err)
+	}
+	if read, err := api.GetTeam(t.Context(), area, teamFixture, team1); err != nil || read.ParentID != root {
+		t.Fatalf("the refused move still happened: %#v err=%v", read, err)
+	}
+
+	// Team2 holds nothing yet, so it may move. Without this the refusal above
+	// could be a prohibition on moving teams at all.
+	if _, err := api.SetTeamParent(t.Context(), area, teamFixture, team2, ""); err != nil {
+		t.Fatalf("moving a team with no binding was refused: %v", err)
+	}
+	if _, err := api.SetTeamParent(t.Context(), area, teamFixture, team2, team1); err != nil {
+		t.Fatal(err)
+	}
+
+	// Give it one, and the same move it just made is refused.
+	if _, err := api.Assign(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, a2Proposal(t)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := api.SetTeamParent(t.Context(), area, teamFixture, team2, ""); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("the move became refused only after the binding existed: %v", err)
 	}
 }
