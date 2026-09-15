@@ -6,6 +6,7 @@ directly. Only the layout is reconstructed, for legibility.
 
 | File | Shows |
 |---|---|
+| `demo-20-a-decision.svg` · `.md` | **The first capture of a decision.** A human asks, and the answer comes back with the chain of grants that authorized it — root first. The same request denied one value outside its boundary; a deeper route needing every predicate its chain accumulated; write allowed for one human and denied for another through the same permission, which is the selected-versus-inherited asymmetry arriving at a decision; an all-values selection denied rather than narrowed (Q-071); and `$self` shown to be writable and unreachable |
 | `demo-19-service-credential.svg` · `.md` | The caller need not be the subject: an application's own credential resolving a human it is not, the same credential returning that human's own answer unchanged, and two refusals — a credential this deployment never issued, and a human the fixture gate does not admit. The impersonation rule is named and not shown, because `--human` supplies both the actor and the subject and no command line can construct one |
 | `demo-18-resolve.svg` · `.md` | The read an enforcing client consumes: one human's entitlements as the canonical document, two routes at different lineage depths with the deeper one's scope folded to `dept=FIN` AND `cert=C17`, the same call filtered to one permission, the form without the explanation that a bearer token would carry, and an unregistered permission refused beside a permission simply not held — a refusal and an empty answer, told apart by their exit codes |
 | `demo-17-root-establishment.svg` · `.md` | Where a lineage begins: a tenant with teams and not one grant, an establishment refused before any permission is registered, the holder rules, the three records written in one transaction, and the same child proposal resolving under the Auth root and refused under the application root — the catalog listing beside it holding every permission both were checked against |
@@ -34,7 +35,7 @@ only started at the grant.
 
 Demonstrations are captured, not described, and they earn their place: the
 wildcard hole in scope registration was found by running demo 5, not by reading
-the code.
+the code, and demo 20 is why we know `$self` cannot be assigned.
 
 Regenerate after any contract change. A demonstration that describes behaviour
 the code no longer has is worse than none — these were rebuilt once already,

@@ -50,6 +50,21 @@ human hold?"** Which is why:
 
 ---
 
+## Captured
+
+[Demo 20](../records/demos/demo-20-a-decision.md) is the first capture of a
+decision: a human asks, and the answer returns with the chain of grants that
+authorized it. Everything above is visible in it — administration built the
+chain, authority loading supplied the routes, resolution matched them against the
+request's material, and the exit code is enforcement's to honour.
+
+It also recorded a dead end. `$self` is bound by the evaluator and accepted by
+the codec, and resolution refuses any content carrying it — at the proposal and
+at every step of the walk. A grant using it can be written and can never be
+assigned, so the evaluator's support for it is unreachable. That is an open
+question, not a defect to fix quietly: the token is in the handbook and the rule
+that blocks it may well be deliberate.
+
 ## Resolution and enforcement do talk to each other
 
 Which direction depends on the endpoint's declared mode — CONTRACT-002, and the
