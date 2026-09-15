@@ -43,7 +43,12 @@ func run(args []string, out, diag *os.File) int {
 	// The application asks as itself about whichever human the request carries.
 	// --human is the lab standing in for authentication, which is the
 	// application's own business and not Auth's.
-	source, err := authclient.New(auth, authclient.Credential{Type: "service_account", ID: credential}, nil)
+	if strings.HasPrefix(auth, "http://") {
+		// The lab speaks http; a deployment must not, and has to say so here.
+		authclient.AllowCleartext()
+	}
+	source, err := authclient.New(auth,
+		authclient.Credential{Type: "service_account", ID: credential, Bearer: credential}, nil)
 	if err != nil {
 		fmt.Fprintln(diag, err)
 		return 2
