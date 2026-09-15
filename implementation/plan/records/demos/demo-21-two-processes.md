@@ -41,7 +41,7 @@ assignment fm5b7t4pan0d created
 ```console
 $ auth-service --authority authority.db --registry registry.db --listen 127.0.0.1:8080
 auth-service listening on 127.0.0.1:8080 for acme/hrms
-$ hrms --auth http://127.0.0.1:8080 --listen 127.0.0.1:8081 --client agent_hrms
+$ HRMS_AUTH_TOKEN=... hrms --auth http://127.0.0.1:8080 --listen 127.0.0.1:8081 --client agent_hrms --allow-cleartext
 hrms listening on 127.0.0.1:8081, asking http://127.0.0.1:8080 as agent_hrms
 ```
 
@@ -234,9 +234,10 @@ alter who gets through — only authority can.
 
 ## What it does not establish
 
-**Who the caller is.** `hrms` sends `Authorization: Bearer agent_hrms`, and the
-lab's credential gate compares that string. A deployment issues credentials and
-derives the calling application from one; this does not.
+**Who the caller is.** `hrms` sends a bearer token it is given out of band, and
+the lab's credential gate compares it — in constant time, because that is the
+line a deployment replaces. Nothing here issues a credential, and the id the
+application is known by is deliberately not the secret it authenticates with.
 
 **Freshness.** Nothing here carries an epoch, and nothing caches. Each request
 asks again from scratch, which is correct and says nothing about what a cache
@@ -246,3 +247,19 @@ would have to invalidate.
 Nothing checks that the permission exists in the application's catalog, so a
 typo would deny every request to that endpoint, permanently and without saying
 why.
+
+## Held by tests, not only by this capture
+
+A capture proves something ran once. These hold it:
+
+| Test | What fails without it |
+|---|---|
+| `wiring.TestEveryEndpointForBothHumans` | the matrix above, as assertions — every endpoint for both women |
+| `wiring.TestAnAuthThatMisbehavesCannotDecideAnything` | an Auth that answers about another human, another area, another permission, another version, or not in JSON at all can decide something |
+| `wiring.TestARedirectNeverReachesTheAttacker` | a `Location` header takes the credential and authors the answer |
+| `wiring.TestThePathCannotChooseTheTenant` | the path moves the area the question is about |
+| `wiring.TestOneRequestAsksExactlyOneQuestion` | a silent cache, or a doubled question |
+| `wiring.TestTheStackIsCorrectUnderConcurrency` | the shared evaluator and store race |
+| `apps/hrms.TestTheApplicationLinksNoAuthorityDomain` | `abv` re-enters the application's dependency closure — two lines in a `go.mod` were enough, and every other test stayed green |
+| `auth-service.TestNothingIsLoggedForAQuestionTheServiceRefused` | an unauthenticated caller writes lines into the record this demonstration reads |
+| `auth-service.TestAValidBodyCannotAddLinesToTheRecord` | a body chooses the shape of that record |

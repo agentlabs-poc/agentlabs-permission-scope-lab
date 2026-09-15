@@ -9,9 +9,13 @@ import (
 	"net/http"
 )
 
-// maxRequestBytes bounds one question. A service that reads any length is one a
+// MaxRequestBytes bounds one question. A service that reads any length is one a
 // caller can exhaust.
-const maxRequestBytes = 1 << 16
+//
+// It is exported because anything wrapping this handler has to read to the same
+// limit: a wrapper that reads less and hands on what it read would make the
+// service reject a question it would otherwise have answered.
+const MaxRequestBytes = 1 << 16
 
 // AgentIdentity establishes which application is asking, from its own
 // credentials on the request.
@@ -75,8 +79,8 @@ func (s *Service) resolve(agents AgentIdentity, w http.ResponseWriter, r *http.R
 		fail(w, http.StatusUnauthorized, "UNAUTHENTICATED")
 		return
 	}
-	body, err := io.ReadAll(io.LimitReader(r.Body, maxRequestBytes+1))
-	if err != nil || len(body) > maxRequestBytes {
+	body, err := io.ReadAll(io.LimitReader(r.Body, MaxRequestBytes+1))
+	if err != nil || len(body) > MaxRequestBytes {
 		fail(w, http.StatusBadRequest, "MALFORMED_REQUEST")
 		return
 	}

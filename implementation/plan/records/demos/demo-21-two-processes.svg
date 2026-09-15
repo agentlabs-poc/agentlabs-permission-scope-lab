@@ -25,7 +25,7 @@
 <text x="38.8" y="419" fill="#e8ecf2" xml:space="preserve">auth-service --authority authority.db --registry registry.db --listen 127.0.0.1:8080</text>
 <text x="22" y="440" fill="#9aa4b4" xml:space="preserve">    auth-service listening on 127.0.0.1:8080 for acme/hrms</text>
 <text x="22" y="482" fill="#4fb8e8">$</text>
-<text x="38.8" y="482" fill="#e8ecf2" xml:space="preserve">hrms --auth http://127.0.0.1:8080 --listen 127.0.0.1:8081 --client agent_hrms</text>
+<text x="38.8" y="482" fill="#e8ecf2" xml:space="preserve">HRMS_AUTH_TOKEN=... hrms --auth http://127.0.0.1:8080 --listen 127.0.0.1:8081 --client agent_hrms --allow-cleartext</text>
 <text x="22" y="503" fill="#9aa4b4" xml:space="preserve">    hrms listening on 127.0.0.1:8081, asking http://127.0.0.1:8080 as agent_hrms</text>
 <text x="22" y="545" fill="#d9a441" xml:space="preserve">══ THE REQUEST REACHES THE HANDLER, OR IT DOES NOT ══</text>
 <text x="22" y="566" fill="#6b7687" xml:space="preserve">   (maya holds payslip read and write within dept=FIN)</text>
