@@ -31,7 +31,7 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = provider.Close() })
-	source, err := localadapter.Open(t.Context(), dbPath, fixedClock{})
+	source, err := localadapter.Open(t.Context(), dbPath, fixedClock{}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +108,7 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
 	})
 	fixtureContext := domain.FixtureContext{Name: "maya-team1"}
-	source, err := localadapter.Open(t.Context(), dbPath, fixedClock{})
+	source, err := localadapter.Open(t.Context(), dbPath, fixedClock{}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,4 +261,16 @@ func assertResponse(t *testing.T, handler http.Handler, method, target, body str
 			t.Fatalf("invalid deny body: %q, err=%v", response.Body.String(), err)
 		}
 	}
+}
+
+// labRegistry answers for the fixture's area and nothing else. A stub that said
+// yes to everything would hide the installation gate, which is exactly what the
+// wrong-boundary cases here assert.
+type labRegistry struct{}
+
+func (labRegistry) ApplicationExists(_ context.Context, applicationID string) (bool, error) {
+	return applicationID == "hrms", nil
+}
+func (labRegistry) Installed(_ context.Context, tenantID, applicationID string) (bool, error) {
+	return tenantID == "acme" && applicationID == "hrms", nil
 }

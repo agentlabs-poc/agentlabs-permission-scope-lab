@@ -1,8 +1,8 @@
 # Demonstration — the assignment record
 
-Captured from a real run of `verify-assignment.sh` against a real SQLite store, then
-rendered into this file **from that capture**. The SVG beside it is generated
-from the same capture, so the image and this file cannot drift.
+Captured from a real run of `verify-assignment.sh`, then rendered into this file **from
+that capture**. The SVG beside it is generated from the same capture, so the
+image and this file cannot drift.
 
 `108` lines captured, 13 commands. Reproduce with:
 
@@ -154,21 +154,7 @@ rc=0
 
 ---
 
-## What the run shows
-
-| | Seen above |
-|---|---|
-| both directions, and neither is not a question | `--grant` and `--recipient` each answer; no filter is refused **with the reason** |
-| the binding identifies the record | `get` prints grant and recipient first, the id after |
-| publication does not move an adoption | two revisions published, the assignment still reads revision 1 — Q-102 |
-| upgrade takes the **latest** | 1 → **3**, never 2. Q-105: *"do not silently select revision 2 instead"* |
-| upgrading again is a no-op | the caller asked for the latest and has it |
-| delete refuses while depended on | the supporting assignment cannot go while a route rests on it — `rc=4` |
-| every id is a base-36 Snowflake | `key4`, `key6` and the value's `id` alike |
-| tables 5 → 4 | `assignments` is gone |
-
-**What this run does not show, and where it is shown instead.** The duplicate
-binding is refused by the lab's administrative gate, which never reaches storage.
-That Q-104 is *also* the envelope's primary key is asserted in
-`internal/storage/sqlite/assignment_l1_test.go`, which calls `insertAssignment`
-with no gate in front of it.
+**Two tables.** The assignment is keyed by what it binds — `key4` the grant,
+`key5` and `key6` the recipient — so the one-per-grant-and-recipient rule is the
+envelope's own primary key rather than a constraint this record type had to add
+to a table it shares with seven others.

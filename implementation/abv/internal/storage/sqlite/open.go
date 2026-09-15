@@ -21,9 +21,13 @@ const defaultMaxSnapshotRecords = 10_000
 
 type Options struct {
 	MaxSnapshotRecords int
-	// Registry routes the two questions about applications and installations to
-	// the application registry domain. Absent, the provider answers them from
-	// its own tables, which is what the lab fixtures do.
+	// Registry answers the two questions about applications and installations.
+	// It is required: those facts belong to the application registry domain and
+	// Auth-AL no longer keeps a copy, so a provider without one can resolve
+	// nothing. Open refuses rather than letting every read fail separately.
+	//
+	// Required means *a* registry, not *this* registry — the legacy tables
+	// behind an adapter satisfy it, which is the point of a port.
 	Registry Registry
 }
 
@@ -40,8 +44,10 @@ type provider struct {
 	afterCatalog func(context.Context) error
 }
 
-func Open(ctx context.Context, path string) (storage.Provider, error) {
-	return OpenWithOptions(ctx, path, Options{})
+// Open is OpenWithOptions with the defaults. The registry is still required —
+// it is a fact Auth-AL does not hold, not an option.
+func Open(ctx context.Context, path string, registry Registry) (storage.Provider, error) {
+	return OpenWithOptions(ctx, path, Options{Registry: registry})
 }
 
 func OpenWithOptions(ctx context.Context, path string, options Options) (storage.Provider, error) {
@@ -61,6 +67,9 @@ func open(ctx context.Context, path string, options Options, fixtureCreated bool
 	}
 	if limit < 0 {
 		return nil, domain.ErrMalformed
+	}
+	if options.Registry == nil {
+		return nil, domain.ErrUnsupported
 	}
 	abs, err := filepath.Abs(path)
 	if err != nil {

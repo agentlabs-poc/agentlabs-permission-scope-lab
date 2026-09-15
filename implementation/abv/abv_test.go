@@ -157,7 +157,7 @@ func TestSQLiteFacadeReopensCommittedAssignment(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reopened, err := abv.OpenSQLite(t.Context(), path, admin, clock{now: time.Now()})
+	reopened, err := abv.OpenSQLite(t.Context(), path, admin, clock{now: time.Now()}, mustFixedRegistry(t, area))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,4 +219,16 @@ func assertCount(t *testing.T, provider storage.Provider, area domain.Area, want
 	}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// mustFixedRegistry composes the smallest thing that satisfies the port, now
+// that Auth-AL keeps no copy of the registry's facts and cannot be opened
+// without one.
+func mustFixedRegistry(t *testing.T, area domain.Area) *lab.FixedRegistry {
+	t.Helper()
+	registry, err := lab.NewFixedRegistry(area)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return registry
 }

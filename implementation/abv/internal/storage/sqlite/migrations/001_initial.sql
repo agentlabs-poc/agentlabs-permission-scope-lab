@@ -2,7 +2,7 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE abv_metadata (
     marker TEXT PRIMARY KEY CHECK (marker = 'agentlabs-abv'),
-    schema_version INTEGER NOT NULL CHECK (schema_version = 10)
+    schema_version INTEGER NOT NULL CHECK (schema_version = 11)
 );
 
 -- The ABV-123 L1 record store. Permissions and scopes live here; the remaining
@@ -46,21 +46,6 @@ CREATE TABLE abv_l1_records (
 CREATE INDEX abv_l1_records_prefix ON abv_l1_records
     (boundary, tenant_id, key1, key2, key3, key4, key5);
 
-CREATE TABLE applications (
-    application_id TEXT PRIMARY KEY,
-    compatibility_enabled INTEGER NOT NULL CHECK (compatibility_enabled IN (0, 1)),
-    -- Bumped in the same transaction as any catalog write. A reader that sees
-    -- the same generation before and after an offset walk knows nothing moved
-    -- between its pages; a different one means retry. Per application, so one
-    -- application's change does not invalidate another's cached catalog.
-    generation INTEGER NOT NULL DEFAULT 0 CHECK (generation >= 0)
-);
-CREATE TABLE installations (
-    tenant_id TEXT NOT NULL,
-    application_id TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, application_id),
-    FOREIGN KEY (application_id) REFERENCES applications(application_id)
-);
 -- The ownership marker is written last, so an incomplete initialization is
 -- never accepted as an ABV database on a later open.
-INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 10);
+INSERT INTO abv_metadata(marker, schema_version) VALUES ('agentlabs-abv', 11);

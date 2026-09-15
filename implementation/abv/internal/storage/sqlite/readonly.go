@@ -15,7 +15,14 @@ import (
 // Reader exposes only read access to an existing ABV SQLite database.
 type Reader struct{ provider *provider }
 
-func OpenReadOnly(ctx context.Context, path string) (*Reader, error) {
+// OpenReadOnly takes a registry for the same reason Open does: whether a tenant
+// holds an application is the registry's fact and Auth-AL keeps no copy. An
+// evaluator without one would resolve authority for tenants that may have been
+// uninstalled, which is the opposite of fail-closed.
+func OpenReadOnly(ctx context.Context, path string, registry Registry) (*Reader, error) {
+	if registry == nil {
+		return nil, domain.ErrUnsupported
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -41,7 +48,7 @@ func OpenReadOnly(ctx context.Context, path string) (*Reader, error) {
 	if err != nil {
 		return nil, classify(err)
 	}
-	p := &provider{db: db, maxSnapshotRecords: defaultMaxSnapshotRecords}
+	p := &provider{db: db, maxSnapshotRecords: defaultMaxSnapshotRecords, registry: registry}
 	fail := func(err error) (*Reader, error) { _ = db.Close(); return nil, err }
 	conn, err := p.connection(ctx)
 	if err != nil {

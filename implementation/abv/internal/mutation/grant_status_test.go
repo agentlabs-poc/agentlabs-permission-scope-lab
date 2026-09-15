@@ -55,7 +55,7 @@ func TestSetGrantStatusPersistsOnlyControlAndUsesAdoptedRevision(t *testing.T) {
 	if err = provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	reopened, err := sqlite.Open(t.Context(), path)
+	reopened, err := sqlite.Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -282,7 +282,7 @@ func TestSetGrantStatusSnapshotLimitDoesNotWrite(t *testing.T) {
 	if err = seeded.Close(); err != nil {
 		t.Fatal(err)
 	}
-	limited, err := sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 2})
+	limited, err := sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 2, Registry: allowAllRegistry{}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,7 +295,7 @@ func TestSetGrantStatusSnapshotLimitDoesNotWrite(t *testing.T) {
 	if err = limited.Close(); err != nil {
 		t.Fatal(err)
 	}
-	reopened, err := sqlite.Open(t.Context(), path)
+	reopened, err := sqlite.Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -347,3 +347,10 @@ func TestSetGrantStatusPreservesDescendantStateAndEffectiveness(t *testing.T) {
 		})
 	}
 }
+
+// allowAllRegistry satisfies the port for tests whose subject is storage rather
+// than the installation gate.
+type allowAllRegistry struct{}
+
+func (allowAllRegistry) ApplicationExists(context.Context, string) (bool, error) { return true, nil }
+func (allowAllRegistry) Installed(context.Context, string, string) (bool, error) { return true, nil }

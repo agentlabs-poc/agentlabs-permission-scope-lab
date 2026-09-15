@@ -20,7 +20,7 @@ func TestGrantTablesAreFoldedAwayAndTheRowsAreCanonical(t *testing.T) {
 	provider := opened.(*provider)
 	defer provider.Close()
 
-	for _, gone := range []string{"grant_controls", "grant_contents", "trusted_roots", "assignments"} {
+	for _, gone := range []string{"grant_controls", "grant_contents", "trusted_roots", "assignments", "applications", "installations"} {
 		if _, err := provider.db.Exec(`SELECT 1 FROM ` + gone + ` LIMIT 1`); err == nil {
 			t.Fatalf("the %s table still exists; it should be folded away", gone)
 		}

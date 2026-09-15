@@ -54,7 +54,7 @@ func TestCatalogProviderPersistsAndIsolatesApplicationCatalog(t *testing.T) {
 	if err := opened.Close(); err != nil {
 		t.Fatal(err)
 	}
-	reopened, err := Open(t.Context(), path)
+	reopened, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +200,7 @@ func TestCatalogProviderDuplicateAndConcurrentInsertConflict(t *testing.T) {
 		}
 	}
 	p1 := opened.(*provider)
-	p2Opened, err := Open(t.Context(), p1Path(p1))
+	p2Opened, err := Open(t.Context(), p1Path(p1), allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -243,7 +243,7 @@ func TestCatalogProviderSnapshotLimit(t *testing.T) {
 		t.Fatal(err)
 	}
 	opened.Close()
-	limited, err := OpenWithOptions(t.Context(), path, Options{MaxSnapshotRecords: 1})
+	limited, err := OpenWithOptions(t.Context(), path, Options{MaxSnapshotRecords: 1, Registry: allowAllRegistry{}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -346,7 +346,7 @@ func TestPermissionStatusUpdatePersistsAndNeverInserts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reopened, err := Open(t.Context(), path)
+	reopened, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -484,3 +484,10 @@ func TestScopesAreL1Records(t *testing.T) {
 		t.Fatalf("scope did not round-trip: %v", err)
 	}
 }
+
+// allowAllRegistry satisfies the port for tests whose subject is storage rather
+// than the installation gate.
+type allowAllRegistry struct{}
+
+func (allowAllRegistry) ApplicationExists(context.Context, string) (bool, error) { return true, nil }
+func (allowAllRegistry) Installed(context.Context, string, string) (bool, error) { return true, nil }

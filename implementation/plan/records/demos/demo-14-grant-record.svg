@@ -69,7 +69,7 @@
 <text x="18" y="1320" fill="#d9a441" xml:space="preserve">══ CREATE — head and revision 1 in one act, the id issued ══</text>
 <text x="18" y="1340" fill="#4fb8e8" xml:space="preserve">$ abv grants create --parent fk3x9r2m5iv8 --permissions hrms:payroll:payslip::read --scope cert=C99</text>
 <text x="18" y="1360" fill="#9aa4b4" xml:space="preserve">    internal projection: grant</text>
-<text x="18" y="1380" fill="#9aa4b4" xml:space="preserve">    id  fyacmyyt1wjk</text>
+<text x="18" y="1380" fill="#9aa4b4" xml:space="preserve">    id  fyahgo3fcuf4</text>
 <text x="18" y="1400" fill="#9aa4b4" xml:space="preserve">    status  enabled</text>
 <text x="18" y="1420" fill="#9aa4b4" xml:space="preserve">    kind  child</text>
 <text x="18" y="1440" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
@@ -80,7 +80,7 @@
 <text x="18" y="1540" fill="#9aa4b4" xml:space="preserve"></text>
 <text x="18" y="1560" fill="#4fb8e8" xml:space="preserve">$ abv grants create --parent fk3x9r2m5iv8 --permissions hrms:payroll:payslip::read --scope dept=FIN</text>
 <text x="18" y="1580" fill="#9aa4b4" xml:space="preserve">    internal projection: grant</text>
-<text x="18" y="1600" fill="#9aa4b4" xml:space="preserve">    id  fyacmz09hrsw</text>
+<text x="18" y="1600" fill="#9aa4b4" xml:space="preserve">    id  fyahgo53aeps</text>
 <text x="18" y="1620" fill="#9aa4b4" xml:space="preserve">    status  enabled</text>
 <text x="18" y="1640" fill="#9aa4b4" xml:space="preserve">    kind  child</text>
 <text x="18" y="1660" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
@@ -134,11 +134,11 @@
 <text x="18" y="2620" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fk3x9r2m5iv8 │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;fk3x9r2m0dq3&quot;,&quot;permissions │</text>
 <text x="18" y="2640" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ fk3x9r2man0d │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
 <text x="18" y="2660" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fk3x9r2man0d │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;fk3x9r2m5iv8&quot;,&quot;permissions │</text>
-<text x="18" y="2680" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ fyacmyyt1wjk │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
-<text x="18" y="2700" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fyacmyyt1wjk │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;fk3x9r2m5iv8&quot;,&quot;permissions │</text>
-<text x="18" y="2720" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ fyacmz09hrsw │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
-<text x="18" y="2740" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fyacmz09hrsw │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;fk3x9r2m5iv8&quot;,&quot;permissions │</text>
+<text x="18" y="2680" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ fyahgo3fcuf4 │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
+<text x="18" y="2700" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fyahgo3fcuf4 │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;fk3x9r2m5iv8&quot;,&quot;permissions │</text>
+<text x="18" y="2720" fill="#8899ab" xml:space="preserve">│ grant          │ hrms │ fyahgo53aeps │            │ {&quot;status&quot;:&quot;enabled&quot;,&quot;trusted_root&quot;:false}      │</text>
+<text x="18" y="2740" fill="#8899ab" xml:space="preserve">│ grant_revision │ hrms │ fyahgo53aeps │ 0000000001 │ {&quot;parent_grant_id&quot;:&quot;fk3x9r2m5iv8&quot;,&quot;permissions │</text>
 <text x="18" y="2760" fill="#8899ab" xml:space="preserve">╰────────────────┴──────┴──────────────┴────────────┴────────────────────────────────────────────────╯</text>
 <text x="18" y="2780" fill="#9aa4b4" xml:space="preserve"></text>
-<text x="18" y="2800" fill="#9aa4b4" xml:space="preserve">  tables: abv_metadata abv_l1_records applications installations abv_lab_metadata</text>
+<text x="18" y="2800" fill="#9aa4b4" xml:space="preserve">  tables: abv_metadata abv_l1_records abv_lab_metadata</text>
 </svg>

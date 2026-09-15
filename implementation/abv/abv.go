@@ -47,30 +47,19 @@ func New(provider storage.Provider, administration Administration, clock Clock) 
 	return &Facade{provider: provider, service: service}, nil
 }
 
-// OpenSQLiteWithRegistry opens a store whose two questions about applications —
-// does this one exist, and does this tenant hold it — are answered by the
-// application registry domain rather than by Auth-AL's own tables.
+// OpenSQLite opens a store. The registry is required, not optional: the two
+// questions about applications — does this one exist, and does this tenant hold
+// it — belong to the application registry domain, and Auth-AL no longer keeps a
+// copy to fall back to. There is one way to open a store, and it takes a
+// registry.
 //
 // The registry argument is satisfied structurally: nothing here imports the
 // registry, and the composition happens in whichever package holds both.
-func OpenSQLiteWithRegistry(ctx context.Context, path string, administration Administration, clock Clock, registry Registry) (*Facade, error) {
+func OpenSQLite(ctx context.Context, path string, administration Administration, clock Clock, registry Registry) (*Facade, error) {
 	if registry == nil {
 		return nil, domain.ErrMalformed
 	}
 	provider, err := sqlite.OpenWithOptions(ctx, path, sqlite.Options{Registry: registry})
-	if err != nil {
-		return nil, err
-	}
-	facade, err := New(provider, administration, clock)
-	if err != nil {
-		_ = provider.Close()
-		return nil, err
-	}
-	return facade, nil
-}
-
-func OpenSQLite(ctx context.Context, path string, administration Administration, clock Clock) (*Facade, error) {
-	provider, err := sqlite.Open(ctx, path)
 	if err != nil {
 		return nil, err
 	}

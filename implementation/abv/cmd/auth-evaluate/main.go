@@ -1,6 +1,8 @@
 package main
 
 import (
+	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/lab"
 	"agentlabs.local/abv/localadapter"
 	"agentlabs.local/authmiddleware"
 	"context"
@@ -72,7 +74,20 @@ func run(args []string, stdout, stderr io.Writer) int {
 		material[key] = authmiddleware.Selection{Kind: authmiddleware.SelectionAll}
 	}
 	now := clock{}
-	source, err := localadapter.Open(context.Background(), db, now)
+	// The lab evaluator trusts the tenant and application it was told to
+	// evaluate. A deployment composes the real registry here; this binary exists
+	// to exercise the evaluation path, not the installation gate.
+	area, err := domain.NewArea(tenant, application)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	registry, err := lab.NewFixedRegistry(area)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 4
+	}
+	source, err := localadapter.Open(context.Background(), db, now, registry)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 4

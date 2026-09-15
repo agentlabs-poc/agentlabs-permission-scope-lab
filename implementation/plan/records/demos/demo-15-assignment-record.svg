@@ -110,5 +110,5 @@
 <text x="18" y="2140" fill="#8899ab" xml:space="preserve">│ assignment │ hrms     │ fk3x9r2m5iv8 │ group          │ fibggi2juubk   │ {&quot;id&quot;:&quot;fm5b7t4p5iv8&quot;,&quot;grant_revision&quot;:1,&quot;status&quot;:&quot;enabled&quot;} │</text>
 <text x="18" y="2160" fill="#8899ab" xml:space="preserve">╰────────────┴──────────┴──────────────┴────────────────┴────────────────┴─────────────────────────────────────────────────────────────╯</text>
 <text x="18" y="2180" fill="#9aa4b4" xml:space="preserve"></text>
-<text x="18" y="2200" fill="#9aa4b4" xml:space="preserve">  tables: abv_metadata abv_l1_records applications installations abv_lab_metadata</text>
+<text x="18" y="2200" fill="#9aa4b4" xml:space="preserve">  tables: abv_metadata abv_l1_records abv_lab_metadata</text>
 </svg>

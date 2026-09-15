@@ -51,7 +51,7 @@ func TestSetAssignmentStatusSQLiteBottomUpAndPreservesRecords(t *testing.T) {
 	if err = provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	provider, err = sqlite.Open(t.Context(), path)
+	provider, err = sqlite.Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestSetAssignmentStatusSQLiteBottomUpAndPreservesRecords(t *testing.T) {
 	if err = provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	reopened, err := sqlite.Open(t.Context(), path)
+	reopened, err := sqlite.Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -317,14 +317,14 @@ func TestSetAssignmentStatusRejectsDepthAndSnapshotOverflowWithoutWrite(t *testi
 	path := t.TempDir() + "/authority.db"
 	seeded, _ := lab.CreateSQLite(t.Context(), path, []storage.Snapshot{lab.TeamFINC17(area).Snapshot})
 	_ = seeded.Close()
-	limited, _ := sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 2})
+	limited, _ := sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 2, Registry: allowAllRegistry{}})
 	service, _ = mutation.New(limited, assignmentStatusAdministration{}, &fixedClock{now: time.Now()})
 	got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "fm5b7t4p5iv8", "disabled")
 	if !errors.Is(err, storage.ErrSnapshotLimit) || got != (domain.Assignment{}) {
 		t.Fatalf("snapshot = %#v, %v", got, err)
 	}
 	_ = limited.Close()
-	reopened, _ := sqlite.Open(t.Context(), path)
+	reopened, _ := sqlite.Open(t.Context(), path, allowAllRegistry{})
 	defer reopened.Close()
 	if err := reopened.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
 		if snapshot.Assignments["fm5b7t4p5iv8"].Status != "enabled" {

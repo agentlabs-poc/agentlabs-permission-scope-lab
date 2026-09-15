@@ -36,7 +36,7 @@ func TestGrantRevisionInsertIsImmutableAndAreaBound(t *testing.T) {
 	if err = p.Close(); err != nil {
 		t.Fatal(err)
 	}
-	p, err = sqlite.Open(t.Context(), path)
+	p, err = sqlite.Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,3 +179,10 @@ func TestGrantRevisionConcurrentDuplicateHasOneWinner(t *testing.T) {
 		t.Fatalf("success=%d conflict=%d", success, conflict)
 	}
 }
+
+// allowAllRegistry satisfies the port for tests whose subject is storage rather
+// than the installation gate.
+type allowAllRegistry struct{}
+
+func (allowAllRegistry) ApplicationExists(context.Context, string) (bool, error) { return true, nil }
+func (allowAllRegistry) Installed(context.Context, string, string) (bool, error) { return true, nil }

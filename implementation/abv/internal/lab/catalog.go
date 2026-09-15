@@ -62,7 +62,17 @@ func ConnectCatalog(ctx context.Context, app domain.Application, path string) (a
 	if _, err := os.Stat(path); err != nil {
 		return nil, nil, errors.Join(domain.ErrUnavailable, err)
 	}
-	facade, err := abv.OpenSQLite(ctx, path, catalogAdministration{app: app}, clock{})
+	// The catalog path is application-scoped, so the registry only has to agree
+	// that this application exists; no tenant is in play.
+	area, err := domain.NewArea("catalog-probe", app.ID())
+	if err != nil {
+		return nil, nil, err
+	}
+	registry, err := NewFixedRegistry(area)
+	if err != nil {
+		return nil, nil, err
+	}
+	facade, err := abv.OpenSQLite(ctx, path, catalogAdministration{app: app}, clock{}, registry)
 	if err != nil {
 		return nil, nil, err
 	}
