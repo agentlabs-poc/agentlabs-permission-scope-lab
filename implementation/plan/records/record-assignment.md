@@ -317,8 +317,8 @@ before it is called cheap.
 
 **Tables 5 → 4**, and `abv_l1_records` then holds **eight** record types:
 permission, scope, role, team, membership, grant, grant_revision, assignment.
-`applications` and `installations` are the only tables left beside it, and they
-leave when Auth-AL's compatibility and generation move into the envelope.
+`applications` and `installations` left immediately afterwards, when the
+catalog's own state became the ninth record type — **two tables**.
 
 ---
 

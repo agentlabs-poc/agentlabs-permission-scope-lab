@@ -351,13 +351,14 @@ here rather than decided here.
 | `grant_contents` | `abv.grant_revision` rows |
 | `trusted_roots` | a flag in the `abv.grant` value |
 
-**Tables 8 → 5.** The precedent is exact and verifiable: the permission, scope,
+**Tables 8 → 5** at the time; two tables remain today, and §9 of
+[the assignment record](record-assignment.md) records the rest of the journey. The precedent is exact and verifiable: the permission, scope,
 role, team and membership folds each *removed* their table rather than leaving it
 beside the envelope, and `role_l1_test.go` asserts `SELECT 1 FROM roles` still
 fails. This fold carries the same assertion.
 
-`assignments` stays until the assignment record. `applications` and
-`installations` stay for the reasons the registry charter records.
+`assignments` went with the assignment record; `applications` and `installations`
+went when the catalog's own state became a record. **Two tables remain.**
 
 ---
 

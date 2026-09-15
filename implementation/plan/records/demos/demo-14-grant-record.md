@@ -1,8 +1,8 @@
 # Demonstration — the grant record
 
-Captured from a real run of `verify-grant.sh` against a real SQLite store, then
-rendered into this file **from that capture**. The SVG beside it is generated
-from the same capture, so the image and this file cannot drift.
+Captured from a real run of `verify-grant.sh`, then rendered into this file **from
+that capture**. The SVG beside it is generated from the same capture, so the
+image and this file cannot drift.
 
 `138` lines captured, 15 commands. Reproduce with:
 
@@ -93,7 +93,7 @@ rc=0
 ```console
 abv grants create --parent fk3x9r2m5iv8 --permissions hrms:payroll:payslip::read --scope cert=C99
 internal projection: grant
-id  fyacmyyt1wjk
+id  fyahgo3fcuf4
 status  enabled
 kind  child
 revision  1
@@ -106,7 +106,7 @@ rc=0
 ```console
 abv grants create --parent fk3x9r2m5iv8 --permissions hrms:payroll:payslip::read --scope dept=FIN
 internal projection: grant
-id  fyacmz09hrsw
+id  fyahgo53aeps
 status  enabled
 kind  child
 revision  1
@@ -180,26 +180,16 @@ rc=0
 │ grant_revision │ hrms │ fk3x9r2m5iv8 │ 0000000001 │ {"parent_grant_id":"fk3x9r2m0dq3","permissions │
 │ grant          │ hrms │ fk3x9r2man0d │            │ {"status":"enabled","trusted_root":false}      │
 │ grant_revision │ hrms │ fk3x9r2man0d │ 0000000001 │ {"parent_grant_id":"fk3x9r2m5iv8","permissions │
-│ grant          │ hrms │ fyacmyyt1wjk │            │ {"status":"enabled","trusted_root":false}      │
-│ grant_revision │ hrms │ fyacmyyt1wjk │ 0000000001 │ {"parent_grant_id":"fk3x9r2m5iv8","permissions │
-│ grant          │ hrms │ fyacmz09hrsw │            │ {"status":"enabled","trusted_root":false}      │
-│ grant_revision │ hrms │ fyacmz09hrsw │ 0000000001 │ {"parent_grant_id":"fk3x9r2m5iv8","permissions │
+│ grant          │ hrms │ fyahgo3fcuf4 │            │ {"status":"enabled","trusted_root":false}      │
+│ grant_revision │ hrms │ fyahgo3fcuf4 │ 0000000001 │ {"parent_grant_id":"fk3x9r2m5iv8","permissions │
+│ grant          │ hrms │ fyahgo53aeps │            │ {"status":"enabled","trusted_root":false}      │
+│ grant_revision │ hrms │ fyahgo53aeps │ 0000000001 │ {"parent_grant_id":"fk3x9r2m5iv8","permissions │
 ╰────────────────┴──────┴──────────────┴────────────┴────────────────────────────────────────────────╯
-  tables: abv_metadata abv_l1_records applications installations abv_lab_metadata
+  tables: abv_metadata abv_l1_records abv_lab_metadata
 ```
 
 ---
 
-## What the run shows
-
-| | Seen above |
-|---|---|
-| the root is a different kind of row | `grants list` marks it `root`; `--roots` and `--children` are the same question either way |
-| a root neither inherits nor narrows | no parent, and `scope {}` adds no narrowing |
-| a child states its permissions | it takes two of the root's three — `delete` was available and not taken |
-| scope accumulates | the grandchild narrows **under** its parent's `dept=FIN` |
-| create writes both records | one command, and the rows show a `grant` *and* a `grant_revision` for each new id |
-| the identifier is issued | a base-36 Snowflake, never a name the caller chose |
-| four refusals, four answers | no parent `rc=2` · unknown parent `rc=3` · unregistered permission `rc=3` · unregistered scope key `rc=3` |
-| delete refuses while depended on | `rc=4`, not a cascade |
-| one table, two record types | told apart by `key2`, the revision zero-padded in `key5` |
+**Two tables.** `abv_metadata` and `abv_l1_records` — the ownership marker and
+one canonical record store. `abv_lab_metadata` is the lab scenario's own marker,
+not Auth-AL's.

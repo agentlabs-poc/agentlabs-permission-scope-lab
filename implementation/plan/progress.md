@@ -1,5 +1,45 @@
 # ABV implementation progress
 
+## The last two tables — `abv_l1_records` and `abv_metadata`, and nothing else
+
+[Record](records/record-catalog.md). The 123 shape finished: one canonical
+key/value record store per domain per layer, plus the ownership marker.
+
+**A table survives a fold for exactly one reason — it holds a fact nobody has
+found a home for.** These two failed that test differently.
+
+`installations` was never a fold. Presence was its whole content, and that is the
+registry's fact, already a record in another domain and already answered by the
+port. It survived as a fallback, which is a second store able to disagree about
+whether a tenant holds an application, with Auth-AL believing itself.
+
+`applications` was three columns in three situations. The identifier was the
+registry's. The other two became `abv.catalog` — `key1=abv key2=catalog
+key3=<application>` at the application boundary, value
+`{"compatibility_enabled", "generation"}`. The name is `catalog` because
+`domain.Catalog` already names exactly these fields: fold out the permissions and
+scopes, which are records of their own, and the catalog's own state is what
+remains.
+
+`compatibility_enabled` is a record that had been living in a column — Q-041 says
+each application "explicitly declares upfront", which is a declaration with an
+identity and a value. `generation` is **not** a record, and the code says so
+plainly: a counter, in a record store because there was nowhere else. Deriving it
+from `COUNT(*)` or `MAX(ts)` is better and does not hold — a status change
+rewrites a value without changing the count, and `ts` has one-second resolution.
+
+**The registry is now required, structurally rather than by a runtime check.**
+There is one way to open a store and it takes a registry. Required means *a*
+registry, not this one — the legacy tables behind an adapter still satisfy it,
+which is the point of a port. The read-only evaluator takes one too: without it
+an evaluator resolves authority for tenants that may have been uninstalled.
+
+Three tests turned out to be asserting the installation gate, which a
+say-yes-to-everything stub would have hidden. The lab's stubs answer for their
+own area and refuse everything else.
+
+**Nine record types, two tables.**
+
 ## The assignment record — tables 5 → 4, and the envelope holds every record type
 
 [Record](records/record-assignment.md) · [demonstration](records/demos/demo-15-assignment-record.md).
