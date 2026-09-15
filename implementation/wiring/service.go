@@ -90,7 +90,6 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 		_ = applications.Close()
 		return nil, err
 	}
-	var _ abv.Registry = port
 	authority, err := abv.OpenSQLite(ctx, cfg.AuthorityPath, cfg.Administration, cfg.Clock, port)
 	if err != nil {
 		_ = applications.Close()

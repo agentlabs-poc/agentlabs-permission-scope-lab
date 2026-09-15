@@ -159,7 +159,7 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 	noSubject := f.Issuer
 	noSubject.HumanID = " "
 	askedAbout := f.Issuer
-	askedAbout.Actor = domain.Actor{Type: "service_account", ID: "agent_hrms"}
+	askedAbout.Actor = domain.Actor{Type: "service_account", ID: lab.WorkloadClient}
 
 	for _, tc := range []struct {
 		name       string
@@ -323,7 +323,7 @@ func TestOnlyTheGatedEntryAdmitsAnActorThatIsNotTheSubject(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	f := lab.TeamFINC17(area)
 	asService := f.Issuer
-	asService.Actor = domain.Actor{Type: "service_account", ID: "agent_hrms"}
+	asService.Actor = domain.Actor{Type: "service_account", ID: lab.WorkloadClient}
 
 	if _, err := lineage.ResolveHuman(t.Context(), f.Snapshot, asService, lab.PayslipRead, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
 		t.Fatalf("the ungated entry admitted a service actor: %v", err)

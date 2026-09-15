@@ -1,7 +1,10 @@
 package wiring_test
 
 import (
+	regdomain "agentlabs.local/registry/domain"
 	"agentlabs.local/wiring"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,11 +21,12 @@ func validConfig(dir string) wiring.Config {
 	}
 }
 
-// A half-configured service is refused rather than assembled. Every field here
-// is something only a deployment knows; defaulting one would mean guessing at
-// who may administer, or which store to open.
+// A half-configured service is refused rather than assembled, and refused *here*
+// rather than somewhere downstream. Asserting only that an error came back was
+// vacuous: registry.Open and abv.OpenSQLite already fail on every spoiled
+// config, so the test passed with both guards deleted. It now names the message
+// this package owns, and checks that nothing was opened on the way to it.
 func TestOpenRefusesIncompleteConfiguration(t *testing.T) {
-	dir := t.TempDir()
 	for name, spoil := range map[string]func(*wiring.Config){
 		"no authority path": func(c *wiring.Config) { c.AuthorityPath = "" },
 		"no registry path":  func(c *wiring.Config) { c.RegistryPath = "" },
@@ -31,6 +35,9 @@ func TestOpenRefusesIncompleteConfiguration(t *testing.T) {
 		"no registry admin": func(c *wiring.Config) { c.RegistryAdministration = nil },
 	} {
 		t.Run(name, func(t *testing.T) {
+			// A directory of its own: a guard that fires late leaves a store
+			// behind, and sharing one would hide that.
+			dir := t.TempDir()
 			cfg := validConfig(dir)
 			spoil(&cfg)
 			service, err := wiring.Open(t.Context(), cfg)
@@ -41,10 +48,37 @@ func TestOpenRefusesIncompleteConfiguration(t *testing.T) {
 			if service != nil {
 				t.Fatal("returned a service beside an error")
 			}
+			if !strings.Contains(err.Error(), "required") {
+				t.Fatalf("refused downstream rather than here: %v", err)
+			}
+			entries, readErr := os.ReadDir(dir)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			if len(entries) != 0 {
+				t.Fatalf("a refused configuration still opened %d file(s)", len(entries))
+			}
 		})
 	}
-	if _, err := wiring.Open(nil, validConfig(dir)); err == nil { //nolint:staticcheck // the nil context is the point
+	if _, err := wiring.Open(nil, validConfig(t.TempDir())); err == nil { //nolint:staticcheck // the nil context is the point
 		t.Fatal("assembled without a context")
+	}
+}
+
+// The port is built after the registry is open, so its failure is the second
+// leak path — the same class as the one below, and it had no test. A zero
+// Operator is what makes NewPort refuse.
+func TestOpenClosesTheRegistryWhenThePortFails(t *testing.T) {
+	dir := t.TempDir()
+	cfg := validConfig(dir)
+	cfg.Operator = regdomain.Identity{}
+	before := openHandles(t, cfg.RegistryPath)
+	if service, err := wiring.Open(t.Context(), cfg); err == nil {
+		_ = service.Close()
+		t.Fatal("assembled with an operator the port refuses")
+	}
+	if after := openHandles(t, cfg.RegistryPath); after > before {
+		t.Fatalf("the failed port left %d registry handle(s) open", after-before)
 	}
 }
 
@@ -111,12 +145,18 @@ func TestNeitherDomainImportsTheOther(t *testing.T) {
 				return err
 			}
 			scanned++
-			source, err := os.ReadFile(path)
+			// Parsed, not grepped. These packages write prose doc comments about
+			// exactly this boundary, and a comment naming the other module's
+			// path would fail a text search — a check that cries wolf gets
+			// deleted the first time it is wrong.
+			file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ImportsOnly)
 			if err != nil {
 				return err
 			}
-			if strings.Contains(string(source), `"`+pair.forbidden) {
-				found = append(found, path)
+			for _, imported := range file.Imports {
+				if strings.HasPrefix(strings.Trim(imported.Path.Value, `"`), pair.forbidden) {
+					found = append(found, path)
+				}
 			}
 			return nil
 		})
