@@ -28,7 +28,9 @@ definitions, permissions from adopted role revisions, validity/conditions, and
 dependencies."* It is about the human, and it is the same answer whatever the
 request is.
 
-**Resolution is about the request.** CONTRACT-005 —
+**Resolution is about the request.** CONTRACT-005 — whose *mode selection* is
+deprecated while the distinction it drew is explicitly retained, per the same
+map: *"deciding authority and enforcing it remain distinct responsibilities"* —
 *"whether application facts are still needed to determine authorized access, or
 whether the handler is applying complete restrictions already determined."* It
 needs material Auth does not have and must not have: the department the
@@ -99,3 +101,32 @@ where that is recorded.
 | Where does request material enter? | Only in the client, only at resolution. |
 | Who may call authority loading? | An enforcing client. Administration is a separate surface and a separate story. |
 | What does the composition root serve? | Two things: administration, and authority loading. Not resolution — that ships to the client. |
+
+
+---
+
+## Every rule this document leans on, checked
+
+Twice in one session a chapter was read without checking whether a later one had
+retired it. So each identifier cited across `terms.md`,
+[resolved-authority.md](resolved-authority.md), [session-scope.md](session-scope.md)
+and [root-establishment.md](../records/root-establishment.md) was searched for a
+deprecation or supersession note elsewhere in the handbook.
+
+| | |
+|---|---|
+| **retired, and cited here only as retired** | CONTRACT-002, CONTRACT-003 (two modes), ENFORCEMENT-001 (prepared) |
+| **half retired** | CONTRACT-005 — mode selection gone, the resolution/enforcement distinction retained, and the citation above now says so |
+| **current, verified** | CHARTER-001/002, CONTRACT-006, CONTRACT-008, CONTRACT-010, CONTRACT-012, ENFORCEMENT-002, RESOLUTION-001, SELF-001, GROUP-004, Q-051, Q-071, Q-086, Q-113, Q-114, Q-115, Q-117, Q-119, Q-122, Q-125, Q-128, Q-130 |
+
+Three of those carry a supersession note that turns out to be about an **earlier
+proposal inside the same question** rather than the question itself — Q-114's
+original seed-authority flow, Q-099's blanket membership retention, Q-122's
+earlier Q-120A mechanism. The current statements are the ones these documents
+use, and they stand.
+
+**The method, because it is the reusable part:** a rule's own chapter does not
+say it has been retired. `endpoint-authorization.md` carries the map that retires
+CONTRACT-002 while `authorization-flow.md` still describes it in full, and
+`discussion-tree.md` marks settled and deprecated decisions in one place. Check
+all three before leaning on an identifier.
