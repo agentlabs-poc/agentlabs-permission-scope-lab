@@ -78,6 +78,22 @@ func ResolveTeamAssignment(s storage.Snapshot, assignmentID string, now time.Tim
 	return resolver.resolve(unique, unique.Recipient.ID)
 }
 
+// validateSubject checks the human whose authority is being walked, and nothing
+// about the actor. The authority belongs to the human; who is entitled to ask
+// about it is the gate's question and not the walk's — so an application asking
+// about someone reaches the same routes that person would.
+func validateSubject(identity domain.Identity) error {
+	if invalidIdentityString(identity.Version) || invalidIdentityString(identity.HumanID) {
+		return domain.ErrMalformed
+	}
+	if identity.Version != "1" {
+		return domain.ErrUnsupported
+	}
+	return nil
+}
+
+// validateIdentity is the acting-human rule, kept for the reads that are about
+// someone acting rather than about someone's authority.
 func validateIdentity(identity domain.Identity) error {
 	if invalidIdentityString(identity.Version) || invalidIdentityString(identity.Actor.Type) || invalidIdentityString(identity.Actor.ID) || invalidIdentityString(identity.HumanID) {
 		return domain.ErrMalformed

@@ -48,7 +48,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
 			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace", "--parent", "--roots", "--human",
-			"--status", "--children", "--role", "--role-revision", "--scope", "--grant", "--recipient", "--recipient-type", "--team", "--no-source":
+			"--status", "--children", "--role", "--role-revision", "--scope", "--grant", "--recipient", "--recipient-type", "--team", "--no-source", "--client":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -312,7 +312,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	case "resolve":
 		// The enforcement read. No verb: there is one question, and asking it is
 		// the whole command.
-		if len(positional) != 0 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--human", "--permissions", "--no-source") ||
+		if len(positional) != 0 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--human", "--permissions", "--no-source", "--client") ||
 			flags["--db"] == "" || flags["--fixture-context"] == "" || empty(flags["--human"]) {
 			return fail(2, "resolve requires a database, a fixture context and --human")
 		}

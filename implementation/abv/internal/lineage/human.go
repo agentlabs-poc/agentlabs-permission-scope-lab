@@ -16,7 +16,22 @@ const maxHumanQueryRecords = 10_000
 
 // ResolveHuman returns eligible routes held by teams the human directly joins,
 // carrying one permission.
+//
+// It holds the actor to the subject, and that is not redundant with the subject
+// check inside the walk. Its caller is localadapter.SQLiteAuthoritySource, which
+// is opened with a path, a clock and a registry — and no administration, so it
+// has no gate at all. This rule IS that path's gate.
+//
+// ResolveAuthority is the loosened entry, and it is loosened only because
+// CheckAuthorityRead runs before it. Loosening the shared walk instead of the
+// gated entry took the check away from the path that had nothing else: a forged
+// or absent actor returned the subject's full route set, predicates and
+// contributing grant ids included, stopped only by a rule in a different module
+// that happened to run first.
 func ResolveHuman(ctx context.Context, s storage.Snapshot, identity domain.Identity, permission string, now time.Time) ([]domain.Route, error) {
+	if err := validateIdentity(identity); err != nil {
+		return nil, err
+	}
 	held, err := collectHumanRoutes(ctx, s, identity, []string{permission}, now)
 	if err != nil {
 		return nil, err
@@ -53,7 +68,7 @@ func collectHumanRoutes(ctx context.Context, s storage.Snapshot, identity domain
 	if err := ctx.Err(); err != nil {
 		return fail(err)
 	}
-	if err := validateIdentity(identity); err != nil {
+	if err := validateSubject(identity); err != nil {
 		return fail(err)
 	}
 	if err := s.Area.Validate(); err != nil {

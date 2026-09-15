@@ -21,13 +21,22 @@ differ in kind rather than in polish.
 | `source` and its lineage, and `OmitSource` | **built** |
 | the `permissions` filter | **built** |
 | `authority_epoch` and `resolved_at` | **not emitted.** The envelope below shows them because the freshness design needs a place to land; nothing computes an epoch yet |
-| `POST authority.resolve`, `GET authority.epoch` | **not built.** There is no HTTP surface at all — the call today is the Go method and the `abv resolve` verb |
+| `POST authority.resolve`, `GET authority.epoch` | **not built.** There is no HTTP surface at all — the call today is the Go method and the `abv resolve` verb, whose `--client` flag supplies the credential in place of a token |
+| a caller who is not the subject | **built** — `--client`, and §2's identity rules |
 | `expand_roles: false` and `permissions_ref` | **not built**, deliberately — §6 |
 
-The gap that matters most is not in this list. The caller and the subject are one
-identity block and must still agree, so a caller can resolve only its own
-authority — enough to prove the read, not enough to serve an application, which
-asks about many humans and is none of them.
+**The caller no longer has to be the subject.** That gap is closed: an
+application resolves other people through its own credential, modelled on the
+Auth service's workload client — an id and a secret exchanged for a token their
+contract describes as *"bound to `auth.registry.read` and one tenant
+application"*. The binding is the area, so the gate is a comparison rather than a
+policy, and nothing about the subject is checked because an application asks
+about many humans and is none of them. See [demo 19](../records/demos/demo-19-service-credential.md).
+
+The lab models the shape and not the issuance. This repository never becomes that
+service, so a real credential — the secret, its rotation, the token exchange —
+belongs to the migration. What must survive the migration is the rule: **who may
+ask is the gate's question, and who is asked about is the walk's.**
 
 ---
 
@@ -130,6 +139,11 @@ already bounded — the client never has to narrow it further.
 | `include_source` | `true` | omit to drop the explanation and keep the hot path lean |
 | `expand_roles` | `true` | see §6 — `false` is a designed-in future option, not built |
 | `permissions` | `null` | a filter, not a requirement. `null` means everything the human holds |
+
+On the CLI the same three boundaries appear as `--tenant`, `--app` and `--human`,
+and `--client` names the credential asking. Without it the caller is the subject
+— which is why no command line can express impersonation: `--human` supplies the
+actor and the subject at once.
 
 `permissions` exists because a gate deciding one request needs one permission,
 and a menu needs all of them. The same call serves both; the default is the
@@ -270,8 +284,17 @@ set, not a winner.
 | `scope` | effective. `{}` means the whole area, which is a complete scope, not an absent one |
 | `validity` | effective — the narrowest window in the chain. `null` bounds mean unbounded |
 | `source.via` | how the human reaches it. `membership` today; groups-only is deliberate, and a direct human assignment is refused at both write and read |
+
 | `source.adopted_role` | present only when the grant adopted a role. Explanation, never authority |
 | `source.lineage` | ordered root-first. Every entry names the grant revision, the assignment that carried it, and the team it went to |
+
+### Who may ask, which is not a field of the answer
+
+| actor type | admitted by the identity rule | admitted by any gate here |
+|---|---|---|
+| `user` | only when it names itself — naming another human is impersonation, refused before any gate | itself only, in the lab |
+| `service_account` | yes, naming anyone | yes, within the area its credential is bound to |
+| `agent` | yes, naming anyone | **no** — Q-086 admits the type and no gate in this repository implements delegation for it, which is unsupported rather than refused |
 
 **`source` is annotation, never a decision input.** The gate matches
 `permissions`, `scope` and `validity` and nothing else. If an application starts
@@ -311,7 +334,8 @@ error, and the same separation applies here.
 | every grant expired or disabled | **success**, `resolved_grants: []`. Same reason — resolution completed. |
 | the tenant has not installed the application | **not found**. There is no area to resolve in. |
 | the caller may not ask about this human | **rejected**. |
-| the identity block is malformed, or the version unsupported | **malformed**. Never a partial document. |
+| the identity block is missing a part, or names a wildcard | **malformed**. Never a partial document. |
+| the version is not `"1"`, or the actor type is outside Q-086, or a `user` actor names another human | **unsupported** — "we do not do that", decided before any gate runs |
 | authority could not be established — store unavailable, snapshot ceiling exceeded | **evaluation error**. Not a deny, and the client must not treat it as one — Q-128. |
 
 **An empty document is the most important row.** It is the normal answer for most

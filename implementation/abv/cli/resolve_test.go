@@ -86,6 +86,32 @@ func TestResolveForwardsFilterAndOmission(t *testing.T) {
 	}
 }
 
+// --client is the difference between "a human asking about themselves" and "an
+// application asking about somebody". It changes the actor on an authorization
+// call, so the verb must build exactly the identity it claims to and not quietly
+// keep the subject as the actor.
+func TestResolveClientMakesTheCallerAServiceCredential(t *testing.T) {
+	api := &authorityAPI{}
+	if code, _, diag := runResolve(t, api, "resolve", "--human", "fi7io4lvjwu8", "--client", "agent_hrms"); code != 0 {
+		t.Fatalf("exit=%d stderr=%q", code, diag)
+	}
+	if api.identity.Actor.Type != "service_account" || api.identity.Actor.ID != "agent_hrms" {
+		t.Fatalf("actor = %#v, want the credential", api.identity.Actor)
+	}
+	// The subject is untouched: the credential asks, the human is asked about.
+	if api.identity.HumanID != "fi7io4lvjwu8" {
+		t.Fatalf("subject = %q, want the human", api.identity.HumanID)
+	}
+
+	// Without it the caller is the subject, and the two must not blur.
+	if code, _, _ := runResolve(t, api, "resolve", "--human", "fi7io4lvjwu8"); code != 0 {
+		t.Fatalf("exit=%d", code)
+	}
+	if api.identity.Actor.Type != "user" || api.identity.Actor.ID != api.identity.HumanID {
+		t.Fatalf("actor = %#v, want the subject acting as itself", api.identity.Actor)
+	}
+}
+
 func TestResolveRefusesUnsupportedForms(t *testing.T) {
 	api := &authorityAPI{}
 	for _, args := range [][]string{
@@ -93,6 +119,7 @@ func TestResolveRefusesUnsupportedForms(t *testing.T) {
 		{"resolve", "--human", " "},
 		{"resolve", "fi7io4lvjqio"},
 		{"resolve", "--human", "fi7io4lvjqio", "--team", "fibggi2juubk"},
+		{"resolve", "--human", "fi7io4lvjqio", "--client", " "},
 	} {
 		if code, _, diag := runResolve(t, api, args...); code != 2 {
 			t.Fatalf("%v gave exit=%d stderr=%q", args, code, diag)

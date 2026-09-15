@@ -446,9 +446,11 @@ func (a *labApplication) EstablishAuthRoot(ctx context.Context, area domain.Area
 	return a.facade.EstablishAuthRoot(ctx, area, TeamFINC17(area).Issuer, holderTeamID)
 }
 
-// ResolveAuthority is the enforcement side's read. The lab reaches it with the
-// same fixture administrator as every other operation; in a deployment the
-// caller is the application enforcing its own endpoints.
+// ResolveAuthority is the enforcement side's read, and the one operation here
+// whose caller need not be a person. The identity passed through names both the
+// caller and the subject; RoleAdministration.CheckAuthorityRead decides whether
+// that caller may ask about that subject, which for a service credential is a
+// comparison of area bindings rather than a fixture-administrator check.
 func (a *labApplication) ResolveAuthority(ctx context.Context, area domain.Area, fc domain.FixtureContext, identity domain.Identity, opts domain.ResolveOptions) (domain.ResolvedAuthority, error) {
 	if err := a.teamArea(area, fc); err != nil {
 		return domain.ResolvedAuthority{}, err

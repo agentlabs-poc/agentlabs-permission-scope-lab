@@ -153,8 +153,13 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 	otherArea, _ := domain.NewArea("acme", "crm")
 	wrongArea := f.Snapshot
 	wrongArea.Area = otherArea
-	badIdentity := f.Issuer
-	badIdentity.Actor.ID = "fi7io4lvkfsw"
+	// The walk is about the subject, so a subject with no id is refused and an
+	// actor that differs from it is not — an application asking about someone
+	// reaches the same routes that person would.
+	noSubject := f.Issuer
+	noSubject.HumanID = " "
+	askedAbout := f.Issuer
+	askedAbout.Actor = domain.Actor{Type: "service_account", ID: lab.WorkloadClient}
 
 	for _, tc := range []struct {
 		name       string
@@ -165,7 +170,8 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 	}{
 		{"nil context", f.Snapshot, f.Issuer, lab.PayslipRead, domain.ErrMalformed},
 		{"wrong area", wrongArea, f.Issuer, lab.PayslipRead, domain.ErrRejected},
-		{"non-direct identity", f.Snapshot, badIdentity, lab.PayslipRead, domain.ErrUnsupported},
+		{"no subject", f.Snapshot, noSubject, lab.PayslipRead, domain.ErrMalformed},
+		{"actor is not the subject", f.Snapshot, askedAbout, lab.PayslipRead, domain.ErrUnsupported},
 		{"noncanonical permission", f.Snapshot, f.Issuer, "*", domain.ErrMalformed},
 		{"unknown permission", f.Snapshot, f.Issuer, "hrms:missing::read", domain.ErrRejected},
 	} {
@@ -179,6 +185,13 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 				t.Fatalf("got %#v, %v; want %v", got, err, tc.want)
 			}
 		})
+	}
+
+	// ResolveHuman still holds the actor to the subject, and this is the test
+	// that says why: its caller has no gate, so this rule is the gate. The
+	// loosened entry is ResolveAuthority, below.
+	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, askedAbout, lab.PayslipRead, time.Time{}); !errors.Is(err, domain.ErrUnsupported) || len(got) != 0 {
+		t.Fatalf("an actor that is not the subject resolved %#v, %v; want ErrUnsupported", got, err)
 	}
 
 	f.Snapshot.Assignments["fm5b7t4pzcp2"] = domain.Assignment{Version: "1", ID: "fm5b7t4pzcp2", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}, Status: "enabled"}
@@ -214,7 +227,9 @@ func TestResolveTeamAssignmentDistinguishesOnlyInactiveEvidence(t *testing.T) {
 			c.Status = "retired"
 			f.Snapshot.Controls["fk3x9r2m5iv8"] = c
 		}, false},
-		{"missing adopted content", func(f *lab.TeamFINC17Case) { delete(f.Snapshot.Contents, domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}) }, false},
+		{"missing adopted content", func(f *lab.TeamFINC17Case) {
+			delete(f.Snapshot.Contents, domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1})
+		}, false},
 		{"untrusted root", func(f *lab.TeamFINC17Case) { delete(f.Snapshot.TrustedRoots, "fk3x9r2m0dq3") }, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -294,4 +309,30 @@ func TestResolveHumanCancellationWinsOverEmptySuccess(t *testing.T) {
 			t.Fatalf("got %#v, %v; want cancellation and no routes", got, err)
 		}
 	})
+}
+
+// The two entries are deliberately asymmetric, and the asymmetry is the whole
+// security argument: ResolveHuman is reached through an adapter with no
+// administration, so it keeps the acting-human rule. ResolveAuthority is reached
+// through a service that runs CheckAuthorityRead first, so it may admit a caller
+// who is not the subject.
+//
+// Making the shared walk permissive once removed the check from the path that
+// had nothing else. This pins both halves so that cannot recur quietly.
+func TestOnlyTheGatedEntryAdmitsAnActorThatIsNotTheSubject(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	f := lab.TeamFINC17(area)
+	asService := f.Issuer
+	asService.Actor = domain.Actor{Type: "service_account", ID: lab.WorkloadClient}
+
+	if _, err := lineage.ResolveHuman(t.Context(), f.Snapshot, asService, lab.PayslipRead, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("the ungated entry admitted a service actor: %v", err)
+	}
+	resolved, err := lineage.ResolveAuthority(t.Context(), f.Snapshot, asService, domain.ResolveOptions{}, time.Time{})
+	if err != nil {
+		t.Fatalf("the gated entry refused a service actor: %v", err)
+	}
+	if len(resolved.ResolvedGrants) == 0 {
+		t.Fatal("the gated entry resolved nothing for a subject who holds authority")
+	}
 }
