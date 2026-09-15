@@ -239,11 +239,11 @@ not.
 > Whether that reading of Q-119 is right is [the proposal's question](proposal-root-source.md),
 > not this document's. This records what was built on it.
 
-**Nothing establishes a trusted root.** The only writer is
-`internal/storage/sqlite/fixture.go`; there is no operation, no CLI verb and no
-gate. A root can be *seeded* and never *established*. That gap is unchanged by
-this record and is the first thing the assignment slice closes — establishment
-writes four things and the fourth is a holder assignment.
+**Nothing established a trusted root** when this was written: the only writer
+was `internal/storage/sqlite/fixture.go`, so a root could be *seeded* and never
+*established*. That gap was unchanged by this record and closed after the
+assignment one, which is what it waited for — establishment writes three records
+and the third is a holder assignment. See `root-establishment.md`.
 
 ## 6 · The contract
 
@@ -366,8 +366,9 @@ went when the catalog's own state became a record. **Two tables remain.**
 
 The root's shape, permission source, trust establishment, the two lineages that
 reach it and the operations that create it are **not in this document**. They are
-[the root proposal](proposal-root-source.md), because they are handbook
-questions rather than record-layout ones.
+[the root proposal](proposal-root-source.md) and, once built,
+[root establishment](root-establishment.md) — handbook questions rather than
+record-layout ones.
 
 What this record must preserve, and the proposal depends on:
 

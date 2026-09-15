@@ -17,6 +17,7 @@ type establisher interface {
 	ListGrants(context.Context, domain.Area, domain.FixtureContext, domain.GrantFilter) (domain.GrantPage, error)
 	ListAssignments(context.Context, domain.Area, domain.FixtureContext, domain.AssignmentFilter) (domain.AssignmentPage, error)
 	CreateTeam(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Team, error)
+	EstablishAuthRoot(context.Context, domain.Area, domain.FixtureContext, string) (domain.Grant, domain.GrantContent, error)
 	CreateGrant(context.Context, domain.Area, domain.FixtureContext, string, domain.GrantContent) (domain.Grant, domain.GrantContent, error)
 	CheckAssignment(context.Context, domain.Area, []byte) (domain.Diagnostic, error)
 }
@@ -111,4 +112,88 @@ func TestAnEstablishedRootSupportsAChild(t *testing.T) {
 	// package's claim, and TestAnApplicationRootDoesNotCarryPlatformPermissions
 	// makes it against a planted platform permission. Here the point is only
 	// that an established root supports anything at all.
+}
+
+// The Auth root is the tenant's first authority, and no Go test reached it until
+// now — only the shell demonstration did. Its area names the platform's
+// namespace rather than an application, which is how one implementation serves
+// both roots: the ceiling it computes is the platform catalog because that is
+// the namespace it is in.
+func TestEstablishAuthRootComputesFromThePlatformCatalog(t *testing.T) {
+	tenantArea, err := domain.NewArea("acme", "hrms")
+	if err != nil {
+		t.Fatal(err)
+	}
+	authArea, err := domain.NewArea("acme", lab.PlatformNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "auth-root.db")
+	if err := (lab.Scenarios{}).Seed(context.Background(), tenantArea, "tenant-genesis", path); err != nil {
+		t.Fatal(err)
+	}
+	api, closeConnection, err := lab.Connect(t.Context(), authArea, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = closeConnection() })
+	auth, ok := api.(establisher)
+	if !ok {
+		t.Fatalf("lab application does not expose establishment: %T", api)
+	}
+
+	// Q-114 first: Auth's own catalog is empty, and a ceiling of nothing is not
+	// a ceiling.
+	if _, _, err := auth.EstablishAuthRoot(t.Context(), authArea, teamFixture, "fibggi2jur5s"); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("establishing against an empty platform catalog gave %v, want ErrRejected", err)
+	}
+
+	application, err := domain.NewApplication("hrms")
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog, closeCatalog, err := lab.ConnectCatalog(t.Context(), application, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The namespace is named separately from the application, because a platform
+	// permission belongs to no application.
+	if _, err := catalog.RegisterPlatformPermission(t.Context(), lab.PlatformNamespace, domain.FixtureContext{Name: "application-publisher"},
+		domain.PermissionDefinition{ID: lab.AssignmentCreate, Active: true, Boundary: domain.PlatformBoundary}); err != nil {
+		t.Fatal(err)
+	}
+	if err := closeCatalog(); err != nil {
+		t.Fatal(err)
+	}
+
+	root, content, err := auth.EstablishAuthRoot(t.Context(), authArea, teamFixture, "fibggi2jur5s")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !root.TrustedRoot || content.ParentGrantID != "" || content.Permissions != nil || len(content.Scope) != 0 {
+		t.Fatalf("auth root = %#v / %#v", root, content)
+	}
+	// And the ceiling it computes is the platform permission, reached through a
+	// child that selects it — which no application root could do, because
+	// no application root's namespace holds it.
+	child, childContent, err := auth.CreateGrant(t.Context(), authArea, teamFixture, root.ID, domain.GrantContent{
+		Permissions: []string{lab.AssignmentCreate}, Scope: map[string]string{},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := json.Marshal(domain.Assignment{
+		Version: "1", ID: "fm5b7t4pan0d", GrantID: child.ID, GrantRevision: childContent.Revision,
+		Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	diagnostic, err := auth.CheckAssignment(t.Context(), authArea, raw)
+	if err != nil {
+		t.Fatalf("a child of the Auth root did not resolve: %v", err)
+	}
+	if !slices.Contains(diagnostic.Route.Permissions, lab.AssignmentCreate) {
+		t.Fatalf("route lost the platform permission: %#v", diagnostic.Route)
+	}
 }

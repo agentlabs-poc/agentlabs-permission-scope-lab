@@ -6,6 +6,7 @@ directly. Only the layout is reconstructed, for legibility.
 
 | File | Shows |
 |---|---|
+| `demo-17-root-establishment.svg` · `.md` | Where a lineage begins: a tenant with teams and not one grant, an establishment refused before any permission is registered, the holder rules, the three records written in one transaction, and the same child proposal resolving under the Auth root and refused under the application root — the catalog listing beside it holding every permission both were checked against |
 | `demo-16-ownership-record.svg` · `.md` | Ownership as authority to administer a team and nothing else: plural owners per team and per human, add-only and a remove that says whether it did anything, and a human on each side of the line Q-099 draws — an owner who is not a member, and a member who owns nothing |
 | `demo-1-create-and-read.svg` | Registration is add-only, the identifier grammar is enforced, a typed read rejects unregistered identifiers and wildcards |
 | `demo-2-retire-and-restore.svg` | Retirement is one reversible idempotent operation; a retired permission stays visible to administration and cannot be created by a status change |

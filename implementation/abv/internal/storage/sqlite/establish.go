@@ -9,13 +9,15 @@ import (
 	"errors"
 )
 
-// EstablishRoot is the four writes that bring a root into existence, in the
-// caller's transaction:
+// establishRoot is the three records that bring a root into existence, written
+// in the caller's transaction:
 //
-//	abv.grant            the head, trusted_root=true
+//	abv.grant            the head, trusted_root=true — this is the trust evidence
 //	abv.grant_revision   revision 1 — no parent, no permissions, scope {}
-//	   trust evidence    the head's trusted_root field carries it
 //	abv.assignment       to the holder team, adopting revision 1
+//
+// The evidence is not a fourth write. Q-119 keeps it off the content, so the
+// head carries it, and the head was going to be written anyway.
 //
 // Atomicity is the mechanism rather than a workflow. Q-117 requires that
 // incomplete setup provide no authority, and one transaction gives that for
