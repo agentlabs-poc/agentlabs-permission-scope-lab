@@ -3,8 +3,8 @@ package wiring_test
 import (
 	"agentlabs.local/abv"
 	abvdomain "agentlabs.local/abv/domain"
-	"agentlabs.local/registry"
 	regdomain "agentlabs.local/registry/domain"
+	"agentlabs.local/wiring"
 	"context"
 	"errors"
 	"path/filepath"
@@ -46,26 +46,21 @@ var operator = regdomain.Identity{Version: "1", HumanID: "fi7io4lvjqio"}
 func TestAuthALAsksTheRegistryRatherThanItsOwnTables(t *testing.T) {
 	dir := t.TempDir()
 
-	reg, err := registry.Open(t.Context(), filepath.Join(dir, "registry.db"), regAdmin{}, clock{}, true)
+	// One call, where there used to be three steps duplicated between this test
+	// and the command beside it. The compile is still half the proof: nothing in
+	// abv imports agentlabs.local/registry, and nothing in registry imports abv.
+	service, err := wiring.Open(t.Context(), wiring.Config{
+		AuthorityPath:  filepath.Join(dir, "authority.db"),
+		RegistryPath:   filepath.Join(dir, "registry.db"),
+		CreateRegistry: true,
+		Administration: abvAdmin{}, RegistryAdministration: regAdmin{},
+		Operator: operator, Clock: clock{},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer reg.Close()
-
-	port, err := registry.NewPort(reg, operator)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Auth-AL takes the port as its Registry. The compile itself is half the
-	// proof: nothing in abv imports agentlabs.local/registry.
-	var _ abv.Registry = port
-
-	facade, err := abv.OpenSQLite(t.Context(), filepath.Join(dir, "authority.db"), abvAdmin{}, clock{}, port)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer facade.Close()
+	defer service.Close()
+	reg, facade := service.Applications(), service.Authority()
 
 	area, err := abvdomain.NewArea("acme", "hrms")
 	if err != nil {

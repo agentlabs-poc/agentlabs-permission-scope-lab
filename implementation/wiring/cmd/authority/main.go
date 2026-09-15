@@ -9,9 +9,10 @@ package main
 import (
 	"agentlabs.local/abv"
 	abvdomain "agentlabs.local/abv/domain"
-	"agentlabs.local/registry"
 	regdomain "agentlabs.local/registry/domain"
+	"agentlabs.local/wiring"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -66,44 +67,37 @@ func run(args []string) int {
 	}
 	ctx := context.Background()
 
-	// The registry domain, opened on its own store.
-	reg, err := registry.Open(ctx, flags["--registry"], regAdmin{}, clock{}, true)
+	// One call assembles the service: both stores, and the port between them.
+	// This used to be three steps here and the same three steps in a test, where
+	// they could drift without anything noticing.
+	service, err := wiring.Open(ctx, wiring.Config{
+		AuthorityPath: flags["--authority"], RegistryPath: flags["--registry"], CreateRegistry: true,
+		Administration: abvAdmin{}, RegistryAdministration: regAdmin{},
+		Operator: operator, Clock: clock{},
+	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 5
 	}
-	defer reg.Close()
-
-	// Its port. Auth-AL declares this shape; the registry satisfies it.
-	port, err := registry.NewPort(reg, operator)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 5
-	}
-
-	// Auth-AL, told to ask the port instead of its own tables.
-	facade, err := abv.OpenSQLite(ctx, flags["--authority"], abvAdmin{}, clock{}, port)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 5
-	}
-	defer facade.Close()
+	defer service.Close()
+	reg, facade := service.Applications(), service.Authority()
 
 	area, err := abvdomain.NewArea(flags["--tenant"], flags["--app"])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
-	// Ask the port directly first, so the demonstration reports which domain
+	// Ask the registry first, so the demonstration reports which domain
 	// actually answered rather than inferring it from an error string. An
 	// earlier version matched on "not found" and misattributed Auth-AL's own
 	// missing-record error to the registry.
-	exists, err := port.ApplicationExists(ctx, area.ApplicationID())
-	if err != nil {
+	application, err := reg.GetApplication(ctx, operator, area.ApplicationID())
+	exists := err == nil && application.Status == regdomain.StatusActive
+	if err != nil && !errors.Is(err, regdomain.ErrNotFound) {
 		fmt.Fprintln(os.Stderr, err)
 		return 5
 	}
-	held, err := port.Installed(ctx, area.TenantID(), area.ApplicationID())
+	held, err := reg.IsInstalled(ctx, operator, area.TenantID(), area.ApplicationID())
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 5
