@@ -10,7 +10,7 @@ go run ./cmd/abv scenario seed team-fin-c17 --db /tmp/authority.db --tenant acme
 Evaluate Maya's existing A1 authority for FIN:
 
 ```sh
-go run ./cmd/auth-evaluate --db /tmp/authority.db --tenant acme --application hrms --human maya --permission hrms:payroll:payslip::read --boundary dept=FIN
+go run ./cmd/auth-evaluate --db /tmp/authority.db --tenant acme --application hrms --human fi7io4lvjqio --permission hrms:payroll:payslip::read --boundary dept=FIN
 ```
 
 The same command with `--boundary dept=ENG` prints canonical deny JSON. The
@@ -25,7 +25,10 @@ Use repeatable `--boundary key=value` for exact selections and `--all key` for
 all-values selections.
 
 These flags are trusted **test context**, not authentication or HTTP permission
-selection. The adapter supports literal SQLite scope values only, reads a bounded
+selection. The adapter now reads through Auth-AL's public `ResolveAuthority`
+rather than walking its internal packages, and asks with its own service
+credential about whichever human the request carries — so the evaluation path
+has an administrative gate, which it did not before. The adapter supports literal SQLite scope values only, reads a bounded
 full snapshot, and has no JWT verification or production freshness mechanism.
 The reusable HTTP wrapper and bounded application demonstration are also
 available. They remain local proof, not an Auth-service integration.
@@ -34,15 +37,20 @@ To exercise Nutan's narrower Team2 grant through the existing protected lab flow
 
 ```sh
 go run ./cmd/abv assign --db /tmp/authority.db --tenant acme --app hrms --fixture-context maya-team1 --file testdata/a2.json
-/tmp/auth-evaluate --db /tmp/authority.db --tenant acme --application hrms --human nutan --permission hrms:payroll:payslip::read --boundary dept=FIN --boundary cert=C17
+/tmp/auth-evaluate --db /tmp/authority.db --tenant acme --application hrms --human fi7io4lvjwu8 --permission hrms:payroll:payslip::read --boundary dept=FIN --boundary cert=C17
 ```
 
 Expected allow: `{"version":"1","decision":"allow","grant_ids":["fk3x9r2m0dq3","fk3x9r2m5iv8","fk3x9r2man0d"]}`.
 Changing FIN to ENG or C17 to C18 denies. `--all dept` also denies this route.
 Grant/assignment changes are observed on the next read; no allow cache is used.
 These decisions do not prove certificate ownership: the HTTP demo below shows
-the required endpoint/handler enforcement. Runtime `$self` is tested using resolved fixtures;
-the current SQLite lineage adapter explicitly rejects it rather than guessing.
+the required endpoint/handler enforcement. Runtime `$self` is bound by the evaluator to the authorizing human at match
+time; the earlier claim that the SQLite adapter rejects it was left behind by
+the code.
+
+Human identifiers are base-36 Snowflakes, not names. The commands above said
+`--human maya` until the identifier sweep, and then denied everything while
+looking correct — a reader following the readme got a deny and no clue why.
 
 ## In-process HTTP application demo
 
@@ -50,7 +58,7 @@ Using the same seeded database, run the HTTP walkthrough without opening a
 network listener:
 
 ```sh
-go run ./cmd/auth-http-demo --db /tmp/authority.db --tenant acme --application hrms --human maya
+go run ./cmd/auth-http-demo --db /tmp/authority.db --tenant acme --application hrms --human fi7io4lvjqio
 ```
 
 Maya's expected highlights are `GET /api/v1/acme/FIN/C17` → 200,

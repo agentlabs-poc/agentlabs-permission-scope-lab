@@ -87,7 +87,19 @@ func run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 4
 	}
-	source, err := localadapter.Open(context.Background(), db, now, registry)
+	// The gate this path never had. Resolving what a human is entitled to is a
+	// gated read, and until Facade.ResolveAuthority existed the adapter walked
+	// the lineage itself with nothing deciding who may ask. The lab answers it
+	// with the fixture's rules; a deployment answers it with its own.
+	status, err := lab.NewAssignmentStatusAdministration(area, lab.TeamFINC17(area).Administration)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 4
+	}
+	admin := &lab.RoleAdministration{AssignmentStatusAdministration: status}
+	// The agent asks as itself. The human it asks about arrives on the request.
+	credential := domain.Actor{Type: "service_account", ID: lab.WorkloadClient}
+	source, err := localadapter.Open(context.Background(), db, credential, admin, now, registry)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 4

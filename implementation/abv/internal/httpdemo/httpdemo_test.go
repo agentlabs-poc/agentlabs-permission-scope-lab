@@ -31,7 +31,14 @@ func TestSQLiteHTTPDemoConstrainsRecordsAndObservesDisablement(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = provider.Close() })
-	source, err := localadapter.Open(t.Context(), dbPath, fixedClock{}, labRegistry{})
+	status, err := lab.NewAssignmentStatusAdministration(fixture.Snapshot.Area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The agent asks as itself about whichever human the request carries.
+	source, err := localadapter.Open(t.Context(), dbPath,
+		domain.Actor{Type: "service_account", ID: lab.WorkloadClient},
+		&lab.RoleAdministration{AssignmentStatusAdministration: status}, fixedClock{}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +115,14 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
 	})
 	fixtureContext := domain.FixtureContext{Name: "maya-team1"}
-	source, err := localadapter.Open(t.Context(), dbPath, fixedClock{}, labRegistry{})
+	status, err := lab.NewAssignmentStatusAdministration(fixture.Snapshot.Area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The agent asks as itself about whichever human the request carries.
+	source, err := localadapter.Open(t.Context(), dbPath,
+		domain.Actor{Type: "service_account", ID: lab.WorkloadClient},
+		&lab.RoleAdministration{AssignmentStatusAdministration: status}, fixedClock{}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
