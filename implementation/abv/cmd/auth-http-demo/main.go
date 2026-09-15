@@ -1,6 +1,8 @@
 package main
 
 import (
+	"agentlabs.local/abv/internal/lab"
+	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/httpdemo"
 	"agentlabs.local/abv/localadapter"
 	"agentlabs.local/authmiddleware"
@@ -40,7 +42,19 @@ func run(args []string, out, diag io.Writer) int {
 		fmt.Fprintln(diag, "db, tenant, application and human are required")
 		return 2
 	}
-	source, err := localadapter.Open(context.Background(), db, clock{})
+	// As in auth-evaluate: the demo trusts the area it was given, and a
+	// deployment composes the real registry in its place.
+	area, err := domain.NewArea(tenant, application)
+	if err != nil {
+		fmt.Fprintln(diag, err)
+		return 2
+	}
+	registry, err := lab.NewFixedRegistry(area)
+	if err != nil {
+		fmt.Fprintln(diag, err)
+		return 4
+	}
+	source, err := localadapter.Open(context.Background(), db, clock{}, registry)
 	if err != nil {
 		fmt.Fprintln(diag, err)
 		return 4

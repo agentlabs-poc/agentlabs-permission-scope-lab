@@ -3,6 +3,7 @@
 package localadapter
 
 import (
+	"agentlabs.local/abv"
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/lineage"
 	"agentlabs.local/abv/internal/storage"
@@ -19,11 +20,13 @@ type SQLiteAuthoritySource struct {
 	clock  authmiddleware.Clock
 }
 
-func Open(ctx context.Context, path string, clock authmiddleware.Clock) (*SQLiteAuthoritySource, error) {
+// Open takes a registry because the store no longer answers whether a tenant
+// holds an application — that fact moved to the application registry domain.
+func Open(ctx context.Context, path string, clock authmiddleware.Clock, registry abv.Registry) (*SQLiteAuthoritySource, error) {
 	if ctx == nil || nilInterface(clock) {
 		return nil, errors.New("context and clock are required")
 	}
-	reader, err := storageSQLite.OpenReadOnly(ctx, path)
+	reader, err := storageSQLite.OpenReadOnly(ctx, path, registry)
 	if err != nil {
 		return nil, err
 	}

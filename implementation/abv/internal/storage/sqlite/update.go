@@ -153,7 +153,7 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 			// application. Over-invalidation is wrong in the cheap direction —
 			// a retry — where the alternative is a missed row. Narrowing it waits
 			// on whether a role is tenant- or application-scoped.
-			return bumpGeneration(ctx, conn, area.ApplicationID())
+			return bumpCatalogGeneration(ctx, conn, area.ApplicationID())
 		}
 		if writes.NewGrantRevision != nil {
 			return p.insertGrantRevision(ctx, conn, area, *writes.NewGrantRevision)

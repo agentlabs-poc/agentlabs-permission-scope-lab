@@ -72,7 +72,7 @@ func TestRegisterCatalogDefinitionsPersistsHostileAdminCannotForgeEvidence(t *te
 	if err := provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	reopened, err := sqlite.Open(t.Context(), path)
+	reopened, err := sqlite.Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -235,3 +235,10 @@ func (p *catalogFake) UpdatePlatformCatalog(_ context.Context, namespace string,
 	_, err := callback()
 	return err
 }
+
+// allowAllRegistry satisfies the port for tests whose subject is storage rather
+// than the installation gate.
+type allowAllRegistry struct{}
+
+func (allowAllRegistry) ApplicationExists(context.Context, string) (bool, error) { return true, nil }
+func (allowAllRegistry) Installed(context.Context, string, string) (bool, error) { return true, nil }

@@ -61,7 +61,7 @@ func TestAuthALAsksTheRegistryRatherThanItsOwnTables(t *testing.T) {
 	// proof: nothing in abv imports agentlabs.local/registry.
 	var _ abv.Registry = port
 
-	facade, err := abv.OpenSQLiteWithRegistry(t.Context(), filepath.Join(dir, "authority.db"), abvAdmin{}, clock{}, port)
+	facade, err := abv.OpenSQLite(t.Context(), filepath.Join(dir, "authority.db"), abvAdmin{}, clock{}, port)
 	if err != nil {
 		t.Fatal(err)
 	}

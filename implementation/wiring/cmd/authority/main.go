@@ -82,7 +82,7 @@ func run(args []string) int {
 	}
 
 	// Auth-AL, told to ask the port instead of its own tables.
-	facade, err := abv.OpenSQLiteWithRegistry(ctx, flags["--authority"], abvAdmin{}, clock{}, port)
+	facade, err := abv.OpenSQLite(ctx, flags["--authority"], abvAdmin{}, clock{}, port)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 5

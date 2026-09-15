@@ -41,17 +41,19 @@ func (c *beginThenCancelConnection) Raw(callback func(any) error) error {
 
 func TestProviderContract(t *testing.T) {
 	contracttest.Run(t, contracttest.Factory{
-		Open:   Open,
+		Open: func(ctx context.Context, path string) (storage.Provider, error) {
+			return Open(ctx, path, allowAllRegistry{})
+		},
 		Create: CreateFixture,
 		OpenWithLimit: func(ctx context.Context, path string, limit int) (storage.Provider, error) {
-			return OpenWithOptions(ctx, path, Options{MaxSnapshotRecords: limit})
+			return OpenWithOptions(ctx, path, Options{MaxSnapshotRecords: limit, Registry: allowAllRegistry{}})
 		},
 	})
 }
 
 func TestCancelledBeginThatExecutedIsRolledBackBeforeConnectionReuse(t *testing.T) {
 	path := t.TempDir() + "/authority.db"
-	opened, err := Open(t.Context(), path)
+	opened, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +137,7 @@ func TestOpenPreservesMigrationBeginConflictClassification(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
 	defer cancel()
-	_, err = open(ctx, path, Options{}, true)
+	_, err = open(ctx, path, Options{Registry: allowAllRegistry{}}, true)
 	if !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("migration lock lost conflict classification: %v", err)
 	}
@@ -156,7 +158,7 @@ func TestOpenRejectsUnknownExistingDatabaseWithoutMigration(t *testing.T) {
 	if err = db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = Open(t.Context(), path); !errors.Is(err, storage.ErrNotABVDatabase) {
+	if _, err = Open(t.Context(), path, allowAllRegistry{}); !errors.Is(err, storage.ErrNotABVDatabase) {
 		t.Fatalf("want non-ABV error, got %v", err)
 	}
 	db, _ = sql.Open("sqlite", path)
@@ -169,7 +171,7 @@ func TestOpenRejectsUnknownExistingDatabaseWithoutMigration(t *testing.T) {
 
 func TestMarkerCancellationRemainsCancellationNotUnsupported(t *testing.T) {
 	path := t.TempDir() + "/authority.db"
-	opened, err := Open(t.Context(), path)
+	opened, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -209,7 +211,7 @@ func TestLockedMarkerReadRemainsConflictNotUnsupported(t *testing.T) {
 	defer locker.ExecContext(context.Background(), "ROLLBACK")
 	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Second)
 	defer cancel()
-	_, err = Open(ctx, path)
+	_, err = Open(ctx, path, allowAllRegistry{})
 	if !errors.Is(err, domain.ErrConflict) || errors.Is(err, storage.ErrNotABVDatabase) {
 		t.Fatalf("locked marker classified as %v", err)
 	}
@@ -231,7 +233,7 @@ func TestFixtureRefusesExistingPath(t *testing.T) {
 
 func TestEveryAcquiredConnectionHasForeignKeysAndFileUsesWAL(t *testing.T) {
 	path := t.TempDir() + "/authority.db"
-	p, err := Open(t.Context(), path)
+	p, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -303,21 +305,13 @@ func TestReadRejectsCanonicalPayloadAndIndexDisagreement(t *testing.T) {
 
 func TestCorruptCatalogProjectionsDoNotReachCallback(t *testing.T) {
 	cases := map[string]func(*testing.T, *provider, domain.Area){
+		// compatibility_enabled is a field of the catalog record now, so a
+		// corrupt one is a value the codec refuses rather than an integer
+		// outside a column's CHECK.
 		"compatibility boolean": func(t *testing.T, p *provider, area domain.Area) {
-			p.db.SetMaxOpenConns(1)
-			conn, err := p.connection(t.Context())
-			if err != nil {
-				t.Fatal(err)
-			}
-			if _, err := conn.ExecContext(t.Context(), `PRAGMA ignore_check_constraints=ON`); err != nil {
-				conn.Close()
-				t.Fatal(err)
-			}
-			if _, err := conn.ExecContext(t.Context(), `UPDATE applications SET compatibility_enabled=2 WHERE application_id=?`, area.ApplicationID()); err != nil {
-				conn.Close()
-				t.Fatal(err)
-			}
-			if err := conn.Close(); err != nil {
+			if _, err := p.db.ExecContext(t.Context(), `
+				UPDATE abv_l1_records SET value='{"compatibility_enabled":"yes","generation":0}'
+				 WHERE key2='catalog' AND key3=?`, area.ApplicationID()); err != nil {
 				t.Fatal(err)
 			}
 		},
@@ -387,7 +381,7 @@ func TestFailureAfterFirstInsertRollsBackWholeWriteSetAndPersistsAfterReopen(t *
 	if err := p.Close(); err != nil {
 		t.Fatal(err)
 	}
-	reopened, err := Open(t.Context(), path)
+	reopened, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -403,7 +397,7 @@ func TestTwoProvidersNeverReplayCompetingCallback(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer p1.Close()
-	p2, err := Open(t.Context(), path)
+	p2, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -447,7 +441,7 @@ func TestReadTransactionPinsOneVersionAcrossCatalogAndAssignmentQueries(t *testi
 	}
 	reader := opened.(*provider)
 	defer reader.Close()
-	writerOpened, err := Open(t.Context(), path)
+	writerOpened, err := Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}

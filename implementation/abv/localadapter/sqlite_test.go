@@ -48,7 +48,7 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	source, err := Open(t.Context(), dbPath, &fixedClock{now})
+	source, err := Open(t.Context(), dbPath, &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func TestSQLiteAuthoritySourceSeesCommittedStatusChanges(t *testing.T) {
 	if err := provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	source, err := Open(t.Context(), dbPath, &fixedClock{now})
+	source, err := Open(t.Context(), dbPath, &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +194,7 @@ func TestSQLiteAuthoritySourceSeesProtectedDescendantStatusChanges(t *testing.T)
 		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
 	})
 	fixtureContext := domain.FixtureContext{Name: "maya-team1"}
-	source, err := Open(t.Context(), dbPath, &fixedClock{now})
+	source, err := Open(t.Context(), dbPath, &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,7 +233,7 @@ func TestSQLiteAuthoritySourceSeesProtectedDescendantStatusChanges(t *testing.T)
 
 func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *testing.T) {
 	var nilClock *fixedClock
-	if source, err := Open(t.Context(), "unused", nilClock); err == nil || source != nil {
+	if source, err := Open(t.Context(), "unused", nilClock, labRegistry{}); err == nil || source != nil {
 		t.Fatalf("source=%v err=%v", source, err)
 	}
 	now := time.Now()
@@ -248,7 +248,7 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 	if err := provider.Close(); err != nil {
 		t.Fatal(err)
 	}
-	source, err := Open(t.Context(), dbPath, &fixedClock{now})
+	source, err := Open(t.Context(), dbPath, &fixedClock{now}, labRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -293,4 +293,16 @@ func TestConvertRouteUsesResolvedArea(t *testing.T) {
 	if got.Area != (authmiddleware.Area{TenantID: "resolved-tenant", ApplicationID: "resolved-app"}) {
 		t.Fatalf("area=%+v", got.Area)
 	}
+}
+
+// labRegistry answers for the fixture's area and nothing else. A stub that said
+// yes to everything would hide the installation gate, which is exactly what the
+// wrong-boundary cases here assert.
+type labRegistry struct{}
+
+func (labRegistry) ApplicationExists(_ context.Context, applicationID string) (bool, error) {
+	return applicationID == "hrms", nil
+}
+func (labRegistry) Installed(_ context.Context, tenantID, applicationID string) (bool, error) {
+	return tenantID == "acme" && applicationID == "hrms", nil
 }

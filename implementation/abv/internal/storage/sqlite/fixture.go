@@ -29,7 +29,10 @@ func CreateFixture(ctx context.Context, path string, snapshots []storage.Snapsho
 	if err = file.Close(); err != nil {
 		return nil, errors.Join(domain.ErrUnavailable, err)
 	}
-	opened, err := open(ctx, path, Options{}, true)
+	// A fixture provider answers the registry's questions for exactly the areas
+	// it seeded, and nothing else. It has to answer them somehow: the facts live
+	// in the registry domain now, and a fixture is not going to compose one.
+	opened, err := open(ctx, path, Options{Registry: seededRegistry(snapshots)}, true)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +87,11 @@ func seedCatalog(ctx context.Context, conn *sql.Conn, c domain.Catalog) error {
 	if invalid(c.ApplicationID) || c.Permissions == nil || c.Scopes == nil {
 		return domain.ErrMalformed
 	}
-	if _, err := conn.ExecContext(ctx, `INSERT INTO applications(application_id,compatibility_enabled) VALUES(?,?)`, c.ApplicationID, boolInt(c.CompatibilityEnabled)); err != nil {
-		return classify(err)
+	// The catalog's own state is a record now. Generation starts at zero: a
+	// seeded catalog has been written once, as a whole, and nothing has read it
+	// to compare against.
+	if err := writeCatalogState(ctx, conn, c.ApplicationID, catalogPayload{CompatibilityEnabled: c.CompatibilityEnabled, Generation: c.Generation}); err != nil {
+		return err
 	}
 	permissionIDs := sortedKeys(c.Permissions)
 	for _, id := range permissionIDs {
@@ -111,10 +117,10 @@ func seedCatalog(ctx context.Context, conn *sql.Conn, c domain.Catalog) error {
 }
 
 func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
-	tenant, app := s.Area.TenantID(), s.Area.ApplicationID()
-	if _, err := conn.ExecContext(ctx, `INSERT INTO installations(tenant_id,application_id) VALUES(?,?)`, tenant, app); err != nil {
-		return classify(err)
-	}
+	// Installation is the registry's fact and is no longer seeded here. A
+	// fixture's caller composes a registry that agrees the area exists — see
+	// lab.FixedRegistry.
+	tenant := s.Area.TenantID()
 	for _, key := range sortedRoleKeys(s.Roles) {
 		r := s.Roles[key]
 		if !codec.ValidRoleID(r.ID) || r.ID != key.ID || r.Revision != key.Revision ||
@@ -227,12 +233,6 @@ func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {
 }
 
 func invalid(value string) bool { return strings.TrimSpace(value) == "" || !utf8.ValidString(value) }
-func boolInt(value bool) int {
-	if value {
-		return 1
-	}
-	return 0
-}
 func sortedKeys[V any](values map[string]V) []string {
 	keys := make([]string, 0, len(values))
 	for key := range values {
@@ -266,4 +266,35 @@ func sortedRoleKeys(values map[domain.RoleKey]domain.RoleContent) []domain.RoleK
 		return keys[i].ID < keys[j].ID
 	})
 	return keys
+}
+
+// seededRegistry answers for the areas a fixture was given. A fixture is a
+// closed world — it seeds what it seeds — so agreeing with itself is the honest
+// answer, and disagreeing about anything else is the honest refusal.
+type fixtureRegistry struct {
+	applications map[string]bool
+	installed    map[[2]string]bool
+}
+
+func seededRegistry(snapshots []storage.Snapshot) *fixtureRegistry {
+	r := &fixtureRegistry{applications: map[string]bool{}, installed: map[[2]string]bool{}}
+	for _, s := range snapshots {
+		r.applications[s.Area.ApplicationID()] = true
+		r.installed[[2]string{s.Area.TenantID(), s.Area.ApplicationID()}] = true
+	}
+	return r
+}
+
+func (r *fixtureRegistry) ApplicationExists(ctx context.Context, applicationID string) (bool, error) {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	return r.applications[applicationID], nil
+}
+
+func (r *fixtureRegistry) Installed(ctx context.Context, tenantID, applicationID string) (bool, error) {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	return r.installed[[2]string{tenantID, applicationID}], nil
 }

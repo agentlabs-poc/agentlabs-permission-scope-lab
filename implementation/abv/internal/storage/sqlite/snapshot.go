@@ -28,25 +28,16 @@ func (r *snapshotReader) add() error {
 
 func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Area) (storage.Snapshot, error) {
 	r := snapshotReader{conn: conn, ctx: ctx, area: area, limit: p.maxSnapshotRecords}
-	// Does this tenant hold this application? That is the registry's fact. It
-	// gates every read of a tenant's authority, which is why it runs first.
-	if p.registry != nil {
-		held, err := p.registry.Installed(ctx, area.TenantID(), area.ApplicationID())
-		if err != nil {
-			return storage.Snapshot{}, err
-		}
-		if !held {
-			return storage.Snapshot{}, domain.ErrNotFound
-		}
-	} else {
-		var installed int
-		err := conn.QueryRowContext(ctx, `SELECT 1 FROM installations WHERE tenant_id=? AND application_id=?`, area.TenantID(), area.ApplicationID()).Scan(&installed)
-		if errors.Is(err, sql.ErrNoRows) {
-			return storage.Snapshot{}, domain.ErrNotFound
-		}
-		if err != nil {
-			return storage.Snapshot{}, classify(err)
-		}
+	// Does this tenant hold this application? That is the registry's fact, and
+	// now its only home — the installations table is gone, so there is nothing
+	// local to disagree with it. It gates every read of a tenant's authority,
+	// which is why it runs first.
+	held, err := p.registry.Installed(ctx, area.TenantID(), area.ApplicationID())
+	if err != nil {
+		return storage.Snapshot{}, err
+	}
+	if !held {
+		return storage.Snapshot{}, domain.ErrNotFound
 	}
 	s := storage.Snapshot{Area: area, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{}, Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, TrustedRoots: map[string]bool{}}
 	if err := r.catalog(area.ApplicationID(), &s.Catalog); err != nil {
@@ -82,33 +73,18 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 }
 
 func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) error {
-	// compatibility_enabled and generation are Auth-AL's own state about an
-	// application, not the application itself — whether it exists is the
-	// registry's answer, given before this runs.
-	//
-	// So an absent row is not "no such application"; it is "no state recorded
-	// yet", and the defaults are the honest reading: relationship validation off
-	// under Q-041, generation zero. The row appears on the first catalog write.
-	var compat int
-	err := r.conn.QueryRowContext(r.ctx, `SELECT compatibility_enabled FROM applications WHERE application_id=?`, applicationID).Scan(&compat)
-	if errors.Is(err, sql.ErrNoRows) {
-		compat = 0
-	} else if err != nil {
-		return corruptOrDB(err)
+	state, err := readCatalogState(r.ctx, r.conn, applicationID)
+	if err != nil {
+		return err
 	}
 	if err := r.add(); err != nil {
 		return err
 	}
-	if compat != 0 && compat != 1 {
-		return domain.ErrMalformed
+	*catalog = domain.Catalog{
+		ApplicationID: applicationID, Generation: state.Generation,
+		Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{},
+		CompatibilityEnabled: state.CompatibilityEnabled,
 	}
-	var generation int64
-	if err := r.conn.QueryRowContext(r.ctx, `SELECT generation FROM applications WHERE application_id=?`, applicationID).Scan(&generation); errors.Is(err, sql.ErrNoRows) {
-		generation = 0
-	} else if err != nil {
-		return classify(err)
-	}
-	*catalog = domain.Catalog{ApplicationID: applicationID, Generation: generation, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}, CompatibilityEnabled: compat == 1}
 	// Permissions are L1 records. The identifier is rebuilt from its slots by
 	// the shared codec; storage never assembles the string itself.
 	rows, err := r.conn.QueryContext(r.ctx, `

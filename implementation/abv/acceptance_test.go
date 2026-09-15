@@ -47,7 +47,7 @@ func TestEmptyChildScopeRetainsParentPredicateAndPersists(t *testing.T) {
 	if err = facade.Close(); err != nil {
 		t.Fatal(err)
 	}
-	reopened, err := abv.OpenSQLite(t.Context(), path, admin, clock{now: time.Now()})
+	reopened, err := abv.OpenSQLite(t.Context(), path, admin, clock{now: time.Now()}, mustFixedRegistry(t, area))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestSnapshotLimitReturnsNoReceiptAndNoWrite(t *testing.T) {
 	provider.Close()
 	// Deliberately far below the fixture's size, so the bound keeps biting as
 	// records are added or removed rather than being tuned to one count.
-	provider, err = sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 5})
+	provider, err = sqlite.OpenWithOptions(t.Context(), path, sqlite.Options{MaxSnapshotRecords: 5, Registry: mustFixedRegistry(t, area)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestSnapshotLimitReturnsNoReceiptAndNoWrite(t *testing.T) {
 		t.Fatalf("bounded snapshot receipt=%#v err=%v", receipt, err)
 	}
 	facade.Close()
-	reopened, err := abv.OpenSQLite(t.Context(), path, admin, clock{now: time.Now()})
+	reopened, err := abv.OpenSQLite(t.Context(), path, admin, clock{now: time.Now()}, mustFixedRegistry(t, area))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +103,7 @@ func BenchmarkBoundedAuthorityDiagnosis(b *testing.B) {
 				b.Fatal(err)
 			}
 			provider.Close()
-			provider, err = sqlite.OpenWithOptions(context.Background(), path, sqlite.Options{MaxSnapshotRecords: records})
+			provider, err = sqlite.OpenWithOptions(context.Background(), path, sqlite.Options{MaxSnapshotRecords: records, Registry: allowAllRegistry{}})
 			if err != nil {
 				b.Fatal(err)
 			}

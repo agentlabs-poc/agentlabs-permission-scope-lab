@@ -44,7 +44,7 @@ func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
 	if err = p.Close(); err != nil {
 		t.Fatal(err)
 	}
-	p, err = Open(t.Context(), path)
+	p, err = Open(t.Context(), path, allowAllRegistry{})
 	if err != nil {
 		t.Fatal(err)
 	}

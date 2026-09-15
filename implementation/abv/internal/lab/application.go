@@ -47,7 +47,11 @@ func Connect(ctx context.Context, area domain.Area, path string) (application.AP
 		return nil, nil, err
 	}
 	administration := &GrantRevisionAdministration{RoleAdministration: &RoleAdministration{AssignmentStatusAdministration: statusAdministration}}
-	facade, err := abv.OpenSQLite(ctx, path, administration, clock{})
+	registry, err := NewFixedRegistry(area)
+	if err != nil {
+		return nil, nil, err
+	}
+	facade, err := abv.OpenSQLite(ctx, path, administration, clock{}, registry)
 	if err != nil {
 		return nil, nil, err
 	}

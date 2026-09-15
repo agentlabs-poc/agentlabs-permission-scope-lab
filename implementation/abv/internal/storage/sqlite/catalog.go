@@ -9,7 +9,6 @@ import (
 	"database/sql"
 	"strings"
 	"encoding/json"
-	"errors"
 )
 
 func (p *provider) ReadCatalog(ctx context.Context, app domain.Application, callback func(domain.Catalog) error) (err error) {
@@ -69,8 +68,7 @@ func (p *provider) UpdatePlatformCatalog(ctx context.Context, namespace string, 
 		// A platform permission is in every application's catalog, so a write to
 		// it invalidates every cached view. Bumping all of them keeps the
 		// read-page-reread guarantee true rather than nearly true.
-		_, err = conn.ExecContext(ctx, `UPDATE applications SET generation = generation + 1`)
-		return classify(err)
+		return bumpEveryCatalogGeneration(ctx, conn)
 	})
 }
 
@@ -115,7 +113,7 @@ func (p *provider) UpdateCatalog(ctx context.Context, app domain.Application, ca
 		if err != nil {
 			return err
 		}
-		if err := bumpGeneration(ctx, conn, app.ID()); err != nil {
+		if err := bumpCatalogGeneration(ctx, conn, app.ID()); err != nil {
 			return err
 		}
 		if writes.Permission != nil {
@@ -174,23 +172,15 @@ func (p *provider) UpdateCatalog(ctx context.Context, app domain.Application, ca
 
 func (p *provider) readCatalog(ctx context.Context, conn *sql.Conn, applicationID string) (domain.Catalog, error) {
 	// Does this application exist? The application registry domain owns that
-	// fact. Without a registry the provider answers from its own table, which is
-	// what a lab fixture does.
-	if p.registry != nil {
-		exists, err := p.registry.ApplicationExists(ctx, applicationID)
-		if err != nil {
-			return domain.Catalog{}, err
-		}
-		if !exists {
-			return domain.Catalog{}, domain.ErrNotFound
-		}
-	} else {
-		var exists int
-		if err := conn.QueryRowContext(ctx, `SELECT 1 FROM applications WHERE application_id=?`, applicationID).Scan(&exists); errors.Is(err, sql.ErrNoRows) {
-			return domain.Catalog{}, domain.ErrNotFound
-		} else if err != nil {
-			return domain.Catalog{}, classify(err)
-		}
+	// fact, and now owns it alone — there is no local table to fall back to, so
+	// a provider opened without a registry can answer nothing. Open refuses that
+	// rather than letting it fail one read at a time.
+	exists, err := p.registry.ApplicationExists(ctx, applicationID)
+	if err != nil {
+		return domain.Catalog{}, err
+	}
+	if !exists {
+		return domain.Catalog{}, domain.ErrNotFound
 	}
 	r := snapshotReader{conn: conn, ctx: ctx, limit: p.maxSnapshotRecords}
 	var catalog domain.Catalog
@@ -275,26 +265,6 @@ func permissionPayload(active bool) ([]byte, error) {
 		return nil, domain.ErrMalformed
 	}
 	return raw, nil
-}
-
-
-// bumpGeneration advances the application catalog's version. It runs inside the
-// caller's write transaction, so the generation and the change it describes
-// commit together or not at all.
-func bumpGeneration(ctx context.Context, conn *sql.Conn, applicationID string) error {
-	result, err := conn.ExecContext(ctx,
-		`UPDATE applications SET generation = generation + 1 WHERE application_id = ?`, applicationID)
-	if err != nil {
-		return classify(err)
-	}
-	affected, err := result.RowsAffected()
-	if err != nil {
-		return classify(err)
-	}
-	if affected != 1 {
-		return domain.ErrRejected
-	}
-	return nil
 }
 
 

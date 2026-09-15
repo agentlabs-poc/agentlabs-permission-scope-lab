@@ -15,7 +15,7 @@ import (
 func TestOpenReadOnlyRejectsInvalidDatabaseWithoutChangingIt(t *testing.T) {
 	t.Run("missing", func(t *testing.T) {
 		path := filepath.Join(t.TempDir(), "missing.db")
-		if _, err := OpenReadOnly(t.Context(), path); err == nil {
+		if _, err := OpenReadOnly(t.Context(), path, allowAll{}); err == nil {
 			t.Fatal("opened missing database")
 		}
 		if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
@@ -24,13 +24,13 @@ func TestOpenReadOnlyRejectsInvalidDatabaseWithoutChangingIt(t *testing.T) {
 	})
 
 	t.Run("blank", func(t *testing.T) {
-		if _, err := OpenReadOnly(t.Context(), " \t"); !errors.Is(err, domain.ErrMalformed) {
+		if _, err := OpenReadOnly(t.Context(), " \t", allowAll{}); !errors.Is(err, domain.ErrMalformed) {
 			t.Fatalf("want malformed path, got %v", err)
 		}
 	})
 
 	t.Run("nonregular", func(t *testing.T) {
-		if _, err := OpenReadOnly(t.Context(), t.TempDir()); err == nil {
+		if _, err := OpenReadOnly(t.Context(), t.TempDir(), allowAll{}); err == nil {
 			t.Fatal("opened directory")
 		}
 	})
@@ -64,7 +64,7 @@ func TestOpenReadOnlyRejectsInvalidDatabaseWithoutChangingIt(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if _, err = OpenReadOnly(t.Context(), path); !errors.Is(err, storage.ErrNotABVDatabase) {
+			if _, err = OpenReadOnly(t.Context(), path, allowAll{}); !errors.Is(err, storage.ErrNotABVDatabase) {
 				t.Fatalf("want non-ABV error, got %v", err)
 			}
 			after, err := os.ReadFile(path)
@@ -94,7 +94,7 @@ func TestOpenReadOnlyReadsOnlyTheRequestedArea(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reader, err := OpenReadOnly(t.Context(), path)
+	reader, err := OpenReadOnly(t.Context(), path, allowAll{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestReaderConnectionIsReadOnlyAndSeesLaterCommits(t *testing.T) {
 	}
 	defer writer.Close()
 
-	reader, err := OpenReadOnly(t.Context(), path)
+	reader, err := OpenReadOnly(t.Context(), path, allowAll{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,10 +194,10 @@ func TestOpenReadOnlyCancellationAndMalformedRowFail(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
-	if _, err = OpenReadOnly(ctx, path); !errors.Is(err, context.Canceled) {
+	if _, err = OpenReadOnly(ctx, path, allowAll{}); !errors.Is(err, context.Canceled) {
 		t.Fatalf("want cancellation, got %v", err)
 	}
-	reader, err := OpenReadOnly(t.Context(), path)
+	reader, err := OpenReadOnly(t.Context(), path, allowAll{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,4 +206,16 @@ func TestOpenReadOnlyCancellationAndMalformedRowFail(t *testing.T) {
 	if err = reader.Read(t.Context(), base.Area, func(storage.Snapshot) error { called = true; return nil }); !errors.Is(err, domain.ErrMalformed) || called {
 		t.Fatalf("malformed row reached callback: called=%v err=%v", called, err)
 	}
+}
+
+// allowAll answers for one application, because the reader's area isolation is
+// what several of these tests are about — a registry that says yes to
+// everything would hide exactly the refusal they assert.
+type allowAll struct{}
+
+func (allowAll) ApplicationExists(_ context.Context, applicationID string) (bool, error) {
+	return applicationID == "hrms", nil
+}
+func (allowAll) Installed(_ context.Context, _, applicationID string) (bool, error) {
+	return applicationID == "hrms", nil
 }
