@@ -4,7 +4,6 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -254,15 +253,16 @@ func (r *snapshotReader) contents(s *storage.Snapshot) error {
 	return finishRows(rows)
 }
 func (r *snapshotReader) assignments(s *storage.Snapshot) error {
-	rows, err := r.areaRows(`SELECT assignment_id,grant_id,grant_revision,recipient_type,recipient_id,status,canonical_json FROM assignments WHERE tenant_id=? AND application_id=? ORDER BY assignment_id`)
+	rows, err := r.areaRows(`
+		SELECT key4,key5,key6,value FROM abv_l1_records
+		 WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='assignment' AND key3=?
+		 ORDER BY key4,key5,key6`)
 	if err != nil {
 		return err
 	}
 	for rows.Next() {
-		var id, gid, rt, rid, status string
-		var rev int64
-		var raw []byte
-		if err = rows.Scan(&id, &gid, &rev, &rt, &rid, &status, &raw); err != nil {
+		var grantID, recipientType, recipientID, raw string
+		if err = rows.Scan(&grantID, &recipientType, &recipientID, &raw); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -270,19 +270,23 @@ func (r *snapshotReader) assignments(s *storage.Snapshot) error {
 			rows.Close()
 			return err
 		}
-		a, e := codec.DecodeAssignment(raw)
-		canonical, marshalErr := json.Marshal(a)
-		if e != nil || marshalErr != nil || !bytes.Equal(canonical, raw) || a.ID != id || a.GrantID != gid || a.GrantRevision != rev || a.Recipient.Type != rt || a.Recipient.ID != rid || a.Status != status {
+		a, e := decodeAssignment(grantID, recipientType, recipientID, []byte(raw))
+		if e != nil {
 			rows.Close()
-			if e != nil {
-				return e
-			}
+			return e
+		}
+		// The snapshot is keyed by assignment id because that is how callers ask
+		// for one. Two bindings carrying the same id would make that map lossy,
+		// and the key path cannot forbid it — the id is in the value.
+		if _, clash := s.Assignments[a.ID]; clash {
+			rows.Close()
 			return domain.ErrMalformed
 		}
-		s.Assignments[id] = a
+		s.Assignments[a.ID] = a
 	}
 	return finishRows(rows)
 }
+
 // roles reads the tenant's role revisions from the L1 record store. The
 // identity fields come back out of their key slots and the bundle out of the
 // value, each by the same codec that wrote them.

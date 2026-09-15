@@ -21,7 +21,7 @@ func (a *GrantStatusAdministration) CheckGrantStatus(ctx context.Context, snapsh
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity.HumanID != "fi7io4lvjqio" || identity.Actor != (domain.Actor{Type: "user", ID: "fi7io4lvjqio"}) || proposed.ID != "G2" || proposed.Version != "1" || (proposed.Status != "enabled" && proposed.Status != "disabled") {
+	if snapshot.Area != a.area || identity.HumanID != "fi7io4lvjqio" || identity.Actor != (domain.Actor{Type: "user", ID: "fi7io4lvjqio"}) || proposed.ID != "fk3x9r2man0d" || proposed.Version != "1" || (proposed.Status != "enabled" && proposed.Status != "disabled") {
 		return domain.ErrRejected
 	}
 	for _, membership := range snapshot.Memberships {

@@ -34,24 +34,24 @@ to understand source reconstruction and the separate dependency inventory.
 continues producing `domain.Route`; `HasSource` reconstructs it through the same
 resolver. Do not alter ordinary `validation.SelectedPermissions` or `Narrow`.
 
-- [x] **1. RED:** use `lab.TeamFINC17` and `ResolveParentTeam` with its G1 content
-  and Team1 recipient, so the returned parent is G0, not narrowed G1. Add one
+- [x] **1. RED:** use `lab.TeamFINC17` and `ResolveParentTeam` with its fk3x9r2m5iv8 content
+  and Team1 recipient, so the returned parent is fk3x9r2m0dq3, not narrowed fk3x9r2m5iv8. Add one
   active permission only to the catalog and require its presence in the root
-  route without modifying stored G0. Independently expect sorted read/write/
+  route without modifying stored fk3x9r2m0dq3. Independently expect sorted read/write/
   delete/export values. Example core call:
 
 ```go
 root, err := lineage.ResolveParentTeam(f.Snapshot,
-    f.Snapshot.Contents[domain.GrantKey{ID: "G1", Revision: 1}], "Team1", now)
+    f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}], "Team1", now)
 if err != nil { t.Fatal(err) }
 if !slices.Contains(root.Permissions, "hrms:payroll:payslip::export") {
     t.Fatal("trusted root did not reflect registered addition")
 }
 ```
 
-  Assert ordinary Team2 parent route remains G1's exact read/write. Include two
+  Assert ordinary Team2 parent route remains fk3x9r2m5iv8's exact read/write. Include two
   tenant fixtures for the same app, separate-app catalog without export, malformed
-  catalog key/definition mismatch, untrusted parentless G0, disabled grant,
+  catalog key/definition mismatch, untrusted parentless fk3x9r2m0dq3, disabled grant,
   disabled assignment, expired validity, missing assignment, preserved nonempty
   root scope/validity, deterministic order, inactive extra permission excluded,
   and source revalidation through `HasSource` for a root holder. Deep-compare

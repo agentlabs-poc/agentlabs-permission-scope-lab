@@ -43,7 +43,11 @@ type WriteSet struct {
 	// transaction. Revision 1 cannot go through NewGrantRevision, which amends
 	// an existing grant and requires a predecessor. RemovedGrant destroys one
 	// whole, head and every revision — add-only's mirror.
-	NewGrant               *NewGrant
+	// RemovedAssignment deletes one by id. AssignmentRevisionChange is Q-105's
+	// explicit adoption: the same binding, a different adopted revision.
+	RemovedAssignment        string
+	AssignmentRevisionChange *AssignmentStatusChange
+	NewGrant                 *NewGrant
 	RemovedGrant           string
 	NewGrantRevision       *domain.GrantContent
 	GrantStatusChange      *GrantStatusChange

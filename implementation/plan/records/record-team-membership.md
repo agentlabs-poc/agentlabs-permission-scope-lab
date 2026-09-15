@@ -83,8 +83,8 @@ mentions a team is the recipient reference inside an assignment:
 ```json
 {
   "version": "1",
-  "id": "A1",
-  "grant_id": "G1",
+  "id": "fm5b7t4p5iv8",
+  "grant_id": "fk3x9r2m5iv8",
   "grant_revision": 2,
   "recipient": {"type": "group", "id": "Team1"},
   "status": "enabled"

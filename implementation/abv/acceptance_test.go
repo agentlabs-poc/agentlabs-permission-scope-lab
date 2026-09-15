@@ -18,7 +18,7 @@ import (
 func TestEmptyChildScopeRetainsParentPredicateAndPersists(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	key := domain.GrantKey{ID: "G2", Revision: 1}
+	key := domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}
 	child := fixture.Snapshot.Contents[key]
 	child.Scope = map[string]string{}
 	fixture.Snapshot.Contents[key], fixture.Child = child, child
@@ -37,7 +37,7 @@ func TestEmptyChildScopeRetainsParentPredicateAndPersists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}}
+	want := []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}
 	if diagnostic.Route == nil || !slices.Equal(diagnostic.Route.Predicates, want) {
 		t.Fatalf("empty child scope route predicates = %#v, want %#v", diagnostic.Route, want)
 	}

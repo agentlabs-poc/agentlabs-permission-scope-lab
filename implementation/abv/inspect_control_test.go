@@ -15,12 +15,12 @@ func TestInspectGrantControlRejectsMissingAndMalformedStoredControls(t *testing.
 		want     error
 	}{
 		{"missing", map[string]domain.GrantControl{}, domain.ErrNotFound},
-		{"identity mismatch", map[string]domain.GrantControl{"G2": {Version: "1", ID: "fi7io4lvkfsw", Status: "enabled"}}, domain.ErrMalformed},
-		{"version", map[string]domain.GrantControl{"G2": {Version: "2", ID: "G2", Status: "enabled"}}, domain.ErrMalformed},
-		{"status", map[string]domain.GrantControl{"G2": {Version: "1", ID: "G2", Status: "paused"}}, domain.ErrMalformed},
+		{"identity mismatch", map[string]domain.GrantControl{"fk3x9r2man0d": {Version: "1", ID: "fi7io4lvkfsw", Status: "enabled"}}, domain.ErrMalformed},
+		{"version", map[string]domain.GrantControl{"fk3x9r2man0d": {Version: "2", ID: "fk3x9r2man0d", Status: "enabled"}}, domain.ErrMalformed},
+		{"status", map[string]domain.GrantControl{"fk3x9r2man0d": {Version: "1", ID: "fk3x9r2man0d", Status: "paused"}}, domain.ErrMalformed},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			record := domain.Record{Area: area, Kind: "grant-control", ID: "G2"}
+			record := domain.Record{Area: area, Kind: "grant-control", ID: "fk3x9r2man0d"}
 			err := inspectSnapshot(storage.Snapshot{Area: area, Controls: tc.controls}, &record)
 			if !errors.Is(err, tc.want) || len(record.CanonicalJSON) != 0 {
 				t.Fatalf("error=%v json=%s", err, record.CanonicalJSON)

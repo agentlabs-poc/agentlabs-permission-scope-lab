@@ -343,10 +343,10 @@ Proposed local testing commands:
 
 ```text
 abv scenario seed team-fin-c17 --db /tmp/my-abv-lab.db --tenant acme --app hrms
-abv inspect grant G1 --db /tmp/my-abv-lab.db --tenant acme --app hrms
-abv inspect assignment A1 --db /tmp/my-abv-lab.db --tenant acme --app hrms
-abv check assignment --file A2.json --db /tmp/my-abv-lab.db --tenant acme --app hrms
-abv assign --file A2.json --fixture-context maya-team1 --db /tmp/my-abv-lab.db --tenant acme --app hrms
+abv inspect grant fk3x9r2m5iv8 --db /tmp/my-abv-lab.db --tenant acme --app hrms
+abv inspect assignment fm5b7t4p5iv8 --db /tmp/my-abv-lab.db --tenant acme --app hrms
+abv check assignment --file fm5b7t4pan0d.json --db /tmp/my-abv-lab.db --tenant acme --app hrms
+abv assign --file fm5b7t4pan0d.json --fixture-context maya-team1 --db /tmp/my-abv-lab.db --tenant acme --app hrms
 abv scenario run team-fin-c17 --case unsupported-permission --db /tmp/another-new-abv-lab.db --tenant acme --app hrms
 ```
 
@@ -395,7 +395,7 @@ management are visible work, not “minor checks” silently skipped.
 
 ### Security acceptance examples
 
-- G1/Team1 grants Finance read/write; G2/Team2 selects read and adds C17: valid
+- fk3x9r2m5iv8/Team1 grants Finance read/write; fk3x9r2man0d/Team2 selects read and adds C17: valid
   assignment succeeds with current administration/source support.
 - Delete permission absent from parent: rejected, not trimmed.
 - Parent Finance plus child `{}`: Finance retained.

@@ -8,21 +8,21 @@ the [implementation design](../../plan/abv-design.md) and Task 4 of the
 
 ## What the resolver establishes
 
-The proposed assignment is A2: grant G2, revision 1, to Team2. Its selected
-content names G1 as its parent; Team2's recorded parent is Team1. Therefore the
-resolver must find Team1's actual current G1 assignment, A1, and follow the
-revision A1 adopted. G1 being stored, or being assigned to TeamX, is not that proof.
+The proposed assignment is fm5b7t4pan0d: grant fk3x9r2man0d, revision 1, to fp8h2w6yan0d. Its selected
+content names fk3x9r2m5iv8 as its parent; fp8h2w6yan0d's recorded parent is fp8h2w6y5iv8. Therefore the
+resolver must find fp8h2w6y5iv8's actual current fk3x9r2m5iv8 assignment, fm5b7t4p5iv8, and follow the
+revision fm5b7t4p5iv8 adopted. fk3x9r2m5iv8 being stored, or being assigned to TeamX, is not that proof.
 
 ![Actual team/grant support and the separate acting-human source check](assets/team-lineage-resolution.svg)
 
-The controlled test fixture makes the root premise explicit: RootTeam holds G0
-through A0, G0 has an established-root entry, and Team1 is RootTeam's child.
+The controlled test fixture makes the root premise explicit: fp8h2w6ykxan holds fk3x9r2m0dq3
+through fm5b7t4p0dq3, fk3x9r2m0dq3 has an established-root entry, and fp8h2w6y5iv8 is fp8h2w6ykxan's child.
 This is a disposable lab fixture, not a canonical root format or production
 bootstrap. A missing parent field is not evidence of root trust.
 
 The resolver walks toward that root using the actual adopted contents, then
-builds the effective route back down. For this example, G1 permits payslip
-read/write in FIN. The coordinator can subsequently check that G2 selects read
+builds the effective route back down. For this example, fk3x9r2m5iv8 permits payslip
+read/write in FIN. The coordinator can subsequently check that fk3x9r2man0d selects read
 and adds C17, producing FIN AND C17. A broad unrelated holder or newer unadopted
 revision must not enlarge this route.
 
@@ -36,8 +36,8 @@ coordinator check; parent traversal uses actual adoptions.
 
 `HasSource` separately establishes the acting human's access to the required
 source route from explicit current membership and assignments. Maya's membership
-in Team1 can supply G1; Nutan's membership in Team2 cannot substitute for it.
-Membership in an ancestor team is not implicitly membership in Team1. Neither
+in fp8h2w6y5iv8 can supply fk3x9r2m5iv8; Nutan's membership in fp8h2w6yan0d cannot substitute for it.
+Membership in an ancestor team is not implicitly membership in fp8h2w6y5iv8. Neither
 membership nor possession establishes assignment-administration permission.
 
 The supported team route remains based on team/grant support after issuance.
@@ -83,7 +83,7 @@ application endpoint; this component does not query HRMS to locate C17.
 
 | Evidence | Current result |
 |---|---|
-| Root → Team1 gives read/write, FIN and `[A0, A1]` | Pass |
+| Root → fp8h2w6y5iv8 gives read/write, FIN and `[fm5b7t4p0dq3, fm5b7t4p5iv8]` | Pass |
 | Unrelated holder cannot substitute; exact adopted revision retained | Pass |
 | Disabled/missing support, relevant cycles and selected-content mismatch | Pass |
 | Trusted root cannot skip a non-root team's ceiling | Pass |

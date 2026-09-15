@@ -32,7 +32,7 @@ type assignmentStatusAPI struct {
 
 func (s *assignmentStatusAPI) SetAssignmentStatus(_ context.Context, area domain.Area, fixture domain.FixtureContext, id, status string) (domain.Assignment, error) {
 	s.area, s.fixture, s.id, s.status, s.calls = area, fixture, id, status, s.calls+1
-	return domain.Assignment{Version: "1", ID: id, GrantID: "G2", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: status}, nil
+	return domain.Assignment{Version: "1", ID: id, GrantID: "fk3x9r2man0d", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: status}, nil
 }
 
 type nilMapAPI map[string]string
@@ -81,7 +81,7 @@ func (s *apiSpy) CheckAssignment(_ context.Context, area domain.Area, raw []byte
 }
 func (s *apiSpy) Assign(_ context.Context, area domain.Area, fixture domain.FixtureContext, raw []byte) (domain.Receipt, error) {
 	s.area, s.fixture, s.raw = area, fixture, append([]byte(nil), raw...)
-	return domain.Receipt{AssignmentID: "A2"}, nil
+	return domain.Receipt{AssignmentID: "fm5b7t4pan0d"}, nil
 }
 
 type connectorSpy struct {
@@ -108,32 +108,32 @@ func (s *connectorSpy) connect(_ context.Context, area domain.Area, path string)
 // Parsing must fail before any adapter call. Nil adapters turn an accidental dispatch into a failure.
 func TestInvalidCommandNeverDispatches(t *testing.T) {
 	cases := [][]string{
-		{}, {"unknown"}, {"inspect", "grant", "G1", "--app", "hrms"},
-		{"inspect", "grant", "G1", "--tenant", "acme"},
-		{"inspect", "grant", "G1", "--tenant"},
-		{"inspect", "grant", "G1", "--tenant", "*", "--app", "hrms"},
-		{"inspect", "grant", "G1", "--tenant", "acme", "--app", "hrms", "--skip-abv"},
-		{"inspect", "grant", "G1", "--tenant", "acme", "--tenant", "fi7io4lvkfsw", "--app", "hrms"},
-		{"inspect", "unknown", "G1", "--db", "x", "--tenant", "acme", "--app", "hrms"},
+		{}, {"unknown"}, {"inspect", "grant", "fk3x9r2m5iv8", "--app", "hrms"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--tenant", "acme"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--tenant"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--tenant", "*", "--app", "hrms"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--tenant", "acme", "--app", "hrms", "--skip-abv"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--tenant", "acme", "--tenant", "fi7io4lvkfsw", "--app", "hrms"},
+		{"inspect", "unknown", "fk3x9r2m5iv8", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"inspect", "grant", "", "--db", "x", "--tenant", "acme", "--app", "hrms"},
-		{"inspect", "grant", "G1", "--db=", "--tenant", "acme", "--app", "hrms"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--db=", "--tenant", "acme", "--app", "hrms"},
 		{"check", "assignment", "--file=", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"assign", "--file", "a.json", "--db", "", "--fixture-context", "fi7io4lvjqio", "--tenant", "acme", "--app", "hrms"},
-		{"inspect", "grant", "G1", "--file", "a.json", "--db", "x", "--tenant", "acme", "--app", "hrms"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--file", "a.json", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"check", "assignment", "--file", "a.json", "--db", "x", "--case", "bad", "--tenant", "acme", "--app", "hrms"},
 		{"assign", "--file", "a.json", "--db", "x", "--fixture-context", "fi7io4lvjqio", "--case", "bad", "--tenant", "acme", "--app", "hrms"},
 		{"scenario", "seed", "team-fin-c17", "--file", "a.json", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"scenario", "run", "team-fin-c17", "--db", "x", "--tenant", "acme", "--app", "hrms"},
 		{"scenario", "seed", "team-fin-c17", "--case", "bad", "--db", "x", "--tenant", "acme", "--app", "hrms"},
-		{"inspect", "grant", "G1", "--db", "x", "--db", "y", "--tenant", "acme", "--app", "hrms"},
-		{"grant", "pause", "G2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"inspect", "grant", "fk3x9r2m5iv8", "--db", "x", "--db", "y", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "pause", "fk3x9r2man0d", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"grant", "disable", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
-		{"grant", "disable", "G2", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
-		{"grant", "disable", "G2", "--recipient", "fibggi2juxhc", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
-		{"assignment", "pause", "A2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "disable", "fk3x9r2man0d", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"grant", "disable", "fk3x9r2man0d", "--recipient", "fibggi2juxhc", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "pause", "fm5b7t4pan0d", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 		{"assignment", "disable", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
-		{"assignment", "disable", "A2", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
-		{"assignment", "disable", "A2", "--recipient", "fibggi2juxhc", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "disable", "fm5b7t4pan0d", "--revision", "1", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
+		{"assignment", "disable", "fm5b7t4pan0d", "--recipient", "fibggi2juxhc", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"},
 	}
 	for _, args := range cases {
 		var out, diag bytes.Buffer
@@ -151,21 +151,21 @@ func TestAssignmentStatusForwardsExactRequestAndClosesOnce(t *testing.T) {
 		api := &assignmentStatusAPI{}
 		connector := &connectorSpy{api: api}
 		var out, diag bytes.Buffer
-		args := []string{"assignment", tc.verb, "A2", "--db", "relative.db", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+		args := []string{"assignment", tc.verb, "fm5b7t4pan0d", "--db", "relative.db", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
 		if got := Run(t.Context(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 0 {
 			t.Fatalf("%s: exit %d: %s", tc.verb, got, diag.String())
 		}
-		if api.id != "A2" || api.status != tc.status || api.fixture.Name != "maya-team1" || api.area.TenantID() != "acme" || api.area.ApplicationID() != "hrms" || connector.path != "relative.db" || connector.closes != 1 || api.calls != 1 {
+		if api.id != "fm5b7t4pan0d" || api.status != tc.status || api.fixture.Name != "maya-team1" || api.area.TenantID() != "acme" || api.area.ApplicationID() != "hrms" || connector.path != "relative.db" || connector.closes != 1 || api.calls != 1 {
 			t.Fatalf("wrong forwarding: api=%+v connector=%+v", api, connector)
 		}
-		if out.String() != `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"`+tc.status+`"}`+"\n" {
+		if out.String() != `{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"`+tc.status+`"}`+"\n" {
 			t.Fatalf("output = %q", out.String())
 		}
 	}
 }
 
 func TestAssignmentStatusRequiresOptionalCapability(t *testing.T) {
-	args := []string{"assignment", "disable", "A2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+	args := []string{"assignment", "disable", "fm5b7t4pan0d", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
 	for _, api := range []application.API{&apiSpy{}, (*assignmentStatusAPI)(nil), nilAssignmentMap(nil)} {
 		connector := &connectorSpy{api: api}
 		var out, diag bytes.Buffer
@@ -186,22 +186,22 @@ func TestGrantStatusForwardsExactControlAndClosesOnce(t *testing.T) {
 		api := &grantAPI{}
 		connector := &connectorSpy{api: api}
 		var out, diag bytes.Buffer
-		args := []string{"grant", tc.verb, "G2", "--db", "relative.db", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+		args := []string{"grant", tc.verb, "fk3x9r2man0d", "--db", "relative.db", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
 		if got := Run(context.Background(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 0 {
 			t.Fatalf("%s: exit %d: %s", tc.verb, got, diag.String())
 		}
-		want := domain.GrantControl{Version: "1", ID: "G2", Status: tc.status}
+		want := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: tc.status}
 		if api.control != want || api.fixture.Name != "maya-team1" || api.area.TenantID() != "acme" || api.area.ApplicationID() != "hrms" || connector.path != "relative.db" || connector.closes != 1 {
 			t.Fatalf("wrong forwarding: api=%+v connector=%+v", api, connector)
 		}
-		if out.String() != `{"version":"1","id":"G2","status":"`+tc.status+`"}`+"\n" {
+		if out.String() != `{"version":"1","id":"fk3x9r2man0d","status":"`+tc.status+`"}`+"\n" {
 			t.Fatalf("output = %q", out.String())
 		}
 	}
 }
 
 func TestGrantStatusRequiresOptionalCapabilityAndReportsOutputFailure(t *testing.T) {
-	args := []string{"grant", "disable", "G2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+	args := []string{"grant", "disable", "fk3x9r2man0d", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
 	for _, tc := range []struct {
 		api  application.API
 		out  io.Writer
@@ -219,7 +219,7 @@ func TestGrantStatusRejectsNonPointerTypedNilWithoutCallingIt(t *testing.T) {
 	nilMapAPICalls = 0
 	connector := &connectorSpy{api: nilMapAPI(nil)}
 	var out, diag bytes.Buffer
-	args := []string{"grant", "disable", "G2", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
+	args := []string{"grant", "disable", "fk3x9r2man0d", "--db", "x", "--fixture-context", "maya-team1", "--tenant", "acme", "--app", "hrms"}
 	if got := Run(context.Background(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 5 || nilMapAPICalls != 0 || connector.closes != 1 {
 		t.Fatalf("exit=%d method calls=%d closes=%d", got, nilMapAPICalls, connector.closes)
 	}
@@ -229,7 +229,7 @@ func TestMissingContextMakesZeroConnectorAndAPICalls(t *testing.T) {
 	api := &apiSpy{}
 	connector := &connectorSpy{api: api}
 	var out, diag bytes.Buffer
-	got := Run(context.Background(), []string{"inspect", "grant", "G1", "--db", "x", "--app", "hrms"}, strings.NewReader(""), &out, &diag, connector.connect, nil)
+	got := Run(context.Background(), []string{"inspect", "grant", "fk3x9r2m5iv8", "--db", "x", "--app", "hrms"}, strings.NewReader(""), &out, &diag, connector.connect, nil)
 	if got != 2 || connector.calls != 0 || api.kind != "" {
 		t.Fatalf("exit=%d connector=%d api=%+v", got, connector.calls, api)
 	}
@@ -239,14 +239,14 @@ func TestInspectForwardsExactAreaPathAndCloses(t *testing.T) {
 		api := &apiSpy{}
 		connector := &connectorSpy{api: api}
 		var out, diag bytes.Buffer
-		args := []string{"inspect", kind, "G1", "--db", "relative.db", "--tenant", "acme", "--app", "hrms"}
+		args := []string{"inspect", kind, "fk3x9r2m5iv8", "--db", "relative.db", "--tenant", "acme", "--app", "hrms"}
 		if got := Run(context.Background(), args, strings.NewReader(""), &out, &diag, connector.connect, nil); got != 0 {
 			t.Fatalf("%s: exit %d: %s", kind, got, diag.String())
 		}
 		if connector.calls != 1 || connector.closes != 1 || connector.path != "relative.db" || connector.area.TenantID() != "acme" || connector.area.ApplicationID() != "hrms" {
 			t.Fatalf("%s: wrong connector forwarding: %+v", kind, connector)
 		}
-		if api.kind != kind || api.id != "G1" || !strings.Contains(out.String(), "internal projection") {
+		if api.kind != kind || api.id != "fk3x9r2m5iv8" || !strings.Contains(out.String(), "internal projection") {
 			t.Fatalf("%s: wrong dispatch/output: %q", kind, out.String())
 		}
 	}

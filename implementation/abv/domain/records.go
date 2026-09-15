@@ -22,15 +22,12 @@ type Recipient struct {
 // GrantControl below is the *wire* form Q-107 approves — version, id, status,
 // and nothing else. TrustedRoot is deliberately not in it: Q-119 refuses a root
 // flag in submitted content, and this is what Auth recorded rather than what a
-// caller said.
+// caller said. The snapshot reader builds the wire form where it is needed, so
+// there is no conversion method here for callers that do not exist.
 type Grant struct {
 	ID          string
 	Status      string
 	TrustedRoot bool
-}
-
-func (g Grant) Control() GrantControl {
-	return GrantControl{Version: "1", ID: g.ID, Status: g.Status}
 }
 
 type GrantControl struct {
@@ -222,6 +219,23 @@ type GrantPage struct {
 type GrantRevisionPage struct {
 	Revisions []GrantContent
 	Total     int
+}
+
+// AssignmentFilter answers in both directions: a grant's recipients, or a
+// recipient's grants. Exactly one is required, the rule ListMembers and
+// ListInstallations already hold — an unfiltered listing is unbounded in the
+// dimension that grows fastest.
+type AssignmentFilter struct {
+	GrantID   string
+	Recipient *Recipient
+	Status    string
+	Offset    int
+	Limit     int
+}
+
+type AssignmentPage struct {
+	Assignments []Assignment
+	Total       int
 }
 
 type TeamFilter struct {

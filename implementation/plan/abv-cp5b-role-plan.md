@@ -171,7 +171,7 @@ verification. No role scope or parent source is invented; publication does not
 assign business access. No production permission name or new canonical admin grant.
 
 - [x] **1. RED:** real seeded-DB CLI publication of revision2, reopen inspect both
-  revisions, preserve G0/G1/G2 and assignments. Include wrong fixture/role, permission
+  revisions, preserve fk3x9r2m0dq3/fk3x9r2m5iv8/fk3x9r2man0d and assignments. Include wrong fixture/role, permission
   outside lab publish ceiling (registered delete), missing membership, unregistered
   permission, malformed revision/list, duplicate revision, nil/typed-nil capability,
   missing/unmarked DB, cancellation, output and close failures. Failure has no

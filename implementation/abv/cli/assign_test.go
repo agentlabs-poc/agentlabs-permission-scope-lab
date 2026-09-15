@@ -14,7 +14,7 @@ func TestAssignDisplaysFixtureIdentityLimit(t *testing.T) {
 	if err := assign(context.Background(), &apiSpy{}, area, "maya-team1", []byte("proposal"), &out, &diag); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(diag.String(), "not authenticated identity") || out.String() != "assignment A2 created\n" {
+	if !strings.Contains(diag.String(), "not authenticated identity") || out.String() != "assignment fm5b7t4pan0d created\n" {
 		t.Fatalf("stdout=%q stderr=%q", out.String(), diag.String())
 	}
 }

@@ -66,8 +66,8 @@ Fresh controller evidence after the final code handoff:
   the middleware module, with no ABV/SQLite dependency.
 - Site: all 10 tests and production build pass.
 - Compiled command against the existing disposable fixture: Nutan FIN/C17 allows
-  with G0/G1/G2; ENG/C17, FIN/C18 and all-departments deny (exit 3).
-- G2 disabled through the existing protected ABV command: next check denies;
+  with fk3x9r2m0dq3/fk3x9r2m5iv8/fk3x9r2man0d; ENG/C17, FIN/C18 and all-departments deny (exit 3).
+- fk3x9r2man0d disabled through the existing protected ABV command: next check denies;
   explicitly re-enabled: next check allows. Selected assignment remains intact.
 - Missing database: error exit 4, no allow/deny result and no new database file.
 

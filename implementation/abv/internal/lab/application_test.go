@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-const a2JSON = `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`
+const a2JSON = `{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`
 
 func TestConnectDoesNotCreateMissingDatabase(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "missing.db")
@@ -46,13 +46,13 @@ func TestGenericABVDatabaseCannotUseFixtureIdentity(t *testing.T) {
 	statusAPI := api.(interface {
 		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
 	})
-	if _, err = statusAPI.SetGrantStatus(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}); !errors.Is(err, domain.ErrRejected) {
+	if _, err = statusAPI.SetGrantStatus(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("unmarked database grant-status error = %v", err)
 	}
 	assignmentStatusAPI := api.(interface {
 		SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error)
 	})
-	if got, err := assignmentStatusAPI.SetAssignmentStatus(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, "A1", "disabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
+	if got, err := assignmentStatusAPI.SetAssignmentStatus(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, "fm5b7t4p5iv8", "disabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
 		t.Fatalf("unmarked database assignment-status = %+v, %v", got, err)
 	}
 }
@@ -71,12 +71,12 @@ func TestAssignmentStatusRequiresFixtureAndLeavesRecordUntouched(t *testing.T) {
 	statusAPI := api.(interface {
 		SetAssignmentStatus(context.Context, domain.Area, domain.FixtureContext, string, string) (domain.Assignment, error)
 	})
-	if got, err := statusAPI.SetAssignmentStatus(t.Context(), area, domain.FixtureContext{Name: "wrong"}, "A1", "disabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
+	if got, err := statusAPI.SetAssignmentStatus(t.Context(), area, domain.FixtureContext{Name: "wrong"}, "fm5b7t4p5iv8", "disabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
 		t.Fatalf("refusal = %+v, %v", got, err)
 	}
-	record, err := api.Inspect(t.Context(), area, "assignment", "A1")
-	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"enabled"}` {
-		t.Fatalf("A1 changed: %s %v", record.CanonicalJSON, err)
+	record, err := api.Inspect(t.Context(), area, "assignment", "fm5b7t4p5iv8")
+	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"fm5b7t4p5iv8","grant_id":"fk3x9r2m5iv8","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"enabled"}` {
+		t.Fatalf("fm5b7t4p5iv8 changed: %s %v", record.CanonicalJSON, err)
 	}
 }
 
@@ -150,14 +150,14 @@ func TestGrantStatusRequiresMarkerFixtureAndExactG2(t *testing.T) {
 	statusAPI := api.(interface {
 		SetGrantStatus(context.Context, domain.Area, domain.FixtureContext, domain.GrantControl) (domain.GrantControl, error)
 	})
-	for _, tc := range []struct{ fixture, id string }{{"wrong", "G2"}, {"maya-team1", "G1"}} {
+	for _, tc := range []struct{ fixture, id string }{{"wrong", "fk3x9r2man0d"}, {"maya-team1", "fk3x9r2m5iv8"}} {
 		_, err = statusAPI.SetGrantStatus(t.Context(), area, domain.FixtureContext{Name: tc.fixture}, domain.GrantControl{Version: "1", ID: tc.id, Status: "disabled"})
 		if !errors.Is(err, domain.ErrRejected) {
 			t.Fatalf("%+v error = %v", tc, err)
 		}
 	}
-	record, err := api.Inspect(t.Context(), area, "grant-control", "G1")
-	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"G1","status":"enabled"}` {
-		t.Fatalf("G1 changed: %s %v", record.CanonicalJSON, err)
+	record, err := api.Inspect(t.Context(), area, "grant-control", "fk3x9r2m5iv8")
+	if err != nil || string(record.CanonicalJSON) != `{"version":"1","id":"fk3x9r2m5iv8","status":"enabled"}` {
+		t.Fatalf("fk3x9r2m5iv8 changed: %s %v", record.CanonicalJSON, err)
 	}
 }

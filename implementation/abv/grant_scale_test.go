@@ -47,7 +47,7 @@ func TestDeleteGrantStaysBoundedAsChildrenGrow(t *testing.T) {
 	leaves := make([]string, 0, children)
 	start := time.Now()
 	for i := 0; i < children; i++ {
-		grant, _, err := writer.CreateGrant(t.Context(), area, teamFixture, "G1", domain.GrantContent{
+		grant, _, err := writer.CreateGrant(t.Context(), area, teamFixture, "fk3x9r2m5iv8", domain.GrantContent{
 			Permissions: []string{payslipRead},
 			Scope:       map[string]string{"cert": fmt.Sprintf("C%04d", i)},
 		})
@@ -61,7 +61,7 @@ func TestDeleteGrantStaysBoundedAsChildrenGrow(t *testing.T) {
 	// The refusal is the expensive direction: it has to look at every revision
 	// in the area before it can say no.
 	refuse := time.Now()
-	if err := writer.DeleteGrant(t.Context(), area, teamFixture, "G1"); !errors.Is(err, domain.ErrConflict) {
+	if err := writer.DeleteGrant(t.Context(), area, teamFixture, "fk3x9r2m5iv8"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("delete with %d children gave %v, want ErrConflict", children, err)
 	}
 	refused := time.Since(refuse)

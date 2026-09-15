@@ -22,10 +22,10 @@ Sources: [Q-101 binding lifecycle](../../docs/parent-grant-bindings.md),
 
 ![Existing canonical four-part binding](../../docs/assets/parent-grant-bindings.svg)
 
-In the existing lab, A1 assigns G1 to Team1; A2 assigns child G2 to child Team2.
-After A2 is created, disabling A1 must fail while A2 remains enabled. Disable
-A2 first, then A1. Enabling A2 while required A1 is disabled must fail. Restore
-A1 explicitly, then A2. Every call needs its own current administrative check.
+In the existing lab, fm5b7t4p5iv8 assigns fk3x9r2m5iv8 to Team1; fm5b7t4pan0d assigns child fk3x9r2man0d to child Team2.
+After fm5b7t4pan0d is created, disabling fm5b7t4p5iv8 must fail while fm5b7t4pan0d remains enabled. Disable
+fm5b7t4pan0d first, then fm5b7t4p5iv8. Enabling fm5b7t4pan0d while required fm5b7t4p5iv8 is disabled must fail. Restore
+fm5b7t4p5iv8 explicitly, then fm5b7t4pan0d. Every call needs its own current administrative check.
 
 Grant disablement or expiry does not substitute for explicit assignment
 disablement in the structural guard. This follows Q-101's bottom-up rule, not
@@ -88,10 +88,10 @@ type AssignmentStatusAPI interface {
 }
 ```
 
-Successful output after disabling A2, within the implied selected tenant/app:
+Successful output after disabling fm5b7t4pan0d, within the implied selected tenant/app:
 
 ```json
-{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"disabled"}
+{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"Team2"},"status":"disabled"}
 ```
 
 Old assignment-create or grant-status adapters do not gain this new capability.

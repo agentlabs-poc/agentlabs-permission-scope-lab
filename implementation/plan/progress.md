@@ -1,5 +1,48 @@
 # ABV implementation progress
 
+## The assignment record — tables 5 → 4, and the envelope holds every record type
+
+[Record](records/record-assignment.md) · [demonstration](records/demos/demo-15-assignment-record.md).
+
+Keyed by what it binds, not by its own identifier:
+
+```
+key1=abv  key2=assignment  key3=<application>
+key4=<grant id>  key5=<recipient type>  key6=<recipient id>
+```
+
+**That is forced rather than preferred.** Q-104 says a grant has at most one
+current assignment to a given recipient, with retained disabled ones counting.
+The old table enforced it with a `UNIQUE` of its own; `abv_l1_records` is shared
+by every record type and cannot carry a per-type constraint. So the pair either
+occupies the key path — where the envelope's existing primary key enforces it for
+nothing — or the rule stops being enforced by storage at all. Nothing was added
+to the shared schema.
+
+The identifier therefore stays in the value, and there is no layout carrying
+both: the primary key is all ten slots, so adding the id would widen uniqueness
+to `(grant, recipient, id)` and admit exactly the duplicate Q-104 forbids.
+Operations keep their id-taking signatures and those lookups scan, which keeps
+the layout reversible inside one storage file.
+
+Four operations that the handbook had already approved and nobody had built:
+`GetAssignment`, `ListAssignments`, `DeleteAssignment`, and Q-104's *"authorized
+adoption operation"* — `UpgradeAssignment`. The last selects the **latest**
+published revision, never an intermediate, and rejects unchanged when the latest
+cannot be supported; falling back is the specific behaviour Q-105 forbids.
+
+`DeleteAssignment` refuses while a dependent route rests on this one. Removal
+differs from disablement exactly as Q-104 needs: a removed assignment stops being
+current, so the binding is free again, where a disabled one still blocks it.
+
+**Tables 5 → 4.** `abv_l1_records` now holds all eight canonical record types —
+permission, scope, role, team, membership, grant, grant_revision, assignment.
+`applications` and `installations` are the only tables beside it, and they leave
+when Auth-AL's compatibility and generation move into the envelope.
+
+`ts` and `state` remain written-by-default and read by nothing, kept by decision
+rather than oversight.
+
 ## The grant record — two record types, and tables 8 → 5
 
 [Record](records/record-grant.md) · [root proposal](records/proposal-root-source.md) ·
@@ -43,7 +86,7 @@ one completely: no parent, and no local scope.
 **Carried deliberately.** A trusted root still cannot be created by any operation,
 because establishment writes four things and the fourth is a holder assignment —
 three-now-four-later would destroy the atomicity Q-117 depends on. Grant
-identifiers are still accepted as the corpus holds them (`G0`/`G1`/`G2`) while
+identifiers are still accepted as the corpus holds them (`fk3x9r2m0dq3`/`fk3x9r2m5iv8`/`fk3x9r2man0d`) while
 issuance is strict, pending the base-36 sweep. `DeleteGrant`'s dependency refusal
 errs conservative and is loosened when assignments can be consulted, never
 tightened.
@@ -110,7 +153,7 @@ CLI/lab acceptance is the remaining task in CP4-C. No review passes were run.
 
 Task 3 now completes CLI/lab/process acceptance at `7624edf`. Final full Go,
 full race, vet, build and module checks pass; site build and all 10 tests pass.
-The compiled demo publishes G2/revision2 and reopens A2 still on revision1.
+The compiled demo publishes fk3x9r2man0d/revision2 and reopens fm5b7t4pan0d still on revision1.
 All three first attempts finished within their caps; one bounded Task2 interface
 correction restored the planned admin source-ID argument. No review was performed.
 See [evidence and SVG](../abv/docs/acceptance.md#cp4-c--immutable-grant-revision-publication).
@@ -367,7 +410,7 @@ spec and quality approved, ready for Task 5. Full tests/race/vet/build pass.
 
 The resolver now takes exact selected child content rather than implicitly
 choosing a revision from an ID; parent support follows actual adoptions. The lab
-fixture explicitly establishes RootTeam/A0/G0 so a stored root-shaped definition
+fixture explicitly establishes RootTeam/fm5b7t4p0dq3/fk3x9r2m0dq3 so a stored root-shaped definition
 does not manufacture trust. Direct-human discovery, proxies and cross-recipient
 self binding remain unsupported implementation cases, not new canonical bans.
 
@@ -401,8 +444,8 @@ to exercise file opening against a valid seeded database. Independent review
 and scoped fix review approve specification compliance and quality. Parent-run
 full Go tests, race checks, vet and build pass on the corrected source.
 
-The independent CLI demonstration saves A2 and reopens it in another process;
-the out-of-bound permission scenario rejects and independently proves A2 absent.
+The independent CLI demonstration saves fm5b7t4pan0d and reopens it in another process;
+the out-of-bound permission scenario rejects and independently proves fm5b7t4pan0d absent.
 The scenario marker guards accidental fixture use, not hostile database owners
 or real authentication. Read-only diagnosis is never a save ticket. An input-file
 close-error minor remains explicitly tracked in Task 7 alongside the source-case

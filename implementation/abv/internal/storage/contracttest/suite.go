@@ -76,8 +76,8 @@ func Run(t *testing.T, factory Factory) {
 			assertSnapshot(t, provider, seeded)
 		}
 		for i, seeded := range want {
-			a := domain.Assignment{Version: "1", ID: "same-new-id", GrantID: "G1", GrantRevision: 2,
-				Recipient: domain.Recipient{Type: "user", ID: []string{"tenant-user", "other-tenant-user", "other-app-user"}[i]}, Status: "enabled"}
+			a := domain.Assignment{Version: "1", ID: "fm5b7t4pesu9", GrantID: "fk3x9r2m5iv8", GrantRevision: 2,
+				Recipient: domain.Recipient{Type: "user", ID: []string{"fn2q6v8s0dq3", "fn2q6v8s5iv8", "fn2q6v8san0d"}[i]}, Status: "enabled"}
 			if err := provider.Update(t.Context(), seeded.Area, func(storage.Snapshot) (storage.WriteSet, error) {
 				return storage.WriteSet{NewAssignments: []domain.Assignment{a}}, nil
 			}); err != nil {
@@ -89,8 +89,8 @@ func Run(t *testing.T, factory Factory) {
 				if len(got.Assignments) != 2 {
 					t.Fatalf("area %d leaked assignments: %#v", i, got.Assignments)
 				}
-				if got.Assignments["same-new-id"].Recipient.ID != []string{"tenant-user", "other-tenant-user", "other-app-user"}[i] {
-					t.Fatalf("area %d saw another area's write: %#v", i, got.Assignments["same-new-id"])
+				if got.Assignments["fm5b7t4pesu9"].Recipient.ID != []string{"fn2q6v8s0dq3", "fn2q6v8s5iv8", "fn2q6v8san0d"}[i] {
+					t.Fatalf("area %d saw another area's write: %#v", i, got.Assignments["fm5b7t4pesu9"])
 				}
 				return nil
 			})
@@ -172,17 +172,17 @@ func Run(t *testing.T, factory Factory) {
 		}
 		defer p.Close()
 		if err := p.Update(t.Context(), seeded.Area, func(s storage.Snapshot) (storage.WriteSet, error) {
-			delete(s.Assignments, "A1")
-			s.Controls["G1"] = domain.GrantControl{Version: "1", ID: "G1", Status: "disabled"}
-			return storage.WriteSet{NewAssignments: []domain.Assignment{newAssignment("A2")}}, nil
+			delete(s.Assignments, "fm5b7t4p5iv8")
+			s.Controls["fk3x9r2m5iv8"] = domain.GrantControl{Version: "1", ID: "fk3x9r2m5iv8", Status: "disabled"}
+			return storage.WriteSet{NewAssignments: []domain.Assignment{newAssignment("fm5b7t4pan0d")}}, nil
 		}); err != nil {
 			t.Fatal(err)
 		}
 		err = p.Read(t.Context(), seeded.Area, func(s storage.Snapshot) error {
-			if s.Assignments["A1"].Status != "disabled" || s.Controls["G1"].Status != "enabled" {
+			if s.Assignments["fm5b7t4p5iv8"].Status != "disabled" || s.Controls["fk3x9r2m5iv8"].Status != "enabled" {
 				t.Fatalf("snapshot mutation persisted: %#v", s)
 			}
-			if _, ok := s.Assignments["A2"]; !ok {
+			if _, ok := s.Assignments["fm5b7t4pan0d"]; !ok {
 				t.Fatal("explicit write missing")
 			}
 			return nil
@@ -200,7 +200,7 @@ func Run(t *testing.T, factory Factory) {
 			t.Fatal(err)
 		}
 		first := newAssignment("first")
-		duplicate := seeded.Assignments["A1"]
+		duplicate := seeded.Assignments["fm5b7t4p5iv8"]
 		duplicate.ID = "duplicate-id"
 		duplicate.Status = "enabled"
 		err = p.Update(t.Context(), seeded.Area, func(storage.Snapshot) (storage.WriteSet, error) {
@@ -224,15 +224,15 @@ func Run(t *testing.T, factory Factory) {
 	t.Run("grant recipient uniqueness spans revisions and disabled rows", func(t *testing.T) {
 		path := t.TempDir() + "/authority.db"
 		seeded := fixtures(t)[0]
-		older := seeded.Contents[domain.GrantKey{ID: "G1", Revision: 2}]
+		older := seeded.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 2}]
 		older.Revision = 1
-		seeded.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = older
+		seeded.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = older
 		p, err := factory.Create(t.Context(), path, []storage.Snapshot{seeded})
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer p.Close()
-		duplicate := seeded.Assignments["A1"]
+		duplicate := seeded.Assignments["fm5b7t4p5iv8"]
 		duplicate.ID = "new-id"
 		duplicate.GrantRevision = 1
 		duplicate.Status = "enabled"
@@ -253,14 +253,14 @@ func Run(t *testing.T, factory Factory) {
 		}
 		defer p.Close()
 		cases := map[string]domain.Assignment{
-			"malformed":       {Version: "1", ID: "bad", GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "service", ID: "x"}, Status: "enabled"},
-			"missing content": {Version: "1", ID: "missing", GrantID: "elsewhere", GrantRevision: 2, Recipient: domain.Recipient{Type: "user", ID: "x"}, Status: "enabled"},
-			"missing group":   {Version: "1", ID: "group", GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "elsewhere"}, Status: "enabled"},
+			"malformed":       {Version: "1", ID: "bad", GrantID: "fk3x9r2m5iv8", GrantRevision: 2, Recipient: domain.Recipient{Type: "service", ID: "fn2q6v8s0dq3"}, Status: "enabled"},
+			"missing content": {Version: "1", ID: "missing", GrantID: "elsewhere", GrantRevision: 2, Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8s0dq3"}, Status: "enabled"},
+			"missing group":   {Version: "1", ID: "group", GrantID: "fk3x9r2m5iv8", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "elsewhere"}, Status: "enabled"},
 		}
 		for name, proposed := range cases {
 			t.Run(name, func(t *testing.T) {
 				err := p.Update(t.Context(), seeded.Area, func(s storage.Snapshot) (storage.WriteSet, error) {
-					s.Contents[domain.GrantKey{ID: proposed.GrantID, Revision: proposed.GrantRevision}] = seeded.Contents[domain.GrantKey{ID: "G1", Revision: 2}]
+					s.Contents[domain.GrantKey{ID: proposed.GrantID, Revision: proposed.GrantRevision}] = seeded.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 2}]
 					s.Teams[proposed.Recipient.ID] = domain.Team{Name: "team",ID: proposed.Recipient.ID}
 					return storage.WriteSet{NewAssignments: []domain.Assignment{proposed}}, nil
 				})
@@ -354,13 +354,13 @@ func fixtures(t *testing.T) []storage.Snapshot {
 	nb := time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC)
 	ex := time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)
 	makeSnapshot := func(area domain.Area, catalog domain.Catalog, human string) storage.Snapshot {
-		content := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 2, Permissions: []string{hrmsRead}, Scope: map[string]string{"部門": "財務"}, Validity: &domain.Validity{NotBefore: &nb, ExpiresAt: &ex}}
-		assignment := domain.Assignment{Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "disabled"}
+		content := domain.GrantContent{Version: "1", GrantID: "fk3x9r2m5iv8", Revision: 2, Permissions: []string{hrmsRead}, Scope: map[string]string{"部門": "財務"}, Validity: &domain.Validity{NotBefore: &nb, ExpiresAt: &ex}}
+		assignment := domain.Assignment{Version: "1", ID: "fm5b7t4p5iv8", GrantID: "fk3x9r2m5iv8", GrantRevision: 2, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "disabled"}
 		return storage.Snapshot{Area: area, Catalog: catalog,
-			Controls: map[string]domain.GrantControl{"G1": {Version: "1", ID: "G1", Status: "enabled"}},
-			Contents: map[domain.GrantKey]domain.GrantContent{{ID: "G1", Revision: 2}: content}, Assignments: map[string]domain.Assignment{"A1": assignment},
+			Controls: map[string]domain.GrantControl{"fk3x9r2m5iv8": {Version: "1", ID: "fk3x9r2m5iv8", Status: "enabled"}},
+			Contents: map[domain.GrantKey]domain.GrantContent{{ID: "fk3x9r2m5iv8", Revision: 2}: content}, Assignments: map[string]domain.Assignment{"fm5b7t4p5iv8": assignment},
 			Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 3}: {ID: "reader", Name: "payslip-reader", Revision: 3, Permissions: []string{hrmsRead}}},
-			Teams: map[string]domain.Team{"fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "fibggi2jv3sw"}}, Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: human}}, TrustedRoots: map[string]bool{"G1": true}}
+			Teams: map[string]domain.Team{"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fibggi2jv3sw"}}, Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: human}}, TrustedRoots: map[string]bool{"fk3x9r2m5iv8": true}}
 	}
 	// a1 and a3 are the same tenant in two applications. Teams and memberships
 	// belong to the tenant and not to an application, so the two snapshots must
@@ -373,8 +373,12 @@ func fixtures(t *testing.T) []storage.Snapshot {
 	return []storage.Snapshot{makeSnapshot(a1, hrms, "fi7io4lvk9hc"), makeSnapshot(a2, hrms, "fi7io4lvkfsw"), makeSnapshot(a3, crm, "fi7io4lvk9hc")}
 }
 
+// The recipient is derived from the assignment id so each call gets a distinct
+// binding, and both stay base-36: the last character is swapped rather than a
+// suffix appended, which would leave the alphabet.
 func newAssignment(id string) domain.Assignment {
-	return domain.Assignment{Version: "1", ID: id, GrantID: "G1", GrantRevision: 2, Recipient: domain.Recipient{Type: "user", ID: id + "-user"}, Status: "enabled"}
+	return domain.Assignment{Version: "1", ID: id, GrantID: "fk3x9r2m5iv8", GrantRevision: 2,
+		Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8s" + id[len(id)-4:]}, Status: "enabled"}
 }
 func assertSnapshot(t *testing.T, p storage.Provider, want storage.Snapshot) {
 	t.Helper()

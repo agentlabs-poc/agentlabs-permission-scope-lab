@@ -17,7 +17,7 @@ undefined.
 ```json
 {
   "version": "1",
-  "grant_id": "G0",
+  "grant_id": "fk3x9r2m0dq3",
   "revision": 1,
   "permissions": [
     "hrms:payroll:payslip::read",
@@ -38,7 +38,7 @@ record cannot tell, and the row is the thing an operator inspects.
 ```json
 {
   "version": "1",
-  "grant_id": "G0",
+  "grant_id": "fk3x9r2m0dq3",
   "revision": 1,
   "scope": {}
 }
@@ -340,7 +340,7 @@ root id would let a caller *name* a root, which is one short step from claiming
 one. `EstablishRoot` returns the id it issued.
 
 ```
-G0            the handbook's illustrative id
+fk3x9r2m0dq3            the handbook's illustrative id
 fi8c8111kow0  what EstablishRoot issues
 ```
 
@@ -642,7 +642,7 @@ application, so there is no installation and no `applications` row — `key3`
 answers *which catalog do these permissions come from*, and for Auth that is the
 platform catalog.
 
-#### A1 · the tenant's Auth root — established by platform administration
+#### fm5b7t4p5iv8 · the tenant's Auth root — established by platform administration
 
 ```json
 { "version": "1", "id": "fi8c8111kow0", "status": "enabled" }
@@ -659,9 +659,9 @@ auth:tenant:team::write         auth:tenant:application::admin
 auth:tenant:authorization::admin   …
 ```
 
-#### A2 · a narrower administrator — an ordinary child
+#### fm5b7t4pan0d · a narrower administrator — an ordinary child
 
-The Administrators team already holds everything through A1. A2 exists because
+The Administrators team already holds everything through fm5b7t4p5iv8. fm5b7t4pan0d exists because
 not every administrator should: a helpdesk team that manages members and nothing
 else.
 
@@ -707,7 +707,7 @@ is a precondition.
 { "version": "1", "grant_id": "fi8c81m2xk3o", "revision": 1, "scope": {} }
 ```
 
-Byte-identical in shape to A1. What differs is `key3`, and therefore which
+Byte-identical in shape to fm5b7t4p5iv8. What differs is `key3`, and therefore which
 catalog it computes from:
 
 ```
@@ -766,8 +766,8 @@ child said only `cert`; `dept=FIN` arrived from the parent and cannot be dropped
 
 | | lineage | key3 | grant | parent | permissions | scope | holder team |
 |---|---|---|---|---|---|---|---|
-| A1 | Auth | `auth` | root | — | *computed:* platform catalog | `{}` | Administrators |
-| A2 | Auth | `auth` | child | A1 | `member::read`, `member::write` | `{}` → inherits | Team1 |
+| fm5b7t4p5iv8 | Auth | `auth` | root | — | *computed:* platform catalog | `{}` | Administrators |
+| fm5b7t4pan0d | Auth | `auth` | child | fm5b7t4p5iv8 | `member::read`, `member::write` | `{}` → inherits | Team1 |
 | B1 | HRMS | `hrms` | root | — | *computed:* HRMS catalog | `{}` | Administrators |
 | B2 | HRMS | `hrms` | child | B1 | `payslip::read`, `::write` | `dept=FIN` | Team1 |
 | B3 | HRMS | `hrms` | child | B2 | `payslip::read` | `+cert=C17` | Team2 |
@@ -776,13 +776,13 @@ child said only `cert`; `dept=FIN` arrived from the parent and cannot be dropped
 
 1. **Roots are the only rows with no parent**, and the only ones whose
    permissions are blank — because they are computed.
-2. **A1 and B1 are the same shape.** Different `key3`, different catalog,
+2. **fm5b7t4p5iv8 and B1 are the same shape.** Different `key3`, different catalog,
    different establishing actor — one mechanism.
 3. **The two lineages never join.** No row in B has a parent in A. Auth
    administration and HRMS business authority are separate ceilings.
 4. **Permissions shrink downward and are always stated.** Never blank below a
    root, never inherited.
-5. **Scope accumulates downward and may be blank.** `{}` at A2 keeps the
+5. **Scope accumulates downward and may be blank.** `{}` at fm5b7t4pan0d keeps the
    parent's boundary; `cert=C17` at B3 is added *to* `dept=FIN`, not instead of.
 
 ### What is still not access
@@ -818,7 +818,7 @@ who already holds authority.
 | 3 | application platform admin | `RegisterPermission`, `RegisterScope` × n | HRMS's catalog at `boundary=application` | step 2 |
 | 4 | Auth platform admin | create the tenant | the tenant | — |
 | 5 | Auth platform admin | `CreateTeam` "Administrators", `AddMember` | a top-level team, one human in it | step 4 |
-| 6 | Auth platform admin | **`EstablishAuthRoot(acme, Administrators)`** | **A1** head + revision + evidence + assignment, atomically | steps 1, 4, 5 |
+| 6 | Auth platform admin | **`EstablishAuthRoot(acme, Administrators)`** | **fm5b7t4p5iv8** head + revision + evidence + assignment, atomically | steps 1, 4, 5 |
 
 > **Step 5 is platform-performed and looks wrong until you see why.** A tenant
 > has no administrator yet, so the first team and the first membership cannot be
@@ -837,8 +837,8 @@ requires the platform.
 | # | Who | Operation | Writes | Requires |
 |---|---|---|---|---|
 | 7 | tenant admin | `Install` *(registry domain)* | the installation | `auth:tenant:application::install`, step 2 |
-| 8 | tenant admin | **`EstablishRoot(acme, hrms, Administrators)`** | **B1** head + revision + evidence + assignment, atomically | A1, step 7, step 3 |
-| 9 | tenant admin | `CreateTeam` Team1, Team2 | the team tree | A1 |
+| 8 | tenant admin | **`EstablishRoot(acme, hrms, Administrators)`** | **B1** head + revision + evidence + assignment, atomically | fm5b7t4p5iv8, step 7, step 3 |
+| 9 | tenant admin | `CreateTeam` Team1, Team2 | the team tree | fm5b7t4p5iv8 |
 | 10 | tenant admin | `CreateGrant` B2 under B1 | head + revision 1 | step 8 |
 | 11 | tenant admin | `CreateAssignment` B2 → Team1 | the assignment | steps 9, 10 |
 | 12 | tenant admin | `CreateGrant` B3 under B2, assign → Team2 | head + revision 1 + assignment | step 11 |

@@ -26,7 +26,7 @@ func TestRunEvaluatesSQLiteAndRejectsMalformedMaterial(t *testing.T) {
 
 	var stdout, stderr strings.Builder
 	args := append(append([]string{}, base...), "--boundary", "dept=FIN", "--boundary", "cert=C17")
-	if code := run(args, &stdout, &stderr); code != 0 || stderr.Len() != 0 || stdout.String() != `{"version":"1","decision":"allow","grant_ids":["G0","G1","G2"]}`+"\n" {
+	if code := run(args, &stdout, &stderr); code != 0 || stderr.Len() != 0 || stdout.String() != `{"version":"1","decision":"allow","grant_ids":["fk3x9r2m0dq3","fk3x9r2m5iv8","fk3x9r2man0d"]}`+"\n" {
 		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
 

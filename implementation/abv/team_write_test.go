@@ -79,11 +79,11 @@ func TestDeleteTeamRefusesWhileAnythingDependsOnIt(t *testing.T) {
 	api, area := openTeamLab(t)
 	const team1, team2 = "fibggi2juubk", "fibggi2juxhc"
 
-	// Team1 has a child.
+	// fp8h2w6y5iv8 has a child.
 	if err := api.DeleteTeam(t.Context(), area, teamFixture, team1); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("deleted a team with a child: %v", err)
 	}
-	// Team2 has a member.
+	// fp8h2w6yan0d has a member.
 	if err := api.DeleteTeam(t.Context(), area, teamFixture, team2); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("deleted a team with a member: %v", err)
 	}
@@ -124,7 +124,7 @@ func TestSetTeamParentPersistsAndRefusesACycle(t *testing.T) {
 		t.Fatalf("the move did not persist: %#v err=%v", read, err)
 	}
 	// The name survives a re-parent: only the parent changes.
-	if read.Name != "Team2" {
+	if read.Name != "fp8h2w6yan0d" {
 		t.Fatalf("a re-parent changed the name: %#v", read)
 	}
 	// Put it back, then try to make its ancestor its descendant.

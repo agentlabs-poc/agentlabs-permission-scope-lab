@@ -8,9 +8,9 @@ import (
 
 func hierarchy() map[string]domain.Team {
 	return map[string]domain.Team{
-		"fibggi2jur5s": {ID: "fibggi2jur5s", Name: "RootTeam"},
-		"fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "fibggi2jur5s"},
-		"fibggi2juxhc": {ID: "fibggi2juxhc", Name: "Team2", ParentID: "fibggi2juubk"},
+		"fibggi2jur5s": {ID: "fibggi2jur5s", Name: "fp8h2w6ykxan"},
+		"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fibggi2jur5s"},
+		"fibggi2juxhc": {ID: "fibggi2juxhc", Name: "fp8h2w6yan0d", ParentID: "fibggi2juubk"},
 	}
 }
 
@@ -21,11 +21,11 @@ func TestDeleteRefusesWhileAnythingDependsOnTheTeam(t *testing.T) {
 	teams := hierarchy()
 	none := map[string]domain.Assignment{}
 
-	// Team1 has a child.
+	// fp8h2w6y5iv8 has a child.
 	if err := CheckTeamDeletion(teams, nil, none, "fibggi2juubk"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("a team with a child was deletable: %v", err)
 	}
-	// Team2 is a leaf, so with nothing else depending on it the delete stands.
+	// fp8h2w6yan0d is a leaf, so with nothing else depending on it the delete stands.
 	if err := CheckTeamDeletion(teams, nil, none, "fibggi2juxhc"); err != nil {
 		t.Fatalf("an empty leaf was not deletable: %v", err)
 	}
@@ -35,12 +35,12 @@ func TestDeleteRefusesWhileAnythingDependsOnTheTeam(t *testing.T) {
 		t.Fatalf("a team with a member was deletable: %v", err)
 	}
 	// So does an assignment naming it.
-	held := map[string]domain.Assignment{"A1": {ID: "A1", Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}}}
+	held := map[string]domain.Assignment{"fm5b7t4p5iv8": {ID: "fm5b7t4p5iv8", Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}}}
 	if err := CheckTeamDeletion(teams, nil, held, "fibggi2juxhc"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("a team an assignment names was deletable: %v", err)
 	}
 	// An assignment to a human, not this group, does not block it.
-	other := map[string]domain.Assignment{"A1": {ID: "A1", Recipient: domain.Recipient{Type: "user", ID: "fibggi2juxhc"}}}
+	other := map[string]domain.Assignment{"fm5b7t4p5iv8": {ID: "fm5b7t4p5iv8", Recipient: domain.Recipient{Type: "user", ID: "fibggi2juxhc"}}}
 	if err := CheckTeamDeletion(teams, nil, other, "fibggi2juxhc"); err != nil {
 		t.Fatalf("a user assignment blocked a group's delete: %v", err)
 	}
@@ -54,7 +54,7 @@ func TestDeleteRefusesWhileAnythingDependsOnTheTeam(t *testing.T) {
 // a state that can never resolve.
 func TestReparentRefusesACycleAtTheWrite(t *testing.T) {
 	teams := hierarchy()
-	// RootTeam under its own grandchild.
+	// fp8h2w6ykxan under its own grandchild.
 	if err := CheckTeamReparent(teams, "fibggi2jur5s", "fibggi2juxhc"); !errors.Is(err, domain.ErrRejected) {
 		t.Fatalf("a cycle was accepted: %v", err)
 	}

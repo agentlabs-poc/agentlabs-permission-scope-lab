@@ -32,10 +32,10 @@ func (a grantAdministration) CheckGrantStatus(_ context.Context, snapshot storag
 func TestSetGrantStatusPersistsOnlyControlAndUsesAdoptedRevision(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Assignments["A2"] = fixture.Proposed
+	fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
 	newer := fixture.Child
 	newer.Revision = 2
-	fixture.Snapshot.Contents[domain.GrantKey{ID: "G2", Revision: 2}] = newer
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 2}] = newer
 	beforeAssignments := len(fixture.Snapshot.Assignments)
 	path := t.TempDir() + "/authority.db"
 	provider, err := lab.CreateSQLite(t.Context(), path, []storage.Snapshot{fixture.Snapshot})
@@ -43,7 +43,7 @@ func TestSetGrantStatusPersistsOnlyControlAndUsesAdoptedRevision(t *testing.T) {
 		t.Fatal(err)
 	}
 	service, _ := mutation.New(provider, grantAdministration{}, &fixedClock{now: time.Now()})
-	disabled := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	disabled := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
 	if got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, disabled); err != nil || got != disabled {
 		t.Fatalf("disable = %#v, %v", got, err)
 	}
@@ -61,8 +61,8 @@ func TestSetGrantStatusPersistsOnlyControlAndUsesAdoptedRevision(t *testing.T) {
 	}
 	defer reopened.Close()
 	if err = reopened.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
-		if snapshot.Controls["G2"] != enabled || len(snapshot.Assignments) != beforeAssignments || snapshot.Assignments["A2"].GrantRevision != 1 {
-			t.Fatalf("unexpected persisted state: control=%#v assignments=%#v", snapshot.Controls["G2"], snapshot.Assignments)
+		if snapshot.Controls["fk3x9r2man0d"] != enabled || len(snapshot.Assignments) != beforeAssignments || snapshot.Assignments["fm5b7t4pan0d"].GrantRevision != 1 {
+			t.Fatalf("unexpected persisted state: control=%#v assignments=%#v", snapshot.Controls["fk3x9r2man0d"], snapshot.Assignments)
 		}
 		return nil
 	}); err != nil {
@@ -86,13 +86,13 @@ func TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes(t *te
 		t.Run(test.name, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
 			fixture.Snapshot.Teams["ficfwlfpxibk"] = domain.Team{Name: "team",ID: "ficfwlfpxibk", ParentID: "fibggi2jur5s"}
-			control := fixture.Snapshot.Controls["G2"]
+			control := fixture.Snapshot.Controls["fk3x9r2man0d"]
 			control.Status = "disabled"
-			fixture.Snapshot.Controls["G2"] = control
+			fixture.Snapshot.Controls["fk3x9r2man0d"] = control
 			if test.brokenMode != "" && test.brokenMode != "upstream" {
-				fixture.Snapshot.Assignments["A2"] = fixture.Proposed
+				fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
 				broken := fixture.Proposed
-				broken.ID, broken.Recipient.ID, broken.Status = "A3", "ficfwlfpxibk", test.brokenMode
+				broken.ID, broken.Recipient.ID, broken.Status = "fm5b7t4pfs5i", "ficfwlfpxibk", test.brokenMode
 				if test.brokenMode == "user" {
 					broken.Recipient = domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}
 					broken.Status = "enabled"
@@ -100,10 +100,10 @@ func TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes(t *te
 				fixture.Snapshot.Assignments[broken.ID] = broken
 			}
 			if test.brokenMode == "upstream" {
-				fixture.Snapshot.Assignments["A2"] = fixture.Proposed
-				upstream := fixture.Snapshot.Assignments["A1"]
+				fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
+				upstream := fixture.Snapshot.Assignments["fm5b7t4p5iv8"]
 				upstream.Status = "disabled"
-				fixture.Snapshot.Assignments["A1"] = upstream
+				fixture.Snapshot.Assignments["fm5b7t4p5iv8"] = upstream
 			}
 			provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
 			if err != nil {
@@ -111,7 +111,7 @@ func TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes(t *te
 			}
 			defer provider.Close()
 			service, _ := mutation.New(provider, grantAdministration{}, &fixedClock{now: time.Now()})
-			proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "enabled"}
+			proposed := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "enabled"}
 			got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed)
 			if !errors.Is(err, test.want) {
 				t.Fatalf("error = %v, want %v", err, test.want)
@@ -124,10 +124,10 @@ func TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes(t *te
 				if test.want != nil {
 					wantStatus = "disabled"
 				}
-				if snapshot.Controls["G2"].Status != wantStatus {
-					t.Fatalf("status = %q, want %q", snapshot.Controls["G2"].Status, wantStatus)
+				if snapshot.Controls["fk3x9r2man0d"].Status != wantStatus {
+					t.Fatalf("status = %q, want %q", snapshot.Controls["fk3x9r2man0d"].Status, wantStatus)
 				}
-				if test.brokenMode == "disabled" && snapshot.Assignments["A3"].Status != "disabled" {
+				if test.brokenMode == "disabled" && snapshot.Assignments["fm5b7t4pfs5i"].Status != "disabled" {
 					t.Fatal("disabled assignment changed")
 				}
 				return nil
@@ -141,16 +141,16 @@ func TestSetGrantStatusEnableRequiresEveryEnabledRouteButSkipsDisabledOnes(t *te
 func TestSetGrantStatusWithdrawalIgnoresBrokenSupportButStillUsesAdministrativeGate(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Assignments["A2"] = fixture.Proposed
-	delete(fixture.Snapshot.Assignments, "A1")
+	fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
+	delete(fixture.Snapshot.Assignments, "fm5b7t4p5iv8")
 	admin := grantAdministration{check: func(snapshot storage.Snapshot, _ domain.Identity, _ domain.GrantControl) error {
-		delete(snapshot.Controls, "G2")
+		delete(snapshot.Controls, "fk3x9r2man0d")
 		return nil
 	}}
 	provider, _ := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
 	defer provider.Close()
 	service, _ := mutation.New(provider, admin, &fixedClock{now: time.Now()})
-	proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	proposed := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
 	if got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed); err != nil || got != proposed {
 		t.Fatalf("withdrawal = %#v, %v", got, err)
 	}
@@ -159,20 +159,20 @@ func TestSetGrantStatusWithdrawalIgnoresBrokenSupportButStillUsesAdministrativeG
 func TestSetGrantStatusRejectsExpiryCrossingAndSameStateBypass(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Assignments["A2"] = fixture.Proposed
+	fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
 	start := time.Now()
 	expires := start.Add(time.Second)
-	key := domain.GrantKey{ID: "G2", Revision: 1}
+	key := domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}
 	content := fixture.Snapshot.Contents[key]
 	content.Validity = &domain.Validity{ExpiresAt: &expires}
 	fixture.Snapshot.Contents[key] = content
-	control := fixture.Snapshot.Controls["G2"]
+	control := fixture.Snapshot.Controls["fk3x9r2man0d"]
 	control.Status = "disabled"
-	fixture.Snapshot.Controls["G2"] = control
+	fixture.Snapshot.Controls["fk3x9r2man0d"] = control
 	provider, _ := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
 	defer provider.Close()
 	service, _ := mutation.New(provider, grantAdministration{}, &sequenceClock{times: []time.Time{start, expires}})
-	proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "enabled"}
+	proposed := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "enabled"}
 	if got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed); !errors.Is(err, domain.ErrRejected) || got != (domain.GrantControl{}) {
 		t.Fatalf("expiry crossing = %#v, %v", got, err)
 	}
@@ -186,19 +186,19 @@ func TestSetGrantStatusRejectsExpiryCrossingAndSameStateBypass(t *testing.T) {
 func TestSetGrantStatusRejectsParentExpiryCrossing(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	fixture.Snapshot.Assignments["A2"] = fixture.Proposed
+	fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
 	start, expires := time.Now(), time.Now().Add(time.Second)
-	key := domain.GrantKey{ID: "G1", Revision: 1}
+	key := domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}
 	content := fixture.Snapshot.Contents[key]
 	content.Validity = &domain.Validity{ExpiresAt: &expires}
 	fixture.Snapshot.Contents[key] = content
-	control := fixture.Snapshot.Controls["G2"]
+	control := fixture.Snapshot.Controls["fk3x9r2man0d"]
 	control.Status = "disabled"
-	fixture.Snapshot.Controls["G2"] = control
+	fixture.Snapshot.Controls["fk3x9r2man0d"] = control
 	provider, _ := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
 	defer provider.Close()
 	service, _ := mutation.New(provider, grantAdministration{}, &sequenceClock{times: []time.Time{start, expires}})
-	got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, domain.GrantControl{Version: "1", ID: "G2", Status: "enabled"})
+	got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "enabled"})
 	if !errors.Is(err, domain.ErrRejected) || got != (domain.GrantControl{}) {
 		t.Fatalf("parent expiry crossing = %#v, %v", got, err)
 	}
@@ -210,7 +210,7 @@ func TestSetGrantStatusCancellationAndCompetingWriterReturnNoControl(t *testing.
 	ctx, cancel := context.WithCancel(t.Context())
 	cancelling := grantAdministration{check: func(storage.Snapshot, domain.Identity, domain.GrantControl) error { cancel(); return nil }}
 	service, _ := mutation.New(&failingCommitProvider{snapshot: fixture.Snapshot}, cancelling, &fixedClock{now: time.Now()})
-	proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	proposed := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
 	if got, err := service.SetGrantStatus(ctx, area, fixture.Issuer, proposed); !errors.Is(err, context.Canceled) || got != (domain.GrantControl{}) {
 		t.Fatalf("cancelled = %#v, %v", got, err)
 	}
@@ -224,7 +224,7 @@ func TestSetGrantStatusCancellationAndCompetingWriterReturnNoControl(t *testing.
 func TestSetGrantStatusRejectsDepthOverflow(t *testing.T) {
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-	parentTeam, parentGrant := "fibggi2jur5s", "G0"
+	parentTeam, parentGrant := "fibggi2jur5s", "fk3x9r2m0dq3"
 	for i := 1; i <= 258; i++ {
 		team, grant, assignment := fmt.Sprintf("DeepTeam%d", i), fmt.Sprintf("DeepGrant%d", i), fmt.Sprintf("DeepAssignment%d", i)
 		fixture.Snapshot.Teams[team] = domain.Team{Name: "team",ID: team, ParentID: parentTeam}
@@ -254,9 +254,9 @@ func TestSetGrantStatusBoundaryValidationAndTypedNil(t *testing.T) {
 		control domain.GrantControl
 		want    error
 	}{
-		"wrong area": {area: other, control: domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}, want: domain.ErrRejected},
+		"wrong area": {area: other, control: domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}, want: domain.ErrRejected},
 		"wildcard":   {area: area, control: domain.GrantControl{Version: "1", ID: "G*", Status: "disabled"}, want: domain.ErrMalformed},
-		"bad status": {area: area, control: domain.GrantControl{Version: "1", ID: "G2", Status: "paused"}, want: domain.ErrMalformed},
+		"bad status": {area: area, control: domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "paused"}, want: domain.ErrMalformed},
 	} {
 		t.Run(name, func(t *testing.T) {
 			got, err := service.SetGrantStatus(t.Context(), request.area, fixture.Issuer, request.control)
@@ -287,7 +287,7 @@ func TestSetGrantStatusSnapshotLimitDoesNotWrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	service, _ := mutation.New(limited, grantAdministration{}, &fixedClock{now: time.Now()})
-	proposed := domain.GrantControl{Version: "1", ID: "G2", Status: "disabled"}
+	proposed := domain.GrantControl{Version: "1", ID: "fk3x9r2man0d", Status: "disabled"}
 	got, err := service.SetGrantStatus(t.Context(), area, fixture.Issuer, proposed)
 	if !errors.Is(err, storage.ErrSnapshotLimit) || !errors.Is(err, domain.ErrUnavailable) || got != (domain.GrantControl{}) {
 		t.Fatalf("limited snapshot = %#v, %v", got, err)
@@ -301,8 +301,8 @@ func TestSetGrantStatusSnapshotLimitDoesNotWrite(t *testing.T) {
 	}
 	defer reopened.Close()
 	if err = reopened.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
-		if snapshot.Controls["G2"].Status != "enabled" {
-			t.Fatalf("status after limited attempt = %q", snapshot.Controls["G2"].Status)
+		if snapshot.Controls["fk3x9r2man0d"].Status != "enabled" {
+			t.Fatalf("status after limited attempt = %q", snapshot.Controls["fk3x9r2man0d"].Status)
 		}
 		return nil
 	}); err != nil {
@@ -315,13 +315,13 @@ func TestSetGrantStatusPreservesDescendantStateAndEffectiveness(t *testing.T) {
 	for _, descendantStatus := range []string{"disabled", "enabled"} {
 		t.Run(descendantStatus, func(t *testing.T) {
 			fixture := lab.TeamFINC17(area)
-			fixture.Snapshot.Assignments["A2"] = fixture.Proposed
-			ancestor := fixture.Snapshot.Controls["G1"]
+			fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
+			ancestor := fixture.Snapshot.Controls["fk3x9r2m5iv8"]
 			ancestor.Status = "disabled"
-			fixture.Snapshot.Controls["G1"] = ancestor
-			descendant := fixture.Snapshot.Controls["G2"]
+			fixture.Snapshot.Controls["fk3x9r2m5iv8"] = ancestor
+			descendant := fixture.Snapshot.Controls["fk3x9r2man0d"]
 			descendant.Status = descendantStatus
-			fixture.Snapshot.Controls["G2"] = descendant
+			fixture.Snapshot.Controls["fk3x9r2man0d"] = descendant
 			if _, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Now()); !errors.Is(err, domain.ErrRejected) {
 				t.Fatalf("descendant effective before restore: %v", err)
 			}
@@ -333,7 +333,7 @@ func TestSetGrantStatusPreservesDescendantStateAndEffectiveness(t *testing.T) {
 				t.Fatal(err)
 			}
 			if err := provider.Read(t.Context(), area, func(snapshot storage.Snapshot) error {
-				if snapshot.Controls["G2"].Status != descendantStatus || snapshot.Assignments["A2"].Status != "enabled" {
+				if snapshot.Controls["fk3x9r2man0d"].Status != descendantStatus || snapshot.Assignments["fm5b7t4pan0d"].Status != "enabled" {
 					t.Fatal("descendant state changed")
 				}
 				_, err := lineage.ResolveParentTeam(snapshot, fixture.Child, "fibggi2juxhc", time.Now())

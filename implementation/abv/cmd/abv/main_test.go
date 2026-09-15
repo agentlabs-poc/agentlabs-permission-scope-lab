@@ -48,9 +48,9 @@ func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testin
 	if !strings.Contains(reopenedRoles, "1         hrms:payroll:payslip::read") || !strings.Contains(reopenedRoles, "2         hrms:payroll:payslip::read,hrms:payroll:payslip::write") {
 		t.Fatalf("roles=%q", reopenedRoles)
 	}
-	g0Before, _ := run(0, "inspect", "grant", "G0", "--db", database, "--tenant", "acme", "--app", "hrms")
-	grant, _ := run(0, "inspect", "grant", "G1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if grant != `{"version":"1","grant_id":"G1","revision":1,"parent_grant_id":"G0","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"dept":"FIN"}}`+"\n" {
+	g0Before, _ := run(0, "inspect", "grant", "fk3x9r2m0dq3", "--db", database, "--tenant", "acme", "--app", "hrms")
+	grant, _ := run(0, "inspect", "grant", "fk3x9r2m5iv8", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if grant != `{"version":"1","grant_id":"fk3x9r2m5iv8","revision":1,"parent_grant_id":"fk3x9r2m0dq3","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"dept":"FIN"}}`+"\n" {
 		t.Fatalf("grant output = %q", grant)
 	}
 	scopeOutput, warning := run(0, "catalog", "register-scope", "region", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
@@ -102,70 +102,70 @@ func TestCompiledBinaryGrantPublicationSeedInspectCheckAssignAndReopen(t *testin
 	run(3, "catalog", "set-permission-status", "hrms:payroll:payslip::invented", "--active", "true", "--app", "hrms", "--db", database, "--fixture-context", "application-publisher")
 
 	persistedPermission := fetched
-	g0After, _ := run(0, "inspect", "grant", "G0", "--db", database, "--tenant", "acme", "--app", "hrms")
+	g0After, _ := run(0, "inspect", "grant", "fk3x9r2m0dq3", "--db", database, "--tenant", "acme", "--app", "hrms")
 	if !strings.Contains(persistedScope, "owner") || !strings.Contains(persistedPermission, "true") || g0After != g0Before {
-		t.Fatalf("reopen scope=%q permission=%q G0 before=%q after=%q", persistedScope, persistedPermission, g0Before, g0After)
+		t.Fatalf("reopen scope=%q permission=%q fk3x9r2m0dq3 before=%q after=%q", persistedScope, persistedPermission, g0Before, g0After)
 	}
-	run(0, "inspect", "assignment", "A1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(0, "inspect", "assignment", "fm5b7t4p5iv8", "--db", database, "--tenant", "acme", "--app", "hrms")
 	diagnosis, _ := run(0, "check", "assignment", "--file", a2, "--db", database, "--tenant", "acme", "--app", "hrms")
 	if !strings.Contains(diagnosis, "does not authorize a later write") {
 		t.Fatalf("diagnosis = %q", diagnosis)
 	}
 	run(0, "assign", "--file", a2, "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	after, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	after, _ := run(0, "inspect", "assignment", "fm5b7t4pan0d", "--db", database, "--tenant", "acme", "--app", "hrms")
 	want, _ := os.ReadFile(a2)
 	if after != strings.TrimSpace(string(want))+"\n" {
-		t.Fatalf("reopened A2 = %q", after)
+		t.Fatalf("reopened fm5b7t4pan0d = %q", after)
 	}
-	run(3, "assignment", "disable", "A1", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(0, "assignment", "disable", "A2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(0, "assignment", "disable", "A1", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(3, "assignment", "enable", "A2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(0, "assignment", "enable", "A1", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	a2Disabled, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if a2Disabled != `{"version":"1","id":"A2","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"disabled"}`+"\n" {
-		t.Fatalf("A2 was changed by A1 enable: %q", a2Disabled)
+	run(3, "assignment", "disable", "fm5b7t4p5iv8", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(0, "assignment", "disable", "fm5b7t4pan0d", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(0, "assignment", "disable", "fm5b7t4p5iv8", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(3, "assignment", "enable", "fm5b7t4pan0d", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(0, "assignment", "enable", "fm5b7t4p5iv8", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	a2Disabled, _ := run(0, "inspect", "assignment", "fm5b7t4pan0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if a2Disabled != `{"version":"1","id":"fm5b7t4pan0d","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"disabled"}`+"\n" {
+		t.Fatalf("fm5b7t4pan0d was changed by fm5b7t4p5iv8 enable: %q", a2Disabled)
 	}
-	run(0, "assignment", "enable", "A2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	a1Final, _ := run(0, "inspect", "assignment", "A1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	a2Final, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if a1Final != `{"version":"1","id":"A1","grant_id":"G1","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"enabled"}`+"\n" || a2Final != after {
-		t.Fatalf("assignments not restored: A1=%q A2=%q", a1Final, a2Final)
+	run(0, "assignment", "enable", "fm5b7t4pan0d", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	a1Final, _ := run(0, "inspect", "assignment", "fm5b7t4p5iv8", "--db", database, "--tenant", "acme", "--app", "hrms")
+	a2Final, _ := run(0, "inspect", "assignment", "fm5b7t4pan0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if a1Final != `{"version":"1","id":"fm5b7t4p5iv8","grant_id":"fk3x9r2m5iv8","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juubk"},"status":"enabled"}`+"\n" || a2Final != after {
+		t.Fatalf("assignments not restored: fm5b7t4p5iv8=%q fm5b7t4pan0d=%q", a1Final, a2Final)
 	}
-	g1Final, _ := run(0, "inspect", "grant", "G1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	g2, _ := run(0, "inspect", "grant", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	g1Control, _ := run(0, "inspect", "grant-control", "G1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	g2Control, _ := run(0, "inspect", "grant-control", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if g1Final != grant || g2 != `{"version":"1","grant_id":"G2","revision":1,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`+"\n" || g1Control != `{"version":"1","id":"G1","status":"enabled"}`+"\n" || g2Control != `{"version":"1","id":"G2","status":"enabled"}`+"\n" {
-		t.Fatalf("grant records changed: G1=%q G2=%q G1-control=%q G2-control=%q", g1Final, g2, g1Control, g2Control)
+	g1Final, _ := run(0, "inspect", "grant", "fk3x9r2m5iv8", "--db", database, "--tenant", "acme", "--app", "hrms")
+	g2, _ := run(0, "inspect", "grant", "fk3x9r2man0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	g1Control, _ := run(0, "inspect", "grant-control", "fk3x9r2m5iv8", "--db", database, "--tenant", "acme", "--app", "hrms")
+	g2Control, _ := run(0, "inspect", "grant-control", "fk3x9r2man0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if g1Final != grant || g2 != `{"version":"1","grant_id":"fk3x9r2man0d","revision":1,"parent_grant_id":"fk3x9r2m5iv8","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`+"\n" || g1Control != `{"version":"1","id":"fk3x9r2m5iv8","status":"enabled"}`+"\n" || g2Control != `{"version":"1","id":"fk3x9r2man0d","status":"enabled"}`+"\n" {
+		t.Fatalf("grant records changed: fk3x9r2m5iv8=%q fk3x9r2man0d=%q G1-control=%q G2-control=%q", g1Final, g2, g1Control, g2Control)
 	}
-	run(0, "grant", "disable", "G2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	control, _ := run(0, "inspect", "grant-control", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if control != `{"version":"1","id":"G2","status":"disabled"}`+"\n" {
+	run(0, "grant", "disable", "fk3x9r2man0d", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	control, _ := run(0, "inspect", "grant-control", "fk3x9r2man0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if control != `{"version":"1","id":"fk3x9r2man0d","status":"disabled"}`+"\n" {
 		t.Fatalf("disabled control = %q", control)
 	}
 	run(3, "check", "assignment", "--file", a2, "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(0, "grant", "enable", "G2", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	control, _ = run(0, "inspect", "grant-control", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	if control != `{"version":"1","id":"G2","status":"enabled"}`+"\n" {
+	run(0, "grant", "enable", "fk3x9r2man0d", "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
+	control, _ = run(0, "inspect", "grant-control", "fk3x9r2man0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	if control != `{"version":"1","id":"fk3x9r2man0d","status":"enabled"}`+"\n" {
 		t.Fatalf("enabled control = %q", control)
 	}
 	run(0, "check", "assignment", "--file", a2, "--db", database, "--tenant", "acme", "--app", "hrms")
-	reopened, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	reopened, _ := run(0, "inspect", "assignment", "fm5b7t4pan0d", "--db", database, "--tenant", "acme", "--app", "hrms")
 	if reopened != after {
 		t.Fatalf("grant status changed assignment: before=%q after=%q", after, reopened)
 	}
 	g2v2 := filepath.Join(t.TempDir(), "g2-v2.json")
-	g2v2JSON := `{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}`
+	g2v2JSON := `{"version":"1","grant_id":"fk3x9r2man0d","revision":2,"parent_grant_id":"fk3x9r2m5iv8","permissions":["hrms:payroll:payslip::read","hrms:payroll:payslip::write"],"scope":{"cert":"C17"}}`
 	if err := os.WriteFile(g2v2, []byte(g2v2JSON), 0600); err != nil {
 		t.Fatal(err)
 	}
-	published, publicationWarning := run(0, "grant", "publish", "--file", g2v2, "--support-assignment", "A1", "--tenant", "acme", "--app", "hrms", "--db", database, "--fixture-context", "maya-grant-publisher")
+	published, publicationWarning := run(0, "grant", "publish", "--file", g2v2, "--support-assignment", "fm5b7t4p5iv8", "--tenant", "acme", "--app", "hrms", "--db", database, "--fixture-context", "maya-grant-publisher")
 	if published != g2v2JSON+"\n" || !strings.Contains(publicationWarning, "transient publication evidence") {
 		t.Fatalf("publication stdout=%q stderr=%q", published, publicationWarning)
 	}
-	reopenedGrant, _ := run(0, "inspect", "grant", "G2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	reopenedAssignment, _ := run(0, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	reopenedGrant, _ := run(0, "inspect", "grant", "fk3x9r2man0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	reopenedAssignment, _ := run(0, "inspect", "assignment", "fm5b7t4pan0d", "--db", database, "--tenant", "acme", "--app", "hrms")
 	if reopenedGrant != published || reopenedAssignment != after {
 		t.Fatalf("reopen grant=%q assignment before=%q after=%q", reopenedGrant, after, reopenedAssignment)
 	}
@@ -185,23 +185,23 @@ func testCompiledBinaryNegativeCases(t *testing.T, binary, root string) {
 	run(5, "scenario", "seed", "unknown", "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(0, "scenario", "run", "team-fin-c17", "--case", "unsupported-permission", "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(4, "assign", "--file", filepath.Join(dir, "missing.json"), "--fixture-context", "maya-team1", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(3, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(3, "inspect", "grant", "G1", "--db", database, "--tenant", "acme", "--app", "fi7io4lvkfsw")
-	run(3, "inspect", "grant", "G1", "--db", database, "--tenant", "fi7io4lvkfsw", "--app", "hrms")
+	run(3, "inspect", "assignment", "fm5b7t4pan0d", "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(3, "inspect", "grant", "fk3x9r2m5iv8", "--db", database, "--tenant", "acme", "--app", "fi7io4lvkfsw")
+	run(3, "inspect", "grant", "fk3x9r2m5iv8", "--db", database, "--tenant", "fi7io4lvkfsw", "--app", "hrms")
 	run(4, "scenario", "seed", "team-fin-c17", "--db", database, "--tenant", "acme", "--app", "hrms")
 	duplicate := filepath.Join(dir, "duplicate.json")
-	if err := os.WriteFile(duplicate, []byte(`{"version":"1","id":"A2","id":"fi7io4lvkfsw","grant_id":"G2","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`), 0600); err != nil {
+	if err := os.WriteFile(duplicate, []byte(`{"version":"1","id":"fm5b7t4pan0d","id":"fi7io4lvkfsw","grant_id":"fk3x9r2man0d","grant_revision":1,"recipient":{"type":"group","id":"fibggi2juxhc"},"status":"enabled"}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	run(2, "check", "assignment", "--file", duplicate, "--db", database, "--tenant", "acme", "--app", "hrms")
 	run(3, "assign", "--file", filepath.Join(root, "testdata", "a2.json"), "--fixture-context", "unknown", "--db", database, "--tenant", "acme", "--app", "hrms")
-	run(3, "inspect", "assignment", "A2", "--db", database, "--tenant", "acme", "--app", "hrms")
+	run(3, "inspect", "assignment", "fm5b7t4pan0d", "--db", database, "--tenant", "acme", "--app", "hrms")
 	revision := filepath.Join(dir, "g2-v2.json")
-	if err := os.WriteFile(revision, []byte(`{"version":"1","grant_id":"G2","revision":2,"parent_grant_id":"G1","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`), 0600); err != nil {
+	if err := os.WriteFile(revision, []byte(`{"version":"1","grant_id":"fk3x9r2man0d","revision":2,"parent_grant_id":"fk3x9r2m5iv8","permissions":["hrms:payroll:payslip::read"],"scope":{"cert":"C17"}}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	missingDB := filepath.Join(dir, "missing.db")
-	run(4, "grant", "publish", "--file", revision, "--support-assignment", "A1", "--fixture-context", "maya-grant-publisher", "--db", missingDB, "--tenant", "acme", "--app", "hrms")
+	run(4, "grant", "publish", "--file", revision, "--support-assignment", "fm5b7t4p5iv8", "--fixture-context", "maya-grant-publisher", "--db", missingDB, "--tenant", "acme", "--app", "hrms")
 	if _, err := os.Stat(missingDB); !os.IsNotExist(err) {
 		t.Fatalf("missing publication database was created: %v", err)
 	}

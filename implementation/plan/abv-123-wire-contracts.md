@@ -70,8 +70,8 @@ additional transport wrapper:
 ```json
 {
   "version": "1",
-  "id": "A2",
-  "grant_id": "G2",
+  "id": "fm5b7t4pan0d",
+  "grant_id": "fk3x9r2man0d",
   "grant_revision": 2,
   "recipient": {"type": "group", "id": "Team2"},
   "status": "enabled"
@@ -94,7 +94,7 @@ body and cannot be supplied to impersonate Maya. The endpoint must run its D1
 operation-specific administrative check for Team2 and independently validate
 the proposed authority, latest-on-create selection, current actual support,
 permission subset, inherited scope, team ceiling, registrations, validity,
-uniqueness, and other applicable constraints. `grant_id: "G2"` alone proves no
+uniqueness, and other applicable constraints. `grant_id: "fk3x9r2man0d"` alone proves no
 support. The assignment is written only if both gates pass against coherent
 state.
 
@@ -120,12 +120,12 @@ operation-specific envelope:
 ```json
 {
   "version": "1",
-  "support_assignment_id": "A1",
+  "support_assignment_id": "fm5b7t4p5iv8",
   "grant_revision": {
     "version": "1",
-    "grant_id": "G2",
+    "grant_id": "fk3x9r2man0d",
     "revision": 2,
-    "parent_grant_id": "G1",
+    "parent_grant_id": "fk3x9r2m5iv8",
     "permissions": [
       "hrms:payroll:payslip::read",
       "hrms:payroll:payslip::write"
@@ -143,7 +143,7 @@ content, issuer history, adoption state, or a permanent dependency.
 
 The operation-specific administrative gate and the authority-boundary checks
 both run. The candidate must be a newer immutable revision of the existing
-non-root G2, retain the applicable parent identity, use registered content, and
+non-root fk3x9r2man0d, retain the applicable parent identity, use registered content, and
 fit the resolved current parent route. Publication does not create or update an
 assignment, change a control, select the revision for a recipient, or establish
 a root.
@@ -239,8 +239,8 @@ Example proposed response, with canonical Assignment values unchanged:
   "items": [
     {
       "version": "1",
-      "id": "A2",
-      "grant_id": "G2",
+      "id": "fm5b7t4pan0d",
+      "grant_id": "fk3x9r2man0d",
       "grant_revision": 2,
       "recipient": {"type": "group", "id": "Team2"},
       "status": "enabled"
@@ -332,11 +332,11 @@ a completed deny.
    It is never a ticket, capability, prepared transaction, or authority to call
    execute without all checks again.
 3. Assignment-create replay after a lost response is not automatically
-   idempotent. Read A2 through its protected read route and compare the complete
+   idempotent. Read fm5b7t4pan0d through its protected read route and compare the complete
    canonical record. A duplicate/conflict does not authorize overwriting or
    treating a different record as success. Whether an explicit idempotency key
    is added later remains open.
-4. Grant-publication replay likewise reads `(G2,2)` through its protected exact-
+4. Grant-publication replay likewise reads `(fk3x9r2man0d,2)` through its protected exact-
    revision route and compares canonical content. Immutability prevents overwrite,
    but a duplicate error alone does not prove that this caller's attempt created
    the stored revision. No support evidence is recovered from the record.

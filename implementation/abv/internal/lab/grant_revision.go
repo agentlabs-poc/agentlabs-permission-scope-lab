@@ -17,7 +17,7 @@ func (a *GrantRevisionAdministration) CheckGrantRevisionPublication(ctx context.
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) || sourceAssignmentID != "A1" || proposed.GrantID != "G2" {
+	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) || sourceAssignmentID != "fm5b7t4p5iv8" || proposed.GrantID != "fk3x9r2man0d" {
 		return domain.ErrRejected
 	}
 	for _, membership := range snapshot.Memberships {

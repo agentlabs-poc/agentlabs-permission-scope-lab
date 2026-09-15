@@ -24,7 +24,7 @@ func (a *AssignmentStatusAdministration) CheckAssignmentStatus(ctx context.Conte
 	if snapshot.Area != a.area || identity != (domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}) || (proposed.Status != "enabled" && proposed.Status != "disabled") {
 		return domain.ErrRejected
 	}
-	wanted := proposed.ID == "A1" && proposed.GrantID == "G1" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "fibggi2juubk"}) || proposed.ID == "A2" && proposed.GrantID == "G2" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "fibggi2juxhc"})
+	wanted := proposed.ID == "fm5b7t4p5iv8" && proposed.GrantID == "fk3x9r2m5iv8" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "fibggi2juubk"}) || proposed.ID == "fm5b7t4pan0d" && proposed.GrantID == "fk3x9r2man0d" && proposed.Recipient == (domain.Recipient{Type: "group", ID: "fibggi2juxhc"})
 	if !wanted {
 		return domain.ErrRejected
 	}

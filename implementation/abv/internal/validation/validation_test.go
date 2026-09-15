@@ -26,7 +26,7 @@ func catalog() domain.Catalog {
 	}
 }
 func content() domain.GrantContent {
-	return domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{read}, Scope: map[string]string{"cert": "C17"}}
+	return domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 1, ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{read}, Scope: map[string]string{"cert": "C17"}}
 }
 func TestContentRequiresRegisteredDefinitionsAndContext(t *testing.T) {
 	for _, tc := range []struct {
@@ -112,22 +112,22 @@ func TestContentChecksSelectedDefinitionIntegrityAndTokens(t *testing.T) {
 func TestNarrowKeepsAllRestrictionsAndCopiesInputs(t *testing.T) {
 	a := area(t)
 	expires := time.Date(2026, 9, 30, 0, 0, 0, 0, time.UTC)
-	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read, write}, Predicates: []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}}, AssignmentIDs: []string{"A1"}, Validities: []domain.Validity{{ExpiresAt: &expires}}}
+	parent := domain.Route{Area: a, GrantID: "fk3x9r2m5iv8", Permissions: []string{read, write}, Predicates: []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}, AssignmentIDs: []string{"fm5b7t4p5iv8"}, Validities: []domain.Validity{{ExpiresAt: &expires}}}
 	g := content()
 	g.Scope = map[string]string{"dept": "ENG", "cert": "C17"}
 	got, err := Narrow(a, parent, g, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "G1"}, {Key: "cert", Value: "C17", SourceGrantID: "G2"}, {Key: "dept", Value: "ENG", SourceGrantID: "G2"}}
-	if got.Area != a || got.GrantID != "G2" || !reflect.DeepEqual(got.Predicates, want) || !reflect.DeepEqual(got.Permissions, []string{read}) || len(got.Validities) != 1 {
+	want := []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}, {Key: "cert", Value: "C17", SourceGrantID: "fk3x9r2man0d"}, {Key: "dept", Value: "ENG", SourceGrantID: "fk3x9r2man0d"}}
+	if got.Area != a || got.GrantID != "fk3x9r2man0d" || !reflect.DeepEqual(got.Predicates, want) || !reflect.DeepEqual(got.Permissions, []string{read}) || len(got.Validities) != 1 {
 		t.Fatalf("lost restrictions: %#v", got)
 	}
 	got.Predicates[0].Value = "BROKEN"
 	got.Permissions[0] = "BROKEN"
 	got.AssignmentIDs[0] = "BROKEN"
 	*got.Validities[0].ExpiresAt = time.Time{}
-	if parent.Predicates[0].Value != "FIN" || parent.Permissions[0] != read || parent.AssignmentIDs[0] != "A1" || g.Permissions[0] != read || expires.IsZero() {
+	if parent.Predicates[0].Value != "FIN" || parent.Permissions[0] != read || parent.AssignmentIDs[0] != "fm5b7t4p5iv8" || g.Permissions[0] != read || expires.IsZero() {
 		t.Fatal("mutated parent's authority through alias")
 	}
 	g.Scope = map[string]string{}
@@ -141,7 +141,7 @@ func TestNarrowAppendsChildValidityAndDeepCopiesEveryConstraint(t *testing.T) {
 	a := area(t)
 	parentStart := time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC)
 	childEnd := time.Date(2026, 9, 30, 0, 0, 0, 0, time.UTC)
-	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read}, Validities: []domain.Validity{{NotBefore: &parentStart}}}
+	parent := domain.Route{Area: a, GrantID: "fk3x9r2m5iv8", Permissions: []string{read}, Validities: []domain.Validity{{NotBefore: &parentStart}}}
 	g := content()
 	g.Validity = &domain.Validity{ExpiresAt: &childEnd}
 	got, err := Narrow(a, parent, g, nil)
@@ -158,7 +158,7 @@ func TestNarrowAppendsChildValidityAndDeepCopiesEveryConstraint(t *testing.T) {
 func TestNarrowRejectsPermissionAndOuterBoundaryEscape(t *testing.T) {
 	a := area(t)
 	g := content()
-	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read}}
+	parent := domain.Route{Area: a, GrantID: "fk3x9r2m5iv8", Permissions: []string{read}}
 	g.Permissions = []string{write}
 	if _, err := Narrow(a, parent, g, nil); !errors.Is(err, domain.ErrRejected) {
 		t.Fatal("expanded permission", err)
@@ -184,7 +184,7 @@ func TestNarrowRejectsPermissionAndOuterBoundaryEscape(t *testing.T) {
 
 func TestNarrowDerivesExactAdoptedRolePermissions(t *testing.T) {
 	a := area(t)
-	parent := domain.Route{Area: a, GrantID: "G1", Permissions: []string{read, write}}
+	parent := domain.Route{Area: a, GrantID: "fk3x9r2m5iv8", Permissions: []string{read, write}}
 	child := content()
 	child.Permissions = nil
 	child.RoleID = "reader"
@@ -234,7 +234,7 @@ func TestNarrowRejectsIncompleteOrCorruptPermissionSources(t *testing.T) {
 		}(), nil},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			parent := domain.Route{Area: a, GrantID: "G1", Permissions: tc.parentPermissions}
+			parent := domain.Route{Area: a, GrantID: "fk3x9r2m5iv8", Permissions: tc.parentPermissions}
 			if got, err := Narrow(a, parent, tc.child, tc.roles); !errors.Is(err, domain.ErrRejected) {
 				t.Fatalf("accepted incomplete or corrupt permission source: %#v, %v", got, err)
 			}

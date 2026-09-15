@@ -64,7 +64,7 @@ func httpEvaluator(t *testing.T, source *httpAuthoritySource) *Evaluator {
 }
 
 func allowAuthority() Authority {
-	return Authority{Routes: []Route{{Area: httpContext().Area, HumanID: "maya", Permission: "certificate::write", GrantIDs: []string{"G1"}, Predicates: []Predicate{{Key: "cert", Value: "C17", SourceGrantID: "G1"}, {Key: "dept", Value: "FIN", SourceGrantID: "G1"}}}}}
+	return Authority{Routes: []Route{{Area: httpContext().Area, HumanID: "maya", Permission: "certificate::write", GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []Predicate{{Key: "cert", Value: "C17", SourceGrantID: "fk3x9r2m5iv8"}, {Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}}}}
 }
 
 func TestWrapAllowsExactlyOneBoundEffectWithExactInputs(t *testing.T) {

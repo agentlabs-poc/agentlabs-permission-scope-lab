@@ -117,7 +117,7 @@ func TestOpenReadOnlyReadsOnlyTheRequestedArea(t *testing.T) {
 
 func TestReaderConnectionIsReadOnlyAndSeesLaterCommits(t *testing.T) {
 	base := contractFixture(t)
-	base.Controls["G1"] = domain.GrantControl{Version: "1", ID: "G1", Status: "enabled"}
+	base.Controls["fk3x9r2m5iv8"] = domain.GrantControl{Version: "1", ID: "fk3x9r2m5iv8", Status: "enabled"}
 	path := filepath.Join(t.TempDir(), "authority.db")
 	writer, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
 	if err != nil {
@@ -156,7 +156,7 @@ func TestReaderConnectionIsReadOnlyAndSeesLaterCommits(t *testing.T) {
 		t.Fatalf("journal mode=%q err=%v", mode, err)
 	}
 
-	before := base.Controls["G1"]
+	before := base.Controls["fk3x9r2m5iv8"]
 	after := before
 	after.Status = "disabled"
 	if err = writer.Update(t.Context(), base.Area, func(storage.Snapshot) (storage.WriteSet, error) {
@@ -165,7 +165,7 @@ func TestReaderConnectionIsReadOnlyAndSeesLaterCommits(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err = reader.Read(t.Context(), base.Area, func(snapshot storage.Snapshot) error {
-		if got := snapshot.Controls["G1"]; got != after {
+		if got := snapshot.Controls["fk3x9r2m5iv8"]; got != after {
 			t.Fatalf("reader saw stale control: %#v", got)
 		}
 		return nil

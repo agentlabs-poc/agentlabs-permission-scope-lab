@@ -49,7 +49,7 @@ func TestParentDisablementBeforeMutationAcquisitionConflictsThenIsSeen(t *testin
 		}
 		defer conn.Close()
 		if _, err = conn.ExecContext(t.Context(), "BEGIN IMMEDIATE"); err == nil {
-			control := fixture.Snapshot.Controls["G1"]
+			control := fixture.Snapshot.Controls["fk3x9r2m5iv8"]
 			control.Status = "disabled"
 			_, err = conn.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant' AND key3=? AND key4=?`, `{"status":"disabled","trusted_root":false}`, area.TenantID(), area.ApplicationID(), control.ID)
 		}
@@ -140,7 +140,7 @@ func TestParentDisablementAfterAssignmentCommitIsNotRetroactive(t *testing.T) {
 			return
 		}
 		<-allowDisable
-		control := fixture.Snapshot.Controls["G1"]
+		control := fixture.Snapshot.Controls["fk3x9r2m5iv8"]
 		control.Status = "disabled"
 		_, err = db.ExecContext(t.Context(), `UPDATE abv_l1_records SET value=? WHERE boundary='tenant' AND tenant_id=? AND key1='abv' AND key2='grant' AND key3=? AND key4=?`, `{"status":"disabled","trusted_root":false}`, area.TenantID(), area.ApplicationID(), control.ID)
 		disabled <- err

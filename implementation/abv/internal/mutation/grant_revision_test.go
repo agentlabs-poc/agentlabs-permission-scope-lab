@@ -53,22 +53,22 @@ func (p *revisionProvider) Update(_ context.Context, _ domain.Area, cb func(stor
 }
 
 func revisionCandidate() domain.GrantContent {
-	return domain.GrantContent{Version: "1", GrantID: "G2", Revision: 2, ParentGrantID: "G1", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"cert": "C17"}}
+	return domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 2, ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"cert": "C17"}}
 }
 
 func revisionFixture(area domain.Area) (storage.Snapshot, domain.Identity) {
-	g0 := domain.GrantContent{Version: "1", GrantID: "G0", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::delete"}, Scope: map[string]string{}}
-	g1 := domain.GrantContent{Version: "1", GrantID: "G1", Revision: 1, ParentGrantID: "G0", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"dept": "FIN"}}
-	g2 := domain.GrantContent{Version: "1", GrantID: "G2", Revision: 1, ParentGrantID: "G1", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"cert": "C17"}}
+	g0 := domain.GrantContent{Version: "1", GrantID: "fk3x9r2m0dq3", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::delete"}, Scope: map[string]string{}}
+	g1 := domain.GrantContent{Version: "1", GrantID: "fk3x9r2m5iv8", Revision: 1, ParentGrantID: "fk3x9r2m0dq3", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"dept": "FIN"}}
+	g2 := domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 1, ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"cert": "C17"}}
 	return storage.Snapshot{
 		Area:        area,
 		Catalog:     domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::delete": {ID: "hrms:payroll:payslip::delete", Active: true}}, Scopes: map[string]domain.ScopeDefinition{"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"}}},
-		Controls:    map[string]domain.GrantControl{"G0": {Version: "1", ID: "G0", Status: "enabled"}, "G1": {Version: "1", ID: "G1", Status: "enabled"}, "G2": {Version: "1", ID: "G2", Status: "enabled"}},
-		Contents:    map[domain.GrantKey]domain.GrantContent{{ID: "G0", Revision: 1}: g0, {ID: "G1", Revision: 1}: g1, {ID: "G2", Revision: 1}: g2},
-		Assignments: map[string]domain.Assignment{"A0": {Version: "1", ID: "A0", GrantID: "G0", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "Root"}, Status: "enabled"}, "A1": {Version: "1", ID: "A1", GrantID: "G1", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"}},
+		Controls:    map[string]domain.GrantControl{"fk3x9r2m0dq3": {Version: "1", ID: "fk3x9r2m0dq3", Status: "enabled"}, "fk3x9r2m5iv8": {Version: "1", ID: "fk3x9r2m5iv8", Status: "enabled"}, "fk3x9r2man0d": {Version: "1", ID: "fk3x9r2man0d", Status: "enabled"}},
+		Contents:    map[domain.GrantKey]domain.GrantContent{{ID: "fk3x9r2m0dq3", Revision: 1}: g0, {ID: "fk3x9r2m5iv8", Revision: 1}: g1, {ID: "fk3x9r2man0d", Revision: 1}: g2},
+		Assignments: map[string]domain.Assignment{"fm5b7t4p0dq3": {Version: "1", ID: "fm5b7t4p0dq3", GrantID: "fk3x9r2m0dq3", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fp8h2w6y9mzc"}, Status: "enabled"}, "fm5b7t4p5iv8": {Version: "1", ID: "fm5b7t4p5iv8", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"}},
 		Roles:       map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}},
-		Teams:       map[string]domain.Team{"Root": {ID: "Root"}, "fibggi2juubk": {ID: "fibggi2juubk", Name: "Team1", ParentID: "Root"}},
-		Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}, TrustedRoots: map[string]bool{"G0": true},
+		Teams:       map[string]domain.Team{"fp8h2w6y9mzc": {ID: "fp8h2w6y9mzc"}, "fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fp8h2w6y9mzc"}},
+		Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}, TrustedRoots: map[string]bool{"fk3x9r2m0dq3": true},
 	}, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}
 }
 
@@ -83,14 +83,14 @@ func TestPublishGrantRevisionUsesSeparateAdministrationAndActualSource(t *testin
 			return domain.ErrRejected
 		}
 		s.Catalog.Permissions["hrms:payroll:payslip::read"] = domain.PermissionDefinition{}
-		s.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = domain.GrantContent{}
+		s.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = domain.GrantContent{}
 		got.Permissions[0] = "forged"
 		got.Scope["cert"] = "forged"
 		return nil
 	}, source: &adminSource}
 	s, _ := New(p, admin, fixedClock{now: time.Now()})
-	got, err := s.PublishGrantRevision(t.Context(), area, issuer, "A1", candidate)
-	if err != nil || adminSource != "A1" || !reflect.DeepEqual(got, candidate) || p.writes != 1 || candidate.Permissions[0] != "hrms:payroll:payslip::read" || candidate.Scope["cert"] != "C17" {
+	got, err := s.PublishGrantRevision(t.Context(), area, issuer, "fm5b7t4p5iv8", candidate)
+	if err != nil || adminSource != "fm5b7t4p5iv8" || !reflect.DeepEqual(got, candidate) || p.writes != 1 || candidate.Permissions[0] != "hrms:payroll:payslip::read" || candidate.Scope["cert"] != "C17" {
 		t.Fatalf("got=%#v writes=%d input=%#v err=%v", got, p.writes, candidate, err)
 	}
 }
@@ -114,27 +114,27 @@ func TestPublishGrantRevisionRejectsInvalidAuthorityAndContentWithoutWrite(t *te
 		{name: "bad identity", identity: domain.Identity{}, admin: revisionAdmin{}, want: domain.ErrMalformed},
 		{name: "bad source", source: " ", admin: revisionAdmin{}, want: domain.ErrMalformed},
 		{name: "missing grant", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.GrantID = "missing" }, want: domain.ErrRejected},
-		{name: "root", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.GrantID, g.ParentGrantID = "G0", "" }, want: domain.ErrRejected},
-		{name: "changed parent", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.ParentGrantID = "G0" }, want: domain.ErrRejected},
+		{name: "root", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.GrantID, g.ParentGrantID = "fk3x9r2m0dq3", "" }, want: domain.ErrRejected},
+		{name: "changed parent", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.ParentGrantID = "fk3x9r2m0dq3" }, want: domain.ErrRejected},
 		{name: "duplicate revision", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Revision = 1 }, want: domain.ErrConflict},
 		{name: "lower revision", admin: revisionAdmin{}, mutate: func(s *storage.Snapshot, g *domain.GrantContent) {
-			x := s.Contents[domain.GrantKey{ID: "G2", Revision: 1}]
+			x := s.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 1}]
 			x.Revision = 3
-			s.Contents[domain.GrantKey{ID: "G2", Revision: 3}] = x
+			s.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 3}] = x
 			g.Revision = 2
 		}, want: domain.ErrConflict},
-		{name: "unrelated source", source: "A0", admin: revisionAdmin{}, want: domain.ErrRejected},
+		{name: "unrelated source", source: "fm5b7t4p0dq3", admin: revisionAdmin{}, want: domain.ErrRejected},
 		{name: "lost membership", admin: revisionAdmin{}, mutate: func(s *storage.Snapshot, _ *domain.GrantContent) { s.Memberships = nil }, want: domain.ErrRejected},
 		{name: "disabled source", admin: revisionAdmin{}, mutate: func(s *storage.Snapshot, _ *domain.GrantContent) {
-			a := s.Assignments["A1"]
+			a := s.Assignments["fm5b7t4p5iv8"]
 			a.Status = "disabled"
-			s.Assignments["A1"] = a
+			s.Assignments["fm5b7t4p5iv8"] = a
 		}, want: domain.ErrRejected},
 		{name: "expired source", admin: revisionAdmin{}, mutate: func(s *storage.Snapshot, _ *domain.GrantContent) {
 			past := time.Now().Add(-time.Hour)
-			g := s.Contents[domain.GrantKey{ID: "G1", Revision: 1}]
+			g := s.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
 			g.Validity = &domain.Validity{ExpiresAt: &past}
-			s.Contents[domain.GrantKey{ID: "G1", Revision: 1}] = g
+			s.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = g
 		}, want: domain.ErrRejected},
 		{name: "unknown permission", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Permissions = []string{"unknown"} }, want: domain.ErrRejected},
 		{name: "unknown scope", admin: revisionAdmin{}, mutate: func(_ *storage.Snapshot, g *domain.GrantContent) { g.Scope = map[string]string{"unknown": "x"} }, want: domain.ErrRejected},
@@ -164,7 +164,7 @@ func TestPublishGrantRevisionRejectsInvalidAuthorityAndContentWithoutWrite(t *te
 			}
 			source := tc.source
 			if source == "" {
-				source = "A1"
+				source = "fm5b7t4p5iv8"
 			}
 			p := &revisionProvider{snapshot: snapshot, err: tc.perr}
 			s, _ := New(p, tc.admin, fixedClock{now: time.Now()})
@@ -184,14 +184,14 @@ func TestPublishGrantRevisionCancellationAndCandidateFutureValidity(t *testing.T
 	candidate.Validity = &domain.Validity{NotBefore: &future}
 	p := &revisionProvider{snapshot: snapshot}
 	s, _ := New(p, revisionAdmin{}, fixedClock{now: time.Now()})
-	if got, err := s.PublishGrantRevision(t.Context(), area, issuer, "A1", candidate); err != nil || !reflect.DeepEqual(got, candidate) {
+	if got, err := s.PublishGrantRevision(t.Context(), area, issuer, "fm5b7t4p5iv8", candidate); err != nil || !reflect.DeepEqual(got, candidate) {
 		t.Fatalf("future candidate got=%#v err=%v", got, err)
 	}
 
 	ctx, cancel := context.WithCancel(t.Context())
 	p = &revisionProvider{snapshot: snapshot}
 	s, _ = New(p, revisionAdmin{check: func(storage.Snapshot, domain.Identity, domain.GrantContent) error { cancel(); return nil }}, fixedClock{now: time.Now()})
-	if got, err := s.PublishGrantRevision(ctx, area, issuer, "A1", revisionCandidate()); !errors.Is(err, context.Canceled) || !reflect.DeepEqual(got, domain.GrantContent{}) || p.writes != 0 {
+	if got, err := s.PublishGrantRevision(ctx, area, issuer, "fm5b7t4p5iv8", revisionCandidate()); !errors.Is(err, context.Canceled) || !reflect.DeepEqual(got, domain.GrantContent{}) || p.writes != 0 {
 		t.Fatalf("cancel got=%#v writes=%d err=%v", got, p.writes, err)
 	}
 }

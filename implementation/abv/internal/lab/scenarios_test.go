@@ -44,8 +44,8 @@ func TestUnsupportedPermissionScenarioObservesRejectionAndNoWrite(t *testing.T) 
 		t.Fatal(err)
 	}
 	defer closeConnection()
-	if _, err = api.Inspect(t.Context(), area, "assignment", "A2"); !errors.Is(err, domain.ErrNotFound) {
-		t.Fatalf("A2 inspection = %v", err)
+	if _, err = api.Inspect(t.Context(), area, "assignment", "fm5b7t4pan0d"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("fm5b7t4pan0d inspection = %v", err)
 	}
 }
 
