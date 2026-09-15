@@ -24,7 +24,7 @@ func TestHasSourceRequiresActingHumanMembershipInActualHolder(t *testing.T) {
 			f.Snapshot.Memberships = []domain.Membership{{TeamID: "fibggi2jur5s", HumanID: "fi7io4lvjqio"}}
 		}, domain.ErrRejected},
 		{"differently scoped holder cannot substitute", func(f *lab.TeamFINC17Case) {
-			f.Snapshot.Teams["fp8h2w6y4hu7"] = domain.Team{Name: "team",ID: "fp8h2w6y4hu7", ParentID: "fibggi2jur5s"}
+			f.Snapshot.Teams["fp8h2w6y4hu7"] = domain.Team{Name: "team", ID: "fp8h2w6y4hu7", ParentID: "fibggi2jur5s"}
 			f.Snapshot.Memberships = []domain.Membership{{TeamID: "fp8h2w6y4hu7", HumanID: "fi7io4lvjqio"}}
 		}, domain.ErrRejected},
 	} {
@@ -130,7 +130,7 @@ func TestHasSourceRechecksExactExpiry(t *testing.T) {
 	}
 }
 
-func TestHasSourceLeavesDirectHumanAndSelfBindingExplicitlyUnsupported(t *testing.T) {
+func TestHasSourceLeavesDirectHumanUnsupportedAndChecksSelfLikeAnyRule(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	fixture := lab.TeamFINC17(area)
 	parent, err := lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
@@ -152,15 +152,33 @@ func TestHasSourceLeavesDirectHumanAndSelfBindingExplicitlyUnsupported(t *testin
 		t.Fatalf("direct-human differing support was guessed: %v", err)
 	}
 
+	// A self-scoped supporting route is claimed and checked like any other,
+	// because the check compares the *rule* rather than a resolved value: both
+	// the stored grant and the claimed route carry the token unresolved, so
+	// literal equality is the right comparison after all.
+	//
+	// It used to answer ErrUnsupported, on the reading that a recipient-relative
+	// source cannot be compared literally. SELF-001 says the opposite — "the
+	// scope rule is shared; the resolved reach is specific to the human being
+	// authorized" — so the issuer donates the rule, not their own resources, and
+	// each human's reach is worked out later by whoever is asking.
 	fixture = lab.TeamFINC17(area)
-	parent, err = lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
-	if err != nil {
-		t.Fatal(err)
-	}
 	g1 := fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
 	g1.Scope = map[string]string{"user": "$self"}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = g1
-	if err := lineage.HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
-		t.Fatalf("recipient-relative source was treated as literal equality: %v", err)
+	parent, err = lineage.ResolveParentTeam(fixture.Snapshot, fixture.Child, "fibggi2juxhc", time.Time{})
+	if err != nil {
+		t.Fatalf("a self-scoped supporting route did not resolve: %v", err)
+	}
+	if err := lineage.HasSource(fixture.Snapshot, fixture.Issuer, parent, time.Time{}); err != nil {
+		t.Fatalf("a self-scoped source the issuer holds was refused: %v", err)
+	}
+
+	// And a claim that does not match the store is still rejected — the token
+	// changes what is compared, not whether it is compared.
+	stale := parent
+	stale.Predicates = []domain.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}
+	if err := lineage.HasSource(fixture.Snapshot, fixture.Issuer, stale, time.Time{}); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("a claimed route that contradicts the store was accepted: %v", err)
 	}
 }

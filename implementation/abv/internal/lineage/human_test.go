@@ -129,11 +129,6 @@ func TestResolveHumanFailsClosedForInvalidEvidence(t *testing.T) {
 			a.ID = "fm5b7t4p5iv8-copy"
 			f.Snapshot.Assignments[a.ID] = a
 		}, domain.ErrRejected},
-		{"self", func(f *lab.TeamFINC17Case) {
-			g := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
-			g.Scope = map[string]string{"user": "$self"}
-			f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = g
-		}, domain.ErrUnsupported},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -334,5 +329,52 @@ func TestOnlyTheGatedEntryAdmitsAnActorThatIsNotTheSubject(t *testing.T) {
 	}
 	if len(resolved.ResolvedGrants) == 0 {
 		t.Fatal("the gated entry resolved nothing for a subject who holds authority")
+	}
+}
+
+// $self is not invalid evidence — it is the handbook's preferred shape. SELF-001:
+// "An Employees group may receive one self-scoped payslip-read grant… The scope
+// rule is shared; the resolved reach is specific to the human being authorized."
+//
+// So the walk carries the token through unresolved, and the human it stands for
+// is decided at match time by whoever is asking. This case used to be listed
+// among the invalid ones and answered ErrUnsupported.
+func TestSelfTravelsTheChainUnresolved(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	f := lab.TeamFINC17(area)
+	g := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
+	g.Scope = map[string]string{"user": "$self"}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = g
+
+	got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
+	if err != nil || len(got) != 1 {
+		t.Fatalf("a self-scoped grant resolved %#v, %v", got, err)
+	}
+	if len(got[0].Predicates) != 1 || got[0].Predicates[0].Key != "user" || got[0].Predicates[0].Value != "$self" {
+		t.Fatalf("predicates = %#v, want the token carried unresolved", got[0].Predicates)
+	}
+}
+
+// And it does not take the rest of the chain down with it. The old refusal fired
+// at every step of the climb, so a self-scoped grant anywhere killed every grant
+// below it — the grandchild here, which says nothing about self at all.
+func TestSelfAboveDoesNotKillTheGrantsBelow(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	f := lab.TeamFINC17(area)
+	root := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}]
+	root.Permissions = []string{lab.PayslipRead, lab.PayslipWrite, lab.PayslipDelete}
+	root.Scope = map[string]string{"user": "$self"}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m0dq3", Revision: 1}] = root
+
+	got, err := lineage.ResolveParentTeam(f.Snapshot, f.Child, "fibggi2juxhc", time.Time{})
+	if err != nil {
+		t.Fatalf("a self-scoped root refused the whole chain: %v", err)
+	}
+	keys := map[string]string{}
+	for _, p := range got.Predicates {
+		keys[p.Key] = p.Value
+	}
+	if keys["user"] != "$self" || keys["dept"] != "FIN" {
+		t.Fatalf("predicates = %#v, want the token beside the narrowing below it", got.Predicates)
 	}
 }

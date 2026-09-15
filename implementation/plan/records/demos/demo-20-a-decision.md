@@ -8,7 +8,7 @@ It is the first of thirty demonstrations to capture a **decision**. Every other
 one shows a record being written, read or refused; this one shows the thing the
 records exist to produce.
 
-`114` lines captured, 10 commands in 10 blocks. Reproduce with:
+`134` lines captured, 12 commands in 12 blocks. Reproduce with:
 
 ```sh
 $(sess path)/verify-decision.sh
@@ -144,17 +144,16 @@ auth-evaluate --human fi7io4lvjqio --permission hrms:payroll:payslip::read --all
 rc=3
 ```
 
-## $self IS WRITABLE AND UNREACHABLE
+## $self — ONE GRANT, A DIFFERENT REACH FOR EACH PERSON
 
-> (the evaluator binds $self to the authorizing human, and the codec
-> accepts it as a scope value — but resolution refuses any content
-> carrying it, at the proposal and at every step of the walk. So a grant
-> can be created and can never be assigned. Captured, not asserted.)
+> (SELF-001, and GROUP-004 calls it the preferred practice: one
+> self-service grant to a group instead of one grant per employee.
+> The scope rule is shared; the reach is specific to whoever asks.)
 
 ```console
 abv grants create --parent fk3x9r2m5iv8 --permissions hrms:payroll:payslip::read --scope user=$self
 internal projection: grant
-id  fyc2tdaf2y2o
+id  fyc64qen9r0g
 status  enabled
 kind  child
 revision  1
@@ -165,7 +164,34 @@ rc=0
 ```
 
 ```console
-abv assign --file self.json
-unsupported operation
-rc=5
+abv assign --file self.json   (to Team2, the group)
+assignment fm5b7t4pslf1 created
+rc=0
+   (nutan is in Team2. The token resolves to her — and to nobody else.)
+```
+
+```console
+auth-evaluate --human fi7io4lvjwu8 --permission hrms:payroll:payslip::read --boundary dept=FIN --boundary user=fi7io4lvjwu8
+{
+    "version": "1",
+    "decision": "allow",
+    "grant_ids": [
+        "fk3x9r2m0dq3",
+        "fk3x9r2m5iv8",
+        "fyc64qen9r0g"
+    ]
+}
+rc=0
+```
+
+```console
+auth-evaluate --human fi7io4lvjwu8 --permission hrms:payroll:payslip::read --boundary dept=FIN --boundary user=fi7io4lvjqio
+{
+    "version": "1",
+    "decision": "deny",
+    "error_code": "NO_AUTHORIZING_GRANT",
+    "error_message": "You do not have access to this resource.",
+    "error_message_reason": "No grant authorizes this operation within the requested boundary."
+}
+rc=3
 ```
