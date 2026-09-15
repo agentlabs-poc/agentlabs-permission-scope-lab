@@ -52,7 +52,7 @@ func TestAuthALAsksTheRegistryRatherThanItsOwnTables(t *testing.T) {
 	service, err := wiring.Open(t.Context(), wiring.Config{
 		AuthorityPath:  filepath.Join(dir, "authority.db"),
 		RegistryPath:   filepath.Join(dir, "registry.db"),
-		CreateRegistry: true,
+		CreateRegistry: true, CreateAuthority: true,
 		Administration: abvAdmin{}, RegistryAdministration: regAdmin{},
 		Operator: operator, Clock: clock{},
 	})

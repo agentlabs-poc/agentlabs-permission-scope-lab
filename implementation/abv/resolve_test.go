@@ -5,12 +5,14 @@ import (
 	"agentlabs.local/abv/internal/lab"
 	"context"
 	"errors"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 )
 
 type resolver interface {
+	Assign(context.Context, domain.Area, domain.FixtureContext, []byte) (domain.Receipt, error)
 	ResolveAuthority(context.Context, domain.Area, domain.FixtureContext, domain.Identity, domain.ResolveOptions) (domain.ResolvedAuthority, error)
 }
 
@@ -196,13 +198,29 @@ func TestAServiceCredentialResolvesOtherPeople(t *testing.T) {
 		t.Fatalf("the answer depended on who asked:\n own   %#v\n asked %#v", own, asked)
 	}
 
-	// And a second human, which is the thing that was impossible.
+	// And a second human — the thing that was impossible. Nutan must actually
+	// hold something first: asserting on an echoed HumanID would pass for a
+	// subject who holds nothing, and for one who does not exist.
+	proposed, err := os.ReadFile("testdata/a2.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := api.Assign(t.Context(), area, domain.FixtureContext{Name: "maya-team1"}, proposed); err != nil {
+		t.Fatal(err)
+	}
 	nutan, err := api.ResolveAuthority(t.Context(), area, teamFixture, hrms("fi7io4lvjwu8"), domain.ResolveOptions{})
 	if err != nil {
 		t.Fatalf("asking about a second human failed: %v", err)
 	}
 	if nutan.HumanID != "fi7io4lvjwu8" {
 		t.Fatalf("answered about the wrong subject: %#v", nutan)
+	}
+	if len(nutan.ResolvedGrants) == 0 {
+		t.Fatal("resolved nothing for a human who holds a route — an echoed subject is not an answer")
+	}
+	// Two different people, two different answers, one credential.
+	if reflect.DeepEqual(nutan.ResolvedGrants, asked.ResolvedGrants) {
+		t.Fatalf("both humans resolved identically: %#v", nutan.ResolvedGrants)
 	}
 }
 
@@ -219,11 +237,12 @@ func TestAnUnboundCredentialIsRefused(t *testing.T) {
 	}
 
 	// A human actor is still held to itself. Naming someone else is
-	// impersonation rather than delegation, and it is refused before the gate.
+	// impersonation rather than delegation, and it is refused before the gate —
+	// as unsupported, the same kind the writes answer for the same condition.
 	impersonating := maya
 	impersonating.HumanID = "fi7io4lvjwu8"
-	if _, err := api.ResolveAuthority(t.Context(), area, teamFixture, impersonating, domain.ResolveOptions{}); !errors.Is(err, domain.ErrRejected) {
-		t.Fatalf("a user actor named someone else and got %v, want ErrRejected", err)
+	if _, err := api.ResolveAuthority(t.Context(), area, teamFixture, impersonating, domain.ResolveOptions{}); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("a user actor named someone else and got %v, want ErrUnsupported", err)
 	}
 
 	// An actor type outside Q-086 is unsupported rather than rejected: the

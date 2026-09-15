@@ -171,6 +171,7 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 		{"nil context", f.Snapshot, f.Issuer, lab.PayslipRead, domain.ErrMalformed},
 		{"wrong area", wrongArea, f.Issuer, lab.PayslipRead, domain.ErrRejected},
 		{"no subject", f.Snapshot, noSubject, lab.PayslipRead, domain.ErrMalformed},
+		{"actor is not the subject", f.Snapshot, askedAbout, lab.PayslipRead, domain.ErrUnsupported},
 		{"noncanonical permission", f.Snapshot, f.Issuer, "*", domain.ErrMalformed},
 		{"unknown permission", f.Snapshot, f.Issuer, "hrms:missing::read", domain.ErrRejected},
 	} {
@@ -186,10 +187,11 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 		})
 	}
 
-	// An actor that is not the subject reaches the subject's routes. Who may ask
-	// is CheckAuthorityRead's question, not this walk's.
-	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, askedAbout, lab.PayslipRead, time.Time{}); err != nil || len(got) == 0 {
-		t.Fatalf("a service actor resolved %#v, %v; want the subject's routes", got, err)
+	// ResolveHuman still holds the actor to the subject, and this is the test
+	// that says why: its caller has no gate, so this rule is the gate. The
+	// loosened entry is ResolveAuthority, below.
+	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, askedAbout, lab.PayslipRead, time.Time{}); !errors.Is(err, domain.ErrUnsupported) || len(got) != 0 {
+		t.Fatalf("an actor that is not the subject resolved %#v, %v; want ErrUnsupported", got, err)
 	}
 
 	f.Snapshot.Assignments["fm5b7t4pzcp2"] = domain.Assignment{Version: "1", ID: "fm5b7t4pzcp2", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}, Status: "enabled"}
@@ -307,4 +309,30 @@ func TestResolveHumanCancellationWinsOverEmptySuccess(t *testing.T) {
 			t.Fatalf("got %#v, %v; want cancellation and no routes", got, err)
 		}
 	})
+}
+
+// The two entries are deliberately asymmetric, and the asymmetry is the whole
+// security argument: ResolveHuman is reached through an adapter with no
+// administration, so it keeps the acting-human rule. ResolveAuthority is reached
+// through a service that runs CheckAuthorityRead first, so it may admit a caller
+// who is not the subject.
+//
+// Making the shared walk permissive once removed the check from the path that
+// had nothing else. This pins both halves so that cannot recur quietly.
+func TestOnlyTheGatedEntryAdmitsAnActorThatIsNotTheSubject(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	f := lab.TeamFINC17(area)
+	asService := f.Issuer
+	asService.Actor = domain.Actor{Type: "service_account", ID: "agent_hrms"}
+
+	if _, err := lineage.ResolveHuman(t.Context(), f.Snapshot, asService, lab.PayslipRead, time.Time{}); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("the ungated entry admitted a service actor: %v", err)
+	}
+	resolved, err := lineage.ResolveAuthority(t.Context(), f.Snapshot, asService, domain.ResolveOptions{}, time.Time{})
+	if err != nil {
+		t.Fatalf("the gated entry refused a service actor: %v", err)
+	}
+	if len(resolved.ResolvedGrants) == 0 {
+		t.Fatal("the gated entry resolved nothing for a subject who holds authority")
+	}
 }

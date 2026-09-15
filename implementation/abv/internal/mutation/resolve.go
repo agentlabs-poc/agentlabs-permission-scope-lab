@@ -33,8 +33,12 @@ func validateReadingIdentity(identity domain.Identity) error {
 	}
 	switch identity.Actor.Type {
 	case "user":
+		// Unsupported rather than rejected, matching validateSupportedIdentity
+		// and lineage.validateIdentity, which answer the identical condition.
+		// One condition with two error kinds is a difference a caller would have
+		// to learn per entry point.
 		if identity.Actor.ID != identity.HumanID {
-			return domain.ErrRejected
+			return domain.ErrUnsupported
 		}
 	case "agent", "service_account":
 	default:
@@ -59,16 +63,15 @@ type AuthorityRead interface {
 // on this service. Everything else here changes authority; this one uses it.
 //
 // The identity block names both parties: Actor is the caller and HumanID is the
-// subject whose authority is resolved. Q-086 admits `user`, `agent` and
-// `service_account` actors, and this signature is already the shape that carries
-// them — but today they must agree, because validateSupportedIdentity refuses an
-// actor that differs from the subject, as every operation here does.
+// subject whose authority is resolved, and they need not agree. A service
+// credential resolves people it is not — see validateReadingIdentity for which
+// actors are admitted, and CheckAuthorityRead for which of them may ask about
+// whom.
 //
-// That is the one thing an enforcing client will need lifted: an application
-// asks about many humans and is not any of them. Until it is, a caller can only
-// resolve its own authority, which is enough to prove the read and not enough to
-// serve an application. Lifting it is delegation work (AUTHORITY-002), not a
-// change to what this returns.
+// Every write on this service still requires the actor to be the human. The
+// difference is deliberate: an application enforcing its own endpoints asks
+// about many humans and is none of them, while nothing should write authority
+// on someone's behalf without being them.
 func (s *Service) ResolveAuthority(ctx context.Context, area domain.Area, identity domain.Identity, opts domain.ResolveOptions) (domain.ResolvedAuthority, error) {
 	fail := func(err error) (domain.ResolvedAuthority, error) {
 		return domain.ResolvedAuthority{}, err

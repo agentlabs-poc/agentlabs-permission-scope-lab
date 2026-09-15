@@ -12,7 +12,6 @@ import (
 	regdomain "agentlabs.local/registry/domain"
 	"agentlabs.local/wiring"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -71,7 +70,8 @@ func run(args []string) int {
 	// This used to be three steps here and the same three steps in a test, where
 	// they could drift without anything noticing.
 	service, err := wiring.Open(ctx, wiring.Config{
-		AuthorityPath: flags["--authority"], RegistryPath: flags["--registry"], CreateRegistry: true,
+		AuthorityPath: flags["--authority"], RegistryPath: flags["--registry"],
+		CreateRegistry: true, CreateAuthority: true,
 		Administration: abvAdmin{}, RegistryAdministration: regAdmin{},
 		Operator: operator, Clock: clock{},
 	})
@@ -80,7 +80,7 @@ func run(args []string) int {
 		return 5
 	}
 	defer service.Close()
-	reg, facade := service.Applications(), service.Authority()
+	facade, port := service.Authority(), service.Registry()
 
 	area, err := abvdomain.NewArea(flags["--tenant"], flags["--app"])
 	if err != nil {
@@ -91,13 +91,16 @@ func run(args []string) int {
 	// actually answered rather than inferring it from an error string. An
 	// earlier version matched on "not found" and misattributed Auth-AL's own
 	// missing-record error to the registry.
-	application, err := reg.GetApplication(ctx, operator, area.ApplicationID())
-	exists := err == nil && application.Status == regdomain.StatusActive
-	if err != nil && !errors.Is(err, regdomain.ErrNotFound) {
+	// Through the port, not the facade beside it. The port owns the narrowing
+	// from an application record to one bit, and this is the only binary that
+	// links both domains — asking the facade instead would re-implement that
+	// narrowing here and stop exercising the seam.
+	exists, err := port.ApplicationExists(ctx, area.ApplicationID())
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 5
 	}
-	held, err := reg.IsInstalled(ctx, operator, area.TenantID(), area.ApplicationID())
+	held, err := port.Installed(ctx, area.TenantID(), area.ApplicationID())
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 5

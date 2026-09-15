@@ -212,12 +212,20 @@ func (a *RoleAdministration) CheckAuthorityRead(ctx context.Context, area domain
 	}
 	switch identity.Actor.Type {
 	case "service_account":
+		// The binding checked above is the area; this only refuses a credential
+		// the lab has never heard of. The constant is named for the worked
+		// fixture and is not itself the binding — a deployment's credential is
+		// bound by what issued it, not by its spelling.
 		if identity.Actor.ID != WorkloadClient {
 			return domain.ErrRejected
 		}
 		return nil
 	case "user":
 		return a.teamGate(ctx, area, identity)
+	case "agent":
+		// Q-086 admits the type; this deployment has not implemented delegation
+		// for it, which is "we do not do that" rather than "you may not".
+		return domain.ErrUnsupported
 	}
 	return domain.ErrRejected
 }

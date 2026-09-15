@@ -12,7 +12,7 @@ func validConfig(dir string) wiring.Config {
 	return wiring.Config{
 		AuthorityPath:  filepath.Join(dir, "authority.db"),
 		RegistryPath:   filepath.Join(dir, "registry.db"),
-		CreateRegistry: true,
+		CreateRegistry: true, CreateAuthority: true,
 		Administration: abvAdmin{}, RegistryAdministration: regAdmin{},
 		Operator: operator, Clock: clock{},
 	}
@@ -129,5 +129,45 @@ func TestNeitherDomainImportsTheOther(t *testing.T) {
 		if len(found) != 0 {
 			t.Fatalf("%s imports %s in %v — the two domains must meet only here", pair.domain, pair.forbidden, found)
 		}
+	}
+}
+
+// A missing authority store is refused rather than created. A typo'd path used
+// to succeed and leave an empty database behind, and an empty tenant answers
+// every question with "no" — a deny-everything service instead of an error an
+// operator can see.
+func TestOpenRefusesAMissingAuthorityStore(t *testing.T) {
+	dir := t.TempDir()
+	cfg := validConfig(dir)
+	cfg.CreateAuthority = false
+	service, err := wiring.Open(t.Context(), cfg)
+	if err == nil {
+		_ = service.Close()
+		t.Fatal("created the authority store behind the caller's back")
+	}
+	if _, statErr := os.Stat(cfg.AuthorityPath); statErr == nil {
+		t.Fatal("a store was left on disk by the refused attempt")
+	}
+}
+
+// A typed nil in an interface is not nil. The registry half is the load-bearing
+// one: without the reflective check, wiring.Open accepts a typed-nil registry
+// administration and returns a working-looking Service whose gates nil-deref on
+// the first request. The authority half is caught downstream by mutation.New
+// anyway, and is kept because a reader should not have to know which is which.
+func TestOpenRefusesATypedNilAdministration(t *testing.T) {
+	dir := t.TempDir()
+	for name, spoil := range map[string]func(*wiring.Config){
+		"authority administration": func(c *wiring.Config) { var typed *abvAdmin; c.Administration = typed },
+		"registry administration":  func(c *wiring.Config) { var typed *regAdmin; c.RegistryAdministration = typed },
+	} {
+		t.Run(name, func(t *testing.T) {
+			cfg := validConfig(dir)
+			spoil(&cfg)
+			if service, err := wiring.Open(t.Context(), cfg); err == nil {
+				_ = service.Close()
+				t.Fatal("assembled with a typed-nil administration")
+			}
+		})
 	}
 }

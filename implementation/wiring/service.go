@@ -6,6 +6,9 @@ import (
 	regdomain "agentlabs.local/registry/domain"
 	"context"
 	"errors"
+	"fmt"
+	"os"
+	"reflect"
 	"time"
 )
 
@@ -21,10 +24,16 @@ type Config struct {
 	// files because they are separate domains; nothing joins them in SQL.
 	AuthorityPath string
 	RegistryPath  string
-	// CreateRegistry allows the registry store to be created when absent. The
-	// authority store is never created here: a store that appears by accident is
-	// an empty tenant, and an empty tenant answers every question with "no".
-	CreateRegistry bool
+	// CreateRegistry and CreateAuthority allow each store to be created when
+	// absent, and both default to refusing.
+	//
+	// The refusal is the point. abv.OpenSQLite creates a missing store
+	// unconditionally, so a typo'd path used to succeed silently and leave an
+	// empty database behind — and an empty tenant answers every question with
+	// "no", which is a deny-everything service rather than an error an operator
+	// can see. Administrative writes would land in the accidental store too.
+	CreateRegistry  bool
+	CreateAuthority bool
 	// Administration answers who may do what, in each domain. Auth-AL's gates
 	// are discovered on this value, so one type may satisfy several of them.
 	Administration         abv.Administration
@@ -45,6 +54,7 @@ type Config struct {
 type Service struct {
 	authority    *abv.Facade
 	applications *registry.Facade
+	port         abv.Registry
 }
 
 // Open assembles the service. The order is not arbitrary: the registry opens
@@ -57,8 +67,16 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 	if cfg.AuthorityPath == "" || cfg.RegistryPath == "" {
 		return nil, errors.New("both store paths are required")
 	}
-	if cfg.Clock == nil || cfg.Administration == nil || cfg.RegistryAdministration == nil {
+	// A typed nil in an interface is not nil, and both domains hold their own
+	// reflective check for exactly that reason. Catching it here means assembly
+	// fails rather than the first request.
+	if nilInterface(cfg.Clock) || nilInterface(cfg.Administration) || nilInterface(cfg.RegistryAdministration) {
 		return nil, errors.New("administration for both domains and a clock are required")
+	}
+	if !cfg.CreateAuthority {
+		if _, err := os.Stat(cfg.AuthorityPath); err != nil {
+			return nil, fmt.Errorf("authority store %q: %w", cfg.AuthorityPath, err)
+		}
 	}
 	applications, err := registry.Open(ctx, cfg.RegistryPath, cfg.RegistryAdministration, cfg.Clock, cfg.CreateRegistry)
 	if err != nil {
@@ -78,7 +96,27 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 		_ = applications.Close()
 		return nil, err
 	}
-	return &Service{authority: authority, applications: applications}, nil
+	return &Service{authority: authority, applications: applications, port: port}, nil
+}
+
+// Registry is the port Auth-AL was opened against. It is exposed so the
+// composed binary can demonstrate the seam it exists to demonstrate — asking the
+// port is not the same as asking the registry facade, and the port owns the
+// narrowing from an application record to one bit.
+func (s *Service) Registry() abv.Registry { return s.port }
+
+// nilInterface reports a typed nil held in an interface, which == nil does not.
+func nilInterface(value any) bool {
+	if value == nil {
+		return true
+	}
+	v := reflect.ValueOf(value)
+	switch v.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		return v.IsNil()
+	default:
+		return false
+	}
 }
 
 // Authority is Auth-AL: the records, the operations that change them, and the
