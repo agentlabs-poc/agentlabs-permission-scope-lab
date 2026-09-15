@@ -68,7 +68,7 @@ func revisionFixture(area domain.Area) (storage.Snapshot, domain.Identity) {
 		Assignments: map[string]domain.Assignment{"fm5b7t4p0dq3": {Version: "1", ID: "fm5b7t4p0dq3", GrantID: "fk3x9r2m0dq3", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fp8h2w6y9mzc"}, Status: "enabled"}, "fm5b7t4p5iv8": {Version: "1", ID: "fm5b7t4p5iv8", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"}},
 		Roles:       map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 1}: {ID: "reader", Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}},
 		Teams:       map[string]domain.Team{"fp8h2w6y9mzc": {ID: "fp8h2w6y9mzc"}, "fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fp8h2w6y9mzc"}},
-		Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}, TrustedRoots: map[string]bool{"fk3x9r2m0dq3": true},
+		Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}, Ownerships: []domain.Ownership{}, TrustedRoots: map[string]bool{"fk3x9r2m0dq3": true},
 	}, domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}
 }
 

@@ -36,6 +36,13 @@ type AssignmentAPI interface {
 	UpgradeAssignment(context.Context, domain.Area, domain.FixtureContext, string) (domain.Assignment, error)
 }
 
+// OwnerAPI is the ownership record's surface: who may administer a team.
+type OwnerAPI interface {
+	AddOwner(context.Context, domain.Area, domain.FixtureContext, string, string) error
+	RemoveOwner(context.Context, domain.Area, domain.FixtureContext, string, string) error
+	ListOwners(context.Context, domain.Area, domain.FixtureContext, domain.OwnerFilter) (domain.OwnerPage, error)
+}
+
 // TeamAPI reads a tenant's teams and memberships.
 type TeamAPI interface {
 	GetTeam(context.Context, domain.Area, domain.FixtureContext, string) (domain.Team, error)

@@ -6,6 +6,7 @@ directly. Only the layout is reconstructed, for legibility.
 
 | File | Shows |
 |---|---|
+| `demo-16-ownership-record.svg` · `.md` | Ownership as authority to administer a team and nothing else: plural owners per team and per human, add-only and a remove that says whether it did anything, and a human on each side of the line Q-099 draws — an owner who is not a member, and a member who owns nothing |
 | `demo-1-create-and-read.svg` | Registration is add-only, the identifier grammar is enforced, a typed read rejects unregistered identifiers and wildcards |
 | `demo-2-retire-and-restore.svg` | Retirement is one reversible idempotent operation; a retired permission stays visible to administration and cannot be created by a status change |
 | `demo-3-list-and-page.svg` | 603 permissions in one application — total, generation, whole-segment prefix, offset paging into the middle and past the end |
@@ -22,6 +23,11 @@ directly. Only the layout is reconstructed, for legibility.
 | `demo-12-team-membership.svg` | Teams and membership as tenant-scoped L1 records: both directions of the roster question, ids rather than names, the parent as an id, and both tables folded away |
 | `demo-11-envelope-drift-correction.svg` | The envelope before and after: `boundary`, `application_id` and `revision` removed, every record type sharing one shape, and `key3` holding the application in all of them — which is what let `application_id` go |
 | `demo-10-role-storage-table.svg` | The role rows: an application role carrying no tenant beside tenant roles that do, the revision zero-padded in `key5`, the name in `key6`, and the drifted `revision` column left at `0` |
+
+Every demonstration is **both** an SVG and a markdown file, generated from one
+capture by one parse — so the image and the text cannot disagree. That was not
+true until now: the four oldest had images and no text, because demo markdown
+only started at the grant.
 
 Demonstrations are captured, not described, and they earn their place: the
 wildcard hole in scope registration was found by running demo 5, not by reading

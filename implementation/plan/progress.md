@@ -1,5 +1,42 @@
 # ABV implementation progress
 
+## The ownership record — the last one the handbook has settled
+
+[Record](records/record-ownership.md) · [demonstration](records/demos/demo-16-ownership-record.md).
+
+```
+key1=abv  key2=ownership  key3=<team id>  key4=<human id>
+value={}
+```
+
+The membership shape, because a relationship has no id of its own. `key3` is the
+team rather than the application — the one place this record departs from the
+rest, since a team is a tenant's and ownership follows the thing it owns.
+
+**Membership and ownership are identical paths but for `key2`**, and that is
+exactly right. Q-099 exists to say they are different relationships between the
+same two things: an owner may administer the team and has none of its business
+authority; a member receives that authority and may not administer the team. The
+demonstration shows a human on each side of that line.
+
+`CheckOwnership` is `CheckMembership`'s shape and checks nothing more. Ownership
+grants no authority, so there is no ceiling to stay within and no lineage to
+walk — the lightest record in the model, and the reason is Q-099's rule rather
+than an oversight.
+
+Three decisions worth naming. **Add and remove, not a whole-list replace** — a
+replace is an add and a remove that cannot be told apart afterwards, and it can
+empty an owner list in one call. **Removing the last owner is permitted**, since
+team administration is tenant-wide and there is always a way back. **The gate is
+its own interface**, because the handbook is explicit that it has not decided
+whether `auth:group::write` carries ownership transfer; the permission is
+deliberately not chosen here.
+
+**Ten record types, two tables.** Also in this slice: markdown for the four
+oldest demonstrations, which had images and no text because demo markdown only
+started at the grant. Every demonstration is now both, generated from one capture
+by one parse, so the image and the text cannot disagree.
+
 ## The last two tables — `abv_l1_records` and `abv_metadata`, and nothing else
 
 [Record](records/record-catalog.md). The 123 shape finished: one canonical

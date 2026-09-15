@@ -385,3 +385,30 @@ func (a *labApplication) UpgradeAssignment(ctx context.Context, area domain.Area
 	}
 	return a.facade.UpgradeAssignment(ctx, area, TeamFINC17(area).Issuer, id)
 }
+
+func (a *labApplication) AddOwner(ctx context.Context, area domain.Area, fc domain.FixtureContext, teamID, humanID string) error {
+	if err := a.teamArea(area, fc); err != nil {
+		return err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return err
+	}
+	return a.facade.AddOwner(ctx, area, TeamFINC17(area).Issuer, teamID, humanID)
+}
+
+func (a *labApplication) RemoveOwner(ctx context.Context, area domain.Area, fc domain.FixtureContext, teamID, humanID string) error {
+	if err := a.teamArea(area, fc); err != nil {
+		return err
+	}
+	if err := verifyMarker(ctx, a.path, area); err != nil {
+		return err
+	}
+	return a.facade.RemoveOwner(ctx, area, TeamFINC17(area).Issuer, teamID, humanID)
+}
+
+func (a *labApplication) ListOwners(ctx context.Context, area domain.Area, fc domain.FixtureContext, filter domain.OwnerFilter) (domain.OwnerPage, error) {
+	if err := a.teamArea(area, fc); err != nil {
+		return domain.OwnerPage{}, err
+	}
+	return a.facade.ListOwners(ctx, area, TeamFINC17(area).Issuer, filter)
+}

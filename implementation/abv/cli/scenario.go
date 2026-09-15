@@ -55,6 +55,38 @@ func dispatch(ctx context.Context, command string, positional []string, flags ma
 			return report(diag, err)
 		}
 		return 0
+	case "owners":
+		ownerAPI, ok := api.(application.OwnerAPI)
+		if !ok || nilCapability(ownerAPI) {
+			return report(diag, domain.ErrUnsupported)
+		}
+		fixture := domain.FixtureContext{Name: flags["--fixture-context"]}
+		switch positional[0] {
+		case "add", "remove":
+			act, verb := ownerAPI.AddOwner, "owns"
+			if positional[0] == "remove" {
+				act, verb = ownerAPI.RemoveOwner, "no longer owns"
+			}
+			if err := act(ctx, area, fixture, flags["--team"], flags["--human"]); err != nil {
+				return report(diag, err)
+			}
+			if _, err := fmt.Fprintf(out, "internal projection: ownership\n%s %s %s\n", flags["--human"], verb, flags["--team"]); err != nil {
+				return 4
+			}
+		case "list":
+			filter := domain.OwnerFilter{TeamID: flags["--team"], HumanID: flags["--human"]}
+			if code := teamBounds(flags, &filter.Offset, &filter.Limit, diag); code != 0 {
+				return code
+			}
+			page, err := ownerAPI.ListOwners(ctx, area, fixture, filter)
+			if err != nil {
+				return report(diag, err)
+			}
+			if err := renderOwnerPage(out, diag, page); err != nil {
+				return 4
+			}
+		}
+		return 0
 	case "assignments":
 		assignmentAPI, ok := api.(application.AssignmentAPI)
 		if !ok || nilCapability(assignmentAPI) {

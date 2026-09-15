@@ -22,29 +22,29 @@ func TestDeleteRefusesWhileAnythingDependsOnTheTeam(t *testing.T) {
 	none := map[string]domain.Assignment{}
 
 	// fp8h2w6y5iv8 has a child.
-	if err := CheckTeamDeletion(teams, nil, none, "fibggi2juubk"); !errors.Is(err, domain.ErrConflict) {
+	if err := CheckTeamDeletion(teams, nil, nil, none, "fibggi2juubk"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("a team with a child was deletable: %v", err)
 	}
 	// fp8h2w6yan0d is a leaf, so with nothing else depending on it the delete stands.
-	if err := CheckTeamDeletion(teams, nil, none, "fibggi2juxhc"); err != nil {
+	if err := CheckTeamDeletion(teams, nil, nil, none, "fibggi2juxhc"); err != nil {
 		t.Fatalf("an empty leaf was not deletable: %v", err)
 	}
 	// A member blocks it.
 	members := []domain.Membership{{TeamID: "fibggi2juxhc", HumanID: "fi7io4lvjqio"}}
-	if err := CheckTeamDeletion(teams, members, none, "fibggi2juxhc"); !errors.Is(err, domain.ErrConflict) {
+	if err := CheckTeamDeletion(teams, members, nil, none, "fibggi2juxhc"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("a team with a member was deletable: %v", err)
 	}
 	// So does an assignment naming it.
 	held := map[string]domain.Assignment{"fm5b7t4p5iv8": {ID: "fm5b7t4p5iv8", Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}}}
-	if err := CheckTeamDeletion(teams, nil, held, "fibggi2juxhc"); !errors.Is(err, domain.ErrConflict) {
+	if err := CheckTeamDeletion(teams, nil, nil, held, "fibggi2juxhc"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("a team an assignment names was deletable: %v", err)
 	}
 	// An assignment to a human, not this group, does not block it.
 	other := map[string]domain.Assignment{"fm5b7t4p5iv8": {ID: "fm5b7t4p5iv8", Recipient: domain.Recipient{Type: "user", ID: "fibggi2juxhc"}}}
-	if err := CheckTeamDeletion(teams, nil, other, "fibggi2juxhc"); err != nil {
+	if err := CheckTeamDeletion(teams, nil, nil, other, "fibggi2juxhc"); err != nil {
 		t.Fatalf("a user assignment blocked a group's delete: %v", err)
 	}
-	if err := CheckTeamDeletion(teams, nil, none, "fy6x28qcdreo"); !errors.Is(err, domain.ErrNotFound) {
+	if err := CheckTeamDeletion(teams, nil, nil, none, "fy6x28qcdreo"); !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("deleting an absent team gave %v", err)
 	}
 }
@@ -95,5 +95,21 @@ func TestTheLostForeignKeysAreNowRules(t *testing.T) {
 	}
 	if err := CheckMembership(teams, domain.Membership{TeamID: "fibggi2juubk", HumanID: "Maya"}); !errors.Is(err, domain.ErrMalformed) {
 		t.Fatalf("a human name passed where an id is required: %v", err)
+	}
+}
+
+// An ownership depends on its team exactly as a membership does. Without this,
+// deleting the team leaves a row naming a team that no longer exists — which is
+// what happened before it was checked.
+func TestTeamDeletionRefusesWhileAnOwnershipDependsOnIt(t *testing.T) {
+	teams := map[string]domain.Team{"fibggi2juxhc": {ID: "fibggi2juxhc", Name: "Team2"}}
+	owned := []domain.Ownership{{TeamID: "fibggi2juxhc", HumanID: "fi7io4lvjqio"}}
+	if err := CheckTeamDeletion(teams, nil, owned, map[string]domain.Assignment{}, "fibggi2juxhc"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting an owned team gave %v, want ErrConflict", err)
+	}
+	// An ownership of a different team is not a dependency of this one.
+	elsewhere := []domain.Ownership{{TeamID: "fibggi2juubk", HumanID: "fi7io4lvjqio"}}
+	if err := CheckTeamDeletion(teams, nil, elsewhere, map[string]domain.Assignment{}, "fibggi2juxhc"); err != nil {
+		t.Fatalf("an unrelated ownership blocked deletion: %v", err)
 	}
 }

@@ -100,7 +100,8 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 			categories++
 		}
 		for _, set := range []bool{writes.NewTeam != nil, writes.TeamParent != nil, writes.RemovedTeam != "",
-			writes.AddedMembership != nil, writes.RemovedMembership != nil} {
+			writes.AddedMembership != nil, writes.RemovedMembership != nil,
+			writes.AddedOwnership != nil, writes.RemovedOwnership != nil} {
 			if set {
 				categories++
 			}
@@ -125,6 +126,12 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		}
 		if writes.RemovedMembership != nil {
 			return deleteMembership(ctx, conn, area.TenantID(), *writes.RemovedMembership)
+		}
+		if writes.AddedOwnership != nil {
+			return insertOwnership(ctx, conn, area.TenantID(), *writes.AddedOwnership)
+		}
+		if writes.RemovedOwnership != nil {
+			return deleteOwnership(ctx, conn, area.TenantID(), *writes.RemovedOwnership)
 		}
 		if writes.GrantStatusChange != nil {
 			return p.writeGrantStatus(ctx, conn, area, s, *writes.GrantStatusChange)

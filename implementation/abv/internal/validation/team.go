@@ -93,7 +93,7 @@ const maxTeamDepth = 64
 // memberships would make one administrative act perform another, and the
 // handbook keeps team administration, membership administration and assignment
 // authority distinct.
-func CheckTeamDeletion(teams map[string]domain.Team, memberships []domain.Membership, assignments map[string]domain.Assignment, id string) error {
+func CheckTeamDeletion(teams map[string]domain.Team, memberships []domain.Membership, ownerships []domain.Ownership, assignments map[string]domain.Assignment, id string) error {
 	if !codec.ValidRoleID(id) {
 		return domain.ErrMalformed
 	}
@@ -108,6 +108,15 @@ func CheckTeamDeletion(teams map[string]domain.Team, memberships []domain.Member
 	}
 	for _, m := range memberships {
 		if m.TeamID == id {
+			return domain.ErrConflict
+		}
+	}
+	// An ownership depends on its team exactly as a membership does: deleting
+	// the team without it would leave a row naming a team that no longer exists.
+	// Ownership grants no authority, but an orphan record is still a record
+	// nothing can resolve.
+	for _, o := range ownerships {
+		if o.TeamID == id {
 			return domain.ErrConflict
 		}
 	}
@@ -126,6 +135,24 @@ func CheckMembership(teams map[string]domain.Team, m domain.Membership) error {
 		return domain.ErrMalformed
 	}
 	if team, ok := teams[m.TeamID]; !ok || team.ID != m.TeamID {
+		return domain.ErrNotFound
+	}
+	return nil
+}
+
+// CheckOwnership validates an ownership write. It is CheckMembership's shape
+// because ownership is membership's shape — and it checks nothing more, which is
+// the point rather than an omission.
+//
+// Ownership grants no authority (Q-099), so there is no ceiling to stay within
+// and no lineage to walk. A membership distributes the team's authority to a
+// human; an ownership lets a human administer the team and gives them none of
+// its business authority. The lighter check follows from the weaker fact.
+func CheckOwnership(teams map[string]domain.Team, o domain.Ownership) error {
+	if !codec.ValidRoleID(o.TeamID) || !codec.ValidHumanID(o.HumanID) {
+		return domain.ErrMalformed
+	}
+	if team, ok := teams[o.TeamID]; !ok || team.ID != o.TeamID {
 		return domain.ErrNotFound
 	}
 	return nil

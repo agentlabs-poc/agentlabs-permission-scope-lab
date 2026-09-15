@@ -15,6 +15,7 @@ type Snapshot struct {
 	Roles        map[domain.RoleKey]domain.RoleContent
 	Teams        map[string]domain.Team
 	Memberships  []domain.Membership
+	Ownerships   []domain.Ownership
 	TrustedRoots map[string]bool
 }
 
@@ -39,6 +40,10 @@ type WriteSet struct {
 	RemovedTeam       string
 	AddedMembership   *domain.Membership
 	RemovedMembership *domain.Membership
+	// AddedOwnership and RemovedOwnership move one human in or out of a team's
+	// owners. Separate from membership because Q-099 makes them separate facts.
+	AddedOwnership   *domain.Ownership
+	RemovedOwnership *domain.Ownership
 	// NewGrant creates a grant whole: its head and its first revision, in one
 	// transaction. Revision 1 cannot go through NewGrantRevision, which amends
 	// an existing grant and requires a predecessor. RemovedGrant destroys one

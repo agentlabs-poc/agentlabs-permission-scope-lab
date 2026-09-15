@@ -1,57 +1,107 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1123" width="800" height="1123" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
-<rect width="800" height="1123" rx="7" fill="#12161d"/>
-<path d="M0 7a7 7 0 0 1 7-7h786a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1151 2072" width="1151" height="2072" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
+<rect width="1151" height="2072" rx="7" fill="#12161d"/>
+<path d="M0 7a7 7 0 0 1 7-7h1137a7 7 0 0 1 7 7v27H0Z" fill="#1b212b"/>
 <circle cx="20" cy="17" r="5" fill="#e0787c"/><circle cx="38" cy="17" r="5" fill="#d9a441"/><circle cx="56" cy="17" r="5" fill="#6cc292"/>
-<text x="400.0" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">auth-al — role · two publication paths</text>
-<text x="22" y="62" fill="#9b8cd8" font-weight="600" xml:space="preserve">APPLICATION-MANAGED   published by the platform administrator</text>
-<text x="22" y="83" fill="#6b7687" xml:space="preserve"># --application ships the role to every tenant. no id is supplied:</text>
-<text x="22" y="104" fill="#6b7687" xml:space="preserve"># the service issues one, so nothing arbitrary enters the key path.</text>
-<text x="22" y="125" fill="#4fb8e8">$</text><text x="38.8" y="125" fill="#e8ecf2" xml:space="preserve">abv role publish --application --name Viewer --revision 1 \</text>
-<text x="38.8" y="146" fill="#e8ecf2" xml:space="preserve">    --permissions hrms:payroll:payslip::read \</text>
-<text x="38.8" y="167" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
-<text x="22" y="188" fill="#9aa4b4" xml:space="preserve">internal projection: role</text>
-<text x="22" y="209" fill="#9b8cd8" xml:space="preserve">id  fy52ef7ztla8          &lt;- issued, not chosen</text>
-<text x="22" y="230" fill="#9aa4b4" xml:space="preserve">name  Viewer</text>
-<text x="22" y="251" fill="#9b8cd8" xml:space="preserve">managed  application</text>
-<text x="22" y="272" fill="#9aa4b4" xml:space="preserve">revision  1</text>
-<text x="22" y="293" fill="#9aa4b4" xml:space="preserve">permissions  hrms:payroll:payslip::read</text>
-<text x="22" y="314" fill="#6cc292" xml:space="preserve">rc=0</text>
-<text x="22" y="335" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="356" fill="#9b8cd8" font-weight="600" xml:space="preserve">TENANT-MANAGED   published by a tenant administrator</text>
-<text x="22" y="377" fill="#6b7687" xml:space="preserve"># no --application flag. the role belongs to the tenant publishing it,</text>
-<text x="22" y="398" fill="#6b7687" xml:space="preserve"># composed from the same application vocabulary.</text>
-<text x="22" y="419" fill="#4fb8e8">$</text><text x="38.8" y="419" fill="#e8ecf2" xml:space="preserve">abv role publish --name acme-payroll-approver --revision 1 \</text>
-<text x="38.8" y="440" fill="#e8ecf2" xml:space="preserve">    --permissions hrms:payroll:payslip::read,hrms:payroll:payslip::write \</text>
-<text x="38.8" y="461" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
-<text x="22" y="482" fill="#6cc292" xml:space="preserve">id  fy52efa2qjnk</text>
-<text x="22" y="503" fill="#9aa4b4" xml:space="preserve">name  acme-payroll-approver</text>
-<text x="22" y="524" fill="#6cc292" xml:space="preserve">managed  tenant</text>
-<text x="22" y="545" fill="#9aa4b4" xml:space="preserve">revision  1</text>
-<text x="22" y="566" fill="#6cc292" xml:space="preserve">rc=0</text>
-<text x="22" y="587" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="608" fill="#9b8cd8" font-weight="600" xml:space="preserve">A NEW REVISION OF EACH   --id names the role being extended</text>
-<text x="22" y="629" fill="#4fb8e8">$</text><text x="38.8" y="629" fill="#e8ecf2" xml:space="preserve">abv role publish --application --id fy52ef7ztla8 --name Viewer --revision 2 \</text>
-<text x="38.8" y="650" fill="#e8ecf2" xml:space="preserve">    --permissions hrms:payroll:payslip::read,hrms:payroll:payslip::write \</text>
-<text x="38.8" y="671" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
-<text x="22" y="692" fill="#9b8cd8" xml:space="preserve">id  fy52ef7ztla8   managed  application   revision  2         rc=0</text>
-<text x="22" y="713" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="734" fill="#4fb8e8">$</text><text x="38.8" y="734" fill="#e8ecf2" xml:space="preserve">abv role publish --id fy52efa2qjnk --name acme-payroll-approver --revision 2 \</text>
-<text x="38.8" y="755" fill="#e8ecf2" xml:space="preserve">    --permissions hrms:payroll:payslip::read \</text>
-<text x="38.8" y="776" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
-<text x="22" y="797" fill="#6cc292" xml:space="preserve">id  fy52efa2qjnk   managed  tenant        revision  2         rc=0</text>
-<text x="22" y="818" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="839" fill="#9b8cd8" font-weight="600" xml:space="preserve">THE BOUNDARY IS ENFORCED, NOT MERELY RECORDED</text>
-<text x="22" y="860" fill="#6b7687" xml:space="preserve"># a tenant administrator may not revise a role the application ships —</text>
-<text x="22" y="881" fill="#6b7687" xml:space="preserve"># it is the platform's property. a tenant wanting a different bundle</text>
-<text x="22" y="902" fill="#6b7687" xml:space="preserve"># composes its own rather than editing someone else's.</text>
-<text x="22" y="923" fill="#4fb8e8">$</text><text x="38.8" y="923" fill="#e8ecf2" xml:space="preserve">abv role publish --id fy52ef7ztla8 --name Viewer --revision 3 \</text>
-<text x="38.8" y="944" fill="#e8ecf2" xml:space="preserve">    --permissions hrms:payroll:payslip::read \</text>
-<text x="38.8" y="965" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
-<text x="22" y="986" fill="#e0787c" xml:space="preserve">operation rejected or record not found                             rc=3</text>
-<text x="22" y="1007" fill="#6b7687" xml:space="preserve"></text>
-<text x="22" y="1028" fill="#6b7687" xml:space="preserve"># and an id nobody issued is refused on either path</text>
-<text x="22" y="1049" fill="#4fb8e8">$</text><text x="38.8" y="1049" fill="#e8ecf2" xml:space="preserve">abv role publish --id zzzzzzzz --name invented --revision 1 \</text>
-<text x="38.8" y="1070" fill="#e8ecf2" xml:space="preserve">    --permissions hrms:payroll:payslip::read \</text>
-<text x="38.8" y="1091" fill="#e8ecf2" xml:space="preserve">--tenant acme --app hrms --db role.db --fixture-context maya-role-publisher</text>
-<text x="22" y="1112" fill="#e0787c" xml:space="preserve">operation rejected or record not found                             rc=3</text>
+<text x="575.5" y="21.5" text-anchor="middle" fill="#8892a4" font-size="11.5">the role record — publication and the two boundaries</text>
+<text x="18" y="60" fill="#d9a441" xml:space="preserve">════ APPLICATION-MANAGED — the platform administrator ships a role ════</text>
+<text x="18" y="80" fill="#4fb8e8" xml:space="preserve">$ abv role publish --application --name Viewer --revision 1 --permissions hrms:payroll:payslip::read</text>
+<text x="18" y="100" fill="#9aa4b4" xml:space="preserve">    internal projection: role</text>
+<text x="18" y="120" fill="#9aa4b4" xml:space="preserve">    id  fyb0tpp1et4w</text>
+<text x="18" y="140" fill="#9aa4b4" xml:space="preserve">    name  Viewer</text>
+<text x="18" y="160" fill="#9aa4b4" xml:space="preserve">    managed  application</text>
+<text x="18" y="180" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
+<text x="18" y="200" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read</text>
+<text x="18" y="220" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="240" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="260" fill="#d9a441" xml:space="preserve">════ TENANT-MANAGED — a tenant administrator composes one ════</text>
+<text x="18" y="280" fill="#4fb8e8" xml:space="preserve">$ abv role publish --name acme-payroll-approver --revision 1 --permissions hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="300" fill="#9aa4b4" xml:space="preserve">    internal projection: role</text>
+<text x="18" y="320" fill="#9aa4b4" xml:space="preserve">    id  fyb0tpr4bri8</text>
+<text x="18" y="340" fill="#9aa4b4" xml:space="preserve">    name  acme-payroll-approver</text>
+<text x="18" y="360" fill="#9aa4b4" xml:space="preserve">    managed  tenant</text>
+<text x="18" y="380" fill="#9aa4b4" xml:space="preserve">    revision  1</text>
+<text x="18" y="400" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="420" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="440" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="460" fill="#d9a441" xml:space="preserve">════ a new revision of each — --id names the role being extended ════</text>
+<text x="18" y="480" fill="#4fb8e8" xml:space="preserve">$ abv role publish --application --id fyb0tpp1et4w --name Viewer --revision 2 --permissions hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="500" fill="#9aa4b4" xml:space="preserve">    internal projection: role</text>
+<text x="18" y="520" fill="#9aa4b4" xml:space="preserve">    id  fyb0tpp1et4w</text>
+<text x="18" y="540" fill="#9aa4b4" xml:space="preserve">    name  Viewer</text>
+<text x="18" y="560" fill="#9aa4b4" xml:space="preserve">    managed  application</text>
+<text x="18" y="580" fill="#9aa4b4" xml:space="preserve">    revision  2</text>
+<text x="18" y="600" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="620" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="640" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="660" fill="#4fb8e8" xml:space="preserve">$ abv role publish --id fyb0tpr4bri8 --name acme-payroll-approver --revision 2 --permissions hrms:payroll:payslip::read</text>
+<text x="18" y="680" fill="#9aa4b4" xml:space="preserve">    internal projection: role</text>
+<text x="18" y="700" fill="#9aa4b4" xml:space="preserve">    id  fyb0tpr4bri8</text>
+<text x="18" y="720" fill="#9aa4b4" xml:space="preserve">    name  acme-payroll-approver</text>
+<text x="18" y="740" fill="#9aa4b4" xml:space="preserve">    managed  tenant</text>
+<text x="18" y="760" fill="#9aa4b4" xml:space="preserve">    revision  2</text>
+<text x="18" y="780" fill="#9aa4b4" xml:space="preserve">    permissions  hrms:payroll:payslip::read</text>
+<text x="18" y="800" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="820" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="840" fill="#d9a441" xml:space="preserve">════ a tenant may NOT revise a role the application ships ════</text>
+<text x="18" y="860" fill="#4fb8e8" xml:space="preserve">$ abv role publish --id fyb0tpp1et4w --name Viewer --revision 3 --permissions hrms:payroll:payslip::read</text>
+<text x="18" y="880" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="900" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="920" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="940" fill="#d9a441" xml:space="preserve">════ an id nobody issued is refused, either way ════</text>
+<text x="18" y="960" fill="#4fb8e8" xml:space="preserve">$ abv role publish --id zzzzzzzz --name invented --revision 1 --permissions hrms:payroll:payslip::read</text>
+<text x="18" y="980" fill="#9aa4b4" xml:space="preserve">    operation rejected or record not found</text>
+<text x="18" y="1000" fill="#e0787c" xml:space="preserve">    rc=3</text>
+<text x="18" y="1020" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1040" fill="#d9a441" xml:space="preserve">════ one listing, both kinds ════</text>
+<text x="18" y="1060" fill="#4fb8e8" xml:space="preserve">$ abv role list</text>
+<text x="18" y="1080" fill="#9aa4b4" xml:space="preserve">    internal projection: roles</text>
+<text x="18" y="1100" fill="#9aa4b4" xml:space="preserve">    count  5</text>
+<text x="18" y="1120" fill="#9aa4b4" xml:space="preserve">    total  5</text>
+<text x="18" y="1140" fill="#9aa4b4" xml:space="preserve">    generation  4</text>
+<text x="18" y="1160" fill="#9aa4b4" xml:space="preserve">    fi9jvxobqsxs  rev=1  tenant       payslip-reader  hrms:payroll:payslip::read</text>
+<text x="18" y="1180" fill="#9aa4b4" xml:space="preserve">    fyb0tpp1et4w  rev=1  application  Viewer  hrms:payroll:payslip::read</text>
+<text x="18" y="1200" fill="#9aa4b4" xml:space="preserve">    fyb0tpp1et4w  rev=2  application  Viewer  hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="1220" fill="#9aa4b4" xml:space="preserve">    fyb0tpr4bri8  rev=1  tenant       acme-payroll-approver  hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="1240" fill="#9aa4b4" xml:space="preserve">    fyb0tpr4bri8  rev=2  tenant       acme-payroll-approver  hrms:payroll:payslip::read</text>
+<text x="18" y="1260" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1280" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1300" fill="#d9a441" xml:space="preserve">════ narrowed ════</text>
+<text x="18" y="1320" fill="#4fb8e8" xml:space="preserve">$ abv role list --managed application</text>
+<text x="18" y="1340" fill="#9aa4b4" xml:space="preserve">    internal projection: roles</text>
+<text x="18" y="1360" fill="#9aa4b4" xml:space="preserve">    count  2</text>
+<text x="18" y="1380" fill="#9aa4b4" xml:space="preserve">    total  2</text>
+<text x="18" y="1400" fill="#9aa4b4" xml:space="preserve">    generation  4</text>
+<text x="18" y="1420" fill="#9aa4b4" xml:space="preserve">    fyb0tpp1et4w  rev=1  application  Viewer  hrms:payroll:payslip::read</text>
+<text x="18" y="1440" fill="#9aa4b4" xml:space="preserve">    fyb0tpp1et4w  rev=2  application  Viewer  hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="1460" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1480" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1500" fill="#4fb8e8" xml:space="preserve">$ abv role list --managed tenant</text>
+<text x="18" y="1520" fill="#9aa4b4" xml:space="preserve">    internal projection: roles</text>
+<text x="18" y="1540" fill="#9aa4b4" xml:space="preserve">    count  3</text>
+<text x="18" y="1560" fill="#9aa4b4" xml:space="preserve">    total  3</text>
+<text x="18" y="1580" fill="#9aa4b4" xml:space="preserve">    generation  4</text>
+<text x="18" y="1600" fill="#9aa4b4" xml:space="preserve">    fi9jvxobqsxs  rev=1  tenant       payslip-reader  hrms:payroll:payslip::read</text>
+<text x="18" y="1620" fill="#9aa4b4" xml:space="preserve">    fyb0tpr4bri8  rev=1  tenant       acme-payroll-approver  hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="1640" fill="#9aa4b4" xml:space="preserve">    fyb0tpr4bri8  rev=2  tenant       acme-payroll-approver  hrms:payroll:payslip::read</text>
+<text x="18" y="1660" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1680" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1700" fill="#d9a441" xml:space="preserve">════ latest revision of each ════</text>
+<text x="18" y="1720" fill="#4fb8e8" xml:space="preserve">$ abv role list --latest</text>
+<text x="18" y="1740" fill="#9aa4b4" xml:space="preserve">    internal projection: roles</text>
+<text x="18" y="1760" fill="#9aa4b4" xml:space="preserve">    count  3</text>
+<text x="18" y="1780" fill="#9aa4b4" xml:space="preserve">    total  3</text>
+<text x="18" y="1800" fill="#9aa4b4" xml:space="preserve">    generation  4</text>
+<text x="18" y="1820" fill="#9aa4b4" xml:space="preserve">    fi9jvxobqsxs  rev=1  tenant       payslip-reader  hrms:payroll:payslip::read</text>
+<text x="18" y="1840" fill="#9aa4b4" xml:space="preserve">    fyb0tpp1et4w  rev=2  application  Viewer  hrms:payroll:payslip::read,hrms:payroll:payslip::write</text>
+<text x="18" y="1860" fill="#9aa4b4" xml:space="preserve">    fyb0tpr4bri8  rev=2  tenant       acme-payroll-approver  hrms:payroll:payslip::read</text>
+<text x="18" y="1880" fill="#6cc292" xml:space="preserve">    rc=0</text>
+<text x="18" y="1900" fill="#9aa4b4" xml:space="preserve"></text>
+<text x="18" y="1920" fill="#d9a441" xml:space="preserve">════ the rows ════</text>
+<text x="18" y="1940" fill="#9aa4b4" xml:space="preserve"> boundary    tenant_id  key3      key4         key5             key6</text>
+<text x="18" y="1960" fill="#9aa4b4" xml:space="preserve">-----------  ---------  ----  ------------  ----------  ---------------------</text>
+<text x="18" y="1980" fill="#9aa4b4" xml:space="preserve">application             hrms  fyb0tpp1et4w  0000000001  Viewer</text>
+<text x="18" y="2000" fill="#9aa4b4" xml:space="preserve">application             hrms  fyb0tpp1et4w  0000000002  Viewer</text>
+<text x="18" y="2020" fill="#9aa4b4" xml:space="preserve">tenant       acme       hrms  fi9jvxobqsxs  0000000001  payslip-reader</text>
+<text x="18" y="2040" fill="#9aa4b4" xml:space="preserve">tenant       acme       hrms  fyb0tpr4bri8  0000000001  acme-payroll-approver</text>
+<text x="18" y="2060" fill="#9aa4b4" xml:space="preserve">tenant       acme       hrms  fyb0tpr4bri8  0000000002  acme-payroll-approver</text>
 </svg>

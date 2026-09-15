@@ -32,7 +32,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 	}
 	command := args[0]
 	switch command {
-	case "inspect", "check", "assign", "grant", "grants", "assignment", "assignments", "role", "team", "scenario", "catalog":
+	case "inspect", "check", "assign", "grant", "grants", "assignment", "assignments", "role", "team", "owners", "scenario", "catalog":
 	default:
 		return fail(2, "unknown command")
 	}
@@ -48,7 +48,7 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 		switch name {
 		case "--tenant", "--app", "--db", "--file", "--fixture-context", "--case", "--revision", "--permissions", "--support-assignment",
 			"--prefix", "--offset", "--limit", "--active", "--active-only", "--name", "--latest", "--id", "--managed", "--application", "--namespace", "--parent", "--roots", "--human",
-			"--status", "--children", "--role", "--role-revision", "--scope", "--grant", "--recipient", "--recipient-type":
+			"--status", "--children", "--role", "--role-revision", "--scope", "--grant", "--recipient", "--recipient-type", "--team":
 		default:
 			return fail(2, "unknown flag")
 		}
@@ -230,6 +230,25 @@ func Run(ctx context.Context, args []string, in io.Reader, out, diag io.Writer,
 			}
 		default:
 			return fail(2, "team requires get, list, members, create, reparent, delete, add-member or remove-member")
+		}
+	case "owners":
+		if len(positional) == 0 || flags["--db"] == "" || flags["--fixture-context"] == "" {
+			return fail(2, "owners requires a verb, database and fixture context")
+		}
+		switch positional[0] {
+		case "add", "remove":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--team", "--human") || empty(flags["--team"]) || empty(flags["--human"]) {
+				return fail(2, "owners "+positional[0]+" requires --team and --human")
+			}
+		case "list":
+			if len(positional) != 1 || !only(flags, "--tenant", "--app", "--db", "--fixture-context", "--team", "--human", "--offset", "--limit") {
+				return fail(2, "owners list accepts team, human, offset and limit only")
+			}
+			if empty(flags["--team"]) == empty(flags["--human"]) {
+				return fail(2, "owners list requires exactly one of --team and --human: a team's owners, or a human's teams")
+			}
+		default:
+			return fail(2, "owners requires add, remove or list")
 		}
 	case "assignments":
 		if len(positional) == 0 || flags["--db"] == "" || flags["--fixture-context"] == "" {

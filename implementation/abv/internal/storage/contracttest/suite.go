@@ -360,7 +360,7 @@ func fixtures(t *testing.T) []storage.Snapshot {
 			Controls: map[string]domain.GrantControl{"fk3x9r2m5iv8": {Version: "1", ID: "fk3x9r2m5iv8", Status: "enabled"}},
 			Contents: map[domain.GrantKey]domain.GrantContent{{ID: "fk3x9r2m5iv8", Revision: 2}: content}, Assignments: map[string]domain.Assignment{"fm5b7t4p5iv8": assignment},
 			Roles: map[domain.RoleKey]domain.RoleContent{{ID: "reader", Revision: 3}: {ID: "reader", Name: "payslip-reader", Revision: 3, Permissions: []string{hrmsRead}}},
-			Teams: map[string]domain.Team{"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fibggi2jv3sw"}}, Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: human}}, TrustedRoots: map[string]bool{"fk3x9r2m5iv8": true}}
+			Teams: map[string]domain.Team{"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fibggi2jv3sw"}}, Memberships: []domain.Membership{{TeamID: "fibggi2juubk", HumanID: human}}, Ownerships: []domain.Ownership{}, TrustedRoots: map[string]bool{"fk3x9r2m5iv8": true}}
 	}
 	// a1 and a3 are the same tenant in two applications. Teams and memberships
 	// belong to the tenant and not to an application, so the two snapshots must

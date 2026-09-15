@@ -238,6 +238,32 @@ type AssignmentPage struct {
 	Total       int
 }
 
+// Ownership is authority to administer a team, held by a human. Q-099: it is
+// separate from the team's business authority, and being an owner supplies
+// neither that authority nor permission to assign grants.
+//
+// It is the same shape as a Membership and deliberately a different type —
+// they are two different relationships between the same two things, and Q-099
+// exists to say so.
+type Ownership struct {
+	TeamID  string
+	HumanID string
+}
+
+// OwnerFilter answers in both directions: a team's owners, or a human's teams.
+// Exactly one is required, the rule ListMembers already holds.
+type OwnerFilter struct {
+	TeamID  string
+	HumanID string
+	Offset  int
+	Limit   int
+}
+
+type OwnerPage struct {
+	Owners []Ownership
+	Total  int
+}
+
 type TeamFilter struct {
 	ParentID *string
 	Name     string

@@ -156,3 +156,14 @@ func (a *RoleAdministration) CheckAssignmentDelete(ctx context.Context, area dom
 func (a *RoleAdministration) CheckAssignmentAdoption(ctx context.Context, area domain.Area, identity domain.Identity, _ domain.Assignment, _ time.Time) error {
 	return a.teamGate(ctx, area, identity)
 }
+
+// The ownership operations. The lab admits the same fixture administrator, and
+// gates them separately from the team writes because the handbook has not
+// decided whether team-write authority carries ownership transfer.
+func (a *RoleAdministration) CheckOwnershipWrite(ctx context.Context, area domain.Area, identity domain.Identity, _ domain.Ownership, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
+
+func (a *RoleAdministration) CheckOwnershipRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
+	return a.teamGate(ctx, area, identity)
+}
