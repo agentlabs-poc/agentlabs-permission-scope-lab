@@ -50,7 +50,9 @@ func TeamFINC17(area domain.Area) TeamFINC17Case {
 			Catalog: domain.Catalog{
 				ApplicationID: area.ApplicationID(),
 				Permissions: map[string]domain.PermissionDefinition{
-					PayslipRead: {ID: PayslipRead, Active: true}, PayslipWrite: {ID: PayslipWrite, Active: true}, PayslipDelete: {ID: PayslipDelete, Active: true},
+					PayslipRead:   {ID: PayslipRead, Active: true, Boundary: domain.ApplicationBoundary, Namespace: area.ApplicationID()},
+					PayslipWrite:  {ID: PayslipWrite, Active: true, Boundary: domain.ApplicationBoundary, Namespace: area.ApplicationID()},
+					PayslipDelete: {ID: PayslipDelete, Active: true, Boundary: domain.ApplicationBoundary, Namespace: area.ApplicationID()},
 				},
 				Scopes: map[string]domain.ScopeDefinition{
 					"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"},

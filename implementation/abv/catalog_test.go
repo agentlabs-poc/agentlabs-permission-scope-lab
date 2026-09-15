@@ -41,7 +41,7 @@ func TestFacadeForwardsProtectedCatalogRegistration(t *testing.T) {
 		t.Fatalf("got=%#v err=%v", got, err)
 	}
 	denied, _ := abv.New(provider, catalogAdministration{}, clock{})
-	got, err := denied.RegisterPermission(t.Context(), app, id, domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true})
+	got, err := denied.RegisterPermission(t.Context(), app, id, domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"})
 	if !errors.Is(err, domain.ErrRejected) || got != (domain.PermissionDefinition{}) {
 		t.Fatalf("denied got=%#v err=%v", got, err)
 	}

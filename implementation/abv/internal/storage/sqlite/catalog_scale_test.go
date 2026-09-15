@@ -46,14 +46,14 @@ func scaleCatalog(t *testing.T, n int) (storage.CatalogProvider, domain.Applicat
 		// Registration requires Active true — a permission cannot be created
 		// pre-retired — so a realistic mix is produced by registering and then
 		// retiring, which is also the only path the contract offers.
-		definition := domain.PermissionDefinition{ID: id, Active: true}
+		definition := domain.PermissionDefinition{ID: id, Active: true, Boundary: domain.ApplicationBoundary}
 		if err := catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
 			return storage.CatalogWriteSet{Permission: &definition}, nil
 		}); err != nil {
 			t.Fatalf("register %d (%s): %v", i, id, err)
 		}
 		if i%7 == 0 {
-			retired := domain.PermissionDefinition{ID: id, Active: false}
+			retired := domain.PermissionDefinition{ID: id, Active: false, Boundary: domain.ApplicationBoundary}
 			if err := catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
 				return storage.CatalogWriteSet{PermissionStatus: &retired}, nil
 			}); err != nil {
@@ -121,7 +121,7 @@ func TestGenerationIsOneWritePerChange(t *testing.T) {
 	}
 
 	before := read()
-	definition := domain.PermissionDefinition{ID: "hrms:employee:certificate::unique", Active: true}
+	definition := domain.PermissionDefinition{ID: "hrms:employee:certificate::unique", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 	if err := catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
 		return storage.CatalogWriteSet{Permission: &definition}, nil
 	}); err != nil {

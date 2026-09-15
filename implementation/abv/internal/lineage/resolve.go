@@ -115,12 +115,29 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 }
 
 func rootRoute(s storage.Snapshot, content domain.GrantContent, assignmentID string) (domain.Route, error) {
+	// A root's ceiling is sliced by boundary, and the catalog is not.
+	//
+	// An application's catalog is its own permissions union every platform one,
+	// which is right for evaluation: a request inside an application may
+	// legitimately require a platform permission. It is wrong for a ceiling.
+	// Without this, an application root would carry every auth:* permission —
+	// including whichever one authorises establishing an application root, so
+	// the thing created by the authority could create more of that authority.
+	//
+	// The slice follows the namespace in key3, which is what the root is a root
+	// *of*: the platform's own namespace takes the platform permissions, an
+	// application takes its own.
+	// One rule covers both roots: a root takes the permissions registered under
+	// its OWN namespace. For an application root that is the application's own;
+	// for the Auth root, whose namespace is the platform's, it is the platform
+	// permissions. No discriminator is needed and none is invented.
+	namespace := s.Catalog.ApplicationID
 	permissions := make([]string, 0, len(s.Catalog.Permissions))
 	for id, definition := range s.Catalog.Permissions {
 		if definition.ID != id {
 			return domain.Route{}, domain.ErrRejected
 		}
-		if definition.Active {
+		if definition.Active && definition.Namespace == namespace {
 			permissions = append(permissions, id)
 		}
 	}

@@ -16,10 +16,10 @@ func seeded(t *testing.T, allow bool, active []string, retired []string) (*abv.F
 	t.Helper()
 	permissions := map[string]domain.PermissionDefinition{}
 	for _, id := range active {
-		permissions[id] = domain.PermissionDefinition{ID: id, Active: true}
+		permissions[id] = domain.PermissionDefinition{ID: id, Active: true, Boundary: domain.ApplicationBoundary}
 	}
 	for _, id := range retired {
-		permissions[id] = domain.PermissionDefinition{ID: id, Active: false}
+		permissions[id] = domain.PermissionDefinition{ID: id, Active: false, Boundary: domain.ApplicationBoundary}
 	}
 	provider := &catalogMemoryProvider{catalog: domain.Catalog{
 		ApplicationID: "hrms",
@@ -161,7 +161,7 @@ func TestGenerationDetectsAWriteBetweenPages(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err = f.RegisterPermission(t.Context(), app, id,
-		domain.PermissionDefinition{ID: "hrms:a:b::approve", Active: true}); err != nil {
+		domain.PermissionDefinition{ID: "hrms:a:b::approve", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}); err != nil {
 		t.Fatal(err)
 	}
 	after, err := f.ListPermissions(t.Context(), app, id, domain.PermissionFilter{Offset: 1, Limit: 1})

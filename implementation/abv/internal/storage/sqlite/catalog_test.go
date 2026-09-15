@@ -33,7 +33,7 @@ func TestCatalogProviderPersistsAndIsolatesApplicationCatalog(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true}
+	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::export", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 	if err = catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
 		return storage.CatalogWriteSet{Permission: &permission}, nil
 	}); err != nil {
@@ -108,7 +108,7 @@ func TestCatalogProviderRejectsInvalidOperationsWithoutWrites(t *testing.T) {
 		},
 		"mixed write": func() error {
 			return p.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-				permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
+				permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 				scope := domain.ScopeDefinition{Key: "new"}
 				return storage.CatalogWriteSet{Permission: &permission, Scope: &scope}, nil
 			})
@@ -145,10 +145,10 @@ func TestCatalogProviderUsesPersistedEvidenceAndHandlesCancellation(t *testing.T
 	defer opened.Close()
 	p := opened.(storage.CatalogProvider)
 	app, _ := domain.NewApplication("hrms")
-	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true}
+	permission := domain.PermissionDefinition{ID: "hrms:payroll:payslip::new", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 	// A callback that mutates its catalog copy must not influence the store: the
 	// write re-reads authoritatively, so the forged entry cannot persist.
-	forgedProbe := domain.PermissionDefinition{ID: "hrms:payroll:payslip::probe", Active: true}
+	forgedProbe := domain.PermissionDefinition{ID: "hrms:payroll:payslip::probe", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 	if err = p.UpdateCatalog(t.Context(), app, func(c domain.Catalog) (storage.CatalogWriteSet, error) {
 		c.Scopes["invented"] = domain.ScopeDefinition{Key: "invented"}
 		return storage.CatalogWriteSet{Permission: &forgedProbe}, nil
@@ -215,7 +215,7 @@ func TestCatalogProviderDuplicateAndConcurrentInsertConflict(t *testing.T) {
 			ready.Done()
 			<-start
 			results <- provider.UpdateCatalog(context.Background(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-				definition := domain.PermissionDefinition{ID: "hrms:payroll:payslip::concurrent", Active: true}
+				definition := domain.PermissionDefinition{ID: "hrms:payroll:payslip::concurrent", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 				return storage.CatalogWriteSet{Permission: &definition}, nil
 			})
 		}(provider)
@@ -295,7 +295,7 @@ func TestPermissionStatusUpdatePersistsAndNeverInserts(t *testing.T) {
 
 	register := func() error {
 		return catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-			definition := domain.PermissionDefinition{ID: id, Active: true}
+			definition := domain.PermissionDefinition{ID: id, Active: true, Boundary: domain.ApplicationBoundary}
 			return storage.CatalogWriteSet{Permission: &definition}, nil
 		})
 	}
@@ -373,7 +373,7 @@ func TestPermissionsAreL1Records(t *testing.T) {
 	db := opened.(*provider).db
 
 	if err = catalogs.UpdateCatalog(t.Context(), app, func(domain.Catalog) (storage.CatalogWriteSet, error) {
-		definition := domain.PermissionDefinition{ID: id, Active: true}
+		definition := domain.PermissionDefinition{ID: id, Active: true, Boundary: domain.ApplicationBoundary}
 		return storage.CatalogWriteSet{Permission: &definition}, nil
 	}); err != nil {
 		t.Fatalf("register: %v", err)

@@ -296,6 +296,30 @@ type MemberPage struct {
 type PermissionDefinition struct {
 	ID     string
 	Active bool
+	// Boundary is where the permission was registered: `application` for one an
+	// application declared, `platform` for Auth's own vocabulary.
+	//
+	// An application's catalog holds both, because a platform permission is
+	// vocabulary every application inherits — and that union is right for
+	// *evaluation*, where a request inside an application may legitimately
+	// require a platform permission.
+	//
+	// It is wrong for a root's *ceiling*, which is why these two fields exist. A
+	// root computes its coverage from the catalog, so without them an
+	// application root would carry every auth:* permission — including whichever
+	// one authorises establishing an application root. The thing created by the
+	// authority would be able to create more of that authority.
+	Boundary Boundary
+	// Namespace is key3: the application for an application permission, the
+	// platform's own namespace for a platform one. It is what a root's ceiling
+	// is sliced by, and one rule covers both roots — a root takes the
+	// permissions registered under its own namespace, which for the Auth root is
+	// the platform's and for an application root is that application's.
+	//
+	// It cannot be recovered from the identifier. An application permission's
+	// leading noun is its application and could stand in, but a platform
+	// permission's leading noun is whatever the platform chose.
+	Namespace string
 }
 
 // PermissionFilter bounds a catalog listing. Prefix is an administrative

@@ -53,7 +53,7 @@ func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
 	role := domain.RoleContent{Name: "payslip-reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
-	snap := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
+	snap := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
 	p := &roleProvider{snapshot: snap}
 	admin := roleAdmin{check: func(s storage.Snapshot, _ domain.Identity, r domain.RoleContent) error {
 		s.Area = domain.Area{}
@@ -79,7 +79,7 @@ func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 	role := domain.RoleContent{Name: "payslip-reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
 	// A supplied id is only legal when it names a role that already exists.
 	existing := domain.RoleContent{Name: "payslip-reader", ID: "reader", Revision: 2, Permissions: []string{"hrms:payroll:payslip::read"}}
-	base := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
+	base := storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}
 	for _, tc := range []struct {
 		name  string
 		snap  storage.Snapshot
@@ -109,7 +109,7 @@ func TestPublishRoleFailuresReturnZeroAndDoNotWrite(t *testing.T) {
 func TestPublishRoleCancellationInsideAdministrationDoesNotWrite(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
-	p := &roleProvider{snapshot: storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}}
+	p := &roleProvider{snapshot: storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}}
 	ctx, cancel := context.WithCancel(t.Context())
 	admin := roleAdmin{check: func(storage.Snapshot, domain.Identity, domain.RoleContent) error { cancel(); return nil }}
 	s, _ := New(p, admin, fixedClock{})
@@ -279,7 +279,7 @@ func TestATenantCannotReviseAnApplicationRole(t *testing.T) {
 	read := "hrms:payroll:payslip::read"
 	snap := storage.Snapshot{
 		Area:    area,
-		Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{read: {ID: read, Active: true}}},
+		Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{read: {ID: read, Active: true, Boundary: domain.ApplicationBoundary}}},
 		Roles: map[domain.RoleKey]domain.RoleContent{
 			{ID: "aaaaaaaaaaaa", Revision: 1}: {ID: "aaaaaaaaaaaa", Name: "Viewer", Revision: 1, Permissions: []string{read}, Managed: domain.ApplicationManaged},
 			{ID: "bbbbbbbbbbbb", Revision: 1}: {ID: "bbbbbbbbbbbb", Name: "own", Revision: 1, Permissions: []string{read}, Managed: domain.TenantManaged},

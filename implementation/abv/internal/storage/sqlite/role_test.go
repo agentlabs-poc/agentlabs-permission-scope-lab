@@ -12,7 +12,7 @@ import (
 )
 
 func roleSnapshot(area domain.Area) storage.Snapshot {
-	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true}, "hrms:payroll:payslip::write": {ID: "hrms:payroll:payslip::write", Active: true}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "fk3x9r2mbo1e", Revision: 1}: {Version: "1", GrantID: "fk3x9r2mbo1e", Revision: 1, RoleID: "fr4j5x7z1bo1", RoleRevision: 1, Scope: map[string]string{}}}, Assignments: map[string]domain.Assignment{"fm5b7t4pbo1e": {Version: "1", ID: "fm5b7t4pbo1e", GrantID: "fk3x9r2mbo1e", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8s5iv8"}, Status: "enabled"}}, Roles: map[domain.RoleKey]domain.RoleContent{{ID: "fr4j5x7z1bo1", Revision: 1}: {ID: "fr4j5x7z1bo1", Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, Ownerships: []domain.Ownership{}, TrustedRoots: map[string]bool{}}
+	return storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: area.ApplicationID(), Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}, "hrms:payroll:payslip::write": {ID: "hrms:payroll:payslip::write", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}}, Scopes: map[string]domain.ScopeDefinition{}}, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{{ID: "fk3x9r2mbo1e", Revision: 1}: {Version: "1", GrantID: "fk3x9r2mbo1e", Revision: 1, RoleID: "fr4j5x7z1bo1", RoleRevision: 1, Scope: map[string]string{}}}, Assignments: map[string]domain.Assignment{"fm5b7t4pbo1e": {Version: "1", ID: "fm5b7t4pbo1e", GrantID: "fk3x9r2mbo1e", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fn2q6v8s5iv8"}, Status: "enabled"}}, Roles: map[domain.RoleKey]domain.RoleContent{{ID: "fr4j5x7z1bo1", Revision: 1}: {ID: "fr4j5x7z1bo1", Name: "payslip-reader", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}}, Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, Ownerships: []domain.Ownership{}, TrustedRoots: map[string]bool{}}
 }
 
 func TestRolePublicationInsertIsImmutableAndAreaBound(t *testing.T) {
@@ -115,7 +115,7 @@ func TestRolePublicationProviderRejectsMixedAndHostileWrites(t *testing.T) {
 	role := domain.RoleContent{Name: "payslip-reader", ID: "new", Revision: 1, Permissions: []string{"hrms:payroll:payslip::read"}}
 	for _, cb := range []func(storage.Snapshot) (storage.WriteSet, error){
 		func(s storage.Snapshot) (storage.WriteSet, error) {
-			s.Catalog.Permissions["hrms:payroll:payslip::forged"] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::forged", Active: true}
+			s.Catalog.Permissions["hrms:payroll:payslip::forged"] = domain.PermissionDefinition{ID: "hrms:payroll:payslip::forged", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}
 			x := role
 			x.Permissions = []string{"forged"}
 			return storage.WriteSet{NewRoleRevision: &x}, nil
