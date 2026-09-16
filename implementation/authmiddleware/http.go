@@ -83,6 +83,25 @@ func handleHTTP(policy Policy, identities IdentitySource, evaluator *Evaluator, 
 		failure(Result{}, err)
 		return
 	}
+	// These bind the route's area claim to the trusted one, and they find it by
+	// the placeholder's spelling: a policy whose path says {tenant_id} is not
+	// checked here at all, and the gate cannot tell. The handbook requires the
+	// binding — "route tenant claims must still be bound to trusted context;
+	// field names alone do not prove relationships" (endpoint-policy-format.md).
+	//
+	// There is no declaration to read instead. CONTRACT-012 (agreed) adopted a
+	// policy of version, method, path, one permission and selected inputs, and
+	// deliberately adopted *no* relationships block, named resolver or
+	// argument-mapping contract — putting the duty on the endpoint
+	// implementation "to keep execution within the authorized" boundary. So a
+	// Policy field naming the tenant input is not an open question this could
+	// settle; it is machinery the handbook considered and declined.
+	//
+	// The lab lives with it, and the endpoint owning the duty is why that is
+	// defensible rather than merely convenient: one application, four policies,
+	// each written beside the handler it guards, every path spelling it
+	// "tenant". A deployment with more of them needs something better than a
+	// convention — see plan/migration-requirements.md.
 	if tenant := request.PathValue("tenant"); tenant != "" && tenant != requestContext.Area.TenantID {
 		failure(Result{}, errors.New("path tenant does not match trusted area"))
 		return

@@ -13,7 +13,7 @@ func TestParsePermissionDecomposesAndRoundTrips(t *testing.T) {
 		"codehost:repository:branch:protection:rule::write",
 		"a:b::c",
 		"single::verb",
-		"hrms::read", // a one-segment noun path is legitimate
+		"hrms::read",                        // a one-segment noun path is legitimate
 		"one:two:three:four:five:six::verb", // exactly the envelope's limit
 	} {
 		key, err := ParsePermission(id)

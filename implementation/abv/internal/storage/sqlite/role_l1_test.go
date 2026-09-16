@@ -126,9 +126,9 @@ func roleSeed(t *testing.T) storage.Snapshot {
 			{ID: "fi9jvxobqsxs", Revision: 1}: {ID: "fi9jvxobqsxs", Name: "payslip-reader", Revision: 1, Permissions: []string{read}},
 			{ID: "fi9jvxobqsxs", Revision: 2}: {ID: "fi9jvxobqsxs", Name: "payslip-reader", Revision: 2, Permissions: []string{read, write}},
 		},
-		Controls:     map[string]domain.GrantControl{},
-		Contents:     map[domain.GrantKey]domain.GrantContent{},
-		Assignments:  map[string]domain.Assignment{},
+		Controls:    map[string]domain.GrantControl{},
+		Contents:    map[domain.GrantKey]domain.GrantContent{},
+		Assignments: map[string]domain.Assignment{},
 		Teams: map[string]domain.Team{
 			"fibggi2jur5s": {ID: "fibggi2jur5s", Name: "fp8h2w6ykxan"},
 			"fibggi2juubk": {ID: "fibggi2juubk", Name: "fp8h2w6y5iv8", ParentID: "fibggi2jur5s"},

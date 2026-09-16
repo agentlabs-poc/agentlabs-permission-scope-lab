@@ -32,12 +32,12 @@ type Options struct {
 }
 
 type provider struct {
-	db                 *sql.DB
+	db *sql.DB
 	// registry answers whether an application exists and whether a tenant holds
 	// it. Both facts belong to the application registry domain, not here. When
 	// it is absent the provider falls back to its own tables, which is what a
 	// lab fixture and the existing tests use.
-	registry Registry
+	registry           Registry
 	maxSnapshotRecords int
 	// afterCatalog is an internal deterministic test seam for proving that one
 	// read transaction pins all cross-query evidence to the same DB version.

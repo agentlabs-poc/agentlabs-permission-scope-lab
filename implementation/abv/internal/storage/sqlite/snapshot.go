@@ -356,6 +356,7 @@ func (r *snapshotReader) teams(s *storage.Snapshot) error {
 	}
 	return finishRows(rows)
 }
+
 // ownerships reads who may administer each team. Q-099 keeps this separate from
 // membership: identical shape, different relationship, and neither implies the
 // other.
@@ -414,6 +415,7 @@ func (r *snapshotReader) memberships(s *storage.Snapshot) error {
 	}
 	return finishRows(rows)
 }
+
 // roots is satisfied by controls: the trusted-root marker is a field on the
 // grant head, not a separate table. It stays as a named step so the snapshot's
 // reading order still says what it loads.

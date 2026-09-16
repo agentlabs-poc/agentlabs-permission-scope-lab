@@ -6,8 +6,8 @@ import (
 )
 
 type CatalogWriteSet struct {
-	Permission    *domain.PermissionDefinition
-	Scope         *domain.ScopeDefinition
+	Permission *domain.PermissionDefinition
+	Scope      *domain.ScopeDefinition
 	// PlatformPermission registers a permission in a namespace the platform
 	// defines and no application can claim. PlatformNamespace is that namespace,
 	// and it lands in key3 where an application permission puts its application.

@@ -261,7 +261,7 @@ func Run(t *testing.T, factory Factory) {
 			t.Run(name, func(t *testing.T) {
 				err := p.Update(t.Context(), seeded.Area, func(s storage.Snapshot) (storage.WriteSet, error) {
 					s.Contents[domain.GrantKey{ID: proposed.GrantID, Revision: proposed.GrantRevision}] = seeded.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 2}]
-					s.Teams[proposed.Recipient.ID] = domain.Team{Name: "team",ID: proposed.Recipient.ID}
+					s.Teams[proposed.Recipient.ID] = domain.Team{Name: "team", ID: proposed.Recipient.ID}
 					return storage.WriteSet{NewAssignments: []domain.Assignment{proposed}}, nil
 				})
 				if err == nil {

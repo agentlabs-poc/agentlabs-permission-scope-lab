@@ -1,14 +1,14 @@
 package sqlite
 
 import (
-	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/domain"
+	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
 	"context"
 	"database/sql"
-	"strings"
 	"encoding/json"
+	"strings"
 )
 
 func (p *provider) ReadCatalog(ctx context.Context, app domain.Application, callback func(domain.Catalog) error) (err error) {
@@ -222,7 +222,6 @@ func (p *provider) updatePermissionStatus(ctx context.Context, conn *sql.Conn, a
 	return nil
 }
 
-
 // insertPermissionRecord writes a permission as an L1 record. The identifier is
 // decomposed by the shared codec — storage never splits the string itself, so
 // the two layers cannot disagree about what a row means.
@@ -266,7 +265,6 @@ func permissionPayload(active bool) ([]byte, error) {
 	}
 	return raw, nil
 }
-
 
 // insertScopeRecord writes a scope as an L1 record. key3 is the application,
 // key4 the scope key: a scope key is a flat token, so it needs no decomposition.

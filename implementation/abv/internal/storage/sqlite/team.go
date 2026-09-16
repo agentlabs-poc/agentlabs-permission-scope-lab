@@ -2,10 +2,10 @@ package sqlite
 
 import (
 	"agentlabs.local/abv/domain"
-	"errors"
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 )
 
 // teamPayload is a team record's value column. The parent is state about the

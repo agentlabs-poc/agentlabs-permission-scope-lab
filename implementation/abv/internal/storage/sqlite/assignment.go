@@ -195,4 +195,3 @@ func updateAssignmentValue(ctx context.Context, conn *sql.Conn, area domain.Area
 	}
 	return nil
 }
-

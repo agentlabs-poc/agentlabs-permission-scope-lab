@@ -30,8 +30,8 @@ type AssignmentStatusChange struct {
 }
 
 type WriteSet struct {
-	NewAssignments         []domain.Assignment
-	NewRoleRevision        *domain.RoleContent
+	NewAssignments  []domain.Assignment
+	NewRoleRevision *domain.RoleContent
 	// NewTeam creates a team; TeamParent re-parents one; RemovedTeam deletes
 	// one. AddedMembership and RemovedMembership move one human in or out.
 	// Exactly one is set per write.
@@ -54,8 +54,8 @@ type WriteSet struct {
 	AssignmentRevisionChange *AssignmentStatusChange
 	// NewRoot is establishment: a head, its first revision and the holder's
 	// assignment, written together or not at all.
-	NewRoot                  *NewRoot
-	NewGrant                 *NewGrant
+	NewRoot                *NewRoot
+	NewGrant               *NewGrant
 	RemovedGrant           string
 	NewGrantRevision       *domain.GrantContent
 	GrantStatusChange      *GrantStatusChange

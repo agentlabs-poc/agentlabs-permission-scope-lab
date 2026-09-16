@@ -400,7 +400,7 @@ func TestPermissionsAreL1Records(t *testing.T) {
 	} {
 		want := map[string]string{
 			"tenant_id": "", // '' not NULL, so the identity key stays usable
-			"key1": "abv", "key2": "permission",
+			"key1":      "abv", "key2": "permission",
 			// key3 is the application AND the identifier's first segment — the
 			// same fact, stored once. A permission whose first noun is not the
 			// application is rejected at registration, which is what makes that
@@ -408,7 +408,7 @@ func TestPermissionsAreL1Records(t *testing.T) {
 			"key3": "hrms",
 			// Segments two onward. The first is not repeated here.
 			"key4": "employee", "key5": "certificate", "key6": "",
-			"key7": "",      // padding is contiguous
+			"key7":  "",     // padding is contiguous
 			"key10": "read", // the verb is pinned to the last slot, never floating
 			"value": `{"active":true}`,
 		}[name]
@@ -464,10 +464,10 @@ func TestScopesAreL1Records(t *testing.T) {
 	for name, pair := range map[string][2]string{
 		"tenant_id": {tenant, ""}, // an empty tenant is what application-wide means now
 		"key1":      {k1, "abv"}, "key2": {k2, "scope"},
-		"key3": {k3, "hrms"},   // the application, in every record type
-		"key4": {k4, "region"}, // a scope key is flat: one slot, whole
-		"key5": {k5, ""},       // nothing follows
-		"value": {value, `{}`}, // a scope record's presence is the fact
+		"key3":  {k3, "hrms"},   // the application, in every record type
+		"key4":  {k4, "region"}, // a scope key is flat: one slot, whole
+		"key5":  {k5, ""},       // nothing follows
+		"value": {value, `{}`},  // a scope record's presence is the fact
 	} {
 		if pair[0] != pair[1] {
 			t.Errorf("%s = %q, want %q", name, pair[0], pair[1])
