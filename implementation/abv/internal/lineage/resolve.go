@@ -56,7 +56,13 @@ var ErrInactive = fmt.Errorf("inactive authority: %w", domain.ErrRejected)
 // route resolved.
 var ErrIneligible = fmt.Errorf("ineligible authority: %w", domain.ErrRejected)
 
+// ResolveParentTeam resolves one chain. A caller resolving many over the same
+// snapshot should build a Bindings index once and use ResolveParentTeamIndexed.
 func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientTeamID string, now time.Time) (domain.Route, error) {
+	return ResolveParentTeamIndexed(s, nil, child, recipientTeamID, now)
+}
+
+func ResolveParentTeamIndexed(s storage.Snapshot, bindings *Bindings, child domain.GrantContent, recipientTeamID string, now time.Time) (domain.Route, error) {
 	fail := func(err error) (domain.Route, error) { return domain.Route{}, err }
 	if err := s.Area.Validate(); err != nil {
 		return fail(err)
@@ -84,7 +90,7 @@ func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientT
 	if err != nil {
 		return fail(err)
 	}
-	resolver := routeResolver{s: s, now: now, active: map[string]bool{child.GrantID: true}, remaining: maxChainSteps}
+	resolver := routeResolver{s: s, now: now, active: map[string]bool{child.GrantID: true}, remaining: maxChainSteps, bindings: bindings}
 	return resolver.resolve(assignment, team.ParentID)
 }
 
@@ -93,6 +99,113 @@ type routeResolver struct {
 	now       time.Time
 	active    map[string]bool
 	remaining int
+	// bindings is shared by the caller across every chain it resolves over one
+	// snapshot, or nil when there is only one to resolve.
+	bindings *Bindings
+}
+
+// Bindings indexes (grant, team) → the one assignment binding them.
+//
+// Every step of a chain otherwise rescans every assignment in the area, so one
+// walk costs depth × assignments — and a caller walking a chain per dependent
+// pays that per dependent, which is how validating an adoption became
+// super-linear in the number of dependents.
+//
+// It belongs to the caller rather than to a resolver, and that is the whole
+// lesson: building it per chain costs *more* than the scans it saves, because
+// chains are shallow and areas are wide.
+//
+// Measured on the adoption guard at 800 dependents, whole operation: ~128 ms
+// with the scans, ~87 ms with one shared index, ~434 ms with an index per chain.
+// Building the index is not where the cost is — over 800 assignments it takes
+// ~272 µs, so the two builds an adoption does are well under a millisecond of
+// that ~87 ms. What the index removes is a scan per chain step, and a review
+// caught an earlier version of this comment claiming ~40 ms for the build, which
+// was wrong by two orders of magnitude and made the saving look like something
+// it is not.
+type Bindings struct {
+	byKey    map[bindingKey]domain.Assignment
+	poisoned map[bindingKey]bool
+	// misKeyed is area-wide because a scan is: it reads every row on its way to
+	// the one it was asked about, and refuses on a row keyed by anything other
+	// than its own id whichever pair that row binds.
+	misKeyed bool
+}
+
+// IndexBindings builds that index, answering exactly what a scan would.
+//
+// "Exactly" is the whole contract, and the first version of this did not meet
+// it. A scan refuses a route the moment any row binding that pair is invalid,
+// and it refuses only the route that owns a duplicate. The index skipped invalid
+// rows before counting, so an invalid row beside a valid one left the pair
+// looking singular and handed back the valid one — an allow where a scan
+// refused. And it marked the whole index ambiguous on any duplicate, so a
+// duplicate on a pair no chain touches refused every lookup — a refusal where a
+// scan allowed. Both were reachable through the exported API and neither was in
+// the parity test.
+//
+// So: a mis-keyed row anywhere poisons the area, because a scan sees every row
+// and refuses on it whatever it was asked. Everything else poisons one pair.
+func IndexBindings(s storage.Snapshot) *Bindings {
+	index := &Bindings{
+		byKey:    make(map[bindingKey]domain.Assignment, len(s.Assignments)),
+		poisoned: map[bindingKey]bool{},
+	}
+	for key, assignment := range s.Assignments {
+		if key != assignment.ID {
+			index.misKeyed = true
+			return index
+		}
+		if assignment.Recipient.Type != "group" {
+			continue
+		}
+		at := bindingKey{assignment.GrantID, assignment.Recipient.ID}
+		// Counted before it is judged, exactly as the scan counts it: an invalid
+		// row still occupies the pair, and a second row still makes it plural.
+		if !validAssignment(assignment) {
+			index.poisoned[at] = true
+			continue
+		}
+		if _, taken := index.byKey[at]; taken {
+			index.poisoned[at] = true
+			continue
+		}
+		index.byKey[at] = assignment
+	}
+	return index
+}
+
+// binding answers exactly what uniqueAssignment answers, from an index the
+// caller built once over this snapshot rather than a scan per chain step.
+//
+// "Exactly" is the contract, and an earlier version of this comment described
+// the opposite: it said a duplicate made the whole area's assignments
+// untrustworthy, which is what the code did and what a scan does not do. A scan
+// refuses the route that owns the duplicate and answers every other route
+// normally. Only a mis-keyed row is area-wide, because a scan reads every row on
+// its way to the one it was asked about.
+func (r *routeResolver) binding(grantID, teamID string) (domain.Assignment, error) {
+	if r.bindings == nil {
+		return uniqueAssignment(r.s, grantID, teamID)
+	}
+	if r.bindings.misKeyed {
+		return domain.Assignment{}, domain.ErrRejected
+	}
+	at := bindingKey{grantID, teamID}
+	if r.bindings.poisoned[at] {
+		return domain.Assignment{}, domain.ErrRejected
+	}
+	found, ok := r.bindings.byKey[at]
+	if !ok {
+		// Nothing binds them. A scan answers ErrInactive for that and the index
+		// can now say so itself: an invalid or duplicated row is recorded as
+		// poison rather than skipped, so a miss here means absent and nothing
+		// else. There used to be a fallback scan on this line, kept because the
+		// index could not tell the two apart — it was dead code the moment the
+		// index could.
+		return domain.Assignment{}, ErrInactive
+	}
+	return found, nil
 }
 
 func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID string) (domain.Route, error) {
@@ -129,7 +242,7 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	if team.ParentID == "" {
 		return fail(domain.ErrRejected)
 	}
-	parentAssignment, err := uniqueAssignment(r.s, content.ParentGrantID, team.ParentID)
+	parentAssignment, err := r.binding(content.ParentGrantID, team.ParentID)
 	if err != nil {
 		return fail(err)
 	}

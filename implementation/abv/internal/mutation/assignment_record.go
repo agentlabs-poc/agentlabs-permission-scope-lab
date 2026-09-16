@@ -340,6 +340,25 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 	}
 	staged := cloneSnapshot(snapshot)
 	staged.Assignments[proposed.ID] = proposed
+	// One index per snapshot, not per dependent. Each chain step otherwise
+	// rescans every assignment in the area, and there is a chain per dependent.
+	//
+	// Each index must be built over the snapshot it is used with — they differ in
+	// exactly one entry, the upgraded binding's revision. A review swapped them,
+	// built both from one snapshot, and passed nil for both, and the module
+	// stayed green every time, so the pairing is worth stating: a dependent only
+	// reads that entry *through* the index if it sits two or more levels below
+	// the binding being upgraded, and such a dependent cannot break alone.
+	//
+	// It cannot because narrowing is transitive. A grandchild selects from its
+	// parent, which selects from the binding being upgraded, so an adoption that
+	// takes away what the grandchild holds has already taken it from the child —
+	// and the child's own first chain step is a scan on the right snapshot, so it
+	// reports the breakage whatever the indexes say. The pairing is therefore
+	// unobservable here by construction rather than by accident, and it is pinned
+	// where it *is* observable: lineage's parity tests resolve a chain against an
+	// index built over a different snapshot and require the answer to change.
+	before, after := lineage.IndexBindings(snapshot), lineage.IndexBindings(staged)
 	for _, dependent := range dependents {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -352,7 +371,7 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 		if dependent.Status != "enabled" {
 			continue
 		}
-		if resolvesUnder(staged, dependent, now) {
+		if resolvesUnder(staged, after, dependent, now) {
 			continue
 		}
 		// It does not resolve after. The question that decides whether this
@@ -365,7 +384,7 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 		// whose content was identical to what was already adopted. Revision
 		// content is immutable, so an expired dependent would have frozen its
 		// ancestor's binding for good.
-		if !resolvesUnder(snapshot, dependent, now) {
+		if !resolvesUnder(snapshot, before, dependent, now) {
 			continue
 		}
 		return domain.ErrRejected
@@ -376,12 +395,12 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 // resolvesUnder answers whether one binding has a complete route in the given
 // snapshot: its content is there, its parent support resolves, and its own
 // narrowing holds against that parent.
-func resolvesUnder(snapshot storage.Snapshot, dependent domain.Assignment, now time.Time) bool {
+func resolvesUnder(snapshot storage.Snapshot, bindings *lineage.Bindings, dependent domain.Assignment, now time.Time) bool {
 	content, ok := snapshot.Contents[domain.GrantKey{ID: dependent.GrantID, Revision: dependent.GrantRevision}]
 	if !ok || content.GrantID != dependent.GrantID || content.Revision != dependent.GrantRevision {
 		return false
 	}
-	parent, err := lineage.ResolveParentTeam(snapshot, content, dependent.Recipient.ID, now)
+	parent, err := lineage.ResolveParentTeamIndexed(snapshot, bindings, content, dependent.Recipient.ID, now)
 	if err != nil {
 		return false
 	}

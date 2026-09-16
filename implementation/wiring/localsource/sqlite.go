@@ -108,28 +108,55 @@ func (s *SQLiteAuthoritySource) Load(ctx context.Context, query authmiddleware.A
 // routesFor turns one answer into the evaluator's vocabulary, checking what it
 // is allowed to assume on the way.
 func routesFor(resolved domain.ResolvedAuthority, query authmiddleware.AuthorityQuery) (authmiddleware.Authority, error) {
+	// The same four things the HTTP source checks, for the same reasons. Both
+	// implementations answer one contract, and an invariant enforced on one side
+	// and trusted on the other is how the two drift — this side was the trusting
+	// one, and closing only the permission check left three quarters of the
+	// asymmetry in place.
+	//
+	// Nothing in-process can produce these today: ResolveAuthority answers about
+	// the area and human it was asked about, and filters on the permissions. That
+	// is what makes it defence in depth rather than a fix, and also what makes it
+	// worth having — the day this source is given a different implementation, or
+	// the facade grows a cache, the assumptions are written down instead of
+	// remembered.
+	if resolved.Version != "1" {
+		return failed("UNSUPPORTED_VERSION", "the answer states contract version "+resolved.Version)
+	}
+	if resolved.TenantID != query.Context.Area.TenantID || resolved.ApplicationID != query.Context.Area.ApplicationID {
+		return failed("WRONG_AREA", "the answer describes a different area")
+	}
+	if resolved.HumanID != query.Context.Identity.HumanID {
+		return failed("WRONG_SUBJECT", "the answer describes a different human")
+	}
 	routes := make([]authmiddleware.Route, len(resolved.ResolvedGrants))
 	for i, grant := range resolved.ResolvedGrants {
-		// The permission is checked here, not assumed — the same check the HTTP
-		// source makes, for the same reason. convertGrant stamps the asked-for
-		// permission onto the route, so a grant that does not carry it would
-		// become a route that claims it, and the evaluator would never know.
-		//
-		// ResolveAuthority does filter on the requested permissions, so this is
-		// defence in depth today. It is here because the two AuthoritySource
-		// implementations are the same contract: one of them enforcing an
-		// invariant the other trusts is how the two drift, and the one that
-		// trusted was the one nothing tested.
+		// A grant states its own contract version, and it is that version which
+		// says how to read the grant's scope and validity — the two fields that
+		// decide a boundary.
+		if grant.Version != "1" {
+			return failed("UNSUPPORTED_VERSION", "a resolved grant states contract version "+grant.Version)
+		}
+		// convertGrant stamps the asked-for permission onto the route, so a grant
+		// that does not carry it would become a route that claims it and the
+		// evaluator would never know.
 		if !slices.Contains(grant.Permissions, query.Permission) {
-			return authmiddleware.Authority{}, &authmiddleware.EvaluationError{
-				Version: "1", Code: "WRONG_PERMISSION",
-				Message:       "We could not check your access.",
-				MessageReason: "a resolved grant does not carry the permission that was asked about",
-			}
+			return failed("WRONG_PERMISSION", "a resolved grant does not carry the permission that was asked about")
 		}
 		routes[i] = convertGrant(resolved, grant, query)
 	}
 	return authmiddleware.Authority{Routes: routes}, nil
+}
+
+// failed reports an answer this source cannot use. Every one of these is an
+// evaluation failure and never a denial: the routes came from the store, not
+// from the request, so nothing the caller sent can produce one.
+func failed(code, reason string) (authmiddleware.Authority, error) {
+	return authmiddleware.Authority{}, &authmiddleware.EvaluationError{
+		Version: "1", Code: code,
+		Message:       "We could not check your access.",
+		MessageReason: reason,
+	}
 }
 
 func (s *SQLiteAuthoritySource) Close() error { return s.authority.Close() }
@@ -165,7 +192,12 @@ func convertGrant(resolved domain.ResolvedAuthority, grant domain.ResolvedGrant,
 // the explanation there is one grant to name — the one that reaches the human —
 // and naming it is what the approved deny/allow blocks call grant_ids.
 func grantChain(grant domain.ResolvedGrant) []string {
-	if grant.Source == nil {
+	// An empty lineage is the same as no explanation at all: the grant that
+	// reaches the human is the one to name. Without this an allow could carry
+	// zero grant_ids, which Q-066 forbids — validateRoute then refuses the route
+	// and a human with real authority is answered "we could not check". The HTTP
+	// source guards both conditions; this one guarded only the first.
+	if grant.Source == nil || len(grant.Source.Lineage) == 0 {
 		return []string{grant.GrantID}
 	}
 	chain := make([]string, 0, len(grant.Source.Lineage))

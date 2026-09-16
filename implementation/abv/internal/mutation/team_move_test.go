@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/internal/mutation"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/lab"
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -145,4 +146,110 @@ func TestSetTeamParentIsANoOpAgainstTheParentItAlreadyHas(t *testing.T) {
 	if moved.ParentID != "fibggi2jur5s" {
 		t.Fatalf("the no-op changed the parent: %#v", moved)
 	}
+}
+
+// refuseAffectedBindings walks a graph it does not own. CheckTeamReparent runs
+// first and refuses a cycle, so the walk's own guard against one is never
+// reached through SetTeamParent — which means the ordering is load-bearing and
+// nothing asserted it, and the walk's behaviour on a graph that is already
+// broken was a matter of reading rather than of test.
+//
+// Both matter at migration: a store written by anything other than this code can
+// hold a cycle or a parent id that names no team, and the answer must be a
+// refusal or a bounded walk, never a hang.
+func TestMovingATeamInAGraphThatIsAlreadyBroken(t *testing.T) {
+	area, err := domain.NewArea("acme", "hrms")
+	if err != nil {
+		t.Fatal(err)
+	}
+	service := func(t *testing.T, bend func(*storage.Snapshot)) *mutation.Service {
+		t.Helper()
+		fixture := lab.TeamFINC17(area)
+		snapshot := fixture.Snapshot
+		bend(&snapshot)
+		provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/broken.db", []storage.Snapshot{snapshot})
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _ = provider.Close() })
+		statusAdmin, err := lab.NewAssignmentStatusAdministration(area, fixture.Administration)
+		if err != nil {
+			t.Fatal(err)
+		}
+		built, err := mutation.New(provider,
+			&lab.RoleAdministration{AssignmentStatusAdministration: statusAdmin},
+			&fixedClock{now: time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return built
+	}
+	publisher := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}
+
+	// A cycle among teams the move does not touch. The walk must terminate and
+	// the answer must be the guard's, not a hang.
+	t.Run("a cycle elsewhere in the graph", func(t *testing.T) {
+		moved := service(t, func(s *storage.Snapshot) {
+			s.Teams["fibggi2jc001"] = domain.Team{ID: "fibggi2jc001", Name: "fp8h2w6yc001", ParentID: "fibggi2jc002"}
+			s.Teams["fibggi2jc002"] = domain.Team{ID: "fibggi2jc002", Name: "fp8h2w6yc002", ParentID: "fibggi2jc001"}
+		})
+		// Team1 holds an enabled binding, so the guard is what answers.
+		if _, err := moved.SetTeamParent(t.Context(), area, publisher, "fibggi2juubk", "fibggi2jv0n4"); !errors.Is(err, domain.ErrConflict) {
+			t.Fatalf("gave %v, want ErrConflict — the guard, not the cycle", err)
+		}
+	})
+
+	// A cycle the walk actually enters. Every member of a cycle has its parent
+	// inside the cycle, so descending from a team outside one can never reach it
+	// — the only way in is for the moved team itself to be a member. Then the
+	// walk descends into it, comes back to where it started, and the set having
+	// only grown is what stops it.
+	t.Run("the moved team is itself in a cycle", func(t *testing.T) {
+		moved := service(t, func(s *storage.Snapshot) {
+			// Team1 and a team below it, each the other's parent.
+			s.Teams["fibggi2jc001"] = domain.Team{ID: "fibggi2jc001", Name: "fp8h2w6yc001", ParentID: "fibggi2juubk"}
+			team1 := s.Teams["fibggi2juubk"]
+			team1.ParentID = "fibggi2jc001"
+			s.Teams["fibggi2juubk"] = team1
+		})
+		// On its own deadline, because the failure this guards against is a walk
+		// that never returns — and a test that hangs blocks a suite for ten
+		// minutes and then reports a timeout on whatever ran last. Removing the
+		// guard should fail here, not everywhere.
+		answered := make(chan error, 1)
+		go func() {
+			_, err := moved.SetTeamParent(context.Background(), area, publisher, "fibggi2juubk", "fibggi2jv0n4")
+			answered <- err
+		}()
+		select {
+		case err := <-answered:
+			if !errors.Is(err, domain.ErrConflict) {
+				t.Fatalf("gave %v, want ErrConflict", err)
+			}
+		case <-time.After(10 * time.Second):
+			t.Fatal("the walk did not settle on a graph that cycles through the team being moved")
+		}
+	})
+
+	// A parent id naming no team. It is a leaf as far as the walk is concerned,
+	// and it must not disturb a move that has nothing to do with it.
+	t.Run("a parent id naming no team", func(t *testing.T) {
+		moved := service(t, func(s *storage.Snapshot) {
+			s.Teams["fibggi2jd001"] = domain.Team{ID: "fibggi2jd001", Name: "fp8h2w6yd001", ParentID: "fibggi2jnope"}
+		})
+		// Team2 holds nothing, so an unrelated dangling team must not refuse it.
+		if _, err := moved.SetTeamParent(t.Context(), area, publisher, "fibggi2juxhc", "fibggi2jur5s"); err != nil {
+			t.Fatalf("a dangling team elsewhere refused an unrelated move: %v", err)
+		}
+	})
+
+	// And the ordering itself: a cycle the move *would* create is refused as a
+	// cycle, before the binding guard is reached. Nothing asserted which of the
+	// two answers a caller gets.
+	t.Run("the move would create a cycle", func(t *testing.T) {
+		moved := service(t, func(*storage.Snapshot) {})
+		if _, err := moved.SetTeamParent(t.Context(), area, publisher, "fibggi2jur5s", "fibggi2juxhc"); !errors.Is(err, domain.ErrRejected) {
+			t.Fatalf("gave %v, want ErrRejected — the cycle check answers first", err)
+		}
+	})
 }

@@ -41,7 +41,13 @@ func TestArgumentsThatDoNotNameAConfiguration(t *testing.T) {
 		// The hazard the change exists for: an operator who said exactly where to
 		// listen, and whose value went missing. It used to take the default port.
 		"a listen flag with no value": {append(without("--listen"), "--listen"), "--listen needs a value"},
-		"an auth flag with no value":  {append(without("--auth"), "--auth"), "--auth needs a value"},
+		// Not in final position: the flag is followed by another flag, which is
+		// the case the parser's own comment is about and the one neither "no
+		// value" case above reaches — both put the flag last, where the shorter
+		// rule takes the same branch.
+		"a listen flag followed by a switch":   {append(without("--listen"), "--listen", "--allow-cleartext"), "--listen needs a value"},
+		"an app flag followed by another flag": {append(without("--app"), "--app", "--tenant", "acme"), "--app needs a value"},
+		"an auth flag with no value":           {append(without("--auth"), "--auth"), "--auth needs a value"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			var out, diag strings.Builder
@@ -62,9 +68,13 @@ func TestArgumentsThatDoNotNameAConfiguration(t *testing.T) {
 		// The switch is last, and asking for cleartext is what lets the http URL
 		// through — so reaching the later failure at all proves the switch was
 		// read as a switch.
-		// An address nothing can bind, so the run ends the moment parsing and
-		// construction are done rather than serving.
-		args := append(without("--listen"), "--listen", "256.256.256.256:1", "--allow-cleartext")
+		// A port number outside the range, so net.Listen fails on the address
+		// itself. 256.256.256.256 was the first choice and is not an address at
+		// all — Go treats it as a hostname and resolves it, so the run reached
+		// ListenAndServe and blocked in the resolver. Fast here; on a host with
+		// a slow or blackholed resolver it is five seconds per nameserver, in a
+		// test with no deadline.
+		args := append(without("--listen"), "--listen", "127.0.0.1:99999", "--allow-cleartext")
 		if code := run(args, &out, &diag); strings.Contains(diag.String(), "needs a value") {
 			t.Fatalf("exit %d: a switch was read as a flag needing a value: %s", code, diag.String())
 		}
