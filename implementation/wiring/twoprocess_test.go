@@ -332,13 +332,6 @@ func TestAnAuthThatMisbehavesCannotDecideAnything(t *testing.T) {
 		"an answer about another area": func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"tenant_id":"acme"`, `"tenant_id":"globex"`, 1)))
 		},
-		// The permission is the one dimension that decides what may be done. It
-		// used to be stamped on from the question while the grant's own
-		// permissions were decoded and never read, so a grant for reading
-		// authorized a write.
-		"a grant for a different permission": func(w http.ResponseWriter, _ *http.Request) {
-			_, _ = w.Write([]byte(answer(maya, "hrms:payroll:payslip::write")))
-		},
 		"a field neither side agreed on": func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write([]byte(strings.Replace(answer(maya, read), `"scope":{}`, `"scope":{},"surprise":true`, 1)))
 		},
@@ -620,15 +613,40 @@ func TestTheApplicationAsksAsItselfAboutAHuman(t *testing.T) {
 			t.Fatalf("the question carries %q — it is about a request, not a person: %s", leaked, encoded)
 		}
 	}
-	// It does name the one permission the answer is filtered to, which is a
-	// narrowing of the reply and not a question about the request.
+	// Nor does it narrow the reply to the permission in hand. The question is
+	// "what does this person hold here", and the complete answer is the one
+	// worth caching against them; a reply filtered to one permission could only
+	// ever have served the request that asked for it.
 	options, ok := question.body["options"].(map[string]any)
 	if !ok {
 		t.Fatalf("the question carries no options: %#v", question.body)
 	}
-	permissions, ok := options["permissions"].([]any)
-	if !ok || len(permissions) != 1 || permissions[0] != read {
-		t.Fatalf("options.permissions = %#v, want exactly the policy's permission", options["permissions"])
+	if permissions, narrowed := options["permissions"]; narrowed {
+		t.Fatalf("options.permissions = %#v, want no permission filter at all", permissions)
+	}
+}
+
+// A grant for some other permission is not a misbehaving authority. The answer
+// describes the person, so it names every grant they hold here — including the
+// ones this request is not about. Those are ordinary, and the gate denies on
+// them rather than reporting that Auth answered the wrong question.
+//
+// What must still hold is that they cannot authorize: the permission is read
+// from the grant, and it used to be stamped on from the question while the
+// grant's own permissions were decoded and never read, so a grant for reading
+// authorized a write.
+func TestAGrantForAnotherPermissionDeniesRatherThanFailing(t *testing.T) {
+	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(answer(maya, "hrms:payroll:payslip::write")))
+	}))
+	defer other.Close()
+	status, body := call(t, application(t, other.URL, other.Client(), maya),
+		http.MethodGet, "/api/v1/acme/FIN/C17", "")
+	if status != http.StatusForbidden {
+		t.Fatalf("status = %d, want 403 — %s", status, body)
+	}
+	if !strings.Contains(body, "NO_AUTHORIZING_GRANT") {
+		t.Fatalf("body = %s", body)
 	}
 }
 

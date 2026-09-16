@@ -10,7 +10,7 @@ import (
 
 func route(grants []string, predicates ...Predicate) Route {
 	r := validRequest()
-	return Route{Area: r.Context.Area, HumanID: "maya", Permission: r.Permission, GrantIDs: grants, Predicates: predicates}
+	return Route{Area: r.Context.Area, HumanID: "maya", Permissions: []string{r.Permission}, GrantIDs: grants, Predicates: predicates}
 }
 
 func evaluate(t *testing.T, request Request, authority Authority, now time.Time) (Result, error) {
@@ -37,7 +37,7 @@ func TestEvaluateAllowsOneCompleteApplicableRoute(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(got, want) {
 		t.Fatalf("Evaluate() = %#v, %v", got, err)
 	}
-	if source.query != (AuthorityQuery{Context: request.Context, Permission: request.Permission}) {
+	if source.query != (AuthorityQuery{Context: request.Context}) {
 		t.Fatalf("query = %#v", source.query)
 	}
 	source.authority.Routes[0].GrantIDs[0] = "mutated"
@@ -103,9 +103,14 @@ func TestEvaluateValidatesEveryRouteBeforeAllowing(t *testing.T) {
 	request := validRequest()
 	valid := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
 	cases := map[string]Route{
-		"wrong area":        func() Route { r := valid; r.Area.TenantID = "other"; return r }(),
-		"wrong human":       func() Route { r := valid; r.HumanID = "other"; return r }(),
-		"wrong permission":  func() Route { r := valid; r.Permission = "certificate::write"; return r }(),
+		"wrong area":    func() Route { r := valid; r.Area.TenantID = "other"; return r }(),
+		"wrong human":   func() Route { r := valid; r.HumanID = "other"; return r }(),
+		"no permission": func() Route { r := valid; r.Permissions = nil; return r }(),
+		"unusable permission": func() Route {
+			r := valid
+			r.Permissions = []string{"certificate::write", "not a permission"}
+			return r
+		}(),
 		"duplicate grant":   func() Route { r := valid; r.GrantIDs = []string{"fk3x9r2m5iv8", "fk3x9r2m5iv8"}; return r }(),
 		"missing grant":     func() Route { r := valid; r.GrantIDs = nil; return r }(),
 		"empty key":         route([]string{"fk3x9r2m5iv8"}, Predicate{Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}),
@@ -267,5 +272,34 @@ func TestEvaluateRejectsSafetyCeilingOverflow(t *testing.T) {
 	}
 	if got, err := evaluate(t, validRequest(), Authority{Routes: []Route{route([]string{"G"}, predicates...)}}, time.Time{}); err == nil || !reflect.DeepEqual(got, Result{}) {
 		t.Fatalf("accepted excess predicates: %#v, %v", got, err)
+	}
+}
+
+// A route carrying some other permission is not a malformed answer. The gate
+// asks what this human holds, so the answer names every grant they hold here —
+// including the ones for permissions this request is not about. Those are
+// ordinary, and they simply do not match. Before the question stopped carrying
+// a permission, one of them meant the source had answered the wrong question
+// and the request failed with 503 instead of being denied.
+func TestARouteForAnotherPermissionIsANonMatchAndNotAnError(t *testing.T) {
+	other := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
+	other.Permissions = []string{"certificate::write"}
+	got, err := evaluate(t, validRequest(), Authority{Routes: []Route{other}}, time.Time{})
+	if err != nil {
+		t.Fatalf("unrelated route reported as an unusable answer: %v", err)
+	}
+	if got.Decision != Deny {
+		t.Fatalf("Evaluate() = %#v", got)
+	}
+}
+
+// And the request's permission is picked out of a route that carries several,
+// which is the ordinary shape now: one grant, every permission it names.
+func TestARouteAllowsOnAnyPermissionItCarries(t *testing.T) {
+	many := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
+	many.Permissions = []string{"certificate::write", validRequest().Permission, "certificate::delete"}
+	got, err := evaluate(t, validRequest(), Authority{Routes: []Route{many}}, time.Time{})
+	if err != nil || got.Decision != Allow {
+		t.Fatalf("Evaluate() = %#v, %v", got, err)
 	}
 }

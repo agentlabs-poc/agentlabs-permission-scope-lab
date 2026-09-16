@@ -30,11 +30,11 @@ func (s stubAuthority) Load(context.Context, authmiddleware.AuthorityQuery) (aut
 
 func finRead(human string) authmiddleware.Route {
 	return authmiddleware.Route{
-		Area:       authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
-		HumanID:    human,
-		Permission: "hrms:payroll:payslip::read",
-		GrantIDs:   []string{"fk3x9r2m0dq3", "fk3x9r2m5iv8"},
-		Predicates: []authmiddleware.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}},
+		Area:        authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
+		HumanID:     human,
+		Permissions: []string{"hrms:payroll:payslip::read"},
+		GrantIDs:    []string{"fk3x9r2m0dq3", "fk3x9r2m5iv8"},
+		Predicates:  []authmiddleware.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}},
 	}
 }
 

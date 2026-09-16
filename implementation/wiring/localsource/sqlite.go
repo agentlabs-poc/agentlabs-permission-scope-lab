@@ -79,17 +79,17 @@ func (s *SQLiteAuthoritySource) Load(ctx context.Context, query authmiddleware.A
 		Actor:   s.credential,
 		HumanID: query.Context.Identity.HumanID,
 	}
-	// The permission is a filter rather than a second question: the evaluator
-	// decides one request, so it wants the grants carrying one permission.
+	// No permission filter. The gate asks what this human holds here, not
+	// whether they hold one thing, so the answer describes the person and could
+	// be cached against them; narrowing it to the permission in hand would have
+	// made every answer single-use.
 	//
 	// The source is *not* omitted, and that corrects an assumption. "A decision
 	// never reads the explanation" is true of the decision and false of the
 	// result: the approved allow block requires grant_ids, and grant_ids is the
 	// contributing chain, which only the lineage carries. So the one caller the
 	// OmitSource option was written for is the one that cannot use it.
-	resolved, err := s.authority.ResolveAuthority(ctx, area, identity, domain.ResolveOptions{
-		Permissions: []string{query.Permission},
-	})
+	resolved, err := s.authority.ResolveAuthority(ctx, area, identity, domain.ResolveOptions{})
 	if err != nil {
 		// Reported as an evaluation failure, because that is what an
 		// AuthoritySource owes its caller. A bare error reaches the application
@@ -115,9 +115,8 @@ func routesFor(resolved domain.ResolvedAuthority, query authmiddleware.Authority
 	// asymmetry in place.
 	//
 	// Nothing in-process can produce these today: ResolveAuthority answers about
-	// the area and human it was asked about, and filters on the permissions. That
-	// is what makes it defence in depth rather than a fix, and also what makes it
-	// worth having — the day this source is given a different implementation, or
+	// the area and human it was asked about. That is what makes it defence in
+	// depth rather than a fix, and also what makes it worth having — the day this source is given a different implementation, or
 	// the facade grows a cache, the assumptions are written down instead of
 	// remembered.
 	if resolved.Version != "1" {
@@ -137,13 +136,7 @@ func routesFor(resolved domain.ResolvedAuthority, query authmiddleware.Authority
 		if grant.Version != "1" {
 			return failed("UNSUPPORTED_VERSION", "a resolved grant states contract version "+grant.Version)
 		}
-		// convertGrant stamps the asked-for permission onto the route, so a grant
-		// that does not carry it would become a route that claims it and the
-		// evaluator would never know.
-		if !slices.Contains(grant.Permissions, query.Permission) {
-			return failed("WRONG_PERMISSION", "a resolved grant does not carry the permission that was asked about")
-		}
-		routes[i] = convertGrant(resolved, grant, query)
+		routes[i] = convertGrant(resolved, grant)
 	}
 	return authmiddleware.Authority{Routes: routes}, nil
 }
@@ -164,17 +157,20 @@ func (s *SQLiteAuthoritySource) Close() error { return s.authority.Close() }
 // convertGrant renames a resolved grant into the evaluator's vocabulary. It is
 // a translation and nothing more: every value here was decided on Auth-AL's side
 // of the boundary, which is what keeps the lineage rules there.
-func convertGrant(resolved domain.ResolvedAuthority, grant domain.ResolvedGrant, query authmiddleware.AuthorityQuery) authmiddleware.Route {
+func convertGrant(resolved domain.ResolvedAuthority, grant domain.ResolvedGrant) authmiddleware.Route {
 	route := authmiddleware.Route{
 		// The answer's boundaries, not the query's. They cannot disagree — the
 		// area asked for is the area read — but taking them from the answer is
 		// why the envelope echoes them, and it keeps a route describing where it
 		// actually came from rather than where it was asked for.
-		Area:       authmiddleware.Area{TenantID: resolved.TenantID, ApplicationID: resolved.ApplicationID},
-		HumanID:    resolved.HumanID,
-		Permission: query.Permission,
-		GrantIDs:   grantChain(grant),
-		Predicates: make([]authmiddleware.Predicate, 0, len(grant.Scope)),
+		Area:    authmiddleware.Area{TenantID: resolved.TenantID, ApplicationID: resolved.ApplicationID},
+		HumanID: resolved.HumanID,
+		// The grant's own permissions, not the one that was asked about. Stamping
+		// the query's permission on was how a grant that did not carry it became
+		// a route that claimed it.
+		Permissions: slices.Clone(grant.Permissions),
+		GrantIDs:    grantChain(grant),
+		Predicates:  make([]authmiddleware.Predicate, 0, len(grant.Scope)),
 	}
 	for key, value := range grant.Scope {
 		route.Predicates = append(route.Predicates, authmiddleware.Predicate{

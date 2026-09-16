@@ -2,9 +2,12 @@ package authclient
 
 import (
 	"agentlabs.local/authmiddleware"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -17,7 +20,6 @@ func ask() authmiddleware.AuthorityQuery {
 			Area:     authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
 			Identity: authmiddleware.Identity{Version: "1", HumanID: "fi7io4lvjqio"},
 		},
-		Permission: "hrms:payroll:payslip::read",
 	}
 }
 
@@ -66,9 +68,6 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 		"another application": {strings.Replace(sound, `"application_id":"hrms"`, `"application_id":"crm"`, 1), "WRONG_AREA"},
 		"another human":       {strings.Replace(sound, `"human_id":"fi7io4lvjqio"`, `"human_id":"fn2q6v8sbo1e"`, 1), "WRONG_SUBJECT"},
 		"another version":     {strings.Replace(sound, `"version":"1"`, `"version":"2"`, 1), "UNSUPPORTED_VERSION"},
-		// The one that decides what may be done, and the one that was stamped on
-		// from the query rather than read from the grant.
-		"another permission": {strings.Replace(sound, `"hrms:payroll:payslip::read"`, `"hrms:payroll:payslip::write"`, 1), "WRONG_PERMISSION"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			source, _ := answering(t, http.StatusOK, tc.body)
@@ -87,8 +86,58 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 	if err != nil || len(got.Routes) != 1 {
 		t.Fatalf("a sound answer gave %#v, %v", got.Routes, err)
 	}
-	if got.Routes[0].Permission != ask().Permission || len(got.Routes[0].GrantIDs) == 0 {
+	if !slices.Equal(got.Routes[0].Permissions, []string{"hrms:payroll:payslip::read"}) || len(got.Routes[0].GrantIDs) == 0 {
 		t.Fatalf("route = %#v", got.Routes[0])
+	}
+}
+
+// The permission is no longer one of the corroborations, because the answer is
+// no longer filtered by one: the question names the human and the area, so a
+// grant for some other permission is an ordinary part of the answer. What must
+// still hold is that the grant's own permissions are carried across rather than
+// the query's stamped on — that stamping is how a grant for reading the
+// directory once came back approved for reading payroll, and the gate would
+// have matched it.
+func TestAGrantCarriesItsOwnPermissionsAndNotTheQuestions(t *testing.T) {
+	body := strings.Replace(sound, `["hrms:payroll:payslip::read"]`, `["hrms:payroll:payslip::write","hrms:directory:employee::read"]`, 1)
+	source, _ := answering(t, http.StatusOK, body)
+	got, err := source.Load(t.Context(), ask())
+	if err != nil || len(got.Routes) != 1 {
+		t.Fatalf("Load() = %#v, %v", got.Routes, err)
+	}
+	if !slices.Equal(got.Routes[0].Permissions, []string{"hrms:payroll:payslip::write", "hrms:directory:employee::read"}) {
+		t.Fatalf("route = %#v", got.Routes[0])
+	}
+}
+
+// And the question itself carries no permission filter. Asking for one would
+// narrow the answer to the request in hand, and an answer that describes one
+// request cannot be cached against the human it is about.
+func TestTheQuestionDoesNotNarrowTheAnswerToOnePermission(t *testing.T) {
+	var body []byte
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ = io.ReadAll(r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(sound))
+	}))
+	t.Cleanup(server.Close)
+	source, err := New(server.URL, Credential{Type: "service_account", ID: "agent_hrms", Bearer: "secret"}, server.Client())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := source.Load(t.Context(), ask()); err != nil {
+		t.Fatal(err)
+	}
+	var sent struct {
+		Options struct {
+			Permissions []string `json:"permissions"`
+		} `json:"options"`
+	}
+	if err := json.Unmarshal(body, &sent); err != nil {
+		t.Fatalf("request body %q: %v", body, err)
+	}
+	if len(sent.Options.Permissions) != 0 {
+		t.Fatalf("the question narrowed the answer to %q", sent.Options.Permissions)
 	}
 }
 

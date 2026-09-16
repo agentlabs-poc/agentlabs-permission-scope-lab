@@ -125,7 +125,7 @@ func New(baseURL string, credential Credential, doer Doer) (*Source, error) {
 	return &Source{base: parsed, credential: credential, doer: doer}, nil
 }
 
-// Load resolves what one human holds, for one permission, in one area.
+// Load resolves what one human holds in one area — all of it.
 func (s *Source) Load(ctx context.Context, query authmiddleware.AuthorityQuery) (authmiddleware.Authority, error) {
 	if ctx == nil {
 		return authmiddleware.Authority{}, (&Error{Code: "MISCONFIGURED", Message: "context is required"}).evaluation()
@@ -142,9 +142,11 @@ func (s *Source) Load(ctx context.Context, query authmiddleware.AuthorityQuery) 
 			Actor:   actor{Type: s.credential.Type, ID: s.credential.ID},
 			HumanID: query.Context.Identity.HumanID,
 		},
-		// One permission, because the gate is deciding one request. The complete
-		// answer is the cacheable one, and nothing caches yet.
-		Options: options{Permissions: []string{query.Permission}},
+		// No permission filter. The complete answer is the cacheable one, and an
+		// answer narrowed to the permission in hand could only ever have served
+		// the request that asked for it. Nothing caches yet; the shape is what
+		// makes caching possible later without changing the contract.
+		Options: options{},
 	})
 	if err != nil {
 		return authmiddleware.Authority{}, (&Error{Code: "MISCONFIGURED", Message: "could not encode the request", Cause: err}).evaluation()

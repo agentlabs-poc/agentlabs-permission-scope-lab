@@ -64,7 +64,7 @@ func httpEvaluator(t *testing.T, source *httpAuthoritySource) *Evaluator {
 }
 
 func allowAuthority() Authority {
-	return Authority{Routes: []Route{{Area: httpContext().Area, HumanID: "maya", Permission: "certificate::write", GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []Predicate{{Key: "cert", Value: "C17", SourceGrantID: "fk3x9r2m5iv8"}, {Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}}}}
+	return Authority{Routes: []Route{{Area: httpContext().Area, HumanID: "maya", Permissions: []string{"certificate::write"}, GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []Predicate{{Key: "cert", Value: "C17", SourceGrantID: "fk3x9r2m5iv8"}, {Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}}}}
 }
 
 func TestWrapAllowsExactlyOneBoundEffectWithExactInputs(t *testing.T) {
@@ -100,7 +100,11 @@ func TestWrapAllowsExactlyOneBoundEffectWithExactInputs(t *testing.T) {
 	if identity.body != "" {
 		t.Fatalf("identity source received business body %q", identity.body)
 	}
-	if authority.query.Permission != "certificate::write" || authority.query.Context != httpContext() {
+	// The question names the human and the area and nothing else — the permission
+	// is not part of it any more. That the policy's permission was the one applied
+	// is visible in the 204 above: the only route offered carries
+	// certificate::write, and any other permission would have denied.
+	if authority.query != (AuthorityQuery{Context: httpContext()}) {
 		t.Fatalf("query = %#v", authority.query)
 	}
 }
@@ -188,10 +192,11 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 	identity := &httpIdentitySource{requestContext: httpContext()}
 	authority := &httpAuthoritySource{authority: allowAuthority()}
 	evaluator := httpEvaluator(t, authority)
+	executed, refused := 0, 0
 	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
-		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter) {}}, nil
+		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter) { executed++ }}, nil
 	})
-	failure := FailureHandler(func(http.ResponseWriter, *http.Request, Result, error) {})
+	failure := FailureHandler(func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
 	valid := httpPolicy(http.MethodPut)
 	var nilIdentity *httpIdentitySource
 	var nilBinder Binder
@@ -227,8 +232,11 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 	p.Inputs["dept"] = Input{Source: SourceBody, Name: "forged"}
 	r := httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
 	h.ServeHTTP(httptest.NewRecorder(), r)
-	if authority.query.Permission != "certificate::write" {
-		t.Fatalf("mutated permission used: %#v", authority.query)
+	// The mounted copy decides, not the caller's struct. The only route offered
+	// carries certificate::write, so forged::write would have found no matching
+	// route and reached the failure handler instead of the effect.
+	if executed != 1 || refused != 0 {
+		t.Fatalf("mutated policy changed the decision: executed=%d refused=%d", executed, refused)
 	}
 
 	before := identity.called

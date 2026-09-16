@@ -5,14 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 )
 
 const (
-	maxRoutes          = 10000
-	maxGrantsPerRoute  = 256
-	maxTotalPredicates = 10000
-	maxMaterialEntries = 10000
+	maxRoutes         = 10000
+	maxGrantsPerRoute = 256
+	// A route names what its grant carries. Bounded like everything else a
+	// source supplies, because the source is across a boundary.
+	maxPermissionsPerRoute = 256
+	maxTotalPredicates     = 10000
+	maxMaterialEntries     = 10000
 )
 
 type Evaluator struct {
@@ -38,7 +42,7 @@ func (e *Evaluator) Evaluate(ctx context.Context, request Request) (Result, erro
 		return Result{}, err
 	}
 
-	authority, err := e.source.Load(ctx, AuthorityQuery{Context: request.Context, Permission: request.Permission})
+	authority, err := e.source.Load(ctx, AuthorityQuery{Context: request.Context})
 	if err != nil {
 		return Result{}, err
 	}
@@ -162,8 +166,17 @@ func validateRoute(ctx context.Context, route Route, request Request) error {
 	if invalidID(route.HumanID) || route.HumanID != request.Context.Identity.HumanID {
 		return errors.New("route human does not match query")
 	}
-	if !validPermission(route.Permission) || route.Permission != request.Permission {
-		return errors.New("route permission does not match query")
+	// Every permission is well formed. Whether this route carries the one being
+	// asked about is not validity — an answer about a person names everything
+	// they hold, so a route that does not carry it is ordinary and simply does
+	// not match. That test moved into routeMatches.
+	if len(route.Permissions) == 0 || len(route.Permissions) > maxPermissionsPerRoute {
+		return errors.New("invalid route permission count")
+	}
+	for _, permission := range route.Permissions {
+		if !validPermission(permission) {
+			return errors.New("invalid route permission")
+		}
 	}
 	if len(route.GrantIDs) == 0 || len(route.GrantIDs) > maxGrantsPerRoute {
 		return errors.New("invalid contributing grant count")
@@ -199,6 +212,13 @@ func validateRoute(ctx context.Context, route Route, request Request) error {
 }
 
 func routeMatches(ctx context.Context, route Route, request Request) (bool, error) {
+	// The permission first, because a route that does not carry it cannot
+	// authorize this request whatever its predicates say. This used to be part
+	// of validating the route, when the answer was filtered to one permission
+	// and anything else meant the source had answered the wrong question.
+	if !slices.Contains(route.Permissions, request.Permission) {
+		return false, nil
+	}
 	for _, predicate := range route.Predicates {
 		if err := ctx.Err(); err != nil {
 			return false, err
