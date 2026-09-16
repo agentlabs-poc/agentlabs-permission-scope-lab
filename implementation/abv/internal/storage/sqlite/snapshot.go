@@ -126,14 +126,14 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 		}
 		if json.Unmarshal(payload, &value) != nil || value.Active == nil {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "permission %q", id)
 		}
 		// The boundary is kept rather than discarded: a root's ceiling is sliced
 		// by it, even though evaluation uses the whole union.
 		where := domain.Boundary(boundary)
 		if !where.Valid() {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "permission %q boundary %q", id, boundary)
 		}
 		catalog.Permissions[id] = domain.PermissionDefinition{ID: id, Active: *value.Active, Boundary: where, Namespace: namespace}
 	}
@@ -161,7 +161,7 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 		// A scope record's payload is empty: its presence is the fact.
 		if key == "" || len(payload) == 0 {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "scope %q of application %q", key, applicationID)
 		}
 		catalog.Scopes[key] = domain.ScopeDefinition{Key: key}
 	}
@@ -196,7 +196,7 @@ func (r *snapshotReader) controls(s *storage.Snapshot) error {
 		if id == "" || json.Unmarshal([]byte(raw), &payload) != nil ||
 			(payload.Status != "enabled" && payload.Status != "disabled") {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "grant %q", id)
 		}
 		s.Controls[id] = domain.GrantControl{Version: "1", ID: id, Status: payload.Status}
 		if payload.TrustedRoot {
@@ -227,12 +227,12 @@ func (r *snapshotReader) contents(s *storage.Snapshot) error {
 		revision, e := codec.ParseRevision(slot)
 		if e != nil {
 			rows.Close()
-			return e
+			return rowf(e, "grant %q revision slot %q", id, slot)
 		}
 		content, e := decodeRevision(id, revision, []byte(raw))
 		if e != nil {
 			rows.Close()
-			return e
+			return rowf(e, "grant %q revision %d", id, revision)
 		}
 		s.Contents[domain.GrantKey{ID: id, Revision: revision}] = content
 	}
@@ -259,14 +259,14 @@ func (r *snapshotReader) assignments(s *storage.Snapshot) error {
 		a, e := decodeAssignment(grantID, recipientType, recipientID, []byte(raw))
 		if e != nil {
 			rows.Close()
-			return e
+			return rowf(e, "assignment of grant %q to %s %q", grantID, recipientType, recipientID)
 		}
 		// The snapshot is keyed by assignment id because that is how callers ask
 		// for one. Two bindings carrying the same id would make that map lossy,
 		// and the key path cannot forbid it — the id is in the value.
 		if _, clash := s.Assignments[a.ID]; clash {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "assignment %q of grant %q is a duplicate id", a.ID, grantID)
 		}
 		s.Assignments[a.ID] = a
 	}
@@ -307,7 +307,7 @@ func (r *snapshotReader) roles(s *storage.Snapshot) error {
 			json.Unmarshal([]byte(payload), &content) != nil ||
 			codec.PermissionList(content.Permissions) != nil {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "role %q revision slot %q", id, slot)
 		}
 		// An empty tenant is the whole distinction: a role the application ships
 		// carries none; a role a tenant composed carries its own.
@@ -345,12 +345,12 @@ func (r *snapshotReader) teams(s *storage.Snapshot) error {
 		var content teamPayload
 		if !codec.ValidRoleID(id) || name == "" || json.Unmarshal([]byte(payload), &content) != nil {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "team %q", id)
 		}
 		// A root's parent is empty; any other parent must be a real id.
 		if content.ParentID != "" && !codec.ValidRoleID(content.ParentID) {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "team %q names parent %q", id, content.ParentID)
 		}
 		s.Teams[id] = domain.Team{ID: id, Name: name, ParentID: content.ParentID}
 	}
@@ -380,7 +380,7 @@ func (r *snapshotReader) ownerships(s *storage.Snapshot) error {
 		}
 		if team == "" || human == "" {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "ownership of team %q by human %q", team, human)
 		}
 		s.Ownerships = append(s.Ownerships, domain.Ownership{TeamID: team, HumanID: human})
 	}
@@ -409,7 +409,7 @@ func (r *snapshotReader) memberships(s *storage.Snapshot) error {
 		// service, and both render base 36 so one spelling serves the system.
 		if !codec.ValidRoleID(team) || !codec.ValidHumanID(human) {
 			rows.Close()
-			return domain.ErrMalformed
+			return rowf(domain.ErrMalformed, "membership of team %q by human %q", team, human)
 		}
 		s.Memberships = append(s.Memberships, domain.Membership{TeamID: team, HumanID: human})
 	}
@@ -442,3 +442,22 @@ func corruptOrDB(err error) error {
 	return classify(err)
 }
 func malformedf(message string) error { return fmt.Errorf("%s: %w", message, domain.ErrMalformed) }
+
+// rowf names the row a snapshot load stopped on.
+//
+// One unreadable row stops the whole area — that is the decision, and it is the
+// only safe direction: skipping the row means answering authorization questions
+// from a store we have admitted we cannot fully read, and if the row was
+// somebody's restriction, skipping it widens their access silently.
+//
+// The cost of that rule is diagnosis, not safety. The load held the grant id and
+// the revision at the point of failure and threw both away, so an operator saw a
+// bare "malformed input" and had to bisect a database. Naming the row turns that
+// into a lookup. The identity stays on Auth's side of the wire — the application
+// sees a 503 and nothing else — so nothing about the contract changes.
+//
+// The wrapped error keeps its class: a row that is unsupported rather than
+// malformed still reads as unsupported.
+func rowf(err error, format string, args ...any) error {
+	return fmt.Errorf("%s: %w", fmt.Sprintf(format, args...), err)
+}

@@ -538,3 +538,82 @@ func assertSQLiteAssignmentsAbsent(t *testing.T, p storage.Provider, area domain
 		t.Fatal(err)
 	}
 }
+
+// One unreadable row stops the whole area, and that is the decision. The cost is
+// diagnosis: the load held the grant id and revision at the point of failure and
+// returned a bare "malformed input", so an operator had to bisect a database to
+// find out which row. The error now names it.
+func TestAMalformedRowIsNamed(t *testing.T) {
+	cases := map[string]struct {
+		corrupt func(*testing.T, *provider, domain.Area)
+		names   []string
+	}{
+		"grant revision": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value=? WHERE key2='grant_revision' AND tenant_id=? AND key3=? AND key4='fk3x9r2m5iv8'`,
+					[]byte(`{"permissions":[""],"scope":{}}`), area.TenantID(), area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fk3x9r2m5iv8", "revision 1"},
+		},
+		"unparseable revision slot": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET key5='not-a-revision' WHERE key2='grant_revision' AND tenant_id=? AND key3=?`,
+					area.TenantID(), area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fk3x9r2m5iv8", "not-a-revision"},
+		},
+		"grant head": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='{"status":"melted"}' WHERE key2='grant' AND tenant_id=? AND key3=?`,
+					area.TenantID(), area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fk3x9r2m5iv8"},
+		},
+		"permission definition": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='{}' WHERE key2='permission' AND key3=?`, area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"hrms:payroll:payslip::read"},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			base := contractFixture(t)
+			base.Controls["fk3x9r2m5iv8"] = domain.GrantControl{Version: "1", ID: "fk3x9r2m5iv8", Status: "enabled"}
+			path := t.TempDir() + "/authority.db"
+			opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
+			if err != nil {
+				t.Fatal(err)
+			}
+			p := opened.(*provider)
+			defer p.Close()
+			tc.corrupt(t, p, base.Area)
+
+			var calls atomic.Int32
+			err = p.Read(t.Context(), base.Area, func(storage.Snapshot) error { calls.Add(1); return nil })
+			// Still fails closed, and still fails closed with the same class —
+			// naming the row must not turn a malformed record into something a
+			// caller reads differently.
+			if !errors.Is(err, domain.ErrMalformed) || calls.Load() != 0 {
+				t.Fatalf("calls=%d err=%v", calls.Load(), err)
+			}
+			for _, named := range tc.names {
+				if !strings.Contains(err.Error(), named) {
+					t.Fatalf("the operator cannot find the row: %q does not name %q", err, named)
+				}
+			}
+		})
+	}
+}
