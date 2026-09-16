@@ -40,33 +40,23 @@ accepted and left unchecked.
 
 ---
 
-## 2 · Whether a trusted root may be deleted
+## 2 · ~~Whether a trusted root may be deleted~~ — answered by Q-132
 
-**What the lab does.** Refuses. `DeleteGrant` and `DeleteAssignment` return
-`ErrUnsupported` for a trusted root and for any binding of it, matching the
-refusals already on the disable paths.
+**Closed.** The lab refused to disable a trusted root, which contradicted
+`bootstrap-authority.md:151` — an established root *"remains an ordinary grant
+subject to status, validity, revisions, assignments"* — and refused to delete
+one, which no rule supported.
 
-**Why the lab lives with it.** Nothing in the lab deletes a root, so the refusal
-costs nothing, and an area whose root is gone has no ceiling for anything —
-every demonstration built on it stops meaning what it says.
+[Q-132 / GRANT-010](../../docs/grant-lifecycle.md) replaced both with one
+condition: **a grant with a child grant can be neither disabled nor deleted**,
+and a root is not a subject of its own. Delete additionally refuses while an
+assignment names the grant, which is the older rule against leaving a dangling
+reference rather than part of Q-132 — reading "child" to include assignments
+would make disable unavailable for every grant anybody holds.
 
-**Why it is not settled.** No handbook rule prohibits it, and the nearest ones
-lean the other way. Q-113 (`bootstrap-authority.md:134-136`) is about
-*conferring* root authority — *"ordinary grant creation or modification must not
-confer root authority merely by omitting/removing a parent reference"* — and says
-nothing about removing one properly established. `bootstrap-authority.md:151-152`
-goes further: an established root *"remains an ordinary grant subject to status,
-validity, revisions, assignments, and its explicit boundaries."*
-
-Deletion is not named in that list, which is the only reason this refusal is not
-flatly against the text. **The lab's refusal to *disable* a root is** — that is
-pre-existing behaviour, it contradicts "subject to status", and it is recorded
-here rather than quietly kept. The authorized root-change procedure is open
-(`root-grant-format.md:90-91`), so both are defaults in unfinished space.
-
-**What the migration owes.** The root-change procedure itself: how a root is
-retired, replaced or repaired, under what authority, and what evidence it leaves.
-Until that exists, refusing is a default and not an answer.
+The migration inherits the rule, not a lab default. What the handbook still
+leaves open is named in the entry: operation permission names, how "has a
+dependent" is represented in published contracts, and bulk dismantle.
 
 ---
 

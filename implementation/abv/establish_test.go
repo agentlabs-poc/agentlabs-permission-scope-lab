@@ -200,18 +200,17 @@ func TestEstablishAuthRootComputesFromThePlatformCatalog(t *testing.T) {
 	}
 }
 
-// The root a moment after it is established is the state in which ordinary
-// administration could destroy it — and did. The route was two steps: the root
-// grant itself is refused while its holder assignment depends on it, so deleting
-// the holder first was the opening, and the root then had nothing left to refuse
-// on its behalf. Neither step was guarded, and the establishment gate does not
-// reach either: it guards writing a root, and these are removals.
+// Q-132, at the one moment it is most visible: a root with nothing beneath it.
 //
-// Recovery is not available, which is not the same as impossible: bootstrap
-// files it as an open contract needing "a separately governed recovery
-// contract", and Q-124 already admits an authorized retry of an *interrupted*
-// setup under conditions. Nothing today puts a deleted root back.
-func TestAnEstablishedRootCannotBeDeleted(t *testing.T) {
+// Establishment writes the root and its holding assignment together, so even
+// then something depends on the grant and the grant cannot go first. Remove the
+// holder, and the root is an ordinary leaf — deletable like any other.
+//
+// That is the rule working rather than a gap. The lab used to refuse both
+// outright: disabling a root, which contradicted "an ordinary grant subject to
+// status", and deleting one, which had no rule behind it. One dependency
+// condition replaced both, and dismantling is bottom-up.
+func TestAnEstablishedRootIsDismantledBottomUp(t *testing.T) {
 	api, area := openEstablishLab(t, "tenant-genesis")
 
 	root, _, err := api.EstablishRoot(t.Context(), area, teamFixture, "fibggi2jur5s")
@@ -223,34 +222,25 @@ func TestAnEstablishedRootCannotBeDeleted(t *testing.T) {
 		t.Fatalf("root assignment = %#v total=%d err=%v", holder.Assignments, holder.Total, err)
 	}
 
-	// Nothing is hanging from it, so nothing else can refuse on its behalf.
-	if err := api.DeleteGrant(t.Context(), area, teamFixture, root.ID); !errors.Is(err, domain.ErrUnsupported) {
-		t.Fatalf("deleting a freshly established root gave %v, want ErrUnsupported", err)
+	// The grant cannot go first: its own holder names it.
+	if err := api.DeleteGrant(t.Context(), area, teamFixture, root.ID); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting a held root gave %v, want ErrConflict", err)
 	}
-	if err := api.DeleteAssignment(t.Context(), area, teamFixture, holder.Assignments[0].ID); !errors.Is(err, domain.ErrUnsupported) {
-		t.Fatalf("deleting the root's own assignment gave %v, want ErrUnsupported", err)
+	// The holder can, because nothing rests on it — nothing else exists yet.
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, holder.Assignments[0].ID); err != nil {
+		t.Fatalf("deleting the holder of an otherwise empty area: %v", err)
+	}
+	// And then so can the root.
+	if err := api.DeleteGrant(t.Context(), area, teamFixture, root.ID); err != nil {
+		t.Fatalf("deleting an unheld root with no child: %v", err)
+	}
+	if _, _, err := api.GetGrant(t.Context(), area, teamFixture, root.ID, 1); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("the root survived its deletion: %v", err)
 	}
 
-	// Both still there, and the root still supports a child — the establishment
-	// survived the attempt intact rather than merely refusing the call.
-	grant, _, err := api.GetGrant(t.Context(), area, teamFixture, root.ID, 1)
-	if err != nil || !grant.TrustedRoot {
-		t.Fatalf("root after the refusals = %#v err=%v", grant, err)
-	}
-	child, childContent, err := api.CreateGrant(t.Context(), area, teamFixture, root.ID, domain.GrantContent{
-		Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"dept": "FIN"},
-	})
-	if err != nil {
-		t.Fatalf("the root no longer supports a child: %v", err)
-	}
-	raw, err := json.Marshal(domain.Assignment{
-		Version: "1", ID: "fm5b7t4pan0d", GrantID: child.ID, GrantRevision: childContent.Revision,
-		Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := api.CheckAssignment(t.Context(), area, raw); err != nil {
-		t.Fatalf("a child of the surviving root did not resolve: %v", err)
+	// The area is back where it started, which is what makes this a dismantling
+	// rather than damage: a root can be established again.
+	if _, _, err := api.EstablishRoot(t.Context(), area, teamFixture, "fibggi2jur5s"); err != nil {
+		t.Fatalf("a dismantled area could not be established again: %v", err)
 	}
 }

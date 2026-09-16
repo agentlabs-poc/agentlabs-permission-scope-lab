@@ -354,3 +354,91 @@ type allowAllRegistry struct{}
 
 func (allowAllRegistry) ApplicationExists(context.Context, string) (bool, error) { return true, nil }
 func (allowAllRegistry) Installed(context.Context, string, string) (bool, error) { return true, nil }
+
+// Q-132: a grant with a child grant can be neither disabled nor deleted.
+//
+// Both halves need a subject whose *only* dependent is a child grant. Delete
+// already refused a grant an assignment names — an older rule, against dangling
+// references — so a parent that is also held is refused either way and says
+// nothing about this rule. The first version of this test used exactly such a
+// parent, and removing the child check left the whole suite green.
+//
+// An assignment is deliberately not a child. Holding a grant *is* an assignment,
+// so counting one would make disable unavailable for every grant anybody holds,
+// and Q-079's operational pause would name an operation nobody could perform.
+func TestQ132RefusesDisableAndDeleteWhileAChildGrantExists(t *testing.T) {
+	area, _ := domain.NewArea("tenant-fin", "hrms")
+	fixture := lab.TeamFINC17(area)
+
+	// A parent and a child, neither of them held by anyone.
+	for _, id := range []string{"fk3x9r2mpppp", "fk3x9r2mcccc"} {
+		fixture.Snapshot.Controls[id] = domain.GrantControl{Version: "1", ID: id, Status: "enabled"}
+	}
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mpppp", Revision: 1}] = domain.GrantContent{
+		Version: "1", GrantID: "fk3x9r2mpppp", Revision: 1, ParentGrantID: "fk3x9r2man0d",
+		Permissions: []string{lab.PayslipRead}, Scope: map[string]string{},
+	}
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mcccc", Revision: 1}] = domain.GrantContent{
+		Version: "1", GrantID: "fk3x9r2mcccc", Revision: 1, ParentGrantID: "fk3x9r2mpppp",
+		Permissions: []string{lab.PayslipRead}, Scope: map[string]string{},
+	}
+	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/q132.db", []storage.Snapshot{fixture.Snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer provider.Close()
+	// One provider, two administrations, because each admits the operation the
+	// other refuses: the stub here admits a status change and not a deletion,
+	// and the lab's own gate the reverse for these grants. Both gates answer
+	// before the dependency rule by design, so isolating that rule means passing
+	// whichever gate the half under test needs.
+	status, err := mutation.New(provider, grantAdministration{}, &fixedClock{now: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	statusAdmin, err := lab.NewAssignmentStatusAdministration(area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := mutation.New(provider,
+		&lab.RoleAdministration{AssignmentStatusAdministration: statusAdmin},
+		&fixedClock{now: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	disable := func(id string) error {
+		_, err := status.SetGrantStatus(t.Context(), area, fixture.Issuer,
+			domain.GrantControl{Version: "1", ID: id, Status: "disabled"})
+		return err
+	}
+
+	// The parent holds nothing and is held by nobody. Only its child refuses it.
+	if err := disable("fk3x9r2mpppp"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("disabling a parent gave %v, want ErrConflict", err)
+	}
+	if err := service.DeleteGrant(t.Context(), area, fixture.Issuer, "fk3x9r2mpppp"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting a parent gave %v, want ErrConflict", err)
+	}
+
+	// The leaf is neither, which is what makes the refusals above about the
+	// child rather than about these two grants.
+	if err := disable("fk3x9r2mcccc"); err != nil {
+		t.Fatalf("disabling a leaf: %v", err)
+	}
+	// Enabling is not constrained by anything beneath — B11's rule is that an
+	// explicit disable is not undone elsewhere, not that enable is guarded.
+	if _, err := status.SetGrantStatus(t.Context(), area, fixture.Issuer,
+		domain.GrantControl{Version: "1", ID: "fk3x9r2mcccc", Status: "enabled"}); err != nil {
+		t.Fatalf("enabling a leaf: %v", err)
+	}
+	if err := service.DeleteGrant(t.Context(), area, fixture.Issuer, "fk3x9r2mcccc"); err != nil {
+		t.Fatalf("deleting a leaf: %v", err)
+	}
+	// Bottom-up: with the child gone, the parent goes too.
+	if err := disable("fk3x9r2mpppp"); err != nil {
+		t.Fatalf("disabling the parent once its child is gone: %v", err)
+	}
+	if err := service.DeleteGrant(t.Context(), area, fixture.Issuer, "fk3x9r2mpppp"); err != nil {
+		t.Fatalf("deleting the parent once its child is gone: %v", err)
+	}
+}

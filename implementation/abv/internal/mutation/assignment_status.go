@@ -40,7 +40,11 @@ func (s *Service) SetAssignmentStatus(ctx context.Context, area domain.Area, ide
 		if before.ID != assignmentID || !validStoredAssignment(before) {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if before.Recipient.Type != "group" || snapshot.TrustedRoots[before.GrantID] {
+		// Group-held only, which is the lineage rule. The trusted-root clause that
+		// stood here went with Q-132: a binding of the root is governed by the
+		// dependency rule below, like any other, rather than by a subject of its
+		// own.
+		if before.Recipient.Type != "group" {
 			return storage.WriteSet{}, domain.ErrUnsupported
 		}
 		after = before
