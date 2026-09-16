@@ -49,9 +49,11 @@ func httpContext() RequestContext {
 
 func httpPolicy(method string) Policy {
 	return Policy{Version: "1", Method: method, Path: "/api/{tenant}/{application}/certificates/{cert}", Permission: "certificate::write", Inputs: map[string]Input{
-		"cert": {Source: SourcePath, Name: "cert"},
-		"dept": {Source: SourceBody, Name: "department_id"},
-	}}
+		"tenant": {Source: SourcePath, Name: "tenant"},
+		"app":    {Source: SourcePath, Name: "application"},
+		"cert":   {Source: SourcePath, Name: "cert"},
+		"dept":   {Source: SourceBody, Name: "department_id"},
+	}, Trusted: map[string]string{TrustedTenant: "tenant", TrustedApplication: "app"}}
 }
 
 func httpEvaluator(t *testing.T, source *httpAuthoritySource) *Evaluator {
@@ -208,8 +210,10 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 		b Binder
 		f FailureHandler
 	}{
-		"invalid policy":          {Policy{}, identity, evaluator, binder, failure},
-		"bad pattern":             {Policy{Version: "1", Method: "GET", Path: "/{x}/{y...}/z", Permission: "x::read", Inputs: map[string]Input{}}, identity, evaluator, binder, failure},
+		"invalid policy": {Policy{}, identity, evaluator, binder, failure},
+		"bad pattern": {Policy{Version: "1", Method: "GET", Path: "/{x}/{y...}/z", Permission: "x::read",
+			Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "x"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"}}, identity, evaluator, binder, failure},
 		"nil identity":            {valid, nilIdentity, evaluator, binder, failure},
 		"nil evaluator":           {valid, identity, nil, binder, failure},
 		"uninitialized evaluator": {valid, identity, &Evaluator{}, binder, failure},
@@ -300,7 +304,9 @@ func TestWrapRejectsNilExecuteBeforeEvaluation(t *testing.T) {
 }
 
 func TestWrapGETUsesRoutedPathWithoutARequestBody(t *testing.T) {
-	policy := Policy{Version: "1", Method: http.MethodGet, Path: "/api/{tenant}/{application}/certificates/{cert}", Permission: "certificate::write", Inputs: map[string]Input{"cert": {Source: SourcePath, Name: "cert"}}}
+	policy := Policy{Version: "1", Method: http.MethodGet, Path: "/api/{tenant}/{application}/certificates/{cert}", Permission: "certificate::write",
+		Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "tenant"}, "cert": {Source: SourcePath, Name: "cert"}},
+		Trusted: map[string]string{TrustedTenant: "tenant"}}
 	identity := &httpIdentitySource{requestContext: httpContext()}
 	authority := allowAuthority()
 	authority.Routes[0].Predicates = authority.Routes[0].Predicates[:1]
@@ -432,5 +438,101 @@ func TestADeniedRequestNeverReachesTheEffect(t *testing.T) {
 	h.ServeHTTP(httptest.NewRecorder(), r)
 	if executed != 0 || refusedWith.Decision != Deny {
 		t.Fatalf("executed=%d refused=%#v", executed, refusedWith)
+	}
+}
+
+// The tenant is bound by declaration, not by spelling. The gate used to find
+// the request's tenant with request.PathValue("tenant"), so a policy whose path
+// said {tenant_id} was never checked against the trusted area at all — no error
+// and no log. Trusted area acme, GET /api/v2/globex/FIN/C17, and the handler ran
+// against globex with a 200.
+func TestAPathThatDoesNotSpellItTenantIsStillBound(t *testing.T) {
+	policy := Policy{Version: "1", Method: http.MethodGet, Path: "/api/v2/{tenant_id}/{dept}/{cert}",
+		Permission: "certificate::write",
+		Inputs: map[string]Input{
+			"tenant": {Source: SourcePath, Name: "tenant_id"},
+			"cert":   {Source: SourcePath, Name: "cert"},
+			"dept":   {Source: SourcePath, Name: "dept"},
+		},
+		Trusted: map[string]string{TrustedTenant: "tenant"},
+	}
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refused := 0, 0
+	h, err := Wrap(policy, identity, httpEvaluator(t, authority),
+		func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+			return BoundOperation{
+				Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+				Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+			}, nil
+		},
+		func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
+	if err != nil {
+		t.Fatal(err)
+	}
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/api/v2/globex/FIN/C17", nil))
+	if executed != 0 || refused != 1 {
+		t.Fatalf("another tenant's record reached the handler: executed=%d refused=%d", executed, refused)
+	}
+	// The same route for the trusted tenant still works, so the refusal above is
+	// the binding and not the route being broken.
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/api/v2/acme/FIN/C17", nil))
+	if executed != 1 || refused != 1 {
+		t.Fatalf("the trusted tenant was refused: executed=%d refused=%d", executed, refused)
+	}
+}
+
+// And the policy that declares nothing cannot be mounted. This is what turns
+// the silent case into an impossible one: the gate has no way to tell a route
+// that binds its tenant from one that forgot to, so it refuses to guess.
+func TestAPolicyThatDeclaresNoTenantCorrelationCannotBeMounted(t *testing.T) {
+	policy := httpPolicy(http.MethodPut)
+	policy.Trusted = nil
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+		return BoundOperation{Material: Material{}, Execute: func(context.Context, http.ResponseWriter, Result) {}}, nil
+	})
+	h, err := Wrap(policy, identity, httpEvaluator(t, authority), binder, func(http.ResponseWriter, *http.Request, Result, error) {})
+	if err == nil || h != nil {
+		t.Fatalf("mounted a policy binding no tenant: %#v, %v", h, err)
+	}
+}
+
+// A correlation may name a body input as readily as a path one — the check is
+// on the resolved value, which is the whole point of declaring it. What it may
+// not be is a value that is not a string.
+func TestACorrelatedInputThatIsNotAStringIsRefused(t *testing.T) {
+	policy := Policy{Version: "1", Method: http.MethodPut, Path: "/api/v2/certificates/{cert}",
+		Permission: "certificate::write",
+		Inputs: map[string]Input{
+			"tenant": {Source: SourceBody, Name: "tenant_id"},
+			"cert":   {Source: SourcePath, Name: "cert"},
+		},
+		Trusted: map[string]string{TrustedTenant: "tenant"},
+	}
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refused := 0, 0
+	h, err := Wrap(policy, identity, httpEvaluator(t, authority),
+		func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+			return BoundOperation{
+				Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+				Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+			}, nil
+		},
+		func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, body := range []string{`{"tenant_id":9}`, `{"tenant_id":["acme"]}`, `{"tenant_id":"globex"}`} {
+		h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/v2/certificates/C17", strings.NewReader(body)))
+	}
+	if executed != 0 || refused != 3 {
+		t.Fatalf("executed=%d refused=%d", executed, refused)
+	}
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/v2/certificates/C17", strings.NewReader(`{"tenant_id":"acme"}`)))
+	if executed != 1 {
+		t.Fatalf("the trusted tenant in the body was refused: executed=%d refused=%d", executed, refused)
 	}
 }

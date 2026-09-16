@@ -154,17 +154,17 @@ func NewHandler(store *Store, evaluator *authmiddleware.Evaluator, identity auth
 	routes := []route{
 		{policy(http.MethodGet, "/api/v1/{tenant}/{dept}/{cert}", payslipRead, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"}, "dept": {Source: authmiddleware.SourcePath, Name: "dept"}, "cert": {Source: authmiddleware.SourcePath, Name: "cert"},
-		}), store.bindGet},
+		}, "tenant"), store.bindGet},
 		{policy(http.MethodPut, "/api/v1/{tenant}/certificates/{cert}", payslipWrite, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"}, "cert": {Source: authmiddleware.SourcePath, Name: "cert"},
 			"proposed_dept": {Source: authmiddleware.SourceBody, Name: "department_id"}, "title": {Source: authmiddleware.SourceBody, Name: "title"},
-		}), store.bindPut},
+		}, "tenant"), store.bindPut},
 		{policy(http.MethodGet, "/api/v1/{tenant}/departments/{dept}/certificates", payslipRead, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"}, "dept": {Source: authmiddleware.SourcePath, Name: "dept"},
-		}), store.bindDepartment},
+		}, "tenant"), store.bindDepartment},
 		{policy(http.MethodGet, "/api/v1/{tenant}/certificates", payslipRead, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"},
-		}), store.bindAll},
+		}, "tenant"), store.bindAll},
 	}
 	mux := http.NewServeMux()
 	for _, route := range routes {
@@ -177,8 +177,14 @@ func NewHandler(store *Store, evaluator *authmiddleware.Evaluator, identity auth
 	return mux, nil
 }
 
-func policy(method, path, permission string, inputs map[string]authmiddleware.Input) authmiddleware.Policy {
-	return authmiddleware.Policy{Version: "1", Method: method, Path: path, Permission: permission, Inputs: inputs}
+// policy names, as its last argument, the input the gate must hold against the
+// trusted tenant. Every route here is about one tenant's certificates, so every
+// one of them declares it; the gate refuses to mount a policy that does not.
+func policy(method, path, permission string, inputs map[string]authmiddleware.Input, tenantInput string) authmiddleware.Policy {
+	return authmiddleware.Policy{
+		Version: "1", Method: method, Path: path, Permission: permission, Inputs: inputs,
+		Trusted: map[string]string{authmiddleware.TrustedTenant: tenantInput},
+	}
 }
 
 func (s *Store) bindGet(_ context.Context, _ authmiddleware.RequestContext, values authmiddleware.InputValues, _ map[string]json.RawMessage) (authmiddleware.BoundOperation, error) {
