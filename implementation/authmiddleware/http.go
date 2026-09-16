@@ -83,6 +83,18 @@ func handleHTTP(policy Policy, identities IdentitySource, evaluator *Evaluator, 
 		failure(Result{}, err)
 		return
 	}
+	// These bind the route's area claim to the trusted one, and they find it by
+	// the placeholder's spelling: a policy whose path says {tenant_id} is not
+	// checked here at all, and the gate cannot tell. The handbook requires the
+	// binding — "route tenant claims must still be bound to trusted context;
+	// field names alone do not prove relationships" — and does not yet say how a
+	// policy declares which of its inputs carries the tenant. That is Q-050-C's
+	// open work, and inventing a Policy field here would be turning an example
+	// into a mechanism, which is the mistake this comment exists to stop.
+	//
+	// The lab lives with it: one application, one policy set, and every path
+	// spells it "tenant". A deployment must not, and the endpoint-policy
+	// contract is where it gets settled — see the migration note in the plan.
 	if tenant := request.PathValue("tenant"); tenant != "" && tenant != requestContext.Area.TenantID {
 		failure(Result{}, errors.New("path tenant does not match trusted area"))
 		return

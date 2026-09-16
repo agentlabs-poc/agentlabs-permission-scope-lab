@@ -146,16 +146,16 @@ func (s *Service) DeleteGrant(ctx context.Context, area domain.Area, identity do
 		if _, ok := snapshot.Controls[id]; !ok {
 			return storage.WriteSet{}, domain.ErrNotFound
 		}
-		// A root is not an ordinary grant and ordinary administration cannot
-		// remove one. Establishing a root has its own gate that grant
-		// administration cannot reach, and the handbook is explicit that
-		// "ordinary bounded operations cannot manufacture root authority" — so
-		// they must not be able to destroy it either, which is the same rule
-		// read in the direction that matters more. Disablement already refuses
-		// here (SetGrantStatus), and deletion is the harsher act with no way
-		// back: bootstrap "cannot reset intentionally changed root authority"
-		// and "recovery must not be achieved by replaying completed initial
-		// setup". An area whose root is gone has no ceiling and no repair.
+		// A lab default, not an agreed rule. Q-113 is about *manufacturing* root
+		// authority — its sentence ends "by submitting parentless JSON" — and
+		// root-grant-format.md files the authorized root-change procedure as
+		// open, so how a root may be removed is undecided rather than settled.
+		//
+		// Refusing is the conservative reading of open space: disablement
+		// already refuses here (SetGrantStatus), an area whose root is gone has
+		// no ceiling, and recovery is itself an unbuilt contract. The cost of
+		// being wrong is an operation nobody in this lab performs. The Auth
+		// service this migrates into is where the real answer belongs.
 		if snapshot.TrustedRoots[id] {
 			return storage.WriteSet{}, domain.ErrUnsupported
 		}
