@@ -3,6 +3,7 @@ package authmiddleware
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -99,33 +100,105 @@ func TestEvaluateAddingPredicateOnlyNarrowsRoute(t *testing.T) {
 	}
 }
 
-func TestEvaluateValidatesEveryRouteBeforeAllowing(t *testing.T) {
+// A malformed route costs that route and nothing else.
+//
+// It used to fail the whole evaluation, which was defensible while the question
+// named a permission — every route in the answer was then about this request.
+// Unfiltered, the answer describes everything the human holds here, so one
+// unusable grant took away every other grant they had. authority-lineage.md
+// forbids that in terms, and Q-051's own table says a deny is not established by
+// one failed grant "if another route could authorize it".
+//
+// Two things must hold, and the second is the one that matters: the other routes
+// still decide, and the malformed route itself never authorizes.
+func TestAMalformedRouteCostsThatRouteAndNothingElse(t *testing.T) {
 	request := validRequest()
 	valid := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
 	cases := map[string]Route{
-		"wrong area":    func() Route { r := valid; r.Area.TenantID = "other"; return r }(),
-		"wrong human":   func() Route { r := valid; r.HumanID = "other"; return r }(),
-		"no permission": func() Route { r := valid; r.Permissions = nil; return r }(),
-		"unusable permission": func() Route {
-			r := valid
-			r.Permissions = []string{"certificate::write", "not a permission"}
-			return r
-		}(),
+		"no permission":     func() Route { r := valid; r.Permissions = nil; return r }(),
 		"duplicate grant":   func() Route { r := valid; r.GrantIDs = []string{"fk3x9r2m5iv8", "fk3x9r2m5iv8"}; return r }(),
 		"missing grant":     func() Route { r := valid; r.GrantIDs = nil; return r }(),
+		"too many grants":   func() Route { r := valid; r.GrantIDs = manyGrants(257); return r }(),
 		"empty key":         route([]string{"fk3x9r2m5iv8"}, Predicate{Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}),
 		"empty value":       route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", SourceGrantID: "fk3x9r2m5iv8"}),
 		"foreign source":    route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2man0d"}),
 		"unsupported token": route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "$manager", SourceGrantID: "fk3x9r2m5iv8"}),
+		"inverted validity": func() Route {
+			r := valid
+			from, until := time.Date(2026, 9, 9, 13, 0, 0, 0, time.UTC), time.Date(2026, 9, 9, 12, 0, 0, 0, time.UTC)
+			r.ValidFrom, r.ValidUntil = &from, &until
+			return r
+		}(),
 	}
 	for name, malformed := range cases {
 		t.Run(name, func(t *testing.T) {
+			// Beside a sound route, the sound one still decides.
 			got, err := evaluate(t, request, Authority{Routes: []Route{valid, malformed}}, time.Time{})
-			if err == nil || !reflect.DeepEqual(got, Result{}) {
-				t.Fatalf("malformed later route hidden by allow: %#v, %v", got, err)
+			if err != nil || got.Decision != Allow || !reflect.DeepEqual(got.GrantIDs, []string{"fk3x9r2m5iv8"}) {
+				t.Fatalf("one malformed route took away a sound one: %#v, %v", got, err)
+			}
+			// Alone, it authorizes nothing — and the refusal is an evaluation
+			// failure, not a denial. Q-051 lets a failed grant stand aside for an
+			// allow another route earns; it does not let one establish a deny,
+			// because a route this gate could not read is exactly a route that
+			// might have authorized.
+			alone, err := evaluate(t, request, Authority{Routes: []Route{malformed}}, time.Time{})
+			if err == nil || !reflect.DeepEqual(alone, Result{}) {
+				t.Fatalf("a malformed route produced a decision: %#v, %v", alone, err)
+			}
+			var evaluation *EvaluationError
+			if !errors.As(err, &evaluation) || evaluation.Code != "AUTHORITY_MALFORMED" {
+				t.Fatalf("err = %v, want an evaluation failure", err)
 			}
 		})
 	}
+}
+
+// The two that are not about one route. An answer describing another area or
+// another human is the source answering about somebody else, and nothing in it
+// can be trusted — so these still fail the evaluation outright.
+func TestAnAnswerAboutSomebodyElseFailsTheEvaluation(t *testing.T) {
+	request := validRequest()
+	valid := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
+	for name, wrong := range map[string]Route{
+		"wrong tenant":      func() Route { r := valid; r.Area.TenantID = "other"; return r }(),
+		"wrong application": func() Route { r := valid; r.Area.ApplicationID = "other"; return r }(),
+		"wrong human":       func() Route { r := valid; r.HumanID = "other"; return r }(),
+		"no human":          func() Route { r := valid; r.HumanID = ""; return r }(),
+	} {
+		t.Run(name, func(t *testing.T) {
+			got, err := evaluate(t, request, Authority{Routes: []Route{valid, wrong}}, time.Time{})
+			if err == nil || !reflect.DeepEqual(got, Result{}) {
+				t.Fatalf("an answer about somebody else was used: %#v, %v", got, err)
+			}
+		})
+	}
+}
+
+// A root grant's permissions are the application's whole active catalog,
+// recomputed at resolve time — the widest legitimate route in this system is
+// produced by the system itself. A per-route ceiling of 256 answered "we could
+// not check your access" to every request a root holder made, including ones an
+// entirely different grant authorized.
+func TestARootWideRouteIsAnOrdinaryAnswer(t *testing.T) {
+	wide := route([]string{"fk3x9r2m5iv8"}, Predicate{Key: "department", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"})
+	wide.Permissions = make([]string, 0, 603)
+	for i := 0; i < 602; i++ {
+		wide.Permissions = append(wide.Permissions, fmt.Sprintf("hrms:payroll:item%d::read", i))
+	}
+	wide.Permissions = append(wide.Permissions, validRequest().Permission)
+	got, err := evaluate(t, validRequest(), Authority{Routes: []Route{wide}}, time.Time{})
+	if err != nil || got.Decision != Allow {
+		t.Fatalf("a catalog-wide root route was refused: %#v, %v", got, err)
+	}
+}
+
+func manyGrants(n int) []string {
+	grants := make([]string, n)
+	for i := range grants {
+		grants[i] = string(rune(0x1000 + i))
+	}
+	return grants
 }
 
 func TestEvaluateExpiredRouteDoesNotSuppressValidRouteAndOrderingIsStable(t *testing.T) {
@@ -139,16 +212,6 @@ func TestEvaluateExpiredRouteDoesNotSuppressValidRouteAndOrderingIsStable(t *tes
 	got, err := evaluate(t, validRequest(), Authority{Routes: []Route{route([]string{"Z"}), expired, future, route([]string{"B", "A"}), route([]string{"B"})}}, now)
 	if err != nil || !reflect.DeepEqual(got.GrantIDs, []string{"B"}) {
 		t.Fatalf("Evaluate() = %#v, %v", got, err)
-	}
-}
-
-func TestEvaluateRejectsInvertedValidityInterval(t *testing.T) {
-	now := time.Date(2026, 9, 9, 12, 0, 0, 0, time.UTC)
-	from, until := now.Add(time.Hour), now
-	malformed := route([]string{"fk3x9r2m5iv8"})
-	malformed.ValidFrom, malformed.ValidUntil = &from, &until
-	if got, err := evaluate(t, validRequest(), Authority{Routes: []Route{malformed}}, now); err == nil || !reflect.DeepEqual(got, Result{}) {
-		t.Fatalf("accepted inverted validity: %#v, %v", got, err)
 	}
 }
 
@@ -258,12 +321,20 @@ func TestEvaluateRejectsSafetyCeilingOverflow(t *testing.T) {
 		t.Fatalf("accepted excess routes: %#v, %v", got, err)
 	}
 
-	grants := make([]string, 257)
-	for i := range grants {
-		grants[i] = string(rune(0x1000 + i))
+	// Permissions are bounded across the answer, not per route, because a root
+	// route legitimately carries the whole catalog. Untested, this ceiling was
+	// how a root holder got a 503 on every request.
+	wide := make([]Route, 4097)
+	for i := range wide {
+		r := route([]string{"G"})
+		r.Permissions = make([]string, 256)
+		for j := range r.Permissions {
+			r.Permissions[j] = fmt.Sprintf("hrms:payroll:i%d:%d::read", i, j)
+		}
+		wide[i] = r
 	}
-	if got, err := evaluate(t, validRequest(), Authority{Routes: []Route{route(grants)}}, time.Time{}); err == nil || !reflect.DeepEqual(got, Result{}) {
-		t.Fatalf("accepted excess grants: %#v, %v", got, err)
+	if got, err := evaluate(t, validRequest(), Authority{Routes: wide}, time.Time{}); err == nil || !reflect.DeepEqual(got, Result{}) {
+		t.Fatalf("accepted excess permissions: %#v, %v", got, err)
 	}
 
 	predicates := make([]Predicate, 10001)

@@ -12,11 +12,16 @@ import (
 const (
 	maxRoutes         = 10000
 	maxGrantsPerRoute = 256
-	// A route names what its grant carries. Bounded like everything else a
-	// source supplies, because the source is across a boundary.
-	maxPermissionsPerRoute = 256
-	maxTotalPredicates     = 10000
-	maxMaterialEntries     = 10000
+	// Permissions are bounded across the whole answer rather than per route,
+	// because the widest legitimate route in this system is produced by the
+	// system itself: a root grant's permissions are the application's entire
+	// active catalog, recomputed at resolve time. A per-route ceiling of 256
+	// locked every root holder out of the whole application with a 503 — the
+	// lab's own demonstrations run to 603 permissions in one application — and
+	// it did so for requests an entirely different grant authorized.
+	maxTotalPermissions = 1 << 20
+	maxTotalPredicates  = 10000
+	maxMaterialEntries  = 10000
 )
 
 type Evaluator struct {
@@ -55,7 +60,8 @@ func (e *Evaluator) Evaluate(ctx context.Context, request Request) (Result, erro
 
 	now := e.clock.Now()
 	var selected []string
-	predicateCount := 0
+	predicateCount, permissionCount := 0, 0
+	unusable := false
 	for i := range authority.Routes {
 		if err := ctx.Err(); err != nil {
 			return Result{}, err
@@ -65,8 +71,32 @@ func (e *Evaluator) Evaluate(ctx context.Context, request Request) (Result, erro
 		if predicateCount > maxTotalPredicates {
 			return Result{}, unusableAuthority(errors.New("authority exceeds predicate limit"))
 		}
-		if err := validateRoute(ctx, *route, request); err != nil {
+		permissionCount += len(route.Permissions)
+		if permissionCount > maxTotalPermissions {
+			return Result{}, unusableAuthority(errors.New("authority exceeds permission limit"))
+		}
+		// An answer that describes the wrong person, or the wrong area, is not
+		// an answer about this request at all, and no part of it can be trusted.
+		if err := validateAnswer(*route, request); err != nil {
 			return Result{}, unusableAuthority(fmt.Errorf("invalid authority route %d: %w", i, err))
+		}
+		// Everything else is about one route, and costs one route — but it is
+		// remembered, because it changes what a deny would mean.
+		//
+		// This used to fail the whole evaluation outright. That was defensible
+		// while the question named a permission, since every route in the answer
+		// was then about this request. It is wrong now that the answer describes
+		// everything the human holds here: one unusable grant took away every
+		// other grant they had, which authority-lineage.md forbids in terms —
+		// "missing support stops the affected authority route, not necessarily
+		// all authority of that user or group" — and which this codebase had
+		// already fixed one layer up, in lineage's routeScoped skip.
+		if err := validateRoute(ctx, *route, request); err != nil {
+			if ctx.Err() != nil {
+				return Result{}, ctx.Err()
+			}
+			unusable = true
+			continue
 		}
 		if route.ValidFrom != nil && now.Before(*route.ValidFrom) || route.ValidUntil != nil && !now.Before(*route.ValidUntil) {
 			continue
@@ -81,6 +111,19 @@ func (e *Evaluator) Evaluate(ctx context.Context, request Request) (Result, erro
 	}
 	if err := ctx.Err(); err != nil {
 		return Result{}, err
+	}
+	// An allow stands on its own route: Q-051 / DECISION-003 requires only that
+	// some complete valid route authorizes, and a different route being unusable
+	// says nothing about this one.
+	//
+	// A deny does not. The same table qualifies it — "one failed grant alone does
+	// not establish this if another route could authorize it" — and a route this
+	// gate could not read is exactly a route that might have. So a deny reached
+	// with an unusable route in the answer is not a completed decision; it is a
+	// failure to establish, and the person is told we could not check rather than
+	// that they have no access.
+	if selected == nil && unusable {
+		return Result{}, unusableAuthority(errors.New("every authorizing route was unusable"))
 	}
 	if selected == nil {
 		return Result{
@@ -141,7 +184,9 @@ func validateArea(area Area) error {
 // unusableAuthority names an answer this gate cannot work with.
 //
 // It is an evaluation failure and never the caller's fault, which is the whole
-// distinction Q-128 draws. Returned as a plain error it reached the application
+// distinction Q-051 / DECISION-003 draws: "report inability to complete
+// evaluation as a separate evaluation error, not a third authorization
+// decision". Returned as a plain error it reached the application
 // as "your request was bad": a person would retry a request that was never the
 // problem, and an operator would never learn that the authority service is
 // answering nonsense. The routes here came from the source, not from the
@@ -156,27 +201,36 @@ func unusableAuthority(cause error) *EvaluationError {
 	}
 }
 
-func validateRoute(ctx context.Context, route Route, request Request) error {
-	if route.ValidFrom != nil && route.ValidUntil != nil && !route.ValidFrom.Before(*route.ValidUntil) {
-		return errors.New("invalid route validity interval")
-	}
+// validateAnswer holds a route to the question that was asked. A route about
+// another area or another human means the source answered about somebody else,
+// and that is a statement about the whole answer rather than about one route —
+// so it is the one validation that still fails the evaluation outright.
+func validateAnswer(route Route, request Request) error {
 	if err := validateArea(route.Area); err != nil || route.Area != request.Context.Area {
 		return errors.New("route area does not match query")
 	}
 	if invalidID(route.HumanID) || route.HumanID != request.Context.Identity.HumanID {
 		return errors.New("route human does not match query")
 	}
-	// Every permission is well formed. Whether this route carries the one being
-	// asked about is not validity — an answer about a person names everything
-	// they hold, so a route that does not carry it is ordinary and simply does
-	// not match. That test moved into routeMatches.
-	if len(route.Permissions) == 0 || len(route.Permissions) > maxPermissionsPerRoute {
-		return errors.New("invalid route permission count")
+	return nil
+}
+
+// validateRoute checks what one route needs to be usable. A failure costs that
+// route and nothing else — see the call site.
+//
+// Nothing here validates the *spelling* of a permission. An answer about a
+// person names everything they hold, and the request's own permission is
+// already validated, so a permission string that is not a permission simply
+// cannot equal it. Rejecting the route for carrying one bought nothing and cost
+// every other grant the person held, because the two sides do not agree on the
+// grammar: Auth-AL's codec accepts a permission with a space in it and this
+// package does not.
+func validateRoute(ctx context.Context, route Route, request Request) error {
+	if route.ValidFrom != nil && route.ValidUntil != nil && !route.ValidFrom.Before(*route.ValidUntil) {
+		return errors.New("invalid route validity interval")
 	}
-	for _, permission := range route.Permissions {
-		if !validPermission(permission) {
-			return errors.New("invalid route permission")
-		}
+	if len(route.Permissions) == 0 {
+		return errors.New("route carries no permission")
 	}
 	if len(route.GrantIDs) == 0 || len(route.GrantIDs) > maxGrantsPerRoute {
 		return errors.New("invalid contributing grant count")
