@@ -366,13 +366,29 @@ func (allowAllRegistry) Installed(context.Context, string, string) (bool, error)
 // An assignment is deliberately not a child. Holding a grant *is* an assignment,
 // so counting one would make disable unavailable for every grant anybody holds,
 // and Q-079's operational pause would name an operation nobody could perform.
-func TestQ132RefusesDisableAndDeleteWhileAChildGrantExists(t *testing.T) {
+// parentAndChild seeds a parent and a child grant, neither of them held by
+// anyone. Both halves of Q-132 need a subject whose *only* dependent is a child
+// grant: delete already refused a grant an assignment names, so a parent that is
+// also held is refused either way and says nothing about this rule.
+func parentAndChild(t *testing.T) (domain.Area, lab.TeamFINC17Case, storage.Provider) {
+	t.Helper()
 	area, _ := domain.NewArea("tenant-fin", "hrms")
 	fixture := lab.TeamFINC17(area)
-
-	// A parent and a child, neither of them held by anyone.
-	for _, id := range []string{"fk3x9r2mpppp", "fk3x9r2mcccc"} {
+	// A second parent/child pair whose parent this administrator may not delete,
+	// so a refusal there can be attributed to authorization rather than to the
+	// dependent. A grant with only one of the two problems cannot tell the
+	// orderings apart — the first version of this test used one, and moving the
+	// dependency check above the gate left the suite green.
+	for _, id := range []string{"fk3x9r2mpppp", "fk3x9r2mcccc", lab.UnadministeredGrant(), "fk3x9r2myyyy"} {
 		fixture.Snapshot.Controls[id] = domain.GrantControl{Version: "1", ID: id, Status: "enabled"}
+	}
+	fixture.Snapshot.Contents[domain.GrantKey{ID: lab.UnadministeredGrant(), Revision: 1}] = domain.GrantContent{
+		Version: "1", GrantID: lab.UnadministeredGrant(), Revision: 1, ParentGrantID: "fk3x9r2man0d",
+		Permissions: []string{lab.PayslipRead}, Scope: map[string]string{},
+	}
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2myyyy", Revision: 1}] = domain.GrantContent{
+		Version: "1", GrantID: "fk3x9r2myyyy", Revision: 1, ParentGrantID: lab.UnadministeredGrant(),
+		Permissions: []string{lab.PayslipRead}, Scope: map[string]string{},
 	}
 	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mpppp", Revision: 1}] = domain.GrantContent{
 		Version: "1", GrantID: "fk3x9r2mpppp", Revision: 1, ParentGrantID: "fk3x9r2man0d",
@@ -386,7 +402,12 @@ func TestQ132RefusesDisableAndDeleteWhileAChildGrantExists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer provider.Close()
+	t.Cleanup(func() { _ = provider.Close() })
+	return area, fixture, provider
+}
+
+func TestQ132RefusesDisableAndDeleteWhileAChildGrantExists(t *testing.T) {
+	area, fixture, provider := parentAndChild(t)
 	// One provider, two administrations, because each admits the operation the
 	// other refuses: the stub here admits a status change and not a deletion,
 	// and the lab's own gate the reverse for these grants. Both gates answer
@@ -440,5 +461,39 @@ func TestQ132RefusesDisableAndDeleteWhileAChildGrantExists(t *testing.T) {
 	}
 	if err := service.DeleteGrant(t.Context(), area, fixture.Issuer, "fk3x9r2mpppp"); err != nil {
 		t.Fatalf("deleting the parent once its child is gone: %v", err)
+	}
+}
+
+// The dependency rule answers after the administration gate, on the delete path
+// as on the status one.
+//
+// A caller with no standing over a grant must be told they may not administer
+// it, not that it has a dependent — the second is a fact about somebody else's
+// authority, and answering it is the disclosure the ordering exists to prevent.
+// Nothing tested this for delete: the lab's CheckGrantDelete discarded the grant
+// id, so it was the same decision the caller had already passed, and moving the
+// dependency check above the gate left every package green.
+func TestDeleteRefusesOnAuthorizationBeforeItRefusesOnADependent(t *testing.T) {
+	area, fixture, provider := parentAndChild(t)
+	statusAdmin, err := lab.NewAssignmentStatusAdministration(area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := mutation.New(provider,
+		&lab.RoleAdministration{AssignmentStatusAdministration: statusAdmin},
+		&fixedClock{now: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// This grant has a child AND is one the administrator may not delete. Only
+	// the ordering decides which refusal comes back, and it must be the
+	// authorization one: that a grant has a dependent is a fact about somebody
+	// else's authority.
+	if err := service.DeleteGrant(t.Context(), area, fixture.Issuer, lab.UnadministeredGrant()); !errors.Is(err, domain.ErrRejected) {
+		t.Fatalf("an unadministered parent gave %v, want ErrRejected", err)
+	}
+	// And where the caller does have standing, the dependent is what refuses.
+	if err := service.DeleteGrant(t.Context(), area, fixture.Issuer, "fk3x9r2mpppp"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("a dependent parent gave %v, want ErrConflict", err)
 	}
 }

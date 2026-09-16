@@ -284,9 +284,17 @@ Status: **AGREED — user-proposed rule.** The user directed: "any grant, be it 
 root or a child, cannot be disabled or deleted if it has a child. This is a
 simple rule we have to adopt." One rule, every grant, both operations.
 
-A grant has a dependent when another grant names it as parent, or when an
-assignment references it. While either is true, disable under Q-079 and delete
-under Q-080/Q-082 are both refused. When neither is true, both are available.
+A grant has a dependent when another grant names it as parent. While that is
+true, disable under Q-079 and delete under Q-080/Q-082 are both refused. When it
+is not, both are available.
+
+A dependent is a **child grant**, not an assignment. The distinction is not a
+refinement of the rule but a condition of its being implementable: holding a
+grant *is* an assignment, so counting assignments as dependents would make every
+grant anybody holds undisablable, and Q-079's operational pause would name an
+operation nobody could perform. Delete separately refuses while an assignment
+still names the grant, which is the older rule against leaving a dangling
+reference and is not part of this decision.
 
 There is no exception for a trusted root. A root is an ordinary grant for these
 operations, as [bootstrap authority](bootstrap-authority.md) already says of
@@ -300,11 +308,12 @@ already requires for structural change, now applied to status and removal too.
 
 | Situation | Result |
 |---|---|
-| Disable or delete a grant no other grant or assignment names | Permitted, subject to administrative authorization. |
+| Disable or delete a grant no other grant names as parent | Permitted, subject to administrative authorization. |
 | Disable or delete a grant with an enabled or disabled child grant | Reject; the dependent is removed first. |
-| Disable or delete a grant an assignment still references | Reject; the assignment is removed first. |
+| Disable a grant an assignment still references | Permitted. An assignment is not a dependent; see above. |
+| Delete a grant an assignment still references | Reject — under the older dangling-reference rule, not this one; the assignment is removed first. |
 | The same, where the grant is a trusted root | Reject for the same reason; no separate root rule applies. |
-| A trusted root with no child grant and no assignment | Permitted; establishment governs creation, not removal. |
+| A trusted root no grant names as parent | Permitted; establishment governs creation, not removal. Delete additionally needs no assignment naming it. |
 
 **Rationale / conscious tradeoff.** A dependency is a dependency whichever
 direction it is exercised from, and one rule covering both operations and every
@@ -322,7 +331,9 @@ without any record of theirs having changed.
 
 This supersedes the disable-propagation cases B09, B10 and B11 in the
 [parent-grant bindings](parent-grant-bindings.md) matrix, which describe a parent
-being disabled beneath live dependents — a state this rule prevents.
+being disabled beneath live **child grants** — a state this rule prevents. B06,
+where a grant held by two recipients is disabled, is untouched and remains
+reachable: its holders are assignments, not dependents.
 
 Exact operation permission names, the representation of "has a dependent" in
 published contracts, and bulk or cascading dismantle operations remain open. No
