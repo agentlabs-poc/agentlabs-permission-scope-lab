@@ -4,7 +4,7 @@ Captured from a real run of `verify-resolve.sh`, then rendered into this file **
 that capture**. The SVG beside it is generated from the same capture, so the
 image and this file cannot drift.
 
-`315` lines captured, 13 commands. Reproduce with:
+`317` lines captured, 13 commands. Reproduce with:
 
 ```sh
 $(sess path)/verify-resolve.sh
@@ -169,8 +169,9 @@ rc=0
 
 ## THE SAME CALL, NARROWED TO ONE PERMISSION
 
-> (the gate passes no filter at all — it asks what she holds and caches
-> the answer. A narrowing is for a caller that wants less than everything.)
+> (the gate passes no filter at all — it asks what she holds, which is the
+> shape that could be cached against her. Nothing caches yet. A narrowing
+> is for a caller that wants less than everything.)
 
 ```console
 abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::write
@@ -261,10 +262,11 @@ rc=0
 
 ## A FILTER IS A NARROWING, NOT AN ASSERTION
 
-> (three permissions the catalog does not supply: one never registered,
-> one registered and then retired, one registered and simply not held.
-> All three are the same answer — empty, rc=0 — and the gate denies on
-> each. Asking about a permission is not a question this service answers.)
+> (three permissions that resolve to nothing: one never registered, one
+> registered and then retired, one registered and active that she simply
+> does not hold. All three are the same answer — empty, rc=0 — and the
+> gate denies on each. Asking whether a permission exists is not a
+> question this service answers.)
 
 ```console
 abv catalog set-permission-status hrms:payroll:payslip::write --active false

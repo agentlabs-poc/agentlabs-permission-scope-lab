@@ -92,7 +92,7 @@ func (f failingAuthority) Load(context.Context, authmiddleware.AuthorityQuery) (
 //
 // Its suite passed while every evaluation failure rendered as a denial: the
 // branches were reached only by a test two modules away, so `go test ./...` here
-// was a false green on the distinction Q-128 exists to protect — an outage must
+// was a false green on the distinction Q-051 exists to protect — an outage must
 // never be reported as "you may not".
 func TestAnOutageIsNotADenial(t *testing.T) {
 	for name, tc := range map[string]struct {

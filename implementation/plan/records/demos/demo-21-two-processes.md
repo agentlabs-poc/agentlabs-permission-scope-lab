@@ -11,7 +11,7 @@ decision is new — the chain walk is the same code demonstration 20 captured.
 What is new is *where it runs*: the question crosses a network, and the
 application that asks holds no authority records at all.
 
-`160` lines captured, 13 commands. Reproduce with:
+`161` lines captured, 13 commands. Reproduce with:
 
 ```sh
 $(sess path)/verify-two-processes.sh
@@ -25,10 +25,13 @@ $(sess path)/verify-two-processes.sh
 > having no grant — and the requests are what say what her route selects.)
 
 ```console
-$ abv scenario seed team-fin-c17
+abv scenario seed team-fin-c17
 LAB ONLY: fixed fixture identity; not authenticated administration
 scenario seeded
-$ abv assign --file a2.json   (Team2, so nutan has a route at all)
+```
+
+```console
+abv assign --file a2.json   (Team2, so nutan has a route at all)
 LAB ONLY: fixture-context is not authenticated identity; both authority gates are rechecked
 assignment fm5b7t4pan0d created
 ```
@@ -39,9 +42,12 @@ assignment fm5b7t4pan0d created
 > it is given a URL where it used to be given a database path.)
 
 ```console
-$ auth-service --authority authority.db --registry registry.db --listen 127.0.0.1:8080
+auth-service --authority authority.db --registry registry.db --listen 127.0.0.1:8080
 auth-service listening on 127.0.0.1:8080 for acme/hrms
-$ HRMS_AUTH_TOKEN=... hrms --auth http://127.0.0.1:8080 --listen 127.0.0.1:8081 --client agent_hrms --allow-cleartext
+```
+
+```console
+HRMS_AUTH_TOKEN=... hrms --auth http://127.0.0.1:8080 --listen 127.0.0.1:8081 --client agent_hrms --allow-cleartext
 hrms listening on 127.0.0.1:8081, asking http://127.0.0.1:8080 as agent_hrms
 ```
 
@@ -50,7 +56,7 @@ hrms listening on 127.0.0.1:8081, asking http://127.0.0.1:8080 as agent_hrms
 > (maya holds payslip read and write within dept=FIN)
 
 ```console
-$ curl -X GET  /api/v1/acme/FIN/C17                             (inside her boundary)
+curl -X GET  /api/v1/acme/FIN/C17                             (inside her boundary)
 {
     "tenant_id": "acme",
     "department_id": "FIN",
@@ -60,7 +66,10 @@ $ curl -X GET  /api/v1/acme/FIN/C17                             (inside her boun
     "title": "FIN annual"
 }
 200
-$ curl -X GET  /api/v1/acme/ENG/C18                             (outside it)
+```
+
+```console
+curl -X GET  /api/v1/acme/ENG/C18                             (outside it)
 {
     "version": "1",
     "decision": "deny",
@@ -78,7 +87,7 @@ $ curl -X GET  /api/v1/acme/ENG/C18                             (outside it)
 > are chosen by each child; scope is inherited and narrowed.)
 
 ```console
-$ curl -X GET  /api/v1/acme/FIN/C17                             (nutan may read it)
+curl -X GET  /api/v1/acme/FIN/C17                             (nutan may read it)
 {
     "tenant_id": "acme",
     "department_id": "FIN",
@@ -88,7 +97,10 @@ $ curl -X GET  /api/v1/acme/FIN/C17                             (nutan may read 
     "title": "FIN annual"
 }
 200
-$ curl -X PUT  /api/v1/acme/certificates/C17                    (maya may write)
+```
+
+```console
+curl -X PUT  /api/v1/acme/certificates/C17                    (maya may write)
 {
     "tenant_id": "acme",
     "department_id": "FIN",
@@ -98,7 +110,10 @@ $ curl -X PUT  /api/v1/acme/certificates/C17                    (maya may write)
     "title": "revised"
 }
 200
-$ curl -X PUT  /api/v1/acme/certificates/C17                    (nutan may not)
+```
+
+```console
+curl -X PUT  /api/v1/acme/certificates/C17                    (nutan may not)
 {
     "version": "1",
     "decision": "deny",
@@ -116,7 +131,7 @@ $ curl -X PUT  /api/v1/acme/certificates/C17                    (nutan may not)
 > maya could have seen.)
 
 ```console
-$ curl -X GET  /api/v1/acme/certificates                        (maya, every department)
+curl -X GET  /api/v1/acme/certificates                        (maya, every department)
 {
     "version": "1",
     "decision": "deny",
@@ -125,7 +140,10 @@ $ curl -X GET  /api/v1/acme/certificates                        (maya, every dep
     "error_message_reason": "No grant authorizes this operation within the requested boundary."
 }
 403
-$ curl -X GET  /api/v1/acme/departments/FIN/certificates        (maya, within FIN)
+```
+
+```console
+curl -X GET  /api/v1/acme/departments/FIN/certificates        (maya, within FIN)
 [
     {
         "tenant_id": "acme",
@@ -150,31 +168,43 @@ $ curl -X GET  /api/v1/acme/departments/FIN/certificates        (maya, within FI
 ## WHAT CROSSED THE BOUNDARY
 
 > (one question per request, and the body is the claim worth checking:
-> the application asks what a human holds — never whether to allow)
+> the application asks what a human holds — never whether to allow, and
+> no longer even which permission it is about)
 
-```console
-auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
-      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
-auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
-      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
-auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
-      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjwu8"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
-auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
-      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::write"]}}
-auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
-      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjwu8"},"options":{"permissions":["hrms:payroll:payslip::write"]}}
-auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
-      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
-auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve
-      {"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":["hrms:payroll:payslip::read"]}}
-```
+**auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve**
+
+**{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{}}**
+
+**auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve**
+
+**{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{}}**
+
+**auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve**
+
+**{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjwu8"},"options":{}}**
+
+**auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve**
+
+**{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{}}**
+
+**auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve**
+
+**{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjwu8"},"options":{}}**
+
+**auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve**
+
+**{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{}}**
+
+**auth  <- POST /api/v1/acme/abv/applications/hrms/authority.resolve**
+
+**{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{}}**
 
 ## WHAT THE APPLICATION LINKS
 
 > (the claim the split exists to make, checked rather than trusted)
 
 ```console
-$ go list -deps ./cmd/hrms | grep agentlabs
+go list -deps ./cmd/hrms | grep agentlabs
 agentlabs.local/authmiddleware
 agentlabs.local/apps/hrms
 agentlabs.local/authclient
@@ -183,11 +213,11 @@ agentlabs.local/apps/hrms/cmd/hrms
 
 ## AND WHEN AUTH IS DOWN
 
-> (an outage is an evaluation failure, never a denial — Q-128. A gate
+> (an outage is an evaluation failure, never a denial — Q-051. A gate
 > that answered 403 here would fail closed and lie about why.)
 
 ```console
-$ curl -X GET  /api/v1/acme/FIN/C17                             (auth service stopped)
+curl -X GET  /api/v1/acme/FIN/C17                             (auth service stopped)
 {
     "version": "1",
     "error_code": "AUTH_UNREACHABLE",
@@ -196,26 +226,31 @@ $ curl -X GET  /api/v1/acme/FIN/C17                             (auth service st
 }
 503
 ```
+
 ## What the run establishes
 
 | Claim | The evidence above |
 |---|---|
 | The gate runs on the client | `hrms` answers 200 and 403 itself; Auth is never asked whether to allow |
 | The application links no authority domain | `go list -deps` names `authmiddleware`, `authclient` and `apps/hrms` — not `abv`, not `registry` |
-| The wire carries authority, not decisions | the seven bodies are printed in full: each names a human and one permission to filter the answer to, and **no** endpoint, method, resource or verdict |
+| The wire carries authority, not decisions | the seven bodies are printed in full: each names a human, `"options":{}`, and **no** permission, endpoint, method, resource or verdict |
 | Permissions are selected, scope is inherited | nutan reads the certificate and cannot write it; maya writes the same one through the same endpoint and the same policy |
 | An all-values ask is a deny | the listing endpoint names no department, and Q-071 refuses rather than quietly narrowing to what maya could have seen |
-| An outage is not a denial | Auth stopped gives `503` `AUTH_UNREACHABLE`, never `403` — Q-128 |
+| An outage is not a denial | Auth stopped gives `503` `AUTH_UNREACHABLE`, never `403` — Q-051 / DECISION-003 |
 
 The application's policy table declares **four** endpoints across **two**
 permissions (`hrms:payroll:payslip::read` and `…::write`), and all four appear
 above.
 
-The seven bodies differ in exactly two fields — `human_id`, and the one
-permission in `options.permissions`. They are otherwise the same question, and
-it is a question about a person, not about a request. That is the architectural
-claim of the whole lab, and here it is the capture rather than the prose that
-makes it.
+The seven bodies differ in exactly **one** field — `human_id`. They are otherwise
+the same question, and it is a question about a person, not about a request.
+That is the architectural claim of the whole lab, and here it is the capture
+rather than the prose that makes it.
+
+They used to differ in two: the question named the permission the endpoint was
+guarding, which narrowed the reply to that one request and made it worthless to
+anyone else. `options` is now empty, and the answer describes the person — the
+shape that can be cached against them, though nothing caches yet.
 
 ## Where the policy comes from
 
@@ -250,10 +285,12 @@ application is known by is deliberately not the secret it authenticates with.
 asks again from scratch, which is correct and says nothing about what a cache
 would have to invalidate.
 
-**That the policy is right.** The gate enforces the permission the policy names.
-Nothing checks that the permission exists in the application's catalog, so a
-typo would deny every request to that endpoint, permanently and without saying
-why.
+**That the policy is right.** The gate enforces the permission the policy names,
+and nothing checks that it exists in the application's catalog — deliberately.
+A filter is a narrowing, not an assertion: the client never asks whether a
+permission exists, so a typo denies every request to that endpoint, permanently
+and without saying why. The endpoint owns its policy and is tested beside the
+handler it guards, which is where a typo is caught.
 
 ## Held by tests, not only by this capture
 
@@ -262,7 +299,8 @@ A capture proves something ran once. These hold it:
 | Test | What fails without it |
 |---|---|
 | `wiring.TestEveryEndpointForBothHumans` | the matrix above, as assertions — every endpoint for both women |
-| `wiring.TestAnAuthThatMisbehavesCannotDecideAnything` | an Auth that answers about another human, another area, another permission, another version, or not in JSON at all can decide something |
+| `wiring.TestAnAuthThatMisbehavesCannotDecideAnything` | an Auth that answers about another human, another area, another version, or not in JSON at all can decide something |
+| `wiring.TestAGrantForAnotherPermissionDeniesRatherThanFailing` | a grant for a permission this request is not about is reported as a broken Auth rather than denied |
 | `wiring.TestARedirectNeverReachesTheAttacker` | a `Location` header takes the credential and authors the answer |
 | `wiring.TestThePathCannotChooseTheTenant` | the path moves the area the question is about |
 | `wiring.TestOneRequestAsksExactlyOneQuestion` | a silent cache, or a doubled question |

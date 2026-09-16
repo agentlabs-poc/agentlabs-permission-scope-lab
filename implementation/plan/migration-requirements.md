@@ -29,8 +29,19 @@ of the trusted context with a *declared input*:
 
 read as *the input I call `tenant` must equal the trusted tenant*. The gate
 compares the input's resolved value, so no path spelling is load-bearing, and a
-policy declaring no tenant correlation cannot be mounted. That is what turns the
-silent case into an impossible one.
+policy declaring no tenant correlation cannot be mounted.
+
+Three rules, not two — the third was missing on the first attempt and the entry
+claimed the silent case was impossible while it was not. Nothing required the
+correlation to name the input that actually carries the route's claim, so a
+policy could hold `{tenant}` in its path, point its correlation elsewhere, and
+the segment the handler reads went unchecked. A path placeholder spelled with a
+trusted field's own name must now be read by the input that field correlates.
+That fires only on this gate's two field names, spelled exactly; a path that
+calls it `{org}` is covered by the mandatory correlation instead.
+
+`trusted` is a required field, to decode and to mount. A policy document carrying
+only version, method, path, permission and inputs is refused.
 
 **Why a declaration rather than a rule.** The alternative was for the gate to
 refuse any path segment it could not account for, which needs it to guess which
@@ -38,7 +49,12 @@ segments are tenant-shaped — a heuristic that catches `tenant_id` and misses
 `org`. A declaration has nothing to guess: the endpoint already knows.
 
 **What the migration owes.** The published policy format is a handbook chapter,
-so the `trusted` field is **a proposal**, not an adopted contract. It is not the
+so the `trusted` field is **a proposal**, not an adopted contract. Note also what
+was given up: the gate previously held *every* route tenant to the trusted one
+unconditionally, by spelling. The declaration is stronger where the spelling
+differed and weaker where it matched, and only the mount rule above closes the
+gap. A deployment adopting this shape has to decide whether a correlation is
+required for every trusted field a path exposes. It is not the
 machinery CONTRACT-012 declined — that was a relationship language between
 application *records*, needing a resolver interface; a correlation between
 trusted context and a declared input needs neither, since both are already in the
@@ -66,6 +82,13 @@ would make disable unavailable for every grant anybody holds.
 The migration inherits the rule, not a lab default. What the handbook still
 leaves open is named in the entry: operation permission names, how "has a
 dependent" is represented in published contracts, and bulk dismantle.
+
+Two assignment-side root special cases went with the grant-side ones: delete of
+an assignment, and its status change, each refused while the grant was a trusted
+root. Q-132 does not cover them — it is about grants — and their old
+justification, that deleting one takes the root's holder away and leaves a
+ceiling nobody holds, is not replaced by anything. **Open for the migration:**
+whether a root's last holder may be removed, and what it means if it is.
 
 ---
 
@@ -112,3 +135,26 @@ denial never reaches the effect at all. hrms demonstrates it on the write path.
 
 **What the migration owes.** Somewhere for it to go. Audit recording is still
 unbuilt, and it is the consumer this evidence exists for.
+
+---
+
+## 6 · What a retirement does to a mixed grant
+
+**What the lab does.** Retiring one permission withdraws every route through a
+grant that selects it — including routes *beneath* that grant which select only
+permissions still supplied. Demonstration 18 captures it: maya holds a grant for
+`::read` and `::write` at `dept=FIN`, and a deeper one for `::read` alone at
+`cert=C17`; retiring `::write` leaves her holding nothing at all, because the
+deeper route's chain runs through the mixed grant.
+
+**Why it is not a defect.** [Permission lifecycle](../../docs/permission-lifecycle.md)
+says so in terms under Q-125's remaining contract boundaries: *"This decision
+specifies loss of the retired permission; it does not settle every consequence
+for other still-supported permissions in a mixed grant."* The route-wise outcome
+is defensible under `authority-lineage.md:169`, and it is fail-closed.
+
+**What the migration owes.** The settlement. The available answers are that a
+mixed grant loses only the retired permission and keeps narrowing beneath it,
+or that it is withdrawn whole as it is here. Either is defensible; the lab
+implements the second because it is what the chain walk already did, not because
+it was chosen.

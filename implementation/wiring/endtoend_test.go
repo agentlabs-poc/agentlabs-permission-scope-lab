@@ -123,9 +123,9 @@ func TestAnApplicationDecidesOverTheWire(t *testing.T) {
 	}
 }
 
-// An unreachable Auth is an evaluation failure and never a denial. Q-128 is
-// explicit, and a gate that answered "deny" here would fail closed in the
-// reassuring direction while lying about why.
+// An unreachable Auth is an evaluation failure and never a denial. Q-051 /
+// DECISION-003 is explicit, and a gate that answered "deny" here would fail
+// closed in the reassuring direction while lying about why.
 func TestAnUnreachableAuthIsNotADenial(t *testing.T) {
 	down := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	down.Close()

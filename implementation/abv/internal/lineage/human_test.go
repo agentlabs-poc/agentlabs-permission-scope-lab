@@ -535,8 +535,9 @@ func TestOneIneligibleRouteDoesNotRemoveTheRest(t *testing.T) {
 
 // A narrowing may name the same permission twice. It narrows to the same set,
 // so there is nothing malformed about it — unlike a grant's selection, where a
-// repeat is a malformed record. Validating the filter as one list applied the
-// grant's rule to the question and refused a legal one.
+// repeat is a malformed record, which is why the filter is validated per item
+// rather than as one list. This pins behaviour that was already correct; it is
+// not a regression guard for the catalog-lookup removal.
 func TestARepeatedFilterEntryIsALegalNarrowing(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	f := lab.TeamFINC17(area)

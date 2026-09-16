@@ -111,8 +111,9 @@ func routesFor(resolved domain.ResolvedAuthority, query authmiddleware.Authority
 	// The same four things the HTTP source checks, for the same reasons. Both
 	// implementations answer one contract, and an invariant enforced on one side
 	// and trusted on the other is how the two drift — this side was the trusting
-	// one, and closing only the permission check left three quarters of the
-	// asymmetry in place.
+	// one. The permission corroboration that used to sit beside these is gone
+	// from both sides: the answer is not filtered by permission any more, so a
+	// grant that does not carry the one in hand is ordinary.
 	//
 	// Nothing in-process can produce these today: ResolveAuthority answers about
 	// the area and human it was asked about. That is what makes it defence in

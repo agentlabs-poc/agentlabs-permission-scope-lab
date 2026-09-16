@@ -95,6 +95,11 @@ type Policy struct {
 	Path       string           `json:"path"`
 	Permission string           `json:"permission"`
 	Inputs     map[string]Input `json:"inputs"`
+	// Trusted correlates a field of the trusted request context with a declared
+	// input: {"tenant":"tenant"} reads as "the input I call tenant must equal
+	// the trusted tenant". It is required, to decode and to mount, so a policy
+	// document carrying only the five fields above is refused.
+	Trusted map[string]string `json:"trusted"`
 }
 
 type SelectionKind uint8
@@ -121,9 +126,11 @@ type Request struct {
 	Material   Material
 }
 
+// AuthorityQuery names the human and the area, and nothing else. The gate asks
+// what this person holds here, not whether they hold one thing, so the answer
+// describes the person and is worth caching against them.
 type AuthorityQuery struct {
-	Context    RequestContext
-	Permission string
+	Context RequestContext
 }
 
 type Predicate struct {
@@ -136,9 +143,10 @@ type Predicate struct {
 // duplicate-free contributing chain for traceability. ValidUntil is the earliest
 // automatic expiry in the route; nil means no automatic expiry was present.
 type Route struct {
-	Area        Area
-	HumanID     string
-	Permission  string
+	Area    Area
+	HumanID string
+	// Permissions is what this route's grant carries, not what was asked about.
+	Permissions []string
 	GrantIDs    []string
 	Predicates  []Predicate
 	ValidFrom   *time.Time
@@ -234,7 +242,11 @@ A successful `Establish` means authentication, tenant binding, application
 binding, and direct-human identity were established by a trusted host adapter.
 The first slice accepts only `version == "1"`, actor type `user`, non-empty IDs,
 and `Actor.ID == HumanID`. Tenant/application must be non-empty, non-wildcard,
-valid UTF-8 values. The route/path tenant must equal the established tenant.
+valid UTF-8 values. A route claim the policy correlates with the trusted context
+must equal it — the tenant always, the application where the path carries one.
+The gate compares the resolved value of the *declared input*, and a path
+placeholder spelled with a trusted field's own name must be the input that field
+correlates, so the binding cannot be declared past.
 
 JWT verification, issuer/audience/time checks, proxy association, and delegation
 evidence belong to a later production adapter. The harness may inject a fixed
@@ -244,8 +256,8 @@ identity, but must label it trusted test setup rather than authentication proof.
 
 A successful `Load(q)` makes one indivisible assertion: `Routes` is the complete
 set of currently usable routes applicable to `q.Context.Identity.HumanID` in the
-exact area for `q.Permission`, including direct-human membership in groups that
-hold assignments. An empty successful set conclusively means no applicable route;
+exact area — every permission they hold there, not a subset for one — including
+direct-human membership in groups that hold assignments. An empty successful set conclusively means no applicable route;
 an error never means an empty set.
 
 `Authority` intentionally does not echo area, identity, query, trust, or

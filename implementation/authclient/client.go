@@ -37,10 +37,12 @@ func refuseRedirect(*http.Request, []*http.Request) error { return http.ErrUseLa
 
 // Error is a failure to establish authority, which is never a denial.
 //
-// Q-128 is explicit that the two must stay apart: "Failure to establish evidence
-// remains an evaluation failure, distinct from a policy denial." A gate that
-// turned an unreachable Auth into a deny would fail closed in the reassuring
-// direction and lie about why.
+// Q-051 / DECISION-003 is where the two are held apart: "report inability to
+// complete evaluation as a separate evaluation error, not a third authorization
+// decision". Q-128 restates it in passing for the freshness case, which is how
+// it came to be cited here for the rule itself. A gate that turned an
+// unreachable Auth into a deny would fail closed in the reassuring direction and
+// lie about why.
 type Error struct {
 	Code    string
 	Message string

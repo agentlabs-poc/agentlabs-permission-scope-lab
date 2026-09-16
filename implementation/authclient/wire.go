@@ -39,9 +39,15 @@ type resolveRequest struct {
 	Options  options  `json:"options"`
 }
 
-// options mirror domain.ResolveOptions without importing it. The source is not
-// omitted: the approved allow block requires grant_ids, and grant_ids is the
-// contributing chain, which only the explanation carries.
+// options mirror domain.ResolveOptions without importing it.
+//
+// This client sets neither field, and both are kept because they are the wire's
+// shape rather than this client's choice — a reader of the contract should see
+// what the server accepts. Permissions is unset because the complete answer is
+// the cacheable one. OmitSource is unset because the approved allow block
+// requires grant_ids, and grant_ids is the contributing chain, which only the
+// explanation carries — so the one caller the option was written for is the one
+// that cannot use it.
 type options struct {
 	Permissions []string `json:"permissions,omitempty"`
 	OmitSource  bool     `json:"omit_source,omitempty"`
