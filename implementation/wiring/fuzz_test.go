@@ -69,6 +69,19 @@ func fuzzHandler(t *testing.T) http.Handler {
 			fuzzSetup = err
 			return
 		}
+		// crm is installed in this tenant and is not the caller's application.
+		// Without it, TestAreasTheCallerCannotAskAboutAreIndistinguishable was
+		// comparing three spellings of one code path — every case took the
+		// not-found route, and the case the test is named for, an area that
+		// exists and is not yours, never ran.
+		if _, err := service.Applications().RegisterApplication(context.Background(), operator, "crm", "CRM"); err != nil {
+			fuzzSetup = err
+			return
+		}
+		if err := service.Applications().Install(context.Background(), operator, "acme", "crm"); err != nil {
+			fuzzSetup = err
+			return
+		}
 		fuzzService_ = service
 		fuzzMux, fuzzSetup = service.Handler(agents{})
 	})

@@ -117,10 +117,18 @@ func collectHumanRoutes(ctx context.Context, s storage.Snapshot, identity domain
 		if key != assignment.ID {
 			return fail(domain.ErrRejected)
 		}
+		// A direct human assignment is not an eligible route here — group-held
+		// support is deliberate, and enforced at both write and read. It is one
+		// route's ineligibility, so it is skipped like any other, for this human
+		// exactly as for anybody else.
+		//
+		// It used to abort the whole answer when the recipient *was* the subject,
+		// which made the difference observable: a caller could tell whether a
+		// named human held a direct assignment by whether the question came back
+		// 501 or 200. That is the enumeration this service merges its refusals to
+		// prevent, reopened one error kind over — and it also took away every
+		// group route the human legitimately held.
 		if assignment.Recipient.Type == "user" {
-			if assignment.Recipient.ID == identity.HumanID {
-				return fail(domain.ErrUnsupported)
-			}
 			continue
 		}
 		if assignment.Recipient.Type != "group" || !teams[assignment.Recipient.ID] {
@@ -131,7 +139,14 @@ func collectHumanRoutes(ctx context.Context, s storage.Snapshot, identity domain
 			return fail(contextErr)
 		}
 		if err != nil {
-			if errors.Is(err, ErrInactive) {
+			// "Missing support stops the affected authority route, not
+			// necessarily all authority of that user or group" —
+			// authority-lineage.md:169. Only ErrInactive was skipped, so a
+			// permission retired in one grant, a missing role revision, or a
+			// child that no longer narrows its parent took away every *other*
+			// grant the human held — and through localsource that reached the
+			// application as an outage rather than a denial.
+			if routeScoped(err) {
 				continue
 			}
 			return fail(err)
@@ -162,4 +177,28 @@ func carries(permissions, filter []string) bool {
 		}
 	}
 	return false
+}
+
+// routeScoped reports whether a failure describes one route rather than the
+// answer as a whole.
+//
+// Two kinds qualify, and they are the two a chain walk says about the chain it
+// walked: support that is disabled or lapsed, and authority that no longer holds
+// — a retired permission, a missing role revision, a child outside its parent.
+//
+// Everything else stays fatal, deliberately. A cycle, a duplicate binding, a
+// status the model does not define and a record the walk could not read are
+// integrity failures of the area, and none of them licenses answering "this
+// human holds nothing" when the truth is that nobody knows.
+//
+// Two narrowings got this right, each after getting it wrong. Widening to every
+// rejection was the first attempt, and two existing tests caught it — they are
+// named for failing closed on invalid evidence, which is what it would have
+// stopped doing. Then the wrap itself was too wide: it covered every CheckContent
+// failure, including the malformed and unsupported ones that describe a row
+// which is not a record at all. A review caught that, and it was invisible
+// because the provider rejects most such rows at load — a coupling in another
+// package that nothing asserts, holding up a guard that claims to be the check.
+func routeScoped(err error) bool {
+	return errors.Is(err, ErrInactive) || errors.Is(err, ErrIneligible)
 }

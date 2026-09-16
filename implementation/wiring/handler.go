@@ -116,8 +116,41 @@ func (s *Service) resolve(agents AgentIdentity, observers []Observer, w http.Res
 		fail(w, http.StatusNotImplemented, "UNSUPPORTED_VERSION")
 		return
 	}
+	// The identity block states its own contract version, so that the identity
+	// contract can evolve independently of the transport one
+	// (identity-context.md). It was decoded and discarded, which meant a v2
+	// block — one where human_id became a tenant-qualified reference, say — was
+	// read by a v1 server as a bare human id and answered about whoever that
+	// spelling happened to name. CONTRACT-010 is explicit that a consumer
+	// rejects an unsupported version rather than guessing a default.
+	if asked.Identity.Version != "1" {
+		fail(w, http.StatusNotImplemented, "UNSUPPORTED_VERSION")
+		return
+	}
 	// The subject comes from the body; the actor comes from the credential. That
 	// is the whole shape: an application asks as itself about somebody else.
+	//
+	// What the body *claims* about the actor is read only to refuse a claim that
+	// contradicts the credential. It is never adopted: a body has no way to
+	// prove who is asking, and the day somebody wires delegation evidence in is
+	// the day that distinction stops being free.
+	if claimed := asked.Identity.Actor; claimed.Type != "" || claimed.ID != "" {
+		if claimed.Type != caller.Actor.Type || claimed.ID != caller.Actor.ID {
+			// Malformed, not unentitled. The body contradicts the credential it
+			// arrived with, which is a request that does not describe one thing —
+			// and it is the caller's own two statements disagreeing, so nothing
+			// about this answer depends on the area, and the merged-403 policy
+			// has nothing to hide here.
+			//
+			// The kind matters operationally. A client configured with the wrong
+			// application id sends that id on every request, so this refuses all
+			// of them; as an entitlement answer it read as "you may not ask about
+			// this tenant" and the application turned it into a permanent 503
+			// with nothing naming the cause.
+			fail(w, http.StatusBadRequest, "MISMATCHED_ACTOR")
+			return
+		}
+	}
 	caller.HumanID = asked.Identity.HumanID
 	resolved, err := s.authority.ResolveAuthority(r.Context(), area, caller, domain.ResolveOptions{
 		Permissions: asked.Options.Permissions, OmitSource: asked.Options.OmitSource,

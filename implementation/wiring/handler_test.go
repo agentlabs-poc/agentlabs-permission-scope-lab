@@ -52,7 +52,21 @@ func TestTheHandlerRefusesWithTheRightKind(t *testing.T) {
 		"a repeated field":    {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","version":"1","identity":{"version":"1","human_id":"a"},"options":{}}`, http.StatusBadRequest, "MALFORMED_REQUEST"},
 		"a trailing document": {"/api/v1/acme/abv/applications/hrms/authority.resolve", goodBody + `{"evil":1}`, http.StatusBadRequest, "MALFORMED_REQUEST"},
 		"another version":     {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"9","identity":{"version":"1","human_id":"a"},"options":{}}`, http.StatusNotImplemented, "UNSUPPORTED_VERSION"},
-		"a blank subject":     {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":" "},"options":{}}`, http.StatusBadRequest, "MALFORMED_REQUEST"},
+		// The identity block carries its own contract version so that contract can
+		// evolve independently of the transport one. It was decoded and thrown
+		// away, so a v2 block was read under v1 rules.
+		"an identity from another version": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"9","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{}}`, http.StatusNotImplemented, "UNSUPPORTED_VERSION"},
+		"an identity stating no version":   {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{}}`, http.StatusNotImplemented, "UNSUPPORTED_VERSION"},
+		// A body cannot prove who is asking. Claiming an actor other than the one
+		// the credential established is refused rather than ignored, so the day
+		// somebody wires delegation evidence in, the claim is already not free.
+		"a body claiming another actor": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"user","id":"fi7io4lvjqio"},"human_id":"fi7io4lvjqio"},"options":{}}`, http.StatusBadRequest, "MISMATCHED_ACTOR"},
+		// Same credential, same application, only the id misspelt — which is what
+		// a client configured with the wrong --client sends on every request. It
+		// must say so, rather than read as an entitlement refusal that the
+		// application then renders as a permanent outage.
+		"a body claiming a near-miss of its own actor": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrm"},"human_id":"fi7io4lvjqio"},"options":{}}`, http.StatusBadRequest, "MISMATCHED_ACTOR"},
+		"a blank subject": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":" "},"options":{}}`, http.StatusBadRequest, "MALFORMED_REQUEST"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			status, code := post(t, handler, tc.path, tc.body)

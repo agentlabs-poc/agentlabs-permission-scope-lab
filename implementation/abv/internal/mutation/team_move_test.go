@@ -22,7 +22,10 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	build := func(t *testing.T, bindBeneath bool, status string) *mutation.Service {
+	// Which branch holds the binding. A walk that followed one path would be
+	// caught by one of these and not the other, whichever path it chose — with a
+	// single fixture it was only caught by half the possible bugs.
+	build := func(t *testing.T, bindBeneath bool, status, branch string) *mutation.Service {
 		t.Helper()
 		fixture := lab.TeamFINC17(area)
 		snapshot := fixture.Snapshot
@@ -31,9 +34,18 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 		// to a fixpoint, and a walk that stopped at direct children would have
 		// passed every test until this one: the claim the commit makes loudest
 		// is that "affected" reaches all the way down.
+		//
+		// It also branches. B18: "inspect all affected bindings and descendants,
+		// not one path" — so the bound subtree hangs off the *second* child by
+		// id, and a walk that followed one branch would miss it.
+		snapshot.Teams["fibggi2ja000"] = domain.Team{ID: "fibggi2ja000", Name: "fp8h2w6ya000", ParentID: "fibggi2juxhc"}
+		snapshot.Teams["fibggi2ja001"] = domain.Team{ID: "fibggi2ja001", Name: "fp8h2w6ya001", ParentID: "fibggi2ja000"}
 		snapshot.Teams["fibggi2jv4hu"] = domain.Team{ID: "fibggi2jv4hu", Name: "fp8h2w6yv4hu", ParentID: "fibggi2juxhc"}
 		snapshot.Teams["fibggi2jv5k0"] = domain.Team{ID: "fibggi2jv5k0", Name: "fp8h2w6yv5k0", ParentID: "fibggi2jv4hu"}
+		// The bound team sits at the foot of whichever branch the case names.
+		bound := map[string]string{"first": "fibggi2ja001", "last": "fibggi2jv5k0"}[branch]
 		snapshot.Memberships = append(snapshot.Memberships, domain.Membership{TeamID: "fibggi2jv5k0", HumanID: "fi7io4lvk35s"})
+		snapshot.Memberships = append(snapshot.Memberships, domain.Membership{TeamID: "fibggi2ja001", HumanID: "fi7io4lvk35s"})
 		snapshot.Controls["fk3x9r2mv5k0"] = domain.GrantControl{Version: "1", ID: "fk3x9r2mv5k0", Status: "enabled"}
 		snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mv5k0", Revision: 1}] = domain.GrantContent{
 			Version: "1", GrantID: "fk3x9r2mv5k0", Revision: 1, ParentGrantID: "fk3x9r2man0d",
@@ -42,7 +54,7 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 		if bindBeneath {
 			snapshot.Assignments["fm5b7t4pv5k0"] = domain.Assignment{
 				Version: "1", ID: "fm5b7t4pv5k0", GrantID: "fk3x9r2mv5k0", GrantRevision: 1,
-				Recipient: domain.Recipient{Type: "group", ID: "fibggi2jv5k0"}, Status: status,
+				Recipient: domain.Recipient{Type: "group", ID: bound}, Status: status,
 			}
 		}
 		provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{snapshot})
@@ -67,22 +79,24 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 	// Team2 itself holds nothing in either case, so the only difference is one
 	// binding two levels down.
 	t.Run("nothing beneath it", func(t *testing.T) {
-		if _, err := build(t, false, "enabled").SetTeamParent(t.Context(), area, publisher, "fibggi2juxhc", "fibggi2jur5s"); err != nil {
+		if _, err := build(t, false, "enabled", "last").SetTeamParent(t.Context(), area, publisher, "fibggi2juxhc", "fibggi2jur5s"); err != nil {
 			t.Fatalf("moving a team with nothing beneath it was refused: %v", err)
 		}
 	})
-	t.Run("an enabled binding beneath it", func(t *testing.T) {
-		if _, err := build(t, true, "enabled").SetTeamParent(t.Context(), area, publisher, "fibggi2juxhc", "fibggi2jur5s"); !errors.Is(err, domain.ErrConflict) {
-			t.Fatalf("moving a team above an enabled binding gave %v, want ErrConflict", err)
-		}
-	})
+	for _, branch := range []string{"first", "last"} {
+		t.Run("an enabled binding beneath its "+branch+" branch", func(t *testing.T) {
+			if _, err := build(t, true, "enabled", branch).SetTeamParent(t.Context(), area, publisher, "fibggi2juxhc", "fibggi2jur5s"); !errors.Is(err, domain.ErrConflict) {
+				t.Fatalf("moving a team above an enabled binding gave %v, want ErrConflict", err)
+			}
+		})
+	}
 	// A disabled binding holds nothing, so there is nothing of its to
 	// re-anchor, and it must not stop the move. Without this the guard could
 	// quietly become "any binding at all", which would make a team unmovable
 	// forever once anything below it had ever been bound — disabled records are
 	// retained, so that state never clears.
 	t.Run("a disabled binding beneath it", func(t *testing.T) {
-		if _, err := build(t, true, "disabled").SetTeamParent(t.Context(), area, publisher, "fibggi2juxhc", "fibggi2jur5s"); err != nil {
+		if _, err := build(t, true, "disabled", "last").SetTeamParent(t.Context(), area, publisher, "fibggi2juxhc", "fibggi2jur5s"); err != nil {
 			t.Fatalf("a disabled binding blocked the move: %v", err)
 		}
 	})
@@ -117,8 +131,12 @@ func TestSetTeamParentIsANoOpAgainstTheParentItAlreadyHas(t *testing.T) {
 
 	// Team1 holds an enabled binding, so a real move is refused — which is what
 	// makes this a test of the no-op and not of an unguarded team.
-	if _, err := service.SetTeamParent(t.Context(), area, publisher, "fibggi2juubk", "fibggi2juxhc"); err == nil {
-		t.Fatal("a real move of a bound team was allowed")
+	//
+	// The parent has to be one Team1 could legitimately move to. The first
+	// version used Team2, Team1's own descendant, so CheckTeamReparent rejected
+	// it as a cycle and the control passed with the guard removed entirely.
+	if _, err := service.SetTeamParent(t.Context(), area, publisher, "fibggi2juubk", "fibggi2jv0n4"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("a real move of a bound team gave %v, want ErrConflict", err)
 	}
 	moved, err := service.SetTeamParent(t.Context(), area, publisher, "fibggi2juubk", "fibggi2jur5s")
 	if err != nil {

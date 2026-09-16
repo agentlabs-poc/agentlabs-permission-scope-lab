@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
@@ -158,5 +159,134 @@ func TestADenialCarriesTheCanonicalBlock(t *testing.T) {
 	}
 	if result.ErrorCode == "" || result.ErrorMessage == "" {
 		t.Fatalf("a denial must carry both messages: %#v", result)
+	}
+}
+
+// movingAuthority answers the gate's question and, as a side effect, moves the
+// record the request named. Load runs after the binder has gathered material and
+// before the bound effect executes, so this is exactly the window Q-074 is about.
+type movingAuthority struct {
+	inner stubAuthority
+	store *hrms.Store
+	moved bool
+}
+
+func (m *movingAuthority) Load(ctx context.Context, q authmiddleware.AuthorityQuery) (authmiddleware.Authority, error) {
+	if !m.moved {
+		m.moved = m.store.Move("acme", "FIN", "ENG", "C17")
+	}
+	return m.inner.Load(ctx, q)
+}
+
+// A record that has left the authorized boundary between the decision and the
+// effect must not be served under the decision that was made about it.
+//
+// > "Step 3 must not update C-17 under the earlier Finance-bound allow. The
+// > protected data operation must preserve the evaluated tenant, department, and
+// > requested-record binding." — concurrent-enforcement.md:84-87
+//
+// The effect re-reads under the evaluated boundary rather than closing over what
+// the binder found, which is the whole guarantee. Nothing tested it: replacing
+// the re-read with the bind-time record left every suite green.
+func TestARecordThatLeavesTheBoundaryIsNotServedUnderTheOldAllow(t *testing.T) {
+	const maya = "fi7io4lvjqio"
+	store := hrms.NewStore(hrms.DefaultRecords())
+	source := &movingAuthority{inner: stubAuthority{routes: []authmiddleware.Route{finRead(maya)}}, store: store}
+	evaluator, err := authmiddleware.New(source, clock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", maya))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/acme/FIN/C17", nil))
+	if !source.moved {
+		t.Fatal("the record never moved, so this test says nothing")
+	}
+	if recorder.Code == http.StatusOK {
+		t.Fatalf("a record outside the evaluated boundary was served: %s", recorder.Body.String())
+	}
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 — it is not there under the boundary that was authorized: %s", recorder.Code, recorder.Body.String())
+	}
+	if body := recorder.Body.String(); strings.Contains(body, "ENG") || strings.Contains(body, "FIN annual") {
+		t.Fatalf("the moved record was disclosed anyway: %s", body)
+	}
+	// It did move, and it is readable where it now lives — by somebody with
+	// authority there. The refusal above is about the boundary, not the record.
+	if record, ok := store.Get("acme", "ENG", "C17"); !ok || record.Title != "FIN annual" {
+		t.Fatalf("the record is not where the move put it: %#v ok=%v", record, ok)
+	}
+}
+
+// > "too much intelligence in endpoint about auth. it shold just deny." …
+// > "return **deny**, not a successful result narrowed to the rows the caller
+// > could access." — collection-enforcement.md:7-11
+//
+// A self-scoped route is the case where narrowing is most tempting: the caller
+// demonstrably may see *some* rows, and an endpoint that filtered to those would
+// look helpful and be wrong. Q-071 says the ask itself is refused.
+//
+// It works because the collection binders supply no `user` material at all, so
+// the predicate cannot match — which is a property of the bindings rather than
+// of any rule written down in the gate, and nothing tested it. The failure it
+// guards against is somebody "improving" bindDepartment to add `user: $self`, or
+// filtering the returned rows; neither would have failed a test.
+func TestASelfScopedRouteDeniesCollectionsRatherThanNarrowingThem(t *testing.T) {
+	const maya = "fi7io4lvjqio"
+	// Scoped to the caller and nothing else. finRead also narrows to dept=FIN,
+	// and against the all-certificates endpoint that predicate refuses on its own
+	// — so with it the self predicate was never what decided, and teaching the
+	// all-certificates binder about $self left the suite green.
+	selfRead := finRead(maya)
+	selfRead.Predicates = []authmiddleware.Predicate{
+		{Key: "user", Value: "$self", SourceGrantID: "fk3x9r2m5iv8"},
+	}
+
+	store := hrms.NewStore(hrms.DefaultRecords())
+	evaluator, err := authmiddleware.New(stubAuthority{routes: []authmiddleware.Route{selfRead}}, clock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", maya))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// The single-record read still works, because that binder does supply the
+	// record's employee — so the refusals below are about the ask, not about the
+	// route being unusable. It reaches an ENG record too, which is the proof that
+	// nothing but the self predicate is doing the refusing below.
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/acme/FIN/C17", nil))
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("a self-scoped route could not read the caller's own record: %d %s", recorder.Code, recorder.Body.String())
+	}
+	elsewhere := httptest.NewRecorder()
+	handler.ServeHTTP(elsewhere, httptest.NewRequest(http.MethodGet, "/api/v1/acme/ENG/C18", nil))
+	if elsewhere.Code != http.StatusForbidden {
+		t.Fatalf("the route is narrowed by something other than the caller: %d", elsewhere.Code)
+	}
+
+	for name, path := range map[string]string{
+		"a department listing": "/api/v1/acme/departments/FIN/certificates",
+		"every certificate":    "/api/v1/acme/certificates",
+	} {
+		t.Run(name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, path, nil))
+			if recorder.Code != http.StatusForbidden {
+				t.Fatalf("status = %d, want 403 — %s", recorder.Code, recorder.Body.String())
+			}
+			// And not one row leaked on the way to refusing.
+			for _, certificate := range []string{"C17", "C18", "C19"} {
+				if strings.Contains(recorder.Body.String(), certificate) {
+					t.Fatalf("the refusal carried rows: %s", recorder.Body.String())
+				}
+			}
+		})
 	}
 }

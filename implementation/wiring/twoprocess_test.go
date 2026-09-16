@@ -721,3 +721,31 @@ func TestTheWriteIsBoundToTheDepartmentTheBodyNames(t *testing.T) {
 		t.Fatalf("a write naming another department = %d, want 403 — %s", status, body)
 	}
 }
+
+// Membership removal is the handbook's own worked example of a withdrawal, and
+// it is a different code path from disabling an assignment: the route is built
+// from the teams a human is in, not from the assignment loop. The existing test
+// covers the assignment; this covers the one most access actually travels.
+func TestRemovingAMembershipChangesTheNextAnswer(t *testing.T) {
+	auth, service, area := authServiceWithStore(t)
+	app := application(t, auth.URL, auth.Client(), maya)
+	if status, body := call(t, app, http.MethodGet, "/api/v1/acme/FIN/C17", ""); status != http.StatusOK {
+		t.Fatalf("status = %d before removal, want 200 — %s", status, body)
+	}
+	// Team1 is how maya reaches the FIN grant. Out of the team, out of the route.
+	if err := service.Authority().RemoveMember(t.Context(), area, lab.TeamFINC17(area).Issuer, "fibggi2juubk", maya); err != nil {
+		t.Fatal(err)
+	}
+	status, body := call(t, app, http.MethodGet, "/api/v1/acme/FIN/C17", "")
+	if status == http.StatusOK {
+		t.Fatalf("a removed member still reached the record — %s", body)
+	}
+	if status != http.StatusForbidden {
+		t.Fatalf("status = %d after removal, want 403 — %s", status, body)
+	}
+	// nutan is in Team2 and untouched by the removal, so this is a withdrawal of
+	// one membership rather than of the grant behind it.
+	if status, body := call(t, application(t, auth.URL, auth.Client(), nutan), http.MethodGet, "/api/v1/acme/FIN/C17", ""); status != http.StatusOK {
+		t.Fatalf("another team's member lost access too: %d — %s", status, body)
+	}
+}

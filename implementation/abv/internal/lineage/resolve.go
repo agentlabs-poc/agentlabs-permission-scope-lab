@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
+	"errors"
 	"fmt"
 	"reflect"
 	"sort"
@@ -39,6 +40,21 @@ const maxChainSteps = 256
 // ErrInactive identifies established but currently ineffective lineage while
 // remaining rejection-compatible for existing issuance callers.
 var ErrInactive = fmt.Errorf("inactive authority: %w", domain.ErrRejected)
+
+// ErrIneligible identifies a route whose own authority no longer holds: a
+// selected permission retired out of the catalog, an adopted role revision that
+// is gone, a child that no longer narrows the parent it descends from.
+//
+// It is that route's problem and no other route's, which is the distinction
+// "missing support stops the affected authority route, not necessarily all
+// authority of that user or group" turns on. Everything else a chain walk can
+// say — a cycle, a duplicate binding, a status the model does not define — is an
+// integrity failure of the area, and those must keep failing closed rather than
+// being answered "this human holds nothing".
+//
+// Rejection-compatible, like ErrInactive, for callers that only ask whether the
+// route resolved.
+var ErrIneligible = fmt.Errorf("ineligible authority: %w", domain.ErrRejected)
 
 func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientTeamID string, now time.Time) (domain.Route, error) {
 	fail := func(err error) (domain.Route, error) { return domain.Route{}, err }
@@ -123,7 +139,13 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	}
 	result, err := validation.Narrow(r.s.Area, parent, content, r.s.Roles)
 	if err != nil {
-		return fail(err)
+		// This child no longer sits within the parent it descends from. One
+		// route, not the answer — and again only when the answer is a rejection,
+		// because Narrow validates the child's own content on the way through.
+		if !errors.Is(err, domain.ErrRejected) {
+			return fail(err)
+		}
+		return fail(fmt.Errorf("%w: %w", ErrIneligible, err))
 	}
 	result.AssignmentIDs = append(result.AssignmentIDs, assignment.ID)
 	return result, nil
@@ -191,7 +213,20 @@ func validateSelectedContent(s storage.Snapshot, content domain.GrantContent, no
 		return ErrInactive
 	}
 	if err := validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil {
-		return err
+		// Only a rejection is this route's own problem — a retired permission,
+		// an adopted role revision that has gone. CheckContent also answers
+		// ErrMalformed and ErrUnsupported, for a stored row that is not a record
+		// at all: no scope, a permission list mixed with a role, an impossible
+		// validity window, a contract version the model does not define. Those
+		// are integrity failures of the area, and wrapping them here would have
+		// made the walk answer "this human holds nothing" to a corrupt store.
+		//
+		// The provider happens to reject most of them at load today, which is
+		// what kept that latent — and is exactly why the guard cannot rest on it.
+		if !errors.Is(err, domain.ErrRejected) {
+			return err
+		}
+		return fmt.Errorf("%w: %w", ErrIneligible, err)
 	}
 	if content.Validity != nil && !eligible(*content.Validity, now) {
 		return ErrInactive

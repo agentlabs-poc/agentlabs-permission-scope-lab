@@ -15,6 +15,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"slices"
 	"time"
 )
 
@@ -101,8 +102,31 @@ func (s *SQLiteAuthoritySource) Load(ctx context.Context, query authmiddleware.A
 			Cause:         err,
 		}
 	}
+	return routesFor(resolved, query)
+}
+
+// routesFor turns one answer into the evaluator's vocabulary, checking what it
+// is allowed to assume on the way.
+func routesFor(resolved domain.ResolvedAuthority, query authmiddleware.AuthorityQuery) (authmiddleware.Authority, error) {
 	routes := make([]authmiddleware.Route, len(resolved.ResolvedGrants))
 	for i, grant := range resolved.ResolvedGrants {
+		// The permission is checked here, not assumed — the same check the HTTP
+		// source makes, for the same reason. convertGrant stamps the asked-for
+		// permission onto the route, so a grant that does not carry it would
+		// become a route that claims it, and the evaluator would never know.
+		//
+		// ResolveAuthority does filter on the requested permissions, so this is
+		// defence in depth today. It is here because the two AuthoritySource
+		// implementations are the same contract: one of them enforcing an
+		// invariant the other trusts is how the two drift, and the one that
+		// trusted was the one nothing tested.
+		if !slices.Contains(grant.Permissions, query.Permission) {
+			return authmiddleware.Authority{}, &authmiddleware.EvaluationError{
+				Version: "1", Code: "WRONG_PERMISSION",
+				Message:       "We could not check your access.",
+				MessageReason: "a resolved grant does not carry the permission that was asked about",
+			}
+		}
 		routes[i] = convertGrant(resolved, grant, query)
 	}
 	return authmiddleware.Authority{Routes: routes}, nil
