@@ -40,6 +40,21 @@ const maxChainSteps = 256
 // remaining rejection-compatible for existing issuance callers.
 var ErrInactive = fmt.Errorf("inactive authority: %w", domain.ErrRejected)
 
+// ErrIneligible identifies a route whose own authority no longer holds: a
+// selected permission retired out of the catalog, an adopted role revision that
+// is gone, a child that no longer narrows the parent it descends from.
+//
+// It is that route's problem and no other route's, which is the distinction
+// "missing support stops the affected authority route, not necessarily all
+// authority of that user or group" turns on. Everything else a chain walk can
+// say — a cycle, a duplicate binding, a status the model does not define — is an
+// integrity failure of the area, and those must keep failing closed rather than
+// being answered "this human holds nothing".
+//
+// Rejection-compatible, like ErrInactive, for callers that only ask whether the
+// route resolved.
+var ErrIneligible = fmt.Errorf("ineligible authority: %w", domain.ErrRejected)
+
 func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientTeamID string, now time.Time) (domain.Route, error) {
 	fail := func(err error) (domain.Route, error) { return domain.Route{}, err }
 	if err := s.Area.Validate(); err != nil {
@@ -123,7 +138,9 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	}
 	result, err := validation.Narrow(r.s.Area, parent, content, r.s.Roles)
 	if err != nil {
-		return fail(err)
+		// This child no longer sits within the parent it descends from. One
+		// route, not the answer.
+		return fail(fmt.Errorf("%w: %w", ErrIneligible, err))
 	}
 	result.AssignmentIDs = append(result.AssignmentIDs, assignment.ID)
 	return result, nil
@@ -191,7 +208,10 @@ func validateSelectedContent(s storage.Snapshot, content domain.GrantContent, no
 		return ErrInactive
 	}
 	if err := validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil {
-		return err
+		// What this grant selects is no longer holdable — a retired permission,
+		// an adopted role revision that has gone. That is this route's
+		// authority, and nobody else's.
+		return fmt.Errorf("%w: %w", ErrIneligible, err)
 	}
 	if content.Validity != nil && !eligible(*content.Validity, now) {
 		return ErrInactive

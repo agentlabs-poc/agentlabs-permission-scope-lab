@@ -189,13 +189,26 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 		t.Fatalf("an actor that is not the subject resolved %#v, %v; want ErrUnsupported", got, err)
 	}
 
-	f.Snapshot.Assignments["fm5b7t4pzcp2"] = domain.Assignment{Version: "1", ID: "fm5b7t4pzcp2", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvjqio"}, Status: "enabled"}
-	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); !errors.Is(err, domain.ErrUnsupported) || len(got) != 0 {
-		t.Fatalf("direct assignment got %#v, %v", got, err)
+	// A direct human assignment is not an eligible route — group-held support is
+	// deliberate — and the answer must not say *whose* it is. Holding one to the
+	// subject used to abort with ErrUnsupported while holding one to anybody else
+	// was skipped, so 501-versus-200 told a caller whether a named human had one.
+	// That is the enumeration the handler merges its refusals to prevent, and it
+	// also took away every group route the human legitimately held.
+	answers := map[string][2]any{}
+	for name, recipient := range map[string]string{
+		"held by the subject":  "fi7io4lvjqio",
+		"held by someone else": "fi7io4lvkfsw",
+	} {
+		f.Snapshot.Assignments["fm5b7t4pzcp2"] = domain.Assignment{Version: "1", ID: "fm5b7t4pzcp2", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: recipient}, Status: "enabled"}
+		got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
+		if err != nil || len(got) != 1 {
+			t.Fatalf("%s: a direct assignment disturbed the group route: %#v, %v", name, got, err)
+		}
+		answers[name] = [2]any{len(got), err}
 	}
-	f.Snapshot.Assignments["fm5b7t4pzcp2"] = domain.Assignment{Version: "1", ID: "fm5b7t4pzcp2", GrantID: "fk3x9r2m5iv8", GrantRevision: 1, Recipient: domain.Recipient{Type: "user", ID: "fi7io4lvkfsw"}, Status: "enabled"}
-	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); err != nil || len(got) != 1 {
-		t.Fatalf("other user's assignment became a candidate: %#v, %v", got, err)
+	if answers["held by the subject"] != answers["held by someone else"] {
+		t.Fatalf("the answer says who holds the direct assignment: %v", answers)
 	}
 }
 
@@ -376,5 +389,66 @@ func TestSelfAboveDoesNotKillTheGrantsBelow(t *testing.T) {
 	}
 	if keys["user"] != "$self" || keys["dept"] != "FIN" {
 		t.Fatalf("predicates = %#v, want the token beside the narrowing below it", got.Predicates)
+	}
+}
+
+// "Missing support stops the affected authority route, not necessarily all
+// authority of that user or group" — authority-lineage.md:169.
+//
+// Only inactive support was skipped, so authority that no longer *holds* — a
+// selected permission retired out of the catalog, a child that no longer narrows
+// its parent — aborted the whole walk. One retirement took away every other
+// grant the human had, and through localsource that reached the application as
+// an outage rather than a denial: a routine lifecycle act paging an operator.
+func TestOneIneligibleRouteDoesNotRemoveTheRest(t *testing.T) {
+	area, err := domain.NewArea("acme", "hrms")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// maya holds two independent routes: Team1's grant, and a second one hung
+	// from the root and held by a team she is also in.
+	second := func() lab.TeamFINC17Case {
+		f := lab.TeamFINC17(area)
+		f.Snapshot.Teams["fibggi2jv7qq"] = domain.Team{ID: "fibggi2jv7qq", Name: "fp8h2w6yv7qq", ParentID: "fibggi2jur5s"}
+		f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "fibggi2jv7qq", HumanID: "fi7io4lvjqio"})
+		f.Snapshot.Controls["fk3x9r2mv7qq"] = domain.GrantControl{Version: "1", ID: "fk3x9r2mv7qq", Status: "enabled"}
+		f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mv7qq", Revision: 1}] = domain.GrantContent{
+			Version: "1", GrantID: "fk3x9r2mv7qq", Revision: 1, ParentGrantID: "fk3x9r2m0dq3",
+			Permissions: []string{lab.PayslipRead}, Scope: map[string]string{"dept": "OPS"},
+		}
+		f.Snapshot.Assignments["fm5b7t4pv7qq"] = domain.Assignment{
+			Version: "1", ID: "fm5b7t4pv7qq", GrantID: "fk3x9r2mv7qq", GrantRevision: 1,
+			Recipient: domain.Recipient{Type: "group", ID: "fibggi2jv7qq"}, Status: "enabled",
+		}
+		return f
+	}
+
+	f := second()
+	both, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
+	if err != nil || len(both) != 2 {
+		t.Fatalf("the fixture does not hold two routes, so nothing below means anything: %#v, %v", both, err)
+	}
+
+	// Retire the permission only Team1's grant selects. Its route stops; the
+	// other one is untouched by the act and must survive it.
+	f = second()
+	write := f.Snapshot.Catalog.Permissions[lab.PayslipWrite]
+	write.Active = false
+	f.Snapshot.Catalog.Permissions[lab.PayslipWrite] = write
+	got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
+	if err != nil {
+		t.Fatalf("retiring one permission failed the whole answer: %v", err)
+	}
+	if len(got) != 1 || got[0].GrantID != "fk3x9r2mv7qq" {
+		t.Fatalf("the surviving route is not the unaffected one: %#v", got)
+	}
+
+	// And an integrity failure still fails closed. A cycle is not one route's
+	// problem, and answering "she holds nothing" would be a lie in the
+	// reassuring direction.
+	f = second()
+	f.Snapshot.Teams["fibggi2jur5s"] = domain.Team{ID: "fibggi2jur5s", Name: "fp8h2w6ykxan", ParentID: "fibggi2juubk"}
+	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); err == nil || len(got) != 0 {
+		t.Fatalf("a cycle was answered rather than refused: %#v, %v", got, err)
 	}
 }
