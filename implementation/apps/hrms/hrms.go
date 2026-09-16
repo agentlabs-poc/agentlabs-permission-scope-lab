@@ -71,6 +71,28 @@ func (s *Store) list(tenant, department string) []Record {
 	return records
 }
 
+// Move relocates a certificate to another department, which is the one change
+// that moves a record across an authorization boundary.
+//
+// No endpoint exposes it. ENFORCEMENT-004 requires authority covering *both* the
+// current and the proposed boundary for such a move, and that rule is not
+// implemented here — so exposing this would be shipping the half of the shape
+// that is easy. It exists because the boundary change is what Q-074 is about,
+// and a rule about a record leaving its authorized boundary between the decision
+// and the effect cannot be tested without something that moves one.
+func (s *Store) Move(tenant, from, to, certificate string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.records {
+		record := &s.records[i]
+		if record.TenantID == tenant && record.DepartmentID == from && record.CertificateID == certificate {
+			record.DepartmentID = to
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Store) update(tenant, department, certificate, title string) (Record, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
