@@ -203,6 +203,7 @@ func TestUpgradeAssignmentRefusesOnlyForDamageItCauses(t *testing.T) {
 			t.Fatalf("the damage this adoption does gave %v, want ErrRejected", err)
 		}
 	})
+
 }
 
 func upgradeFixture(t *testing.T, parentKeepsRead bool, bend func(*storage.Snapshot)) (*mutation.Service, domain.Area, domain.Identity) {

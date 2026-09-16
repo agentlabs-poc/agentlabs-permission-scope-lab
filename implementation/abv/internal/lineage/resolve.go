@@ -113,40 +113,62 @@ type routeResolver struct {
 //
 // It belongs to the caller rather than to a resolver, and that is the whole
 // lesson: building it per chain costs *more* than the scans it saves, because
-// chains are shallow and areas are wide. Measured on the adoption guard at 800
-// dependents — ~150 ms scanning, ~434 ms indexing per chain, ~40 ms indexing
-// once.
+// chains are shallow and areas are wide.
+//
+// Measured on the adoption guard at 800 dependents, whole operation: ~128 ms
+// with the scans, ~87 ms with one shared index, ~434 ms with an index per chain.
+// Building the index is not where the cost is — over 800 assignments it takes
+// ~272 µs, so the two builds an adoption does are well under a millisecond of
+// that ~87 ms. What the index removes is a scan per chain step, and a review
+// caught an earlier version of this comment claiming ~40 ms for the build, which
+// was wrong by two orders of magnitude and made the saving look like something
+// it is not.
 type Bindings struct {
-	byKey     map[bindingKey]domain.Assignment
-	ambiguous bool
+	byKey    map[bindingKey]domain.Assignment
+	poisoned map[bindingKey]bool
+	// misKeyed is area-wide because a scan is: it reads every row on its way to
+	// the one it was asked about, and refuses on a row keyed by anything other
+	// than its own id whichever pair that row binds.
+	misKeyed bool
 }
 
-// IndexBindings builds that index. A duplicate or a mis-keyed row makes the
-// area's assignments untrustworthy rather than one route's, so it is remembered
-// and every lookup refuses — the answer uniqueAssignment gives, found once
-// instead of on every walk that happens to pass the duplicate.
+// IndexBindings builds that index, answering exactly what a scan would.
 //
-// Of those two, only the duplicate check can change an answer today: the first
-// step of every chain is resolved by a scan, which refuses a mis-keyed row
-// anywhere in the area before the index is consulted. The key check is kept
-// because it is a property of this index rather than of its current caller — the
-// day the first step is indexed too, its absence would be a silent allow. Its
-// unreachability is asserted the only way an unreachable branch can be: the
-// parity test refuses to let the two paths disagree.
+// "Exactly" is the whole contract, and the first version of this did not meet
+// it. A scan refuses a route the moment any row binding that pair is invalid,
+// and it refuses only the route that owns a duplicate. The index skipped invalid
+// rows before counting, so an invalid row beside a valid one left the pair
+// looking singular and handed back the valid one — an allow where a scan
+// refused. And it marked the whole index ambiguous on any duplicate, so a
+// duplicate on a pair no chain touches refused every lookup — a refusal where a
+// scan allowed. Both were reachable through the exported API and neither was in
+// the parity test.
+//
+// So: a mis-keyed row anywhere poisons the area, because a scan sees every row
+// and refuses on it whatever it was asked. Everything else poisons one pair.
 func IndexBindings(s storage.Snapshot) *Bindings {
-	index := &Bindings{byKey: make(map[bindingKey]domain.Assignment, len(s.Assignments))}
+	index := &Bindings{
+		byKey:    make(map[bindingKey]domain.Assignment, len(s.Assignments)),
+		poisoned: map[bindingKey]bool{},
+	}
 	for key, assignment := range s.Assignments {
 		if key != assignment.ID {
-			index.ambiguous = true
+			index.misKeyed = true
 			return index
 		}
-		if assignment.Recipient.Type != "group" || !validAssignment(assignment) {
+		if assignment.Recipient.Type != "group" {
 			continue
 		}
 		at := bindingKey{assignment.GrantID, assignment.Recipient.ID}
-		if _, duplicate := index.byKey[at]; duplicate {
-			index.ambiguous = true
-			return index
+		// Counted before it is judged, exactly as the scan counts it: an invalid
+		// row still occupies the pair, and a second row still makes it plural.
+		if !validAssignment(assignment) {
+			index.poisoned[at] = true
+			continue
+		}
+		if _, taken := index.byKey[at]; taken {
+			index.poisoned[at] = true
+			continue
 		}
 		index.byKey[at] = assignment
 	}
@@ -162,17 +184,24 @@ func (r *routeResolver) binding(grantID, teamID string) (domain.Assignment, erro
 	if r.bindings == nil {
 		return uniqueAssignment(r.s, grantID, teamID)
 	}
-	if r.bindings.ambiguous {
+	if r.bindings.misKeyed {
 		return domain.Assignment{}, domain.ErrRejected
 	}
-	if found, ok := r.bindings.byKey[bindingKey{grantID, teamID}]; ok {
-		return found, nil
+	at := bindingKey{grantID, teamID}
+	if r.bindings.poisoned[at] {
+		return domain.Assignment{}, domain.ErrRejected
 	}
-	// Either nothing binds them, or what does is not a valid group binding.
-	// uniqueAssignment answers ErrInactive for the first and ErrRejected for the
-	// second, and the index cannot tell them apart — so the scan decides, on the
-	// one path that is already refusing.
-	return uniqueAssignment(r.s, grantID, teamID)
+	found, ok := r.bindings.byKey[at]
+	if !ok {
+		// Nothing binds them. A scan answers ErrInactive for that and the index
+		// can now say so itself: an invalid or duplicated row is recorded as
+		// poison rather than skipped, so a miss here means absent and nothing
+		// else. There used to be a fallback scan on this line, kept because the
+		// index could not tell the two apart — it was dead code the moment the
+		// index could.
+		return domain.Assignment{}, ErrInactive
+	}
+	return found, nil
 }
 
 func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID string) (domain.Route, error) {

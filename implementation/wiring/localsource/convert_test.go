@@ -161,31 +161,39 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 		t.Fatalf("a sound answer gave %#v, %v", authority, err)
 	}
 
-	for name, bend := range map[string]func(*domain.ResolvedAuthority){
-		"another contract version":     func(a *domain.ResolvedAuthority) { a.Version = "9" },
-		"another tenant":               func(a *domain.ResolvedAuthority) { a.TenantID = "globex" },
-		"another application":          func(a *domain.ResolvedAuthority) { a.ApplicationID = "crm" },
-		"another human":                func(a *domain.ResolvedAuthority) { a.HumanID = "fi7io4lvjwu8" },
-		"a grant from another version": func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Version = "9" },
-		"a grant stating no version":   func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Version = "" },
-		"a grant for another permission": func(a *domain.ResolvedAuthority) {
+	// The code matters as much as the refusal: an operator reads it to tell an
+	// answer about the wrong human from one about the wrong permission, and the
+	// HTTP twin's table asserts it per case. This one asserted only that
+	// something refused, so every check could have reported any other's code —
+	// or all of them the same one — with the suite green.
+	for name, tc := range map[string]struct {
+		bend func(*domain.ResolvedAuthority)
+		code string
+	}{
+		"another contract version":     {func(a *domain.ResolvedAuthority) { a.Version = "9" }, "UNSUPPORTED_VERSION"},
+		"another tenant":               {func(a *domain.ResolvedAuthority) { a.TenantID = "globex" }, "WRONG_AREA"},
+		"another application":          {func(a *domain.ResolvedAuthority) { a.ApplicationID = "crm" }, "WRONG_AREA"},
+		"another human":                {func(a *domain.ResolvedAuthority) { a.HumanID = "fi7io4lvjwu8" }, "WRONG_SUBJECT"},
+		"a grant from another version": {func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Version = "9" }, "UNSUPPORTED_VERSION"},
+		"a grant stating no version":   {func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Version = "" }, "UNSUPPORTED_VERSION"},
+		"a grant for another permission": {func(a *domain.ResolvedAuthority) {
 			a.ResolvedGrants[0].Permissions = []string{write}
-		},
-		"a grant carrying none at all": func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Permissions = nil },
+		}, "WRONG_PERMISSION"},
+		"a grant carrying none at all": {func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Permissions = nil }, "WRONG_PERMISSION"},
 		// The second of several, which every earlier fixture here made
 		// unreachable by carrying exactly one grant.
-		"a second grant that does not carry it": func(a *domain.ResolvedAuthority) {
+		"a second grant that does not carry it": {func(a *domain.ResolvedAuthority) {
 			a.ResolvedGrants = append(a.ResolvedGrants, grant("fk3x9r2man0d", write))
-		},
-		"a third grant from another version": func(a *domain.ResolvedAuthority) {
+		}, "WRONG_PERMISSION"},
+		"a third grant from another version": {func(a *domain.ResolvedAuthority) {
 			a.ResolvedGrants = append(a.ResolvedGrants, grant("fk3x9r2man0d", read))
 			a.ResolvedGrants = append(a.ResolvedGrants, grant("fk3x9r2mv5k0", read))
 			a.ResolvedGrants[2].Version = "9"
-		},
+		}, "UNSUPPORTED_VERSION"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			answer := sound()
-			bend(&answer)
+			tc.bend(&answer)
 			authority, err := routesFor(answer, query)
 			if err == nil {
 				t.Fatalf("accepted, giving %#v", authority.Routes)
@@ -202,6 +210,12 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 			if evaluation.Message != "We could not check your access." {
 				t.Fatalf("message = %q", evaluation.Message)
 			}
+			if evaluation.Code != tc.code {
+				t.Fatalf("code = %q, want %q", evaluation.Code, tc.code)
+			}
+			if evaluation.Version != "1" {
+				t.Fatalf("version = %q", evaluation.Version)
+			}
 		})
 	}
 
@@ -211,5 +225,27 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 	many.ResolvedGrants = append(many.ResolvedGrants, grant("fk3x9r2man0d", read), grant("fk3x9r2mv5k0", read, write))
 	if authority, err := routesFor(many, query); err != nil || len(authority.Routes) != 3 {
 		t.Fatalf("three sound grants gave %#v, %v", authority, err)
+	}
+}
+
+// A Source that carries no lineage is an explanation that explains nothing, and
+// it must not become an allow carrying no contributing grants — Q-066 requires
+// grant_ids on an allow to be a non-empty array, so validateRoute refuses such a
+// route and a human with real authority is told their access could not be
+// checked.
+//
+// Nothing produces one today: buildSource always appends at least the root step.
+// The HTTP source has guarded both conditions all along, and this one guarded
+// only the nil — which is the asymmetry this slice exists to close, one level
+// below where it was closed.
+func TestAGrantWhoseSourceExplainsNothingStillNamesItsGrant(t *testing.T) {
+	grant := domain.ResolvedGrant{GrantID: "fk3x9r2m5iv8", Source: &domain.Source{}}
+	if chain := grantChain(grant); len(chain) != 1 || chain[0] != "fk3x9r2m5iv8" {
+		t.Fatalf("chain = %#v, want the reaching grant", chain)
+	}
+	// And a Source that does explain something still wins.
+	grant.Source.Lineage = []domain.LineageStep{{GrantID: "fk3x9r2m0dq3"}, {GrantID: "fk3x9r2m5iv8"}}
+	if chain := grantChain(grant); len(chain) != 2 || chain[0] != "fk3x9r2m0dq3" {
+		t.Fatalf("chain = %#v, want the lineage", chain)
 	}
 }

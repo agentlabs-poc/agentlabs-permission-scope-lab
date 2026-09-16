@@ -192,7 +192,12 @@ func convertGrant(resolved domain.ResolvedAuthority, grant domain.ResolvedGrant,
 // the explanation there is one grant to name — the one that reaches the human —
 // and naming it is what the approved deny/allow blocks call grant_ids.
 func grantChain(grant domain.ResolvedGrant) []string {
-	if grant.Source == nil {
+	// An empty lineage is the same as no explanation at all: the grant that
+	// reaches the human is the one to name. Without this an allow could carry
+	// zero grant_ids, which Q-066 forbids — validateRoute then refuses the route
+	// and a human with real authority is answered "we could not check". The HTTP
+	// source guards both conditions; this one guarded only the first.
+	if grant.Source == nil || len(grant.Source.Lineage) == 0 {
 		return []string{grant.GrantID}
 	}
 	chain := make([]string, 0, len(grant.Source.Lineage))
