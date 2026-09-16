@@ -77,15 +77,28 @@ func collectHumanRoutes(ctx context.Context, s storage.Snapshot, identity domain
 	if s.Catalog.ApplicationID != s.Area.ApplicationID() {
 		return fail(domain.ErrRejected)
 	}
-	// A filtered permission must be registered and active. Asking about one that
-	// is not is a caller mistake, and answering "you hold nothing" would hide it.
+	// A filter is a narrowing, not an assertion. The caller never asks "does this
+	// permission exist" — it asks what this human holds, restricted to these
+	// permissions — and narrowing a set by something absent yields an empty set.
+	//
+	// This used to refuse a permission the catalog did not supply, before a
+	// single grant had been looked at. Retiring a permission therefore turned
+	// every request to the endpoint guarded by it into a 403 here, an evaluation
+	// failure at the client, and a 503 "we could not check your access" to the
+	// person — for a deliberate administrative act, with a statement that was
+	// untrue. Retired and never-registered are the same answer now: nothing
+	// matches, the answer is empty, and the gate denies. Both are fail-closed,
+	// which is what both states mean.
+	//
+	// The filter is still checked for shape: a permission that is not a
+	// permission is a malformed question rather than a narrowing.
 	for _, permission := range filter {
+		// One at a time, because PermissionList also refuses a repeat — right for
+		// a grant's selection, where a duplicate is a malformed record, and wrong
+		// for a narrowing, where naming the same permission twice narrows to the
+		// same set.
 		if err := codec.PermissionList([]string{permission}); err != nil {
 			return fail(err)
-		}
-		definition, ok := s.Catalog.Permissions[permission]
-		if !ok || definition.ID != permission || !definition.Active {
-			return fail(domain.ErrRejected)
 		}
 	}
 	if len(s.Memberships)+len(s.Assignments) > maxHumanQueryRecords {

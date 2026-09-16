@@ -11,32 +11,41 @@ migration owes.
 
 ---
 
-## 1 · The gate finds the route's tenant by the placeholder's spelling
+## 1 · ~~The gate finds the route's tenant by the placeholder's spelling~~ — built
 
-**What the lab does.** `authmiddleware` binds the route's tenant to the trusted
-area by reading `PathValue("tenant")`. A policy whose path says `{tenant_id}`,
-`{org}` or `{tenant_slug}` is not bound at all, and the gate cannot tell the
-difference. A request for another tenant's record then reaches the handler.
+**Closed in the lab, open for the contract.** The gate bound the route's tenant
+to the trusted area by reading `PathValue("tenant")`, so a policy whose path said
+`{tenant_id}`, `{org}` or `{tenant_slug}` was not bound at all and nothing said
+so — trusted area `acme`, `GET /api/v2/globex/FIN/C17`, **200**, handler running
+against `globex`.
 
-**Why the lab lives with it.** One application, one policy set, and every path
-spells it `tenant`. The endpoint owns its policy and is written beside the
-handler it guards, so the spelling is not something a caller can influence.
+**What the lab now does.** A policy carries a `trusted` block correlating a field
+of the trusted context with a *declared input*:
 
-**Why it is not fixed here.** The handbook requires the binding — *"route tenant
-claims must still be bound to trusted context; field names alone do not prove
-relationships"* (`endpoint-policy-format.md:352`) — and does not say how a policy
-declares which of its inputs carries the tenant. `endpoint-policy-format.md`
-closes with *"Full validation rules … remain open"* and leaves that to Q-050-C.
-Adding a `Policy.TenantInput` field here would settle an open contract by
-implementation, which is the same error as reading the tenant from a name.
+```json
+"inputs":  { "tenant": { "source": "path", "name": "tenant_id" } },
+"trusted": { "tenant": "tenant" }
+```
 
-**What the migration owes.** Not the declined machinery — something that makes
-the duty CONTRACT-012 assigns to the endpoint checkable. A gate that silently
-skips the binding when it cannot find the input is the worst of both: the
-handbook put the responsibility on the endpoint, and the endpoint gets no signal
-when it has not discharged it. At minimum, a policy carrying a route segment the
-gate cannot account for should be refused where policies are mounted, rather than
-accepted and left unchecked.
+read as *the input I call `tenant` must equal the trusted tenant*. The gate
+compares the input's resolved value, so no path spelling is load-bearing, and a
+policy declaring no tenant correlation cannot be mounted. That is what turns the
+silent case into an impossible one.
+
+**Why a declaration rather than a rule.** The alternative was for the gate to
+refuse any path segment it could not account for, which needs it to guess which
+segments are tenant-shaped — a heuristic that catches `tenant_id` and misses
+`org`. A declaration has nothing to guess: the endpoint already knows.
+
+**What the migration owes.** The published policy format is a handbook chapter,
+so the `trusted` field is **a proposal**, not an adopted contract. It is not the
+machinery CONTRACT-012 declined — that was a relationship language between
+application *records*, needing a resolver interface; a correlation between
+trusted context and a declared input needs neither, since both are already in the
+gate's hand. What the migration has to settle is whether the published format
+adopts this shape, whether a correlation may name a source other than the path,
+and whether more than one trusted field is ever correlated at once. The lab
+supports `tenant` and `application`; neither open question blocks the tenant case.
 
 ---
 
@@ -89,15 +98,17 @@ authority changes the next answer.
 
 ---
 
-## 5 · The allow result's evidence does not reach the endpoint
+## 5 · ~~The allow result's evidence does not reach the endpoint~~ — built
 
-**What the lab does.** `authmiddleware` computes the contributing grant ids and
-`BoundOperation.Execute` has no way to receive them.
+**Closed.** `authmiddleware` computed the contributing grant ids and
+`BoundOperation.Execute` had no way to receive them, so an endpoint could record
+*what* it did and nothing about why it was permitted to.
 
-**Why it is not fixed here.** `decision-results.md:306-309` requires the
-references to be *available in the result*, independently of whether the request
-is recorded. Closing it changes a public signature, and audit recording — the
-thing that would consume it — is itself unbuilt.
+`Execute` now takes the `Result` alongside the context and the writer, which is
+what `decision-results.md:306-309` asks for — the references *available in the
+result*, independently of whether the request is recorded. It also bounds the
+other direction: an endpoint cannot record evidence it was never handed, and a
+denial never reaches the effect at all. hrms demonstrates it on the write path.
 
-**What the migration owes.** Both together: the evidence on the result, and
-somewhere for it to go.
+**What the migration owes.** Somewhere for it to go. Audit recording is still
+unbuilt, and it is the consumer this evidence exists for.
