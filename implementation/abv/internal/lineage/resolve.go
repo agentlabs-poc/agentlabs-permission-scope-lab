@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
+	"errors"
 	"fmt"
 	"reflect"
 	"sort"
@@ -139,7 +140,11 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	result, err := validation.Narrow(r.s.Area, parent, content, r.s.Roles)
 	if err != nil {
 		// This child no longer sits within the parent it descends from. One
-		// route, not the answer.
+		// route, not the answer — and again only when the answer is a rejection,
+		// because Narrow validates the child's own content on the way through.
+		if !errors.Is(err, domain.ErrRejected) {
+			return fail(err)
+		}
 		return fail(fmt.Errorf("%w: %w", ErrIneligible, err))
 	}
 	result.AssignmentIDs = append(result.AssignmentIDs, assignment.ID)
@@ -208,9 +213,19 @@ func validateSelectedContent(s storage.Snapshot, content domain.GrantContent, no
 		return ErrInactive
 	}
 	if err := validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil {
-		// What this grant selects is no longer holdable — a retired permission,
-		// an adopted role revision that has gone. That is this route's
-		// authority, and nobody else's.
+		// Only a rejection is this route's own problem — a retired permission,
+		// an adopted role revision that has gone. CheckContent also answers
+		// ErrMalformed and ErrUnsupported, for a stored row that is not a record
+		// at all: no scope, a permission list mixed with a role, an impossible
+		// validity window, a contract version the model does not define. Those
+		// are integrity failures of the area, and wrapping them here would have
+		// made the walk answer "this human holds nothing" to a corrupt store.
+		//
+		// The provider happens to reject most of them at load today, which is
+		// what kept that latent — and is exactly why the guard cannot rest on it.
+		if !errors.Is(err, domain.ErrRejected) {
+			return err
+		}
 		return fmt.Errorf("%w: %w", ErrIneligible, err)
 	}
 	if content.Validity != nil && !eligible(*content.Validity, now) {

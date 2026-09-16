@@ -409,9 +409,9 @@ func (s *Service) teamAdministration(ctx context.Context, area domain.Area, iden
 // this team.
 //
 // Beneath, not just at: a subteam's authority is resolved through the chain
-// above it, so moving an ancestor moves the subteam's inherited scope too. The
-// set is grown rather than walked because a team records its parent and not its
-// children, and it settles after at most one pass per team.
+// above it, so moving an ancestor moves the subteam's inherited scope too. A
+// team records its parent and not its children, so the walk builds the index it
+// needs first.
 //
 // Disabled bindings are left out. They hold nothing to re-anchor, and enabling
 // one revalidates against the structure as it then is.

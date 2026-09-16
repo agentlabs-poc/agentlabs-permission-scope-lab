@@ -107,8 +107,10 @@ func TestAdoptionStaysBoundedAsDependentsGrow(t *testing.T) {
 	}
 	accepted := time.Since(accept)
 
-	// The refusing direction is the expensive one: every dependent fails the
-	// first walk, so every one of them takes the second as well.
+	// Refusing is the cheaper direction, not the dearer one: it stops at the
+	// first dependent it cannot support, while accepting has to look at all of
+	// them. It is measured because it pays the same snapshot load, which bounds
+	// how much of the accepting number is fixture rather than work.
 	refuse := time.Now()
 	if _, err := refusing.UpgradeAssignment(t.Context(), area, issuer, "fm5b7t4pan0d"); err == nil {
 		t.Fatal("the refusing direction adopted")

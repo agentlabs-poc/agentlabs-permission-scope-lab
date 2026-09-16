@@ -34,7 +34,11 @@ func TestEveryRefusalTheServiceCanGiveReachesTheWire(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		status, code := post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", goodBody)
+		// The body names the credential it actually arrived with, so the actor
+		// check passes and the entitlement arm is what refuses. A body claiming
+		// somebody else is a different refusal, covered in handler_test.
+		body := `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_other"},"human_id":"fi7io4lvjqio"},"options":{}}`
+		status, code := post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", body)
 		if status != http.StatusForbidden || code != "NOT_ENTITLED_TO_ASK" {
 			t.Fatalf("got %d/%s, want 403/NOT_ENTITLED_TO_ASK", status, code)
 		}
@@ -128,25 +132,40 @@ func TestEveryRefusalTheServiceCanGiveReachesTheWire(t *testing.T) {
 // service every other application depends on decode arbitrary bytes per request.
 // The only oversize test mounted a refusing identity source, so the 401 fired
 // first and the limit was never reached.
+//
+// The first version of this test was the same defect wearing different clothes:
+// both bodies carried an unknown field, so DisallowUnknownFields refused each of
+// them for its content and the size decided nothing. It passed with the length
+// check deleted outright. The body below is legal all the way through — a long
+// options.permissions list — so refusing it can only be about its size.
 func TestTheSizeLimitAppliesToACallerWhoIsEstablished(t *testing.T) {
 	handler := fuzzHandler(t)
-	padding := func(n int) string {
-		return `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{},"x":"` +
-			strings.Repeat("x", n) + `"}`
+	legal := func(permissions int) string {
+		// The same registered permission, repeated. Anything else is refused for
+		// naming a permission the catalog does not hold, which would make the
+		// content decide again.
+		list := make([]string, permissions)
+		for i := range list {
+			list[i] = `"hrms:payroll:payslip::read"`
+		}
+		return `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{"permissions":[` +
+			strings.Join(list, ",") + `]}}`
 	}
-	// Just over: refused for its size, by a caller the service admits.
-	status, code := post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", padding(wiring.MaxRequestBytes))
-	if status != http.StatusBadRequest || code != "MALFORMED_REQUEST" {
-		t.Fatalf("got %d/%s, want 400/MALFORMED_REQUEST", status, code)
+	// Under the limit, and answered — so the body's shape is not what refuses it.
+	small := legal(4)
+	if len(small) > wiring.MaxRequestBytes {
+		t.Fatal("the control body is not under the limit")
 	}
-	// And the same shape under the limit is refused for its *content* instead —
-	// an unknown field — which is how we know the size is what decided above.
-	status, code = post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", padding(16))
-	if status != http.StatusBadRequest || code != "MALFORMED_REQUEST" {
-		t.Fatalf("a small body of the same shape gave %d/%s", status, code)
+	if status, code := post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", small); status != http.StatusOK {
+		t.Fatalf("a legal small body got %d/%s, so this test cannot attribute the refusal below", status, code)
 	}
-	if len(padding(wiring.MaxRequestBytes)) <= wiring.MaxRequestBytes || len(padding(16)) > wiring.MaxRequestBytes {
-		t.Fatal("the two bodies do not straddle the limit, so this proves nothing")
+	// Over it, same shape, refused.
+	big := legal(3000)
+	if len(big) <= wiring.MaxRequestBytes {
+		t.Fatalf("the oversize body is only %d bytes, under the %d limit", len(big), wiring.MaxRequestBytes)
+	}
+	if status, code := post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", big); status != http.StatusBadRequest || code != "MALFORMED_REQUEST" {
+		t.Fatalf("an oversize but otherwise legal body got %d/%s, want 400/MALFORMED_REQUEST", status, code)
 	}
 }
 

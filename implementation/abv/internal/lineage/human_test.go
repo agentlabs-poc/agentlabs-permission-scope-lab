@@ -443,12 +443,76 @@ func TestOneIneligibleRouteDoesNotRemoveTheRest(t *testing.T) {
 		t.Fatalf("the surviving route is not the unaffected one: %#v", got)
 	}
 
-	// And an integrity failure still fails closed. A cycle is not one route's
-	// problem, and answering "she holds nothing" would be a lie in the
-	// reassuring direction.
+	// The other way a route stops holding: its own content is fine and it no
+	// longer sits inside its parent. That is the second place the signal comes
+	// from, and it was returned by code no test reached — deleting the wrap left
+	// the whole module green.
+	//
+	// It needs a child route in her set, so Team1 also holds a grant hanging
+	// from its own — and then the parent stops carrying what the child selects.
+	// Narrowing the parent alone would prove nothing: her route on the parent is
+	// dropped by the permission filter before anything is resolved, which is how
+	// the first version of this case passed with the wrap deleted.
 	f = second()
-	f.Snapshot.Teams["fibggi2jur5s"] = domain.Team{ID: "fibggi2jur5s", Name: "fp8h2w6ykxan", ParentID: "fibggi2juubk"}
-	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); err == nil || len(got) != 0 {
-		t.Fatalf("a cycle was answered rather than refused: %#v, %v", got, err)
+	// A child grant is held by a team below the one holding its parent — that is
+	// how the chain climbs — so maya joins a subteam of Team1.
+	f.Snapshot.Teams["fibggi2jc4ld"] = domain.Team{ID: "fibggi2jc4ld", Name: "fp8h2w6yc4ld", ParentID: "fibggi2juubk"}
+	f.Snapshot.Memberships = append(f.Snapshot.Memberships, domain.Membership{TeamID: "fibggi2jc4ld", HumanID: "fi7io4lvjqio"})
+	f.Snapshot.Controls["fk3x9r2mc4ld"] = domain.GrantControl{Version: "1", ID: "fk3x9r2mc4ld", Status: "enabled"}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mc4ld", Revision: 1}] = domain.GrantContent{
+		Version: "1", GrantID: "fk3x9r2mc4ld", Revision: 1, ParentGrantID: "fk3x9r2m5iv8",
+		Permissions: []string{lab.PayslipRead}, Scope: map[string]string{},
+	}
+	f.Snapshot.Assignments["fm5b7t4pc4ld"] = domain.Assignment{
+		Version: "1", ID: "fm5b7t4pc4ld", GrantID: "fk3x9r2mc4ld", GrantRevision: 1,
+		Recipient: domain.Recipient{Type: "group", ID: "fibggi2jc4ld"}, Status: "enabled",
+	}
+	if routes, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); err != nil || len(routes) != 3 {
+		t.Fatalf("the child route is not in her set, so nothing below means anything: %#v, %v", routes, err)
+	}
+	narrowed := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
+	narrowed.Permissions = []string{lab.PayslipWrite}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = narrowed
+	got, err = lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
+	if err != nil {
+		t.Fatalf("a child outside its parent failed the whole answer: %v", err)
+	}
+	if len(got) != 1 || got[0].GrantID != "fk3x9r2mv7qq" {
+		t.Fatalf("the surviving route is not the unaffected one: %#v", got)
+	}
+
+	// And integrity failures still fail closed. A cycle is not one route's
+	// problem; neither is a stored row that is not a record at all. Answering
+	// "she holds nothing" to either would be a lie in the reassuring direction —
+	// and the wrap covered every content failure until a review found it, saved
+	// only by the provider rejecting such rows at load, which is a coupling in
+	// another package that nothing here asserts.
+	for name, break_ := range map[string]func(*lab.TeamFINC17Case){
+		"a cycle": func(f *lab.TeamFINC17Case) {
+			f.Snapshot.Teams["fibggi2jur5s"] = domain.Team{ID: "fibggi2jur5s", Name: "fp8h2w6ykxan", ParentID: "fibggi2juubk"}
+		},
+		"a row holding no scope": func(f *lab.TeamFINC17Case) {
+			content := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
+			content.Scope = nil
+			f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = content
+		},
+		"a row from a contract version nobody defines": func(f *lab.TeamFINC17Case) {
+			content := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
+			content.Version = "9"
+			f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = content
+		},
+		"a row naming both a permission list and a role": func(f *lab.TeamFINC17Case) {
+			content := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}]
+			content.RoleID, content.RoleRevision = "fi9jvxobqsxs", 1
+			f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = content
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			f := second()
+			break_(&f)
+			if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{}); err == nil || len(got) != 0 {
+				t.Fatalf("answered rather than refused: %#v, %v", got, err)
+			}
+		})
 	}
 }

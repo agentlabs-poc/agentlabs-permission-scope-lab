@@ -82,8 +82,8 @@ func decodeRevision(id string, revision int64, raw []byte) (domain.GrantContent,
 		Validity:      payload.Validity,
 	}
 	// No missing-scope default here either. SCOPE-007 is path-agnostic — "never
-	// default invalid/missing scope to {}" — so it holds on the way back out as
-	// firmly as on the way in: a row that somehow holds no scope is a
+	// drop invalid restrictions or default invalid/missing scope to {}" — so it
+	// holds on the way back out as firmly as on the way in: a row with no scope is a
 	// malformed record, and reporting it is the only way anyone finds out. This
 	// substitution would have turned every such row into the widest child its
 	// parent allows, silently, at read time.

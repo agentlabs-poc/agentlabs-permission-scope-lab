@@ -189,10 +189,16 @@ func carries(permissions, filter []string) bool {
 // Everything else stays fatal, deliberately. A cycle, a duplicate binding, a
 // status the model does not define and a record the walk could not read are
 // integrity failures of the area, and none of them licenses answering "this
-// human holds nothing" when the truth is that nobody knows. Widening this to
-// every rejection was the first attempt, and two existing tests caught it: they
-// are named for failing closed on invalid evidence, which is exactly what it
-// would have stopped doing.
+// human holds nothing" when the truth is that nobody knows.
+//
+// Two narrowings got this right, each after getting it wrong. Widening to every
+// rejection was the first attempt, and two existing tests caught it — they are
+// named for failing closed on invalid evidence, which is what it would have
+// stopped doing. Then the wrap itself was too wide: it covered every CheckContent
+// failure, including the malformed and unsupported ones that describe a row
+// which is not a record at all. A review caught that, and it was invisible
+// because the provider rejects most such rows at load — a coupling in another
+// package that nothing asserts, holding up a guard that claims to be the check.
 func routeScoped(err error) bool {
 	return errors.Is(err, ErrInactive) || errors.Is(err, ErrIneligible)
 }

@@ -12,6 +12,7 @@ import (
 	"agentlabs.local/authclient"
 	"agentlabs.local/authmiddleware"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -24,7 +25,7 @@ func (clock) Now() time.Time { return time.Now().UTC() }
 
 func main() { os.Exit(run(os.Args[1:], os.Stdout, os.Stderr)) }
 
-func run(args []string, out, diag *os.File) int {
+func run(args []string, out, diag io.Writer) int {
 	// A flag takes the next argument unless that argument is itself a flag, so a
 	// switch with no value is present rather than silently swallowing what
 	// follows it — and a flag in final position is not dropped.

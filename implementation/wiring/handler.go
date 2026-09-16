@@ -136,7 +136,18 @@ func (s *Service) resolve(agents AgentIdentity, observers []Observer, w http.Res
 	// the day that distinction stops being free.
 	if claimed := asked.Identity.Actor; claimed.Type != "" || claimed.ID != "" {
 		if claimed.Type != caller.Actor.Type || claimed.ID != caller.Actor.ID {
-			fail(w, http.StatusForbidden, "NOT_ENTITLED_TO_ASK")
+			// Malformed, not unentitled. The body contradicts the credential it
+			// arrived with, which is a request that does not describe one thing —
+			// and it is the caller's own two statements disagreeing, so nothing
+			// about this answer depends on the area, and the merged-403 policy
+			// has nothing to hide here.
+			//
+			// The kind matters operationally. A client configured with the wrong
+			// application id sends that id on every request, so this refuses all
+			// of them; as an entitlement answer it read as "you may not ask about
+			// this tenant" and the application turned it into a permanent 503
+			// with nothing naming the cause.
+			fail(w, http.StatusBadRequest, "MISMATCHED_ACTOR")
 			return
 		}
 	}

@@ -60,8 +60,13 @@ func TestTheHandlerRefusesWithTheRightKind(t *testing.T) {
 		// A body cannot prove who is asking. Claiming an actor other than the one
 		// the credential established is refused rather than ignored, so the day
 		// somebody wires delegation evidence in, the claim is already not free.
-		"a body claiming another actor": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"user","id":"fi7io4lvjqio"},"human_id":"fi7io4lvjqio"},"options":{}}`, http.StatusForbidden, "NOT_ENTITLED_TO_ASK"},
-		"a blank subject":               {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":" "},"options":{}}`, http.StatusBadRequest, "MALFORMED_REQUEST"},
+		"a body claiming another actor": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"user","id":"fi7io4lvjqio"},"human_id":"fi7io4lvjqio"},"options":{}}`, http.StatusBadRequest, "MISMATCHED_ACTOR"},
+		// Same credential, same application, only the id misspelt — which is what
+		// a client configured with the wrong --client sends on every request. It
+		// must say so, rather than read as an entitlement refusal that the
+		// application then renders as a permanent outage.
+		"a body claiming a near-miss of its own actor": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrm"},"human_id":"fi7io4lvjqio"},"options":{}}`, http.StatusBadRequest, "MISMATCHED_ACTOR"},
+		"a blank subject": {"/api/v1/acme/abv/applications/hrms/authority.resolve", `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":" "},"options":{}}`, http.StatusBadRequest, "MALFORMED_REQUEST"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			status, code := post(t, handler, tc.path, tc.body)

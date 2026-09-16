@@ -237,9 +237,14 @@ func TestARecordThatLeavesTheBoundaryIsNotServedUnderTheOldAllow(t *testing.T) {
 // filtering the returned rows; neither would have failed a test.
 func TestASelfScopedRouteDeniesCollectionsRatherThanNarrowingThem(t *testing.T) {
 	const maya = "fi7io4lvjqio"
+	// Scoped to the caller and nothing else. finRead also narrows to dept=FIN,
+	// and against the all-certificates endpoint that predicate refuses on its own
+	// — so with it the self predicate was never what decided, and teaching the
+	// all-certificates binder about $self left the suite green.
 	selfRead := finRead(maya)
-	selfRead.Predicates = append(selfRead.Predicates,
-		authmiddleware.Predicate{Key: "user", Value: "$self", SourceGrantID: "fk3x9r2m5iv8"})
+	selfRead.Predicates = []authmiddleware.Predicate{
+		{Key: "user", Value: "$self", SourceGrantID: "fk3x9r2m5iv8"},
+	}
 
 	store := hrms.NewStore(hrms.DefaultRecords())
 	evaluator, err := authmiddleware.New(stubAuthority{routes: []authmiddleware.Route{selfRead}}, clock{})
@@ -253,11 +258,17 @@ func TestASelfScopedRouteDeniesCollectionsRatherThanNarrowingThem(t *testing.T) 
 
 	// The single-record read still works, because that binder does supply the
 	// record's employee — so the refusals below are about the ask, not about the
-	// route being unusable.
+	// route being unusable. It reaches an ENG record too, which is the proof that
+	// nothing but the self predicate is doing the refusing below.
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/acme/FIN/C17", nil))
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("a self-scoped route could not read the caller's own record: %d %s", recorder.Code, recorder.Body.String())
+	}
+	elsewhere := httptest.NewRecorder()
+	handler.ServeHTTP(elsewhere, httptest.NewRequest(http.MethodGet, "/api/v1/acme/ENG/C18", nil))
+	if elsewhere.Code != http.StatusForbidden {
+		t.Fatalf("the route is narrowed by something other than the caller: %d", elsewhere.Code)
 	}
 
 	for name, path := range map[string]string{
