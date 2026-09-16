@@ -31,6 +31,12 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 		// to a fixpoint, and a walk that stopped at direct children would have
 		// passed every test until this one: the claim the commit makes loudest
 		// is that "affected" reaches all the way down.
+		//
+		// It also branches. B18: "inspect all affected bindings and descendants,
+		// not one path" — so the bound subtree hangs off the *second* child by
+		// id, and a walk that followed one branch would miss it.
+		snapshot.Teams["fibggi2ja000"] = domain.Team{ID: "fibggi2ja000", Name: "fp8h2w6ya000", ParentID: "fibggi2juxhc"}
+		snapshot.Teams["fibggi2ja001"] = domain.Team{ID: "fibggi2ja001", Name: "fp8h2w6ya001", ParentID: "fibggi2ja000"}
 		snapshot.Teams["fibggi2jv4hu"] = domain.Team{ID: "fibggi2jv4hu", Name: "fp8h2w6yv4hu", ParentID: "fibggi2juxhc"}
 		snapshot.Teams["fibggi2jv5k0"] = domain.Team{ID: "fibggi2jv5k0", Name: "fp8h2w6yv5k0", ParentID: "fibggi2jv4hu"}
 		snapshot.Memberships = append(snapshot.Memberships, domain.Membership{TeamID: "fibggi2jv5k0", HumanID: "fi7io4lvk35s"})

@@ -416,13 +416,32 @@ func (s *Service) teamAdministration(ctx context.Context, area domain.Area, iden
 // Disabled bindings are left out. They hold nothing to re-anchor, and enabling
 // one revalidates against the structure as it then is.
 func refuseAffectedBindings(snapshot storage.Snapshot, teamID string) error {
+	// A children index, built once, then walked downward. Growing the set by
+	// repeated passes over every team was correct and cost a pass per level —
+	// and team depth is whatever a tenant makes it, with no cap at creation.
+	children := make(map[string][]string, len(snapshot.Teams))
+	for id, team := range snapshot.Teams {
+		if team.ParentID != "" {
+			children[team.ParentID] = append(children[team.ParentID], id)
+		}
+	}
+	// Sorted, so the walk visits a branching tree in the same order every run.
+	// Nothing about the answer depends on order — the set is complete either way
+	// — but a walk whose order is a map's is one whose bugs appear and vanish
+	// between runs, and a test cannot pin what it cannot reproduce.
+	for parent := range children {
+		sort.Strings(children[parent])
+	}
 	subtree := map[string]bool{teamID: true}
-	for changed := true; changed; {
-		changed = false
-		for id, team := range snapshot.Teams {
-			if !subtree[id] && team.ParentID != "" && subtree[team.ParentID] {
-				subtree[id] = true
-				changed = true
+	for frontier := []string{teamID}; len(frontier) > 0; {
+		id := frontier[len(frontier)-1]
+		frontier = frontier[:len(frontier)-1]
+		for _, child := range children[id] {
+			// Guarded against a cycle already in the store: the set only grows,
+			// so a team already in it is never queued twice.
+			if !subtree[child] {
+				subtree[child] = true
+				frontier = append(frontier, child)
 			}
 		}
 	}

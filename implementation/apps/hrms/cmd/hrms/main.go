@@ -28,6 +28,7 @@ func run(args []string, out, diag *os.File) int {
 	// A flag takes the next argument unless that argument is itself a flag, so a
 	// switch with no value is present rather than silently swallowing what
 	// follows it — and a flag in final position is not dropped.
+	valued := map[string]bool{"--auth": true, "--tenant": true, "--app": true, "--human": true, "--client": true, "--listen": true}
 	flags := map[string]string{}
 	for i := 0; i < len(args); i++ {
 		if !strings.HasPrefix(args[i], "--") {
@@ -37,6 +38,14 @@ func run(args []string, out, diag *os.File) int {
 			flags[args[i]] = args[i+1]
 			i++
 			continue
+		}
+		// A switch, or a flag whose value is missing. The two are told apart by
+		// whether the flag is one that takes a value: --listen with nothing after
+		// it used to fall back to the default port in silence, against a caller
+		// who had said exactly where to listen.
+		if valued[args[i]] {
+			fmt.Fprintf(diag, "%s needs a value\n", args[i])
+			return 2
 		}
 		flags[args[i]] = ""
 	}
