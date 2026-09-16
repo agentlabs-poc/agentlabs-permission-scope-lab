@@ -17,7 +17,12 @@ type InputValues map[string]json.RawMessage
 
 type BoundOperation struct {
 	Material Material
-	Execute  func(context.Context, http.ResponseWriter)
+	// Execute receives the Result that allowed it. An allow is not a bare yes:
+	// it names the grants that authorized this request, and the effect is the
+	// only place that can record them beside what it did. Passing it here means
+	// an endpoint cannot log evidence it did not receive, and cannot invent
+	// evidence it was never given.
+	Execute func(context.Context, http.ResponseWriter, Result)
 }
 
 type Binder func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error)
@@ -146,7 +151,7 @@ func handleHTTP(policy Policy, identities IdentitySource, evaluator *Evaluator, 
 		failure(Result{}, err)
 		return
 	}
-	operation.Execute(ctx, w)
+	operation.Execute(ctx, w, result)
 }
 
 func decodeBusinessBody(body io.Reader) (map[string]json.RawMessage, error) {

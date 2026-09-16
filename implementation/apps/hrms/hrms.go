@@ -33,6 +33,30 @@ type Record struct {
 type Store struct {
 	mu      sync.Mutex
 	records []Record
+	writes  []WriteEvidence
+}
+
+// WriteEvidence is what the write path records beside the change it made. An
+// allow is not a bare yes — it names the grants that authorized the request —
+// and the effect is the only place that can write those down next to what they
+// permitted. The endpoint can only record evidence the gate handed it.
+type WriteEvidence struct {
+	TenantID      string
+	CertificateID string
+	GrantIDs      []string
+}
+
+// Writes returns the evidence recorded so far, oldest first.
+func (s *Store) Writes() []WriteEvidence {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return append([]WriteEvidence(nil), s.writes...)
+}
+
+func (s *Store) record(evidence WriteEvidence) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.writes = append(s.writes, evidence)
 }
 
 func NewStore(records []Record) *Store {
@@ -169,7 +193,7 @@ func (s *Store) bindGet(_ context.Context, _ authmiddleware.RequestContext, valu
 	if found {
 		material["user"] = authmiddleware.Selection{Kind: authmiddleware.SelectionExact, Value: record.EmployeeID}
 	}
-	return authmiddleware.BoundOperation{Material: material, Execute: func(_ context.Context, w http.ResponseWriter) {
+	return authmiddleware.BoundOperation{Material: material, Execute: func(_ context.Context, w http.ResponseWriter, _ authmiddleware.Result) {
 		record, ok := s.Get(tenant, dept, cert)
 		if !ok {
 			writeError(w, http.StatusNotFound, "not found")
@@ -193,12 +217,15 @@ func (s *Store) bindPut(_ context.Context, _ authmiddleware.RequestContext, valu
 	}
 	return authmiddleware.BoundOperation{
 		Material: authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionExact, Value: dept}},
-		Execute: func(_ context.Context, w http.ResponseWriter) {
+		Execute: func(_ context.Context, w http.ResponseWriter, result authmiddleware.Result) {
 			record, ok := s.update(tenant, dept, cert, title)
 			if !ok {
 				writeError(w, http.StatusNotFound, "not found")
 				return
 			}
+			// Recorded only for a change that actually happened, and only from
+			// the result the gate passed in.
+			s.record(WriteEvidence{TenantID: tenant, CertificateID: cert, GrantIDs: append([]string(nil), result.GrantIDs...)})
 			writeJSON(w, http.StatusOK, record)
 		},
 	}, nil
@@ -211,7 +238,9 @@ func (s *Store) bindDepartment(_ context.Context, _ authmiddleware.RequestContex
 	}
 	return authmiddleware.BoundOperation{
 		Material: authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionExact, Value: dept}},
-		Execute:  func(_ context.Context, w http.ResponseWriter) { writeJSON(w, http.StatusOK, s.list(tenant, dept)) },
+		Execute: func(_ context.Context, w http.ResponseWriter, _ authmiddleware.Result) {
+			writeJSON(w, http.StatusOK, s.list(tenant, dept))
+		},
 	}, nil
 }
 
@@ -222,7 +251,9 @@ func (s *Store) bindAll(_ context.Context, _ authmiddleware.RequestContext, valu
 	}
 	return authmiddleware.BoundOperation{
 		Material: authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionAll}},
-		Execute:  func(_ context.Context, w http.ResponseWriter) { writeJSON(w, http.StatusOK, s.list(tenant, "")) },
+		Execute: func(_ context.Context, w http.ResponseWriter, _ authmiddleware.Result) {
+			writeJSON(w, http.StatusOK, s.list(tenant, ""))
+		},
 	}, nil
 }
 

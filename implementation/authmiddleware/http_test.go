@@ -78,7 +78,7 @@ func TestWrapAllowsExactlyOneBoundEffectWithExactInputs(t *testing.T) {
 			t.Fatalf("context = %#v", got)
 		}
 		gotValues, gotBody = values, body
-		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(_ context.Context, w http.ResponseWriter) {
+		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(_ context.Context, w http.ResponseWriter, _ Result) {
 			executed++
 			w.WriteHeader(http.StatusNoContent)
 		}}, nil
@@ -151,7 +151,7 @@ func TestWrapStopsBeforeProtectedEffect(t *testing.T) {
 				if tc.binderErr != nil {
 					return BoundOperation{}, tc.binderErr
 				}
-				return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter) { executed++ }}, nil
+				return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter, Result) { executed++ }}, nil
 			}
 			h, err := Wrap(httpPolicy(http.MethodPut), tc.identity, httpEvaluator(t, tc.authority), binder, func(_ http.ResponseWriter, _ *http.Request, result Result, err error) {
 				gotResult, gotErr = result, err
@@ -194,7 +194,7 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 	evaluator := httpEvaluator(t, authority)
 	executed, refused := 0, 0
 	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
-		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter) { executed++ }}, nil
+		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter, Result) { executed++ }}, nil
 	})
 	failure := FailureHandler(func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
 	valid := httpPolicy(http.MethodPut)
@@ -309,7 +309,7 @@ func TestWrapGETUsesRoutedPathWithoutARequestBody(t *testing.T) {
 		if string(values["cert"]) != `"C17"` || body != nil {
 			t.Fatalf("values=%q body=%q", values, body)
 		}
-		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}}, Execute: func(context.Context, http.ResponseWriter) { executed++ }}, nil
+		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}}, Execute: func(context.Context, http.ResponseWriter, Result) { executed++ }}, nil
 	}, func(http.ResponseWriter, *http.Request, Result, error) { t.Fatal("GET failed") })
 	if err != nil {
 		t.Fatal(err)
@@ -335,7 +335,7 @@ func TestAllowedSynchronousEffectCompletesAfterAuthorityWithdrawalAndNextRequest
 		}
 		return BoundOperation{
 			Material: Material{"cert": {Kind: SelectionExact, Value: cert}, "dept": {Kind: SelectionExact, Value: dept}},
-			Execute: func(context.Context, http.ResponseWriter) {
+			Execute: func(context.Context, http.ResponseWriter, Result) {
 				authority.authority = Authority{}
 				effects = append(effects, cert+":"+dept)
 			},
@@ -374,5 +374,63 @@ func TestBusinessBodyRejectsNonObjectTrailingInvalidUnicodeAndDepth(t *testing.T
 				t.Fatalf("decodeBusinessBody() = %q, %v", body, err)
 			}
 		})
+	}
+}
+
+// The effect is handed the result that allowed it. An allow names the grants
+// that authorized this request, and the effect is the only place that can
+// record them beside what it did — it used to receive a bare context and
+// writer, so an endpoint could log "updated C17" and nothing about why it was
+// permitted to.
+func TestTheEffectReceivesTheResultThatAllowedIt(t *testing.T) {
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	var seen Result
+	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+		return BoundOperation{
+			Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+			Execute:  func(_ context.Context, _ http.ResponseWriter, result Result) { seen = result },
+		}, nil
+	})
+	h, err := Wrap(httpPolicy(http.MethodPut), identity, httpEvaluator(t, authority), binder,
+		func(_ http.ResponseWriter, _ *http.Request, result Result, err error) {
+			t.Fatalf("refused: %#v %v", result, err)
+		})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
+	h.ServeHTTP(httptest.NewRecorder(), r)
+	if seen.Decision != Allow || seen.Version != "1" {
+		t.Fatalf("effect saw %#v", seen)
+	}
+	// The evidence, not just the verdict. A Result carrying no grants would be
+	// an allow the endpoint cannot account for.
+	if len(seen.GrantIDs) != 1 || seen.GrantIDs[0] != "fk3x9r2m5iv8" {
+		t.Fatalf("effect saw grants %#v", seen.GrantIDs)
+	}
+}
+
+// And a denial never reaches the effect, so nothing it might have recorded can
+// be recorded. The failure handler gets the result instead.
+func TestADeniedRequestNeverReachesTheEffect(t *testing.T) {
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refusedWith := 0, Result{}
+	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+		return BoundOperation{
+			Material: Material{"cert": {Kind: SelectionExact, Value: "C99"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+			Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+		}, nil
+	})
+	h, err := Wrap(httpPolicy(http.MethodPut), identity, httpEvaluator(t, authority), binder,
+		func(_ http.ResponseWriter, _ *http.Request, result Result, _ error) { refusedWith = result })
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
+	h.ServeHTTP(httptest.NewRecorder(), r)
+	if executed != 0 || refusedWith.Decision != Deny {
+		t.Fatalf("executed=%d refused=%#v", executed, refusedWith)
 	}
 }
