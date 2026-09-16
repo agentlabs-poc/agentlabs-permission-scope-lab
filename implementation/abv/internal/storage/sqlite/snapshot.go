@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type snapshotReader struct {
@@ -119,7 +120,10 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 		id, keyErr := codec.PermissionFromSlots(namespace, slots)
 		if keyErr != nil {
 			rows.Close()
-			return keyErr
+			// Named from the slots, because there is no identifier yet — this is
+			// the failure to build one, and it fires before the two permission
+			// refusals below.
+			return rowf(keyErr, "permission in namespace %q with slots %q", namespace, strings.Join(slots[:], "/"))
 		}
 		var value struct {
 			Active *bool `json:"active"`
@@ -350,7 +354,7 @@ func (r *snapshotReader) teams(s *storage.Snapshot) error {
 		// A root's parent is empty; any other parent must be a real id.
 		if content.ParentID != "" && !codec.ValidRoleID(content.ParentID) {
 			rows.Close()
-			return rowf(domain.ErrMalformed, "team %q names parent %q", id, content.ParentID)
+			return rowf(domain.ErrMalformed, "team %q names parent %s", id, clip(content.ParentID))
 		}
 		s.Teams[id] = domain.Team{ID: id, Name: name, ParentID: content.ParentID}
 	}
@@ -460,4 +464,19 @@ func malformedf(message string) error { return fmt.Errorf("%s: %w", message, dom
 // malformed still reads as unsupported.
 func rowf(err error, format string, args ...any) error {
 	return fmt.Errorf("%s: %w", fmt.Sprintf(format, args...), err)
+}
+
+// clip bounds a value that came out of a row's payload rather than its key
+// columns.
+//
+// Every other thing rowf names is a key-column value, which the schema bounds.
+// A team's parent is the exception: it is read from the record's JSON, and it is
+// printed precisely in the branch where it failed to be an identifier — so it is
+// whatever the row happens to hold, at whatever length.
+func clip(value string) string {
+	const limit = 64
+	if len(value) <= limit {
+		return fmt.Sprintf("%q", value)
+	}
+	return fmt.Sprintf("%q (truncated from %d bytes)", value[:limit], len(value))
 }

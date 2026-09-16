@@ -5,6 +5,7 @@ import (
 	"agentlabs.local/abv/internal/storage"
 	"agentlabs.local/abv/internal/validation"
 	"context"
+	"errors"
 	"sort"
 	"strings"
 )
@@ -52,7 +53,24 @@ func DependentTeamAssignments(ctx context.Context, s storage.Snapshot, assignmen
 		if err != nil {
 			return fail(err)
 		}
-		if err = validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil {
+		// A binding whose content is no longer eligible is still a binding.
+		//
+		// This validated every assignment in the area before answering about
+		// one, and failed the whole inventory on the first that did not hold.
+		// Retiring a permission one unrelated grant selects therefore made every
+		// assignment in the area unstatusable — including the root's own, which
+		// selects no permission at all. Q-125 makes retirement an ordinary act
+		// that does not require editing references first, and Q-132 then makes
+		// bottom-up dismantle the only remedy for a subtree; disabling the
+		// bindings is its first half, and the administrator could not perform it.
+		//
+		// So an eligibility failure is tolerated and the node is kept. Keeping it
+		// is the conservative direction: this graph exists to *refuse* a status
+		// change while something still depends on the binding, and dropping a
+		// node would permit a disable that should be refused. Corruption still
+		// fails the answer, because a structure this cannot read is not a
+		// structure it may reason about.
+		if err = validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil && !errors.Is(err, domain.ErrRejected) {
 			return fail(err)
 		}
 		binding := recipientBindingKey{assignment.GrantID, assignment.Recipient}

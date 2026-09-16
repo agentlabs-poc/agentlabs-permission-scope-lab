@@ -47,10 +47,22 @@ type WriteEvidence struct {
 }
 
 // Writes returns the evidence recorded so far, oldest first.
+//
+// Deeply, because GrantIDs is a slice: copying only the outer one handed every
+// reader a live pointer into the store's own record, so anything holding the
+// result could rewrite the grant chain and the next reader would see the
+// forgery. The point of passing the Result to the effect is that an endpoint
+// cannot invent evidence it was not given; that is worth nothing if a reader can
+// invent it afterwards.
 func (s *Store) Writes() []WriteEvidence {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return append([]WriteEvidence(nil), s.writes...)
+	copied := make([]WriteEvidence, len(s.writes))
+	for i, evidence := range s.writes {
+		copied[i] = evidence
+		copied[i].GrantIDs = append([]string(nil), evidence.GrantIDs...)
+	}
+	return copied
 }
 
 func (s *Store) record(evidence WriteEvidence) {

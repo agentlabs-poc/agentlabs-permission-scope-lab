@@ -334,3 +334,56 @@ func TestAWriteRecordsTheGrantsThatAuthorizedIt(t *testing.T) {
 		t.Fatalf("a refused write left evidence: %#v", store.Writes())
 	}
 }
+
+// The evidence a reader gets back is its own. Copying only the outer slice left
+// GrantIDs aliasing the store's record, so a reader could rewrite the chain and
+// the next reader would see the forgery.
+func TestRecordedEvidenceCannotBeRewrittenByAReader(t *testing.T) {
+	store, handler := writingHandler(t)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, httptest.NewRequest(http.MethodPut, "/api/v1/acme/certificates/C17",
+		strings.NewReader(`{"department_id":"FIN","title":"revised"}`)))
+	if w.Code != http.StatusOK {
+		t.Fatalf("code=%d body=%s", w.Code, w.Body)
+	}
+	first := store.Writes()
+	first[0].GrantIDs[0] = "ffffffffffff"
+	if got := store.Writes(); got[0].GrantIDs[0] != "fk3x9r2m0dq3" {
+		t.Fatalf("a reader rewrote the recorded chain: %#v", got[0])
+	}
+}
+
+// Evidence is recorded for a change that happened, not for a request that got
+// past the gate. A PUT for a certificate that does not exist passes — dept=FIN
+// matches the route's predicate — and the effect finds nothing. Moving the
+// record above that guard left the whole suite green, because the test's other
+// negative case is a gate denial, which never reaches the effect at all.
+func TestAnAllowedWriteThatChangesNothingRecordsNothing(t *testing.T) {
+	store, handler := writingHandler(t)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, httptest.NewRequest(http.MethodPut, "/api/v1/acme/certificates/C404",
+		strings.NewReader(`{"department_id":"FIN","title":"nothing here"}`)))
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("code=%d body=%s", w.Code, w.Body)
+	}
+	if writes := store.Writes(); len(writes) != 0 {
+		t.Fatalf("a write that changed nothing left evidence: %#v", writes)
+	}
+}
+
+func writingHandler(t *testing.T) (*hrms.Store, http.Handler) {
+	t.Helper()
+	const maya = "fi7io4lvjqio"
+	route := finRead(maya)
+	route.Permissions = []string{"hrms:payroll:payslip::read", "hrms:payroll:payslip::write"}
+	store := hrms.NewStore(hrms.DefaultRecords())
+	evaluator, err := authmiddleware.New(stubAuthority{routes: []authmiddleware.Route{route}}, clock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", maya))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return store, handler
+}
