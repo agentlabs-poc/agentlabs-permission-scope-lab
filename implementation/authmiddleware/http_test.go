@@ -129,8 +129,12 @@ func TestWrapStopsBeforeProtectedEffect(t *testing.T) {
 	}{
 		{"identity error", http.MethodPut, "/api/acme/hrms/certificates/C17", `{}`, &httpIdentitySource{err: identityErr}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, identityErr, false},
 		{"invalid identity", http.MethodPut, "/api/acme/hrms/certificates/C17", `{}`, &httpIdentitySource{requestContext: RequestContext{Area: httpContext().Area}}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
-		{"tenant mismatch", http.MethodPut, "/api/other/hrms/certificates/C17", `{}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
-		{"application mismatch", http.MethodPut, "/api/acme/other/certificates/C17", `{}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
+		// A body the policy accepts, so the refusal below is the binding and not
+		// a missing input. With `{}` these two stopped reaching verifyTrusted at
+		// all — selectInputs refused first — and deleting the whole trusted check
+		// left both of them passing.
+		{"tenant mismatch", http.MethodPut, "/api/other/hrms/certificates/C17", `{"department_id":"FIN"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
+		{"application mismatch", http.MethodPut, "/api/acme/other/certificates/C17", `{"department_id":"FIN"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
 		{"missing selected body does not use query", http.MethodPut, "/api/acme/hrms/certificates/C17?department_id=FIN", `{}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
 		{"invalid body", http.MethodPut, "/api/acme/hrms/certificates/C17", `{"department_id":"FIN","department_id":"ENG"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
 		{"binder error", http.MethodPut, "/api/acme/hrms/certificates/C17", `{"department_id":"FIN"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, binderErr, binderErr, false},
@@ -232,13 +236,16 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Only the map mutation is a real test of the copy. Wrap takes the Policy by
+	// value, so assigning to a scalar field of the caller's struct could never
+	// have reached the handler — it is left here to say so, not as the check.
 	p.Permission = "forged::write"
 	p.Inputs["dept"] = Input{Source: SourceBody, Name: "forged"}
 	r := httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
 	h.ServeHTTP(httptest.NewRecorder(), r)
-	// The mounted copy decides, not the caller's struct. The only route offered
-	// carries certificate::write, so forged::write would have found no matching
-	// route and reached the failure handler instead of the effect.
+	// The mounted copy of the Inputs map decides, not the caller's. Repointing
+	// "dept" at a body field the request does not carry would refuse the binding
+	// outright, so the effect still running is the clone holding.
 	if executed != 1 || refused != 0 {
 		t.Fatalf("mutated policy changed the decision: executed=%d refused=%d", executed, refused)
 	}
@@ -305,8 +312,12 @@ func TestWrapRejectsNilExecuteBeforeEvaluation(t *testing.T) {
 
 func TestWrapGETUsesRoutedPathWithoutARequestBody(t *testing.T) {
 	policy := Policy{Version: "1", Method: http.MethodGet, Path: "/api/{tenant}/{application}/certificates/{cert}", Permission: "certificate::write",
-		Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "tenant"}, "cert": {Source: SourcePath, Name: "cert"}},
-		Trusted: map[string]string{TrustedTenant: "tenant"}}
+		Inputs: map[string]Input{
+			"tenant": {Source: SourcePath, Name: "tenant"},
+			"app":    {Source: SourcePath, Name: "application"},
+			"cert":   {Source: SourcePath, Name: "cert"},
+		},
+		Trusted: map[string]string{TrustedTenant: "tenant", TrustedApplication: "app"}}
 	identity := &httpIdentitySource{requestContext: httpContext()}
 	authority := allowAuthority()
 	authority.Routes[0].Predicates = authority.Routes[0].Predicates[:1]
@@ -525,14 +536,94 @@ func TestACorrelatedInputThatIsNotAStringIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, body := range []string{`{"tenant_id":9}`, `{"tenant_id":["acme"]}`, `{"tenant_id":"globex"}`} {
+	for _, body := range []string{`{"tenant_id":9}`, `{"tenant_id":["acme"]}`, `{"tenant_id":null}`, `{"tenant_id":"globex"}`} {
 		h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/v2/certificates/C17", strings.NewReader(body)))
 	}
-	if executed != 0 || refused != 3 {
+	if executed != 0 || refused != 4 {
 		t.Fatalf("executed=%d refused=%d", executed, refused)
 	}
 	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/v2/certificates/C17", strings.NewReader(`{"tenant_id":"acme"}`)))
 	if executed != 1 {
 		t.Fatalf("the trusted tenant in the body was refused: executed=%d refused=%d", executed, refused)
+	}
+}
+
+// The declaration has to name the input that actually carries the claim.
+//
+// Without this the new scheme was not even as strong as the spelling match it
+// replaced: a policy could carry {tenant} in its path, point its tenant
+// correlation at a different declared input, and the segment the handler reads
+// went unchecked. Three live handbook lines require that binding —
+// system-overview.md:147, endpoint-authorization.md:297 and
+// endpoint-policy-format.md:352.
+func TestAPolicyCannotCorrelateSomethingOtherThanThePathsOwnTenant(t *testing.T) {
+	for name, policy := range map[string]Policy{
+		// The regression the review found: {tenant} in the path, correlation
+		// pointed elsewhere. GET /api/v1/globex/acme/x under trusted acme used to
+		// mount, pass, and run the effect.
+		"correlation names another input": {
+			Version: "1", Method: http.MethodGet, Path: "/api/v1/{tenant}/{org}/x", Permission: "certificate::read",
+			Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "org"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"},
+		},
+		// A body field cannot stand in for the path's own claim either.
+		"correlation reads the body instead": {
+			Version: "1", Method: http.MethodPut, Path: "/api/v1/{tenant}/x", Permission: "certificate::write",
+			Inputs:  map[string]Input{"tenant": {Source: SourceBody, Name: "tenant_id"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"},
+		},
+		// And the application half, which was optional and so could still be
+		// forgotten — the exact failure this whole change claims to have closed.
+		"application placeholder uncorrelated": {
+			Version: "1", Method: http.MethodGet, Path: "/api/v1/{tenant}/{application}/x", Permission: "certificate::read",
+			Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "tenant"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if err := policy.Validate(); err == nil {
+				t.Fatalf("mounted a policy whose path claim nothing binds: %#v", policy)
+			}
+		})
+	}
+
+	// A path that does not use this gate's own vocabulary is not second-guessed:
+	// {org} is bound because the mandatory correlation names it, and nothing
+	// tries to work out that "org" means a tenant.
+	spelled := Policy{
+		Version: "1", Method: http.MethodGet, Path: "/api/v1/{org}/x", Permission: "certificate::read",
+		Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "org"}},
+		Trusted: map[string]string{TrustedTenant: "tenant"},
+	}
+	if err := spelled.Validate(); err != nil {
+		t.Fatalf("a policy that binds its own {org} was refused: %v", err)
+	}
+}
+
+// The application correlation works when it is reached. It had none of its own
+// coverage: making the branch a permanent no-op left the whole suite green.
+func TestTheApplicationCorrelationIsVerifiedToo(t *testing.T) {
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refused := 0, 0
+	h, err := Wrap(httpPolicy(http.MethodPut), identity, httpEvaluator(t, authority),
+		func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+			return BoundOperation{
+				Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+				Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+			}, nil
+		},
+		func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := `{"department_id":"FIN"}`
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/acme/crm/certificates/C17", strings.NewReader(body)))
+	if executed != 0 || refused != 1 {
+		t.Fatalf("another application reached the handler: executed=%d refused=%d", executed, refused)
+	}
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(body)))
+	if executed != 1 {
+		t.Fatalf("the trusted application was refused: executed=%d refused=%d", executed, refused)
 	}
 }

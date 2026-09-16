@@ -175,8 +175,11 @@ func decodeBusinessBody(body io.Reader) (map[string]json.RawMessage, error) {
 // that arrives as a number or an object is not a tenant.
 func verifyTrusted(policy Policy, values InputValues, requestContext RequestContext) error {
 	for field, local := range policy.Trusted {
-		var declared string
-		if err := json.Unmarshal(values[local], &declared); err != nil {
+		// A pointer, because null unmarshals into a string quite happily and
+		// leaves it empty. That was caught downstream by the trusted area never
+		// being empty, which is true but is not this check doing its job.
+		var declared *string
+		if err := json.Unmarshal(values[local], &declared); err != nil || declared == nil {
 			return fmt.Errorf("trusted %s input %q is not a string", field, local)
 		}
 		var trusted string
@@ -186,7 +189,7 @@ func verifyTrusted(policy Policy, values InputValues, requestContext RequestCont
 		case TrustedApplication:
 			trusted = requestContext.Area.ApplicationID
 		}
-		if declared != trusted {
+		if *declared != trusted {
 			return fmt.Errorf("%s input %q does not match the trusted area", field, local)
 		}
 	}
