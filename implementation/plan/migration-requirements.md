@@ -30,10 +30,13 @@ closes with *"Full validation rules … remain open"* and leaves that to Q-050-C
 Adding a `Policy.TenantInput` field here would settle an open contract by
 implementation, which is the same error as reading the tenant from a name.
 
-**What the migration owes.** An endpoint policy must be able to *declare* which
-input carries the tenant, and the gate must bind the declared one. A policy that
-routes by tenant and declares nothing should be refused at construction, not
-silently unchecked.
+**What the migration owes.** Not the declined machinery — something that makes
+the duty CONTRACT-012 assigns to the endpoint checkable. A gate that silently
+skips the binding when it cannot find the input is the worst of both: the
+handbook put the responsibility on the endpoint, and the endpoint gets no signal
+when it has not discharged it. At minimum, a policy carrying a route segment the
+gate cannot account for should be refused where policies are mounted, rather than
+accepted and left unchecked.
 
 ---
 
@@ -47,11 +50,19 @@ refusals already on the disable paths.
 costs nothing, and an area whose root is gone has no ceiling for anything —
 every demonstration built on it stops meaning what it says.
 
-**Why it is not settled.** No handbook rule prohibits it. Q-113 is about
-*manufacturing* root authority — the sentence ends *"by submitting parentless
-JSON"* — and `root-grant-format.md:90-91` files the **authorized root-change
-procedure** as open, as `bootstrap-initial-assignment.md` does for recovery. The
-refusal is a conservative default chosen in empty space.
+**Why it is not settled.** No handbook rule prohibits it, and the nearest ones
+lean the other way. Q-113 (`bootstrap-authority.md:134-136`) is about
+*conferring* root authority — *"ordinary grant creation or modification must not
+confer root authority merely by omitting/removing a parent reference"* — and says
+nothing about removing one properly established. `bootstrap-authority.md:151-152`
+goes further: an established root *"remains an ordinary grant subject to status,
+validity, revisions, assignments, and its explicit boundaries."*
+
+Deletion is not named in that list, which is the only reason this refusal is not
+flatly against the text. **The lab's refusal to *disable* a root is** — that is
+pre-existing behaviour, it contradicts "subject to status", and it is recorded
+here rather than quietly kept. The authorized root-change procedure is open
+(`root-grant-format.md:90-91`), so both are defaults in unfinished space.
 
 **What the migration owes.** The root-change procedure itself: how a root is
 retired, replaced or repaired, under what authority, and what evidence it leaves.

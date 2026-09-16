@@ -144,12 +144,16 @@ func TestCreateGrantRefusesParentlessUnregisteredAndUnknownParent(t *testing.T) 
 	}
 }
 
-// A root is not an ordinary grant, and ordinary administration cannot remove
-// one. Establishment has its own gate that grant administration cannot reach,
-// and disablement already refuses here — but deletion did not, which made the
-// harsher act the available one. There is no repair: bootstrap "cannot reset
-// intentionally changed root authority", and an area whose root is gone has no
-// ceiling for anything.
+// Ordinary administration cannot remove a root here. That is a lab default
+// rather than an agreed rule — the handbook calls an established root "an
+// ordinary grant subject to status, validity, revisions, assignments" and files
+// the authorized root-change procedure as open — and it is recorded as one in
+// plan/migration-requirements.md.
+//
+// It holds because the alternative is unrecoverable: an area whose root is gone
+// has no ceiling for anything, and nothing today puts one back. Disablement
+// already refused; deletion did not, which made the harsher act the available
+// one.
 func TestDeletingATrustedRootIsNotAnOrdinaryOperation(t *testing.T) {
 	api, area := openGrantLab(t)
 	if err := api.DeleteGrant(t.Context(), area, teamFixture, "fk3x9r2m0dq3"); !errors.Is(err, domain.ErrUnsupported) {

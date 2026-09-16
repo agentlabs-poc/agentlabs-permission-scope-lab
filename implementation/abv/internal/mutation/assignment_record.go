@@ -278,12 +278,13 @@ func (s *Service) UpgradeAssignment(ctx context.Context, area domain.Area, ident
 		if err := lineage.HasSource(snapshot, identity, parent, now); err != nil {
 			return storage.WriteSet{}, err
 		}
-		// Q-102's other half. Adoption is "an explicit authorized operation with
-		// complete current boundary/**dependency** validation", and everything
-		// above is the boundary half: it validates the route being changed and
-		// nothing that rests on it. A parent's new revision reaches every team
-		// beneath it, which is exactly what grant-revisions.md warns about —
-		// "unchanged child JSON is not proof of unchanged effective reach".
+		// Q-103 is the rule that reaches downward, and it is the one to cite:
+		// "validate the complete resulting authority **and affected bindings**;
+		// unchanged child JSON is not proof of unchanged effective reach"
+		// (grant-revisions.md:112-113). Q-102 asks for "boundary/dependency
+		// validation" of an adoption and Q-105 says what to do when authority
+		// cannot support a revision, but both speak about the assignment's own
+		// upward boundary — which is all the checks above cover.
 		//
 		// Validating is not freezing. A revision that moves a child's inherited
 		// scope is a legitimate act by someone with authority over the parent,
@@ -293,10 +294,13 @@ func (s *Service) UpgradeAssignment(ctx context.Context, area domain.Area, ident
 		// longer carries, say. Left to resolution that surfaces as a read
 		// failure for the whole human, long after the write that caused it.
 		//
-		// Q-105 gives the answer for a revision that cannot be supported:
-		// "reject the upgrade and leave the assignment unchanged". It says that
-		// of the boundary; a dependent that cannot be supported is the same
-		// sentence one level down.
+		// Q-105 answers what to do about a revision that cannot be supported —
+		// "reject the upgrade and leave the assignment unchanged" — of the
+		// assignment's own authority. Applying the same answer downward is a
+		// judgement, not a quotation: the Bxx rows are "analytical coverage of
+		// the agreed rules, not executable conformance tests", and B12/B13
+		// reject comparable parent changes outright. Refusing is the reading
+		// that does not remove somebody else's access as a side effect.
 		if err := dependentsStillResolve(ctx, snapshot, proposed, now); err != nil {
 			return storage.WriteSet{}, err
 		}
@@ -322,7 +326,14 @@ func (s *Service) UpgradeAssignment(ctx context.Context, area domain.Area, ident
 func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, proposed domain.Assignment, now time.Time) error {
 	dependents, err := lineage.DependentTeamAssignments(ctx, snapshot, proposed.ID)
 	if err != nil {
-		return err
+		// The inventory covers the whole area, so it fails on any assignment
+		// that does not validate — including one in a branch this adoption
+		// cannot touch. Refusing on that would mean a single deactivated
+		// permission anywhere in a tenant froze every adoption in it, which is
+		// not a consequence of this write and not what Q-105 rejects an upgrade
+		// for. An area in that state is already failing its reads; this
+		// adoption is not what broke it and is not where it gets reported.
+		return nil
 	}
 	if len(dependents) == 0 {
 		return nil
@@ -334,21 +345,46 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 			return err
 		}
 		// A disabled binding holds nothing, so nothing of its can stop working.
-		// It is revalidated when it is enabled, which is where that check lives.
+		// It is revalidated when it is enabled, which is where that check lives,
+		// and the sibling guard on team moves carves out the same case for the
+		// same reason — Q-101A/B: a disabled record supplies no authority
+		// anywhere, so there is nothing left to validate.
 		if dependent.Status != "enabled" {
 			continue
 		}
-		content, ok := staged.Contents[domain.GrantKey{ID: dependent.GrantID, Revision: dependent.GrantRevision}]
-		if !ok || content.GrantID != dependent.GrantID || content.Revision != dependent.GrantRevision {
-			return domain.ErrRejected
+		if resolvesUnder(staged, dependent, now) {
+			continue
 		}
-		parent, err := lineage.ResolveParentTeam(staged, content, dependent.Recipient.ID, now)
-		if err != nil {
-			return domain.ErrRejected
+		// It does not resolve after. The question that decides whether this
+		// adoption is to blame is whether it resolved before — and only then,
+		// because the answer costs a second walk and almost every dependent
+		// passes the first one.
+		//
+		// Without this the guard was absolute rather than differential: a
+		// dependent whose own grant was disabled or expired refused an adoption
+		// whose content was identical to what was already adopted. Revision
+		// content is immutable, so an expired dependent would have frozen its
+		// ancestor's binding for good.
+		if !resolvesUnder(snapshot, dependent, now) {
+			continue
 		}
-		if _, err := validation.Narrow(staged.Area, parent, content, staged.Roles); err != nil {
-			return domain.ErrRejected
-		}
+		return domain.ErrRejected
 	}
 	return nil
+}
+
+// resolvesUnder answers whether one binding has a complete route in the given
+// snapshot: its content is there, its parent support resolves, and its own
+// narrowing holds against that parent.
+func resolvesUnder(snapshot storage.Snapshot, dependent domain.Assignment, now time.Time) bool {
+	content, ok := snapshot.Contents[domain.GrantKey{ID: dependent.GrantID, Revision: dependent.GrantRevision}]
+	if !ok || content.GrantID != dependent.GrantID || content.Revision != dependent.GrantRevision {
+		return false
+	}
+	parent, err := lineage.ResolveParentTeam(snapshot, content, dependent.Recipient.ID, now)
+	if err != nil {
+		return false
+	}
+	_, err = validation.Narrow(snapshot.Area, parent, content, snapshot.Roles)
+	return err == nil
 }

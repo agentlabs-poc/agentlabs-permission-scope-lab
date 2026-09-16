@@ -200,16 +200,17 @@ func TestEstablishAuthRootComputesFromThePlatformCatalog(t *testing.T) {
 	}
 }
 
-// The root a moment after it is established, with nothing resting on it yet, is
-// the state in which ordinary administration could delete it — and did. The
-// dependency refusals that protect every other grant do not apply, because
-// nothing depends on it; the establishment gate does not apply either, because
-// that gate guards writing a root and this is a removal. So the only thing
-// between a tenant and an area with no ceiling was a rule nobody had written.
+// The root a moment after it is established is the state in which ordinary
+// administration could destroy it — and did. The route was two steps: the root
+// grant itself is refused while its holder assignment depends on it, so deleting
+// the holder first was the opening, and the root then had nothing left to refuse
+// on its behalf. Neither step was guarded, and the establishment gate does not
+// reach either: it guards writing a root, and these are removals.
 //
-// There is no repair. Bootstrap "cannot reset intentionally changed root
-// authority", and "recovery must not be achieved by replaying completed initial
-// setup" — the fixture cannot be re-run to put it back.
+// Recovery is not available, which is not the same as impossible: bootstrap
+// files it as an open contract needing "a separately governed recovery
+// contract", and Q-124 already admits an authorized retry of an *interrupted*
+// setup under conditions. Nothing today puts a deleted root back.
 func TestAnEstablishedRootCannotBeDeleted(t *testing.T) {
 	api, area := openEstablishLab(t, "tenant-genesis")
 

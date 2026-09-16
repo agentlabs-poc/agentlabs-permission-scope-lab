@@ -27,7 +27,12 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 		fixture := lab.TeamFINC17(area)
 		snapshot := fixture.Snapshot
 		// A subteam of Team2, and a grant hung below Team2's own.
-		snapshot.Teams["fibggi2jv5k0"] = domain.Team{ID: "fibggi2jv5k0", Name: "fp8h2w6yv5k0", ParentID: "fibggi2juxhc"}
+		// Two levels below the moved team, not one. The guard grows the subtree
+		// to a fixpoint, and a walk that stopped at direct children would have
+		// passed every test until this one: the claim the commit makes loudest
+		// is that "affected" reaches all the way down.
+		snapshot.Teams["fibggi2jv4hu"] = domain.Team{ID: "fibggi2jv4hu", Name: "fp8h2w6yv4hu", ParentID: "fibggi2juxhc"}
+		snapshot.Teams["fibggi2jv5k0"] = domain.Team{ID: "fibggi2jv5k0", Name: "fp8h2w6yv5k0", ParentID: "fibggi2jv4hu"}
 		snapshot.Memberships = append(snapshot.Memberships, domain.Membership{TeamID: "fibggi2jv5k0", HumanID: "fi7io4lvk35s"})
 		snapshot.Controls["fk3x9r2mv5k0"] = domain.GrantControl{Version: "1", ID: "fk3x9r2mv5k0", Status: "enabled"}
 		snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mv5k0", Revision: 1}] = domain.GrantContent{
@@ -81,4 +86,45 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 			t.Fatalf("a disabled binding blocked the move: %v", err)
 		}
 	})
+}
+
+// Re-asserting the parent a team already has is not a change, so B13 — which
+// governs *changing* or removing a parent — does not reach it. Refusing it broke
+// idempotent retries: a caller whose request timed out after succeeding got a
+// conflict on the repeat, against a store already in the state it asked for.
+func TestSetTeamParentIsANoOpAgainstTheParentItAlreadyHas(t *testing.T) {
+	area, err := domain.NewArea("acme", "hrms")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixture := lab.TeamFINC17(area)
+	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer provider.Close()
+	statusAdmin, err := lab.NewAssignmentStatusAdministration(area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := mutation.New(provider,
+		&lab.RoleAdministration{AssignmentStatusAdministration: statusAdmin},
+		&fixedClock{now: time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	publisher := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}
+
+	// Team1 holds an enabled binding, so a real move is refused — which is what
+	// makes this a test of the no-op and not of an unguarded team.
+	if _, err := service.SetTeamParent(t.Context(), area, publisher, "fibggi2juubk", "fibggi2juxhc"); err == nil {
+		t.Fatal("a real move of a bound team was allowed")
+	}
+	moved, err := service.SetTeamParent(t.Context(), area, publisher, "fibggi2juubk", "fibggi2jur5s")
+	if err != nil {
+		t.Fatalf("re-asserting the parent a team already has was refused: %v", err)
+	}
+	if moved.ParentID != "fibggi2jur5s" {
+		t.Fatalf("the no-op changed the parent: %#v", moved)
+	}
 }

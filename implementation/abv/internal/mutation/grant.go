@@ -146,16 +146,26 @@ func (s *Service) DeleteGrant(ctx context.Context, area domain.Area, identity do
 		if _, ok := snapshot.Controls[id]; !ok {
 			return storage.WriteSet{}, domain.ErrNotFound
 		}
-		// A lab default, not an agreed rule. Q-113 is about *manufacturing* root
-		// authority — its sentence ends "by submitting parentless JSON" — and
-		// root-grant-format.md files the authorized root-change procedure as
-		// open, so how a root may be removed is undecided rather than settled.
+		// A lab default, not an agreed rule, and the handbook leans the other
+		// way on the neighbouring question.
 		//
-		// Refusing is the conservative reading of open space: disablement
-		// already refuses here (SetGrantStatus), an area whose root is gone has
-		// no ceiling, and recovery is itself an unbuilt contract. The cost of
-		// being wrong is an operation nobody in this lab performs. The Auth
-		// service this migrates into is where the real answer belongs.
+		// Q-113 (bootstrap-authority.md:134-136) is about *conferring* root
+		// authority: "ordinary grant creation or modification must not confer
+		// root authority merely by omitting/removing a parent reference." It
+		// says nothing about removing a root that was properly established, and
+		// bootstrap-authority.md:151-152 says the opposite of special: an
+		// established root "remains an ordinary grant subject to status,
+		// validity, revisions, assignments, and its explicit boundaries."
+		// Deletion is not in that list, which is the only reason this refusal is
+		// not flatly against the text — and the lab already refuses to *disable*
+		// a root, which is.
+		//
+		// It stays because an area whose root is gone has no ceiling for
+		// anything, recovery is an unbuilt contract, and nothing in this lab
+		// deletes a root — so the cost of being wrong is an operation nobody
+		// performs. The authorized root-change procedure is open
+		// (root-grant-format.md:90-91) and the service this migrates into is
+		// where it gets written. Recorded in plan/migration-requirements.md.
 		if snapshot.TrustedRoots[id] {
 			return storage.WriteSet{}, domain.ErrUnsupported
 		}

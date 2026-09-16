@@ -276,8 +276,15 @@ func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity 
 		// touching one grant, one assignment or one record anyone would think to
 		// review. DeleteTeam already refuses while an assignment names the team;
 		// the asymmetry between removing a team and moving it was the whole bug.
-		if err := refuseAffectedBindings(snapshot, id); err != nil {
-			return storage.WriteSet{}, err
+		// Re-asserting the parent a team already has changes nothing and
+		// re-anchors nothing, so B13 — which governs *changing* or removing a
+		// parent — does not reach it. Refusing here broke idempotent retries: a
+		// caller whose request timed out after succeeding got a conflict on the
+		// repeat. UpgradeAssignment carries the same shortcut for its own no-op.
+		if snapshot.Teams[id].ParentID != parentID {
+			if err := refuseAffectedBindings(snapshot, id); err != nil {
+				return storage.WriteSet{}, err
+			}
 		}
 		if err := ctx.Err(); err != nil {
 			return storage.WriteSet{}, err
