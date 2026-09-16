@@ -118,3 +118,57 @@ func (brokenRegistry) ApplicationExists(context.Context, string) (bool, error) {
 func (brokenRegistry) Installed(context.Context, string, string) (bool, error) {
 	return false, errors.New("registry unavailable")
 }
+
+// The two AuthoritySource implementations answer the same contract, and one of
+// them was enforcing an invariant the other trusted.
+//
+// convertGrant stamps the asked-for permission onto every route, so a grant that
+// does not carry it becomes a route claiming it and the evaluator never knows —
+// which is the bug authclient's own decode already carries a comment about: "a
+// grant for reading the directory came back approved for reading payroll."
+// ResolveAuthority does filter, so nothing can produce this through the real
+// path today. That is the point: the trusting side is the one nothing tested,
+// and drift starts where one side assumes.
+func TestAGrantWithoutTheAskedPermissionDoesNotBecomeARoute(t *testing.T) {
+	const read, write = "hrms:payroll:payslip::read", "hrms:payroll:payslip::write"
+	query := authmiddleware.AuthorityQuery{
+		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}},
+		Permission: read,
+	}
+	resolved := func(permissions ...string) domain.ResolvedAuthority {
+		return domain.ResolvedAuthority{
+			Version: "1", TenantID: "acme", ApplicationID: "hrms", HumanID: "fi7io4lvjqio",
+			ResolvedGrants: []domain.ResolvedGrant{{
+				GrantID: "fk3x9r2m5iv8", Permissions: permissions, Scope: map[string]string{"dept": "FIN"},
+			}},
+		}
+	}
+
+	// The control: a grant that does carry it becomes exactly one route.
+	authority, err := routesFor(resolved(read, write), query)
+	if err != nil || len(authority.Routes) != 1 || authority.Routes[0].Permission != read {
+		t.Fatalf("a grant carrying the permission gave %#v, %v", authority, err)
+	}
+
+	for name, permissions := range map[string][]string{
+		"a different permission": {write},
+		"none at all":            nil,
+		"a near miss":            {read + "x"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			authority, err := routesFor(resolved(permissions...), query)
+			if err == nil {
+				t.Fatalf("a grant carrying %v became %#v", permissions, authority.Routes)
+			}
+			if len(authority.Routes) != 0 {
+				t.Fatalf("a refused answer still carried routes: %#v", authority.Routes)
+			}
+			// And it is an evaluation failure, so the application answers 503
+			// rather than telling the person they lack access.
+			var evaluation *authmiddleware.EvaluationError
+			if !errors.As(err, &evaluation) {
+				t.Fatalf("err = %T %v, want an EvaluationError", err, err)
+			}
+		})
+	}
+}
