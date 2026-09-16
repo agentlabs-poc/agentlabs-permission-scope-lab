@@ -31,12 +31,17 @@ import (
 // expensive direction here, because refusing stops at the first dependent it
 // cannot support while accepting has to look at all of them.
 //
-// What this is *not* is a claim that the cost is linear. Measured on this
-// machine: ~150 ms accepting at 800 dependents, and the review measured ~379 ms
-// at 1600 — the walk rescans the assignment map per chain step per dependent, so
-// doubling the fan-out more than doubles the work. The budget sits where it does
-// to leave that headroom visible rather than to bless it. If the day comes that
-// this fails, the fix is an index built once per call, not a bigger number here.
+// The walk used to rescan every assignment in the area at each chain step, and
+// there is a chain per dependent, so doubling the fan-out more than doubled the
+// work: 19.5 / 54.8 / 132 / 328 ms at 200 / 400 / 800 / 1600, about 2.4–2.8×
+// per doubling. A Bindings index built once per call and shared across
+// dependents makes it 16.7 / 44.2 / 86.5 / 185 ms — about 2.1×, which is as
+// close to linear as this shape gets.
+//
+// Worth recording because the obvious version of that fix was slower than the
+// problem: an index built per chain cost ~434 ms at 800, against ~150 ms for the
+// scans it replaced. Chains are shallow and areas are wide, so the index only
+// pays when it is shared.
 func TestAdoptionStaysBoundedAsDependentsGrow(t *testing.T) {
 	area, err := domain.NewArea("acme", "hrms")
 	if err != nil {

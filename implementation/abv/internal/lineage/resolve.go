@@ -56,7 +56,13 @@ var ErrInactive = fmt.Errorf("inactive authority: %w", domain.ErrRejected)
 // route resolved.
 var ErrIneligible = fmt.Errorf("ineligible authority: %w", domain.ErrRejected)
 
+// ResolveParentTeam resolves one chain. A caller resolving many over the same
+// snapshot should build a Bindings index once and use ResolveParentTeamIndexed.
 func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientTeamID string, now time.Time) (domain.Route, error) {
+	return ResolveParentTeamIndexed(s, nil, child, recipientTeamID, now)
+}
+
+func ResolveParentTeamIndexed(s storage.Snapshot, bindings *Bindings, child domain.GrantContent, recipientTeamID string, now time.Time) (domain.Route, error) {
 	fail := func(err error) (domain.Route, error) { return domain.Route{}, err }
 	if err := s.Area.Validate(); err != nil {
 		return fail(err)
@@ -84,7 +90,7 @@ func ResolveParentTeam(s storage.Snapshot, child domain.GrantContent, recipientT
 	if err != nil {
 		return fail(err)
 	}
-	resolver := routeResolver{s: s, now: now, active: map[string]bool{child.GrantID: true}, remaining: maxChainSteps}
+	resolver := routeResolver{s: s, now: now, active: map[string]bool{child.GrantID: true}, remaining: maxChainSteps, bindings: bindings}
 	return resolver.resolve(assignment, team.ParentID)
 }
 
@@ -93,6 +99,80 @@ type routeResolver struct {
 	now       time.Time
 	active    map[string]bool
 	remaining int
+	// bindings is shared by the caller across every chain it resolves over one
+	// snapshot, or nil when there is only one to resolve.
+	bindings *Bindings
+}
+
+// Bindings indexes (grant, team) → the one assignment binding them.
+//
+// Every step of a chain otherwise rescans every assignment in the area, so one
+// walk costs depth × assignments — and a caller walking a chain per dependent
+// pays that per dependent, which is how validating an adoption became
+// super-linear in the number of dependents.
+//
+// It belongs to the caller rather than to a resolver, and that is the whole
+// lesson: building it per chain costs *more* than the scans it saves, because
+// chains are shallow and areas are wide. Measured on the adoption guard at 800
+// dependents — ~150 ms scanning, ~434 ms indexing per chain, ~40 ms indexing
+// once.
+type Bindings struct {
+	byKey     map[bindingKey]domain.Assignment
+	ambiguous bool
+}
+
+// IndexBindings builds that index. A duplicate or a mis-keyed row makes the
+// area's assignments untrustworthy rather than one route's, so it is remembered
+// and every lookup refuses — the answer uniqueAssignment gives, found once
+// instead of on every walk that happens to pass the duplicate.
+//
+// Of those two, only the duplicate check can change an answer today: the first
+// step of every chain is resolved by a scan, which refuses a mis-keyed row
+// anywhere in the area before the index is consulted. The key check is kept
+// because it is a property of this index rather than of its current caller — the
+// day the first step is indexed too, its absence would be a silent allow. Its
+// unreachability is asserted the only way an unreachable branch can be: the
+// parity test refuses to let the two paths disagree.
+func IndexBindings(s storage.Snapshot) *Bindings {
+	index := &Bindings{byKey: make(map[bindingKey]domain.Assignment, len(s.Assignments))}
+	for key, assignment := range s.Assignments {
+		if key != assignment.ID {
+			index.ambiguous = true
+			return index
+		}
+		if assignment.Recipient.Type != "group" || !validAssignment(assignment) {
+			continue
+		}
+		at := bindingKey{assignment.GrantID, assignment.Recipient.ID}
+		if _, duplicate := index.byKey[at]; duplicate {
+			index.ambiguous = true
+			return index
+		}
+		index.byKey[at] = assignment
+	}
+	return index
+}
+
+// binding answers the same question as uniqueAssignment, from an index built
+// once per resolver rather than a scan per step. Duplicates and malformed rows
+// are refusals exactly as they are there: they are found while indexing, and the
+// answer is the same whichever binding is asked for, because a duplicate makes
+// the area's assignments untrustworthy rather than one route's.
+func (r *routeResolver) binding(grantID, teamID string) (domain.Assignment, error) {
+	if r.bindings == nil {
+		return uniqueAssignment(r.s, grantID, teamID)
+	}
+	if r.bindings.ambiguous {
+		return domain.Assignment{}, domain.ErrRejected
+	}
+	if found, ok := r.bindings.byKey[bindingKey{grantID, teamID}]; ok {
+		return found, nil
+	}
+	// Either nothing binds them, or what does is not a valid group binding.
+	// uniqueAssignment answers ErrInactive for the first and ErrRejected for the
+	// second, and the index cannot tell them apart — so the scan decides, on the
+	// one path that is already refusing.
+	return uniqueAssignment(r.s, grantID, teamID)
 }
 
 func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID string) (domain.Route, error) {
@@ -129,7 +209,7 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	if team.ParentID == "" {
 		return fail(domain.ErrRejected)
 	}
-	parentAssignment, err := uniqueAssignment(r.s, content.ParentGrantID, team.ParentID)
+	parentAssignment, err := r.binding(content.ParentGrantID, team.ParentID)
 	if err != nil {
 		return fail(err)
 	}

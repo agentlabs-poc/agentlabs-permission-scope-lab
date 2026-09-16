@@ -340,6 +340,9 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 	}
 	staged := cloneSnapshot(snapshot)
 	staged.Assignments[proposed.ID] = proposed
+	// One index per snapshot, not per dependent. Each chain step otherwise
+	// rescans every assignment in the area, and there is a chain per dependent.
+	before, after := lineage.IndexBindings(snapshot), lineage.IndexBindings(staged)
 	for _, dependent := range dependents {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -352,7 +355,7 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 		if dependent.Status != "enabled" {
 			continue
 		}
-		if resolvesUnder(staged, dependent, now) {
+		if resolvesUnder(staged, after, dependent, now) {
 			continue
 		}
 		// It does not resolve after. The question that decides whether this
@@ -365,7 +368,7 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 		// whose content was identical to what was already adopted. Revision
 		// content is immutable, so an expired dependent would have frozen its
 		// ancestor's binding for good.
-		if !resolvesUnder(snapshot, dependent, now) {
+		if !resolvesUnder(snapshot, before, dependent, now) {
 			continue
 		}
 		return domain.ErrRejected
@@ -376,12 +379,12 @@ func dependentsStillResolve(ctx context.Context, snapshot storage.Snapshot, prop
 // resolvesUnder answers whether one binding has a complete route in the given
 // snapshot: its content is there, its parent support resolves, and its own
 // narrowing holds against that parent.
-func resolvesUnder(snapshot storage.Snapshot, dependent domain.Assignment, now time.Time) bool {
+func resolvesUnder(snapshot storage.Snapshot, bindings *lineage.Bindings, dependent domain.Assignment, now time.Time) bool {
 	content, ok := snapshot.Contents[domain.GrantKey{ID: dependent.GrantID, Revision: dependent.GrantRevision}]
 	if !ok || content.GrantID != dependent.GrantID || content.Revision != dependent.GrantRevision {
 		return false
 	}
-	parent, err := lineage.ResolveParentTeam(snapshot, content, dependent.Recipient.ID, now)
+	parent, err := lineage.ResolveParentTeamIndexed(snapshot, bindings, content, dependent.Recipient.ID, now)
 	if err != nil {
 		return false
 	}
