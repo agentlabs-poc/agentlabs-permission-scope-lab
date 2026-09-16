@@ -175,11 +175,15 @@ func IndexBindings(s storage.Snapshot) *Bindings {
 	return index
 }
 
-// binding answers the same question as uniqueAssignment, from an index built
-// once per resolver rather than a scan per step. Duplicates and malformed rows
-// are refusals exactly as they are there: they are found while indexing, and the
-// answer is the same whichever binding is asked for, because a duplicate makes
-// the area's assignments untrustworthy rather than one route's.
+// binding answers exactly what uniqueAssignment answers, from an index the
+// caller built once over this snapshot rather than a scan per chain step.
+//
+// "Exactly" is the contract, and an earlier version of this comment described
+// the opposite: it said a duplicate made the whole area's assignments
+// untrustworthy, which is what the code did and what a scan does not do. A scan
+// refuses the route that owns the duplicate and answers every other route
+// normally. Only a mis-keyed row is area-wide, because a scan reads every row on
+// its way to the one it was asked about.
 func (r *routeResolver) binding(grantID, teamID string) (domain.Assignment, error) {
 	if r.bindings == nil {
 		return uniqueAssignment(r.s, grantID, teamID)

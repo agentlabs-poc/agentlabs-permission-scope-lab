@@ -74,6 +74,18 @@ func TestAnIndexedResolveAnswersExactlyAsAnUnindexedOne(t *testing.T) {
 			broken.Status = "revoked"
 			f.Snapshot.Assignments[rootBinding] = broken
 		},
+		// A pair this chain never touches, made unusable *without* a duplicate.
+		// The refusal-too-wide divergence had two causes and only the duplicate
+		// one was defended: poisoning the area on an invalid row survived every
+		// test here, because no bend put an invalid row anywhere but on the pair
+		// under resolution.
+		"an unrelated pair has an invalid row": func(f *lab.TeamFINC17Case) {
+			broken := copyOf(f, "fm5b7t4pelsebad")
+			broken.GrantID = "fk3x9r2mstray"
+			broken.Recipient = domain.Recipient{Type: "group", ID: "fibggi2jv0n4"}
+			broken.Status = "revoked"
+			f.Snapshot.Assignments[broken.ID] = broken
+		},
 		// The divergence that used to be a refusal: a duplicate on a pair this
 		// chain never touches. A scan refuses only the route that owns it.
 		"an unrelated pair duplicated": func(f *lab.TeamFINC17Case) {
@@ -185,7 +197,12 @@ func TestTheParityBendsReachTheIndexAndChangeTheAnswer(t *testing.T) {
 	stray.GrantID = "fk3x9r2mstray"
 	stray.Recipient = domain.Recipient{Type: "group", ID: "fibggi2jv0n4"}
 	misKeyed.Snapshot.Assignments["fm5b7t4pnotitsid"] = stray
-	if _, err := lineage.ResolveParentTeamIndexed(f.Snapshot, lineage.IndexBindings(misKeyed.Snapshot), child, "fibggi2juxhc", now); !errors.Is(err, domain.ErrRejected) {
-		t.Fatalf("an index built over a mis-keyed row answered %v, want a refusal", err)
+	// class, not errors.Is. This line used errors.Is(err, domain.ErrRejected),
+	// which ErrInactive satisfies — so the one assertion covering the one branch
+	// no resolve can reach accepted exactly the substitution this file exists to
+	// forbid. A review found it by swapping the branch to ErrInactive and
+	// watching the suite stay green.
+	if _, err := lineage.ResolveParentTeamIndexed(f.Snapshot, lineage.IndexBindings(misKeyed.Snapshot), child, "fibggi2juxhc", now); class(err) != "rejected" {
+		t.Fatalf("an index built over a mis-keyed row answered %s (%v), want a rejection", class(err), err)
 	}
 }
