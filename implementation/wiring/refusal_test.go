@@ -6,7 +6,9 @@ import (
 	"agentlabs.local/wiring"
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -120,4 +122,63 @@ func TestEveryRefusalTheServiceCanGiveReachesTheWire(t *testing.T) {
 			t.Fatalf("got %d/%s, want 503/AUTHORITY_UNAVAILABLE", code, errorCode)
 		}
 	})
+}
+
+// The size limit is what stops an authenticated tenant application making the
+// service every other application depends on decode arbitrary bytes per request.
+// The only oversize test mounted a refusing identity source, so the 401 fired
+// first and the limit was never reached.
+func TestTheSizeLimitAppliesToACallerWhoIsEstablished(t *testing.T) {
+	handler := fuzzHandler(t)
+	padding := func(n int) string {
+		return `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"fi7io4lvjqio"},"options":{},"x":"` +
+			strings.Repeat("x", n) + `"}`
+	}
+	// Just over: refused for its size, by a caller the service admits.
+	status, code := post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", padding(wiring.MaxRequestBytes))
+	if status != http.StatusBadRequest || code != "MALFORMED_REQUEST" {
+		t.Fatalf("got %d/%s, want 400/MALFORMED_REQUEST", status, code)
+	}
+	// And the same shape under the limit is refused for its *content* instead —
+	// an unknown field — which is how we know the size is what decided above.
+	status, code = post(t, handler, "/api/v1/acme/abv/applications/hrms/authority.resolve", padding(16))
+	if status != http.StatusBadRequest || code != "MALFORMED_REQUEST" {
+		t.Fatalf("a small body of the same shape gave %d/%s", status, code)
+	}
+	if len(padding(wiring.MaxRequestBytes)) <= wiring.MaxRequestBytes || len(padding(16)) > wiring.MaxRequestBytes {
+		t.Fatal("the two bodies do not straddle the limit, so this proves nothing")
+	}
+}
+
+// An answer about a human who holds nothing is a completed answer, and so is one
+// about a human this deployment has never heard of. Neither is a refusal, and
+// the two must not be told apart — the echoed human_id is what a client
+// corroborates against, and a 404 for one of them would let any caller ask
+// whether a person exists.
+func TestAHumanWithNothingAndAHumanWhoIsNotThereAnswerAlike(t *testing.T) {
+	handler := fuzzHandler(t)
+	body := func(human string) string {
+		return `{"version":"1","identity":{"version":"1","actor":{"type":"service_account","id":"agent_hrms"},"human_id":"` + human + `"},"options":{}}`
+	}
+	answers := map[string]string{}
+	for name, human := range map[string]string{
+		// In the fixture and holding nothing, against never seen at all.
+		"holds nothing": "fi7io4lvk35s",
+		"is not there":  "fn2q6v8sbo1e",
+	} {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, "/api/v1/acme/abv/applications/hrms/authority.resolve", strings.NewReader(body(human)))
+		request.Header.Set("Authorization", "Bearer "+lab.WorkloadToken)
+		handler.ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s answered %d, want 200 — resolving nothing is an answer: %s", name, recorder.Code, recorder.Body.String())
+		}
+		answers[name] = strings.Replace(recorder.Body.String(), human, "<human>", 1)
+	}
+	if answers["holds nothing"] != answers["is not there"] {
+		t.Fatalf("the two answers differ apart from the subject:\n%s\n%s", answers["holds nothing"], answers["is not there"])
+	}
+	if !strings.Contains(answers["holds nothing"], `"resolved_grants":[]`) {
+		t.Fatalf("an empty answer is not an empty grant list: %s", answers["holds nothing"])
+	}
 }
