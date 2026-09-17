@@ -133,9 +133,33 @@ func (a *RoleAdministration) CheckGrantCreate(ctx context.Context, area domain.A
 	return nil
 }
 
-func (a *RoleAdministration) CheckGrantDelete(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
-	return a.teamGate(ctx, area, identity)
+// CheckGrantDelete is grant-scoped, the way the status gate is.
+//
+// It discarded the id, which made it the same decision as the team gate the
+// caller had already passed — so no in-tree administration could refuse the
+// delete of one particular grant, and the ordering of the authorization gate
+// against Q-132's dependency check was unobservable. Moving the dependency check
+// above the gate left the whole suite green, and under any real administration
+// that ordering is what stops a caller with no standing over a grant learning
+// that it has a dependent.
+func (a *RoleAdministration) CheckGrantDelete(ctx context.Context, area domain.Area, identity domain.Identity, id string, _ time.Time) error {
+	if err := a.teamGate(ctx, area, identity); err != nil {
+		return err
+	}
+	if id == unadministeredGrant {
+		return domain.ErrRejected
+	}
+	return nil
 }
+
+// unadministeredGrant is a grant this fixture administrator may read and hold
+// but never remove. A test names it to exercise a refusal that is about
+// authorization rather than about the grant's dependents.
+const unadministeredGrant = "fk3x9r2mzzzz"
+
+// UnadministeredGrant is the id CheckGrantDelete refuses. Exported so a test can
+// name it without restating a constant the gate owns.
+func UnadministeredGrant() string { return unadministeredGrant }
 
 func (a *RoleAdministration) CheckGrantRead(ctx context.Context, area domain.Area, identity domain.Identity, _ time.Time) error {
 	return a.teamGate(ctx, area, identity)

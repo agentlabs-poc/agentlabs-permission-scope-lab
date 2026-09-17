@@ -278,6 +278,68 @@ whole-grant and dependent-authority rules, not new independent authority.
 Enable/disable operations require administrative authorization within current
 bounds. Exact operation permission names and propagation contracts remain open.
 
+## Q-132 / GRANT-010 — a grant with a dependent cannot be disabled or deleted
+
+Status: **AGREED — user-proposed rule.** The user directed: "any grant, be it a
+root or a child, cannot be disabled or deleted if it has a child. This is a
+simple rule we have to adopt." One rule, every grant, both operations.
+
+A grant has a dependent when another grant names it as parent. While that is
+true, disable under Q-079 and delete under Q-080/Q-082 are both refused. When it
+is not, both are available.
+
+A dependent is a **child grant**, not an assignment. The distinction is not a
+refinement of the rule but a condition of its being implementable: holding a
+grant *is* an assignment, so counting assignments as dependents would make every
+grant anybody holds undisablable, and Q-079's operational pause would name an
+operation nobody could perform. Delete separately refuses while an assignment
+still names the grant, which is the older rule against leaving a dangling
+reference and is not part of this decision.
+
+There is no exception for a trusted root. A root is an ordinary grant for these
+operations, as [bootstrap authority](bootstrap-authority.md) already says of
+status; the establishment gate governs writing a root, not removing one. A root
+with dependents is refused by this rule rather than by a rule of its own, and a
+root with none is treated like any other leaf.
+
+Dismantling is therefore bottom-up: remove or delete the dependents, then the
+grant. This is the order [parent-grant bindings](parent-grant-bindings.md) B14
+already requires for structural change, now applied to status and removal too.
+
+| Situation | Result |
+|---|---|
+| Disable or delete a grant no other grant names as parent | Permitted, subject to administrative authorization. |
+| Disable or delete a grant with an enabled or disabled child grant | Reject; the dependent is removed first. |
+| Disable a grant an assignment still references | Permitted. An assignment is not a dependent; see above. |
+| Delete a grant an assignment still references | Reject — under the older dangling-reference rule, not this one; the assignment is removed first. |
+| The same, where the grant is a trusted root | Reject for the same reason; no separate root rule applies. |
+| A trusted root no grant names as parent | Permitted; establishment governs creation, not removal. Delete additionally needs no assignment naming it. |
+
+**Rationale / conscious tradeoff.** A dependency is a dependency whichever
+direction it is exercised from, and one rule covering both operations and every
+grant is simpler to hold than a status rule, a removal rule and a root exception.
+Delete already worked this way for ordinary grants; this extends the same
+condition to disable and drops the root special cases.
+
+The tradeoff is deliberate and worth stating. Disabling a parent was previously
+available as a wholesale suspension: the dependents beneath it became ineffective
+without being disabled themselves, and re-enabling restored them. Under this rule
+a subtree cannot be suspended by one write at its top; it is dismantled from the
+bottom, and rebuilt. That cost is accepted in exchange for a single rule with no
+cascade to reason about, and it removes the case where a person's authority stops
+without any record of theirs having changed.
+
+This supersedes the disable-propagation cases B09, B10 and B11 in the
+[parent-grant bindings](parent-grant-bindings.md) matrix, which describe a parent
+being disabled beneath live **child grants** — a state this rule prevents. B06,
+where a grant held by two recipients is disabled, is untouched and remains
+reachable: its holders are assignments, not dependents.
+
+Exact operation permission names, the representation of "has a dependent" in
+published contracts, and bulk or cascading dismantle operations remain open. No
+cascade is approved here: each dependent is removed by its own authorized
+operation.
+
 ## Q-080 / GRANT-006 — create and delete are lifecycle operations
 
 Status: **AGREED — user-proposed addition.** The user added: “offcouse there can be

@@ -146,39 +146,25 @@ func (s *Service) DeleteGrant(ctx context.Context, area domain.Area, identity do
 		if _, ok := snapshot.Controls[id]; !ok {
 			return storage.WriteSet{}, domain.ErrNotFound
 		}
-		// A lab default, not an agreed rule, and the handbook leans the other
-		// way on the neighbouring question.
+		// Q-132 / GRANT-010: a grant with a dependent can be neither disabled nor
+		// deleted, and there is no exception for a trusted root. The rule is one
+		// condition covering both operations and every grant — it replaced a
+		// status rule, a removal rule and a root special case on each.
 		//
-		// Q-113 (bootstrap-authority.md:134-136) is about *conferring* root
-		// authority: "ordinary grant creation or modification must not confer
-		// root authority merely by omitting/removing a parent reference." It
-		// says nothing about removing a root that was properly established, and
-		// bootstrap-authority.md:151-152 says the opposite of special: an
-		// established root "remains an ordinary grant subject to status,
-		// validity, revisions, assignments, and its explicit boundaries."
-		// Deletion is not in that list, which is the only reason this refusal is
-		// not flatly against the text — and the lab already refuses to *disable*
-		// a root, which is.
-		//
-		// It stays because an area whose root is gone has no ceiling for
-		// anything, recovery is an unbuilt contract, and nothing in this lab
-		// deletes a root — so the cost of being wrong is an operation nobody
-		// performs. The authorized root-change procedure is open
-		// (root-grant-format.md:90-91) and the service this migrates into is
-		// where it gets written. Recorded in plan/migration-requirements.md.
-		if snapshot.TrustedRoots[id] {
-			return storage.WriteSet{}, domain.ErrUnsupported
+		// The root check that used to stand here refused even a root nothing
+		// depended on. It was a lab default recorded as unsupported by any rule,
+		// and the handbook now answers the question it was standing in for.
+		if err := hasChildGrant(snapshot, id); err != nil {
+			return storage.WriteSet{}, err
 		}
-		for _, content := range snapshot.Contents {
-			if content.ParentGrantID == id {
-				return storage.WriteSet{}, domain.ErrConflict
-			}
-		}
+		// And delete alone refuses while an assignment names this grant, which
+		// is not Q-132 but the older rule against leaving a dangling reference.
 		for _, assignment := range snapshot.Assignments {
 			if assignment.GrantID == id {
 				return storage.WriteSet{}, domain.ErrConflict
 			}
 		}
+
 		if err := ctx.Err(); err != nil {
 			return storage.WriteSet{}, err
 		}
@@ -330,4 +316,27 @@ func grantPage[T any](items []T, offset, limit int) []T {
 		end = len(items)
 	}
 	return items[offset:end]
+}
+
+// hasChildGrant answers Q-132's condition: another grant naming this one as
+// parent. Either operation is refused while one exists — dismantling is
+// bottom-up, which is the order B14 already requires for structural change.
+//
+// An assignment is deliberately *not* a child here. Delete refuses while one
+// exists, and must, or it leaves the assignment naming a grant that is gone —
+// but that is about dangling references, not about Q-132. Reading Q-132's
+// "child" to include assignments would make disable unavailable for every grant
+// anybody actually holds, since holding one *is* an assignment; Q-079's
+// operational pause would then name an operation that could never be performed.
+//
+// Status is not consulted. A disabled child grant is still a child: it is a
+// record resting on this one, and the rule is about what depends on it rather
+// than about what is currently effective.
+func hasChildGrant(snapshot storage.Snapshot, grantID string) error {
+	for _, content := range snapshot.Contents {
+		if content.ParentGrantID == grantID {
+			return domain.ErrConflict
+		}
+	}
+	return nil
 }

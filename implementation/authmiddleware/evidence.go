@@ -46,9 +46,12 @@ type Request struct {
 	Material   Material
 }
 
+// AuthorityQuery names the human and the area, and nothing else. The gate asks
+// what this person holds here, not whether they hold one thing: the answer then
+// describes the person rather than the request, which is what makes it worth
+// caching. Filtering it by permission would have made every answer single-use.
 type AuthorityQuery struct {
-	Context    RequestContext
-	Permission string
+	Context RequestContext
 }
 
 type Predicate struct {
@@ -58,13 +61,17 @@ type Predicate struct {
 }
 
 type Route struct {
-	Area       Area
-	HumanID    string
-	Permission string
-	GrantIDs   []string
-	Predicates []Predicate
-	ValidFrom  *time.Time
-	ValidUntil *time.Time
+	Area    Area
+	HumanID string
+	// Permissions is what this route carries, not what was asked about. The
+	// gate asks what a human holds rather than whether they hold one thing, so
+	// an answer describes the person and can be reused; a route naming a single
+	// permission could only ever have described one request.
+	Permissions []string
+	GrantIDs    []string
+	Predicates  []Predicate
+	ValidFrom   *time.Time
+	ValidUntil  *time.Time
 }
 
 type Authority struct {

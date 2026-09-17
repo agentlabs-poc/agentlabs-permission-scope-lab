@@ -212,3 +212,53 @@ func assertSnapshotUnchanged(t *testing.T, got storage.Snapshot, before string) 
 		t.Fatal("snapshot mutated")
 	}
 }
+
+// Retiring a permission must not wedge the whole area's status writes.
+//
+// The inventory validated every assignment's content before answering about
+// one, and failed on the first that did not hold — so retiring a permission one
+// unrelated grant selects made every assignment unstatusable, including the
+// root's own, which selects no permission at all. Q-125 makes retirement an
+// ordinary act that does not require editing references first, and Q-132 makes
+// bottom-up dismantle the only remedy for a subtree. The administrator could not
+// perform its first half.
+func TestARetiredPermissionDoesNotWedgeTheInventory(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	fixture := lab.TeamFINC17(area)
+	fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
+
+	// The control, so the refusal below cannot be a broken fixture.
+	if _, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "fm5b7t4p0dq3"); err != nil {
+		t.Fatalf("the fixture does not answer, so nothing below means anything: %v", err)
+	}
+
+	write := fixture.Snapshot.Catalog.Permissions[lab.PayslipWrite]
+	write.Active = false
+	fixture.Snapshot.Catalog.Permissions[lab.PayslipWrite] = write
+
+	// The root's binding selects no permission whatever, so a retirement cannot
+	// be about it.
+	if _, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "fm5b7t4p0dq3"); err != nil {
+		t.Fatalf("one retired permission wedged the inventory: %v", err)
+	}
+
+	// And the binding whose own grant selects the retired permission is still
+	// found as a dependent. Dropping it would be the widening direction: this
+	// graph exists to refuse a disable while something depends on the binding.
+	got, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "fm5b7t4p5iv8")
+	if err != nil {
+		t.Fatalf("dependents after retirement: %v", err)
+	}
+	if len(got) != 1 || got[0] != fixture.Proposed {
+		t.Fatalf("an ineligible binding stopped being a dependent: %#v", got)
+	}
+
+	// Corruption is still fatal: a structure this cannot read is not one it may
+	// reason about.
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2m5iv8", Revision: 1}] = domain.GrantContent{
+		Version: "1", GrantID: "fk3x9r2m5iv8", Revision: 1, Permissions: []string{""}, Scope: map[string]string{},
+	}
+	if _, err := lineage.DependentTeamAssignments(t.Context(), fixture.Snapshot, "fm5b7t4p0dq3"); err == nil {
+		t.Fatal("a corrupt grant content was tolerated")
+	}
+}

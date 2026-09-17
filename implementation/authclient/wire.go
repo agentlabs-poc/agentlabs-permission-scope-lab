@@ -39,9 +39,15 @@ type resolveRequest struct {
 	Options  options  `json:"options"`
 }
 
-// options mirror domain.ResolveOptions without importing it. The source is not
-// omitted: the approved allow block requires grant_ids, and grant_ids is the
-// contributing chain, which only the explanation carries.
+// options mirror domain.ResolveOptions without importing it.
+//
+// This client sets neither field, and both are kept because they are the wire's
+// shape rather than this client's choice — a reader of the contract should see
+// what the server accepts. Permissions is unset because the complete answer is
+// the cacheable one. OmitSource is unset because the approved allow block
+// requires grant_ids, and grant_ids is the contributing chain, which only the
+// explanation carries — so the one caller the option was written for is the one
+// that cannot use it.
 type options struct {
 	Permissions []string `json:"permissions,omitempty"`
 	OmitSource  bool     `json:"omit_source,omitempty"`
@@ -125,24 +131,18 @@ func (r resolveResponse) decode(query authmiddleware.AuthorityQuery) (authmiddle
 				Message: "a returned grant states contract version " + grant.Version,
 			}).evaluation()
 		}
-		// The permission is checked, not assumed. Everything else the answer
-		// claims is corroborated against the question — tenant, application,
-		// human — and this was the exception: the one dimension that decides
-		// what may be done was stamped on from the query while the grant's own
-		// permissions were decoded and never read. A grant for reading the
-		// directory came back approved for reading payroll.
-		if !slices.Contains(grant.Permissions, query.Permission) {
-			return authmiddleware.Authority{}, (&Error{
-				Code:    "WRONG_PERMISSION",
-				Message: "a returned grant does not carry the permission that was asked about",
-			}).evaluation()
-		}
+		// The grant's own permissions are carried across. They used to be decoded
+		// and never read while the query's permission was stamped on instead,
+		// which meant a grant for reading the directory came back approved for
+		// reading payroll. There is nothing left to corroborate here: the answer
+		// is not filtered by permission any more, so a grant that does not carry
+		// the one in hand is ordinary and simply will not match.
 		route := authmiddleware.Route{
-			Area:       authmiddleware.Area{TenantID: r.TenantID, ApplicationID: r.ApplicationID},
-			HumanID:    r.HumanID,
-			Permission: query.Permission,
-			GrantIDs:   chain(grant),
-			Predicates: make([]authmiddleware.Predicate, 0, len(grant.Scope)),
+			Area:        authmiddleware.Area{TenantID: r.TenantID, ApplicationID: r.ApplicationID},
+			HumanID:     r.HumanID,
+			Permissions: slices.Clone(grant.Permissions),
+			GrantIDs:    chain(grant),
+			Predicates:  make([]authmiddleware.Predicate, 0, len(grant.Scope)),
 		}
 		for key, value := range grant.Scope {
 			route.Predicates = append(route.Predicates, authmiddleware.Predicate{

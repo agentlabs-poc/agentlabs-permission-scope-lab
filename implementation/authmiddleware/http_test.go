@@ -49,9 +49,11 @@ func httpContext() RequestContext {
 
 func httpPolicy(method string) Policy {
 	return Policy{Version: "1", Method: method, Path: "/api/{tenant}/{application}/certificates/{cert}", Permission: "certificate::write", Inputs: map[string]Input{
-		"cert": {Source: SourcePath, Name: "cert"},
-		"dept": {Source: SourceBody, Name: "department_id"},
-	}}
+		"tenant": {Source: SourcePath, Name: "tenant"},
+		"app":    {Source: SourcePath, Name: "application"},
+		"cert":   {Source: SourcePath, Name: "cert"},
+		"dept":   {Source: SourceBody, Name: "department_id"},
+	}, Trusted: map[string]string{TrustedTenant: "tenant", TrustedApplication: "app"}}
 }
 
 func httpEvaluator(t *testing.T, source *httpAuthoritySource) *Evaluator {
@@ -64,7 +66,7 @@ func httpEvaluator(t *testing.T, source *httpAuthoritySource) *Evaluator {
 }
 
 func allowAuthority() Authority {
-	return Authority{Routes: []Route{{Area: httpContext().Area, HumanID: "maya", Permission: "certificate::write", GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []Predicate{{Key: "cert", Value: "C17", SourceGrantID: "fk3x9r2m5iv8"}, {Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}}}}
+	return Authority{Routes: []Route{{Area: httpContext().Area, HumanID: "maya", Permissions: []string{"certificate::write"}, GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []Predicate{{Key: "cert", Value: "C17", SourceGrantID: "fk3x9r2m5iv8"}, {Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}}}}}
 }
 
 func TestWrapAllowsExactlyOneBoundEffectWithExactInputs(t *testing.T) {
@@ -78,7 +80,7 @@ func TestWrapAllowsExactlyOneBoundEffectWithExactInputs(t *testing.T) {
 			t.Fatalf("context = %#v", got)
 		}
 		gotValues, gotBody = values, body
-		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(_ context.Context, w http.ResponseWriter) {
+		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(_ context.Context, w http.ResponseWriter, _ Result) {
 			executed++
 			w.WriteHeader(http.StatusNoContent)
 		}}, nil
@@ -100,7 +102,11 @@ func TestWrapAllowsExactlyOneBoundEffectWithExactInputs(t *testing.T) {
 	if identity.body != "" {
 		t.Fatalf("identity source received business body %q", identity.body)
 	}
-	if authority.query.Permission != "certificate::write" || authority.query.Context != httpContext() {
+	// The question names the human and the area and nothing else — the permission
+	// is not part of it any more. That the policy's permission was the one applied
+	// is visible in the 204 above: the only route offered carries
+	// certificate::write, and any other permission would have denied.
+	if authority.query != (AuthorityQuery{Context: httpContext()}) {
 		t.Fatalf("query = %#v", authority.query)
 	}
 }
@@ -123,8 +129,12 @@ func TestWrapStopsBeforeProtectedEffect(t *testing.T) {
 	}{
 		{"identity error", http.MethodPut, "/api/acme/hrms/certificates/C17", `{}`, &httpIdentitySource{err: identityErr}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, identityErr, false},
 		{"invalid identity", http.MethodPut, "/api/acme/hrms/certificates/C17", `{}`, &httpIdentitySource{requestContext: RequestContext{Area: httpContext().Area}}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
-		{"tenant mismatch", http.MethodPut, "/api/other/hrms/certificates/C17", `{}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
-		{"application mismatch", http.MethodPut, "/api/acme/other/certificates/C17", `{}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
+		// A body the policy accepts, so the refusal below is the binding and not
+		// a missing input. With `{}` these two stopped reaching verifyTrusted at
+		// all — selectInputs refused first — and deleting the whole trusted check
+		// left both of them passing.
+		{"tenant mismatch", http.MethodPut, "/api/other/hrms/certificates/C17", `{"department_id":"FIN"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
+		{"application mismatch", http.MethodPut, "/api/acme/other/certificates/C17", `{"department_id":"FIN"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
 		{"missing selected body does not use query", http.MethodPut, "/api/acme/hrms/certificates/C17?department_id=FIN", `{}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
 		{"invalid body", http.MethodPut, "/api/acme/hrms/certificates/C17", `{"department_id":"FIN","department_id":"ENG"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, nil, nil, false},
 		{"binder error", http.MethodPut, "/api/acme/hrms/certificates/C17", `{"department_id":"FIN"}`, &httpIdentitySource{requestContext: httpContext()}, &httpAuthoritySource{authority: allowAuthority()}, false, binderErr, binderErr, false},
@@ -147,7 +157,7 @@ func TestWrapStopsBeforeProtectedEffect(t *testing.T) {
 				if tc.binderErr != nil {
 					return BoundOperation{}, tc.binderErr
 				}
-				return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter) { executed++ }}, nil
+				return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter, Result) { executed++ }}, nil
 			}
 			h, err := Wrap(httpPolicy(http.MethodPut), tc.identity, httpEvaluator(t, tc.authority), binder, func(_ http.ResponseWriter, _ *http.Request, result Result, err error) {
 				gotResult, gotErr = result, err
@@ -188,10 +198,11 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 	identity := &httpIdentitySource{requestContext: httpContext()}
 	authority := &httpAuthoritySource{authority: allowAuthority()}
 	evaluator := httpEvaluator(t, authority)
+	executed, refused := 0, 0
 	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
-		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter) {}}, nil
+		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}}, Execute: func(context.Context, http.ResponseWriter, Result) { executed++ }}, nil
 	})
-	failure := FailureHandler(func(http.ResponseWriter, *http.Request, Result, error) {})
+	failure := FailureHandler(func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
 	valid := httpPolicy(http.MethodPut)
 	var nilIdentity *httpIdentitySource
 	var nilBinder Binder
@@ -203,8 +214,10 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 		b Binder
 		f FailureHandler
 	}{
-		"invalid policy":          {Policy{}, identity, evaluator, binder, failure},
-		"bad pattern":             {Policy{Version: "1", Method: "GET", Path: "/{x}/{y...}/z", Permission: "x::read", Inputs: map[string]Input{}}, identity, evaluator, binder, failure},
+		"invalid policy": {Policy{}, identity, evaluator, binder, failure},
+		"bad pattern": {Policy{Version: "1", Method: "GET", Path: "/{x}/{y...}/z", Permission: "x::read",
+			Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "x"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"}}, identity, evaluator, binder, failure},
 		"nil identity":            {valid, nilIdentity, evaluator, binder, failure},
 		"nil evaluator":           {valid, identity, nil, binder, failure},
 		"uninitialized evaluator": {valid, identity, &Evaluator{}, binder, failure},
@@ -223,12 +236,18 @@ func TestWrapConstructionRoutingAndPolicyCopy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Only the map mutation is a real test of the copy. Wrap takes the Policy by
+	// value, so assigning to a scalar field of the caller's struct could never
+	// have reached the handler — it is left here to say so, not as the check.
 	p.Permission = "forged::write"
 	p.Inputs["dept"] = Input{Source: SourceBody, Name: "forged"}
 	r := httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
 	h.ServeHTTP(httptest.NewRecorder(), r)
-	if authority.query.Permission != "certificate::write" {
-		t.Fatalf("mutated permission used: %#v", authority.query)
+	// The mounted copy of the Inputs map decides, not the caller's. Repointing
+	// "dept" at a body field the request does not carry would refuse the binding
+	// outright, so the effect still running is the clone holding.
+	if executed != 1 || refused != 0 {
+		t.Fatalf("mutated policy changed the decision: executed=%d refused=%d", executed, refused)
 	}
 
 	before := identity.called
@@ -292,7 +311,13 @@ func TestWrapRejectsNilExecuteBeforeEvaluation(t *testing.T) {
 }
 
 func TestWrapGETUsesRoutedPathWithoutARequestBody(t *testing.T) {
-	policy := Policy{Version: "1", Method: http.MethodGet, Path: "/api/{tenant}/{application}/certificates/{cert}", Permission: "certificate::write", Inputs: map[string]Input{"cert": {Source: SourcePath, Name: "cert"}}}
+	policy := Policy{Version: "1", Method: http.MethodGet, Path: "/api/{tenant}/{application}/certificates/{cert}", Permission: "certificate::write",
+		Inputs: map[string]Input{
+			"tenant": {Source: SourcePath, Name: "tenant"},
+			"app":    {Source: SourcePath, Name: "application"},
+			"cert":   {Source: SourcePath, Name: "cert"},
+		},
+		Trusted: map[string]string{TrustedTenant: "tenant", TrustedApplication: "app"}}
 	identity := &httpIdentitySource{requestContext: httpContext()}
 	authority := allowAuthority()
 	authority.Routes[0].Predicates = authority.Routes[0].Predicates[:1]
@@ -301,7 +326,7 @@ func TestWrapGETUsesRoutedPathWithoutARequestBody(t *testing.T) {
 		if string(values["cert"]) != `"C17"` || body != nil {
 			t.Fatalf("values=%q body=%q", values, body)
 		}
-		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}}, Execute: func(context.Context, http.ResponseWriter) { executed++ }}, nil
+		return BoundOperation{Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}}, Execute: func(context.Context, http.ResponseWriter, Result) { executed++ }}, nil
 	}, func(http.ResponseWriter, *http.Request, Result, error) { t.Fatal("GET failed") })
 	if err != nil {
 		t.Fatal(err)
@@ -327,7 +352,7 @@ func TestAllowedSynchronousEffectCompletesAfterAuthorityWithdrawalAndNextRequest
 		}
 		return BoundOperation{
 			Material: Material{"cert": {Kind: SelectionExact, Value: cert}, "dept": {Kind: SelectionExact, Value: dept}},
-			Execute: func(context.Context, http.ResponseWriter) {
+			Execute: func(context.Context, http.ResponseWriter, Result) {
 				authority.authority = Authority{}
 				effects = append(effects, cert+":"+dept)
 			},
@@ -366,5 +391,239 @@ func TestBusinessBodyRejectsNonObjectTrailingInvalidUnicodeAndDepth(t *testing.T
 				t.Fatalf("decodeBusinessBody() = %q, %v", body, err)
 			}
 		})
+	}
+}
+
+// The effect is handed the result that allowed it. An allow names the grants
+// that authorized this request, and the effect is the only place that can
+// record them beside what it did — it used to receive a bare context and
+// writer, so an endpoint could log "updated C17" and nothing about why it was
+// permitted to.
+func TestTheEffectReceivesTheResultThatAllowedIt(t *testing.T) {
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	var seen Result
+	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+		return BoundOperation{
+			Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+			Execute:  func(_ context.Context, _ http.ResponseWriter, result Result) { seen = result },
+		}, nil
+	})
+	h, err := Wrap(httpPolicy(http.MethodPut), identity, httpEvaluator(t, authority), binder,
+		func(_ http.ResponseWriter, _ *http.Request, result Result, err error) {
+			t.Fatalf("refused: %#v %v", result, err)
+		})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
+	h.ServeHTTP(httptest.NewRecorder(), r)
+	if seen.Decision != Allow || seen.Version != "1" {
+		t.Fatalf("effect saw %#v", seen)
+	}
+	// The evidence, not just the verdict. A Result carrying no grants would be
+	// an allow the endpoint cannot account for.
+	if len(seen.GrantIDs) != 1 || seen.GrantIDs[0] != "fk3x9r2m5iv8" {
+		t.Fatalf("effect saw grants %#v", seen.GrantIDs)
+	}
+}
+
+// And a denial never reaches the effect, so nothing it might have recorded can
+// be recorded. The failure handler gets the result instead.
+func TestADeniedRequestNeverReachesTheEffect(t *testing.T) {
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refusedWith := 0, Result{}
+	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+		return BoundOperation{
+			Material: Material{"cert": {Kind: SelectionExact, Value: "C99"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+			Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+		}, nil
+	})
+	h, err := Wrap(httpPolicy(http.MethodPut), identity, httpEvaluator(t, authority), binder,
+		func(_ http.ResponseWriter, _ *http.Request, result Result, _ error) { refusedWith = result })
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(`{"department_id":"FIN"}`))
+	h.ServeHTTP(httptest.NewRecorder(), r)
+	if executed != 0 || refusedWith.Decision != Deny {
+		t.Fatalf("executed=%d refused=%#v", executed, refusedWith)
+	}
+}
+
+// The tenant is bound by declaration, not by spelling. The gate used to find
+// the request's tenant with request.PathValue("tenant"), so a policy whose path
+// said {tenant_id} was never checked against the trusted area at all — no error
+// and no log. Trusted area acme, GET /api/v2/globex/FIN/C17, and the handler ran
+// against globex with a 200.
+func TestAPathThatDoesNotSpellItTenantIsStillBound(t *testing.T) {
+	policy := Policy{Version: "1", Method: http.MethodGet, Path: "/api/v2/{tenant_id}/{dept}/{cert}",
+		Permission: "certificate::write",
+		Inputs: map[string]Input{
+			"tenant": {Source: SourcePath, Name: "tenant_id"},
+			"cert":   {Source: SourcePath, Name: "cert"},
+			"dept":   {Source: SourcePath, Name: "dept"},
+		},
+		Trusted: map[string]string{TrustedTenant: "tenant"},
+	}
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refused := 0, 0
+	h, err := Wrap(policy, identity, httpEvaluator(t, authority),
+		func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+			return BoundOperation{
+				Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+				Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+			}, nil
+		},
+		func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
+	if err != nil {
+		t.Fatal(err)
+	}
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/api/v2/globex/FIN/C17", nil))
+	if executed != 0 || refused != 1 {
+		t.Fatalf("another tenant's record reached the handler: executed=%d refused=%d", executed, refused)
+	}
+	// The same route for the trusted tenant still works, so the refusal above is
+	// the binding and not the route being broken.
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/api/v2/acme/FIN/C17", nil))
+	if executed != 1 || refused != 1 {
+		t.Fatalf("the trusted tenant was refused: executed=%d refused=%d", executed, refused)
+	}
+}
+
+// And the policy that declares nothing cannot be mounted. This is what turns
+// the silent case into an impossible one: the gate has no way to tell a route
+// that binds its tenant from one that forgot to, so it refuses to guess.
+func TestAPolicyThatDeclaresNoTenantCorrelationCannotBeMounted(t *testing.T) {
+	policy := httpPolicy(http.MethodPut)
+	policy.Trusted = nil
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	binder := Binder(func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+		return BoundOperation{Material: Material{}, Execute: func(context.Context, http.ResponseWriter, Result) {}}, nil
+	})
+	h, err := Wrap(policy, identity, httpEvaluator(t, authority), binder, func(http.ResponseWriter, *http.Request, Result, error) {})
+	if err == nil || h != nil {
+		t.Fatalf("mounted a policy binding no tenant: %#v, %v", h, err)
+	}
+}
+
+// A correlation may name a body input as readily as a path one — the check is
+// on the resolved value, which is the whole point of declaring it. What it may
+// not be is a value that is not a string.
+func TestACorrelatedInputThatIsNotAStringIsRefused(t *testing.T) {
+	policy := Policy{Version: "1", Method: http.MethodPut, Path: "/api/v2/certificates/{cert}",
+		Permission: "certificate::write",
+		Inputs: map[string]Input{
+			"tenant": {Source: SourceBody, Name: "tenant_id"},
+			"cert":   {Source: SourcePath, Name: "cert"},
+		},
+		Trusted: map[string]string{TrustedTenant: "tenant"},
+	}
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refused := 0, 0
+	h, err := Wrap(policy, identity, httpEvaluator(t, authority),
+		func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+			return BoundOperation{
+				Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+				Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+			}, nil
+		},
+		func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, body := range []string{`{"tenant_id":9}`, `{"tenant_id":["acme"]}`, `{"tenant_id":null}`, `{"tenant_id":"globex"}`} {
+		h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/v2/certificates/C17", strings.NewReader(body)))
+	}
+	if executed != 0 || refused != 4 {
+		t.Fatalf("executed=%d refused=%d", executed, refused)
+	}
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/v2/certificates/C17", strings.NewReader(`{"tenant_id":"acme"}`)))
+	if executed != 1 {
+		t.Fatalf("the trusted tenant in the body was refused: executed=%d refused=%d", executed, refused)
+	}
+}
+
+// The declaration has to name the input that actually carries the claim.
+//
+// Without this the new scheme was not even as strong as the spelling match it
+// replaced: a policy could carry {tenant} in its path, point its tenant
+// correlation at a different declared input, and the segment the handler reads
+// went unchecked. Three live handbook lines require that binding —
+// system-overview.md:147, endpoint-authorization.md:297 and
+// endpoint-policy-format.md:352.
+func TestAPolicyCannotCorrelateSomethingOtherThanThePathsOwnTenant(t *testing.T) {
+	for name, policy := range map[string]Policy{
+		// The regression the review found: {tenant} in the path, correlation
+		// pointed elsewhere. GET /api/v1/globex/acme/x under trusted acme used to
+		// mount, pass, and run the effect.
+		"correlation names another input": {
+			Version: "1", Method: http.MethodGet, Path: "/api/v1/{tenant}/{org}/x", Permission: "certificate::read",
+			Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "org"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"},
+		},
+		// A body field cannot stand in for the path's own claim either.
+		"correlation reads the body instead": {
+			Version: "1", Method: http.MethodPut, Path: "/api/v1/{tenant}/x", Permission: "certificate::write",
+			Inputs:  map[string]Input{"tenant": {Source: SourceBody, Name: "tenant_id"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"},
+		},
+		// And the application half, which was optional and so could still be
+		// forgotten — the exact failure this whole change claims to have closed.
+		"application placeholder uncorrelated": {
+			Version: "1", Method: http.MethodGet, Path: "/api/v1/{tenant}/{application}/x", Permission: "certificate::read",
+			Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "tenant"}},
+			Trusted: map[string]string{TrustedTenant: "tenant"},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if err := policy.Validate(); err == nil {
+				t.Fatalf("mounted a policy whose path claim nothing binds: %#v", policy)
+			}
+		})
+	}
+
+	// A path that does not use this gate's own vocabulary is not second-guessed:
+	// {org} is bound because the mandatory correlation names it, and nothing
+	// tries to work out that "org" means a tenant.
+	spelled := Policy{
+		Version: "1", Method: http.MethodGet, Path: "/api/v1/{org}/x", Permission: "certificate::read",
+		Inputs:  map[string]Input{"tenant": {Source: SourcePath, Name: "org"}},
+		Trusted: map[string]string{TrustedTenant: "tenant"},
+	}
+	if err := spelled.Validate(); err != nil {
+		t.Fatalf("a policy that binds its own {org} was refused: %v", err)
+	}
+}
+
+// The application correlation works when it is reached. It had none of its own
+// coverage: making the branch a permanent no-op left the whole suite green.
+func TestTheApplicationCorrelationIsVerifiedToo(t *testing.T) {
+	identity := &httpIdentitySource{requestContext: httpContext()}
+	authority := &httpAuthoritySource{authority: allowAuthority()}
+	executed, refused := 0, 0
+	h, err := Wrap(httpPolicy(http.MethodPut), identity, httpEvaluator(t, authority),
+		func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error) {
+			return BoundOperation{
+				Material: Material{"cert": {Kind: SelectionExact, Value: "C17"}, "dept": {Kind: SelectionExact, Value: "FIN"}},
+				Execute:  func(context.Context, http.ResponseWriter, Result) { executed++ },
+			}, nil
+		},
+		func(http.ResponseWriter, *http.Request, Result, error) { refused++ })
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := `{"department_id":"FIN"}`
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/acme/crm/certificates/C17", strings.NewReader(body)))
+	if executed != 0 || refused != 1 {
+		t.Fatalf("another application reached the handler: executed=%d refused=%d", executed, refused)
+	}
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPut, "/api/acme/hrms/certificates/C17", strings.NewReader(body)))
+	if executed != 1 {
+		t.Fatalf("the trusted application was refused: executed=%d refused=%d", executed, refused)
 	}
 }

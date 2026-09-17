@@ -538,3 +538,193 @@ func assertSQLiteAssignmentsAbsent(t *testing.T, p storage.Provider, area domain
 		t.Fatal(err)
 	}
 }
+
+// One unreadable row stops the whole area, and that is the decision. The cost is
+// diagnosis: the load held the grant id and revision at the point of failure and
+// returned a bare "malformed input", so an operator had to bisect a database to
+// find out which row. The error now names it.
+// Three of the twelve named rows are not reachable through this path and have no
+// case below: the permission boundary column is held to its three values by a
+// CHECK constraint, and CreateFixture does not write ownership or membership
+// rows at all. They are named in the same shape as the rest; nothing here proves
+// it.
+func TestAMalformedRowIsNamed(t *testing.T) {
+	cases := map[string]struct {
+		seed    func(*storage.Snapshot)
+		corrupt func(*testing.T, *provider, domain.Area)
+		names   []string
+	}{
+		"grant revision": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value=? WHERE key2='grant_revision' AND tenant_id=? AND key3=? AND key4='fk3x9r2m5iv8'`,
+					[]byte(`{"permissions":[""],"scope":{}}`), area.TenantID(), area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fk3x9r2m5iv8", "revision 1"},
+		},
+		"unparseable revision slot": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET key5='not-a-revision' WHERE key2='grant_revision' AND tenant_id=? AND key3=?`,
+					area.TenantID(), area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fk3x9r2m5iv8", "not-a-revision"},
+		},
+		"grant head": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='{"status":"melted"}' WHERE key2='grant' AND tenant_id=? AND key3=?`,
+					area.TenantID(), area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fk3x9r2m5iv8"},
+		},
+		"permission definition": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='{}' WHERE key2='permission' AND key3=?`, area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"hrms:payroll:payslip::read"},
+		},
+		// The failure to build the identifier at all, which fires before either
+		// of the two above and was returning bare.
+		"permission key slots": {
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET key10='' WHERE key2='permission' AND key3=?`, area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"hrms"},
+		},
+		"scope": {
+			seed: func(base *storage.Snapshot) {
+				base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept"}
+			},
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='' WHERE key2='scope' AND key3=?`, area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"dept", "hrms"},
+		},
+		"assignment": {
+			seed: func(base *storage.Snapshot) {
+				base.Teams["fibggi2juubk"] = domain.Team{ID: "fibggi2juubk", Name: "Team1"}
+				base.Assignments["fm5b7t4p5iv8"] = domain.Assignment{
+					Version: "1", ID: "fm5b7t4p5iv8", GrantID: "fk3x9r2m5iv8", GrantRevision: 1,
+					Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled",
+				}
+			},
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='{}' WHERE key2='assignment' AND tenant_id=? AND key3=?`,
+					area.TenantID(), area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fk3x9r2m5iv8", "fibggi2juubk"},
+		},
+		"role": {
+			seed: func(base *storage.Snapshot) {
+				base.Roles[domain.RoleKey{ID: "fp8h2w6y5iv8", Revision: 1}] = domain.RoleContent{
+					ID: "fp8h2w6y5iv8", Name: "reader", Revision: 1,
+					Permissions: []string{"hrms:payroll:payslip::read"}, Managed: domain.TenantManaged,
+				}
+			},
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='{' WHERE key2='role' AND key3=?`, area.ApplicationID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fp8h2w6y5iv8"},
+		},
+		"team": {
+			seed: func(base *storage.Snapshot) {
+				base.Teams["fibggi2juubk"] = domain.Team{ID: "fibggi2juubk", Name: "Team1"}
+			},
+			corrupt: func(t *testing.T, p *provider, area domain.Area) {
+				if _, err := p.db.ExecContext(t.Context(),
+					`UPDATE abv_l1_records SET value='{' WHERE key2='team' AND tenant_id=?`, area.TenantID()); err != nil {
+					t.Fatal(err)
+				}
+			},
+			names: []string{"fibggi2juubk"},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			base := contractFixture(t)
+			base.Controls["fk3x9r2m5iv8"] = domain.GrantControl{Version: "1", ID: "fk3x9r2m5iv8", Status: "enabled"}
+			if tc.seed != nil {
+				tc.seed(&base)
+			}
+			path := t.TempDir() + "/authority.db"
+			opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
+			if err != nil {
+				t.Fatal(err)
+			}
+			p := opened.(*provider)
+			defer p.Close()
+			tc.corrupt(t, p, base.Area)
+
+			var calls atomic.Int32
+			err = p.Read(t.Context(), base.Area, func(storage.Snapshot) error { calls.Add(1); return nil })
+			// Still fails closed, and still fails closed with the same class —
+			// naming the row must not turn a malformed record into something a
+			// caller reads differently.
+			if !errors.Is(err, domain.ErrMalformed) || calls.Load() != 0 {
+				t.Fatalf("calls=%d err=%v", calls.Load(), err)
+			}
+			for _, named := range tc.names {
+				if !strings.Contains(err.Error(), named) {
+					t.Fatalf("the operator cannot find the row: %q does not name %q", err, named)
+				}
+			}
+		})
+	}
+}
+
+// Every other thing a named row prints is a key-column value, which the schema
+// bounds. A team's parent is the exception: it is read from the record's JSON,
+// and it is printed precisely in the branch where it failed to be an identifier,
+// so it is whatever the row happens to hold at whatever length.
+func TestANamedRowDoesNotPrintAWholePayload(t *testing.T) {
+	base := contractFixture(t)
+	base.Teams["fibggi2juubk"] = domain.Team{ID: "fibggi2juubk", Name: "Team1"}
+	path := t.TempDir() + "/authority.db"
+	opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := opened.(*provider)
+	defer p.Close()
+	payload := strings.Repeat("A", 4000)
+	if _, err := p.db.ExecContext(t.Context(),
+		`UPDATE abv_l1_records SET value=? WHERE key2='team' AND tenant_id=?`,
+		`{"parent_id":"`+payload+`"}`, base.Area.TenantID()); err != nil {
+		t.Fatal(err)
+	}
+	err = p.Read(t.Context(), base.Area, func(storage.Snapshot) error { return nil })
+	if !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("err = %v", err)
+	}
+	if !strings.Contains(err.Error(), "fibggi2juubk") {
+		t.Fatalf("the row is not named: %q", err)
+	}
+	if len(err.Error()) > 300 {
+		t.Fatalf("the error carries the row's payload: %d bytes", len(err.Error()))
+	}
+	if !strings.Contains(err.Error(), "truncated from 4000 bytes") {
+		t.Fatalf("the truncation is not declared: %q", err)
+	}
+}

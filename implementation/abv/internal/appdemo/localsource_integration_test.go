@@ -78,7 +78,7 @@ func TestSQLiteAuthoritySourceEvaluatesRealSnapshot(t *testing.T) {
 	if err != nil || allowed.Decision != authmiddleware.Allow || !reflect.DeepEqual(allowed.GrantIDs, []string{"fk3x9r2m0dq3", "fk3x9r2m5iv8", "fk3x9r2man0d"}) {
 		t.Fatalf("allowed=%+v err=%v", allowed, err)
 	}
-	authority, err := source.Load(t.Context(), authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}}, Permission: lab.PayslipRead})
+	authority, err := source.Load(t.Context(), authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}}})
 	if err != nil || len(authority.Routes) != 1 {
 		t.Fatalf("authority=%+v err=%v", authority, err)
 	}
@@ -270,7 +270,7 @@ func TestSQLiteAuthoritySourceReturnsZeroOnCorruptReadAndRejectsNilClock(t *test
 		t.Fatal(err)
 	}
 	_ = db.Close()
-	query := authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}}, Permission: lab.PayslipRead}
+	query := authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, Identity: authmiddleware.Identity{Version: "1", Actor: authmiddleware.Actor{Type: "user", ID: "fi7io4lvjwu8"}, HumanID: "fi7io4lvjwu8"}}}
 	got, err := source.Load(t.Context(), query)
 	if err == nil || !reflect.DeepEqual(got, authmiddleware.Authority{}) {
 		t.Fatalf("got=%+v err=%v", got, err)

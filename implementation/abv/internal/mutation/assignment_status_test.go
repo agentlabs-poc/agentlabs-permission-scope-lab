@@ -211,8 +211,13 @@ func TestSetAssignmentStatusGateCancellationConflictAndBoundaries(t *testing.T) 
 	if got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "fm5b7t4p5iv8", "disabled"); !errors.Is(err, domain.ErrConflict) || got != (domain.Assignment{}) || provider.returned.AssignmentStatusChange == nil {
 		t.Fatalf("conflict = %#v, %#v, %v", got, provider.returned, err)
 	}
-	if got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "fm5b7t4p0dq3", "disabled"); !errors.Is(err, domain.ErrUnsupported) || got != (domain.Assignment{}) {
-		t.Fatalf("trusted root = %#v, %v", got, err)
+	// The root's binding was refused as Unsupported until Q-132 removed the root
+	// as a subject of its own. It is refused as a Rejection now, by the
+	// administration gate — this issuer may not administer that binding — and the
+	// gate answers before the dependency rule by design: a caller with no
+	// standing is told that and nothing about the shape of the tenant's authority.
+	if got, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "fm5b7t4p0dq3", "disabled"); !errors.Is(err, domain.ErrRejected) || got != (domain.Assignment{}) {
+		t.Fatalf("the root's binding = %#v, %v", got, err)
 	}
 	var nilAdmin *assignmentStatusAdministration
 	if _, err := mutation.New(provider, nilAdmin, &fixedClock{now: time.Now()}); !errors.Is(err, domain.ErrMalformed) {

@@ -168,7 +168,6 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 		{"no subject", f.Snapshot, noSubject, lab.PayslipRead, domain.ErrMalformed},
 		{"actor is not the subject", f.Snapshot, askedAbout, lab.PayslipRead, domain.ErrUnsupported},
 		{"noncanonical permission", f.Snapshot, f.Issuer, "*", domain.ErrMalformed},
-		{"unknown permission", f.Snapshot, f.Issuer, "hrms:missing::read", domain.ErrRejected},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := t.Context()
@@ -180,6 +179,12 @@ func TestResolveHumanRejectsInvalidRequestAndDirectUserAssignment(t *testing.T) 
 				t.Fatalf("got %#v, %v; want %v", got, err, tc.want)
 			}
 		})
+	}
+
+	// An unregistered permission is not on that list. A filter is a narrowing,
+	// not an assertion — nothing matches, and the empty answer is the answer.
+	if got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, "hrms:missing::read", time.Time{}); err != nil || len(got) != 0 {
+		t.Fatalf("an unregistered permission gave %#v, %v; want an empty answer", got, err)
 	}
 
 	// ResolveHuman still holds the actor to the subject, and this is the test
@@ -443,6 +448,17 @@ func TestOneIneligibleRouteDoesNotRemoveTheRest(t *testing.T) {
 		t.Fatalf("the surviving route is not the unaffected one: %#v", got)
 	}
 
+	// And asking *about* the retired permission is an empty answer, not a
+	// refusal. It used to be refused before a grant was looked at, so retiring
+	// a permission turned every request to the endpoint guarded by it into a
+	// 503 "we could not check your access" — for a deliberate administrative
+	// act, with a statement that was untrue. Retired and never-registered are
+	// the same answer now, and the gate denies on both.
+	retired, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipWrite, time.Time{})
+	if err != nil || len(retired) != 0 {
+		t.Fatalf("asking about a retired permission gave %#v, %v; want an empty answer", retired, err)
+	}
+
 	// The other way a route stops holding: its own content is fine and it no
 	// longer sits inside its parent. That is the second place the signal comes
 	// from, and it was returned by code no test reached — deleting the wrap left
@@ -514,5 +530,23 @@ func TestOneIneligibleRouteDoesNotRemoveTheRest(t *testing.T) {
 				t.Fatalf("answered rather than refused: %#v, %v", got, err)
 			}
 		})
+	}
+}
+
+// A narrowing may name the same permission twice. It narrows to the same set,
+// so there is nothing malformed about it — unlike a grant's selection, where a
+// repeat is a malformed record, which is why the filter is validated per item
+// rather than as one list. This pins behaviour that was already correct; it is
+// not a regression guard for the catalog-lookup removal.
+func TestARepeatedFilterEntryIsALegalNarrowing(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	f := lab.TeamFINC17(area)
+	got, err := lineage.ResolveAuthority(t.Context(), f.Snapshot, f.Issuer,
+		domain.ResolveOptions{Permissions: []string{lab.PayslipRead, lab.PayslipRead}}, time.Time{})
+	if err != nil {
+		t.Fatalf("a repeated filter entry was refused: %v", err)
+	}
+	if len(got.ResolvedGrants) == 0 {
+		t.Fatalf("a repeated filter entry narrowed to nothing: %#v", got)
 	}
 }

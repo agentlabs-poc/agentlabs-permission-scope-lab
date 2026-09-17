@@ -174,15 +174,7 @@ func (s *Service) DeleteAssignment(ctx context.Context, area domain.Area, identi
 		if !ok || target.ID != id {
 			return storage.WriteSet{}, domain.ErrNotFound
 		}
-		// A binding of the root grant is part of the root's establishment, and
-		// deleting one takes the root's holder away — a ceiling nobody holds,
-		// which is the same irrecoverable state as deleting the root itself.
-		// Disabling is already refused (SetAssignmentStatus), and this keys on
-		// the grant exactly as that check does, so every binding of the root is
-		// treated alike rather than only the one establishment wrote.
-		if snapshot.TrustedRoots[target.GrantID] {
-			return storage.WriteSet{}, domain.ErrUnsupported
-		}
+
 		for _, other := range snapshot.Assignments {
 			if other.ID == id {
 				continue

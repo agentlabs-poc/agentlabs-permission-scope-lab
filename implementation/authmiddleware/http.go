@@ -17,7 +17,12 @@ type InputValues map[string]json.RawMessage
 
 type BoundOperation struct {
 	Material Material
-	Execute  func(context.Context, http.ResponseWriter)
+	// Execute receives the Result that allowed it. An allow is not a bare yes:
+	// it names the grants that authorized this request, and the effect is the
+	// only place that can record them beside what it did. Passing it here means
+	// an endpoint cannot log evidence it did not receive, and cannot invent
+	// evidence it was never given.
+	Execute func(context.Context, http.ResponseWriter, Result)
 }
 
 type Binder func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error)
@@ -32,6 +37,7 @@ func Wrap(policy Policy, identities IdentitySource, evaluator *Evaluator, bind B
 		return nil, errors.New("identity source, initialized evaluator, binder, and failure handler are required")
 	}
 	policy.Inputs = cloneInputs(policy.Inputs)
+	policy.Trusted = cloneTrusted(policy.Trusted)
 
 	mux := http.NewServeMux()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
@@ -41,6 +47,14 @@ func Wrap(policy Policy, identities IdentitySource, evaluator *Evaluator, bind B
 		return nil, err
 	}
 	return mux, nil
+}
+
+func cloneTrusted(trusted map[string]string) map[string]string {
+	cloned := make(map[string]string, len(trusted))
+	for field, local := range trusted {
+		cloned[field] = local
+	}
+	return cloned
 }
 
 func cloneInputs(inputs map[string]Input) map[string]Input {
@@ -83,33 +97,6 @@ func handleHTTP(policy Policy, identities IdentitySource, evaluator *Evaluator, 
 		failure(Result{}, err)
 		return
 	}
-	// These bind the route's area claim to the trusted one, and they find it by
-	// the placeholder's spelling: a policy whose path says {tenant_id} is not
-	// checked here at all, and the gate cannot tell. The handbook requires the
-	// binding — "route tenant claims must still be bound to trusted context;
-	// field names alone do not prove relationships" (endpoint-policy-format.md).
-	//
-	// There is no declaration to read instead. CONTRACT-012 (agreed) adopted a
-	// policy of version, method, path, one permission and selected inputs, and
-	// deliberately adopted *no* relationships block, named resolver or
-	// argument-mapping contract — putting the duty on the endpoint
-	// implementation "to keep execution within the authorized" boundary. So a
-	// Policy field naming the tenant input is not an open question this could
-	// settle; it is machinery the handbook considered and declined.
-	//
-	// The lab lives with it, and the endpoint owning the duty is why that is
-	// defensible rather than merely convenient: one application, four policies,
-	// each written beside the handler it guards, every path spelling it
-	// "tenant". A deployment with more of them needs something better than a
-	// convention — see plan/migration-requirements.md.
-	if tenant := request.PathValue("tenant"); tenant != "" && tenant != requestContext.Area.TenantID {
-		failure(Result{}, errors.New("path tenant does not match trusted area"))
-		return
-	}
-	if application := request.PathValue("application"); application != "" && application != requestContext.Area.ApplicationID {
-		failure(Result{}, errors.New("path application does not match trusted area"))
-		return
-	}
 	body, err := decodeBusinessBody(request.Body)
 	if err != nil {
 		failure(Result{}, err)
@@ -117,6 +104,15 @@ func handleHTTP(policy Policy, identities IdentitySource, evaluator *Evaluator, 
 	}
 	values, err := selectInputs(policy.Inputs, request, body)
 	if err != nil {
+		failure(Result{}, err)
+		return
+	}
+	// The route's area claim bound to the trusted one, before anything is bound
+	// to a record. This is checked against the value of a *declared input*, not
+	// against a path segment that happens to be spelled "tenant" — the spelling
+	// match was the whole bug, because a policy that called it {tenant_id} was
+	// not checked at all and nothing said so.
+	if err := verifyTrusted(policy, values, requestContext); err != nil {
 		failure(Result{}, err)
 		return
 	}
@@ -146,7 +142,7 @@ func handleHTTP(policy Policy, identities IdentitySource, evaluator *Evaluator, 
 		failure(Result{}, err)
 		return
 	}
-	operation.Execute(ctx, w)
+	operation.Execute(ctx, w, result)
 }
 
 func decodeBusinessBody(body io.Reader) (map[string]json.RawMessage, error) {
@@ -171,6 +167,33 @@ func decodeBusinessBody(body io.Reader) (map[string]json.RawMessage, error) {
 		return nil, errors.New("request body must be a JSON object")
 	}
 	return fields, nil
+}
+
+// verifyTrusted checks every correlation the policy declares. The values are
+// the resolved ones, so a correlation may name a body field as readily as a path
+// segment; what it may not be is anything other than a string, because a tenant
+// that arrives as a number or an object is not a tenant.
+func verifyTrusted(policy Policy, values InputValues, requestContext RequestContext) error {
+	for field, local := range policy.Trusted {
+		// A pointer, because null unmarshals into a string quite happily and
+		// leaves it empty. That was caught downstream by the trusted area never
+		// being empty, which is true but is not this check doing its job.
+		var declared *string
+		if err := json.Unmarshal(values[local], &declared); err != nil || declared == nil {
+			return fmt.Errorf("trusted %s input %q is not a string", field, local)
+		}
+		var trusted string
+		switch field {
+		case TrustedTenant:
+			trusted = requestContext.Area.TenantID
+		case TrustedApplication:
+			trusted = requestContext.Area.ApplicationID
+		}
+		if *declared != trusted {
+			return fmt.Errorf("%s input %q does not match the trusted area", field, local)
+		}
+	}
+	return nil
 }
 
 func selectInputs(inputs map[string]Input, request *http.Request, body map[string]json.RawMessage) (InputValues, error) {

@@ -135,11 +135,26 @@ func TestResolveAuthorityFiltersAndOmitsOnRequest(t *testing.T) {
 		}
 	}
 
-	// Asking about a permission the catalog does not register is a caller
-	// mistake. Answering "you hold nothing" would hide it.
+	// A filter is a narrowing, not an assertion. The caller asks what this human
+	// holds restricted to these permissions, never whether a permission exists,
+	// so narrowing by one the catalog does not supply yields an empty answer —
+	// the same answer as a permission she simply does not hold, deliberately
+	// told apart from nothing.
+	//
+	// It used to refuse, which meant retiring a permission turned every request
+	// to the endpoint guarded by it into a 503 "we could not check your access"
+	// — an untrue statement, for a deliberate administrative act.
+	for _, absent := range []string{"hrms:payroll:payslip::export", "hrms:payroll:payslip::delete"} {
+		answer, err := api.ResolveAuthority(t.Context(), area, teamFixture, maya,
+			domain.ResolveOptions{Permissions: []string{absent}})
+		if err != nil || len(answer.ResolvedGrants) != 0 {
+			t.Fatalf("narrowing by %q gave %#v, %v; want an empty answer", absent, answer.ResolvedGrants, err)
+		}
+	}
+	// A filter that is not a permission at all is still a malformed question.
 	if _, err := api.ResolveAuthority(t.Context(), area, teamFixture, maya,
-		domain.ResolveOptions{Permissions: []string{"hrms:payroll:payslip::export"}}); !errors.Is(err, domain.ErrRejected) {
-		t.Fatalf("an unregistered filter gave %v, want ErrRejected", err)
+		domain.ResolveOptions{Permissions: []string{"*"}}); !errors.Is(err, domain.ErrMalformed) {
+		t.Fatalf("a noncanonical filter gave %v, want ErrMalformed", err)
 	}
 }
 

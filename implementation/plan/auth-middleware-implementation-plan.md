@@ -286,7 +286,7 @@ type IdentitySource interface {
 type InputValues map[string]json.RawMessage
 type BoundOperation struct {
     Material Material
-    Execute func(context.Context, http.ResponseWriter)
+    Execute func(context.Context, http.ResponseWriter, Result)
 }
 type Binder func(context.Context, RequestContext, InputValues, map[string]json.RawMessage) (BoundOperation, error)
 type FailureHandler func(http.ResponseWriter, *http.Request, Result, error)
@@ -297,6 +297,8 @@ The binder validates the application schema and binds selected values to Materia
 it returns a synchronous effect closure capturing those SAME validated values.
 It receives parsed business body fields so it need not reinterpret request bytes.
 No HTTP request is passed to Execute, discouraging body/path reparsing after allow.
+The allowing Result is, so the effect can record the grants that authorized the
+change beside what it changed — and can record nothing it was not handed.
 Binder may prepare facts but must not publish protected output or perform effects.
 Only Execute performs protected work. This is internal host wiring, not a prepared
 authorization result: the evaluator still makes exactly one completed decision.

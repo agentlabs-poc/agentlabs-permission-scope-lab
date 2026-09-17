@@ -144,36 +144,34 @@ func TestCreateGrantRefusesParentlessUnregisteredAndUnknownParent(t *testing.T) 
 	}
 }
 
-// Ordinary administration cannot remove a root here. That is a lab default
-// rather than an agreed rule — the handbook calls an established root "an
-// ordinary grant subject to status, validity, revisions, assignments" and files
-// the authorized root-change procedure as open — and it is recorded as one in
-// plan/migration-requirements.md.
+// Q-132: a grant with a child grant can be neither disabled nor deleted, and a
+// root is not exempt. The refusal is the dependency rule doing its ordinary work
+// — it is what refuses any parent — rather than a rule of the root's own.
 //
-// It holds because the alternative is unrecoverable: an area whose root is gone
-// has no ceiling for anything, and nothing today puts one back. Disablement
-// already refused; deletion did not, which made the harsher act the available
-// one.
-func TestDeletingATrustedRootIsNotAnOrdinaryOperation(t *testing.T) {
+// This replaced two special cases: a refusal to disable a root, which
+// contradicted "an ordinary grant subject to status", and a refusal to delete
+// one, which had no rule behind it at all.
+func TestARootWithAChildIsRefusedLikeAnyOtherParent(t *testing.T) {
 	api, area := openGrantLab(t)
-	if err := api.DeleteGrant(t.Context(), area, teamFixture, "fk3x9r2m0dq3"); !errors.Is(err, domain.ErrUnsupported) {
-		t.Fatalf("deleting the trusted root gave %v, want ErrUnsupported", err)
+
+	// ErrConflict, not ErrUnsupported: the answer a parent gets, not the answer
+	// a root used to get.
+	if err := api.DeleteGrant(t.Context(), area, teamFixture, "fk3x9r2m0dq3"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting a root with a child gave %v, want ErrConflict", err)
 	}
-	// Still there, and still a root.
+	// And the same answer for the child in the middle, which is the point: one
+	// rule, no special subject.
+	if err := api.DeleteGrant(t.Context(), area, teamFixture, "fk3x9r2m5iv8"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting an ordinary parent gave %v, want ErrConflict", err)
+	}
 	grant, _, err := api.GetGrant(t.Context(), area, teamFixture, "fk3x9r2m0dq3", 1)
 	if err != nil || !grant.TrustedRoot {
 		t.Fatalf("root after the refusal = %#v err=%v", grant, err)
 	}
-	// And the answer is Unsupported rather than Conflict, which is the whole
-	// point: a child does rest on this root, so a dependency refusal would have
-	// masked the categorical one and gone on masking it until the day nothing
-	// depended on the root. TestAnEstablishedRootCannotBeDeleted takes that day.
-	//
-	// The root's own assignment is refused the same way, and for the same
-	// reason: it was written beside the root in the transaction that
-	// established it, and deleting it leaves a ceiling nobody holds.
-	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrUnsupported) {
-		t.Fatalf("deleting the root's assignment gave %v, want ErrUnsupported", err)
+	// The root's own assignment is refused too, by the rule that a deletion must
+	// not leave a dependent binding naming what it rests on.
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting the root's assignment gave %v, want ErrConflict", err)
 	}
 }
 

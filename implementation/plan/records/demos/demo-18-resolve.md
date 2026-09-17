@@ -4,7 +4,7 @@ Captured from a real run of `verify-resolve.sh`, then rendered into this file **
 that capture**. The SVG beside it is generated from the same capture, so the
 image and this file cannot drift.
 
-`239` lines captured, 9 commands. Reproduce with:
+`317` lines captured, 13 commands. Reproduce with:
 
 ```sh
 $(sess path)/verify-resolve.sh
@@ -167,9 +167,11 @@ abv resolve --human fi7io4lvjqio
 rc=0
 ```
 
-## THE SAME CALL, FILTERED TO ONE PERMISSION
+## THE SAME CALL, NARROWED TO ONE PERMISSION
 
-> (a gate deciding one request passes a filter; a menu passes none)
+> (the gate passes no filter at all — it asks what she holds, which is the
+> shape that could be cached against her. Nothing caches yet. A narrowing
+> is for a caller that wants less than everything.)
 
 ```console
 abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::write
@@ -258,16 +260,50 @@ abv resolve --human fi7io4lvjqio --no-source
 rc=0
 ```
 
-## REFUSALS AND EMPTY ANSWERS
+## A FILTER IS A NARROWING, NOT AN ASSERTION
 
-> (an unregistered permission is a caller mistake, not an empty answer;
-> a permission she does not hold IS an empty answer, and rc=0)
+> (three permissions that resolve to nothing: one never registered, one
+> registered and then retired, one registered and active that she simply
+> does not hold. All three are the same answer — empty, rc=0 — and the
+> gate denies on each. Asking whether a permission exists is not a
+> question this service answers.)
+
+```console
+abv catalog set-permission-status hrms:payroll:payslip::write --active false
+internal projection: permission
+id  hrms:payroll:payslip::write
+active  false
+```
+
+**never registered**
 
 ```console
 abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::export
-operation rejected or record not found
-rc=3
+{
+  "version": "1",
+  "tenant_id": "acme",
+  "application_id": "hrms",
+  "human_id": "fi7io4lvjqio",
+  "resolved_grants": []
+}
+rc=0
 ```
+
+**registered, then retired**
+
+```console
+abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::write
+{
+  "version": "1",
+  "tenant_id": "acme",
+  "application_id": "hrms",
+  "human_id": "fi7io4lvjqio",
+  "resolved_grants": []
+}
+rc=0
+```
+
+**registered and active, simply not held**
 
 ```console
 abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::delete
@@ -280,6 +316,48 @@ abv resolve --human fi7io4lvjqio --permissions hrms:payroll:payslip::delete
 }
 rc=0
 ```
+
+## WHAT RETIREMENT ACTUALLY DID
+
+> (the stored grant is untouched — Q-125 rewrites nothing — but the route
+> through it no longer holds, because it selects a permission the catalog
+> no longer supplies. The deeper grant selects only ::read, and it goes
+> too: its chain runs through the grant that selects ::write, so retiring
+> one permission on a parent stops every route beneath it.)
+
+```console
+abv resolve --human fi7io4lvjqio --no-source
+{
+  "version": "1",
+  "tenant_id": "acme",
+  "application_id": "hrms",
+  "human_id": "fi7io4lvjqio",
+  "resolved_grants": []
+}
+rc=0
+```
+
+```console
+abv inspect grant fk3x9r2m5iv8 | jq .
+{
+  "version": "1",
+  "grant_id": "fk3x9r2m5iv8",
+  "revision": 1,
+  "parent_grant_id": "fk3x9r2m0dq3",
+  "permissions": [
+    "hrms:payroll:payslip::read",
+    "hrms:payroll:payslip::write"
+  ],
+  "scope": {
+    "dept": "FIN"
+  }
+}
+```
+
+## AND A HUMAN WITH NOTHING
+
+> (a subject this tenant has no record of is a refusal, not an empty
+> answer: there is no set to narrow.)
 
 ```console
 abv resolve --human fn2q6v8sbo1e

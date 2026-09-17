@@ -12,7 +12,6 @@ func query() authmiddleware.AuthorityQuery {
 			Area:     authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
 			Identity: authmiddleware.Identity{Version: "1", HumanID: "fi7io4lvjqio"},
 		},
-		Permission: "hrms:payroll:payslip::read",
 	}
 }
 

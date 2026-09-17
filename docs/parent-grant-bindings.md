@@ -271,9 +271,9 @@ tests or proof of exhaustive security. Bxx references identify review cases.
 | B06 | Same G2 assigned to TeamY and Nutan; G2 disabled | Both lose authority supplied by G2; other grants remain separate. |
 | B07 | Only A2 disabled | Its route stops; unrelated assignments are not disabled. |
 | B08 | Shared G2 cannot pass required enable validation | Remains disabled for everyone; no partial grant enablement. |
-| B09 | G2 disabled; enabled G3 derives from it | G3 is ineffective without a persistent G3 disable write. |
-| B10 | G2 validly enabled; G3 still enabled and otherwise valid | G3 can resume. |
-| B11 | G3 or its assignment explicitly disabled | Restoring its parent does not enable that disabled record. |
+| B09 | ~~G2 disabled; enabled G3 derives from it~~ | ~~G3 is ineffective without a persistent G3 disable write.~~ **Superseded by [Q-132](grant-lifecycle.md): G2 cannot be disabled while the child grant G3 names it as parent.** A holder of G2 is an assignment, not a dependent, and does not block the disable. |
+| B10 | ~~G2 validly enabled; G3 still enabled and otherwise valid~~ | ~~G3 can resume.~~ **Superseded by [Q-132](grant-lifecycle.md): the state it resumes from cannot be reached, because G2 could not have been disabled beneath the child grant G3.** |
+| B11 | G3 or its assignment explicitly disabled | Restoring its parent does not enable that disabled record. Under [Q-132](grant-lifecycle.md) the parent could not have been disabled beneath the child grant; the rule that an explicit disable is never undone by another record stands. |
 | B12 | Change grant parent under an affected enabled subgroup binding | Reject structural change. |
 | B13 | Change/remove team parent under an affected enabled binding | Reject; equivalent authority elsewhere is not an exemption. |
 | B14 | Relevant bindings explicitly disabled or removed bottom-up | Structural change may proceed with required authorization/validation. |

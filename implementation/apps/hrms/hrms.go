@@ -33,6 +33,42 @@ type Record struct {
 type Store struct {
 	mu      sync.Mutex
 	records []Record
+	writes  []WriteEvidence
+}
+
+// WriteEvidence is what the write path records beside the change it made. An
+// allow is not a bare yes — it names the grants that authorized the request —
+// and the effect is the only place that can write those down next to what they
+// permitted. The endpoint can only record evidence the gate handed it.
+type WriteEvidence struct {
+	TenantID      string
+	CertificateID string
+	GrantIDs      []string
+}
+
+// Writes returns the evidence recorded so far, oldest first.
+//
+// Deeply, because GrantIDs is a slice: copying only the outer one handed every
+// reader a live pointer into the store's own record, so anything holding the
+// result could rewrite the grant chain and the next reader would see the
+// forgery. The point of passing the Result to the effect is that an endpoint
+// cannot invent evidence it was not given; that is worth nothing if a reader can
+// invent it afterwards.
+func (s *Store) Writes() []WriteEvidence {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	copied := make([]WriteEvidence, len(s.writes))
+	for i, evidence := range s.writes {
+		copied[i] = evidence
+		copied[i].GrantIDs = append([]string(nil), evidence.GrantIDs...)
+	}
+	return copied
+}
+
+func (s *Store) record(evidence WriteEvidence) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.writes = append(s.writes, evidence)
 }
 
 func NewStore(records []Record) *Store {
@@ -130,17 +166,17 @@ func NewHandler(store *Store, evaluator *authmiddleware.Evaluator, identity auth
 	routes := []route{
 		{policy(http.MethodGet, "/api/v1/{tenant}/{dept}/{cert}", payslipRead, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"}, "dept": {Source: authmiddleware.SourcePath, Name: "dept"}, "cert": {Source: authmiddleware.SourcePath, Name: "cert"},
-		}), store.bindGet},
+		}, "tenant"), store.bindGet},
 		{policy(http.MethodPut, "/api/v1/{tenant}/certificates/{cert}", payslipWrite, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"}, "cert": {Source: authmiddleware.SourcePath, Name: "cert"},
 			"proposed_dept": {Source: authmiddleware.SourceBody, Name: "department_id"}, "title": {Source: authmiddleware.SourceBody, Name: "title"},
-		}), store.bindPut},
+		}, "tenant"), store.bindPut},
 		{policy(http.MethodGet, "/api/v1/{tenant}/departments/{dept}/certificates", payslipRead, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"}, "dept": {Source: authmiddleware.SourcePath, Name: "dept"},
-		}), store.bindDepartment},
+		}, "tenant"), store.bindDepartment},
 		{policy(http.MethodGet, "/api/v1/{tenant}/certificates", payslipRead, map[string]authmiddleware.Input{
 			"tenant": {Source: authmiddleware.SourcePath, Name: "tenant"},
-		}), store.bindAll},
+		}, "tenant"), store.bindAll},
 	}
 	mux := http.NewServeMux()
 	for _, route := range routes {
@@ -153,8 +189,14 @@ func NewHandler(store *Store, evaluator *authmiddleware.Evaluator, identity auth
 	return mux, nil
 }
 
-func policy(method, path, permission string, inputs map[string]authmiddleware.Input) authmiddleware.Policy {
-	return authmiddleware.Policy{Version: "1", Method: method, Path: path, Permission: permission, Inputs: inputs}
+// policy names, as its last argument, the input the gate must hold against the
+// trusted tenant. Every route here is about one tenant's certificates, so every
+// one of them declares it; the gate refuses to mount a policy that does not.
+func policy(method, path, permission string, inputs map[string]authmiddleware.Input, tenantInput string) authmiddleware.Policy {
+	return authmiddleware.Policy{
+		Version: "1", Method: method, Path: path, Permission: permission, Inputs: inputs,
+		Trusted: map[string]string{authmiddleware.TrustedTenant: tenantInput},
+	}
 }
 
 func (s *Store) bindGet(_ context.Context, _ authmiddleware.RequestContext, values authmiddleware.InputValues, _ map[string]json.RawMessage) (authmiddleware.BoundOperation, error) {
@@ -169,7 +211,7 @@ func (s *Store) bindGet(_ context.Context, _ authmiddleware.RequestContext, valu
 	if found {
 		material["user"] = authmiddleware.Selection{Kind: authmiddleware.SelectionExact, Value: record.EmployeeID}
 	}
-	return authmiddleware.BoundOperation{Material: material, Execute: func(_ context.Context, w http.ResponseWriter) {
+	return authmiddleware.BoundOperation{Material: material, Execute: func(_ context.Context, w http.ResponseWriter, _ authmiddleware.Result) {
 		record, ok := s.Get(tenant, dept, cert)
 		if !ok {
 			writeError(w, http.StatusNotFound, "not found")
@@ -193,12 +235,15 @@ func (s *Store) bindPut(_ context.Context, _ authmiddleware.RequestContext, valu
 	}
 	return authmiddleware.BoundOperation{
 		Material: authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionExact, Value: dept}},
-		Execute: func(_ context.Context, w http.ResponseWriter) {
+		Execute: func(_ context.Context, w http.ResponseWriter, result authmiddleware.Result) {
 			record, ok := s.update(tenant, dept, cert, title)
 			if !ok {
 				writeError(w, http.StatusNotFound, "not found")
 				return
 			}
+			// Recorded only for a change that actually happened, and only from
+			// the result the gate passed in.
+			s.record(WriteEvidence{TenantID: tenant, CertificateID: cert, GrantIDs: append([]string(nil), result.GrantIDs...)})
 			writeJSON(w, http.StatusOK, record)
 		},
 	}, nil
@@ -211,7 +256,9 @@ func (s *Store) bindDepartment(_ context.Context, _ authmiddleware.RequestContex
 	}
 	return authmiddleware.BoundOperation{
 		Material: authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionExact, Value: dept}},
-		Execute:  func(_ context.Context, w http.ResponseWriter) { writeJSON(w, http.StatusOK, s.list(tenant, dept)) },
+		Execute: func(_ context.Context, w http.ResponseWriter, _ authmiddleware.Result) {
+			writeJSON(w, http.StatusOK, s.list(tenant, dept))
+		},
 	}, nil
 }
 
@@ -222,7 +269,9 @@ func (s *Store) bindAll(_ context.Context, _ authmiddleware.RequestContext, valu
 	}
 	return authmiddleware.BoundOperation{
 		Material: authmiddleware.Material{"dept": {Kind: authmiddleware.SelectionAll}},
-		Execute:  func(_ context.Context, w http.ResponseWriter) { writeJSON(w, http.StatusOK, s.list(tenant, "")) },
+		Execute: func(_ context.Context, w http.ResponseWriter, _ authmiddleware.Result) {
+			writeJSON(w, http.StatusOK, s.list(tenant, ""))
+		},
 	}, nil
 }
 

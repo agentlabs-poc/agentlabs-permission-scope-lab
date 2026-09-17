@@ -22,12 +22,29 @@ type Input struct {
 	Name   string `json:"name"`
 }
 
+// Trusted field names. A correlation is keyed by the field of the trusted
+// request context it constrains, and names one of the policy's own inputs.
+const (
+	TrustedTenant      = "tenant"
+	TrustedApplication = "application"
+)
+
 type Policy struct {
 	Version    string           `json:"version"`
 	Method     string           `json:"method"`
 	Path       string           `json:"path"`
 	Permission string           `json:"permission"`
 	Inputs     map[string]Input `json:"inputs"`
+	// Trusted correlates a field of the trusted request context with a declared
+	// input: {"tenant": "tenant"} reads as "the input I call tenant must equal
+	// the trusted tenant". The gate used to find the request's tenant by looking
+	// for a path placeholder spelled exactly "tenant", so a policy that spelled
+	// it "tenant_id" got no check at all — no error, no log, and a request for
+	// another tenant's records went through. A declaration has nothing to guess:
+	// the endpoint already knows which input is the tenant, and now writes it
+	// down. A tenant correlation is required, which is what turns the silent
+	// case into an impossible one.
+	Trusted map[string]string `json:"trusted"`
 }
 
 func DecodePolicy(raw []byte) (Policy, error) {
@@ -49,8 +66,18 @@ func DecodePolicy(raw []byte) (Policy, error) {
 
 func validatePolicyFields(raw []byte) error {
 	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(raw, &fields); err != nil || !hasOnly(fields, "version", "method", "path", "permission", "inputs") {
+	if err := json.Unmarshal(raw, &fields); err != nil || !hasOnly(fields, "version", "method", "path", "permission", "inputs", "trusted") {
 		return errors.New("invalid policy fields")
+	}
+	var trusted map[string]json.RawMessage
+	if err := json.Unmarshal(fields["trusted"], &trusted); err != nil || trusted == nil {
+		return errors.New("invalid policy trusted correlations")
+	}
+	for _, rawLocal := range trusted {
+		var local string
+		if err := json.Unmarshal(rawLocal, &local); err != nil {
+			return errors.New("invalid policy trusted correlation")
+		}
 	}
 	var inputs map[string]json.RawMessage
 	if err := json.Unmarshal(fields["inputs"], &inputs); err != nil || inputs == nil {
@@ -97,6 +124,56 @@ func (p Policy) Validate() error {
 			}
 		default:
 			return fmt.Errorf("unsupported input source %q", input.Source)
+		}
+	}
+	return p.validateTrusted(placeholders)
+}
+
+// validateTrusted is the mount-time half of the binding. Three rules, and the
+// third is the one that took two attempts to get right.
+//
+// A policy that declares no tenant correlation cannot be mounted: the gate would
+// otherwise have no way to tell a route that binds its tenant from one that
+// forgot to, and forgetting was the silent case.
+//
+// A correlation must name a declared input, or there is nothing to compare.
+//
+// And a path placeholder spelled with a trusted field's own name must be the
+// input that field correlates. Without this the declaration was not even as
+// strong as the spelling match it replaced: a policy could carry {tenant} in its
+// path, point its tenant correlation at some other input, and the segment the
+// handler reads went unchecked — "the silent case is impossible" was false, and
+// three live handbook lines require the binding. This is not the heuristic that
+// was rejected. It guesses nothing: it fires only on this gate's own two field
+// names, spelled exactly, and a path that calls it {org} or {tenant_slug} is
+// covered by the mandatory correlation instead.
+func (p Policy) validateTrusted(placeholders map[string]struct{}) error {
+	if p.Trusted == nil {
+		return errors.New("missing policy trusted correlations")
+	}
+	if _, bound := p.Trusted[TrustedTenant]; !bound {
+		return errors.New("policy declares no trusted tenant correlation")
+	}
+	for field, local := range p.Trusted {
+		switch field {
+		case TrustedTenant, TrustedApplication:
+		default:
+			return fmt.Errorf("unknown trusted field %q", field)
+		}
+		if _, declared := p.Inputs[local]; !declared {
+			return fmt.Errorf("trusted %s names undeclared input %q", field, local)
+		}
+	}
+	for _, field := range []string{TrustedTenant, TrustedApplication} {
+		if _, spelled := placeholders[field]; !spelled {
+			continue
+		}
+		local, correlated := p.Trusted[field]
+		if !correlated {
+			return fmt.Errorf("path carries {%s} and no trusted %s correlation names it", field, field)
+		}
+		if input := p.Inputs[local]; input.Source != SourcePath || input.Name != field {
+			return fmt.Errorf("trusted %s names input %q, which does not read the path's {%s}", field, local, field)
 		}
 	}
 	return nil

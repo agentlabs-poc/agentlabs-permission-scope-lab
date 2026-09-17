@@ -43,12 +43,34 @@ func (s *Service) SetGrantStatus(ctx context.Context, area domain.Area, identity
 		if before.ID != proposed.ID || validateGrantControl(before) != nil {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if snapshot.TrustedRoots[proposed.ID] {
-			return storage.WriteSet{}, domain.ErrUnsupported
-		}
 		now := s.clock.Now()
 		if err := admin.CheckGrantStatus(ctx, cloneSnapshot(snapshot), identity, proposed, now); err != nil {
 			return storage.WriteSet{}, err
+		}
+		// Q-132 / GRANT-010. Disabling used to be refused for a trusted root and
+		// permitted for every other grant however much rested on it — the two
+		// halves of a rule that did not exist. Now one condition governs both
+		// disable and delete, for every grant alike: while anything depends on
+		// it, neither is available.
+		//
+		// This is the half that changes behaviour. A parent with children could
+		// previously be disabled in one write, which suspended everything
+		// beneath it without disabling those records — B09 and B10, superseded.
+		// A subtree is dismantled from the bottom now, and rebuilt. What it buys
+		// is a rule with no cascade to reason about, and no case where a person's
+		// authority stops with no record of theirs having changed.
+		//
+		// Enabling is not constrained: nothing depends on a grant being disabled,
+		// and B11 stands — an explicit disable is never undone by another record.
+		//
+		// After the administration gate, deliberately. A caller who may not
+		// administer this grant is told that and nothing else; answering a
+		// dependency conflict first would describe the shape of a tenant's
+		// authority to someone with no standing to ask.
+		if proposed.Status == "disabled" {
+			if err := hasChildGrant(snapshot, proposed.ID); err != nil {
+				return storage.WriteSet{}, err
+			}
 		}
 		routes, err := stageGrantStatus(snapshot, proposed, now)
 		if err != nil {

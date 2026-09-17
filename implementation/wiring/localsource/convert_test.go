@@ -9,6 +9,7 @@ import (
 	"errors"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 )
@@ -25,15 +26,11 @@ func TestConvertGrantUsesTheResolvedBoundaries(t *testing.T) {
 		Version: "1", TenantID: "resolved-tenant", ApplicationID: "resolved-app", HumanID: "fi7io4lvjqio",
 	}
 	grant := domain.ResolvedGrant{GrantID: "fk3x9r2m0dq3", Scope: map[string]string{"dept": "FIN"}}
-	query := authmiddleware.AuthorityQuery{
-		Context:    authmiddleware.RequestContext{Area: authmiddleware.Area{TenantID: "query-tenant", ApplicationID: "query-app"}},
-		Permission: "hrms:payroll:payslip::read",
-	}
-	got := convertGrant(resolved, grant, query)
+	got := convertGrant(resolved, grant)
 	if got.Area != (authmiddleware.Area{TenantID: "resolved-tenant", ApplicationID: "resolved-app"}) {
 		t.Fatalf("area=%+v", got.Area)
 	}
-	if got.HumanID != "fi7io4lvjqio" || got.Permission != query.Permission {
+	if got.HumanID != "fi7io4lvjqio" {
 		t.Fatalf("route=%+v", got)
 	}
 	if len(got.Predicates) != 1 || got.Predicates[0] != (authmiddleware.Predicate{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m0dq3"}) {
@@ -90,7 +87,6 @@ func TestAFailureIsReportedAsAnEvaluationFailure(t *testing.T) {
 			Area:     authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
 			Identity: authmiddleware.Identity{Version: "1", HumanID: "fi7io4lvjqio"},
 		},
-		Permission: "hrms:payroll:payslip::read",
 	})
 	if loadErr == nil {
 		t.Fatal("a missing store answered")
@@ -139,7 +135,6 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 			Area:     authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
 			Identity: authmiddleware.Identity{HumanID: maya},
 		},
-		Permission: read,
 	}
 	grant := func(id string, permissions ...string) domain.ResolvedGrant {
 		return domain.ResolvedGrant{
@@ -157,10 +152,15 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 	// The control. Without it every refusal below could be a fixture that was
 	// never usable, which is how a set of negative cases quietly proves nothing.
 	authority, err := routesFor(sound(), query)
-	if err != nil || len(authority.Routes) != 1 || authority.Routes[0].Permission != read {
+	if err != nil || len(authority.Routes) != 1 || !slices.Equal(authority.Routes[0].Permissions, []string{read, write}) {
 		t.Fatalf("a sound answer gave %#v, %v", authority, err)
 	}
 
+	// There is no permission case here any more, and that is the point: the answer
+	// is not filtered by permission, so a grant for some other permission is an
+	// ordinary part of what this human holds. What it must not do is arrive wearing
+	// the permission that was asked about — see the test below.
+	//
 	// The code matters as much as the refusal: an operator reads it to tell an
 	// answer about the wrong human from one about the wrong permission, and the
 	// HTTP twin's table asserts it per case. This one asserted only that
@@ -176,15 +176,6 @@ func TestTheAnswerIsCorroboratedAgainstTheQuestion(t *testing.T) {
 		"another human":                {func(a *domain.ResolvedAuthority) { a.HumanID = "fi7io4lvjwu8" }, "WRONG_SUBJECT"},
 		"a grant from another version": {func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Version = "9" }, "UNSUPPORTED_VERSION"},
 		"a grant stating no version":   {func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Version = "" }, "UNSUPPORTED_VERSION"},
-		"a grant for another permission": {func(a *domain.ResolvedAuthority) {
-			a.ResolvedGrants[0].Permissions = []string{write}
-		}, "WRONG_PERMISSION"},
-		"a grant carrying none at all": {func(a *domain.ResolvedAuthority) { a.ResolvedGrants[0].Permissions = nil }, "WRONG_PERMISSION"},
-		// The second of several, which every earlier fixture here made
-		// unreachable by carrying exactly one grant.
-		"a second grant that does not carry it": {func(a *domain.ResolvedAuthority) {
-			a.ResolvedGrants = append(a.ResolvedGrants, grant("fk3x9r2man0d", write))
-		}, "WRONG_PERMISSION"},
 		"a third grant from another version": {func(a *domain.ResolvedAuthority) {
 			a.ResolvedGrants = append(a.ResolvedGrants, grant("fk3x9r2man0d", read))
 			a.ResolvedGrants = append(a.ResolvedGrants, grant("fk3x9r2mv5k0", read))
@@ -247,5 +238,31 @@ func TestAGrantWhoseSourceExplainsNothingStillNamesItsGrant(t *testing.T) {
 	grant.Source.Lineage = []domain.LineageStep{{GrantID: "fk3x9r2m0dq3"}, {GrantID: "fk3x9r2m5iv8"}}
 	if chain := grantChain(grant); len(chain) != 2 || chain[0] != "fk3x9r2m0dq3" {
 		t.Fatalf("chain = %#v, want the lineage", chain)
+	}
+}
+
+// The route carries the grant's permissions, not the question's. This is the
+// invariant the removed WRONG_PERMISSION case used to stand in for: back when
+// the query was stamped onto every route, a grant for reading the directory
+// became a route claiming payroll and the gate had no way to tell.
+func TestARouteCarriesTheGrantsOwnPermissions(t *testing.T) {
+	const read, write = "hrms:payroll:payslip::read", "hrms:payroll:payslip::write"
+	resolved := domain.ResolvedAuthority{
+		Version: "1", TenantID: "acme", ApplicationID: "hrms", HumanID: "fi7io4lvjqio",
+		ResolvedGrants: []domain.ResolvedGrant{
+			{Version: "1", GrantID: "fk3x9r2m5iv8", Revision: 1, Permissions: []string{read}},
+			{Version: "1", GrantID: "fk3x9r2man0d", Revision: 1, Permissions: []string{write}},
+		},
+	}
+	query := authmiddleware.AuthorityQuery{Context: authmiddleware.RequestContext{
+		Area:     authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"},
+		Identity: authmiddleware.Identity{HumanID: "fi7io4lvjqio"},
+	}}
+	authority, err := routesFor(resolved, query)
+	if err != nil || len(authority.Routes) != 2 {
+		t.Fatalf("routesFor() = %#v, %v", authority, err)
+	}
+	if !slices.Equal(authority.Routes[0].Permissions, []string{read}) || !slices.Equal(authority.Routes[1].Permissions, []string{write}) {
+		t.Fatalf("routes = %#v", authority.Routes)
 	}
 }

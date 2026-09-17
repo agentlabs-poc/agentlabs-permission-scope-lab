@@ -158,8 +158,11 @@ func TestDeleteAssignmentRefusesWhileADependentRouteRestsOnIt(t *testing.T) {
 	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p5iv8"); !errors.Is(err, domain.ErrConflict) {
 		t.Fatalf("deleting the supporting assignment gave %v, want ErrConflict", err)
 	}
-	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrUnsupported) {
-		t.Fatalf("deleting the root's assignment gave %v, want ErrUnsupported", err)
+	// Refused as a Conflict, by the dependency rule rather than by a rule of the
+	// root's own: Q-132 removed the root as a subject, and fm5b7t4p5iv8 rests on
+	// this binding.
+	if err := api.DeleteAssignment(t.Context(), area, teamFixture, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting the root's assignment gave %v, want ErrConflict", err)
 	}
 	// Clear the dependent, so the support can go too a few lines below — which
 	// is what makes the refusal above a dependency and not a prohibition.

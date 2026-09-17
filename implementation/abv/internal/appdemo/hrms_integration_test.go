@@ -159,7 +159,7 @@ func TestSQLiteHTTPDemoTracksProtectedDescendantAssignmentAndGrantControls(t *te
 func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 	store := hrms.NewStore(hrms.DefaultRecords())
 	evaluator := evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
-		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipWrite,
+		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permissions: []string{lab.PayslipWrite},
 		GrantIDs: []string{"fk3x9r2m5iv8"}, Predicates: []authmiddleware.Predicate{{Key: "dept", Value: "FIN", SourceGrantID: "fk3x9r2m5iv8"}},
 	}}})
 	handler, err := hrms.NewHandler(store, evaluator, hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
@@ -184,7 +184,7 @@ func TestHTTPDemoRejectsBoundaryIdentityAndBodyClaims(t *testing.T) {
 func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 	store := hrms.NewStore(hrms.DefaultRecords())
 	self := staticSource{routes: []authmiddleware.Route{{
-		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipRead,
+		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permissions: []string{lab.PayslipRead},
 		GrantIDs: []string{"self"}, Predicates: []authmiddleware.Predicate{{Key: "user", Value: "$self", SourceGrantID: "self"}},
 	}}}
 	handler, err := hrms.NewHandler(store, evaluatorFor(t, self), hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
@@ -226,7 +226,7 @@ func TestHTTPDemoSelfAndTimeoutFixturesNeverDiscloseOrExecute(t *testing.T) {
 func TestHTTPDemoAllDepartmentGrantReturnsWholeTenantCollection(t *testing.T) {
 	store := hrms.NewStore(hrms.DefaultRecords())
 	handler, err := hrms.NewHandler(store, evaluatorFor(t, staticSource{routes: []authmiddleware.Route{{
-		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permission: lab.PayslipRead, GrantIDs: []string{"all"},
+		Area: authmiddleware.Area{TenantID: "acme", ApplicationID: "hrms"}, HumanID: "fi7io4lvjqio", Permissions: []string{lab.PayslipRead}, GrantIDs: []string{"all"},
 	}}}), hrms.TrustedIdentity("acme", "hrms", "fi7io4lvjqio"))
 	if err != nil {
 		t.Fatal(err)
