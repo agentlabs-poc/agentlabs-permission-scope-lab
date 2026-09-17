@@ -1,4 +1,4 @@
-# Current handbook state — RECON-002, through Q-134
+# Current handbook state — RECON-002, through Q-135
 
 ## Publication checkpoint — RECON-002 and C01-D1/D2
 
@@ -45,7 +45,7 @@ the end of this page. Draft supported behavior first; do not start another
 question sequence merely because a review-area row remains open. Changes remain
 local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 
-## Fourteen decisions recorded since the previous checkpoint
+## Fifteen decisions recorded since the previous checkpoint
 
 | Decision | Current approved rule | Source with rationale and examples |
 |---|---|---|
@@ -60,11 +60,12 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-128 | New checks after any confirmed authority reduction cannot rely on withdrawn stale support. Other complete valid routes may allow; uncertain freshness is not proof of denial. | [Freshness](authority-freshness.md) |
 | Q-129 | The same already-allowed ordinary synchronous application operation may finish within evaluated boundaries after later withdrawal. Q-074 and Q-110 remain; queues, streams, long-running and not-yet-allowed cases are not included. | [Concurrent enforcement](concurrent-enforcement.md) |
 | Q-130 | Different complete valid grant routes may cover different batch items. All items need complete support before effects; no permission/scope fragment mixing or partial successful filtering. | [Bulk enforcement](bulk-enforcement.md) |
+| Q-135 | The error-code catalogue is open and its names are fixed: a published code never changes meaning, new codes may appear, and a consumer must tolerate an unknown one by falling back to the class the result arrived in. A code explains; it never decides — that is the allow/deny/evaluation-error split. Thirteen codes published, and the drifted `AUTH_*` family renamed while renaming was still possible. | [Decision results](decision-results.md) |
 | Q-134 | An allow result's `grant_ids` is the contributing chain of the authorizing route, ordered root first, so the order carries the dependency. The richer lineage form — assignment, team and revision per step — was considered and not adopted, because it is audit structure and audit sits in another layer. Closes HC-08-04. | [Decision results](decision-results.md) |
 | Q-133 | The endpoint policy declares its trusted correlations: one `trusted` map from a trusted context field to a declared input. A tenant correlation is required, a path spelling a trusted field's own name must be correlated, and a correlation may name any declared source. Supplies the mechanism for an obligation the chapter already mandated. Adopted with a recorded reservation about where the rule belongs. | [Endpoint policy format](endpoint-policy-format.md) |
 | Q-132 | A grant another grant names as parent can be neither disabled nor deleted. One rule for both operations and every grant, with no trusted-root exception; dismantling is bottom-up. A dependent is a child grant, not an assignment — counting assignments would make every held grant undisablable. Supersedes the disable-propagation cases B09–B11. | [Grant lifecycle](grant-lifecycle.md) |
 
-These are fourteen answered decisions, not fourteen completed chapters or fourteen
+These are fifteen answered decisions, not fifteen completed chapters or fifteen
 of the original eighteen agenda packages. Q-117 is no longer parked. Q-131 has
 not been approved; move source/destination grant composition remains open.
 Q-132 was raised by implementation rather than by the question sequence: the lab

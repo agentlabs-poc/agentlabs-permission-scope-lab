@@ -163,7 +163,7 @@ func (s *Source) Load(ctx context.Context, query authmiddleware.AuthorityQuery) 
 	}
 	response, err := s.doer.Do(request)
 	if err != nil {
-		return authmiddleware.Authority{}, (&Error{Code: "AUTH_UNREACHABLE", Message: "the authority service did not answer", Cause: err}).evaluation()
+		return authmiddleware.Authority{}, (&Error{Code: "AUTHORITY_UNREACHABLE", Message: "the authority service did not answer", Cause: err}).evaluation()
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
@@ -172,29 +172,29 @@ func (s *Source) Load(ctx context.Context, query authmiddleware.AuthorityQuery) 
 		// an already-struggling service.
 		_, _ = io.Copy(io.Discard, io.LimitReader(response.Body, 4096))
 		return authmiddleware.Authority{}, (&Error{
-			Code:    "AUTH_REFUSED",
+			Code:    "AUTHORITY_REFUSED",
 			Message: fmt.Sprintf("the authority service answered %d", response.StatusCode),
 		}).evaluation()
 	}
 	raw, err := io.ReadAll(io.LimitReader(response.Body, maxResponseBytes+1))
 	if err != nil {
-		return authmiddleware.Authority{}, (&Error{Code: "AUTH_UNREACHABLE", Message: "the answer could not be read", Cause: err}).evaluation()
+		return authmiddleware.Authority{}, (&Error{Code: "AUTHORITY_UNREACHABLE", Message: "the answer could not be read", Cause: err}).evaluation()
 	}
 	if len(raw) > maxResponseBytes {
-		return authmiddleware.Authority{}, (&Error{Code: "AUTH_OVERSIZED", Message: "the answer exceeded the accepted size"}).evaluation()
+		return authmiddleware.Authority{}, (&Error{Code: "AUTHORITY_OVERSIZED", Message: "the answer exceeded the accepted size"}).evaluation()
 	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	var answer resolveResponse
 	if err := decoder.Decode(&answer); err != nil {
-		return authmiddleware.Authority{}, (&Error{Code: "AUTH_MALFORMED", Message: "the answer did not match the contract", Cause: err}).evaluation()
+		return authmiddleware.Authority{}, (&Error{Code: "AUTHORITY_UNREADABLE", Message: "the answer did not match the contract", Cause: err}).evaluation()
 	}
 	// After the decode, so that text which is not the contract at all is
 	// reported as malformed rather than as ambiguous — but before the answer is
 	// used for anything, because an answer that says two things has not been
 	// read yet.
 	if err := rejectAmbiguousJSON(raw); err != nil {
-		return authmiddleware.Authority{}, (&Error{Code: "AUTH_AMBIGUOUS", Message: "the answer did not mean exactly one thing", Cause: err}).evaluation()
+		return authmiddleware.Authority{}, (&Error{Code: "AUTHORITY_AMBIGUOUS", Message: "the answer did not mean exactly one thing", Cause: err}).evaluation()
 	}
 	return answer.decode(query)
 }

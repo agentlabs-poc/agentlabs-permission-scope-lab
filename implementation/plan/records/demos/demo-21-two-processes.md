@@ -220,7 +220,7 @@ agentlabs.local/apps/hrms/cmd/hrms
 curl -X GET  /api/v1/acme/FIN/C17                             (auth service stopped)
 {
     "version": "1",
-    "error_code": "AUTH_UNREACHABLE",
+    "error_code": "AUTHORITY_UNREACHABLE",
     "error_message": "We could not check your access.",
     "error_message_reason": "the authority service did not answer"
 }
@@ -236,7 +236,7 @@ curl -X GET  /api/v1/acme/FIN/C17                             (auth service stop
 | The wire carries authority, not decisions | the seven bodies are printed in full: each names a human, `"options":{}`, and **no** permission, endpoint, method, resource or verdict |
 | Permissions are selected, scope is inherited | nutan reads the certificate and cannot write it; maya writes the same one through the same endpoint and the same policy |
 | An all-values ask is a deny | the listing endpoint names no department, and Q-071 refuses rather than quietly narrowing to what maya could have seen |
-| An outage is not a denial | Auth stopped gives `503` `AUTH_UNREACHABLE`, never `403` — Q-051 / DECISION-003 |
+| An outage is not a denial | Auth stopped gives `503` `AUTHORITY_UNREACHABLE`, never `403` — Q-051 / DECISION-003 |
 
 The application's policy table declares **four** endpoints across **two**
 permissions (`hrms:payroll:payslip::read` and `…::write`), and all four appear

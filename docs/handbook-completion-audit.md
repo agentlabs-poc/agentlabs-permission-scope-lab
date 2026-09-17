@@ -32,6 +32,12 @@ evidence, not the authority.
 |---|---|---|---|
 | HC-08-04 | OPEN | DONE | [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency. Q-061's no-scope rule and Q-076's audit exclusion are both preserved — the lineage form was considered and not adopted for that reason. |
 
+**HC-08-02 advances but does not close.** [Q-135](decision-results.md) settles the
+code catalogue and its compatibility rule, which was one of three named residues.
+Full value validation and the remaining failure cases stay open and stay parked
+under PROCESS-007, so the row keeps its OPEN status rather than taking partial
+credit — this register does not award fractional closure.
+
 **Current after CLOSURE-002: 39 DONE / 29 OPEN / 1 EXCLUDED; 68 in scope;
 57.4% closed, 42.6% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
 OPEN, 55.9% closed. [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
@@ -281,7 +287,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | Checkpoint | Status | Completion criterion | Evidence or outstanding gap |
 |---|---|---|---|
 | HC-08-01 | DONE | Settle alternative complete positive grants, no cross-grant field mixing, and no explicit deny grants in v1. | DECISION-001/002 / GRANT-001; [grant model](grant-model.md). |
-| HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-067 settle core meanings, minimal shapes, mixed/unknown-field rejection, and grant-ID cardinality in [decision results](decision-results.md). Full value validation, code catalogue/compatibility, and remaining failure cases are unfinished. Further details are parked under PROCESS-007, not excluded. No fractional credit. |
+| HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-067 settle core meanings, minimal shapes, mixed/unknown-field rejection, and grant-ID cardinality in [decision results](decision-results.md). Full value validation, code catalogue/compatibility, and remaining failure cases are unfinished. Further details are parked under PROCESS-007, not excluded. No fractional credit. Catalogue and compatibility settled by [Q-135](decision-results.md); value validation and remaining failure cases still open. |
 | HC-08-03 | OPEN | Specify conditions and their evaluation when evidence is missing, invalid, or unsupported. | [Q-084 is DISAPPROVED](grant-conditions.md) to prevent business-logic scope creep; its revised question is withdrawn, not pending. Authorization-only model gaps and existing conceptual restrictions remain; neither a condition engine nor removal of restrictions is approved. No closure credit is claimed. |
 | HC-08-04 | DONE | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Contributing IDs remain approved; [Q-130](bulk-enforcement.md) preserves complete route support across batch items. The residue — actual dependency/provenance representation without reintroducing Q-061 returned scope or Q-076 external audit design — is settled by CLOSURE-002 / [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency and no audit-shaped field is added. |
 

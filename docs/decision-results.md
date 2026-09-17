@@ -273,7 +273,8 @@ retained as history: ~~PROPOSED, not approved~~. The evaluator supplies an
 `error_code` alongside the two readable messages, to represent the
 machine-readable cause required by Q-052. The code accompanies the messages
 delivered to the UI; it is not inferred by parsing their text.
-For an Auth timeout the illustrative code could be `AUTH_SERVICE_TIMEOUT`, while
+For an Auth timeout the illustrative code could be `AUTHORITY_TIMEOUT` (renamed
+from `AUTH_SERVICE_TIMEOUT` by [Q-135](#q-135--decision-017--the-code-catalogue-is-open-its-names-are-fixed)), while
 `error_message` and `error_message_reason` remain readable explanations.
 
 Rationale for the additional field: software can identify the cause
@@ -290,9 +291,10 @@ alternatives are not adopted: `error_message_reason` remains readable text, and
 clients should use the code rather than matching that text for machine handling.
 
 Counterexample: changing the explanation's wording must not change how software
-identifies the cause. The illustrative `AUTH_SERVICE_TIMEOUT` spelling is not
-yet a finalized catalogue entry, and a code does not authorize automatic retry
-or collapse the distinction between evaluation error and completed denial.
+identifies the cause. A code does not authorize automatic retry, and does not
+collapse the distinction between evaluation error and completed denial. The
+spelling shown here was illustrative until [Q-135](#q-135--decision-017--the-code-catalogue-is-open-its-names-are-fixed)
+published the catalogue and fixed it as `AUTHORITY_TIMEOUT`.
 
 **Q-055 — answered yes:** Should we add `error_code` for the stable machine-readable cause while
 keeping both agreed message fields readable?
@@ -352,7 +354,75 @@ Returning a grant identifier is not a substitute for enforcing all restrictions.
 **Q-060 — answered yes:** Should the allow result return its supporting-grant references to the
 endpoint for traceability?
 
-## Q-134 / DECISION-011 — grant_ids is the contributing chain, in order
+## Q-135 / DECISION-017 — the code catalogue is open, its names are fixed
+
+Status: **AGREED.** Q-055 added `error_code` and left open what the list of codes
+is and whether a consumer may rely on it. This settles that.
+
+**A published code never changes meaning. New codes may appear at any time.** A
+consumer must tolerate a code it does not recognise and fall back to the class
+the result arrived in — a completed denial, or a failure to establish authority.
+
+A consumer may therefore not switch exhaustively on codes, and must not make a
+security-relevant choice from one. That choice is already carried by the
+allow / deny / evaluation-error distinction of Q-051, which is the contract a
+consumer branches on. A code explains; it does not decide.
+
+### Why not a closed list
+
+A closed enumeration is what lets a consumer be exhaustive, and it is the reason
+to want one. It was not adopted because the failure modes are discovered by the
+layer that meets them, not by this document: an HTTP source learns about
+redirects and oversized bodies, an in-process source about unreadable rows, and
+a gate about answers it cannot use. Closing the list makes each such discovery a
+contract version, and the reference implementation would have needed four in a
+single week.
+
+### The catalogue as published
+
+Prefixed `AUTHORITY_` means the authority answer failed, or failed to arrive.
+Unprefixed names either the decision itself, the caller's own configuration, or
+the specific way an answer disagreed with the question it was asked.
+
+| Code | Meaning |
+|---|---|
+| `AUTHORITY_UNREACHABLE` | The authority service did not answer. |
+| `AUTHORITY_TIMEOUT` | It did not answer in time. |
+| `AUTHORITY_REFUSED` | It answered, and the answer was not a success. |
+| `AUTHORITY_UNAVAILABLE` | An in-process authority store could not answer. |
+| `AUTHORITY_UNREADABLE` | The answer did not match the contract, or was not the contract at all. |
+| `AUTHORITY_AMBIGUOUS` | The answer did not mean exactly one thing. |
+| `AUTHORITY_OVERSIZED` | The answer exceeded the accepted size. |
+| `AUTHORITY_MALFORMED` | The answer was read, and this gate cannot use it. |
+| `UNSUPPORTED_VERSION` | The answer states a contract version this consumer does not speak. |
+| `WRONG_AREA` | The answer describes a different tenant or application. |
+| `WRONG_SUBJECT` | The answer describes a different human. |
+| `NO_AUTHORIZING_GRANT` | A completed denial: no complete route authorizes this operation. |
+| `MISCONFIGURED` | The asking application's own setup is wrong, before any question is sent. |
+
+`AUTHORITY_UNREADABLE` and `AUTHORITY_MALFORMED` are deliberately distinct: one
+answer could not be read, the other was read and could not be used. An operator
+needs to tell those apart, and they occur in different layers.
+
+Q-055's illustrative `AUTH_SERVICE_TIMEOUT` is **renamed to
+`AUTHORITY_TIMEOUT`**. Renaming is possible precisely because no code had been
+published before this decision; under the rule above it would not be possible
+afterwards.
+
+### Rationale / conscious tradeoff
+
+The cost is stated plainly: **no consumer can write an exhaustive handler**, and
+one that logs an unrecognised code without alerting on it will swallow a new
+failure mode silently. That is accepted because the alternative — freezing the
+list — buys exhaustiveness in exchange for a contract version every time a layer
+learns something new about how authority can fail to arrive.
+
+The naming families here were not designed; they accumulated across four
+components, and the drift reached the point where this handbook's own example
+code and the reference implementation disagreed. That is the argument for fixing
+names once, now, and holding them afterwards.
+
+## Q-134 / DECISION-016 — grant_ids is the contributing chain, in order
 
 Status: **AGREED.** The user chose the ordered chain and framed the choice
 itself: *"these are the things that can be decided on the flow based on the
@@ -558,7 +628,7 @@ fields without a `decision` field because evaluation could not complete:
 ```json
 {
   "version": "1",
-  "error_code": "AUTH_SERVICE_TIMEOUT",
+  "error_code": "AUTHORITY_TIMEOUT",
   "error_message": "We could not check your access.",
   "error_message_reason": "The authorization service did not respond in time."
 }
@@ -588,7 +658,8 @@ code catalogue remain open and must be finalized before publishing the schema.
 
 **Q-064 — answered yes:** this is the minimal evaluation-error shape, with no
 `decision` field because no authorization decision was reached. The example's
-`AUTH_SERVICE_TIMEOUT` spelling remains illustrative, not a finalized code entry.
+spelling is now the published `AUTHORITY_TIMEOUT` — Q-135 closed the catalogue
+question this sentence left open.
 
 ## Q-065 / DECISION-013 — reject mixtures of result variants
 
@@ -604,7 +675,7 @@ Intentionally invalid example under the agreed rule:
   "version": "1",
   "decision": "allow",
   "grant_ids": ["G-17"],
-  "error_code": "AUTH_SERVICE_TIMEOUT"
+  "error_code": "AUTHORITY_TIMEOUT"
 }
 ```
 
