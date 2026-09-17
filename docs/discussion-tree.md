@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-132
+## Current execution tree — through Q-133
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -30,6 +30,9 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── Different complete grants across batch items [Q-130 APPROVED]
 │   ├── No disable or delete beneath a dependent [Q-132 APPROVED]
 │   └── OPEN: move composition, timing/background/collection cases
+├── Endpoint policy and its declared bindings
+│   ├── Policy declares its trusted correlations [Q-133 APPROVED]
+│   └── OPEN: nested input syntax, further trusted fields, proxy attribution
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]
 └── Final scenarios, reconciliation, package and acceptance [OPEN]
@@ -37,7 +40,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 
 Twelve design topics contain remaining choices, plus five contract reviews and
 final acceptance. D02's mechanism is resolved; no new topics offset the twelve
-answers. Q-132 is approved and supersedes B09–B11. Q-131 is not approved. Next discussion: move source/destination grant
+answers. Q-132 is approved and supersedes B09–B11. Q-133 amends CONTRACT-012's field list. Q-131 is not approved. Next discussion: move source/destination grant
 composition, distinct from Q-130's finite-batch case.
 
 <details>

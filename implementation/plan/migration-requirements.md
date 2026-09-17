@@ -11,7 +11,7 @@ migration owes.
 
 ---
 
-## 1 · ~~The gate finds the route's tenant by the placeholder's spelling~~ — built
+## 1 · ~~The gate finds the route's tenant by the placeholder's spelling~~ — built and adopted
 
 **Closed in the lab, open for the contract.** The gate bound the route's tenant
 to the trusted area by reading `PathValue("tenant")`, so a policy whose path said
@@ -48,8 +48,11 @@ refuse any path segment it could not account for, which needs it to guess which
 segments are tenant-shaped — a heuristic that catches `tenant_id` and misses
 `org`. A declaration has nothing to guess: the endpoint already knows.
 
-**What the migration owes.** The published policy format is a handbook chapter,
-so the `trusted` field is **a proposal**, not an adopted contract. Note also what
+**What the migration owes.** The `trusted` field is **adopted** — Q-133 /
+CONTRACT-013 in [endpoint policy format](../../docs/endpoint-policy-format.md),
+which amends CONTRACT-012's field list and supplies the mechanism for the
+binding this chapter already mandated. It was carried here as a proposal until
+that decision; it is no longer one. Note also what
 was given up: the gate previously held *every* route tenant to the trusted one
 unconditionally, by spelling. The declaration is stronger where the spelling
 differed and weaker where it matched, and only the mount rule above closes the
