@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-138
+## Current execution tree — through Q-139
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -37,6 +37,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── Open code catalogue, fixed names [Q-135 APPROVED]
 │   ├── An unusable route does not establish a denial [Q-137 APPROVED]
 │   ├── Response disclosure is the endpoint's duty [Q-138 APPROVED]
+│   ├── Authority loading transport published [Q-139 APPROVED]
 │   └── OPEN: nested input syntax, further trusted fields, proxy attribution
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]

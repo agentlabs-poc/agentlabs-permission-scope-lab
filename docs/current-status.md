@@ -1,4 +1,4 @@
-# Current handbook state — RECON-002, through Q-138
+# Current handbook state — RECON-002, through Q-139
 
 ## Publication checkpoint — RECON-002 and C01-D1/D2
 
@@ -45,7 +45,7 @@ the end of this page. Draft supported behavior first; do not start another
 question sequence merely because a review-area row remains open. Changes remain
 local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 
-## Eighteen decisions recorded since the previous checkpoint
+## Nineteen decisions recorded since the previous checkpoint
 
 | Decision | Current approved rule | Source with rationale and examples |
 |---|---|---|
@@ -60,6 +60,7 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-128 | New checks after any confirmed authority reduction cannot rely on withdrawn stale support. Other complete valid routes may allow; uncertain freshness is not proof of denial. | [Freshness](authority-freshness.md) |
 | Q-129 | The same already-allowed ordinary synchronous application operation may finish within evaluated boundaries after later withdrawal. Q-074 and Q-110 remain; queues, streams, long-running and not-yet-allowed cases are not included. | [Concurrent enforcement](concurrent-enforcement.md) |
 | Q-130 | Different complete valid grant routes may cover different batch items. All items need complete support before effects; no permission/scope fragment mixing or partial successful filtering. | [Bulk enforcement](bulk-enforcement.md) |
+| Q-139 | The authority-loading transport is published: the question names the asking application and the human and nothing else, and the answer echoes the three boundaries and carries every grant with its folded scope, validity and lineage. Consumers reject unsupported versions, unknown fields and redirects, and every failure is an evaluation error. The route is deliberately not adopted — the reference path carries a lab module name. | [Authority loading transport](authority-resolve-transport.md) |
 | Q-138 | What a response body discloses is the endpoint's duty, not the gate's. The gate authorizes a request; it cannot know what a body contains and is not given the job. Disclosure stays mandatory authorization work, assigned where the responsibility split already puts it. | [Endpoint authorization](endpoint-authorization.md) |
 | Q-137 | An unusable route does not establish a denial. A route that could not be read is a route that might have authorized, so an allow another route earns stands, and a denial reached with an unusable route present is reported as a failure to establish. Carries authority-lineage's route-scoped rule across to the consuming side. | [Decision results](decision-results.md) |
 | Q-136 | A filter is a narrowing, not an assertion. A permission the catalog does not supply — retired or never registered — yields an empty answer rather than a refusal, and the two are deliberately indistinguishable. A caller never asks whether a permission exists. | [Permission lifecycle](permission-lifecycle.md) |
@@ -68,7 +69,7 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-133 | The endpoint policy declares its trusted correlations: one `trusted` map from a trusted context field to a declared input. A tenant correlation is required, a path spelling a trusted field's own name must be correlated, and a correlation may name any declared source. Supplies the mechanism for an obligation the chapter already mandated. Adopted with a recorded reservation about where the rule belongs. | [Endpoint policy format](endpoint-policy-format.md) |
 | Q-132 | A grant another grant names as parent can be neither disabled nor deleted. One rule for both operations and every grant, with no trusted-root exception; dismantling is bottom-up. A dependent is a child grant, not an assignment — counting assignments would make every held grant undisablable. Supersedes the disable-propagation cases B09–B11. | [Grant lifecycle](grant-lifecycle.md) |
 
-These are eighteen answered decisions, not eighteen completed chapters or eighteen
+These are nineteen answered decisions, not nineteen completed chapters or nineteen
 of the original eighteen agenda packages. Q-117 is no longer parked. Q-131 has
 not been approved; move source/destination grant composition remains open.
 Q-132 was raised by implementation rather than by the question sequence: the lab

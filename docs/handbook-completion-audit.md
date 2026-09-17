@@ -32,6 +32,11 @@ evidence, not the authority.
 |---|---|---|---|
 | HC-08-04 | OPEN | DONE | [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency. Q-061's no-scope rule and Q-076's audit exclusion are both preserved — the lineage form was considered and not adopted for that reason. |
 
+**HC-07-09 advances but does not close.** [Q-139](authority-resolve-transport.md)
+publishes the versioned request and answer, which is one of its two named
+residues. Batch evidence is the other, and no batch transport has been built or
+demonstrated — Q-130 adds no batch schema by design. The row keeps OPEN.
+
 **HC-08-02 advances but does not close.** [Q-135](decision-results.md) settles the
 code catalogue and its compatibility rule, which was one of three named residues.
 Full value validation and the remaining failure cases stay open and stay parked
@@ -279,7 +284,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-07-06 | DONE | Settle required input presence/source binding and application-owned value validation. | INPUT-002/003 / Q-050-E/F; [endpoint policy](endpoint-policy-format.md). |
 | HC-07-07 | OPEN | Complete remaining structural endpoint-policy validation, nested input syntax, and supported-source decisions. | Q-050 remains open in [endpoint policy](endpoint-policy-format.md); no reopening of agreed fields or validation ownership. |
 | HC-07-08 | OPEN | Complete grant and role wire schemas, including the agreed lifecycle representation. | [Q-107/109](grant-revision-format.md), [Q-118](role-grant-contract.md), and [Q-119](root-grant-format.md) settle core records, validity, direct/role exclusivity and trusted-root parent omission. Q-122 selects computation, not encoding. Remaining: computed source representation, full value/default/timestamp/variant validation and operation contracts. No wildcard/source field approved. |
-| HC-07-09 | OPEN | Complete authorization-request, resolved-request, and resolved-grant transport contracts. | Request/resolved meanings are agreed. [Q-127](delegation-lifecycle.md) excludes proxy-chain transports; [Q-130](bulk-enforcement.md) requires per-item complete routes without a new batch schema. Remaining: full versioned transports and actual lineage/batch evidence, without a Q-061 returned-scope requirement. |
+| HC-07-09 | OPEN | Complete authorization-request, resolved-request, and resolved-grant transport contracts. | Request/resolved meanings are agreed. [Q-127](delegation-lifecycle.md) excludes proxy-chain transports; [Q-130](bulk-enforcement.md) requires per-item complete routes without a new batch schema. Remaining: full versioned transports and actual lineage/batch evidence, without a Q-061 returned-scope requirement. Versioned transport published by [Q-139](authority-resolve-transport.md); batch evidence still absent. |
 | HC-07-10 | OPEN | Specify the handler/embedded-agent integration contract and failures at its boundaries. | Exact integration APIs remain open in [system overview](system-overview.md); no requirement to implement an SDK for handbook completion. |
 
 ### 8. Decision semantics
