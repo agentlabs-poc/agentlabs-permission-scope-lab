@@ -111,6 +111,50 @@ No automatic grant-disable mutation, assignment deletion, new status value,
 rule for activating permission/scope compatibility validation is unchanged;
 retirement does not authorize silently enabling an incompatible configuration.
 
+## Q-136 / PERMISSION-006 — a filter is a narrowing, not an assertion
+
+Status: **AGREED.** The user settled this while reviewing what a retired
+permission does to a running system, and directed that there be no distinction:
+*"I don't need any distinction between retired and no permission. It can just
+deny."*
+
+When authority loading is asked about a permission the catalog does not supply —
+**retired, or never registered** — the answer is an empty set of routes, not a
+refusal. The gate then denies, as it does for any empty answer.
+
+A caller never asks *"does this permission exist"*. It asks what a human holds,
+restricted to these permissions, and narrowing a set by something absent yields
+an empty set. Treating the narrowing as a claim to be validated is a category
+error, and it had a cost: a refusal before any grant was examined, surfacing to
+the person as *"we could not check your access"* — an untrue statement, produced
+by a deliberate administrative act.
+
+Retired and never-registered are deliberately indistinguishable. Both deny, both
+fail closed, and that is what both states mean.
+
+### What this does not change
+
+Q-125 still governs the records: retirement rewrites no grant and deletes no
+assignment. This is about the *question*, not the stored authority.
+
+Nor does it weaken enforcement. A retired permission cannot authorize anything —
+a grant selecting one no longer validates, so the route carrying it stops. That
+is a separate mechanism from the filter, and it is what actually withdraws
+access.
+
+### Rationale / conscious tradeoff
+
+The argument for keeping the refusal was a mistyped permission: a silent denial
+hides a misconfigured endpoint. It does not survive the principle — the caller
+did not ask, so the answer cannot carry it. The endpoint owns its policy, is
+written beside the handler it guards and is tested there, and an endpoint that
+denies every request is not subtle in practice.
+
+Carrying a *reason* to the operator was considered and dropped. Auth knows why
+the set is empty, the gate composes the message, and the only bridge is a new
+field on a wire whose consumer rejects unknown fields — a version bump for a
+diagnostic.
+
 ## Remaining contract boundaries
 
 The retirement request/evidence format, effective visibility and concurrency,

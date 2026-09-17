@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-135
+## Current execution tree — through Q-138
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -29,11 +29,14 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── Prior bounded synchronous allow may finish [Q-129 APPROVED]
 │   ├── Different complete grants across batch items [Q-130 APPROVED]
 │   ├── No disable or delete beneath a dependent [Q-132 APPROVED]
+│   ├── A filter is a narrowing, not an assertion [Q-136 APPROVED]
 │   └── OPEN: move composition, timing/background/collection cases
 ├── Endpoint policy and its declared bindings
 │   ├── Policy declares its trusted correlations [Q-133 APPROVED]
 │   ├── Allow evidence is the ordered contributing chain [Q-134 APPROVED]
 │   ├── Open code catalogue, fixed names [Q-135 APPROVED]
+│   ├── An unusable route does not establish a denial [Q-137 APPROVED]
+│   ├── Response disclosure is the endpoint's duty [Q-138 APPROVED]
 │   └── OPEN: nested input syntax, further trusted fields, proxy attribution
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]

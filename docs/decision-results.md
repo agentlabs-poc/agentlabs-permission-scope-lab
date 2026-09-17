@@ -354,6 +354,57 @@ Returning a grant identifier is not a substitute for enforcing all restrictions.
 **Q-060 — answered yes:** Should the allow result return its supporting-grant references to the
 endpoint for traceability?
 
+## Q-137 / DECISION-018 — an unusable route does not establish a denial
+
+Status: **AGREED.** This makes explicit a line already in Q-051's table, after
+the reference implementation violated it in the opposite direction and had to be
+corrected.
+
+Q-051 admits a completed denial when *"sufficient evidence conclusively
+establishes that no complete applicable route authorizes the operation"*, and
+qualifies it in the same row: *"one failed grant alone does not establish this if
+another route could authorize it."*
+
+A route the consumer **cannot read** — malformed, internally inconsistent,
+carrying identifiers it cannot parse — is exactly a route that might have
+authorized. So:
+
+| Situation | Result |
+|---|---|
+| A route is unusable, and another complete route authorizes | **Allow.** The unusable route says nothing about the one that did. |
+| A route is unusable, and no other route authorizes | **Evaluation error.** The denial is not established. |
+| Every route is readable, and none authorizes | **Completed denial**, as Q-051 already provides. |
+
+An unusable route therefore costs that route, and costs the *certainty* of a
+denial — not the whole answer.
+
+### Why this needs saying
+
+The unfiltered authority answer of an authority-loading contract describes
+everything a human holds in an area, so a single unreadable grant is no longer
+plausibly about the request being decided. A consumer that failed the whole
+evaluation on any bad route took away every other grant that human held, which
+is what [authority lineage](authority-lineage.md) forbids — *"missing support
+stops the affected authority route, not necessarily all authority of that user or
+group"* — and what [freshness](authority-freshness.md) repeats: *"the rule
+removes the withdrawn support, not every other grant the human holds."*
+
+Those two lines govern the *loading* side. This one carries the same rule across
+to the *consuming* side, which had no statement of it.
+
+### Rationale / conscious tradeoff
+
+Skipping an unusable route can only remove authority, never add it, so the
+direction is safe. The cost is on the other side: reporting an evaluation error
+rather than a denial tells a person "we could not check" when the honest answer
+might have been "you have no access". That is the correct trade — a denial
+asserts something about their authority, and asserting it from evidence that was
+never read is the error this prevents.
+
+An answer describing another tenant, application or human is not covered here.
+That is not one unusable route; it means the answer is about somebody else, and
+nothing in it may be used.
+
 ## Q-135 / DECISION-017 — the code catalogue is open, its names are fixed
 
 Status: **AGREED.** Q-055 added `error_code` and left open what the list of codes

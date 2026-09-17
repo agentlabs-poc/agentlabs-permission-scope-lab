@@ -332,6 +332,43 @@ An endpoint may enforce authorized reach through a constrained data operation
 where supported. The exact collection, query, aggregate, create, move, and bulk
 contracts remain open and do not revive the two-location decision model.
 
+## Q-138 / ENFORCEMENT-010 — what a response discloses is the endpoint's duty
+
+Status: **AGREED.** The user declined to place this on the authorization layer:
+*"this question does not belong to this domain at all… we cannot claim to solve
+the problems of all the layers and the security of the entire system in this one
+layer. This is just a gate."*
+
+The gate authorizes **a request**. What the response body then discloses is not
+its question and it is not the authorization model's.
+
+The case that raised it is concrete. A caller holding a write permission and not
+the matching read issues an update. The write is authorized and succeeds, and the
+response carries the whole record — fields the caller never supplied and now
+learns by writing. No rule in this handbook was violated, and the gate could not
+have prevented it: it cannot know what a body contains, and should not be given
+the job of finding out.
+
+**This does not make it nobody's duty.** Disclosure is authorization work, and it
+is assigned where the existing split already puts it — the endpoint keeps
+execution, and its output, inside the authorized boundary. The same sentence that
+places the relationship duty there covers this: *"endpoint enforcement is
+mandatory authorization work, not optional business validation."*
+
+### Rationale / conscious tradeoff
+
+A gate that grew a disclosure check would be performing a check it cannot
+actually perform, on data it does not model, for every endpoint it guards. One
+layer cannot be made answerable for the correctness of every layer above it, and
+attempting it is how a gate accretes obligations that look like safety and are
+not.
+
+The tradeoff is real and worth naming: an endpoint author who reads only the
+policy contract may never think about the response at all. That is why this is
+stated as a rule here rather than left implied by the responsibility split — so
+the obligation has a name to point at during endpoint review under
+ENFORCEMENT-003.
+
 ## Deprecation map
 
 | Earlier material, preserved | Current interpretation |
