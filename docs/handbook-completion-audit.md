@@ -3,7 +3,8 @@
 ## Current evidence reconciliation — RECON-002, through Q-130
 
 [Eleven recent decisions](current-status.md) are mapped into current evidence.
-All 69 criterion texts/statuses remain unchanged: **38 DONE / 30 OPEN / one
+All 69 criterion texts remain unchanged; statuses move only by a recorded
+closure. Current: **39 DONE / 29 OPEN / one
 EXCLUDED**, 68 in scope. Each open row still has an incomplete full deliverable.
 These are not all user-blocking questions: drafting and verification can proceed
 from approval; ask only for materially different behavior or new contract choices.
@@ -21,8 +22,19 @@ are now satisfied, with no change to the measurement denominator:
 | HC-03-04 | OPEN | DONE | [Identity/authority glossary](identity-glossary.md): actor/principal wording/subject/human/membership distinctions and a relationship example; full trust mapping stays open separately. |
 | HC-11-04 | OPEN | DONE | [Separate implementation roadmap](implementation-roadmap.md): dependency phases, approved/open inputs, verified/unverified evidence, and exit checks. No runtime implementation required or claimed. |
 
-**Current: 38 DONE / 30 OPEN / 1 EXCLUDED; 68 in scope; 55.9% closed, 44.1%
-remaining.** [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
+## Closure update — CLOSURE-002, decisions from the lab
+
+Criteria whose remaining residue is settled by a decision the lab supplied
+evidence for. Each names the decision, not the implementation: the lab is the
+evidence, not the authority.
+
+| Checkpoint | Earlier status | Current status | Completion evidence |
+|---|---|---|---|
+| HC-08-04 | OPEN | DONE | [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency. Q-061's no-scope rule and Q-076's audit exclusion are both preserved — the lineage form was considered and not adopted for that reason. |
+
+**Current after CLOSURE-002: 39 DONE / 29 OPEN / 1 EXCLUDED; 68 in scope;
+57.4% closed, 42.6% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
+OPEN, 55.9% closed. [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
 The detailed register below incorporates these three updates; older numerical
 summaries retain their historical values. No other row is newly closed or
 excluded, and this is not a full re-audit of previously DONE model semantics.
@@ -271,7 +283,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-08-01 | DONE | Settle alternative complete positive grants, no cross-grant field mixing, and no explicit deny grants in v1. | DECISION-001/002 / GRANT-001; [grant model](grant-model.md). |
 | HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-067 settle core meanings, minimal shapes, mixed/unknown-field rejection, and grant-ID cardinality in [decision results](decision-results.md). Full value validation, code catalogue/compatibility, and remaining failure cases are unfinished. Further details are parked under PROCESS-007, not excluded. No fractional credit. |
 | HC-08-03 | OPEN | Specify conditions and their evaluation when evidence is missing, invalid, or unsupported. | [Q-084 is DISAPPROVED](grant-conditions.md) to prevent business-logic scope creep; its revised question is withdrawn, not pending. Authorization-only model gaps and existing conceptual restrictions remain; neither a condition engine nor removal of restrictions is approved. No closure credit is claimed. |
-| HC-08-04 | OPEN | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Contributing IDs remain approved; [Q-130](bulk-enforcement.md) preserves complete route support across batch items. Remaining: actual dependency/provenance representation, without reintroducing Q-061 returned scope or Q-076 external audit design. |
+| HC-08-04 | DONE | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Contributing IDs remain approved; [Q-130](bulk-enforcement.md) preserves complete route support across batch items. The residue — actual dependency/provenance representation without reintroducing Q-061 returned scope or Q-076 external audit design — is settled by CLOSURE-002 / [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency and no audit-shaped field is added. |
 
 ### 9. Enforcement and time
 
@@ -365,7 +377,12 @@ frozen at the initial audit snapshot; the user subsequently reopened it.
 
 **HC-07-09 — previous evidence:** Meaning is agreed; concrete contracts remain open in [endpoint authorization](endpoint-authorization.md) and [grant model](grant-model.md).
 
-**HC-08-04 — previous evidence:** Authorization-result evidence remains in scope in [tree](discussion-tree.md); supporting grant IDs are agreed, full dependency/provenance contracts remain open. External audit event storage is excluded by Q-076, not counted under this row.
+**HC-08-04 — previous evidence, retained as history:** ~~Authorization-result
+evidence remains in scope in [tree](discussion-tree.md); supporting grant IDs are
+agreed, full dependency/provenance contracts remain open.~~ Closed by
+[Q-134](decision-results.md). External audit event storage is excluded by Q-076
+and was never counted under this row — which is part of why the ordered chain was
+adopted over a lineage form.
 
 **HC-09-05 — previous evidence:** Q-073 agrees complete-batch authorization and boundary checks before effects in [bulk enforcement](bulk-enforcement.md). Transaction, concurrency, retry, and representation contracts remain open.
 

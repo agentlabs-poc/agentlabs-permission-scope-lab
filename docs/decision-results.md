@@ -352,6 +352,69 @@ Returning a grant identifier is not a substitute for enforcing all restrictions.
 **Q-060 — answered yes:** Should the allow result return its supporting-grant references to the
 endpoint for traceability?
 
+## Q-134 / DECISION-011 — grant_ids is the contributing chain, in order
+
+Status: **AGREED.** The user chose the ordered chain and framed the choice
+itself: *"these are the things that can be decided on the flow based on the
+requirement, and can always change… this anyway is a very shallow requirement,
+not deep into the engine."* Recorded as a representation decision at the edge of
+the contract, revisable without disturbing the model beneath it.
+
+Q-060 settled that an allow carries references to the routes that justified it,
+and Q-061 settled the field name and refused a scope echo. Neither said what the
+array contains. This does.
+
+`grant_ids` is the **contributing chain of the route that authorized the
+request, ordered root first**:
+
+```json
+{
+  "version": "1",
+  "decision": "allow",
+  "grant_ids": ["fk3x9r2m0dq3", "fk3x9r2m5iv8", "fk3x9r2man0d"]
+}
+```
+
+Read left to right, that is the trusted root, the group grant narrowing it to
+one department, and the grant narrowing that to one certificate. **The order is
+the dependency**: each entry is bounded by the one before it, which is what
+DECISION-001 preserves during evaluation and what this returns.
+
+It remains what Q-061 said it is — the grants supporting *this* evaluation, not
+every grant the human holds, and not a reusable authorization for another
+request.
+
+### What was considered and not adopted
+
+The alternative was carrying, for each step, the assignment and team that held
+it and the revision in force:
+
+```json
+{ "grant_id": "fk3x9r2m0dq3", "revision": 1,
+  "assignment_id": "fm5b7t4p0dq3", "team_id": "fibggi2jur5s", "root": true }
+```
+
+Authority loading already answers in that shape, so a caller who needs it can
+ask the service that owns those records. Placing it in the decision result would
+put reconstruct-this-later fields into a contract the handbook deliberately
+narrowed: audit design is HC-09-08, excluded from this handbook because Q-076
+placed it in another layer.
+
+### Rationale / conscious tradeoff
+
+The order carries the structure, so a parent field would restate it. Everything
+the richer form adds is history rather than structure.
+
+The cost is stated rather than hidden. An endpoint holding only grant ids cannot
+later say **which assignment** carried the authority, if that assignment has
+since been deleted. That is acceptable while the evidence exists to let an
+endpoint account for its own effect, and it would not be acceptable if the same
+array were ever made the record of last resort — which is the audit layer's
+question, not this one.
+
+Because this is a representation at the edge, changing it later costs a contract
+version and no model change.
+
 ## Q-061 / DECISION-009 — evaluated boundary information with allow
 
 ### Current conclusion — not required

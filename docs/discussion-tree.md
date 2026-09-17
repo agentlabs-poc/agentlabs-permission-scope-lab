@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-133
+## Current execution tree — through Q-134
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -32,6 +32,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   └── OPEN: move composition, timing/background/collection cases
 ├── Endpoint policy and its declared bindings
 │   ├── Policy declares its trusted correlations [Q-133 APPROVED]
+│   ├── Allow evidence is the ordered contributing chain [Q-134 APPROVED]
 │   └── OPEN: nested input syntax, further trusted fields, proxy attribution
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]
