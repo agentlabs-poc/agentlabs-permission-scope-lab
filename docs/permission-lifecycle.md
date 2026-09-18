@@ -111,6 +111,74 @@ No automatic grant-disable mutation, assignment deletion, new status value,
 rule for activating permission/scope compatibility validation is unchanged;
 retirement does not authorize silently enabling an incompatible configuration.
 
+## Q-143 / PERMISSION-007 — retirement withdraws the permission, not the route
+
+Status: **AGREED.** The user chose narrowing over closure and gave the reason:
+*"as far as the user is concerned, we cannot silently stop his access."*
+
+Q-125 retires a permission without rewriting the grants that reference it. This
+settles what that leaves behind — the case Q-125's own remaining boundaries
+parked, *"every consequence for other still-supported permissions in a mixed
+grant"*.
+
+**A grant supplies what it selects and the catalog still supplies.** It stops only
+when nothing it selects survives.
+
+A grant selecting `payslip::read` and `payslip::write`, whose `write` is retired,
+still supplies `read`. Its route narrows rather than closing, and a route hanging
+beneath it that never selected `write` is untouched.
+
+| | Before this decision | Under this decision |
+|---|---|---|
+| The grant that selects the retired permission | Route closes | Narrows to what survives |
+| A route beneath it, selecting only survivors | Closes too | Untouched |
+| A grant selecting *only* the retired permission | Route closes | Route closes |
+
+### Why not closure
+
+Closure was the behaviour and it needed no new rule: invalid content, and
+[Q-140](authority-lineage.md) closes a route whose supporting authority is not
+valid. It was rejected because retirement is a deliberate act on **one
+permission**, and closure withdrew others that were never retired, plus
+descendant routes that never referenced it. A person loses access nobody decided
+to take away, and loses it silently.
+
+### The write path is unchanged
+
+A grant may not be **authored, revised or assigned** while it selects a permission
+the catalog does not supply. That refusal stays. The narrowing is a property of
+resolution, not of authoring: nothing new may reference a retired permission, and
+what already references one keeps working for the rest.
+
+### Rationale / conscious tradeoff
+
+The cost is that a grant's effect no longer matches its record. The stored content
+reads `["read", "write"]` while the grant supplies only `read`, so *"what does this
+grant give"* cannot be answered from the record alone — it needs the record and the
+catalog together.
+
+That cost is accepted, and it is also the reason for the requirement below.
+
+## Grant health — a stated requirement, not a decision
+
+A grant that still references a retired permission is **unhealthy**. It keeps
+working, which is the point of Q-143, and it is also no longer what its author
+wrote. The user named the obligation that follows:
+
+> *"There should be a way to detect that it is unhealthy and [surface it] to the
+> user so that it is corrected… where we have a catalog of grants, and we show
+> which one is healthy and which one is not. And it is always the administrator
+> who has to do that."*
+
+**What is required, and is not specified here:** a way to evaluate a grant's
+health, a way for an administrator to see which grants in their area are
+unhealthy, and correction as an administrative act. Auth does not repair them —
+Q-125 already forbids silently rewriting stored grants.
+
+This is recorded as a requirement rather than drafted as a contract, because it is
+an administrative surface and no administrative surface is settled yet. It belongs
+with HC-05-08 and the collection contracts, not here.
+
 ## Q-136 / PERMISSION-006 — a filter is a narrowing, not an assertion
 
 Status: **AGREED.** The user settled this while reviewing what a retired

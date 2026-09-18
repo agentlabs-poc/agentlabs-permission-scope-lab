@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-142
+## Current execution tree — through Q-143
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -30,6 +30,8 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── Different complete grants across batch items [Q-130 APPROVED]
 │   ├── No disable or delete beneath a dependent [Q-132 APPROVED]
 │   ├── A filter is a narrowing, not an assertion [Q-136 APPROVED]
+│   ├── Retirement withdraws the permission, not the route [Q-143 APPROVED]
+│   ├── OPEN: grant health — detection and administrative correction
 │   └── OPEN: move composition, timing/background/collection cases
 ├── Endpoint policy and its declared bindings
 │   ├── Policy declares its trusted correlations [Q-133 APPROVED]

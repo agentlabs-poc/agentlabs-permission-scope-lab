@@ -4,7 +4,7 @@ Captured from a real run of `verify-resolve.sh`, then rendered into this file **
 that capture**. The SVG beside it is generated from the same capture, so the
 image and this file cannot drift.
 
-`317` lines captured, 13 commands. Reproduce with:
+`343` lines captured, 13 commands. Reproduce with:
 
 ```sh
 $(sess path)/verify-resolve.sh
@@ -319,11 +319,11 @@ rc=0
 
 ## WHAT RETIREMENT ACTUALLY DID
 
-> (the stored grant is untouched — Q-125 rewrites nothing — but the route
-> through it no longer holds, because it selects a permission the catalog
-> no longer supplies. The deeper grant selects only ::read, and it goes
-> too: its chain runs through the grant that selects ::write, so retiring
-> one permission on a parent stops every route beneath it.)
+> (Q-143: the retirement withdraws the retired permission and nothing
+> else. The stored grant is untouched — Q-125 rewrites nothing — and it
+> still supplies ::read, so her route narrows rather than closing. The
+> deeper grant never selected ::write and is untouched. A route closes
+> only when nothing it selects survives.)
 
 ```console
 abv resolve --human fi7io4lvjqio --no-source
@@ -332,7 +332,33 @@ abv resolve --human fi7io4lvjqio --no-source
   "tenant_id": "acme",
   "application_id": "hrms",
   "human_id": "fi7io4lvjqio",
-  "resolved_grants": []
+  "resolved_grants": [
+    {
+      "version": "1",
+      "grant_id": "fk3x9r2m5iv8",
+      "revision": 1,
+      "parent_grant_id": "fk3x9r2m0dq3",
+      "permissions": [
+        "hrms:payroll:payslip::read"
+      ],
+      "scope": {
+        "dept": "FIN"
+      }
+    },
+    {
+      "version": "1",
+      "grant_id": "fk3x9r2man0d",
+      "revision": 1,
+      "parent_grant_id": "fk3x9r2m5iv8",
+      "permissions": [
+        "hrms:payroll:payslip::read"
+      ],
+      "scope": {
+        "cert": "C17",
+        "dept": "FIN"
+      }
+    }
+  ]
 }
 rc=0
 ```

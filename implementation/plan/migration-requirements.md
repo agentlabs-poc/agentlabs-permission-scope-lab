@@ -156,23 +156,25 @@ unbuilt, and it is the consumer this evidence exists for.
 
 ---
 
-## 6 · What a retirement does to a mixed grant
+## 6 · ~~What a retirement does to a mixed grant~~ — answered by Q-143
 
-**What the lab does.** Retiring one permission withdraws every route through a
-grant that selects it — including routes *beneath* that grant which select only
-permissions still supplied. Demonstration 18 captures it: maya holds a grant for
-`::read` and `::write` at `dept=FIN`, and a deeper one for `::read` alone at
-`cert=C17`; retiring `::write` leaves her holding nothing at all, because the
-deeper route's chain runs through the mixed grant.
+**What the lab used to do.** Retiring one permission withdrew every route through
+a grant that selected it — including routes *beneath* that grant which selected
+only permissions still supplied. Retiring `::write` left maya holding nothing,
+because the deeper `cert=C17` route's chain ran through the mixed grant.
 
-**Why it is not a defect.** [Permission lifecycle](../../docs/permission-lifecycle.md)
-says so in terms under Q-125's remaining contract boundaries: *"This decision
-specifies loss of the retired permission; it does not settle every consequence
-for other still-supported permissions in a mixed grant."* The route-wise outcome
-is defensible under `authority-lineage.md:169`, and it is fail-closed.
+That was never chosen; it was what the chain walk already did, and Q-125's
+remaining boundaries had parked the question: *"it does not settle every
+consequence for other still-supported permissions in a mixed grant."*
 
-**What the migration owes.** The settlement. The available answers are that a
-mixed grant loses only the retired permission and keeps narrowing beneath it,
-or that it is withdrawn whole as it is here. Either is defensible; the lab
-implements the second because it is what the chain walk already did, not because
-it was chosen.
+**Settled by [Q-143](../../docs/permission-lifecycle.md), and the lab now
+implements it.** A grant supplies what it selects and the catalog still supplies;
+it stops only when nothing survives. So maya keeps `::read` at `dept=FIN` and
+keeps the deeper `cert=C17` route, which never selected the retired permission.
+The write path is unchanged — nothing new may reference a retired permission.
+
+**What the migration owes instead:** grant health. A grant still referencing a
+retired permission keeps working and is no longer what its author wrote. An
+administrator needs to see which grants in their area are unhealthy and correct
+them; Auth must not repair them silently, which Q-125 already forbids. That is an
+administrative surface, so it waits on the same work as HC-05-08.
