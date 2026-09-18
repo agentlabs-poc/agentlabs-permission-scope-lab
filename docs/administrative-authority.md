@@ -204,6 +204,23 @@ values validated as Auth team ids. `CheckScopeRegistration` already refuses a ne
 colliding registration, so the reachable case is a key an application registered
 before Auth owned it — a migration to notice loudly rather than guess at.
 
+**A corrupt record answers "could not check", and already did.** The review asked
+whether `Authorize` should mirror the client's `validateRoute` — which turns an
+unreadable route into an evaluation error under [Q-051](decision-results.md) rather
+than a mismatch. It should, and it does: content validation refuses those shapes
+before a route is built, and the refusal propagates as `ErrMalformed`. Adding the
+client's check to `Authorize` was tried and was dead code — three mutation checks
+against it all survived — so what landed is a test pinning the property instead of a
+second implementation of it. The client validates because its answer arrives over
+the wire from a source it does not trust; Auth reads its own store.
+
+One asymmetry stays, and is not this decision's to settle: a scope value that is a
+reserved token other than `$self` is refused *route-scoped*, so the route is dropped
+the way one with missing support is dropped and the answer is a denial. Whether a
+route-scoped skip should itself be an evaluation error is a question about every
+route rather than about administrative ones, and the business path answers it the
+same way today.
+
 **What survived the attack.** The mirroring of `authmiddleware`'s `routeMatches`;
 the same-transaction claim; that no other write path authors a grant's scope; and
 sideways escalation, attacked through re-parenting, a revision dropping the
