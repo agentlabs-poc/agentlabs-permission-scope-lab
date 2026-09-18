@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-154
+## Current execution tree — through Q-157
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -57,6 +57,11 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── A tenant operates in two namespaces [Q-153 APPROVED]
 │   ├── Establishment is the platform-namespace authority's closing step [Q-153]
 │   └── OPEN: administrative API contracts for establishment
+├── Administrative authority
+│   ├── Administration is an ordinary grant [Q-155 APPROVED, closes HC-05-08]
+│   ├── A platform `team` scope key; Auth-record values validated [Q-156 APPROVED]
+│   ├── Creating a team confers its ownership; no ownerless team [Q-157 APPROVED]
+│   └── OPEN: administrative wire contract, and the operation→permission table
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]
 └── Final scenarios, reconciliation, package and acceptance [OPEN]

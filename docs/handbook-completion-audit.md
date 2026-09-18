@@ -4,7 +4,7 @@
 
 [Eleven recent decisions](current-status.md) are mapped into current evidence.
 All 69 criterion texts remain unchanged; statuses move only by a recorded
-closure. Current: **47 DONE / 21 OPEN / one
+closure. Current: **48 DONE / 20 OPEN / one
 EXCLUDED**, 68 in scope. Each open row still has an incomplete full deliverable.
 These are not all user-blocking questions: drafting and verification can proceed
 from approval; ask only for materially different behavior or new contract choices.
@@ -30,6 +30,7 @@ evidence, not the authority.
 
 | Checkpoint | Earlier status | Current status | Completion evidence |
 |---|---|---|---|
+| HC-05-08 | OPEN | DONE | [Q-155](administrative-authority.md) encodes administrative bounds as grant scope and answers containment by reusing the authority validator rather than building a second one; [Q-156](scope-model.md) supplies the platform `team` key and validates values naming Auth records; [Q-157](ownership-lineage.md) makes ownership a grant and forbids an ownerless team. Tenant administration is team-bounded, platform administration area-bounded. |
 | HC-05-10 | OPEN | DONE | [Q-154](delegation-lifecycle.md): a delegation is permission for an actor to ask about a human, not a holding of authority — so it needs no lineage representation. It carries its own validity window and the effective lifetime is the narrower of the two; it tracks the human's authority at request time rather than copying it; the human administers it. Records name human, proxy and window. Whether a delegation may carry scope is left open deliberately, with the reason. |
 | HC-04-03 | OPEN | DONE | [Q-151](permission-lifecycle.md): an application registers only in its own namespace — the first noun segment is the application — and the platform namespace needs platform authority at a separate boundary. An identifier is never renamed; labels may be corrected. Grammar, wildcards and aliases were already settled by Q-056–Q-059, publication authority by Q-121, retirement and stable meaning by Q-125/126. |
 | HC-09-04 | OPEN | DONE | [Q-150](operation-enforcement.md): composition is not a grant question — the resolved authority must cover the boundary being evaluated, and a move is one endpoint evaluating once per boundary with every evaluation required to allow. Create evaluates the proposed boundary, an update that changes the boundary is a move. Answers Q-131 by withdrawing it. |
@@ -83,8 +84,8 @@ Full value validation and the remaining failure cases stay open and stay parked
 under PROCESS-007, so the row keeps its OPEN status rather than taking partial
 credit — this register does not award fractional closure.
 
-**Current after CLOSURE-002: 47 DONE / 21 OPEN / 1 EXCLUDED; 68 in scope;
-69.1% closed, 30.9% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
+**Current after CLOSURE-002: 48 DONE / 20 OPEN / 1 EXCLUDED; 68 in scope;
+70.6% closed, 29.4% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
 OPEN, 55.9% closed. [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
 The detailed register below incorporates these three updates; older numerical
 summaries retain their historical values. No other row is newly closed or
@@ -293,7 +294,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-05-05 | DONE | Settle the five ordinary-model administrative authorization rules. | ADMIN-004/005 / Q-044; [grant model](grant-model.md). |
 | HC-05-06 | DONE | Settle ordinary grant survival after the issuer loses issuance authority. | ADMIN-006 / Q-046; [grant model](grant-model.md). |
 | HC-05-07 | DONE | Require all service/agent access to depend on a human and stay within that human's authority. | AUTHORITY-002 / DELEGATION-002; [grant model](grant-model.md). |
-| HC-05-08 | OPEN | Encode administrative recipient/permission/scope bounds and define containment validation. | [Q-093](assignment-authority.md), [Q-100](auth-service-authority-gate.md), and [Q-101](parent-grant-bindings.md) clarify separate admin/source checks and parent-dependent narrowing. [Q-103](grant-revisions.md) selects actual adopted support; [Q-112A](direct-human-parent-context.md) reaffirms lineage-supported latest, not an independent parent selector. Complete administrative/boundary-validator contracts and eligible-support discovery/evidence remain open; Q-044's old encoding gap is narrowed, not closed. |
+| HC-05-08 | DONE | Encode administrative recipient/permission/scope bounds and define containment validation. | [Q-093](assignment-authority.md), [Q-100](auth-service-authority-gate.md), and [Q-101](parent-grant-bindings.md) clarify separate admin/source checks and parent-dependent narrowing. [Q-103](grant-revisions.md) selects actual adopted support; [Q-112A](direct-human-parent-context.md) reaffirms lineage-supported latest, not an independent parent selector. Complete administrative/boundary-validator contracts and eligible-support discovery/evidence remain open; Q-044's old encoding gap is narrowed, not closed. Closed by CLOSURE-002 / [Q-155](administrative-authority.md), [Q-156](scope-model.md), [Q-157](ownership-lineage.md). |
 | HC-05-09 | OPEN | Define bootstrap/seed authority and its governed creation procedure. | [Q-113–Q-116](bootstrap-authority.md) establish initial authority and completed replay; [Q-117/124](bootstrap-initial-assignment.md) approve coherent visibility and same-intent continuation. [Q-119/121–123](root-permission-evolution.md) settle parent omission, publication responsibility, computation and shared catalog. Remaining: complete computed-root encoding, trusted setup evidence, deliberate recovery and exact concurrency/API contracts. Setup evidence, recovery and establishment authority settled by [Q-153](bootstrap-authority.md); administrative API contracts still open. |
 | HC-05-10 | DONE | Specify delegation ceilings, chains, expiry, growth, and reactivation semantics. | [Q-070/127](delegation-lifecycle.md) settle bounded human-dependent authority, restoration, and no proxy chains in v1. Chains are not a pending v1 implementation requirement. Remaining: direct-delegation lifetime/growth/administration and full records/evidence; the criterion remains in scope. Closed by CLOSURE-002 / [Q-154](delegation-lifecycle.md). |
 | HC-05-11 | OPEN | Complete ordinary grant status/validity and create/change/revoke lifecycle rules. | Q-082 consolidates permanent withdrawal into delete; the original revoke wording does not require a second operation. [Q-101](parent-grant-bindings.md) distinguishes global grant controls, route controls, ineffective descendants, and guarded structural changes. [Q-108](assignment-validity.md) defers assignment-specific validity in v1; [Q-109](grant-validity.md) places grant validity in immutable revisions. Initial defaults, timestamp validation, full transitions, and operation contracts remain open. |

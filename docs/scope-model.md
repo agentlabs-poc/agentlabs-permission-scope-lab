@@ -560,3 +560,65 @@ can establish this; a separate compatibility registry has not been adopted.
 
 Return to ADMIN-004/005 after these scope questions are settled. The withdrawn
 grant_selector, permissions_subset_of, and scope_within fields remain withdrawn.
+
+## Q-156 / SCOPE-010 — a platform scope key, and values that name Auth's own records
+
+Status: **AGREED.** [Q-155](administrative-authority.md) makes administrative
+authority an ordinary grant scoped to the team it administers. That needs a scope
+key the platform owns, and it needs one thing Q-148 did not allow.
+
+### The key
+
+`team` is registered at the **platform boundary**, and its value is a team
+identifier:
+
+```json
+{ "permissions": ["auth:group::write"], "scope": { "team": "fibggi2juubk" } }
+```
+
+Until now every scope key was application-registered — `RegisterScope` takes an
+application, and the catalog reader loads only application-boundary scopes. A
+platform key is new machinery, and it is the only new machinery
+[Q-155](administrative-authority.md) requires.
+
+There is no per-team registration. The **key** is registered once; the **value** is
+the team's id, like any other scope value.
+
+### A value naming an Auth record is validated, not opaque
+
+[Q-148](application-registration.md) settled that scope values are opaque to
+authorization: nothing resolves one to a record, because resolving would require
+application facts this model does not hold.
+
+**A team is not an application fact.** It is Auth's own record, in Auth's own
+store. So for a platform scope key whose value names an Auth record, the value
+**is** validated — a grant scoped to a team that does not exist is refused.
+
+This refines Q-148 rather than contradicting it. Q-148's reason was that Auth
+cannot know whether a department exists; it can always know whether a team does.
+The rule stated exactly:
+
+- **Application-boundary keys** — values stay opaque. `dept=FIN` is not resolved.
+- **Platform-boundary keys naming an Auth record** — values are validated to exist.
+
+### What does not change
+
+Matching is still **exact**, and subtree scope is still excluded. Administering a
+hierarchy is not expressed by a pattern: `{team: X}` administers X. Reaching more
+teams means holding more grants, or holding one with `{}` from the Auth root.
+
+That is not a limitation worked around — it is what makes sideways escalation
+unsatisfiable under [Q-155](administrative-authority.md), because two values of one
+key can never both be satisfied.
+
+### Rationale / conscious tradeoff
+
+Validating the value costs a lookup on a write path that already reads the
+snapshot, so the cost is close to nothing and it buys the invariant that an
+administrative grant always names a real team.
+
+The conscious cost is the asymmetry: two scope keys now behave differently, and a
+reader has to know which boundary a key belongs to before knowing whether its value
+means anything. That is accepted because the alternative — validating application
+values — is the resolver interface this handbook has declined three times.
+
