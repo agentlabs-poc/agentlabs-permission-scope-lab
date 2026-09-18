@@ -396,6 +396,19 @@ func resolvesUnder(snapshot storage.Snapshot, bindings *lineage.Bindings, depend
 	if err != nil {
 		return false
 	}
-	_, err = validation.Narrow(snapshot.Area, parent, content, snapshot.Roles)
+	// The read rule, because this predicate answers a read question: does this
+	// dependent resolve? Resolution narrows a grant to what the catalog still
+	// supplies (Q-143), so testing it with the strict rule made the guard and
+	// the evaluator disagree about exactly the grants Q-143 keeps alive — one
+	// referencing a retired permission looked dead here and resolved there.
+	//
+	// The consequence was the harm Q-143 was raised to prevent. Because such a
+	// dependent read as broken *before* the adoption as well as after, the
+	// differential escape below waved the adoption through, and a person lost
+	// access with nothing refusing the write.
+	//
+	// This was mislabelled as a write-path caller when the rules were split. It
+	// is not: nothing here proposes a change.
+	_, err = validation.NarrowSupplied(snapshot.Area, snapshot.Catalog, parent, content, snapshot.Roles)
 	return err == nil
 }

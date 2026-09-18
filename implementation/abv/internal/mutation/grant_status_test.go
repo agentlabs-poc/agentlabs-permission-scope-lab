@@ -540,3 +540,69 @@ func TestATrustedRootsHolderIsHeldByTheOrdinaryDependencyRules(t *testing.T) {
 		t.Fatal("disabling the root's holder succeeded")
 	}
 }
+
+// An adoption may not silently take away access a retired permission left intact.
+//
+// resolvesUnder answers a read question — does this dependent resolve? — so it
+// must use the read rule. It was left on the strict one when Q-143 split them,
+// because it sat among the Narrow call sites and was miscounted as a write path.
+// The guard then disagreed with the evaluator about exactly the grants Q-143 keeps
+// alive: a grandchild referencing a retired permission read as dead here and
+// resolved there, so the differential escape waved the adoption through and a
+// person lost access with nothing refusing the write.
+func TestAnAdoptionCannotSilentlyRemoveNarrowedAccess(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	fixture := lab.TeamFINC17(area)
+	fixture.Snapshot.Assignments["fm5b7t4pan0d"] = fixture.Proposed
+
+	// A grandchild beneath Team2, selecting one permission that will be retired
+	// and one that will not, held by somebody other than the administrator.
+	fixture.Snapshot.Catalog.Permissions[lab.PayslipDelete] = domain.PermissionDefinition{
+		ID: lab.PayslipDelete, Active: false, Boundary: domain.ApplicationBoundary, Namespace: "hrms",
+	}
+	fixture.Snapshot.Teams["fibggi2jv5k0"] = domain.Team{ID: "fibggi2jv5k0", Name: "fp8h2w6yv5k0", ParentID: "fibggi2juxhc"}
+	fixture.Snapshot.Memberships = append(fixture.Snapshot.Memberships,
+		domain.Membership{TeamID: "fibggi2jv5k0", HumanID: "fi7io4lvk35s"})
+	fixture.Snapshot.Controls["fk3x9r2mv5k0"] = domain.GrantControl{Version: "1", ID: "fk3x9r2mv5k0", Status: "enabled"}
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mv5k0", Revision: 1}] = domain.GrantContent{
+		Version: "1", GrantID: "fk3x9r2mv5k0", Revision: 1, ParentGrantID: "fk3x9r2man0d",
+		Permissions: []string{lab.PayslipRead, lab.PayslipDelete}, Scope: map[string]string{},
+	}
+	fixture.Snapshot.Assignments["fm5b7t4pv5k0"] = domain.Assignment{
+		Version: "1", ID: "fm5b7t4pv5k0", GrantID: "fk3x9r2mv5k0", GrantRevision: 1,
+		Recipient: domain.Recipient{Type: "group", ID: "fibggi2jv5k0"}, Status: "enabled",
+	}
+	// A second revision of the parent that drops what the grandchild still holds.
+	fixture.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2man0d", Revision: 2}] = domain.GrantContent{
+		Version: "1", GrantID: "fk3x9r2man0d", Revision: 2, ParentGrantID: "fk3x9r2m5iv8",
+		Permissions: []string{lab.PayslipWrite}, Scope: map[string]string{"cert": "C17"},
+	}
+
+	held, err := lineage.ResolveHuman(t.Context(), fixture.Snapshot, holderOf("fi7io4lvk35s"), lab.PayslipRead, time.Time{})
+	if err != nil || len(held) != 1 {
+		t.Fatalf("the grandchild does not hold a narrowed route, so nothing below means anything: %#v, %v", held, err)
+	}
+
+	statusAdmin, err := lab.NewAssignmentStatusAdministration(area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/adopt.db", []storage.Snapshot{fixture.Snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer provider.Close()
+	service, err := mutation.New(provider,
+		&lab.GrantRevisionAdministration{RoleAdministration: &lab.RoleAdministration{AssignmentStatusAdministration: statusAdmin}},
+		&fixedClock{now: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.UpgradeAssignment(t.Context(), area, fixture.Issuer, "fm5b7t4pan0d"); err == nil {
+		t.Fatal("an adoption that strands a narrowed dependent was accepted")
+	}
+}
+
+func holderOf(human string) domain.Identity {
+	return domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: human}, HumanID: human}
+}

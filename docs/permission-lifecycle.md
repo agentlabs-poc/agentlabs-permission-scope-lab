@@ -217,6 +217,43 @@ the catalog does not supply. That refusal stays. The narrowing is a property of
 resolution, not of authoring: nothing new may reference a retired permission, and
 what already references one keeps working for the rest.
 
+### Narrowing changes which routes exist, not only what they supply
+
+Narrowing cannot tell "the parent lost this to retirement" from "the parent never
+had it" — it drops the permission either way. So a retirement can turn a route
+that was **refused** into a route that **resolves**:
+
+```
+  parent supplies {read}
+  child selects   {read, write}
+
+  write active   →  the child is outside its parent  →  route REFUSED
+  write retired  →  the child narrows to {read}      →  route RESOLVES, carrying read
+```
+
+An adversarial sweep found roughly four hundred such routes across three thousand
+retirement scenarios. Nothing is amplified — the opened route is bounded by the
+parent's live set and by the child's own selection, and every permission in it is
+selected *and* active *and* contained. But "dropping a permission can only reduce
+what a route supplies" is a statement about permission **sets**, and it is silent
+about route **existence**, which is the thing this actually changes. The safety
+argument needs both halves.
+
+The state it requires — a child over-selecting relative to its parent — cannot be
+authored: every write path refuses it. It arises from a permission being retired
+after the fact, and retirement is reversible.
+
+### A narrowed grant cannot be re-enabled while disabled
+
+The read path keeps a narrowed grant working; the write path refuses to author or
+re-enable one. So disabling a grant that references a retired permission is
+**one-way** until the permission is restored or the grant is revised. Combined with
+Q-132's bottom-up dismantle, that is a state an administrator can enter and not
+leave by the same route they came in.
+
+This is consistent — the write path is deliberately unchanged — and it is another
+reason the grant-health requirement below is not optional.
+
 ### Rationale / conscious tradeoff
 
 The cost is that a grant's effect no longer matches its record. The stored content
