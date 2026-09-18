@@ -13,6 +13,29 @@ not silently change an existing assignment's adopted grant revision or a grant's
 selected role revision. Authorized administrators can discover older assignments
 and review suggested updates; the suggestion is advisory, not permission to adopt.
 
+**Publication is free; adoption is where the evaluation happens.** A new role
+revision is validated against its own shape, the catalog and the publisher's
+authority. It does **not** consult the grants that adopted earlier revisions and
+cannot be refused because one of them would be affected. When a grant *adopts* a
+newer revision, every enabled dependent beneath it is re-evaluated against the
+revision being adopted; if a dependent that resolved before would not resolve
+after, the adoption is refused and the grant is left exactly as it was.
+
+The reason publication is not the place is concrete. A role may be one the
+application ships to every tenant. Refusing publication because one tenant's private
+grant structure would break would let that tenant block a shared catalog change —
+and the publisher cannot repair it, having no authority over tenant grants. It would
+also make publication's cost grow with every tenant that ever adopted the role.
+
+Two qualifications. **The evaluation is differential, not absolute:** a dependent
+that did not resolve *before* the adoption does not block it — otherwise a dependent
+whose grant had expired or been disabled would refuse an adoption whose content it
+was never compatible with, and because revision content is immutable it would have
+frozen its ancestor's adoption permanently. **A disabled dependent is skipped:** it
+supplies no authority, so nothing of its can stop working, and it is revalidated when
+it is enabled. Correcting the dependents is then the administrator's work, bottom-up
+— fix or remove the children, then adopt at the parent.
+
 New assignments and explicit assignment upgrades must select the latest published
 grant revision and pass current validation. Existing assignments may remain on
 older content. If the latest content is not supported, reject the new assignment
@@ -40,6 +63,9 @@ to ordinary explicit permission selection, not a reason to make all revisions li
 | Validly re-enable G2 | Explicit enablement succeeds only after current checks. | Still-enabled, otherwise valid G3 may work again. |
 | G3 itself was explicitly disabled | Its disabled state remains. | Parent restoration does not enable it. |
 | Delete a grant | Permanent withdrawal from usable authority. | It cannot be enabled back; delete is the selected permanent operation, not a separate revoke state. |
+| Disable or delete a grant another grant names as parent | **Refused.** | Dismantling is bottom-up: the dependent goes first. No exception for a trusted root. |
+| Disable a grant an assignment still references | Permitted. | An assignment is not a dependent — holding a grant *is* an assignment, so counting them would make every held grant undisablable. |
+| Delete a grant an assignment still references | **Refused**, by the older rule against a dangling reference. | The assignment is removed first. |
 
 ### Shared grant, explicitly disabled assignment
 
@@ -243,16 +269,42 @@ pending even though this governing coverage rule is agreed.
 
 ## Scenario E — ownership rotation and dependent agents
 
-Om replaces Maya as an authorized Team1 owner while Team1's grants, assignments
-and actual supporting lineage remain unchanged. Team2's business authority does
-not automatically change. Om's personal ENG-write grant is not imported into the
-team. Future administration still checks the acting person's authority and source.
-Exact ownership-transfer permission/records remain pending.
+Ownership is a grant, so rotating it is an ordinary authority change rather than an
+edit to a list. Om receives an administrative grant scoped to Team1, and Maya's is
+disabled or deleted:
+
+```json
+{
+  "version": "1",
+  "grant_id": "G-ADMIN-TEAM1-OM",
+  "revision": 1,
+  "parent_grant_id": "G-AUTH-ROOT",
+  "permissions": ["auth:group::write"],
+  "scope": {"team": "Team1"}
+}
+```
+
+Team1's grants, assignments and actual supporting lineage remain unchanged, and
+Team2's business authority does not change. Om's personal ENG-write grant is not
+imported into the team: it is a different grant, on a different chain, in a different
+namespace. Future administration still checks the acting person's authority and
+source.
+
+Two rules constrain the rotation. **Team1 must not be left with no enabled
+administrative assignment** — a team is never ownerless, so Maya's grant is withdrawn
+after Om's is in place, not before. And **Om cannot reach Team2 with this grant**: the
+route carries `team=Team1`, a request carries one value per key, and a child scoped to
+`team=Team2` beneath it would demand both at once and authorize nothing. That is not a
+guard; it is what conjunction computes.
 
 Separately, Vinay's read-only agent loses effective Finance access when required
 human Finance support disappears. If that support returns and the delegation
 itself remains valid, the access can become usable again. An explicitly withdrawn
-or expired delegation is not revived by that restoration. This is a chosen
+or expired delegation is not revived by that restoration. Two further properties
+apply: the delegation has **its own validity window**, and the effective lifetime is
+the narrower of it and Vinay's authority; and the delegation **tracks** Vinay rather
+than a snapshot of him, so if his Finance access widens to write, the agent's limits
+still hold it to read, and if his narrows, the agent narrows with it. This is a chosen
 human-dependent lifecycle, not an independent machine entitlement.
 
 ## Scenario F — the unresolved direct-human context
@@ -274,9 +326,14 @@ must still be proved. Keep unresolved cases explicit rather than extending a
 nearby example beyond its assumptions.
 
 **Sources:** [revisions](../../docs/grant-revisions.md),
+[role publication and adoption](../../docs/role-revisions.md),
 [binding lifecycle](../../docs/parent-grant-bindings.md),
+[dependents and dismantling](../../docs/grant-lifecycle.md),
+[unreachable nodes](../../docs/authority-lineage.md),
 [validity](../../docs/grant-validity.md), [freshness](../../docs/authority-freshness.md),
-[bulk](../../docs/bulk-enforcement.md), [delegation](../../docs/delegation-lifecycle.md),
+[bulk](../../docs/bulk-enforcement.md),
+[delegation lifetime and growth](../../docs/delegation-lifecycle.md),
+[ownership](../../docs/ownership-lineage.md),
 [direct-human trace](../../docs/direct-human-parent-context.md).
 
 [Return to contents](../README.md) · [Read the pending register](../appendices/pending.md)

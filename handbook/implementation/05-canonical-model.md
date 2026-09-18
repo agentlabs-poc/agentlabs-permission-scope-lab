@@ -71,10 +71,29 @@ the double colon separates the operation. Department and user identifiers are
 not encoded into each operation name. A shared prefix does not confer descendant
 permissions. V1 has no permission aliases or wildcard permission names.
 
-Register names before grants use them. An existing identifier must not acquire
-a materially different authorization meaning, even after retirement. Descriptive
-labels may change without changing the protected operation. Detailed character
-validation and the full catalog lifecycle remain [pending](../appendices/pending.md).
+Register names before grants use them. **An application registers only in its own
+namespace**: the first noun segment is the application, so `hrms` may register
+`hrms:payroll:payslip::read` and may not register anything under `auth:` or
+`system:`. That is a boundary rule rather than a convention, and Chapter 6 gives the
+reason — a root's ceiling is sliced by namespace where the evaluation catalog is not,
+and without the slice an application root would carry the platform permission that
+authorizes creating application roots.
+
+An existing identifier must not acquire a materially different authorization meaning,
+even after retirement, and **the identifier itself is never renamed**. Descriptive
+labels may change without changing the protected operation. A rename is strictly worse
+than a repurpose: the old identifier stops resolving and every grant referencing it
+narrows silently. Register the right identifier and retire the wrong one.
+
+**Retirement withdraws the permission, not the route.** A grant supplies what it
+selects and the catalog still supplies, and stops only when nothing it selects
+survives — so a grant selecting read and write whose write is retired still supplies
+read, and a route beneath it that never selected write is untouched. The write path is
+unchanged: nothing may be authored, revised or assigned while it selects a permission
+the catalog does not supply.
+
+Detailed character validation and the full catalog lifecycle remain
+[pending](../appendices/pending.md).
 
 ## Scope format and meaning
 
@@ -93,6 +112,22 @@ Reject missing or null scope, unsupported keys/tokens, duplicate keys, empty or
 non-string values, arrays, nested objects and wildcard/query operators. Do not
 repair invalid input by dropping a restriction. The required validation follows
 the registered definitions without making Auth an application database interpreter.
+
+**A value matches exactly and is opaque.** Nothing resolves an application's scope
+value to a record, checks that it exists, or asks what it refers to. Subtree and
+pattern scope are **excluded rather than deferred**: `{"dept": "FIN*"}` is refused
+because it is not a boundary, and a hierarchical scope would give every stored grant
+implied children the day it was introduced.
+
+**One exception, and it is the platform's own key.** A scope key registered at the
+platform boundary names one of Auth's own records, so its value *is* resolved: the key
+`team` carries a team identifier, and a grant naming a team that does not exist is
+refused at the write. Auth cannot know what `dept=FIN` denotes and does know whether a
+team exists — that is the whole of the difference. Matching stays exact either way.
+
+Because a scope key is a bare word, one catalog holds one entry per key, and an
+application's catalog is its own keys union every platform key. **A key claimed at
+both boundaries is refused by name** rather than resolved by storage order.
 
 The explicit empty object `{}` adds no local restriction. At an otherwise
 legitimate tenant root it adds no narrower boundary inside that tenant. On a
@@ -258,8 +293,20 @@ identity/delegation transports are not settled by these core examples. Do not
 fill the gaps by treating a parentless ordinary grant as a root or by copying
 recipient-relative scope text without preserving its meaning.
 
+Two things that were pending when this chapter was first drafted are not any more,
+and it matters because the gap they left was the one a migration could not avoid
+inventing. **Authority loading has a contract** — the question an application asks and
+the answer it receives are approved, and Chapter 7 states them. **Administrative
+authority is an ordinary grant**, so the records in this chapter are the
+administrative records too; there is no second model to specify. And one item is
+superseded rather than completed: ownership is a grant, not a relation, so there is no
+owner record left to design.
+
 **Sources:** [permission](../../docs/permission-model.md),
-[scope](../../docs/scope-model.md), [core records](../../docs/grant-revision-format.md),
+[namespace and permanence](../../docs/permission-lifecycle.md),
+[scope](../../docs/scope-model.md),
+[opacity and exclusion](../../docs/application-registration.md),
+[core records](../../docs/grant-revision-format.md),
 [role variant](../../docs/role-grant-contract.md), [identity](../../docs/identity-context.md),
 [JWT mapping](../../docs/jwt-identity-mapping.md).
 

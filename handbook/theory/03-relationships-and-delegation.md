@@ -29,6 +29,7 @@ Adding a group member should not silently make that person an administrator.
 | Grant lineage | Which parent constrains this derived authority? | A stored parent definition is currently usable. |
 | Team lineage | What boundary must the child team's authority respect? | Child members are also parent-team members. |
 | Ownership/administration | Who may perform specified management operations? | The owner's personal business scope belongs to the team. |
+| Administrative authority | Which management operations may this actor perform, and over which part of the graph? | Authority over one part reaches a neighbouring part. |
 | Delegation | On whose authority is this actor operating, and under what limits? | The actor has independent authority if required support disappears. |
 
 The exact effects depend on the model. Some systems intentionally inherit group
@@ -71,6 +72,13 @@ change who can administer Team1 without changing Team1's assigned business
 authority. Importing Om's broader personal grants would be a separate authority
 change, not a harmless consequence of editing an owner list.
 
+It is worth noticing what an "owner list" is in such a design. If ownership is a
+separate relation that nothing consults during evaluation, then it records an
+intention and enforces nothing — a table that looks like authorization and is not.
+Part II resolves that by making ownership the same kind of thing as any other
+authority: a grant, held by a recipient, narrowed and revoked like any other. An
+edit to it is then visibly an authority change, because it is one.
+
 ## Delegation preserves the source and the limits
 
 A delegated actor needs a clear authority anchor. Suppose Vinay may read and
@@ -82,6 +90,20 @@ Attribution should retain the actual actor as well as the supporting identity.
 Otherwise a downstream component may treat a restricted program as if the human
 were acting with unrestricted authority. Preserving a familiar human identifier
 for compatibility does not remove the need to enforce the agent's limits.
+
+Two further properties of a delegation are easy to leave unstated and expensive to
+get wrong. **Does it expire on its own?** Part II says yes: a delegation carries its
+own validity window, and the effective lifetime is the narrower of the delegation's
+and the human's authority — otherwise a delegation would be the only thing in the
+model that is revocable but never expires. **Does it track the source, or a copy of
+it?** Part II says it tracks: what the proxy may do is resolved from what the human
+holds *at the time of the request*. A frozen snapshot would let a delegation diverge
+from the authority it depends on, with nothing reconciling them.
+
+Note also what a delegation is *not*, in that design: it is not a grant and not a
+step in a lineage. It adds no authority and appears in no contributing chain. It is
+permission for an actor to ask about a human, and the authority that comes back is
+the human's.
 
 Whether a system supports independent machine principals, delegation chains,
 multiple authority anchors or automatic restoration is a design choice. Part II
@@ -106,6 +128,23 @@ for inspection or authorized repair while providing no access. Automatic deletio
 or rebinding is not inherent in the word orphan. Nor does a failed lookup prove
 that a route is orphaned: inability to inspect a relationship differs from an
 established absence.
+
+Part II generalizes that into one rule and one boundary. **A node that cannot be
+reached closes its route** — an absent or disabled binding, a parent that no longer
+carries what the child selects, a retired permission, a closed validity window, a
+withdrawn membership. None of these is an error, and none reaches beyond its own
+route. But **unreachable is not unreadable**: a record that cannot be *parsed* is
+not a closed route, it is a failure. Closing a route can only ever remove authority,
+so skipping an unreachable node is safe; silently closing a route because a row was
+damaged would mean answering authorization questions from a store we have admitted
+we cannot fully read, and the resulting denial would look exactly like a correct one.
+
+A related asymmetry is worth making explicit in any dependent model: **a record with
+dependents cannot be quietly switched off.** Part II refuses to disable or delete a
+grant while another grant names it as parent, for every grant including a root, so
+dismantling is bottom-up. The alternative — allowing a parent to be disabled as a
+wholesale suspension — makes the state of the descendants depend on a record nobody
+edited.
 
 **Chapter takeaway:** the graph is part of the authorization model. Draw the
 relationships precisely, then explain which edges are required now, which are

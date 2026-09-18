@@ -40,21 +40,21 @@ Related words are grouped for comparison; grouping does not make them synonyms.
 | [Identity](#identity) | Identity, principal, actor/caller, human/user, authorizing human, subject, agent, service account, proxy | Approved identity block and JWT profile excerpt. |
 | [Enclosing context](#enclosing-context) | Tenant, tenant context, tenant membership, application, platform administration | Context/responsibility concepts; complete mappings pending. |
 | [Permission](#permission) | Operation, action, permission, permission namespace | Registered string, used in grant and endpoint JSON. |
-| [Scope and self](#scope-and-self) | Scope, boundary, selector, scope key/value, `$self`, additional/effective scope | Nested flat object; effective composition is not an object overwrite. |
+| [Scope and self](#scope-and-self) | Scope, boundary, selector, scope key/value, `$self`, additional/effective scope | Nested flat object, exact match, values opaque except a platform key naming Auth's own records. |
 | [Restrictions and conditions](#restrictions-and-conditions) | Constraint, restriction, condition | Existing limits and rules; no generic condition JSON is adopted. |
 | [Registration](#registration) | Catalog, permission definition, scope definition, compatibility declaration | Meanings agreed; registration payload pending. |
 | [Grant records](#grant-records) | Grant, grant identity/control, grant revision, recipient, assignment, role, role revision | Approved control, revision, assignment and role-reference shapes. |
 | [Version and adoption](#version-and-adoption) | Contract version, revision, publication, adoption, latest revision | Existing version/revision fields; activities are not new entities. |
-| [Teams and administration](#teams-and-administration) | Team/group, membership, ownership, owner/administrator, issuer, assignment authority | Recipient reference exists; full relationship/owner records pending. |
+| [Teams and administration](#teams-and-administration) | Team/group, membership, ownership, owner/administrator, issuer, assignment authority | Administration is an ordinary grant; ownership is a grant and its relation is superseded; membership records pending. |
 | [Dependent relationships](#dependent-relationships) | Parent/child, subteam/subgroup, subgrant, grant/team/scope lineage, support, authority route, binding | Grant parent link and assignments; full team hierarchy format pending. |
-| [Delegation](#delegation) | Delegation, human ceiling, delegation limits | Identity block identifies the participants; delegation-evidence format pending. |
+| [Delegation](#delegation) | Delegation, human ceiling, delegation limits | Not a grant and not a chain step; carries its own window and tracks the human. Evidence format pending. |
 | [Lifecycle](#lifecycle) | Enablement, disablement, effectiveness, validity, expiry, deletion/revocation, orphan | Live controls and revision-local validity; no invented orphan state field. |
-| [Roots and bootstrap](#roots-and-bootstrap) | Root grant, bootstrap, computed root coverage | Trusted-root behavior agreed; complete root/setup representation pending. |
-| [Endpoint declaration](#endpoint-declaration) | Endpoint policy, method, path, required permission, input, source, local input name | Approved GET and PUT policy core JSON. |
+| [Roots and bootstrap](#roots-and-bootstrap) | Root grant, bootstrap, computed root coverage, the tenant's two namespaces | Trusted-root behavior and establishment authority agreed; computed-root encoding pending. |
+| [Endpoint declaration](#endpoint-declaration) | Endpoint policy, method, path, required permission, input, source, local input name, trusted correlation | Approved GET and PUT policy core JSON, plus its mount-time structural rules. |
 | [Request and material](#request-and-material) | Request, input, material, domain/application fact, relationship, resolved request | Policy/identity examples available; full request/resolved envelopes pending. |
-| [Resolution and evaluation](#resolution-and-evaluation) | Resolution, resolved grant, resolved grants, evaluation, complete route, non-amplification | Computed views and activities; full resolved-grant transport pending. |
-| [Decision and enforcement](#decision-and-enforcement) | Allow, deny, evaluation error, result, reason, supporting evidence, enforcement | Approved minimum result variants; evidence details remain incomplete. |
-| [Responsibility layers](#responsibility-layers) | Auth Service, auth agent/evaluator, canonical layer, application layer, authority-boundary validator | Logical responsibilities, not new JSON entities. |
+| [Resolution and evaluation](#resolution-and-evaluation) | Resolution, resolved grant, resolved grants, evaluation, complete route, non-amplification | Computed views, plus the approved authority-loading question and answer. |
+| [Decision and enforcement](#decision-and-enforcement) | Allow, deny, evaluation error, result, reason, supporting evidence, enforcement | Approved result variants, the ordered contributing chain, and the published code catalogue. |
+| [Responsibility layers](#responsibility-layers) | Auth Service, auth agent/evaluator, canonical layer, application layer, authority-boundary validator | Logical responsibilities, plus the handler integration contract. |
 
 ## Principles and rules
 
@@ -225,13 +225,41 @@ new `action` object or separate permission-value wrapper.
 The colon-separated nouns identify the operation namespace; the double colon
 separates the verb. Namespace depth can vary. Department IDs and people do not
 belong in the operation name. No prefix inheritance, permission aliases or
-wildcards are supported in this model. Reusing a retired identifier for a
-different authorization meaning is not permitted.
+wildcards are supported in this model. The noun path *reads* like a hierarchy and
+is not one: evaluation compares whole identifiers, and `hrms:payroll:*` is not a
+thing the model recognizes.
+
+**The first noun segment is the application, and it is load-bearing.** An
+application registers only in its own namespace: `hrms` may register
+`hrms:payroll:payslip::read` and may not register anything under `auth:` or
+`system:`. The reason is not tidiness. A root grant's ceiling is computed as every
+active permission *in its own namespace*, while an application's evaluation
+catalog is wider — its own permissions union the platform's, because a request
+inside an application may legitimately require a platform permission. The ceiling
+is sliced where the catalog is not, and without that slice an application root
+would carry every platform permission, including whichever one authorizes
+establishing an application root. The thing created by an authority could then
+create more of that authority.
+
+**An identifier is never renamed.** Reusing a retired identifier for a different
+authorization meaning is not permitted, and the identifier itself is immutable;
+a description or display label is not. A rename is strictly worse than a
+repurpose, because the old identifier stops resolving and every grant referencing
+it narrows silently — a tenant's grant quietly supplies less and nothing says so.
+If a name is wrong, register the right identifier and retire the wrong one.
+
+**Retirement withdraws the permission, not the route.** A grant supplies what it
+selects and the catalog still supplies; it stops only when nothing it selects
+survives. A grant selecting payslip-read and payslip-write whose write is retired
+still supplies read, and a route beneath it that never selected write is
+untouched. The write path is unchanged: nothing new may be authored, revised or
+assigned while it selects a permission the catalog does not supply.
 
 **Counterexample:** certificate-read does not confer certificate-write, even
 though the names share a prefix. A Finance scope cannot supply the missing verb.
 
-Source: [permission model](../../docs/permission-model.md).
+Sources: [permission model](../../docs/permission-model.md),
+[namespace and permanence](../../docs/permission-lifecycle.md).
 
 ## Scope and self
 
@@ -270,6 +298,41 @@ non-string values, unsupported keys/tokens and wildcard/query operators.
 Missing or null scope is not the explicit empty object. OR alternatives use
 separate complete grant routes, not a scope array or permission/scope mixing.
 
+**A value matches exactly, and it is opaque.** Nothing in this model resolves a
+scope value to a record, checks that the record exists, or asks what it refers to.
+`dept=FIN` authorizes within a boundary named `FIN`; whether such a department
+exists, and whether certificate C17 belongs to it, is the application's to
+establish. Subtree and pattern scope are **excluded rather than deferred**: there
+is no prefix, wildcard or hierarchy, and a hierarchical scope would give every
+existing boundary implied children on the day it was introduced, silently
+changing the reach of every stored grant.
+
+| Written | Means |
+|---|---|
+| `{"dept": "FIN"}` | exactly the boundary named `FIN` |
+| `{}` | no local restriction — the whole application boundary |
+| `{"dept": "FIN*"}` | **refused.** Not a boundary. |
+| `{"dept": "$self"}` | the authorizing human, the one reserved token |
+
+`{}` is not a wildcard by another name: it adds no restriction, which is different
+from matching many values. And a *key* never declares either form — `{}` and
+`$self` are properties of a value.
+
+**One exception, and it is the platform's own key.** A scope key registered at the
+platform boundary names something in Auth's own records, and its value therefore
+*is* resolved: the key `team` carries a team identifier, and a grant naming a team
+that does not exist is refused at the write. Opacity holds for an application's
+keys and does not hold for a key naming Auth's own records — Auth cannot know what
+`dept=FIN` denotes, and does know whether a team exists. Matching stays exact
+either way; the subtree exclusion above is unaffected.
+
+A scope key is a bare word, so one catalog holds one entry per key and an
+application's catalog is its own keys union every platform key. **A key claimed at
+both boundaries is ambiguous and the read refuses it**, naming the key. There is
+no correct winner to choose, and choosing by storage order would mean an
+application's opaque values being validated as Auth record identifiers for some
+application names and not others.
+
 **Counterexample:** recognizing `dept = FIN` in a request is not proof that the
 certificate returned belongs to Finance. The endpoint must establish or enforce
 that relationship against the actual operation's data.
@@ -278,7 +341,8 @@ Runtime self meaning is settled. Whether one person's self-scoped source
 authorizes distributing another person's self access remains a distinct
 source-binding question; copying `$self` text does not answer it.
 
-Source: [scope model](../../docs/scope-model.md).
+Sources: [scope model](../../docs/scope-model.md),
+[opacity and exclusion](../../docs/application-registration.md).
 
 ## Restrictions and conditions
 
@@ -322,11 +386,18 @@ must fail without silently changing or grandfathering those grants.
 complete registration payload is not. The permission and scope values shown in
 this reference are consumers of registration, not a disguised registration API.
 
+An application registers **only within its own namespace**, and the platform
+registers within the platform's. The two boundaries are separate operations with
+separate authority, and a key or permission the platform owns cannot be claimed by
+an application — see [Permission](#permission) for why the first noun segment is a
+boundary rule rather than a convention.
+
 **Counterexample:** registering both `dept` and repository-read does not alone
 prove that a department selector is a supported repository boundary. Nor does
 registering read automatically assign read to the publisher.
 
-Source: [application registration](../../docs/application-registration.md).
+Sources: [application registration](../../docs/application-registration.md),
+[namespace ownership](../../docs/permission-lifecycle.md).
 
 ## Grant records
 
@@ -502,6 +573,69 @@ must be authorized for the actual operation and administrative boundary.
 it does not automatically make that person the permanent support of a team-held
 grant route.
 
+**Administrative authority is an ordinary grant.** This is the model's answer to
+"who may administer this?", and it needed no new mechanism: an administrative
+grant carries platform-namespace permissions, its chain begins at the tenant's
+**Auth root**, and it is created, assigned, narrowed, disabled, deleted and
+resolved by the machinery already described here. A tenant therefore has two
+chains and one set of rules:
+
+```
+  ACME'S AUTH ROOT                        ACME/HRMS'S APPLICATION ROOT
+  every active auth: permission           every active hrms: permission
+      │ parent                                │ parent
+      ▼                                       ▼
+  auth:group::write  { team: Team2 }       hrms:employee:certificate::read
+      │ parent                                │   { dept: FIN }
+      ▼                                       ▼
+  narrower administrative authority        narrower business authority
+
+  SAME walk · SAME narrowing · SAME containment · SAME ceiling rule
+```
+
+What bounds an administrative operation depends on which side it is.
+**Tenant administration** — teams, grants, assignments, roles, establishment —
+is bounded by **a team**, carried as the platform scope key `team`.
+**Platform administration** — permission and scope registration, catalog reads,
+application role publication — is bounded by **the area itself**, and needs no
+scope key: registering a permission into a shared catalog has nothing to do with
+any one team.
+
+**Sideways escalation is impossible rather than guarded.** Scope predicates
+accumulate conjunctively along a chain and a request carries one value per key,
+which supplies the whole containment property:
+
+| Proposed grant | Result |
+|---|---|
+| `{team: X}` beneath a parent scoped `{team: X}` | **allowed** — the predicates agree; this is how one owner appoints another owner of the same team |
+| `{team: Y}` beneath a parent scoped `{team: X}` | the route demands `team=X` **and** `team=Y`, which no request satisfies — it authorizes nothing, ever |
+| `{team: X}` beneath a parent scoped `{}` | **allowed** — and only an unrestricted grant from the Auth root has `{}`, which is the tenant administrator |
+
+Note what that third row means: an operation with **no bounding team** — creating
+a top-level team, or moving one up to become top-level — is satisfied only by a
+route carrying no predicate at all. Nothing enforces any of this; it is what the
+model already computes.
+
+**One wart, recorded rather than hidden.** Narrowing *accepts* the contradictory
+re-scope in the middle row and builds a route that never matches, rather than
+refusing the write. The safety is "authorizes nothing", not "cannot be written".
+
+**Ownership is a grant too, and the separate relation is superseded.** Creating a
+team confers its ownership — the creator receives an administrative grant over it
+— and a team must always retain at least one enabled administrative assignment, so
+no team is ownerless. The earlier ownership *relation* carried no authority at
+all: nothing in resolution or validation consulted it, so "who may administer this
+team" was recorded in a table no decision read.
+
+**A synchronization is an ordinary authorized caller.** An application
+synchronizing its business membership into Auth does so as a service account
+holding team-write authority within a definite scope, calling ordinary endpoints.
+It has no privileged path and cannot write the store directly; nothing can.
+Whether a deployment offers one membership write per call or one call changing
+many is endpoint design, not an authorization question — a bulk write inside one
+team is one boundary and one evaluation, and one spanning several teams is
+governed by the existing per-item coverage rule.
+
 Team create covers creating teams and subteams; team write includes human
 membership management; team delete removes teams. These do not by themselves
 authorize assigning business grants. **Assignment authority** requires the
@@ -514,10 +648,13 @@ existing effective access. The approved rule does not invent an additional
 requirement that this membership administrator personally possess each of the
 team's business permissions. Changing the team's grants is a different operation.
 
-**Representation:** A1's approved nested `recipient` identifies Team1. Complete
-team, membership and owner records remain pending; earlier tentative scratch
+**Representation:** A1's approved nested `recipient` identifies Team1, and an
+administrative grant uses the approved grant and assignment shapes unchanged —
+that is the point of administration being a grant rather than a second model.
+Complete team and membership *records* remain pending; earlier tentative scratch
 JSON must not be presented as finalized contracts. The relationship can be
-persisted in database tables without that choosing a public wire schema.
+persisted in database tables without that choosing a public wire schema. The
+ownership relation is not pending — it is superseded.
 
 **Example:** Nutan is a member of Team2; Maya administers an assignment; Om may
 hold separate Team1 administration. Those are three different relationships.
@@ -527,9 +664,10 @@ Maya's name on an issuance record does not make her all three participants.
 personal permissions into Team1. Team-held supporting authority normally
 continues unchanged when its actual support remains intact.
 
-Sources: [groups](../../docs/groups-and-membership.md),
+Sources: [groups and synchronization](../../docs/groups-and-membership.md),
 [team administration](../../docs/team-administration.md),
 [assignment authority](../../docs/assignment-authority.md),
+[administration is a grant](../../docs/administrative-authority.md),
 [ownership](../../docs/ownership-lineage.md).
 
 ## Dependent relationships
@@ -591,6 +729,38 @@ held by unrelated TeamX cannot replace Team1's required support. Matching JSON
 keys must not overwrite a parent's restriction. Separate permission and scope
 fragments from unrelated routes cannot be combined into broader authority.
 
+**A node that cannot be reached closes its route.** Walking a route means
+reaching every node in its chain; one that cannot be reached means the route
+supplies nothing, and that is an ordinary completed answer rather than a failure.
+The scattered cases were always this one rule:
+
+| Why the node cannot be reached | |
+|---|---|
+| Its supporting binding is absent or disabled | the assignment no longer carries it |
+| Its parent no longer carries what it selects | narrowing fails at that step |
+| A permission it selects is retired or unregistered | the catalog no longer supplies it |
+| Its validity window has not opened, or has closed | the revision is not in force |
+| The group holding it no longer has the member | membership was withdrawn |
+
+None of these is an error and none reaches beyond its own route: other routes the
+human holds are unaffected.
+
+**Unreachable is not unreadable, and the distinction is the whole safety of the
+rule.** A record that cannot be *read* — one that does not parse, or is
+structurally invalid — is not a closed route; the answer fails. Closing a route
+can only ever remove authority, so skipping an unreachable node is safe. Silently
+closing a route because a row was damaged would mean answering authorization
+questions from a store we have admitted we cannot fully read, and the quiet denial
+would look exactly like a correct one.
+
+**A grant with a dependent can be neither disabled nor deleted.** While another
+grant names it as parent, both operations are refused, for every grant including a
+trusted root — there is no root exception. A *dependent* here means a child grant
+and not an assignment: holding a grant is an assignment, so counting assignments
+would make every grant anybody holds undisablable. Delete separately refuses while
+an assignment still names the grant, which is the older rule against leaving a
+dangling reference. Dismantling is therefore bottom-up.
+
 The grant parent link is approved; complete team/support evidence contracts and
 some direct-human support eligibility remain pending. Current structural guards
 also apply: inspect affected bindings, disable/remove them bottom-up as required,
@@ -598,7 +768,8 @@ and validate current reality on explicit re-enablement. Ancestor ineffectiveness
 alone is not equivalent to disabling a child's own binding. Cycles are rejected,
 including in disabled structures.
 
-Sources: [lineage and orphans](../../docs/authority-lineage.md),
+Sources: [lineage, orphans and unreachable nodes](../../docs/authority-lineage.md),
+[dependents and dismantling](../../docs/grant-lifecycle.md),
 [subgroups](../../docs/subgroups.md),
 [four-part bindings](../../docs/parent-grant-bindings.md),
 [cycles](../../docs/lineage-cycles.md).
@@ -613,6 +784,33 @@ creator is not a substitute for establishing this current support.
 In our model, proxy authority must fit both. V1 supports direct human-to-proxy
 delegation, not proxy-to-proxy chains. An agent does not become a first-class
 member of Employees when Vinay delegates access supported by that group.
+
+**A delegation is not a grant and not a step in a lineage.** It adds no authority
+and never appears in a contributing chain. It is permission for an **actor** to ask
+about a **human**, and the authority that comes back is the human's:
+
+```
+  vinay ──▶ agent A                agent A may ask about vinay
+                                   the answer is VINAY'S authority
+                                   A adds nothing to it
+```
+
+That is why a delegation needs no representation in a resolved answer: the
+authority-loading question already names the asking actor and the subject
+separately, and a delegated request differs from a direct one only in the actor.
+
+**Lifetime.** A delegation carries its own validity window, and the effective
+lifetime is the narrower of the delegation's and the human's authority. This is
+the existing rule applied rather than a new one — a route's validity is already
+the narrowest window in its chain, and a delegation is another constraint on the
+same request. Without a window of its own, a delegation would be the only thing in
+the model that is revocable but never expires.
+
+**Growth.** A delegation *tracks* the human's authority: what a proxy may do is
+resolved from what its human holds **at the time of the request**, not at the time
+the delegation was created. A subset is resolved, not copied; freezing a snapshot
+would let a delegation diverge from the authority it depends on with nothing
+reconciling them.
 
 **Representation:** the identity JSON above identifies actor and human. It is
 not the delegation grant, evidence or lifecycle record. The complete delegation
@@ -672,10 +870,25 @@ access at and after that instant. Absence of a local window does not remove
 inherited time limits. Changing the window requires new content and explicit
 adoption. Assignment-specific validity is deferred in v1.
 
+**Publication is free; adoption is where the evaluation happens.** A new role
+revision is validated against its own shape, the catalog and the publisher's
+authority. It does not consult the grants that adopted earlier revisions and
+cannot be refused because one of them would be affected — a role an application
+ships to every tenant would otherwise let one tenant's private grant structure
+block a shared catalog change, and the publisher has no authority to repair it.
+When a grant *adopts* a newer revision, every enabled dependent beneath it is
+re-evaluated against the revision being adopted; if a dependent that resolved
+before would not resolve after, the adoption is refused and the grant is left
+exactly as it was. The evaluation is differential rather than absolute — a
+dependent that did not resolve before does not block the adoption — and a disabled
+dependent is skipped, to be revalidated when it is enabled.
+
 **Deletion/revocation** permanently removes the affected authority binding or
 record in this model; it is not temporary disablement. No separate reversible
 `revoked` control value or delete API is introduced by that wording. Structural
-guards still govern deletions that would break dependent bindings.
+guards still govern deletions that would break dependent bindings, and a grant
+another grant names as parent can be neither disabled nor deleted while that is
+true — see [dependent relationships](#dependent-relationships).
 
 An **orphan grant/route** lacks required parent support in its declared lineage.
 Its affected descendants cannot supply authority. Orphaning is assessed for the
@@ -694,7 +907,8 @@ affected route, not automatically every use of a reusable definition. No new
 reset its expiry. Likewise, an orphan's stored child cannot repair its support
 by automatically choosing a different parent.
 
-Sources: [lifecycle](../../docs/grant-lifecycle.md),
+Sources: [lifecycle and dependents](../../docs/grant-lifecycle.md),
+[role publication and adoption](../../docs/role-revisions.md),
 [validity](../../docs/grant-validity.md),
 [assignment validity](../../docs/assignment-validity.md),
 [orphan definition](../../docs/authority-lineage.md).
@@ -707,6 +921,43 @@ authority, its intended administrator group, legitimate human membership and
 explicit assignment. Ordinary callers cannot manufacture roots by omitting a
 parent from grant content.
 
+**A tenant operates in two namespaces, and establishment belongs to the first.**
+One tenant holds two authorities and neither implies the other:
+
+```
+                     ACME  (one tenant, two authorities)
+  ┌────────────────────────────────────┬────────────────────────────────────┐
+  │  acme in the PLATFORM namespace    │  acme in the APPLICATION namespace │
+  │           auth: / system:          │               hrms:                │
+  ├────────────────────────────────────┼────────────────────────────────────┤
+  │  enable hrms for acme              │  create grants beneath the root    │
+  │  ▸ establish acme/hrms root        │  create teams, add members         │
+  │      names the holder team ────────┼──▶ authorized AGAINST the root     │
+  └────────────────────────────────────┴────────────────────────────────────┘
+       creates the authority ───────────────▶ which authorizes everything here
+```
+
+Establishing an application's root in a tenant is the **closing step of enabling
+that application for that tenant**, authorized by the same authority that enabled
+it. Not by a permission, because requiring one is circular — a grant needs a
+parent, up to some root, which had to be established, which would need that
+permission. Nothing terminates that chain inside the grant model; it has to be
+started from outside it. And not by a separate platform operator, because the
+decision is the tenant's: the party that turned the application on is the party
+that says what authority it starts with and to whom.
+
+The handover is explicit. Establishment names the team that will hold the root, so
+the act creating the authority also names who first receives it. Afterwards the
+platform-namespace authority is finished, and every subsequent act is authorized
+against the root.
+
+No separate ceremony record is introduced. The root grant carries its own trust
+marker and the establishing actor is recorded as the actor of that write; what
+makes an establishment special is what it creates, not how it is recorded.
+Replacing a lost or wrong root is establishment again rather than a distinct
+operation — the subtree is dismantled bottom-up first, so two roots of one
+application never coexist in one tenant.
+
 Our intended bootstrap starts with the maximum intended permissions and scope
 within its authorized boundary, using a minimal coherent setup. Minimal setup
 does not mean arbitrarily underpowered authority that cannot administer the
@@ -718,15 +969,16 @@ The application has one shared catalog, not selectively adopted tenant releases.
 Catalog growth does not silently add permissions to ordinary child revisions,
 create membership or enlarge scopes.
 
-**Representation: format pending.** Parent omission for trusted roots is agreed;
-the complete computed-root source encoding and bootstrap trust payload are not.
-No `*`, `is_root`, or catalog-source field is invented to fill that gap.
+**Representation: format pending.** Parent omission for trusted roots is agreed,
+as is the trust marker on the grant head; the complete computed-root source
+encoding remains unsettled. No `*`, `is_root`, or catalog-source field is invented
+to fill that gap.
 
 **Counterexample:** an ordinary derived grant with a missing parent is not a
 bootstrap shortcut. A platform administrator publishing a permission does not
 thereby receive tenant business access.
 
-Sources: [bootstrap](../../docs/bootstrap-authority.md),
+Sources: [bootstrap and the two namespaces](../../docs/bootstrap-authority.md),
 [initial setup](../../docs/bootstrap-initial-assignment.md),
 [root evolution](../../docs/root-permission-evolution.md).
 
@@ -748,7 +1000,8 @@ Approved GET policy core JSON:
     "tenant": {"source": "path", "name": "tenant"},
     "dept": {"source": "path", "name": "dept"},
     "cert": {"source": "path", "name": "cert"}
-  }
+  },
+  "trusted": {"tenant": "tenant"}
 }
 ```
 
@@ -760,6 +1013,17 @@ Approved GET policy core JSON:
 | `inputs` | Selected local input names; not every body field becomes authorization material. |
 | `source` | Where the value must be obtained. |
 | `name` | Parameter/field name at that source; can differ from the local input name. |
+| `trusted` | Correlates a field of the trusted request context with one of this policy's declared inputs. Required for the tenant. |
+
+`"trusted": {"tenant": "tenant"}` reads as: *the input this policy calls `tenant`
+must equal the trusted tenant.* It is the mechanism for an obligation stated
+everywhere and previously left unspecified — a route's tenant claim must be bound
+to trusted context, and a field name alone proves nothing. A policy declaring no
+tenant correlation **cannot be mounted**, so forgetting becomes impossible rather
+than silent, and a path carrying `{tenant}` or `{application}` that no correlation
+names is refused for the same reason. This is not the relationship language the
+model declined: both values are already in the gate's hand, nothing is looked up,
+and no record relationship is asserted.
 
 Approved PUT policy core JSON makes the local/source distinction visible:
 
@@ -784,14 +1048,44 @@ enforce required relationships. No canonical `relationships` block is adopted.
 
 Every declared input must be present at its declared source. A query parameter
 cannot silently replace a missing body field. A broad `{}` grant does not make
-the endpoint's required inputs optional. Extra source kinds, nested selection
-and the complete policy schema remain pending.
+the endpoint's required inputs optional. A declared input the request does not
+supply is a **refusal of the request** — there is no implicit default, no empty
+string and no fallback to another source.
+
+**A policy is validated structurally at mount time, not at request time.** A
+policy that cannot be mounted cannot guard an endpoint, so the endpoint does not
+serve rather than serving unguarded:
+
+| | |
+|---|---|
+| Version | Exactly the supported contract version; no default is guessed. |
+| Method | A valid uppercase HTTP token, and the request's method must equal it. |
+| Path | Absolute, no query or fragment, every placeholder well formed and unique. |
+| Permission | Exactly one, canonical, no wildcard and no list. |
+| Path inputs | Must name a placeholder the path actually declares. |
+| Body inputs | **Top level only.** A selector containing `.`, `[`, `]` or `/` is refused. |
+| Sources | Exactly two: `path` and `body`. |
+| Trusted | Required for the tenant. |
+| Unknown fields | A field this version does not define is **refused, not ignored**. |
+
+**Nested body selection is refused rather than deferred.** Once `a.b` is admitted,
+arrays, filters and absence semantics follow, and the policy becomes a place where
+application structure is described. An application needing a nested value reads it
+in its binder, validates it, and supplies it as material under its own local name.
+Value validation stays with the application: a policy may be perfectly valid and
+still name an input whose value the application rejects.
+
+**What a policy still does not declare** is the scope *boundary* its endpoint
+operates at, so the boundary reaching evaluation is whatever the binder supplies at
+request time. An endpoint may therefore claim a narrow boundary and read a wide
+one, and nothing can check it. That question is framed and **not approved**.
 
 **Counterexample:** the GET path claims Finance, but a later ID-only lookup
 returns an Engineering certificate. Correct declaration and extraction have not
 enforced the authorized boundary.
 
-Source: [endpoint policy](../../docs/endpoint-policy-format.md).
+Sources: [endpoint policy, trusted correlations and mount-time validation](../../docs/endpoint-policy-format.md),
+[the open boundary question](../../docs/policy-scope-boundary.md).
 
 ## Request and material
 
@@ -827,13 +1121,30 @@ through actual execution. The model does not require Auth Service to query the
 application database. It does require that the operation cannot escape the
 boundary on which authorization relied.
 
+**Evidence that is missing, invalid or unsupported has three different answers,
+and none of them is an allow:**
+
+| | Result |
+|---|---|
+| Required material missing — a declared input absent, or the binder cannot produce it | failure to establish; the request is refused before a decision is reached |
+| A route's own evidence invalid — an ill-formed predicate, content that does not validate, an unreadable chain | that route closes |
+| …and no other route authorizes | failure to establish, not a denial — a route that could not be read might have authorized |
+| Evidence of an unsupported kind — a reserved token other than `$self`, a wildcard where a boundary belongs, a contract version this consumer does not speak | refused, never interpreted, and never treated as absent |
+| Every route readable, none authorizes | completed denial |
+
+An unsupported value is not an empty one. None of this is a condition engine:
+every case concerns evidence *this model already defines* — its own material, its
+own predicates, its own contract versions — and nothing here evaluates a business
+fact or is extensible by an application.
+
 **Counterexample:** using `dept` only in logging does not make it enforced
 material. Conversely, a grant's `{}` does not invent a Finance constraint simply
 because the endpoint has a department input. Request bindings and actual
 authority constraints both need their proper meaning.
 
 Sources: [request vocabulary](../../docs/authorization-vocabulary.md),
-[endpoint gate](../../docs/endpoint-authorization.md).
+[endpoint gate](../../docs/endpoint-authorization.md),
+[missing, invalid and unsupported evidence](../../docs/grant-conditions.md).
 
 ## Resolution and evaluation
 
@@ -859,9 +1170,83 @@ valid. The resolved G2 route retains:
 | Boundary | Parent restrictions, including Finance, AND child C17. |
 | Remaining dependencies | Applicable controls, time windows and any human/proxy limits. |
 
-This is an explanatory view, **not a canonical resolved-grant JSON contract**.
-Its complete serialization and provenance evidence remain pending. The approved
-grant/assignment JSON explains the inputs without inventing output fields.
+**This view now has an approved contract.** An application asks what one human
+holds in one area, and never asks whether to allow:
+
+```json
+{
+  "version": "1",
+  "identity": {
+    "version": "1",
+    "actor": {"type": "service_account", "id": "agent_hrms"},
+    "human_id": "U-17"
+  },
+  "options": {}
+}
+```
+
+`actor` is the asking application's own credential; `human_id` is the person it
+asks about. They are different parties, and that separation is the point — an
+application asks as itself about many humans and is none of them. Nothing in the
+question names an endpoint, a method, a resource or a verdict. `options` carries
+two optional narrowings and nothing else: `permissions` restricts the answer (a
+narrowing, never an assertion — omitted means everything the human holds, which is
+the cacheable answer), and `omit_source` drops the explanation.
+
+The answer echoes the three boundaries and lists every grant the human holds there,
+after the chain has been walked:
+
+```json
+{
+  "version": "1",
+  "tenant_id": "acme",
+  "application_id": "hrms",
+  "human_id": "U-17",
+  "resolved_grants": [
+    {
+      "version": "1",
+      "grant_id": "G2",
+      "revision": 1,
+      "parent_grant_id": "G1",
+      "permissions": ["hrms:employee:certificate::read"],
+      "scope": {"dept": "FIN", "cert": "C17"},
+      "validity": {"not_before": null, "expires_at": null},
+      "source": {
+        "assignment_id": "A2",
+        "team_id": "Team2",
+        "via": "membership",
+        "lineage": [
+          {"grant_id": "G1", "revision": 2, "assignment_id": "A1", "team_id": "Team1", "root": true},
+          {"grant_id": "G2", "revision": 1, "assignment_id": "A2", "team_id": "Team2"}
+        ]
+      }
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `version` | On the envelope and on every grant. A grant's version says how to read its scope and validity — the fields that decide a boundary. |
+| `tenant_id`, `application_id`, `human_id` | The three boundaries, echoed, so a consumer can tell "nothing here" from "answered about somebody else". |
+| `resolved_grants` | Every grant the human holds in this area. **Empty is a completed answer, never a failure.** |
+| `permissions` | What this grant selects, already expanded from any adopted role. |
+| `scope` | The boundary, **already folded down the chain** — a consumer never folds one itself. |
+| `validity` | The narrowest window in the chain; absent means no automatic expiry. |
+| `source` | Why the human holds it: the binding, the group, and the lineage root-first. |
+
+A consumer must reject an unsupported version rather than guessing a default;
+corroborate the three boundaries against its own question, since an answer about a
+different tenant, application or human is unusable *in whole* rather than in part;
+reject unknown fields, duplicate keys and trailing content; bound the answer's
+size; and never follow a redirect, because following one hands the credential to
+whoever set the header and then believes the reply. **Every failure here is an
+evaluation error and never a denial.**
+
+What is deliberately *not* adopted: the route it is served at, a batch form, and
+freshness fields — nothing caches yet, so nothing can be stale, and a cache and an
+epoch are adopted together or not at all. `source` is explanation, not
+authorization: none of it may be used to widen what the grant already permits.
 
 **Complete route** means keeping the operation, boundary and all required
 support together. Finance-write from one route and Engineering-read from another
@@ -870,13 +1255,30 @@ the system does not intersect every unrelated grant into a globally narrowest
 scope either. For an approved finite batch, different complete routes may cover
 different items, with every item covered before protected effects.
 
+**An unusable route does not establish a denial.** A route the consumer cannot
+read — malformed, internally inconsistent, carrying identifiers it cannot parse —
+is exactly a route that might have authorized:
+
+| Situation | Result |
+|---|---|
+| A route is unusable, and another complete route authorizes | **Allow.** The unusable route says nothing about the one that did. |
+| A route is unusable, and no other route authorizes | **Evaluation error.** The denial is not established. |
+| Every route is readable, and none authorizes | **Completed denial.** |
+
+An unusable route therefore costs that route, and costs the *certainty* of a
+denial — not the whole answer. This matters more now that an answer describes
+everything a human holds in an area: failing the whole evaluation on any bad route
+would take away every other grant that human held.
+
 **Counterexample:** copying G2's local `{"cert":"C17"}` into a new independent
 grant drops inherited Finance and source dependencies. That is not resolution;
 it is unauthorized authority expansion.
 
 Sources: [vocabulary](../../docs/authorization-vocabulary.md),
 [lineage](../../docs/authority-lineage.md),
-[decisions](../../docs/decision-results.md), [batch coverage](../../docs/bulk-enforcement.md).
+[authority loading transport](../../docs/authority-resolve-transport.md),
+[decisions and unusable routes](../../docs/decision-results.md),
+[batch coverage](../../docs/bulk-enforcement.md).
 
 ## Decision and enforcement
 
@@ -892,14 +1294,29 @@ Approved minimum allow result, for the G2 route above:
 {
   "version": "1",
   "decision": "allow",
-  "grant_ids": ["G2"]
+  "grant_ids": ["G0", "G1", "G2"]
 }
 ```
 
-`grant_ids` is a non-empty array of non-empty supporting grant identifiers,
-not all the human's grants. These references are **supporting evidence** for
-traceability, not new authority or a complete lineage snapshot. Returning them
-does not require logging every request or supplying a returned scope field.
+`grant_ids` is the **contributing chain of the route that authorized the request,
+ordered root first**. Read left to right, that is the trusted root, the grant
+narrowing it to one department, and the grant narrowing that to one certificate.
+**The order is the dependency**: each entry is bounded by the one before it. It is
+a non-empty array of supporting grant identifiers for *this* evaluation — not all
+the human's grants, and not a reusable authorization for another request. These
+references are **supporting evidence** for traceability, not new authority.
+Returning them does not require logging every request or supplying a returned scope
+field.
+
+The richer alternative — assignment, team and revision per step — was considered
+and not adopted: authority loading already answers in that shape, so a caller
+needing it asks the service that owns those records. The order carries the
+structure, and everything the richer form adds is history rather than structure.
+The cost is stated rather than hidden: an endpoint holding only grant ids cannot
+later say which *assignment* carried the authority if that assignment has since
+been deleted. That is acceptable while the evidence exists to let an endpoint
+account for its own effect, and would not be if the array were ever made the record
+of last resort — which is the audit layer's question.
 
 Approved minimum deny result, with illustrative reason/code text:
 
@@ -916,15 +1333,52 @@ Approved minimum deny result, with illustrative reason/code text:
 `error_code` identifies the cause programmatically. `error_message` is the
 user-facing explanation; `error_message_reason` gives explanatory detail.
 Both are evaluator-provided and reach the UI. The second field is not a private
-server-only diagnostic channel. Exact code catalogs, disclosure/value rules and
-HTTP mappings remain pending.
+server-only diagnostic channel.
 
-Approved minimum evaluation-error result, with illustrative timeout code:
+**The code catalogue is open and its names are fixed.** A published code never
+changes meaning; new codes may appear at any time. A consumer must tolerate a code
+it does not recognize and fall back to the *class* the result arrived in — a
+completed denial, or a failure to establish authority. So a consumer may not switch
+exhaustively on codes and must not make a security-relevant choice from one: that
+choice is already carried by the allow / deny / evaluation-error distinction, which
+is the contract a consumer branches on. **A code explains; it does not decide.**
+
+A `AUTHORITY_` prefix means the authority answer failed or failed to arrive; an
+unprefixed name identifies the decision itself, the caller's own configuration, or
+the specific way an answer disagreed with the question it was asked.
+
+| Code | Meaning |
+|---|---|
+| `AUTHORITY_UNREACHABLE` | The authority service did not answer. |
+| `AUTHORITY_TIMEOUT` | It did not answer in time. |
+| `AUTHORITY_REFUSED` | It answered, and the answer was not a success. |
+| `AUTHORITY_UNAVAILABLE` | An in-process authority store could not answer. |
+| `AUTHORITY_UNREADABLE` | The answer did not match the contract, or was not the contract at all. |
+| `AUTHORITY_AMBIGUOUS` | The answer did not mean exactly one thing. |
+| `AUTHORITY_OVERSIZED` | The answer exceeded the accepted size. |
+| `AUTHORITY_MALFORMED` | The answer was read, and this gate cannot use it. |
+| `UNSUPPORTED_VERSION` | The answer states a contract version this consumer does not speak. |
+| `WRONG_AREA` | The answer describes a different tenant or application. |
+| `WRONG_SUBJECT` | The answer describes a different human. |
+| `NO_AUTHORIZING_GRANT` | A completed denial: no complete route authorizes this operation. |
+| `MISCONFIGURED` | The asking application's own setup is wrong, before any question is sent. |
+
+`AUTHORITY_UNREADABLE` and `AUTHORITY_MALFORMED` are deliberately distinct: one
+answer could not be read, the other was read and could not be used, and they occur
+in different layers. The cost of an open list is stated plainly — **no consumer can
+write an exhaustive handler**, and one that logs an unrecognized code without
+alerting on it will swallow a new failure mode silently. That is accepted, because
+freezing the list buys exhaustiveness in exchange for a contract version every time
+a layer learns something new about how authority can fail to arrive.
+
+Disclosure and value rules, and HTTP mappings, remain outside this contract.
+
+Approved minimum evaluation-error result, with a published timeout code:
 
 ```json
 {
   "version": "1",
-  "error_code": "AUTH_SERVICE_TIMEOUT",
+  "error_code": "AUTHORITY_TIMEOUT",
   "error_message": "We could not check your access.",
   "error_message_reason": "The authorization service did not respond in time."
 }
@@ -941,11 +1395,25 @@ the evaluated boundaries. It is an activity, not another result field. An allow
 for Finance/C17 cannot authorize an unchecked read of a different certificate.
 Evidence, evaluation and execution must remain about the same operation.
 
+**What a response discloses is the endpoint's duty, not the gate's.** A caller
+holding write and not the matching read issues an update: the write is authorized
+and succeeds, and the response carries the whole record — fields the caller never
+supplied and now learns by writing. No rule here is violated, and the gate could
+not have prevented it; it cannot know what a body contains and should not be given
+the job of finding out. That does not make disclosure nobody's duty. It is
+authorization work, assigned where the split already puts it: the endpoint keeps
+execution, and its output, inside the authorized boundary. The tradeoff is worth
+naming — an endpoint author who reads only the policy contract may never think
+about the response at all, which is why it is stated as a rule with a name to point
+at during review.
+
 **Counterexample:** returning a timeout as `NO_AUTHORIZING_GRANT` claims a
 completed policy conclusion the evaluator never reached. Returning allow with
 an empty supporting list violates the approved minimum evidence contract.
 
-Source: [result contracts and rationale](../../docs/decision-results.md).
+Sources: [result contracts, the code catalogue and the contributing chain](../../docs/decision-results.md),
+[response disclosure](../../docs/endpoint-authorization.md),
+[what an audit consumer may rely on](../../docs/authority-change-audit.md).
 
 ## Responsibility layers
 
@@ -972,12 +1440,39 @@ write, and not a second business-rule engine. Their rationale is that authority
 to perform an assignment operation and authority to distribute its proposed
 content answer different questions.
 
+**One gate in front of one endpoint, and the order is the authorization.** An
+application supplies four things and receives one:
+
+| | What it is | What it must not do |
+|---|---|---|
+| **Policy** | The endpoint's static declaration. | Change after mounting. |
+| **Identity source** | Establishes the trusted request context. | Read the business body — it is handed a request whose body is empty. |
+| **Binder** | Validates application schema, selects the material, and returns the effect as a closure over those same validated values. | Publish output, or perform the effect. |
+| **Failure handler** | Renders a denial or an evaluation failure. | Turn one into the other, or proceed. |
+
+And it receives the **Result** — the decision and, on an allow, the contributing
+chain. The order is: method and route, then identity (from a request with no
+business body, so a credential can never be taken from the payload it protects),
+then the trusted correlations, then the binder, then authority loading and
+evaluation, and **only on an allow** the effect, which is handed the Result and no
+HTTP request — so it cannot reparse a path or a body after the decision. The binder
+runs *before* evaluation deliberately: the effect must close over the same
+validated values the decision was made about, and a binder running afterwards could
+bind to something else.
+
+An application linking this gate links **no authority records, no schema and no
+authority store**. It needs the gate and a source of answers, and nothing else.
+Deliberately unspecified: an SDK, the HTTP status mapping for each failure kind,
+and any transport for administration — one endpoint is published, and
+administrative operations have no wire contract.
+
 No new service API, evaluator signature or validator-result JSON is adopted in
 this reference. Those integration details belong to the implementation guide
 and remaining contract work.
 
 Sources: [responsibilities](../../docs/system-overview.md),
-[Auth boundary gate](../../docs/authority-boundary-validation.md).
+[Auth boundary gate](../../docs/authority-boundary-validation.md),
+[handler integration contract](../../docs/handler-integration-contract.md).
 
 ## What this reference deliberately does not invent
 
@@ -986,11 +1481,25 @@ decision state. Subteams and subgrants remain teams and grants. Orphaning and
 effectiveness remain derived meanings, not extra live status fields. Scope
 composition remains AND, not a new query language or JSON merge operation.
 
-Membership/owner records, registration, full role publication, delegation
-evidence, resolved-request/resolved-grant transports and computed-root encoding
-are explicitly marked pending where discussed. Explaining them here does not
-approve a missing schema. See the [pending register](../appendices/pending.md)
-for the remaining choices, not a new question quota.
+Membership records, registration, full role publication, delegation evidence, the
+resolved-*request* envelope and computed-root encoding are explicitly marked
+pending where discussed. Explaining them here does not approve a missing schema.
+See the [pending register](../appendices/pending.md) for the remaining choices, not
+a new question quota.
+
+Two things previously listed there are no longer pending, and one is superseded
+rather than completed. **Authority loading has a contract** — the question and its
+answer are approved, above. **Administration is an ordinary grant**, so it needed no
+administrative authority model of its own. And **the ownership relation is
+superseded**: ownership is a grant, not a table, so there is no owner record left
+to specify.
+
+What remains genuinely open is worth naming precisely rather than gesturing at: the
+boundary an endpoint operates at is not declared, so a policy can claim a narrow
+boundary and read a wide one; administrative operations have no wire contract;
+freshness fields and caching are adopted together or not at all, and neither is;
+non-HTTP and background integration is explicitly deferred for v1; and direct-human
+parent-support eligibility is unchanged.
 
 **Foundation takeaway:** a reader should now be able to distinguish what names
 an operation, what bounds it, what defines authority, how someone receives it,
