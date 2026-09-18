@@ -346,7 +346,7 @@ func fixtures(t *testing.T) []storage.Snapshot {
 	// text, and nothing about the layout assumes otherwise.
 	hrmsRead := "hrms:許可🚀::読む"
 	crmRead := "crm:許可🚀::読む"
-	hrms := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{hrmsRead: {ID: hrmsRead, Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}}, Scopes: map[string]domain.ScopeDefinition{"部門": {Key: "部門"}}}
+	hrms := domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{hrmsRead: {ID: hrmsRead, Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}}, Scopes: map[string]domain.ScopeDefinition{"部門": {Key: "部門", Boundary: domain.ApplicationBoundary}}}
 	crm := domain.Catalog{ApplicationID: "crm", Permissions: map[string]domain.PermissionDefinition{crmRead: {ID: crmRead, Active: false, Boundary: domain.ApplicationBoundary, Namespace: "crm"}}, Scopes: map[string]domain.ScopeDefinition{}}
 	a1, _ := domain.NewArea("acme", "hrms")
 	a2, _ := domain.NewArea("beta", "hrms")

@@ -60,6 +60,7 @@ func TestAnApplicationDecidesOverTheWire(t *testing.T) {
 		CreateRegistry:         true,
 		Administration:         &lab.RoleAdministration{AssignmentStatusAdministration: status},
 		RegistryAdministration: regAdmin{}, Operator: operator, Clock: clock{},
+		PlatformNamespace: lab.PlatformNamespace,
 	})
 	if err != nil {
 		t.Fatal(err)

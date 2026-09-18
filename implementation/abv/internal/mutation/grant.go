@@ -4,6 +4,7 @@ import (
 	"agentlabs.local/abv/domain"
 	"agentlabs.local/abv/internal/codec"
 	"agentlabs.local/abv/internal/storage"
+	"agentlabs.local/abv/internal/validation"
 	"context"
 	"sort"
 	"time"
@@ -107,6 +108,14 @@ func (s *Service) CreateGrant(ctx context.Context, area domain.Area, identity do
 			return storage.WriteSet{}, domain.ErrRejected
 		}
 		if err := admin.CheckGrantCreate(ctx, area, identity, content, s.clock.Now()); err != nil {
+			return storage.WriteSet{}, err
+		}
+		// A platform scope key names one of Auth's own records, so its value is
+		// resolved rather than trusted — Q-156. The teams map is in hand here and
+		// is not in the catalog check the storage layer runs, which is why this is
+		// a separate check; the snapshot is read inside the writing transaction,
+		// so a team deleted between here and the write cannot slip through.
+		if err := validation.CheckPlatformScopeValues(snapshot.Catalog, snapshot.Teams, content); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := ctx.Err(); err != nil {

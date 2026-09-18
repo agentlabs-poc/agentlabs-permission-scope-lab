@@ -56,10 +56,34 @@ func New(provider storage.Provider, administration Administration, clock Clock) 
 // The registry argument is satisfied structurally: nothing here imports the
 // registry, and the composition happens in whichever package holds both.
 func OpenSQLite(ctx context.Context, path string, administration Administration, clock Clock, registry Registry) (*Facade, error) {
-	if registry == nil {
+	return OpenSQLiteWithOptions(ctx, path, administration, clock, Options{Registry: registry})
+}
+
+// Options carries what a store needs beyond its path.
+type Options struct {
+	// Registry answers whether an application exists and whether a tenant holds
+	// it. It is required — those facts are not Auth-AL's.
+	Registry Registry
+	// PlatformNamespace names the namespace Auth's own permissions live in, and
+	// with it the area the tenant's administrative chain is in — Q-155 /
+	// ADMIN-007. Left empty, the administrative operations refuse: a store that
+	// cannot say where the Auth chain is cannot resolve authority on it, and
+	// resolving `auth:` permissions against an application's own chain instead is
+	// exactly the leak Q-151's namespace slice exists to prevent.
+	PlatformNamespace string
+}
+
+// OpenSQLiteWithOptions is OpenSQLite with the deployment's own choices. It is a
+// second door rather than a longer signature because a store's path, its
+// administration and its clock are what every caller has, and the rest is what
+// only some do.
+func OpenSQLiteWithOptions(ctx context.Context, path string, administration Administration, clock Clock, options Options) (*Facade, error) {
+	if options.Registry == nil {
 		return nil, domain.ErrMalformed
 	}
-	provider, err := sqlite.OpenWithOptions(ctx, path, sqlite.Options{Registry: registry})
+	provider, err := sqlite.OpenWithOptions(ctx, path, sqlite.Options{
+		Registry: options.Registry, PlatformNamespace: options.PlatformNamespace,
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -17,6 +17,22 @@ type Snapshot struct {
 	Memberships  []domain.Membership
 	Ownerships   []domain.Ownership
 	TrustedRoots map[string]bool
+	// Administrative carries the tenant's Auth-namespace authority, read in the
+	// same transaction as everything above it.
+	//
+	// Administrative authority is an ordinary grant on the Auth root chain
+	// (Q-155 / ADMIN-007), and that chain lives in the platform namespace — a
+	// different area from the operation being gated. Q-151's namespace slice is
+	// what makes it a different area rather than a convention: an application
+	// root's ceiling is its own namespace, so no chain in an application's area
+	// can ever carry an `auth:` permission.
+	//
+	// Nil means the snapshot is *already* the administrative one, which is the
+	// case when the operation is performed in the platform namespace itself. It
+	// is populated only by UpdateAdministered, because reading a second area for
+	// every business resolve would double the cost of the hot path for a chain
+	// that only administrative writes consult.
+	Administrative *Snapshot
 }
 
 type GrantStatusChange struct {
@@ -82,5 +98,10 @@ type NewGrant struct {
 type Provider interface {
 	Read(context.Context, domain.Area, func(Snapshot) error) error
 	Update(context.Context, domain.Area, func(Snapshot) (WriteSet, error)) error
+	// UpdateAdministered is Update with Snapshot.Administrative populated. An
+	// administrative operation resolves the acting human's authority against the
+	// tenant's Auth chain, which is a different area; this reads both inside one
+	// transaction so the authority cannot change between the check and the write.
+	UpdateAdministered(context.Context, domain.Area, func(Snapshot) (WriteSet, error)) error
 	Close() error
 }

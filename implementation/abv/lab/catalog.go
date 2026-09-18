@@ -186,3 +186,17 @@ func (a catalogAdministration) CheckPlatformPermissionRegistration(ctx context.C
 	}
 	return nil
 }
+
+// CheckPlatformScopeRegistration gates a scope key Auth itself owns. Same fixture
+// publisher as the permission gate above, and the same caveat: a real deployment
+// admits only the platform's own administrator. A platform key lands in every
+// application's catalog, so this is not a tenant's or an application's write.
+func (a catalogAdministration) CheckPlatformScopeRegistration(ctx context.Context, namespace string, identity domain.Identity, _ domain.ScopeDefinition, _ time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if namespace == "" || identity != catalogPublisher {
+		return domain.ErrRejected
+	}
+	return nil
+}

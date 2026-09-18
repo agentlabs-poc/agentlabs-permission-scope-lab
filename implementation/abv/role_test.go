@@ -29,6 +29,13 @@ func (p *publicRoleProvider) Update(_ context.Context, _ domain.Area, cb func(st
 	_, e := cb(p.snapshot)
 	return e
 }
+
+// UpdateAdministered delegates: a fake's snapshot is the whole world it has, so
+// it is its own administrative chain, and a nil Snapshot.Administrative says
+// exactly that.
+func (p *publicRoleProvider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
+}
 func TestFacadePublishRole(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	p := &publicRoleProvider{storage.Snapshot{Area: area, Catalog: domain.Catalog{ApplicationID: "hrms", Permissions: map[string]domain.PermissionDefinition{"hrms:payroll:payslip::read": {ID: "hrms:payroll:payslip::read", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms"}}}, Roles: map[domain.RoleKey]domain.RoleContent{}}}

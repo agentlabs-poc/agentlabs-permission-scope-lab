@@ -56,7 +56,11 @@ func Connect(ctx context.Context, area domain.Area, path string) (application.AP
 	if err != nil {
 		return nil, nil, err
 	}
-	facade, err := abv.OpenSQLite(ctx, path, administration, clock{}, registry)
+	// The platform namespace is where the tenant's administrative chain lives, so
+	// a lab store that did not name it could not resolve a team write — Q-155.
+	facade, err := abv.OpenSQLiteWithOptions(ctx, path, administration, clock{}, abv.Options{
+		Registry: registry, PlatformNamespace: PlatformNamespace,
+	})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -149,54 +153,91 @@ func (a *labApplication) teamArea(area domain.Area, fixtureContext domain.Fixtur
 	return nil
 }
 
+// TeamAdminFixtureContext acts as the human who holds administrative authority
+// over exactly one team — lab.TeamAdminGrant's holder.
+//
+// A second context exists because after Q-155 / ADMIN-007 there is no gate to
+// pin: who may change a team is resolved from that human's own `auth:group::*`
+// authority. A lab that could only act as the tenant administrator could not show
+// a refusal that was about authority rather than about the fixture, which is the
+// whole claim the change makes.
+const TeamAdminFixtureContext = "priya-team-admin"
+
+// teamActors maps a fixture context to the human it acts as. A fixture context is
+// the lab's stand-in for an authenticated session; the identity is what the
+// resolution actually consumes.
+var teamActors = map[string]string{
+	roleFixtureContext:      "fi7io4lvjqio",
+	TeamAdminFixtureContext: "fi7io4lvjwu8",
+}
+
+// teamActor resolves the acting identity for a team write. It replaced teamArea
+// on the five write methods: the check that remains is which sessions the lab
+// admits, and nothing about what they may do.
+func (a *labApplication) teamActor(area domain.Area, fixtureContext domain.FixtureContext) (domain.Identity, error) {
+	if area != a.area {
+		return domain.Identity{}, domain.ErrRejected
+	}
+	human, ok := teamActors[fixtureContext.Name]
+	if !ok {
+		return domain.Identity{}, domain.ErrRejected
+	}
+	return domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: human}, HumanID: human}, nil
+}
+
 func (a *labApplication) CreateTeam(ctx context.Context, area domain.Area, fc domain.FixtureContext, name, parentID string) (domain.Team, error) {
-	if err := a.teamArea(area, fc); err != nil {
+	identity, err := a.teamActor(area, fc)
+	if err != nil {
 		return domain.Team{}, err
 	}
 	if err := verifyMarker(ctx, a.path, area); err != nil {
 		return domain.Team{}, err
 	}
-	return a.facade.CreateTeam(ctx, area, TeamFINC17(area).Issuer, name, parentID)
+	return a.facade.CreateTeam(ctx, area, identity, name, parentID)
 }
 
 func (a *labApplication) SetTeamParent(ctx context.Context, area domain.Area, fc domain.FixtureContext, id, parentID string) (domain.Team, error) {
-	if err := a.teamArea(area, fc); err != nil {
+	identity, err := a.teamActor(area, fc)
+	if err != nil {
 		return domain.Team{}, err
 	}
 	if err := verifyMarker(ctx, a.path, area); err != nil {
 		return domain.Team{}, err
 	}
-	return a.facade.SetTeamParent(ctx, area, TeamFINC17(area).Issuer, id, parentID)
+	return a.facade.SetTeamParent(ctx, area, identity, id, parentID)
 }
 
 func (a *labApplication) DeleteTeam(ctx context.Context, area domain.Area, fc domain.FixtureContext, id string) error {
-	if err := a.teamArea(area, fc); err != nil {
+	identity, err := a.teamActor(area, fc)
+	if err != nil {
 		return err
 	}
 	if err := verifyMarker(ctx, a.path, area); err != nil {
 		return err
 	}
-	return a.facade.DeleteTeam(ctx, area, TeamFINC17(area).Issuer, id)
+	return a.facade.DeleteTeam(ctx, area, identity, id)
 }
 
 func (a *labApplication) AddMember(ctx context.Context, area domain.Area, fc domain.FixtureContext, teamID, humanID string) error {
-	if err := a.teamArea(area, fc); err != nil {
+	identity, err := a.teamActor(area, fc)
+	if err != nil {
 		return err
 	}
 	if err := verifyMarker(ctx, a.path, area); err != nil {
 		return err
 	}
-	return a.facade.AddMember(ctx, area, TeamFINC17(area).Issuer, teamID, humanID)
+	return a.facade.AddMember(ctx, area, identity, teamID, humanID)
 }
 
 func (a *labApplication) RemoveMember(ctx context.Context, area domain.Area, fc domain.FixtureContext, teamID, humanID string) error {
-	if err := a.teamArea(area, fc); err != nil {
+	identity, err := a.teamActor(area, fc)
+	if err != nil {
 		return err
 	}
 	if err := verifyMarker(ctx, a.path, area); err != nil {
 		return err
 	}
-	return a.facade.RemoveMember(ctx, area, TeamFINC17(area).Issuer, teamID, humanID)
+	return a.facade.RemoveMember(ctx, area, identity, teamID, humanID)
 }
 
 func (a *labApplication) GetTeam(ctx context.Context, area domain.Area, fixtureContext domain.FixtureContext, id string) (domain.Team, error) {

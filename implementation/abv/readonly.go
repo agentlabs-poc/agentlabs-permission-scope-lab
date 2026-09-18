@@ -51,4 +51,8 @@ func (p readOnlyProvider) Update(context.Context, domain.Area, func(storage.Snap
 	return domain.ErrUnsupported
 }
 
+func (p readOnlyProvider) UpdateAdministered(context.Context, domain.Area, func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return domain.ErrUnsupported
+}
+
 func (p readOnlyProvider) Close() error { return p.reader.Close() }

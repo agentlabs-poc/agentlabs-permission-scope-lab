@@ -362,6 +362,13 @@ func (p *failingCommitProvider) Update(_ context.Context, _ domain.Area, callbac
 	p.returned = writes
 	return domain.ErrConflict
 }
+
+// UpdateAdministered delegates: a fake's snapshot is the whole world it has, so
+// it is its own administrative chain, and a nil Snapshot.Administrative says
+// exactly that.
+func (p *failingCommitProvider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
+}
 func (p *failingCommitProvider) Close() error { return nil }
 
 type writeProvider struct{ snapshot storage.Snapshot }
@@ -378,6 +385,10 @@ func (p *writeProvider) Update(_ context.Context, _ domain.Area, callback func(s
 		p.snapshot.Assignments[assignment.ID] = assignment
 	}
 	return nil
+}
+
+func (p *writeProvider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
 }
 func (p *writeProvider) Close() error { return nil }
 

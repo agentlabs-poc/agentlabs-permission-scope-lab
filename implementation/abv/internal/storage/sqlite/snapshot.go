@@ -76,6 +76,78 @@ func (p *provider) snapshot(ctx context.Context, conn *sql.Conn, area domain.Are
 	return s, nil
 }
 
+// attachAdministrative reads the tenant's Auth-namespace authority into the
+// snapshot already in hand, on the same connection and inside the same
+// transaction — so the authority a gate resolves cannot change between the check
+// and the write it authorizes.
+//
+// It deliberately does not go through p.snapshot. That path asks the registry
+// whether the tenant holds the application, and the platform namespace is not an
+// application: Auth is never registered and never installed, so the question has
+// no true answer to give. Everything else is the same read.
+//
+// A provider that was not told where the Auth chain lives cannot answer an
+// administrative question at all, and says so rather than falling back to the
+// business snapshot — which would resolve `auth:` permissions against an
+// application's own chain, exactly the leak Q-151 exists to prevent.
+func (p *provider) attachAdministrative(ctx context.Context, conn *sql.Conn, s *storage.Snapshot) error {
+	if p.platformNamespace == "" {
+		return domain.ErrUnsupported
+	}
+	if s.Area.ApplicationID() == p.platformNamespace {
+		// Already the administrative area. Nil is the answer, not an omission:
+		// the chain the gate must walk is the one the caller is holding.
+		//
+		// Checked, not assumed. A namespace that names an *application* would make
+		// this branch hand the application's own chain back as the administrative
+		// one, and the caller would then resolve `<app>:group::write` against the
+		// application's root — an application's root holder silently becoming the
+		// tenant's team administrator, which is precisely the leak Q-151 exists to
+		// prevent. A misconfigured namespace has to fail closed, not sideways.
+		return platformCatalog(s.Catalog, p.platformNamespace)
+	}
+	area, err := domain.NewArea(s.Area.TenantID(), p.platformNamespace)
+	if err != nil {
+		return err
+	}
+	administrative := storage.Snapshot{
+		Area: area, Controls: map[string]domain.GrantControl{}, Contents: map[domain.GrantKey]domain.GrantContent{},
+		Assignments: map[string]domain.Assignment{}, Roles: map[domain.RoleKey]domain.RoleContent{},
+		Teams: map[string]domain.Team{}, Memberships: []domain.Membership{}, Ownerships: []domain.Ownership{},
+		TrustedRoots: map[string]bool{},
+	}
+	r := snapshotReader{conn: conn, ctx: ctx, area: area, limit: p.maxSnapshotRecords}
+	if err := r.catalog(p.platformNamespace, &administrative.Catalog); err != nil {
+		return err
+	}
+	for _, read := range []func(*storage.Snapshot) error{r.controls, r.contents, r.assignments, r.roles, r.teams, r.memberships, r.ownerships, r.roots} {
+		if err := read(&administrative); err != nil {
+			return err
+		}
+	}
+	if err := platformCatalog(administrative.Catalog, p.platformNamespace); err != nil {
+		return err
+	}
+	s.Administrative = &administrative
+	return nil
+}
+
+// platformCatalog refuses a namespace that owns no platform permission.
+//
+// It is the one observable difference between "the platform's namespace" and "some
+// application's name": Auth's own vocabulary is registered at the platform boundary
+// under it. A namespace with none is either misconfigured or not yet bootstrapped,
+// and both answers are the same — this store cannot resolve administrative
+// authority, so it says so rather than resolving something else.
+func platformCatalog(catalog domain.Catalog, namespace string) error {
+	for _, definition := range catalog.Permissions {
+		if definition.Boundary == domain.PlatformBoundary && definition.Namespace == namespace {
+			return nil
+		}
+	}
+	return domain.ErrUnsupported
+}
+
 func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) error {
 	state, err := readCatalogState(r.ctx, r.conn, applicationID)
 	if err != nil {
@@ -144,17 +216,21 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	if err = finishRows(rows); err != nil {
 		return err
 	}
-	// Scopes are L1 records: key3 the application, key4 the key.
+	// Scopes are L1 records: key3 the application or the platform's namespace,
+	// key4 the key. The union mirrors the permission read above and for the same
+	// reason — a platform key is vocabulary every application inherits.
 	rows, err = r.conn.QueryContext(r.ctx, `
-		SELECT key4, value FROM abv_l1_records
-		 WHERE boundary='application' AND tenant_id='' AND key1='abv' AND key2='scope' AND key3=? ORDER BY key4`, applicationID)
+		SELECT boundary, key3, key4, value FROM abv_l1_records
+		 WHERE tenant_id='' AND key1='abv' AND key2='scope'
+		   AND ((boundary='application' AND key3=?) OR boundary='platform')
+		 ORDER BY key3, key4`, applicationID)
 	if err != nil {
 		return classify(err)
 	}
 	for rows.Next() {
-		var key string
+		var boundary, namespace, key string
 		var payload []byte
-		if err = rows.Scan(&key, &payload); err != nil {
+		if err = rows.Scan(&boundary, &namespace, &key, &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -167,7 +243,29 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 			rows.Close()
 			return rowf(domain.ErrMalformed, "scope %q of application %q", key, applicationID)
 		}
-		catalog.Scopes[key] = domain.ScopeDefinition{Key: key}
+		where := domain.Boundary(boundary)
+		if !where.Valid() {
+			rows.Close()
+			return rowf(domain.ErrMalformed, "scope %q boundary %q", key, boundary)
+		}
+		// A scope key is a bare word, so unlike a permission id it carries no
+		// namespace to tell two declarations apart — one catalog, one entry per
+		// key. A key claimed by both an application and the platform is therefore
+		// genuinely ambiguous, and which declaration survived used to depend on how
+		// the application's id sorted against the platform's namespace: an
+		// application whose id sorts first had its own opaque values validated as
+		// Auth team ids, and one whose id sorts later did not.
+		//
+		// Refused rather than resolved, because there is no correct winner.
+		// CheckScopeRegistration already refuses a new registration that collides,
+		// so this state is only reachable for a key an application registered
+		// before Auth owned it — a migration to notice loudly, not to guess at.
+		if existing, seen := catalog.Scopes[key]; seen {
+			rows.Close()
+			return rowf(domain.ErrMalformed, "scope %q is claimed at both the %s and %s boundaries, in namespace %q",
+				key, existing.Boundary, where, clip(namespace))
+		}
+		catalog.Scopes[key] = domain.ScopeDefinition{Key: key, Boundary: where}
 	}
 	if err = finishRows(rows); err != nil {
 		return err

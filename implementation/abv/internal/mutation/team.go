@@ -218,16 +218,19 @@ func (s *Service) teamCatalog(ctx context.Context, area domain.Area, identity do
 // the team; Auth-AL names the record.
 func (s *Service) CreateTeam(ctx context.Context, area domain.Area, identity domain.Identity, name, parentID string) (domain.Team, error) {
 	fail := func(err error) (domain.Team, error) { return domain.Team{}, err }
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return fail(err)
 	}
 	proposed := domain.Team{ID: s.ids.Next(), Name: name, ParentID: parentID}
-	err = s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	err := s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamCreate(ctx, area, identity, proposed, s.clock.Now()); err != nil {
+		// The bounding team is the parent, because creating a subteam is the act
+		// `auth:group::create` covers "creating teams and subteams" with. A
+		// top-level team has no parent and so no bounding team, which only an
+		// unscoped route satisfies — the tenant administrator's.
+		if err := s.authorizeUnder(ctx, snapshot, identity, groupCreate, parentID, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckTeamCreation(snapshot.Teams, proposed); err != nil {
@@ -251,17 +254,37 @@ func (s *Service) CreateTeam(ctx context.Context, area domain.Area, identity dom
 // re-parent is a change to the team.
 func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity domain.Identity, id, parentID string) (domain.Team, error) {
 	fail := func(err error) (domain.Team, error) { return domain.Team{}, err }
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return fail(err)
 	}
 	var result domain.Team
-	err = s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	err := s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamWrite(ctx, area, identity, id, s.clock.Now()); err != nil {
+		// Both ends, and deliberately two calls rather than one. A move changes
+		// where a team hangs, so it is a write to the team *and* a change to what
+		// the new parent contains; requiring authority over each is the
+		// conservative reading, and conservative is the direction that can be
+		// loosened later.
+		//
+		// They cannot be one call: a single route can never carry team=id and
+		// team=parentID at once, so asking for both in one material map would ask
+		// for a route that cannot exist. In practice this means only an unscoped
+		// route — the tenant administrator's — moves a team between two parents,
+		// which is the honest consequence rather than a rule invented here.
+		if err := s.authorizeTeam(ctx, snapshot, identity, groupWrite, id, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
+		}
+		if parentID != snapshot.Teams[id].ParentID {
+			// The other end. A move *up* to top level has no new parent to name,
+			// and the end state is the one CreateTeam reserves for an unscoped
+			// route — so it takes the same unscoped route. Checking only the moved
+			// team here let a holder scoped to one team produce, by moving, the
+			// state it could not produce by creating.
+			if err := s.authorizeUnder(ctx, snapshot, identity, groupWrite, parentID, s.clock.Now()); err != nil {
+				return storage.WriteSet{}, err
+			}
 		}
 		if err := validation.CheckTeamReparent(snapshot.Teams, id, parentID); err != nil {
 			return storage.WriteSet{}, err
@@ -282,7 +305,7 @@ func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity 
 		// caller whose request timed out after succeeding got a conflict on the
 		// repeat. UpgradeAssignment carries the same shortcut for its own no-op.
 		if snapshot.Teams[id].ParentID != parentID {
-			if err := refuseAffectedBindings(snapshot, id); err != nil {
+			if err := refuseAffectedBindings(snapshot, administrativeChain(snapshot), id); err != nil {
 				return storage.WriteSet{}, err
 			}
 		}
@@ -308,18 +331,23 @@ func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity 
 // administration, membership administration and assignment authority distinct.
 // The caller empties the team first, deliberately.
 func (s *Service) DeleteTeam(ctx context.Context, area domain.Area, identity domain.Identity, id string) error {
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return err
 	}
-	return s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	return s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamDelete(ctx, area, identity, id, s.clock.Now()); err != nil {
+		if err := s.authorizeTeam(ctx, snapshot, identity, groupDelete, id, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckTeamDeletion(snapshot.Teams, snapshot.Memberships, snapshot.Ownerships, snapshot.Assignments, id); err != nil {
+			return storage.WriteSet{}, err
+		}
+		// And the administrative chain, which is in another area and so not in the
+		// assignments above. An administrative assignment names a team exactly as a
+		// business one does.
+		if err := refuseAdministrativeDependants(administrativeChain(snapshot), id); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := ctx.Err(); err != nil {
@@ -346,16 +374,18 @@ func (s *Service) RemoveMember(ctx context.Context, area domain.Area, identity d
 }
 
 func (s *Service) membership(ctx context.Context, area domain.Area, identity domain.Identity, teamID, humanID string, add bool) error {
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return err
 	}
 	m := domain.Membership{TeamID: teamID, HumanID: humanID}
-	return s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	return s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamWrite(ctx, area, identity, teamID, s.clock.Now()); err != nil {
+		// `auth:group::write` "includes human membership" — Q-092 — so moving a
+		// human in or out is the same authority as changing the team, bounded by
+		// the team being changed.
+		if err := s.authorizeTeam(ctx, snapshot, identity, groupWrite, teamID, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckMembership(snapshot.Teams, m); err != nil {
@@ -385,26 +415,6 @@ func (s *Service) membership(ctx context.Context, area domain.Area, identity dom
 	})
 }
 
-// teamAdministration resolves the write seam. It is separate from the read seam
-// because creating, changing and deleting a team are the handbook's three named
-// operations, and reading one is none of them.
-func (s *Service) teamAdministration(ctx context.Context, area domain.Area, identity domain.Identity) (TeamAdministration, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	if err := area.Validate(); err != nil {
-		return nil, err
-	}
-	if err := validateSupportedIdentity(identity); err != nil {
-		return nil, err
-	}
-	admin, ok := s.administration.(TeamAdministration)
-	if !ok || nilInterface(admin) {
-		return nil, domain.ErrUnsupported
-	}
-	return admin, nil
-}
-
 // refuseAffectedBindings rejects while an enabled binding sits at or beneath
 // this team.
 //
@@ -415,7 +425,7 @@ func (s *Service) teamAdministration(ctx context.Context, area domain.Area, iden
 //
 // Disabled bindings are left out. They hold nothing to re-anchor, and enabling
 // one revalidates against the structure as it then is.
-func refuseAffectedBindings(snapshot storage.Snapshot, teamID string) error {
+func refuseAffectedBindings(snapshot, chain storage.Snapshot, teamID string) error {
 	// A children index, built once, then walked downward. Growing the set by
 	// repeated passes over every team was correct and cost a pass per level —
 	// and team depth is whatever a tenant makes it, with no cap at creation.
@@ -445,12 +455,20 @@ func refuseAffectedBindings(snapshot storage.Snapshot, teamID string) error {
 			}
 		}
 	}
-	for _, assignment := range snapshot.Assignments {
-		if assignment.Status != "enabled" || assignment.Recipient.Type != "group" {
-			continue
-		}
-		if subtree[assignment.Recipient.ID] {
-			return domain.ErrConflict
+	// Both areas' assignments, over the one subtree. The teams are tenant-wide, so
+	// a move re-anchors an administrative binding exactly as it re-anchors a
+	// business one — and B13 is about what the move affects, not about which area
+	// happens to record it. When there is no separate administrative chain the two
+	// maps are the same map, and scanning it twice costs a pass and answers the
+	// same.
+	for _, assignments := range []map[string]domain.Assignment{snapshot.Assignments, chain.Assignments} {
+		for _, assignment := range assignments {
+			if assignment.Status != "enabled" || assignment.Recipient.Type != "group" {
+				continue
+			}
+			if subtree[assignment.Recipient.ID] {
+				return domain.ErrConflict
+			}
 		}
 	}
 	return nil

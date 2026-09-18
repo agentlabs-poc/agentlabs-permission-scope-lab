@@ -6,14 +6,6 @@ import (
 	"time"
 )
 
-// TeamAdministration gates the three operations the handbook names: team
-// create, team write and team delete.
-type TeamAdministration interface {
-	CheckTeamCreate(context.Context, domain.Area, domain.Identity, domain.Team, time.Time) error
-	CheckTeamWrite(context.Context, domain.Area, domain.Identity, string, time.Time) error
-	CheckTeamDelete(context.Context, domain.Area, domain.Identity, string, time.Time) error
-}
-
 // TeamReadAdministration gates reads of a tenant's teams and memberships.
 type TeamReadAdministration interface {
 	CheckTeamRead(context.Context, domain.Area, domain.Identity, time.Time) error

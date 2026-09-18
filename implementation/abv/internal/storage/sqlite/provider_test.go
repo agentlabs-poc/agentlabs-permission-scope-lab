@@ -331,7 +331,7 @@ func TestCorruptCatalogProjectionsDoNotReachCallback(t *testing.T) {
 	for name, corrupt := range cases {
 		t.Run(name, func(t *testing.T) {
 			base := contractFixture(t)
-			base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept"}
+			base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept", Boundary: domain.ApplicationBoundary}
 			path := t.TempDir() + "/authority.db"
 			opened, err := CreateFixture(t.Context(), path, []storage.Snapshot{base})
 			if err != nil {
@@ -606,7 +606,7 @@ func TestAMalformedRowIsNamed(t *testing.T) {
 		},
 		"scope": {
 			seed: func(base *storage.Snapshot) {
-				base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept"}
+				base.Catalog.Scopes["dept"] = domain.ScopeDefinition{Key: "dept", Boundary: domain.ApplicationBoundary}
 			},
 			corrupt: func(t *testing.T, p *provider, area domain.Area) {
 				if _, err := p.db.ExecContext(t.Context(),

@@ -108,6 +108,7 @@ func TestASecondStartReusesItsOwnInstallation(t *testing.T) {
 		AuthorityPath: authorityPath, RegistryPath: filepath.Join(dir, "registry.db"), CreateRegistry: true,
 		Administration:         &lab.RoleAdministration{AssignmentStatusAdministration: status},
 		RegistryAdministration: labRegistryAdmin{}, Operator: operatorIdentity(), Clock: clock{},
+		PlatformNamespace: lab.PlatformNamespace,
 	})
 	if err != nil {
 		t.Fatal(err)

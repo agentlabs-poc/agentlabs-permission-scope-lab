@@ -370,6 +370,14 @@ const (
 // per-key list of permitted tokens appears nowhere in the handbook.
 type ScopeDefinition struct {
 	Key string
+	// Boundary is where the key was registered: `application` for one an
+	// application declared, `platform` for a key Auth itself owns.
+	//
+	// A platform key names something in Auth's own records — Q-156's `team` is
+	// the first — and that is the one case where a scope value is validated to
+	// exist rather than treated as opaque. An application's catalog holds both
+	// kinds, exactly as it holds both kinds of permission.
+	Boundary Boundary
 }
 
 // ScopeFilter bounds a scope listing. A scope key is a single flat token rather

@@ -106,3 +106,86 @@ not promote them or the scratch owner-list format. The existing Team1/Team2
 example illustrates an already selected route, not a new universal source-selection
 contract. Earlier Q-093/Q-096 wording is preserved, marked superseded where the
 unconditional assigner-membership interpretation conflicts with Q-099.
+
+## Q-157 / GROUP-007 — creating a team confers its ownership, and the ownership relation is superseded
+
+Status: **AGREED.** Two statements from the user, taken together:
+*"when a team is created, he becomes the owner of it — first owner of it"* and
+*"there should be no situation where there is a team and no owner. That should
+never exist."*
+
+### Ownership is a grant
+
+Under [Q-155](administrative-authority.md), administering a team is holding
+`auth:group::write` scoped to that team. So ownership is not a separate relation —
+it is an administrative grant and its assignment:
+
+```json
+{ "grant_id": "fk3x9r2m…", "parent_grant_id": "<the Auth root>",
+  "permissions": ["auth:group::create", "auth:group::write", "auth:group::delete"],
+  "scope": { "team": "fibggi2juubk" } }
+
+{ "grant_id": "fk3x9r2m…", "grant_revision": 1,
+  "recipient": { "type": "user", "id": "fi7io4lvjqio" }, "status": "enabled" }
+```
+
+The recipient may be a human or a team. A human holds it exactly as a team does —
+`recipient.type` has always admitted `user`, and this is a case where a direct
+human assignment is the natural shape rather than an exception.
+
+### The relation is superseded, its substance is not
+
+The `ownership` table recorded the same fact and carried **no authority**: nothing
+in resolution or validation read it. Q-099's canonical rule survives untouched and
+is now a consequence rather than a separate rule — *"an explicit authorized
+ownership change… does not automatically change the team's business grants,
+assignments, selected revisions, parent links, or other human memberships."*
+
+Under Q-155 that is simply true: an administrative grant is in the platform
+namespace and a team's business grants are in the application's, and
+[Q-151](permission-lifecycle.md)'s slice keeps them apart. Changing who administers
+a team cannot move what the team holds, because they are different chains.
+
+What Q-099 also says remains exactly as stated: ownership is not membership, and
+the continuing source of a team-held route is its supporting assignment and lineage,
+never the identity of whoever created it.
+
+### Creating a team confers its ownership
+
+Creating a team **also creates the administrative grant scoped to it and assigns it
+to the creator.** One authorized operation, two records, because the second is what
+makes the first administrable.
+
+This is what makes the invariant reachable. It is also non-circular for the reason
+[Q-153](bootstrap-authority.md) gives: the creator was authorized by something —
+either an administrative grant they already held, or, for the first team in a
+tenant, the platform-namespace authority that exists before the grant model does.
+
+### No team without an owner
+
+**A team must always have at least one enabled administrative grant naming it.**
+
+| Operation | Consequence |
+|---|---|
+| create a team | its administrative grant and assignment are created with it |
+| remove the last administrative assignment | **refused** — it would leave a team nobody can administer |
+| disable the last one | **refused**, for the same reason |
+| delete the team | permitted; the administrative grant goes with it |
+
+This is the same shape as [Q-132](grant-lifecycle.md)'s dependency rule and the
+root-holder protection: a write that would leave something unreachable is refused,
+and dismantling happens in an order that never passes through an unreachable state.
+
+### Rationale / conscious tradeoff
+
+An ownerless team is not a harmless gap. Under the old inert relation it was
+invisible — every team in the reference fixture had zero owners and behaved
+identically to an owned one. Once administration is authority, an ownerless team is
+a team no one can change, and the only remedy would be an authority above it
+reaching in, which is the escalation this model exists to avoid.
+
+The cost is that team creation now writes three records rather than one, and that a
+team cannot be handed over by removal — a new owner is appointed before an old one
+is removed. That ordering is deliberate: it is the only order that never passes
+through an ownerless state.
+

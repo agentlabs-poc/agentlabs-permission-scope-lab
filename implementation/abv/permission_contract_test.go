@@ -272,6 +272,13 @@ func (plainProvider) Read(context.Context, domain.Area, func(storage.Snapshot) e
 func (plainProvider) Update(context.Context, domain.Area, func(storage.Snapshot) (storage.WriteSet, error)) error {
 	return nil
 }
+
+// UpdateAdministered delegates: a fake's snapshot is the whole world it has, so
+// it is its own administrative chain, and a nil Snapshot.Administrative says
+// exactly that.
+func (p plainProvider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
+}
 func (plainProvider) Close() error { return nil }
 
 // plainAdministration implements only the mandatory assignment check.

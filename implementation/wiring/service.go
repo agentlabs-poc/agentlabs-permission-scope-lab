@@ -43,6 +43,11 @@ type Config struct {
 	// application" is asked by the service, not by whoever prompted it.
 	Operator regdomain.Identity
 	Clock    Clock
+	// PlatformNamespace names the namespace Auth's own permissions live in, and
+	// with it the area a tenant's administrative chain is in — Q-155 / ADMIN-007.
+	// Left empty, the administrative operations refuse rather than resolving
+	// `auth:` authority against an application's own chain.
+	PlatformNamespace string
 }
 
 // Service is the assembled Auth service: both L1 domains, and the port between
@@ -90,7 +95,9 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 		_ = applications.Close()
 		return nil, err
 	}
-	authority, err := abv.OpenSQLite(ctx, cfg.AuthorityPath, cfg.Administration, cfg.Clock, port)
+	authority, err := abv.OpenSQLiteWithOptions(ctx, cfg.AuthorityPath, cfg.Administration, cfg.Clock, abv.Options{
+		Registry: port, PlatformNamespace: cfg.PlatformNamespace,
+	})
 	if err != nil {
 		_ = applications.Close()
 		return nil, err

@@ -49,6 +49,13 @@ func (p *roleProvider) Update(_ context.Context, _ domain.Area, cb func(storage.
 	return nil
 }
 
+// UpdateAdministered delegates: a fake's snapshot is the whole world it has, so
+// it is its own administrative chain, and a nil Snapshot.Administrative says
+// exactly that.
+func (p *roleProvider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
+}
+
 func TestPublishRoleProtectsAndIsolatesProposal(t *testing.T) {
 	area, _ := domain.NewArea("acme", "hrms")
 	id := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvl534"}, HumanID: "fi7io4lvl534"}
@@ -134,6 +141,10 @@ func (p *roleReader) Read(_ context.Context, _ domain.Area, cb func(storage.Snap
 func (p *roleReader) Close() error { return nil }
 func (p *roleReader) Update(context.Context, domain.Area, func(storage.Snapshot) (storage.WriteSet, error)) error {
 	return domain.ErrUnsupported
+}
+
+func (p *roleReader) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
 }
 
 func (a roleAdmin) CheckRoleRead(context.Context, domain.Area, domain.Identity, time.Time) error {
