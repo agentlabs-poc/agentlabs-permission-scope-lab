@@ -131,9 +131,11 @@ established absence.
 
 Part II generalizes that into one rule and one boundary. **A node that cannot be
 reached closes its route** — an absent or disabled binding, a parent that no longer
-carries what the child selects, a retired permission, a closed validity window, a
-withdrawn membership. None of these is an error, and none reaches beyond its own
-route. But **unreachable is not unreadable**: a record that cannot be *parsed* is
+carries what the child selects, an unregistered permission, a closed validity window,
+a withdrawn membership. None of these is an error, and none reaches beyond its own
+route. Retirement of *one* of several selected permissions is deliberately not on
+that list: Part II narrows such a route rather than closing it, because retirement is
+a decision about one permission and closure would withdraw others nobody retired. But **unreachable is not unreadable**: a record that cannot be *parsed* is
 not a closed route, it is a failure. Closing a route can only ever remove authority,
 so skipping an unreachable node is safe; silently closing a route because a row was
 damaged would mean answering authorization questions from a store we have admitted

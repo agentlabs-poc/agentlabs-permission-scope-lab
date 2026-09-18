@@ -89,8 +89,9 @@ narrows silently. Register the right identifier and retire the wrong one.
 selects and the catalog still supplies, and stops only when nothing it selects
 survives — so a grant selecting read and write whose write is retired still supplies
 read, and a route beneath it that never selected write is untouched. The write path is
-unchanged: nothing may be authored, revised or assigned while it selects a permission
-the catalog does not supply.
+unchanged: nothing may be authored, revised, assigned **or re-enabled** while it
+selects a permission the catalog does not supply. **Disabling a narrowed grant is
+therefore one-way** until the permission is restored or the grant is revised.
 
 Detailed character validation and the full catalog lifecycle remain
 [pending](../appendices/pending.md).
@@ -141,8 +142,9 @@ with “last value wins” is incorrect when both constrain the same key.
 ## Three records, three responsibilities
 
 The following example supplies Finance certificate read/write to Team1. Assume
-registered permissions and scope definitions, valid G0 support, and successful
-administrative/source-boundary validation. Revision 2 is latest when A1 is created
+registered permissions and scope definitions, and successful administrative and
+source-boundary validation. G0 is the trusted root, held by Team0 through assignment
+A0, with Team1 as Team0's child. Revision 2 is latest when A1 is created
 or explicitly upgraded. These assumptions are required checks, not bootstrap
 shortcuts.
 
@@ -293,14 +295,19 @@ identity/delegation transports are not settled by these core examples. Do not
 fill the gaps by treating a parentless ordinary grant as a root or by copying
 recipient-relative scope text without preserving its meaning.
 
-Two things that were pending when this chapter was first drafted are not any more,
-and it matters because the gap they left was the one a migration could not avoid
+Three things that were pending when this chapter was first drafted are closed, and the
+first matters most because the gap it left was the one a migration could not avoid
 inventing. **Authority loading has a contract** — the question an application asks and
 the answer it receives are approved, and Chapter 7 states them. **Administrative
 authority is an ordinary grant**, so the records in this chapter are the
-administrative records too; there is no second model to specify. And one item is
-superseded rather than completed: ownership is a grant, not a relation, so there is no
-owner record left to design.
+administrative records too; there is no second model to specify. And the **handler
+integration contract** is stated in Chapter 7.
+
+Two more moved without closing, and the difference is worth keeping. Root
+establishment *authority* is settled; the trust evidence a setup must present is not.
+And the ownership *relation* is superseded — ownership is a grant, so no owner record
+is left to design — while the permission authorizing an ownership *transfer* remains
+unchosen.
 
 **Sources:** [permission](../../docs/permission-model.md),
 [namespace and permanence](../../docs/permission-lifecycle.md),

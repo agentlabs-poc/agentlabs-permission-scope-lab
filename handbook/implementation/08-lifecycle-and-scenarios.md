@@ -61,6 +61,7 @@ to ordinary explicit permission selection, not a reason to make all revisions li
 | Disable A2 | A2 becomes disabled; G2 remains enabled. | That recipient route stops; unrelated assignments are not globally disabled. |
 | Disable parent G2 of enabled G3 | G3 can remain stored enabled. | G3 is ineffective through missing usable support. |
 | Validly re-enable G2 | Explicit enablement succeeds only after current checks. | Still-enabled, otherwise valid G3 may work again. |
+| Re-enable a grant selecting a retired permission | **Refused.** The read path keeps a narrowed grant working; the write path will not take it back. | Disabling such a grant is one-way until the permission is restored or the grant is revised. |
 | G3 itself was explicitly disabled | Its disabled state remains. | Parent restoration does not enable it. |
 | Delete a grant | Permanent withdrawal from usable authority. | It cannot be enabled back; delete is the selected permanent operation, not a separate revoke state. |
 | Disable or delete a grant another grant names as parent | **Refused.** | Dismantling is bottom-up: the dependent goes first. No exception for a trusted root. |

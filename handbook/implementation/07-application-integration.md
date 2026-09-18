@@ -202,8 +202,10 @@ field naming an employee likewise does not establish the caller's identity.
 The handler may process other business fields, but selecting only one field as
 authorization material does not authorize arbitrary extra effects. The complete
 operation must remain within the permission and boundary actually evaluated.
-Nested input selectors, further source kinds and complete policy validation
-remain pending; do not introduce an unapproved path-expression syntax.
+Nested input selectors and further source kinds are **refused rather than pending** —
+exactly two sources are supported, and a body selector containing `.`, `[`, `]` or `/`
+is refused at mount. What remains open about a policy is the boundary it operates at,
+below; the structural rules are settled.
 
 ## Resolve authority without making the endpoint inspect grants
 
@@ -263,7 +265,8 @@ after the chain has been walked:
         "team_id": "Team2",
         "via": "membership",
         "lineage": [
-          {"grant_id": "G1", "revision": 2, "assignment_id": "A1", "team_id": "Team1", "root": true},
+          {"grant_id": "G0", "revision": 1, "assignment_id": "A0", "team_id": "Team0", "root": true},
+          {"grant_id": "G1", "revision": 2, "assignment_id": "A1", "team_id": "Team1"},
           {"grant_id": "G2", "revision": 1, "assignment_id": "A2", "team_id": "Team2"}
         ]
       }
@@ -271,6 +274,11 @@ after the chain has been walked:
   ]
 }
 ```
+
+`lineage` is root-first and complete: G0 is the trusted root, held by Team0 through
+A0, which is why it and not G1 carries `"root": true`. That completeness is what lets
+a consumer produce the allow evidence below — the same three grants, in the same
+order.
 
 `scope` arrives **already folded down the chain** — Finance from the parent, C17
 locally — so a consumer never folds one itself. `permissions` arrives already expanded

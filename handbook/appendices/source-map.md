@@ -42,12 +42,14 @@ and no pending format is promoted into a schema by being explained.
 
 ## Example identity and reuse
 
-The Foundations reference and Chapters 5–7 share G1 revision 2 → A1 → Team1,
-then G2 revision 1 → A2 → Team2,
+The Foundations reference and Chapters 5–7 share G0 revision 1 → A0 → Team0 as the
+trusted root, then G1 revision 2 → A1 → Team1, then G2 revision 1 → A2 → Team2,
 with Nutan receiving Team2 authority through membership. The local permission
 is certificate-read/write and the application boundary is FIN, with additional
-C17 narrowing in G2. G0 and the administrative root have explicitly stated valid
-upstream/trusted-establishment premises; they are not fully encoded root examples.
+C17 narrowing in G2. G0's holder and assignment are named because a resolved
+authority answer carries the root step of the chain root-first; the root's
+*establishment* is still a stated premise rather than an encoded example, and the
+administrative root likewise.
 
 Chapter 8's competing FIN/ENG direct-human diagnostic is labeled a separate
 scenario. Its G1 revisions are not an instruction to overwrite the running

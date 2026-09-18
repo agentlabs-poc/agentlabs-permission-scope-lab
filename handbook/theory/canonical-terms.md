@@ -252,8 +252,11 @@ If a name is wrong, register the right identifier and retire the wrong one.
 selects and the catalog still supplies; it stops only when nothing it selects
 survives. A grant selecting payslip-read and payslip-write whose write is retired
 still supplies read, and a route beneath it that never selected write is
-untouched. The write path is unchanged: nothing new may be authored, revised or
-assigned while it selects a permission the catalog does not supply.
+untouched. The write path is unchanged: nothing may be authored, revised, assigned
+**or re-enabled** while it selects a permission the catalog does not supply — so
+**disabling a narrowed grant is one-way** until the permission is restored or the
+grant is revised. The read path keeps such a grant working; the write path will not
+take it back.
 
 **Counterexample:** certificate-read does not confer certificate-write, even
 though the names share a prefix. A Finance scope cannot supply the missing verb.
@@ -408,8 +411,10 @@ reused without pretending that creating a definition gives someone access.
 
 Our model distinguishes live grant control, immutable content and assignment.
 The following is one consistent running example. Assume registered certificate
-permissions and scope keys, legitimate upstream G0 support, existing Team1, and
-successful authorization/boundary checks. G1 revision 2 is latest when A1 is
+permissions and scope keys, existing Team1, and successful authorization/boundary
+checks. G0 is the trusted root, held by Team0 through assignment A0, and Team1 is
+Team0's child — the example needs a named root holder because a resolved answer
+carries the root step, and a chain that begins mid-way cannot be shown honestly. G1 revision 2 is latest when A1 is
 created or explicitly upgraded. These are required premises, not bypasses.
 
 ### Grant identity and control
@@ -738,12 +743,20 @@ The scattered cases were always this one rule:
 |---|---|
 | Its supporting binding is absent or disabled | the assignment no longer carries it |
 | Its parent no longer carries what it selects | narrowing fails at that step |
-| A permission it selects is retired or unregistered | the catalog no longer supplies it |
+| A permission it selects is **unregistered** | the catalog never supplied it |
+| **Every** permission it selects is retired | nothing it selects survives — see below |
 | Its validity window has not opened, or has closed | the revision is not in force |
 | The group holding it no longer has the member | membership was withdrawn |
 
 None of these is an error and none reaches beyond its own route: other routes the
 human holds are unaffected.
+
+**Retirement is the case that does not belong on that list without qualification.**
+A grant supplies what it selects and the catalog still supplies, so retiring one of
+several selected permissions **narrows** the route rather than closing it — the route
+closes only when nothing it selects survives. An earlier statement of the
+unreachable rule listed a retired permission flatly as a closing cause; the later
+retirement decision governs where the two differ.
 
 **Unreachable is not unreadable, and the distinction is the whole safety of the
 rule.** A record that cannot be *read* — one that does not parse, or is
@@ -1037,7 +1050,8 @@ Approved PUT policy core JSON makes the local/source distinction visible:
     "tenant": {"source": "path", "name": "tenant"},
     "cert": {"source": "path", "name": "cert"},
     "proposed_dept": {"source": "body", "name": "department_id"}
-  }
+  },
+  "trusted": {"tenant": "tenant"}
 }
 ```
 
@@ -1216,7 +1230,8 @@ after the chain has been walked:
         "team_id": "Team2",
         "via": "membership",
         "lineage": [
-          {"grant_id": "G1", "revision": 2, "assignment_id": "A1", "team_id": "Team1", "root": true},
+          {"grant_id": "G0", "revision": 1, "assignment_id": "A0", "team_id": "Team0", "root": true},
+          {"grant_id": "G1", "revision": 2, "assignment_id": "A1", "team_id": "Team1"},
           {"grant_id": "G2", "revision": 1, "assignment_id": "A2", "team_id": "Team2"}
         ]
       }
@@ -1233,7 +1248,7 @@ after the chain has been walked:
 | `permissions` | What this grant selects, already expanded from any adopted role. |
 | `scope` | The boundary, **already folded down the chain** — a consumer never folds one itself. |
 | `validity` | The narrowest window in the chain; absent means no automatic expiry. |
-| `source` | Why the human holds it: the binding, the group, and the lineage root-first. |
+| `source` | Why the human holds it: the binding, the group, and the lineage root-first — G0 carries `"root": true` because G0 is the root, and the chain is complete rather than elided. |
 
 A consumer must reject an unsupported version rather than guessing a default;
 corroborate the three boundaries against its own question, since an answer about a
