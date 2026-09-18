@@ -1,4 +1,4 @@
-# Current handbook state — RECON-002, through Q-153
+# Current handbook state — RECON-002, through Q-154
 
 ## Publication checkpoint — RECON-002 and C01-D1/D2
 
@@ -45,7 +45,7 @@ the end of this page. Draft supported behavior first; do not start another
 question sequence merely because a review-area row remains open. Changes remain
 local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 
-## Thirty-two decisions recorded since the previous checkpoint
+## Thirty-three decisions recorded since the previous checkpoint
 
 | Decision | Current approved rule | Source with rationale and examples |
 |---|---|---|
@@ -60,6 +60,7 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-128 | New checks after any confirmed authority reduction cannot rely on withdrawn stale support. Other complete valid routes may allow; uncertain freshness is not proof of denial. | [Freshness](authority-freshness.md) |
 | Q-129 | The same already-allowed ordinary synchronous application operation may finish within evaluated boundaries after later withdrawal. Q-074 and Q-110 remain; queues, streams, long-running and not-yet-allowed cases are not included. | [Concurrent enforcement](concurrent-enforcement.md) |
 | Q-130 | Different complete valid grant routes may cover different batch items. All items need complete support before effects; no permission/scope fragment mixing or partial successful filtering. | [Bulk enforcement](bulk-enforcement.md) |
+| Q-154 | A delegation is permission for an actor to ask about a human, not a holding of authority, so it adds nothing to a lineage and needs no representation in an answer. It carries its own validity window and the effective lifetime is the narrower of it and the human's; it tracks the human's authority at request time rather than copying it; the human administers their own. Whether it may carry scope is left open with the reason. Closes HC-05-10. | [Delegation lifecycle](delegation-lifecycle.md) |
 | Q-153 | A tenant operates in two namespaces and these are different authorities: a platform-namespace authority that enables an application and establishes its root, and an application-namespace authority authorized against that root. Neither confers the other. Root establishment is the closing step of enabling, authorized by the first — not by a permission, which would be circular, and not by a separate operator, because the decision is the tenant's. Establishment names the holder team, which is the handover. | [Bootstrap authority](bootstrap-authority.md) |
 | Q-152 | Membership synchronization is an ordinary authorized caller: a service account with team-write authority in a definite scope, making authorized writes. Nothing writes the store directly. Bulk is an endpoint question — one team is one boundary under Q-150, several teams are governed by Q-130 — so there is no gap to fall through and no privileged mode. Auth's record is the authorization; a directory proposes. Ratifies the team-deletion guard. | [Groups and membership](groups-and-membership.md) |
 | Q-151 | An application registers only in its own namespace — the first noun segment is the application — and the platform namespace is written only by platform authority at a separate boundary. Without that slice an application root would carry platform permissions including the one that establishes application roots. An identifier is never renamed; a rename stops it resolving and every referencing grant narrows silently. Labels may be corrected. Closes HC-04-03. | [Permission lifecycle](permission-lifecycle.md) |
@@ -82,7 +83,7 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-133 | The endpoint policy declares its trusted correlations: one `trusted` map from a trusted context field to a declared input. A tenant correlation is required, a path spelling a trusted field's own name must be correlated, and a correlation may name any declared source. Supplies the mechanism for an obligation the chapter already mandated. Adopted with a recorded reservation about where the rule belongs. | [Endpoint policy format](endpoint-policy-format.md) |
 | Q-132 | A grant another grant names as parent can be neither disabled nor deleted. One rule for both operations and every grant, with no trusted-root exception; dismantling is bottom-up. A dependent is a child grant, not an assignment — counting assignments would make every held grant undisablable. Supersedes the disable-propagation cases B09–B11. | [Grant lifecycle](grant-lifecycle.md) |
 
-These are thirty-two answered decisions, not thirty-two completed chapters or thirty-two
+These are thirty-three answered decisions, not thirty-three completed chapters or thirty-three
 of the original eighteen agenda packages. Q-117 is no longer parked. Q-131 is
 withdrawn rather than approved — [Q-150](operation-enforcement.md) dissolves it,
 because composition is not a grant question. Q-131 has
@@ -108,7 +109,7 @@ every unfinished row was too broad and is not the current working classification
 | Contract-review packages | **5** | C01–C05; assistant drafts and validates, user approves genuinely new contract choices. |
 | Final acceptance | **1** | User acceptance after reconciliation, contracts, and scenarios are finished. |
 | Assistant execution packages | **8** | Same A01–A08 supporting the above agenda, not eight additional discussions. |
-| Full criteria | **46 DONE / 22 OPEN / 1 EXCLUDED** | 68 in scope: 67.6% closed, 32.4% open. HC-08-04 closed by CLOSURE-002; earlier figures retained as history. |
+| Full criteria | **47 DONE / 21 OPEN / 1 EXCLUDED** | 68 in scope: 69.1% closed, 30.9% open. HC-08-04 closed by CLOSURE-002; earlier figures retained as history. |
 
 The original thirteen design topics reduce to twelve because D02's mechanism
 choice is settled. Its remaining root wire representation is C02/C04 work, not

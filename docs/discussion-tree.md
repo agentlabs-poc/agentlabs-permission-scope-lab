@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-153
+## Current execution tree — through Q-154
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -23,6 +23,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 ├── Definition and delegation lifecycle
 │   ├── Retirement despite references; stable meaning [Q-125/126 APPROVED]
 │   ├── Direct human-to-proxy only; no proxy chains [Q-127 APPROVED]
+│   ├── Lifetime, growth and administration of a delegation [Q-154 APPROVED]
 │   └── OPEN: scope evolution, direct-delegation and ownership/sync contracts
 ├── Evaluation and operation coverage
 │   ├── All confirmed reductions govern new checks [Q-128 APPROVED]
