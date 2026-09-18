@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-149
+## Current execution tree — through Q-150
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -28,6 +28,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── All confirmed reductions govern new checks [Q-128 APPROVED]
 │   ├── Prior bounded synchronous allow may finish [Q-129 APPROVED]
 │   ├── Different complete grants across batch items [Q-130 APPROVED]
+│   ├── Composition is not a grant question [Q-150 APPROVED, withdraws Q-131]
 │   ├── No disable or delete beneath a dependent [Q-132 APPROVED]
 │   ├── A filter is a narrowing, not an assertion [Q-136 APPROVED]
 │   ├── Retirement withdraws the permission, not the route [Q-143 APPROVED]
@@ -57,8 +58,9 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 
 Twelve design topics contain remaining choices, plus five contract reviews and
 final acceptance. D02's mechanism is resolved; no new topics offset the twelve
-answers. Q-132 is approved and supersedes B09–B11. Q-133 amends CONTRACT-012's field list. Q-131 and Q-144 are not approved; Q-144 would make Q-071 a consequence of boundary coverage rather than a rule of its own. Next discussion: move source/destination grant
-composition, distinct from Q-130's finite-batch case.
+answers. Q-132 is approved and supersedes B09–B11. Q-133 amends CONTRACT-012's field list. Q-131 is withdrawn by Q-150; Q-144 is not approved; Q-144 would make Q-071 a consequence of boundary coverage rather than a rule of its own. Next discussion: the remaining questions that need the user — identity and
+proxy attribution, permission naming governance, bootstrap authority, delegation
+ceilings, group nesting, and administrative bounds.
 
 <details>
 <summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>

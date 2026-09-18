@@ -4,7 +4,7 @@
 
 [Eleven recent decisions](current-status.md) are mapped into current evidence.
 All 69 criterion texts remain unchanged; statuses move only by a recorded
-closure. Current: **44 DONE / 24 OPEN / one
+closure. Current: **45 DONE / 23 OPEN / one
 EXCLUDED**, 68 in scope. Each open row still has an incomplete full deliverable.
 These are not all user-blocking questions: drafting and verification can proceed
 from approval; ask only for materially different behavior or new contract choices.
@@ -30,6 +30,7 @@ evidence, not the authority.
 
 | Checkpoint | Earlier status | Current status | Completion evidence |
 |---|---|---|---|
+| HC-09-04 | OPEN | DONE | [Q-150](operation-enforcement.md): composition is not a grant question — the resolved authority must cover the boundary being evaluated, and a move is one endpoint evaluating once per boundary with every evaluation required to allow. Create evaluates the proposed boundary, an update that changes the boundary is a move. Answers Q-131 by withdrawing it. |
 | HC-06-07 | OPEN | DONE | [Q-148](application-registration.md): reference existence is delegated to the application — scope values are opaque to authorization — and subtree/pattern scope is excluded rather than deferred. The criterion admitted closure by explicit delegation or exclusion, and takes both. |
 | HC-07-07 | OPEN | DONE | [Q-147](endpoint-policy-format.md): the structural validation a policy must pass to be mounted, with nested body selection refused as a decision and missing inputs refused rather than defaulted. Value validation stays with the application per Q-050-F; agreed fields and validation ownership are not reopened. |
 | HC-07-10 | OPEN | DONE | [Q-146](handler-integration-contract.md): the four things an application supplies, the order the gate imposes, and the two failure kinds at the boundary. No SDK is required, as the criterion states; HTTP status mapping stays with the application. |
@@ -65,8 +66,8 @@ Full value validation and the remaining failure cases stay open and stay parked
 under PROCESS-007, so the row keeps its OPEN status rather than taking partial
 credit — this register does not award fractional closure.
 
-**Current after CLOSURE-002: 44 DONE / 24 OPEN / 1 EXCLUDED; 68 in scope;
-64.7% closed, 35.3% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
+**Current after CLOSURE-002: 45 DONE / 23 OPEN / 1 EXCLUDED; 68 in scope;
+66.2% closed, 33.8% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
 OPEN, 55.9% closed. [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
 The detailed register below incorporates these three updates; older numerical
 summaries retain their historical values. No other row is newly closed or
@@ -325,7 +326,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-09-01 | DONE | Require actual output/effects to stay within authorized boundaries and request bindings. | CONTRACT-012 / Q-050-C; [endpoint policy](endpoint-policy-format.md). |
 | HC-09-02 | DONE | Require review of effective constraints rather than mere input usage, with counterexamples. | ENFORCEMENT-003 / Q-050-D; [endpoint policy](endpoint-policy-format.md). |
 | HC-09-03 | OPEN | Define collection, count, export, and row/field restriction contracts. | Q-071 agrees denial instead of automatic authorized-subset filtering; Q-072 agrees explicit request-boundary semantics in [collection enforcement](collection-enforcement.md). Counts, pagination, exports, and row/field enforcement contracts remain unfinished. |
-| HC-09-04 | OPEN | Define create/update/move authorization for existing and proposed state. | Q-068 agrees both-boundary move authority in [operation-specific enforcement](operation-enforcement.md). The governing rule and detailed Finance example are recorded; create/update details, grant composition, and transition enforcement remain open. |
+| HC-09-04 | DONE | Define create/update/move authorization for existing and proposed state. | Q-068 agrees both-boundary move authority in [operation-specific enforcement](operation-enforcement.md). The governing rule and detailed Finance example are recorded; create/update details, grant composition, and transition enforcement remain open. Closed by CLOSURE-002 / [Q-150](operation-enforcement.md); Q-131 withdrawn rather than approved. |
 | HC-09-05 | OPEN | Define bulk authorization, partial success, and operation transaction semantics. | [Q-073/130](bulk-enforcement.md) approve full preflight, whole-batch denial when uncovered, and different complete routes per item without fragment mixing. Remaining: batch material/transport, concurrency/conflict/retry contracts and authorization-versus-execution failure obligations; no business transaction-engine design implied. |
 | HC-09-06 | OPEN | Define freshness, caching, revocation propagation, and stale membership/dependency behavior. | [Q-069/128](authority-freshness.md) require no stale withdrawn support for new checks after ALL confirmed reductions, not just deletion. Remaining: exact confirmation/ordering/evidence and cache/propagation contracts. No per-request remote call or runtime compliance claimed. |
 | HC-09-07 | OPEN | Define concurrent-change/check-to-use consistency guarantees. | [Q-074/129](concurrent-enforcement.md) preserve application boundaries and permit bounded prior-allowed synchronous completion. [Q-110](auth-write-consistency.md) retains stronger Auth-write consistency; Q-128 governs new checks. Remaining: still-evaluating ordering, exact conflict/retry/evidence and uncovered operation types. |
