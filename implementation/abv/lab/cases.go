@@ -60,7 +60,9 @@ func TeamFINC17(area domain.Area) TeamFINC17Case {
 					PayslipDelete: {ID: PayslipDelete, Active: true, Boundary: domain.ApplicationBoundary, Namespace: area.ApplicationID()},
 				},
 				Scopes: map[string]domain.ScopeDefinition{
-					"dept": {Key: "dept"}, "cert": {Key: "cert"}, "user": {Key: "user"},
+					"dept": {Key: "dept", Boundary: domain.ApplicationBoundary},
+					"cert": {Key: "cert", Boundary: domain.ApplicationBoundary},
+					"user": {Key: "user", Boundary: domain.ApplicationBoundary},
 				},
 			},
 			Controls: map[string]domain.GrantControl{
@@ -103,4 +105,164 @@ func TenantGenesis(area domain.Area) storage.Snapshot {
 	snapshot.Assignments = map[string]domain.Assignment{}
 	snapshot.TrustedRoots = map[string]bool{}
 	return snapshot
+}
+
+// The three group permissions Q-092 approved, spelled in the platform's own
+// namespace. Create covers teams and subteams, write includes human membership,
+// delete is its own authority.
+const (
+	GroupCreate = PlatformNamespace + ":group::create"
+	GroupWrite  = PlatformNamespace + ":group::write"
+	GroupDelete = PlatformNamespace + ":group::delete"
+)
+
+// The administrative chain's ids. They are spelled out rather than issued because
+// a fixture is a record of a state, and a state's identifiers are facts about it.
+const (
+	AuthRootGrant = "fk3x9r2mau01"
+	// TenantAdminGrant is the unscoped administrative authority: every group verb,
+	// no `team` predicate, so it satisfies any team. It is what "the tenant
+	// administrator" means, and Q-155 notes it is the only kind a root hands out
+	// with no predicates.
+	TenantAdminGrant = "fk3x9r2mau02"
+	// TeamAdminGrant is administrative authority over exactly one team. It carries
+	// `auth:group::write` scoped to the C17 team, which is what lets its holder
+	// add and remove that team's members and nobody else's.
+	TeamAdminGrant = "fk3x9r2mau03"
+)
+
+// AuthAdministration returns the tenant's administrative chain — Q-155 /
+// ADMIN-007's two-chain model, as records.
+//
+// Its area is the platform's namespace rather than an application, which is the
+// whole point: Q-151 slices a root's ceiling by namespace, so `auth:group::*`
+// can only ever be carried by a chain rooted here. An application's own root
+// cannot reach it, however wide that root is.
+//
+// It shares the tenant's teams and memberships with the business fixture,
+// because a tenant's teams exist once rather than once per application. The two
+// snapshots name the same teams, and the second naming is the same team.
+//
+//	fk3x9r2mau01  auth root, scope {}          held by fibggi2jur5s
+//	    └── fk3x9r2mau02  create/delete/write, scope {}
+//	                                           held by fibggi2juubk  (maya)
+//	        └── fk3x9r2mau03  write, {team: fibggi2juxhc}
+//	                                           held by fibggi2juxhc  (priya)
+//
+// It mirrors the business fixture's shape exactly, and that is the point: same
+// walk, same narrowing, same containment, one namespace over. Maya holds every
+// group verb over every team; priya holds membership writes over exactly one.
+//
+// Because a route travels the team hierarchy, bending that hierarchy severs the
+// administrative chain along with the business one. That is correct rather than
+// inconvenient — see Reanchored for the fixtures that deliberately bend it.
+func AuthAdministration(area domain.Area) (storage.Snapshot, error) {
+	authArea, err := domain.NewArea(area.TenantID(), PlatformNamespace)
+	if err != nil {
+		return storage.Snapshot{}, err
+	}
+	business := TeamFINC17(area).Snapshot
+	root := domain.GrantContent{Version: "1", GrantID: AuthRootGrant, Revision: 1, Scope: map[string]string{}}
+	tenantAdmin := domain.GrantContent{
+		Version: "1", GrantID: TenantAdminGrant, Revision: 1, ParentGrantID: AuthRootGrant,
+		Permissions: []string{GroupCreate, GroupDelete, GroupWrite}, Scope: map[string]string{},
+	}
+	teamAdmin := domain.GrantContent{
+		Version: "1", GrantID: TeamAdminGrant, Revision: 1, ParentGrantID: TenantAdminGrant,
+		Permissions: []string{GroupWrite}, Scope: map[string]string{"team": "fibggi2juxhc"},
+	}
+	return storage.Snapshot{
+		Area: authArea,
+		Catalog: domain.Catalog{
+			ApplicationID: PlatformNamespace,
+			Permissions: map[string]domain.PermissionDefinition{
+				GroupCreate: {ID: GroupCreate, Active: true, Boundary: domain.PlatformBoundary, Namespace: PlatformNamespace},
+				GroupWrite:  {ID: GroupWrite, Active: true, Boundary: domain.PlatformBoundary, Namespace: PlatformNamespace},
+				GroupDelete: {ID: GroupDelete, Active: true, Boundary: domain.PlatformBoundary, Namespace: PlatformNamespace},
+			},
+			// Q-156's key, and the only scope key Auth owns. Its values name Auth's
+			// own records, so they are resolved on the way in rather than treated as
+			// opaque the way an application's are.
+			Scopes: map[string]domain.ScopeDefinition{
+				"team": {Key: "team", Boundary: domain.PlatformBoundary},
+			},
+		},
+		Controls: map[string]domain.GrantControl{
+			AuthRootGrant:    {Version: "1", ID: AuthRootGrant, Status: "enabled"},
+			TenantAdminGrant: {Version: "1", ID: TenantAdminGrant, Status: "enabled"},
+			TeamAdminGrant:   {Version: "1", ID: TeamAdminGrant, Status: "enabled"},
+		},
+		Contents: map[domain.GrantKey]domain.GrantContent{
+			{ID: AuthRootGrant, Revision: 1}:    root,
+			{ID: TenantAdminGrant, Revision: 1}: tenantAdmin,
+			{ID: TeamAdminGrant, Revision: 1}:   teamAdmin,
+		},
+		Assignments: map[string]domain.Assignment{
+			"fm5b7t4pau01": {Version: "1", ID: "fm5b7t4pau01", GrantID: AuthRootGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2jur5s"}, Status: "enabled"},
+			"fm5b7t4pau02": {Version: "1", ID: "fm5b7t4pau02", GrantID: TenantAdminGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"},
+			"fm5b7t4pau03": {Version: "1", ID: "fm5b7t4pau03", GrantID: TeamAdminGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: "enabled"},
+		},
+		Roles:        map[domain.RoleKey]domain.RoleContent{},
+		Teams:        business.Teams,
+		Memberships:  business.Memberships,
+		Ownerships:   []domain.Ownership{},
+		TrustedRoots: map[string]bool{AuthRootGrant: true},
+	}, nil
+}
+
+// Administered pairs a business snapshot with the administrative chain that
+// authorizes changing the tenant's teams. A store holding only the first can
+// resolve business authority and no administrative authority at all, which after
+// Q-155 means it can answer a request and refuse every team write.
+func Administered(area domain.Area, business storage.Snapshot) ([]storage.Snapshot, error) {
+	administrative, err := AuthAdministration(area)
+	if err != nil {
+		return nil, err
+	}
+	return []storage.Snapshot{business, administrative}, nil
+}
+
+// ReanchoredHolder is the team Reanchored hangs the tenant administrator's grant
+// on. It is a subteam of fibggi2jv0n4, which is parentless — so the two-team
+// ladder a chain needs sits entirely outside the FIN/C17 hierarchy.
+const ReanchoredHolder = "fibggi2jv0n5"
+
+// Reanchored moves an administrative chain off the FIN/C17 hierarchy and onto a
+// ladder of its own, which is what a fixture that bends that hierarchy needs.
+//
+// A route's first hop is fixed: the parent grant must be held by the recipient's
+// *direct parent team*. So a chain is as deep as the team ladder under it, and a
+// cycle or a dangling parent anywhere along that ladder takes the authority away
+// — correctly, and fail-closed. A test about whether the re-parent walk
+// terminates would then be a test about authorization instead, answering before
+// the walk it was written for is reached.
+//
+// The ladder is fibggi2jv0n4 → ReanchoredHolder, and the named human joins the
+// second. The narrow grant is dropped rather than re-anchored: its whole content
+// is a team predicate, and there is no holder for it that does not travel the
+// hierarchy this exists to step off.
+func Reanchored(administrative storage.Snapshot, memberID string) storage.Snapshot {
+	result := administrative
+	result.Teams = map[string]domain.Team{}
+	for id, team := range administrative.Teams {
+		result.Teams[id] = team
+	}
+	result.Teams[ReanchoredHolder] = domain.Team{ID: ReanchoredHolder, Name: "fp8h2w6yv0n5", ParentID: "fibggi2jv0n4"}
+	result.Memberships = append(append([]domain.Membership{}, administrative.Memberships...),
+		domain.Membership{TeamID: ReanchoredHolder, HumanID: memberID})
+	result.Assignments = map[string]domain.Assignment{
+		"fm5b7t4pau01": {Version: "1", ID: "fm5b7t4pau01", GrantID: AuthRootGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2jv0n4"}, Status: "enabled"},
+		"fm5b7t4pau02": {Version: "1", ID: "fm5b7t4pau02", GrantID: TenantAdminGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: ReanchoredHolder}, Status: "enabled"},
+	}
+	result.Controls = map[string]domain.GrantControl{
+		AuthRootGrant:    {Version: "1", ID: AuthRootGrant, Status: "enabled"},
+		TenantAdminGrant: {Version: "1", ID: TenantAdminGrant, Status: "enabled"},
+	}
+	result.Contents = map[domain.GrantKey]domain.GrantContent{}
+	for key, content := range administrative.Contents {
+		if key.ID != TeamAdminGrant {
+			result.Contents[key] = content
+		}
+	}
+	return result
 }

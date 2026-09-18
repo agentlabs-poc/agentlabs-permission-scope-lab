@@ -59,8 +59,16 @@ func (p *provider) UpdatePlatformCatalog(ctx context.Context, namespace string, 
 		if err != nil {
 			return err
 		}
-		if writes.PlatformPermission == nil {
+		// One platform write kind per call, the same rule the application
+		// boundary applies to its own kinds.
+		if (writes.PlatformPermission == nil) == (writes.PlatformScope == nil) {
 			return domain.ErrMalformed
+		}
+		if writes.PlatformScope != nil {
+			if err := insertScopeRecordAt(ctx, conn, domain.PlatformBoundary, namespace, *writes.PlatformScope); err != nil {
+				return err
+			}
+			return bumpEveryCatalogGeneration(ctx, conn)
 		}
 		if err := insertPermissionAt(ctx, conn, domain.PlatformBoundary, namespace, *writes.PlatformPermission); err != nil {
 			return err
@@ -266,19 +274,28 @@ func permissionPayload(active bool) ([]byte, error) {
 	return raw, nil
 }
 
-// insertScopeRecord writes a scope as an L1 record. key3 is the application,
-// key4 the scope key: a scope key is a flat token, so it needs no decomposition.
-func insertScopeRecord(ctx context.Context, conn *sql.Conn, applicationID string, definition domain.ScopeDefinition) error {
+// insertScopeRecord writes a scope as an L1 record. key3 is the application, or
+// the platform's namespace for a key Auth itself owns; key4 the scope key, which
+// is a flat token and needs no decomposition.
+//
+// The boundary parameter mirrors insertPermissionAt, and for the same reason: a
+// platform key is vocabulary every application inherits, so it cannot be stored
+// under one application's own slot.
+func insertScopeRecordAt(ctx context.Context, conn *sql.Conn, boundary domain.Boundary, owner string, definition domain.ScopeDefinition) error {
 	// The payload is empty: a scope record's presence is the fact. $self is a
 	// reserved token the evaluator knows, not something a key declares.
 	if _, err := conn.ExecContext(ctx, `
 		INSERT INTO abv_l1_records
 		  (boundary, tenant_id, key1, key2, key3, key4, value)
-		VALUES ('application', '', 'abv', 'scope', ?, ?, '{}')`,
-		applicationID, definition.Key); err != nil {
+		VALUES (?, '', 'abv', 'scope', ?, ?, '{}')`,
+		string(boundary), owner, definition.Key); err != nil {
 		return classify(err)
 	}
 	return nil
+}
+
+func insertScopeRecord(ctx context.Context, conn *sql.Conn, applicationID string, definition domain.ScopeDefinition) error {
+	return insertScopeRecordAt(ctx, conn, domain.ApplicationBoundary, applicationID, definition)
 }
 
 // applicationRoleRevisions lists the revision slots an application role already

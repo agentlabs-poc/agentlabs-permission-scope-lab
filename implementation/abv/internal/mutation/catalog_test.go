@@ -126,6 +126,13 @@ func (p *catalogFake) Read(context.Context, domain.Area, func(storage.Snapshot) 
 func (p *catalogFake) Update(context.Context, domain.Area, func(storage.Snapshot) (storage.WriteSet, error)) error {
 	return nil
 }
+
+// UpdateAdministered delegates: a fake's snapshot is the whole world it has, so
+// it is its own administrative chain, and a nil Snapshot.Administrative says
+// exactly that.
+func (p *catalogFake) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
+}
 func (p *catalogFake) Close() error { return nil }
 func (p *catalogFake) ReadCatalog(_ context.Context, _ domain.Application, cb func(domain.Catalog) error) error {
 	return cb(cloneCatalog(p.catalog))
@@ -164,6 +171,10 @@ func (*noCatalogProvider) Read(context.Context, domain.Area, func(storage.Snapsh
 }
 func (*noCatalogProvider) Update(context.Context, domain.Area, func(storage.Snapshot) (storage.WriteSet, error)) error {
 	return nil
+}
+
+func (p *noCatalogProvider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
 }
 func (*noCatalogProvider) Close() error { return nil }
 

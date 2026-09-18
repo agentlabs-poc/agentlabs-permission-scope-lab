@@ -52,6 +52,12 @@ func (s *Service) PublishGrantRevision(ctx context.Context, area domain.Area, id
 		if err := validation.CheckContent(area, snapshot.Catalog, proposed, snapshot.Roles); err != nil {
 			return storage.WriteSet{}, err
 		}
+		// A platform scope key names one of Auth's own records, so its value is
+		// resolved rather than trusted — Q-156. The teams map is in hand here and
+		// is not in CheckContent's, which is why this is a separate check.
+		if err := validation.CheckPlatformScopeValues(snapshot.Catalog, snapshot.Teams, proposed); err != nil {
+			return storage.WriteSet{}, err
+		}
 		for _, value := range proposed.Scope {
 			if value == "$self" {
 				return storage.WriteSet{}, domain.ErrUnsupported

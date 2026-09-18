@@ -1,8 +1,9 @@
 # Administrative authority is a grant — Q-155 / ADMIN-007
 
-Status: **AGREED.** The shape is the user's: *"there should also be some kind of
-grant and assignment that should come along with ownership… or something like the
-scope should cover it."* What follows is that framing traced through the rules
+Status: **AGREED**, and implemented one family deep — see *As implemented* below.
+The shape is the user's: *"there should also be some kind of grant and assignment
+that should come along with ownership… or something like the scope should cover
+it."* What follows is that framing traced through the rules
 already agreed, and it turns out to need almost no new mechanism.
 
 This closes the question HC-05-08 asks — how administrative bounds are encoded and
@@ -107,3 +108,74 @@ itself administered. That terminates where the business chain terminates — at 
 root — and the first link is [Q-153](bootstrap-authority.md)'s platform-namespace
 authority, which is outside the grant model by construction. It is a chain someone
 has to be able to read, and the transport already carries lineage for exactly that.
+
+---
+
+## As implemented
+
+The rule is adopted for every administrative operation and **implemented one
+family deep** — the team family. That is deliberate: the model is worth proving
+against a real chain before twenty-eight call sites are rewritten to it, and a
+half-rewritten gate set is worse than an honest boundary.
+
+**What resolves.** `CreateTeam`, `SetTeamParent`, `DeleteTeam`, `AddMember` and
+`RemoveMember` no longer ask a deployment whether the caller may act. Each states
+the permission it requires and the team that bounds it, and one call answers:
+
+```
+  authorize(auth chain, identity, "auth:group::write", { team: "fibggi2juxhc" })
+```
+
+`CheckTeamCreate`, `CheckTeamWrite` and `CheckTeamDelete` are **deleted** from the
+administration interfaces rather than left unused. A gate nobody calls is a gate
+somebody re-wires.
+
+**Where the chain is read.** The administrative chain is in a different *area*
+from the operation it authorizes — `acme/auth`, not `acme/hrms` — so the provider
+reads both inside the one write transaction (`UpdateAdministered`). Reading it
+afterwards on a second connection would be a check that a concurrent revocation
+could outrun. A store that has not been told where the platform namespace is
+refuses every administrative write rather than resolving `auth:` authority against
+an application's own chain, which is the leak [Q-151](permission-lifecycle.md)
+exists to prevent.
+
+**The scope value is resolved, not opaque.** A `team` value is checked against
+the tenant's teams at the write. [Q-148](scope-model.md)'s opacity still holds for
+an application's keys — Auth cannot know what `dept=FIN` denotes — and does not
+hold for a key naming Auth's own records.
+
+**What the lab demonstrates.** Two holders, captured from the CLI against a real
+store:
+
+```
+  fk3x9r2mau01   {"scope":{}}                                    ← the Auth root
+  fk3x9r2mau02   create + delete + write, {"scope":{}}           ← maya
+  fk3x9r2mau03   write, {"scope":{"team":"fibggi2juxhc"}}        ← priya
+
+  priya  add-member  team=fibggi2juxhc   rc=0   her team
+  priya  add-member  team=fibggi2juubk   rc=3   same permission, another team
+  maya   add-member  team=fibggi2juubk   rc=0   no predicate, so nothing to fail
+  priya  team create --parent fibggi2juxhc  rc=3   write is not create
+  priya  team create --name Rootish         rc=3   no bounding team to satisfy
+```
+
+And the sideways grant behaves exactly as the wart above records it: a grant
+scoped `{team: FIN}` beneath one scoped `{team: C17}` is **written**, resolves,
+and produces a route carrying `team` pinned to both values — which no request can
+satisfy. A test asserts the two predicates rather than asserting a refusal,
+because "authorizes nothing" is the property and "cannot be written" is not.
+
+**What is still a fixture, and why it is not a lie.** Every other administrative
+gate — grants, assignments, roles, ownership, establishment, and all of platform
+administration — still compares an identifier to a constant. The rule above
+governs them; the implementation has not reached them. Two pieces of this decision
+are deferred with them, because both need a cross-area *write* rather than the
+cross-area read landed here:
+
+- team creation issuing the creator's own administrative grant and assignment
+  ([Q-157](ownership-lineage.md)'s "creating a team confers ownership")
+- the refusal that keeps a team from losing its last enabled administrative
+  assignment
+
+Until those land, ownership remains what [Q-099](ownership-lineage.md) found it
+to be: a relation nothing consults.

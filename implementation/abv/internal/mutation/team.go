@@ -218,16 +218,19 @@ func (s *Service) teamCatalog(ctx context.Context, area domain.Area, identity do
 // the team; Auth-AL names the record.
 func (s *Service) CreateTeam(ctx context.Context, area domain.Area, identity domain.Identity, name, parentID string) (domain.Team, error) {
 	fail := func(err error) (domain.Team, error) { return domain.Team{}, err }
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return fail(err)
 	}
 	proposed := domain.Team{ID: s.ids.Next(), Name: name, ParentID: parentID}
-	err = s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	err := s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamCreate(ctx, area, identity, proposed, s.clock.Now()); err != nil {
+		// The bounding team is the parent, because creating a subteam is the act
+		// `auth:group::create` covers "creating teams and subteams" with. A
+		// top-level team has no parent and so no bounding team, which only an
+		// unscoped route satisfies — the tenant administrator's.
+		if err := s.authorizeTeam(ctx, snapshot, identity, groupCreate, parentID, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckTeamCreation(snapshot.Teams, proposed); err != nil {
@@ -251,17 +254,32 @@ func (s *Service) CreateTeam(ctx context.Context, area domain.Area, identity dom
 // re-parent is a change to the team.
 func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity domain.Identity, id, parentID string) (domain.Team, error) {
 	fail := func(err error) (domain.Team, error) { return domain.Team{}, err }
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return fail(err)
 	}
 	var result domain.Team
-	err = s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	err := s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamWrite(ctx, area, identity, id, s.clock.Now()); err != nil {
+		// Both ends, and deliberately two calls rather than one. A move changes
+		// where a team hangs, so it is a write to the team *and* a change to what
+		// the new parent contains; requiring authority over each is the
+		// conservative reading, and conservative is the direction that can be
+		// loosened later.
+		//
+		// They cannot be one call: a single route can never carry team=id and
+		// team=parentID at once, so asking for both in one material map would ask
+		// for a route that cannot exist. In practice this means only an unscoped
+		// route — the tenant administrator's — moves a team between two parents,
+		// which is the honest consequence rather than a rule invented here.
+		if err := s.authorizeTeam(ctx, snapshot, identity, groupWrite, id, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
+		}
+		if parentID != "" && parentID != snapshot.Teams[id].ParentID {
+			if err := s.authorizeTeam(ctx, snapshot, identity, groupWrite, parentID, s.clock.Now()); err != nil {
+				return storage.WriteSet{}, err
+			}
 		}
 		if err := validation.CheckTeamReparent(snapshot.Teams, id, parentID); err != nil {
 			return storage.WriteSet{}, err
@@ -308,15 +326,14 @@ func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity 
 // administration, membership administration and assignment authority distinct.
 // The caller empties the team first, deliberately.
 func (s *Service) DeleteTeam(ctx context.Context, area domain.Area, identity domain.Identity, id string) error {
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return err
 	}
-	return s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	return s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamDelete(ctx, area, identity, id, s.clock.Now()); err != nil {
+		if err := s.authorizeTeam(ctx, snapshot, identity, groupDelete, id, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckTeamDeletion(snapshot.Teams, snapshot.Memberships, snapshot.Ownerships, snapshot.Assignments, id); err != nil {
@@ -346,16 +363,18 @@ func (s *Service) RemoveMember(ctx context.Context, area domain.Area, identity d
 }
 
 func (s *Service) membership(ctx context.Context, area domain.Area, identity domain.Identity, teamID, humanID string, add bool) error {
-	admin, err := s.teamAdministration(ctx, area, identity)
-	if err != nil {
+	if err := s.teamWriteAuthority(ctx, area, identity); err != nil {
 		return err
 	}
 	m := domain.Membership{TeamID: teamID, HumanID: humanID}
-	return s.provider.Update(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
+	return s.provider.UpdateAdministered(ctx, area, func(snapshot storage.Snapshot) (storage.WriteSet, error) {
 		if snapshot.Area != area {
 			return storage.WriteSet{}, domain.ErrRejected
 		}
-		if err := admin.CheckTeamWrite(ctx, area, identity, teamID, s.clock.Now()); err != nil {
+		// `auth:group::write` "includes human membership" — Q-092 — so moving a
+		// human in or out is the same authority as changing the team, bounded by
+		// the team being changed.
+		if err := s.authorizeTeam(ctx, snapshot, identity, groupWrite, teamID, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckMembership(snapshot.Teams, m); err != nil {
@@ -383,26 +402,6 @@ func (s *Service) membership(ctx context.Context, area domain.Area, identity dom
 		}
 		return storage.WriteSet{RemovedMembership: &proposed}, nil
 	})
-}
-
-// teamAdministration resolves the write seam. It is separate from the read seam
-// because creating, changing and deleting a team are the handbook's three named
-// operations, and reading one is none of them.
-func (s *Service) teamAdministration(ctx context.Context, area domain.Area, identity domain.Identity) (TeamAdministration, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	if err := area.Validate(); err != nil {
-		return nil, err
-	}
-	if err := validateSupportedIdentity(identity); err != nil {
-		return nil, err
-	}
-	admin, ok := s.administration.(TeamAdministration)
-	if !ok || nilInterface(admin) {
-		return nil, domain.ErrUnsupported
-	}
-	return admin, nil
 }
 
 // refuseAffectedBindings rejects while an enabled binding sits at or beneath

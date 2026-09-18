@@ -441,6 +441,53 @@ func invalidScopeKey(key string) bool {
 // The permission is then visible to every application's catalog, which is what
 // makes it usable: a grant in any application may reference it, the same way a
 // tenant's grant may reference a role the application ships.
+// RegisterPlatformScope registers a scope key at the platform boundary — one Auth
+// itself owns rather than one an application declares.
+//
+// Q-156 needs exactly one today: `team`, which scopes administrative authority to
+// the team it administers. Such a key cannot belong to one application, because
+// administering a team is not an application's business.
+func (s *Service) RegisterPlatformScope(ctx context.Context, namespace string, identity domain.Identity, definition domain.ScopeDefinition) (domain.ScopeDefinition, error) {
+	fail := func(err error) (domain.ScopeDefinition, error) { return domain.ScopeDefinition{}, err }
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	if strings.TrimSpace(namespace) == "" || !utf8.ValidString(namespace) || strings.Contains(namespace, "*") {
+		return fail(domain.ErrMalformed)
+	}
+	if err := validateSupportedIdentity(identity); err != nil {
+		return fail(err)
+	}
+	admin, ok := s.administration.(PlatformAdministration)
+	if !ok || nilInterface(admin) {
+		return fail(domain.ErrUnsupported)
+	}
+	provider, ok := s.provider.(storage.CatalogProvider)
+	if !ok || nilInterface(provider) {
+		return fail(domain.ErrUnsupported)
+	}
+	definition.Boundary = domain.PlatformBoundary
+	err := provider.UpdatePlatformCatalog(ctx, namespace, func() (storage.CatalogWriteSet, error) {
+		if err := admin.CheckPlatformScopeRegistration(ctx, namespace, identity, definition, s.clock.Now()); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		// The same shape rules an application key satisfies: a flat token, no
+		// wildcard, not blank. A platform key is not a looser key.
+		catalog := domain.Catalog{ApplicationID: namespace, Permissions: map[string]domain.PermissionDefinition{}, Scopes: map[string]domain.ScopeDefinition{}}
+		if err := validation.CheckScopeRegistration(catalog, definition); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return storage.CatalogWriteSet{}, err
+		}
+		return storage.CatalogWriteSet{PlatformScope: &definition, PlatformNamespace: namespace}, nil
+	})
+	if err != nil {
+		return fail(err)
+	}
+	return definition, nil
+}
+
 func (s *Service) RegisterPlatformPermission(ctx context.Context, namespace string, identity domain.Identity, definition domain.PermissionDefinition) (domain.PermissionDefinition, error) {
 	fail := func(err error) (domain.PermissionDefinition, error) { return domain.PermissionDefinition{}, err }
 	if err := ctx.Err(); err != nil {

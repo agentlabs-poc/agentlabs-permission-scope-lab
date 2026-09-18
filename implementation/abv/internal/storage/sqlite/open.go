@@ -29,6 +29,15 @@ type Options struct {
 	// Required means *a* registry, not *this* registry — the legacy tables
 	// behind an adapter satisfy it, which is the point of a port.
 	Registry Registry
+	// PlatformNamespace names the namespace Auth's own permissions live in, and
+	// so the area the tenant's administrative chain is in — Q-155 / ADMIN-007.
+	//
+	// It is a deployment's choice rather than a constant: a platform permission's
+	// leading noun is whatever the platform chose, and storage does not get to
+	// hold that opinion. Left empty, UpdateAdministered refuses, because a
+	// provider that cannot say where the Auth chain is cannot resolve authority
+	// on it.
+	PlatformNamespace string
 }
 
 type provider struct {
@@ -38,6 +47,7 @@ type provider struct {
 	// it is absent the provider falls back to its own tables, which is what a
 	// lab fixture and the existing tests use.
 	registry           Registry
+	platformNamespace  string
 	maxSnapshotRecords int
 	// afterCatalog is an internal deterministic test seam for proving that one
 	// read transaction pins all cross-query evidence to the same DB version.
@@ -100,7 +110,7 @@ func open(ctx context.Context, path string, options Options, fixtureCreated bool
 	if err != nil {
 		return nil, classify(err)
 	}
-	p := &provider{db: db, maxSnapshotRecords: limit, registry: options.Registry}
+	p := &provider{db: db, maxSnapshotRecords: limit, registry: options.Registry, platformNamespace: options.PlatformNamespace}
 	fail := func(err error) (storage.Provider, error) { _ = db.Close(); return nil, err }
 	conn, err := p.connection(ctx)
 	if err != nil {

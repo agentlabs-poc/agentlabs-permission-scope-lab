@@ -57,6 +57,7 @@ func authServiceWithStore(t *testing.T) (*httptest.Server, *wiring.Service, doma
 		CreateRegistry:         true,
 		Administration:         &lab.RoleAdministration{AssignmentStatusAdministration: status},
 		RegistryAdministration: regAdmin{}, Operator: operator, Clock: clock{},
+		PlatformNamespace: lab.PlatformNamespace,
 	})
 	if err != nil {
 		t.Fatal(err)

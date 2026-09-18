@@ -85,26 +85,12 @@ func (a *RoleAdministration) CheckTeamRead(ctx context.Context, area domain.Area
 	return nil
 }
 
-// The three team operations. The lab admits the same fixture administrator for
-// all three; a real deployment would hold three separate authorities, which is
-// why they are three methods rather than one.
-func (a *RoleAdministration) CheckTeamCreate(ctx context.Context, area domain.Area, identity domain.Identity, proposed domain.Team, _ time.Time) error {
-	if err := a.teamGate(ctx, area, identity); err != nil {
-		return err
-	}
-	if proposed.Name == "" {
-		return domain.ErrRejected
-	}
-	return nil
-}
-
-func (a *RoleAdministration) CheckTeamWrite(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
-	return a.teamGate(ctx, area, identity)
-}
-
-func (a *RoleAdministration) CheckTeamDelete(ctx context.Context, area domain.Area, identity domain.Identity, _ string, _ time.Time) error {
-	return a.teamGate(ctx, area, identity)
-}
+// The three team operations have no gate here any more, and their absence is the
+// change Q-155 / ADMIN-007 made: creating, changing and deleting a team resolve
+// the caller's own `auth:group::*` authority against the tenant's Auth chain,
+// so there is nothing for a deployment to declare. What is left below is the
+// gates that are still fixtures — every one of them is a rule adopted but not
+// yet implemented, and the implementation is one family deep on purpose.
 
 func (a *RoleAdministration) teamGate(ctx context.Context, area domain.Area, identity domain.Identity) error {
 	if err := ctx.Err(); err != nil {

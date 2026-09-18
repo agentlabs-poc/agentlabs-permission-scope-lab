@@ -32,7 +32,9 @@ func CreateFixture(ctx context.Context, path string, snapshots []storage.Snapsho
 	// A fixture provider answers the registry's questions for exactly the areas
 	// it seeded, and nothing else. It has to answer them somehow: the facts live
 	// in the registry domain now, and a fixture is not going to compose one.
-	opened, err := open(ctx, path, Options{Registry: seededRegistry(snapshots)}, true)
+	opened, err := open(ctx, path, Options{
+		Registry: seededRegistry(snapshots), PlatformNamespace: seededPlatformNamespace(snapshots),
+	}, true)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +51,40 @@ func CreateFixture(ctx context.Context, path string, snapshots []storage.Snapsho
 		return nil, err
 	}
 	return p, nil
+}
+
+// seededPlatformNamespace finds the namespace a fixture files its platform
+// records under, which is the area the tenant's administrative chain is in —
+// Q-155 / ADMIN-007.
+//
+// It is derived rather than configured for the same reason seededRegistry is: a
+// fixture is a closed world, and a catalog that declares a platform-boundary
+// record has already named the platform's namespace by declaring it. Two
+// fixtures disagreeing about it is a fixture that cannot be true, and the honest
+// answer is none — which makes every administrative operation ErrUnsupported
+// rather than resolving against the wrong chain.
+func seededPlatformNamespace(snapshots []storage.Snapshot) string {
+	found := ""
+	for _, s := range snapshots {
+		named := map[string]bool{}
+		for _, d := range s.Catalog.Permissions {
+			if d.Boundary == domain.PlatformBoundary && d.Namespace != "" {
+				named[d.Namespace] = true
+			}
+		}
+		for _, d := range s.Catalog.Scopes {
+			if d.Boundary == domain.PlatformBoundary {
+				named[s.Catalog.ApplicationID] = true
+			}
+		}
+		for namespace := range named {
+			if found != "" && found != namespace {
+				return ""
+			}
+			found = namespace
+		}
+	}
+	return found
 }
 
 func seedSnapshots(ctx context.Context, conn *sql.Conn, snapshots []storage.Snapshot) error {
@@ -96,24 +132,41 @@ func seedCatalog(ctx context.Context, conn *sql.Conn, c domain.Catalog) error {
 	permissionIDs := sortedKeys(c.Permissions)
 	for _, id := range permissionIDs {
 		d := c.Permissions[id]
-		if invalid(id) || d.ID != id {
+		if invalid(id) || d.ID != id || !d.Boundary.Valid() {
 			return domain.ErrMalformed
 		}
-		if err := insertPermissionRecord(ctx, conn, c.ApplicationID, d); err != nil {
+		// A fixture writes what it declares, at the boundary it declares. Writing
+		// everything at the application boundary would make a platform permission
+		// unseedable — it would come back as the application's own, and the root
+		// ceiling that slices by namespace would then hand an application root the
+		// platform's vocabulary.
+		if err := insertPermissionAt(ctx, conn, d.Boundary, catalogNamespace(c, d.Boundary, d.Namespace), d); err != nil {
 			return err
 		}
 	}
 	scopeKeys := sortedKeys(c.Scopes)
 	for _, key := range scopeKeys {
 		d := c.Scopes[key]
-		if invalid(key) || d.Key != key {
+		if invalid(key) || d.Key != key || !d.Boundary.Valid() {
 			return domain.ErrMalformed
 		}
-		if err := insertScopeRecord(ctx, conn, c.ApplicationID, d); err != nil {
+		if err := insertScopeRecordAt(ctx, conn, d.Boundary, catalogNamespace(c, d.Boundary, ""), d); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// catalogNamespace is the namespace a seeded catalog record is filed under: the
+// application's own at the application boundary, and the platform's at the
+// platform boundary. A platform record whose fixture did not name its namespace
+// is filed under the catalog it was declared in, which for Auth's own catalog is
+// the platform namespace itself.
+func catalogNamespace(c domain.Catalog, boundary domain.Boundary, declared string) string {
+	if boundary == domain.PlatformBoundary && declared != "" {
+		return declared
+	}
+	return c.ApplicationID
 }
 
 func seedArea(ctx context.Context, conn *sql.Conn, s storage.Snapshot) error {

@@ -96,6 +96,7 @@ func TestEveryRefusalTheServiceCanGiveReachesTheWire(t *testing.T) {
 			AuthorityPath: path, RegistryPath: filepath.Join(dir, "registry.db"), CreateRegistry: true,
 			Administration:         &lab.RoleAdministration{AssignmentStatusAdministration: status},
 			RegistryAdministration: regAdmin{}, Operator: operator, Clock: clock{},
+			PlatformNamespace: lab.PlatformNamespace,
 		})
 		if err != nil {
 			t.Fatal(err)

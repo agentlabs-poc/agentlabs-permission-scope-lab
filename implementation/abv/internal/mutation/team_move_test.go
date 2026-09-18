@@ -58,7 +58,7 @@ func TestSetTeamParentRefusesWhenTheBindingIsBeneathTheMovedTeam(t *testing.T) {
 				Recipient: domain.Recipient{Type: "group", ID: bound}, Status: status,
 			}
 		}
-		provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{snapshot})
+		provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", administered(t, area, snapshot))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -113,7 +113,7 @@ func TestSetTeamParentIsANoOpAgainstTheParentItAlreadyHas(t *testing.T) {
 		t.Fatal(err)
 	}
 	fixture := lab.TeamFINC17(area)
-	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", []storage.Snapshot{fixture.Snapshot})
+	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/authority.db", administered(t, area, fixture.Snapshot))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +167,7 @@ func TestMovingATeamInAGraphThatIsAlreadyBroken(t *testing.T) {
 		fixture := lab.TeamFINC17(area)
 		snapshot := fixture.Snapshot
 		bend(&snapshot)
-		provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/broken.db", []storage.Snapshot{snapshot})
+		provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/broken.db", administered(t, area, snapshot))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -252,4 +252,21 @@ func TestMovingATeamInAGraphThatIsAlreadyBroken(t *testing.T) {
 			t.Fatalf("gave %v, want ErrRejected — the cycle check answers first", err)
 		}
 	})
+}
+
+// administered is the pair every team write needs: the business records, and the
+// administrative chain in the platform namespace that authorizes changing them.
+// A store with only the first refuses every team write, because after Q-155 the
+// authority to change a team is a grant rather than a gate.
+func administered(t *testing.T, area domain.Area, business storage.Snapshot) []storage.Snapshot {
+	t.Helper()
+	administrative, err := lab.AuthAdministration(area)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Re-anchored onto a parentless team, because every fixture in this file
+	// bends the team graph on purpose. An administrative route reaches its parent
+	// support through the holder's ancestors, so a cycle above the holder is a
+	// refusal before the re-parent walk these tests exercise is ever reached.
+	return []storage.Snapshot{business, lab.Reanchored(administrative, "fi7io4lvjqio")}
 }

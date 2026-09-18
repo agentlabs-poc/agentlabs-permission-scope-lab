@@ -98,6 +98,7 @@ func run(args []string) int {
 		RegistryAdministration: labRegistryAdmin{},
 		Operator:               operatorIdentity(),
 		Clock:                  clock{},
+		PlatformNamespace:      lab.PlatformNamespace,
 	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

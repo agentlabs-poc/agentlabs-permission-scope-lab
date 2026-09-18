@@ -44,7 +44,18 @@ func (p *provider) Read(ctx context.Context, area domain.Area, callback func(sto
 	})
 }
 
-func (p *provider) Update(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) (err error) {
+func (p *provider) Update(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.update(ctx, area, false, callback)
+}
+
+// UpdateAdministered is Update with the tenant's administrative chain read in
+// the same transaction. Only the operations that resolve administrative
+// authority ask for it — see storage.Snapshot.Administrative.
+func (p *provider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.update(ctx, area, true, callback)
+}
+
+func (p *provider) update(ctx context.Context, area domain.Area, administered bool, callback func(storage.Snapshot) (storage.WriteSet, error)) (err error) {
 	if err = area.Validate(); err != nil {
 		return err
 	}
@@ -63,6 +74,11 @@ func (p *provider) Update(ctx context.Context, area domain.Area, callback func(s
 		s, err := p.snapshot(ctx, conn, area)
 		if err != nil {
 			return err
+		}
+		if administered {
+			if err = p.attachAdministrative(ctx, conn, &s); err != nil {
+				return err
+			}
 		}
 		writes, err := callback(s)
 		if err != nil {

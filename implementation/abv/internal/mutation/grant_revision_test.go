@@ -52,6 +52,13 @@ func (p *revisionProvider) Update(_ context.Context, _ domain.Area, cb func(stor
 	return nil
 }
 
+// UpdateAdministered delegates: a fake's snapshot is the whole world it has, so
+// it is its own administrative chain, and a nil Snapshot.Administrative says
+// exactly that.
+func (p *revisionProvider) UpdateAdministered(ctx context.Context, area domain.Area, callback func(storage.Snapshot) (storage.WriteSet, error)) error {
+	return p.Update(ctx, area, callback)
+}
+
 func revisionCandidate() domain.GrantContent {
 	return domain.GrantContent{Version: "1", GrantID: "fk3x9r2man0d", Revision: 2, ParentGrantID: "fk3x9r2m5iv8", Permissions: []string{"hrms:payroll:payslip::read"}, Scope: map[string]string{"cert": "C17"}}
 }
