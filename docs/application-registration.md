@@ -226,3 +226,59 @@ Registration-time grant validation and request-time authorization concern
 different lifecycle events; they are not two decision stages for one request.
 No prepared handoff, new grant field, permission grammar, or implementation
 change is introduced by this agreement.
+
+## Q-148 / SCOPE-009 — reference existence is the application's, and subtree scope is excluded
+
+Status: **AGREED, by explicit delegation and explicit exclusion.** The criterion
+covering this said either could close it, and that no built-in reference types
+were required. Both are taken.
+
+**Scope values are opaque to authorization.** A registered scope key with a value
+is a boundary, and nothing in this model resolves that value to a record, checks
+that it exists, or asks what it refers to. `dept=FIN` authorizes within a
+department named `FIN`; whether such a department exists, and whether certificate
+`C17` belongs to it, is the application's to establish.
+
+That is not a gap. It is CONTRACT-012's split applied to values rather than
+relationships: the endpoint keeps execution inside the authorized boundary, and
+does so without this model needing a resolver or a reference type.
+
+**Subtree and pattern scope are excluded, not deferred.** A scope value matches
+exactly. There is no prefix, no wildcard, no hierarchy, and no
+application-specific subtree behaviour.
+
+| Written | Means |
+|---|---|
+| `{"dept": "FIN"}` | exactly the boundary named `FIN` |
+| `{}` | no local restriction — the whole application boundary |
+| `{"dept": "FIN*"}` | **refused.** Not a boundary. |
+| `{"dept": "$self"}` | the authorizing human, the one reserved token |
+
+An `{}` boundary is not a wildcard by another name: it adds no restriction, which
+is different from matching many values. And a key never declares either form —
+`{}` and `$self` are properties of a value.
+
+### Why exclusion rather than a hierarchy
+
+A hierarchical scope would give every existing boundary implied children the day
+it was introduced. `dept=FIN` would silently begin covering values nobody granted,
+and every stored grant's reach would change without any record of it changing.
+[Q-126](permission-lifecycle.md) forbids exactly that for permission identifiers;
+the same reasoning applies to scope values.
+
+The same argument covers the permission noun path: `hrms:payroll:payslip::read`
+reads as a path, and it is a name. Evaluation compares whole identifiers, and
+`hrms:payroll:*` is not a thing.
+
+### Rationale / conscious tradeoff
+
+The cost is real and falls on applications with genuinely hierarchical data. An
+organisation with nested departments cannot express "this department and
+everything under it" as one boundary; it grants the boundaries it means, or
+composes a parent grant whose children narrow.
+
+That cost is accepted because the alternative moves the application's data model
+into the authorization model, and a boundary would then mean something only the
+application could evaluate — which is the resolver interface this handbook has
+twice declined.
+

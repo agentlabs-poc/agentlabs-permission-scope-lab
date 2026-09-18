@@ -136,3 +136,60 @@ HC-08-03 remains open while this proposal is unanswered.
 the agreed authority checks and mandatory Layer 2 application rules?
 
 </details>
+
+## Q-149 / ENFORCEMENT-012 — missing, invalid and unsupported evidence
+
+Status: **AGREED.** Q-084 is disapproved and stays disapproved: no condition
+engine, and no removal of the restrictions the model already has. What was left
+open is narrower — what happens when the evidence a decision needs is missing,
+invalid, or of a kind this model does not support. That is answered, and answered
+by rules already agreed rather than by new machinery.
+
+There are exactly three cases, and none of them is an allow.
+
+**Missing.** A declared input the request does not supply, or material the binder
+cannot produce. The request is refused before a decision is reached — it is a
+failure to establish, not a denial, because nothing about the person's authority
+was determined. ENFORCEMENT-002 already forbids protected execution here.
+
+**Invalid.** Evidence that arrives and cannot be used: a predicate whose key or
+value is not well formed, a grant whose content does not validate, a route whose
+contributing chain is unreadable. The affected route closes —
+[Q-140](authority-lineage.md) — and if that leaves no route authorizing, the
+result is a failure to establish rather than a denial, because a route that could
+not be read might have authorized ([Q-137](decision-results.md)).
+
+**Unsupported.** Evidence of a kind this model does not define: a reserved token
+other than `$self`, a wildcard where a boundary is expected, a contract version
+this consumer does not speak. Refused, never interpreted, and never treated as
+absent. An unsupported value is not an empty one.
+
+| | Result | Rule it comes from |
+|---|---|---|
+| Required material missing | failure to establish | ENFORCEMENT-002 |
+| A route's evidence invalid | that route closes | Q-140 |
+| …and no route authorizes | failure to establish | Q-137 |
+| Evidence of an unsupported kind | refused | SCOPE-007, CONTRACT-010 |
+| Every route readable, none authorizes | completed denial | Q-051 |
+
+### Why this is not a condition engine
+
+A condition engine would evaluate application facts as part of authorization —
+"this certificate is in Finance", "this record is not locked". Q-084 refused that
+and this does not reintroduce it. Every case above is about evidence *this model
+already defines*: its own material, its own predicates, its own contract versions.
+Nothing here evaluates a business fact, and nothing here is extensible by an
+application.
+
+### Rationale / conscious tradeoff
+
+Stating it is worth doing because the three cases were individually settled and
+collectively unwritten, and the difference between them is the difference between
+telling a person they have no access and telling them we could not check. Getting
+that wrong in either direction is the failure both Q-051 and Q-137 exist to
+prevent.
+
+The cost: "unsupported is refused, not absent" means a consumer meeting a newer
+contract stops rather than degrading. That is deliberate — CONTRACT-010's reason —
+and it means a version bump is a coordinated change, never a silent one.
+

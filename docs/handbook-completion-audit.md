@@ -4,7 +4,7 @@
 
 [Eleven recent decisions](current-status.md) are mapped into current evidence.
 All 69 criterion texts remain unchanged; statuses move only by a recorded
-closure. Current: **40 DONE / 28 OPEN / one
+closure. Current: **44 DONE / 24 OPEN / one
 EXCLUDED**, 68 in scope. Each open row still has an incomplete full deliverable.
 These are not all user-blocking questions: drafting and verification can proceed
 from approval; ask only for materially different behavior or new contract choices.
@@ -30,8 +30,29 @@ evidence, not the authority.
 
 | Checkpoint | Earlier status | Current status | Completion evidence |
 |---|---|---|---|
+| HC-06-07 | OPEN | DONE | [Q-148](application-registration.md): reference existence is delegated to the application — scope values are opaque to authorization — and subtree/pattern scope is excluded rather than deferred. The criterion admitted closure by explicit delegation or exclusion, and takes both. |
+| HC-07-07 | OPEN | DONE | [Q-147](endpoint-policy-format.md): the structural validation a policy must pass to be mounted, with nested body selection refused as a decision and missing inputs refused rather than defaulted. Value validation stays with the application per Q-050-F; agreed fields and validation ownership are not reopened. |
+| HC-07-10 | OPEN | DONE | [Q-146](handler-integration-contract.md): the four things an application supplies, the order the gate imposes, and the two failure kinds at the boundary. No SDK is required, as the criterion states; HTTP status mapping stays with the application. |
+| HC-08-03 | OPEN | DONE | [Q-149](grant-conditions.md): missing, invalid and unsupported evidence, each resolved from rules already agreed. Q-084 stays disapproved — nothing here evaluates a business fact or is extensible by an application. |
 | HC-09-09 | OPEN | DONE | [Q-142](background-authorization.md): the criterion asked for integration requirements **or an explicit deferral**, and the deferral is recorded as a decision with its cost named. Q-075 continues to govern queued work. |
 | HC-08-04 | OPEN | DONE | [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency. Q-061's no-scope rule and Q-076's audit exclusion are both preserved — the lineage form was considered and not adopted for that reason. |
+
+**HC-05-11, HC-05-13 and HC-07-08 advance and do not close.**
+
+HC-05-11: [Q-132](grant-lifecycle.md), [Q-140](authority-lineage.md) and
+[Q-143](permission-lifecycle.md) settle the transitions and what a lapsed or
+narrowed grant does. **Operation contracts remain open** — the permission that
+authorizes each administrative operation has never been chosen, and the reference
+implementation records that in the code that would use it.
+
+HC-05-13: [Q-145](role-revisions.md) settles adoption validation against existing
+dependents. **Publication and adoption APIs, compatibility and retention remain
+open** — there is no administrative wire contract to specify them in.
+
+HC-07-08: [Q-139](authority-resolve-transport.md) supplies the computed-root
+representation, which is an ordinary permissions array with no source field.
+**Value, default, timestamp and variant validation, and operation contracts,
+remain open.**
 
 **HC-07-09 advances but does not close.** [Q-139](authority-resolve-transport.md)
 publishes the versioned request and answer, which is one of its two named
@@ -44,8 +65,8 @@ Full value validation and the remaining failure cases stay open and stay parked
 under PROCESS-007, so the row keeps its OPEN status rather than taking partial
 credit — this register does not award fractional closure.
 
-**Current after CLOSURE-002: 40 DONE / 28 OPEN / 1 EXCLUDED; 68 in scope;
-58.8% closed, 41.2% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
+**Current after CLOSURE-002: 44 DONE / 24 OPEN / 1 EXCLUDED; 68 in scope;
+64.7% closed, 35.3% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
 OPEN, 55.9% closed. [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
 The detailed register below incorporates these three updates; older numerical
 summaries retain their historical values. No other row is newly closed or
@@ -271,7 +292,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-06-04 | DONE | Require application registration of permissions/scope contracts with abstract Auth validation. | REGISTRATION-001 / Q-039; [application registration](application-registration.md). |
 | HC-06-05 | DONE | Settle optional upfront support-validation mode, all-grant checks, and safe activation. | REGISTRATION-002/003/004 / Q-040/041/042; [application registration](application-registration.md). |
 | HC-06-06 | OPEN | Complete registration format, definition-management authority, distribution, and change/removal/versioning rules. | [Q-121–Q-123](root-permission-evolution.md) settle publication authority, computed roots and one shared application catalog. [Q-125/126](permission-lifecycle.md) settle retirement and stable meaning. Remaining: complete registry/source format, trusted binding/publication visibility, scope evolution and restoration contracts. No selective tenant versioning. |
-| HC-06-07 | OPEN | Finish reference/existence handling and treatment of application-specific exact/subtree boundary behavior. | Scope/reference gaps in [tree](discussion-tree.md) and [application registration](application-registration.md); explicit delegation or exclusion can close them, not a requirement to add built-in types. |
+| HC-06-07 | DONE | Finish reference/existence handling and treatment of application-specific exact/subtree boundary behavior. | Scope/reference gaps in [tree](discussion-tree.md) and [application registration](application-registration.md); explicit delegation or exclusion can close them, not a requirement to add built-in types. Closed by CLOSURE-002 / [Q-148](application-registration.md). |
 
 ### 7. Requests and resolution
 
@@ -283,10 +304,10 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-07-04 | DONE | Settle the top-level string version convention and unsupported/malformed-version rejection. | CONTRACT-009/010 / Q-050-A; [contract publication](contract-publication.md). |
 | HC-07-05 | DONE | Settle the partial endpoint-policy shape and GET/PUT source/name bindings without a relationship block. | CONTRACT-011/012 / Q-050-B/C; [endpoint policy](endpoint-policy-format.md). |
 | HC-07-06 | DONE | Settle required input presence/source binding and application-owned value validation. | INPUT-002/003 / Q-050-E/F; [endpoint policy](endpoint-policy-format.md). |
-| HC-07-07 | OPEN | Complete remaining structural endpoint-policy validation, nested input syntax, and supported-source decisions. | Q-050 remains open in [endpoint policy](endpoint-policy-format.md); no reopening of agreed fields or validation ownership. |
+| HC-07-07 | DONE | Complete remaining structural endpoint-policy validation, nested input syntax, and supported-source decisions. | Q-050 remains open in [endpoint policy](endpoint-policy-format.md); no reopening of agreed fields or validation ownership. Closed by CLOSURE-002 / [Q-147](endpoint-policy-format.md). |
 | HC-07-08 | OPEN | Complete grant and role wire schemas, including the agreed lifecycle representation. | [Q-107/109](grant-revision-format.md), [Q-118](role-grant-contract.md), and [Q-119](root-grant-format.md) settle core records, validity, direct/role exclusivity and trusted-root parent omission. Q-122 selects computation, not encoding. Remaining: computed source representation, full value/default/timestamp/variant validation and operation contracts. No wildcard/source field approved. |
 | HC-07-09 | OPEN | Complete authorization-request, resolved-request, and resolved-grant transport contracts. | Request/resolved meanings are agreed. [Q-127](delegation-lifecycle.md) excludes proxy-chain transports; [Q-130](bulk-enforcement.md) requires per-item complete routes without a new batch schema. Remaining: full versioned transports and actual lineage/batch evidence, without a Q-061 returned-scope requirement. Versioned transport published by [Q-139](authority-resolve-transport.md); batch evidence still absent. |
-| HC-07-10 | OPEN | Specify the handler/embedded-agent integration contract and failures at its boundaries. | Exact integration APIs remain open in [system overview](system-overview.md); no requirement to implement an SDK for handbook completion. |
+| HC-07-10 | DONE | Specify the handler/embedded-agent integration contract and failures at its boundaries. | Exact integration APIs remain open in [system overview](system-overview.md); no requirement to implement an SDK for handbook completion. Closed by CLOSURE-002 / [Q-146](handler-integration-contract.md). |
 
 ### 8. Decision semantics
 
@@ -294,7 +315,7 @@ until the full criterion is met; no runtime test completion is claimed.
 |---|---|---|---|
 | HC-08-01 | DONE | Settle alternative complete positive grants, no cross-grant field mixing, and no explicit deny grants in v1. | DECISION-001/002 / GRANT-001; [grant model](grant-model.md). |
 | HC-08-02 | OPEN | Finalize decision outcomes, reasons, and missing/unknown/failure behavior. | Q-051–Q-067 settle core meanings, minimal shapes, mixed/unknown-field rejection, and grant-ID cardinality in [decision results](decision-results.md). Full value validation, code catalogue/compatibility, and remaining failure cases are unfinished. Further details are parked under PROCESS-007, not excluded. No fractional credit. Catalogue and compatibility settled by [Q-135](decision-results.md); value validation and remaining failure cases still open. |
-| HC-08-03 | OPEN | Specify conditions and their evaluation when evidence is missing, invalid, or unsupported. | [Q-084 is DISAPPROVED](grant-conditions.md) to prevent business-logic scope creep; its revised question is withdrawn, not pending. Authorization-only model gaps and existing conceptual restrictions remain; neither a condition engine nor removal of restrictions is approved. No closure credit is claimed. |
+| HC-08-03 | DONE | Specify conditions and their evaluation when evidence is missing, invalid, or unsupported. | [Q-084 is DISAPPROVED](grant-conditions.md) to prevent business-logic scope creep; its revised question is withdrawn, not pending. Authorization-only model gaps and existing conceptual restrictions remain; neither a condition engine nor removal of restrictions is approved. No closure credit is claimed. Closed by CLOSURE-002 / [Q-149](grant-conditions.md). |
 | HC-08-04 | DONE | Define decision-result restrictions and contributing-grant/dependency provenance fields. | Contributing IDs remain approved; [Q-130](bulk-enforcement.md) preserves complete route support across batch items. The residue — actual dependency/provenance representation without reintroducing Q-061 returned scope or Q-076 external audit design — is settled by CLOSURE-002 / [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency and no audit-shaped field is added. |
 
 ### 9. Enforcement and time

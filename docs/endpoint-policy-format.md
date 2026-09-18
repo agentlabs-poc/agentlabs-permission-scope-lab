@@ -428,6 +428,66 @@ The rule is stated for `tenant` and `application`. Whether further trusted
 fields are correlated, and how this interacts with proxy attribution, remain
 open with HC-03-05.
 
+## Q-147 / CONTRACT-016 — the structural validation a policy must pass
+
+Status: **AGREED.** Q-050 left "full policy validation, missing-input handling,
+nested-body selection" open. This closes the structural half — what a policy must
+satisfy to be mounted at all — and leaves value validation where Q-050-F put it,
+with the application.
+
+A policy is refused at **mount time**, not at request time, when any of this
+fails. A policy that cannot be mounted cannot guard an endpoint, so the endpoint
+does not serve rather than serving unguarded.
+
+| Rule | |
+|---|---|
+| Version | Exactly the supported contract version. No default is guessed. |
+| Method | A valid uppercase HTTP token, and the request's method must equal it. |
+| Path | Absolute, with no query or fragment, and every placeholder well formed and unique. |
+| Permission | Exactly one, canonical, no wildcard and no list. |
+| Inputs | Declared; each local name and source name well formed. |
+| Path inputs | Must name a placeholder the path actually declares. A path input naming nothing is refused. |
+| Body inputs | **Top level only.** A selector containing `.`, `[`, `]` or `/` is refused. |
+| Sources | Exactly two are supported: `path` and `body`. Any other is refused. |
+| Trusted | Required for the tenant, and subject to [Q-133](#q-133--contract-013--the-policy-declares-its-trusted-correlations). |
+| Unknown fields | A policy document carrying a field this version does not define is refused, not ignored. |
+
+### Nested body selection is refused, not deferred
+
+A body input names a top-level field. `employee.department_id` is not a selector.
+
+This is a decision, not an omission. A nested selector is a query language —
+once `a.b` is admitted, arrays, filters and absence semantics follow, and the
+policy becomes a place where application structure is described. CONTRACT-012
+declined exactly that for relationships, and the reason holds here: an
+application that needs a nested value reads it in the binder, validates it, and
+supplies it as material under its own local name.
+
+### Missing input handling
+
+A declared input that the request does not supply is a **refusal of the request**,
+not an absent value passed to the binder. There is no implicit default, no empty
+string, and no fallback to another source — a path input is not satisfied by a
+query parameter of the same name.
+
+### What stays with the application
+
+Value validation. Q-050-F settled that the application validates the *values* of
+its inputs; this chapter governs the *shape of the declaration*. A policy may be
+perfectly valid and still name an input whose value the application rejects.
+
+### Rationale / conscious tradeoff
+
+Mount-time refusal is the whole point: every rule here is checkable before a
+request arrives, and a policy that is wrong should fail where an operator is
+looking, not on a caller's request.
+
+The cost is that adding a field to the policy contract is a breaking change by
+construction — unknown fields are refused, so an older consumer cannot ignore a
+newer policy. That is accepted for the reason CONTRACT-010 gives: a consumer that
+silently ignores what it does not understand is a consumer that enforces something
+other than what was declared.
+
 ## Open: the boundary an endpoint operates at
 
 A policy declares its inputs and, under Q-133, its trusted correlations. It does

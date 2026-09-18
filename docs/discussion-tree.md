@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-143
+## Current execution tree — through Q-149
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -31,6 +31,8 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── No disable or delete beneath a dependent [Q-132 APPROVED]
 │   ├── A filter is a narrowing, not an assertion [Q-136 APPROVED]
 │   ├── Retirement withdraws the permission, not the route [Q-143 APPROVED]
+│   ├── Publish roles freely, restrict adoption [Q-145 APPROVED]
+│   ├── Reference existence delegated, subtree scope excluded [Q-148 APPROVED]
 │   ├── OPEN: grant health — detection and administrative correction
 │   └── OPEN: move composition, timing/background/collection cases
 ├── Endpoint policy and its declared bindings
@@ -40,6 +42,9 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── An unusable route does not establish a denial [Q-137 APPROVED]
 │   ├── Response disclosure is the endpoint's duty [Q-138 APPROVED]
 │   ├── Authority loading transport published [Q-139 APPROVED]
+│   ├── Handler integration contract [Q-146 APPROVED]
+│   ├── Structural policy validation at mount [Q-147 APPROVED]
+│   ├── Missing/invalid/unsupported evidence [Q-149 APPROVED]
 │   ├── An unreachable node closes its route [Q-140 APPROVED]
 │   ├── What an audit consumer is given [Q-141 APPROVED]
 │   ├── Background/non-HTTP deferred for v1 [Q-142 APPROVED]
