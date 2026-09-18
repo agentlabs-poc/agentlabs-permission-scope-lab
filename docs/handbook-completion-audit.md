@@ -4,7 +4,7 @@
 
 [Eleven recent decisions](current-status.md) are mapped into current evidence.
 All 69 criterion texts remain unchanged; statuses move only by a recorded
-closure. Current: **45 DONE / 23 OPEN / one
+closure. Current: **46 DONE / 22 OPEN / one
 EXCLUDED**, 68 in scope. Each open row still has an incomplete full deliverable.
 These are not all user-blocking questions: drafting and verification can proceed
 from approval; ask only for materially different behavior or new contract choices.
@@ -30,6 +30,7 @@ evidence, not the authority.
 
 | Checkpoint | Earlier status | Current status | Completion evidence |
 |---|---|---|---|
+| HC-04-03 | OPEN | DONE | [Q-151](permission-lifecycle.md): an application registers only in its own namespace — the first noun segment is the application — and the platform namespace needs platform authority at a separate boundary. An identifier is never renamed; labels may be corrected. Grammar, wildcards and aliases were already settled by Q-056–Q-059, publication authority by Q-121, retirement and stable meaning by Q-125/126. |
 | HC-09-04 | OPEN | DONE | [Q-150](operation-enforcement.md): composition is not a grant question — the resolved authority must cover the boundary being evaluated, and a move is one endpoint evaluating once per boundary with every evaluation required to allow. Create evaluates the proposed boundary, an update that changes the boundary is a move. Answers Q-131 by withdrawing it. |
 | HC-06-07 | OPEN | DONE | [Q-148](application-registration.md): reference existence is delegated to the application — scope values are opaque to authorization — and subtree/pattern scope is excluded rather than deferred. The criterion admitted closure by explicit delegation or exclusion, and takes both. |
 | HC-07-07 | OPEN | DONE | [Q-147](endpoint-policy-format.md): the structural validation a policy must pass to be mounted, with nested body selection refused as a decision and missing inputs refused rather than defaulted. Value validation stays with the application per Q-050-F; agreed fields and validation ownership are not reopened. |
@@ -66,8 +67,8 @@ Full value validation and the remaining failure cases stay open and stay parked
 under PROCESS-007, so the row keeps its OPEN status rather than taking partial
 credit — this register does not award fractional closure.
 
-**Current after CLOSURE-002: 45 DONE / 23 OPEN / 1 EXCLUDED; 68 in scope;
-66.2% closed, 33.8% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
+**Current after CLOSURE-002: 46 DONE / 22 OPEN / 1 EXCLUDED; 68 in scope;
+67.6% closed, 32.4% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
 OPEN, 55.9% closed. [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
 The detailed register below incorporates these three updates; older numerical
 summaries retain their historical values. No other row is newly closed or
@@ -252,7 +253,7 @@ not the whole surrounding topic.
 |---|---|---|---|
 | HC-04-01 | DONE | Separate the operation identified by a permission from scope reach. | PERMISSION-001; [grant model](grant-model.md). |
 | HC-04-02 | DONE | Mandate exactly one required permission covering each protected method/route. | CONTRACT-008 / Q-049; [endpoint authorization](endpoint-authorization.md). |
-| HC-04-03 | OPEN | Finalize permission naming/catalog governance and evolution rules. | [Q-056–Q-059](permission-model.md) settle grammar and no automatic inheritance/wildcards/aliases; [Q-121](application-platform-authority.md) identifies publication authority; [Q-125/126](permission-lifecycle.md) settle retirement and stable meaning. Remaining: full naming/catalog governance, validation and restoration/evolution contracts. |
+| HC-04-03 | DONE | Finalize permission naming/catalog governance and evolution rules. | [Q-056–Q-059](permission-model.md) settle grammar and no automatic inheritance/wildcards/aliases; [Q-121](application-platform-authority.md) identifies publication authority; [Q-125/126](permission-lifecycle.md) settle retirement and stable meaning. Remaining: full naming/catalog governance, validation and restoration/evolution contracts. Closed by CLOSURE-002 / [Q-151](permission-lifecycle.md). |
 | HC-04-04 | DONE | Decide v1 treatment of permission hierarchies, wildcards, and aliases. | Q-057: no automatic permission inheritance; Q-058: no wildcard permission names in v1; Q-059: no permission aliases in v1. Rationale, alternatives, and examples in [Permission](permission-model.md). Original OPEN state retained in the update history above. |
 
 ### 5. Grants and authority

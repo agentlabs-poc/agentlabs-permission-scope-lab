@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-150
+## Current execution tree — through Q-151
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -31,6 +31,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── Composition is not a grant question [Q-150 APPROVED, withdraws Q-131]
 │   ├── No disable or delete beneath a dependent [Q-132 APPROVED]
 │   ├── A filter is a narrowing, not an assertion [Q-136 APPROVED]
+│   ├── Namespace ownership and identifier permanence [Q-151 APPROVED]
 │   ├── Retirement withdraws the permission, not the route [Q-143 APPROVED]
 │   ├── Publish roles freely, restrict adoption [Q-145 APPROVED]
 │   ├── Reference existence delegated, subtree scope excluded [Q-148 APPROVED]

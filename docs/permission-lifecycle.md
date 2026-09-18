@@ -111,6 +111,73 @@ No automatic grant-disable mutation, assignment deletion, new status value,
 rule for activating permission/scope compatibility validation is unchanged;
 retirement does not authorize silently enabling an incompatible configuration.
 
+## Q-151 / PERMISSION-008 — namespace ownership and identifier permanence
+
+Status: **AGREED.** Both halves confirmed by the user: an application's
+permissions must begin with the application — *"if the application is HRMS, every
+permission should start with HRMS… it cannot register any namespace starting with
+auth [or] system"* — and an identifier is never renamed, which the user noted is
+already the handbook's position.
+
+### An application registers only in its own namespace
+
+At the application boundary, a permission's **first noun segment is the
+application**:
+
+```
+hrms:payroll:payslip::read      ← hrms may register this
+auth:client::read               ← hrms may not; platform namespace
+system:user::read               ← hrms may not; platform namespace
+```
+
+A platform permission is a separate operation at a separate boundary, gated by
+platform authority. An application cannot reach it, and cannot claim a namespace
+the platform defines.
+
+**Why this is a boundary rule and not a naming convention.** A root grant's
+ceiling is computed as every active permission **in its own namespace**. An
+application's *evaluation* catalog is wider — its own permissions union the
+platform's — because a request inside an application may legitimately require a
+platform permission. The ceiling is sliced where the catalog is not, and the
+reason is exact: without the slice an application root would carry every
+platform permission, including whichever one authorises establishing an
+application root. The thing created by an authority could then create more of
+that authority.
+
+So an application registering under `auth:` would be minting capability into a
+ceiling it does not own. That is the escalation this rule prevents, and it is why
+the first segment is load-bearing rather than tidy.
+
+It also removes a duplication: the application is stored once, as the record's own
+key, and the identifier's noun path holds only what follows.
+
+### An identifier is never renamed
+
+[Q-126](#q-126--stable-authorization-meaning-approved) already forbids
+repurposing an identifier for a materially different meaning, and permits
+correcting descriptions and display labels. This states the consequence that was
+left implicit: **the identifier itself is immutable.** A label is not.
+
+A rename is strictly worse than a repurpose. The old identifier stops resolving,
+and under [Q-143](#q-143--permission-007--retirement-withdraws-the-permission-not-the-route)
+every grant referencing it **narrows silently** — a tenant's grant quietly
+supplies less, and nothing tells anybody. A repurpose at least keeps resolving
+while meaning the wrong thing; a rename fails quietly.
+
+If a name is wrong: register the right identifier and retire the wrong one. Both
+grants keep working, no authority changes without a record, and grant health is
+what surfaces the grants still naming the retired one.
+
+### Rationale / conscious tradeoff
+
+Neither half is new machinery — both are already enforced, and this ratifies them
+as rules rather than as implementation choices that happened to be made.
+
+The cost of identifier permanence is accumulation: a catalog keeps every
+identifier it ever registered, including ones retired for being badly named, and
+nothing reclaims them. That is accepted, because the alternative is a name whose
+meaning depends on when you read it.
+
 ## Q-143 / PERMISSION-007 — retirement withdraws the permission, not the route
 
 Status: **AGREED.** The user chose narrowing over closure and gave the reason:
