@@ -28,7 +28,12 @@ introduce a second authorization gate, returned scope fields, or a query languag
 
 Q-072 below now records the approved distinction for an explicitly Finance-limited
 request. It was proposed separately and subsequently approved by the user.
-Bulk writes, counts, pagination, exports, and schema details remain open.
+Bulk writes, counts, pagination, exports, and schema details remain open. Counts
+in particular should **not** be answered on their own: see
+[policy-declared scope boundary](policy-scope-boundary.md), where the same
+request at the same boundary is the reason a listing and a count cannot be
+answered differently. That chapter would also make this rule a consequence of
+coverage rather than a rule of its own.
 HC-09-03 remains open; this governing decision does not close the full checkpoint.
 
 ## Q-072 / ENFORCEMENT-006 — explicit collection boundaries

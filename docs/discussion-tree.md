@@ -43,7 +43,8 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── An unreachable node closes its route [Q-140 APPROVED]
 │   ├── What an audit consumer is given [Q-141 APPROVED]
 │   ├── Background/non-HTTP deferred for v1 [Q-142 APPROVED]
-│   └── OPEN: nested input syntax, further trusted fields, proxy attribution
+│   ├── OPEN: nested input syntax, further trusted fields, proxy attribution
+│   └── OPEN: policy-declared scope boundary [Q-144 RAISED, NOT APPROVED]
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]
 └── Final scenarios, reconciliation, package and acceptance [OPEN]
@@ -51,7 +52,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 
 Twelve design topics contain remaining choices, plus five contract reviews and
 final acceptance. D02's mechanism is resolved; no new topics offset the twelve
-answers. Q-132 is approved and supersedes B09–B11. Q-133 amends CONTRACT-012's field list. Q-131 is not approved. Next discussion: move source/destination grant
+answers. Q-132 is approved and supersedes B09–B11. Q-133 amends CONTRACT-012's field list. Q-131 and Q-144 are not approved; Q-144 would make Q-071 a consequence of boundary coverage rather than a rule of its own. Next discussion: move source/destination grant
 composition, distinct from Q-130's finite-batch case.
 
 <details>

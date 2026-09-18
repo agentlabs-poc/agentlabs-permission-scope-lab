@@ -428,6 +428,14 @@ The rule is stated for `tenant` and `application`. Whether further trusted
 fields are correlated, and how this interacts with proxy attribution, remain
 open with HC-03-05.
 
+## Open: the boundary an endpoint operates at
+
+A policy declares its inputs and, under Q-133, its trusted correlations. It does
+not declare the **scope boundary** its endpoint operates at, so the boundary
+reaching evaluation is whatever the binder supplies at request time. An endpoint
+may therefore claim a narrow boundary and read a wide one, and nothing can check
+it. [Q-144](policy-scope-boundary.md) frames that question and is not approved.
+
 ## What stays implicit and what remains open
 
 The declaration is server-owned and fixed. Verified identity/tenant context and

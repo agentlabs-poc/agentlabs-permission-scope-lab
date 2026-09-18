@@ -149,6 +149,13 @@ tenant administration, and application business access must not be collapsed.
 - Canonical completion still requires full contracts and scenario review. Reader
   build/tests verify documentation delivery, not authorization correctness.
 
+**Raised and not approved — [Q-144](policy-scope-boundary.md):** a policy does not
+declare the scope boundary its endpoint operates at, so that boundary comes from
+the binder at request time and an endpoint may claim a narrow one while reading a
+wide one. Framed rather than answered, because it would amend the published policy
+contract a second time and would turn Q-071 into a consequence of coverage. Counts
+are deliberately left unanswered until it is settled.
+
 Next discussion when resumed: whether different complete grants may cover the
 current and proposed boundaries of one move (D09), distinct from Q-130's batch
 items. This reconciliation does not decide that question.
