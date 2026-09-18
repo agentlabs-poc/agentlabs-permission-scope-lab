@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-151
+## Current execution tree — through Q-152
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -265,7 +265,9 @@ Post-0.0.1 canonical direction
 ├── Subteam / subgroup: explicit dependent authority [Q-091 AGREED]
 │   ├── One supporting parent assignment per derived route
 │   ├── Permissions subset; parent scope AND child constraints
-│   └── Human memberships remain direct, not inherited
+│   ├── Human memberships remain direct, not inherited
+│   ├── Synchronization is an ordinary authorized caller [Q-152 APPROVED]
+│   └── OPEN: ownership transfer and absence handling (Q-096 remainder)
 ├── Team administration: create/write/delete; write includes membership [Q-092 AGREED]
 │   └── Creating a subteam does not assign its authority; assignment is separate
 ├── Assignment: admin authority + assigner's valid supporting parent route [Q-093 AGREED]

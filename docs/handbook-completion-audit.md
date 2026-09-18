@@ -39,6 +39,13 @@ evidence, not the authority.
 | HC-09-09 | OPEN | DONE | [Q-142](background-authorization.md): the criterion asked for integration requirements **or an explicit deferral**, and the deferral is recorded as a decision with its cost named. Q-075 continues to govern queued work. |
 | HC-08-04 | OPEN | DONE | [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency. Q-061's no-scope rule and Q-076's audit exclusion are both preserved — the lineage form was considered and not adopted for that reason. |
 
+**HC-05-12 advances and does not close.** [Q-152](groups-and-membership.md)
+settles synchronization as an ordinary authorized caller and ratifies the team
+deletion guard; membership consequences are [Q-140](authority-lineage.md) and
+hierarchy changes are B13. **Ownership transfer and absence handling remain open**
+— the Q-096 remainder — and the permission authorizing an ownership transfer has
+never been chosen, which is the same gap HC-05-11 keeps open.
+
 **HC-05-11, HC-05-13 and HC-07-08 advance and do not close.**
 
 HC-05-11: [Q-132](grant-lifecycle.md), [Q-140](authority-lineage.md) and
@@ -281,7 +288,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-05-09 | OPEN | Define bootstrap/seed authority and its governed creation procedure. | [Q-113–Q-116](bootstrap-authority.md) establish initial authority and completed replay; [Q-117/124](bootstrap-initial-assignment.md) approve coherent visibility and same-intent continuation. [Q-119/121–123](root-permission-evolution.md) settle parent omission, publication responsibility, computation and shared catalog. Remaining: complete computed-root encoding, trusted setup evidence, deliberate recovery and exact concurrency/API contracts. |
 | HC-05-10 | OPEN | Specify delegation ceilings, chains, expiry, growth, and reactivation semantics. | [Q-070/127](delegation-lifecycle.md) settle bounded human-dependent authority, restoration, and no proxy chains in v1. Chains are not a pending v1 implementation requirement. Remaining: direct-delegation lifetime/growth/administration and full records/evidence; the criterion remains in scope. |
 | HC-05-11 | OPEN | Complete ordinary grant status/validity and create/change/revoke lifecycle rules. | Q-082 consolidates permanent withdrawal into delete; the original revoke wording does not require a second operation. [Q-101](parent-grant-bindings.md) distinguishes global grant controls, route controls, ineffective descendants, and guarded structural changes. [Q-108](assignment-validity.md) defers assignment-specific validity in v1; [Q-109](grant-validity.md) places grant validity in immutable revisions. Initial defaults, timestamp validation, full transitions, and operation contracts remain open. |
-| HC-05-12 | OPEN | Define group membership change, nesting, and optional-sync lifecycle behavior. | [Q-091](subgroups.md) supersedes Q-077's blanket subgroup exclusion: dependent subteams are supported, not inherited human membership. [Q-099](ownership-lineage.md) separates owners from team-held support; [Q-101](parent-grant-bindings.md) guards binding changes and [Q-111](lineage-cycles.md) rejects ancestor loops. Complete membership/ownership/hierarchy and optional-sync lifecycle contracts remain open; freshness timing is counted under stage 9. |
+| HC-05-12 | OPEN | Define group membership change, nesting, and optional-sync lifecycle behavior. | [Q-091](subgroups.md) supersedes Q-077's blanket subgroup exclusion: dependent subteams are supported, not inherited human membership. [Q-099](ownership-lineage.md) separates owners from team-held support; [Q-101](parent-grant-bindings.md) guards binding changes and [Q-111](lineage-cycles.md) rejects ancestor loops. Complete membership/ownership/hierarchy and optional-sync lifecycle contracts remain open; freshness timing is counted under stage 9. Synchronization and the deletion guard settled by [Q-152](groups-and-membership.md); ownership transfer/absence still open. |
 | HC-05-13 | OPEN | Define role revision/change validation and evidence for existing referencing grants. | [Q-089-B](role-revisions.md), [Q-102–Q-110](grant-revisions.md), and [Q-118](role-grant-contract.md) settle immutable adoption and core variants. [Q-122](root-permission-evolution.md) computes root catalog coverage without revision/adoption churn. Remaining: full validation/publication/adoption APIs, compatibility/retention and consistent evidence. |
 
 ### 6. Scope and registration
