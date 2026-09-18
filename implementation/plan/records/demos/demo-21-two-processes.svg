@@ -154,7 +154,7 @@
 <text x="38.8" y="3275" fill="#e8ecf2" xml:space="preserve">curl -X GET  /api/v1/acme/FIN/C17                             (auth service stopped)</text>
 <text x="22" y="3296" fill="#9aa4b4" xml:space="preserve">    {</text>
 <text x="22" y="3317" fill="#9aa4b4" xml:space="preserve">        &quot;version&quot;: &quot;1&quot;,</text>
-<text x="22" y="3338" fill="#9aa4b4" xml:space="preserve">        &quot;error_code&quot;: &quot;AUTH_UNREACHABLE&quot;,</text>
+<text x="22" y="3338" fill="#9aa4b4" xml:space="preserve">        &quot;error_code&quot;: &quot;AUTHORITY_UNREACHABLE&quot;,</text>
 <text x="22" y="3359" fill="#9aa4b4" xml:space="preserve">        &quot;error_message&quot;: &quot;We could not check your access.&quot;,</text>
 <text x="22" y="3380" fill="#9aa4b4" xml:space="preserve">        &quot;error_message_reason&quot;: &quot;the authority service did not answer&quot;</text>
 <text x="22" y="3401" fill="#9aa4b4" xml:space="preserve">    }</text>

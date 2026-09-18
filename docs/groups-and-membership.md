@@ -144,3 +144,75 @@ is not a valid authorization membership; it cannot supply inherited access.
 An application's organizational hierarchy may remain separate, but does not
 implicitly become an Auth membership hierarchy. Continue to Q-078 in
 [grant lifecycle](grant-lifecycle.md).
+
+## Q-152 / GROUP-006 — membership synchronization is an ordinary authorized caller
+
+Status: **AGREED.** The user declined the framing that a synchronization needs
+rules of its own: *"there is a job which you should consider as a service account,
+with a definite scope… whether we do it in bulk or we do it in individual account
+all boils down to what endpoint has been provided to do this. Anyway, we are not
+making any database entry directly, that is clearly forbidden. What matters is
+what endpoint has been provided, and does that endpoint have sufficient
+permission."*
+
+An application may synchronize its business membership into Auth. This settles
+what that is, and it is **nothing special**.
+
+### What a synchronization is
+
+A **service account** — an ordinary actor under Q-086, not a mode — calling
+ordinary endpoints under its own authority. It holds team-write authority within a
+definite scope, exactly as a human administrator would, and every membership it
+changes is an authorized write against a record.
+
+It has no privileged path. It cannot write the store directly; nothing can. That
+prohibition is not a rule about synchronization, it is the shape of the system —
+authority records are changed through authorized operations or not at all.
+
+### Bulk is an endpoint question, not an authorization question
+
+Whether a deployment offers one membership write per call or one call that changes
+many is endpoint design. The model has no preference, and a bulk endpoint is not a
+back door — it is authorized like anything else:
+
+- A bulk write within **one team** is one boundary, so one evaluation, which is
+  what [Q-150](operation-enforcement.md) already says.
+- A bulk write spanning **several teams** is several boundaries, and
+  [Q-130](bulk-enforcement.md) already governs it: every item needs complete
+  support before any effect, with no fragment mixing and no partial success.
+
+So there is no gap for a synchronization to fall through. What it may do is
+bounded by the authority it holds and the endpoints it is given, and those are the
+same questions asked of any caller.
+
+### Auth's record is the authorization
+
+A directory that disagrees with Auth is not thereby right. Business membership is
+not authorization membership — this chapter's first policy already says so — and a
+synchronization **proposes** writes rather than being believed. If it is wrong, it
+writes something wrong under its own authority, and that is recorded as its write.
+
+### Team deletion, ratified
+
+Deleting a team is refused while an assignment names it. That is enforced and was
+never written down. It is B13's reasoning applied to removal rather than to a
+move: a team's position is how its bindings reach their parent support, so
+removing the team leaves a binding with nothing to reach.
+
+### Rationale / conscious tradeoff
+
+Writing a synchronization contract would have created the thing worth avoiding: a
+privileged mode whose existence invites a bulk replace that authorizes once for
+four hundred changes, so "who was added, under what authority" stops being
+answerable per person. Refusing to name it as a special case keeps every membership
+change answerable.
+
+The cost is that a deployment synchronizing a large directory through per-record
+writes pays for them, and the alternative — a bulk endpoint — has to be designed
+and authorized rather than assumed. That is the intended consequence.
+
+**What is not settled here** is what authority a synchronization account should
+hold: which teams, and under what administrative bounds. That is HC-05-08, and it
+is open. This chapter says a synchronization is an ordinary caller; it does not say
+what any caller is allowed.
+

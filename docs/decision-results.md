@@ -273,7 +273,8 @@ retained as history: ~~PROPOSED, not approved~~. The evaluator supplies an
 `error_code` alongside the two readable messages, to represent the
 machine-readable cause required by Q-052. The code accompanies the messages
 delivered to the UI; it is not inferred by parsing their text.
-For an Auth timeout the illustrative code could be `AUTH_SERVICE_TIMEOUT`, while
+For an Auth timeout the illustrative code could be `AUTHORITY_TIMEOUT` (renamed
+from `AUTH_SERVICE_TIMEOUT` by [Q-135](#q-135--decision-017--the-code-catalogue-is-open-its-names-are-fixed)), while
 `error_message` and `error_message_reason` remain readable explanations.
 
 Rationale for the additional field: software can identify the cause
@@ -290,9 +291,10 @@ alternatives are not adopted: `error_message_reason` remains readable text, and
 clients should use the code rather than matching that text for machine handling.
 
 Counterexample: changing the explanation's wording must not change how software
-identifies the cause. The illustrative `AUTH_SERVICE_TIMEOUT` spelling is not
-yet a finalized catalogue entry, and a code does not authorize automatic retry
-or collapse the distinction between evaluation error and completed denial.
+identifies the cause. A code does not authorize automatic retry, and does not
+collapse the distinction between evaluation error and completed denial. The
+spelling shown here was illustrative until [Q-135](#q-135--decision-017--the-code-catalogue-is-open-its-names-are-fixed)
+published the catalogue and fixed it as `AUTHORITY_TIMEOUT`.
 
 **Q-055 — answered yes:** Should we add `error_code` for the stable machine-readable cause while
 keeping both agreed message fields readable?
@@ -351,6 +353,188 @@ Returning a grant identifier is not a substitute for enforcing all restrictions.
 
 **Q-060 — answered yes:** Should the allow result return its supporting-grant references to the
 endpoint for traceability?
+
+## Q-137 / DECISION-018 — an unusable route does not establish a denial
+
+Status: **AGREED.** This makes explicit a line already in Q-051's table, after
+the reference implementation violated it in the opposite direction and had to be
+corrected.
+
+Q-051 admits a completed denial when *"sufficient evidence conclusively
+establishes that no complete applicable route authorizes the operation"*, and
+qualifies it in the same row: *"one failed grant alone does not establish this if
+another route could authorize it."*
+
+A route the consumer **cannot read** — malformed, internally inconsistent,
+carrying identifiers it cannot parse — is exactly a route that might have
+authorized. So:
+
+| Situation | Result |
+|---|---|
+| A route is unusable, and another complete route authorizes | **Allow.** The unusable route says nothing about the one that did. |
+| A route is unusable, and no other route authorizes | **Evaluation error.** The denial is not established. |
+| Every route is readable, and none authorizes | **Completed denial**, as Q-051 already provides. |
+
+An unusable route therefore costs that route, and costs the *certainty* of a
+denial — not the whole answer.
+
+### Why this needs saying
+
+The unfiltered authority answer of an authority-loading contract describes
+everything a human holds in an area, so a single unreadable grant is no longer
+plausibly about the request being decided. A consumer that failed the whole
+evaluation on any bad route took away every other grant that human held, which
+is what [authority lineage](authority-lineage.md) forbids — *"missing support
+stops the affected authority route, not necessarily all authority of that user or
+group"* — and what [freshness](authority-freshness.md) repeats: *"the rule
+removes the withdrawn support, not every other grant the human holds."*
+
+Those two lines govern the *loading* side. This one carries the same rule across
+to the *consuming* side, which had no statement of it.
+
+### Rationale / conscious tradeoff
+
+Skipping an unusable route can only remove authority, never add it, so the
+direction is safe. The cost is on the other side: reporting an evaluation error
+rather than a denial tells a person "we could not check" when the honest answer
+might have been "you have no access". That is the correct trade — a denial
+asserts something about their authority, and asserting it from evidence that was
+never read is the error this prevents.
+
+An answer describing another tenant, application or human is not covered here.
+That is not one unusable route; it means the answer is about somebody else, and
+nothing in it may be used.
+
+## Q-135 / DECISION-017 — the code catalogue is open, its names are fixed
+
+Status: **AGREED.** Q-055 added `error_code` and left open what the list of codes
+is and whether a consumer may rely on it. This settles that.
+
+**A published code never changes meaning. New codes may appear at any time.** A
+consumer must tolerate a code it does not recognise and fall back to the class
+the result arrived in — a completed denial, or a failure to establish authority.
+
+A consumer may therefore not switch exhaustively on codes, and must not make a
+security-relevant choice from one. That choice is already carried by the
+allow / deny / evaluation-error distinction of Q-051, which is the contract a
+consumer branches on. A code explains; it does not decide.
+
+### Why not a closed list
+
+A closed enumeration is what lets a consumer be exhaustive, and it is the reason
+to want one. It was not adopted because the failure modes are discovered by the
+layer that meets them, not by this document: an HTTP source learns about
+redirects and oversized bodies, an in-process source about unreadable rows, and
+a gate about answers it cannot use. Closing the list makes each such discovery a
+contract version, and the reference implementation would have needed four in a
+single week.
+
+### The catalogue as published
+
+Prefixed `AUTHORITY_` means the authority answer failed, or failed to arrive.
+Unprefixed names either the decision itself, the caller's own configuration, or
+the specific way an answer disagreed with the question it was asked.
+
+| Code | Meaning |
+|---|---|
+| `AUTHORITY_UNREACHABLE` | The authority service did not answer. |
+| `AUTHORITY_TIMEOUT` | It did not answer in time. |
+| `AUTHORITY_REFUSED` | It answered, and the answer was not a success. |
+| `AUTHORITY_UNAVAILABLE` | An in-process authority store could not answer. |
+| `AUTHORITY_UNREADABLE` | The answer did not match the contract, or was not the contract at all. |
+| `AUTHORITY_AMBIGUOUS` | The answer did not mean exactly one thing. |
+| `AUTHORITY_OVERSIZED` | The answer exceeded the accepted size. |
+| `AUTHORITY_MALFORMED` | The answer was read, and this gate cannot use it. |
+| `UNSUPPORTED_VERSION` | The answer states a contract version this consumer does not speak. |
+| `WRONG_AREA` | The answer describes a different tenant or application. |
+| `WRONG_SUBJECT` | The answer describes a different human. |
+| `NO_AUTHORIZING_GRANT` | A completed denial: no complete route authorizes this operation. |
+| `MISCONFIGURED` | The asking application's own setup is wrong, before any question is sent. |
+
+`AUTHORITY_UNREADABLE` and `AUTHORITY_MALFORMED` are deliberately distinct: one
+answer could not be read, the other was read and could not be used. An operator
+needs to tell those apart, and they occur in different layers.
+
+Q-055's illustrative `AUTH_SERVICE_TIMEOUT` is **renamed to
+`AUTHORITY_TIMEOUT`**. Renaming is possible precisely because no code had been
+published before this decision; under the rule above it would not be possible
+afterwards.
+
+### Rationale / conscious tradeoff
+
+The cost is stated plainly: **no consumer can write an exhaustive handler**, and
+one that logs an unrecognised code without alerting on it will swallow a new
+failure mode silently. That is accepted because the alternative — freezing the
+list — buys exhaustiveness in exchange for a contract version every time a layer
+learns something new about how authority can fail to arrive.
+
+The naming families here were not designed; they accumulated across four
+components, and the drift reached the point where this handbook's own example
+code and the reference implementation disagreed. That is the argument for fixing
+names once, now, and holding them afterwards.
+
+## Q-134 / DECISION-016 — grant_ids is the contributing chain, in order
+
+Status: **AGREED.** The user chose the ordered chain and framed the choice
+itself: *"these are the things that can be decided on the flow based on the
+requirement, and can always change… this anyway is a very shallow requirement,
+not deep into the engine."* Recorded as a representation decision at the edge of
+the contract, revisable without disturbing the model beneath it.
+
+Q-060 settled that an allow carries references to the routes that justified it,
+and Q-061 settled the field name and refused a scope echo. Neither said what the
+array contains. This does.
+
+`grant_ids` is the **contributing chain of the route that authorized the
+request, ordered root first**:
+
+```json
+{
+  "version": "1",
+  "decision": "allow",
+  "grant_ids": ["fk3x9r2m0dq3", "fk3x9r2m5iv8", "fk3x9r2man0d"]
+}
+```
+
+Read left to right, that is the trusted root, the group grant narrowing it to
+one department, and the grant narrowing that to one certificate. **The order is
+the dependency**: each entry is bounded by the one before it, which is what
+DECISION-001 preserves during evaluation and what this returns.
+
+It remains what Q-061 said it is — the grants supporting *this* evaluation, not
+every grant the human holds, and not a reusable authorization for another
+request.
+
+### What was considered and not adopted
+
+The alternative was carrying, for each step, the assignment and team that held
+it and the revision in force:
+
+```json
+{ "grant_id": "fk3x9r2m0dq3", "revision": 1,
+  "assignment_id": "fm5b7t4p0dq3", "team_id": "fibggi2jur5s", "root": true }
+```
+
+Authority loading already answers in that shape, so a caller who needs it can
+ask the service that owns those records. Placing it in the decision result would
+put reconstruct-this-later fields into a contract the handbook deliberately
+narrowed: audit design is HC-09-08, excluded from this handbook because Q-076
+placed it in another layer.
+
+### Rationale / conscious tradeoff
+
+The order carries the structure, so a parent field would restate it. Everything
+the richer form adds is history rather than structure.
+
+The cost is stated rather than hidden. An endpoint holding only grant ids cannot
+later say **which assignment** carried the authority, if that assignment has
+since been deleted. That is acceptable while the evidence exists to let an
+endpoint account for its own effect, and it would not be acceptable if the same
+array were ever made the record of last resort — which is the audit layer's
+question, not this one.
+
+Because this is a representation at the edge, changing it later costs a contract
+version and no model change.
 
 ## Q-061 / DECISION-009 — evaluated boundary information with allow
 
@@ -495,7 +679,7 @@ fields without a `decision` field because evaluation could not complete:
 ```json
 {
   "version": "1",
-  "error_code": "AUTH_SERVICE_TIMEOUT",
+  "error_code": "AUTHORITY_TIMEOUT",
   "error_message": "We could not check your access.",
   "error_message_reason": "The authorization service did not respond in time."
 }
@@ -525,7 +709,8 @@ code catalogue remain open and must be finalized before publishing the schema.
 
 **Q-064 — answered yes:** this is the minimal evaluation-error shape, with no
 `decision` field because no authorization decision was reached. The example's
-`AUTH_SERVICE_TIMEOUT` spelling remains illustrative, not a finalized code entry.
+spelling is now the published `AUTHORITY_TIMEOUT` — Q-135 closed the catalogue
+question this sentence left open.
 
 ## Q-065 / DECISION-013 — reject mixtures of result variants
 
@@ -541,7 +726,7 @@ Intentionally invalid example under the agreed rule:
   "version": "1",
   "decision": "allow",
   "grant_ids": ["G-17"],
-  "error_code": "AUTH_SERVICE_TIMEOUT"
+  "error_code": "AUTHORITY_TIMEOUT"
 }
 ```
 

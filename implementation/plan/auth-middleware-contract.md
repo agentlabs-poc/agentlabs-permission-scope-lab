@@ -228,7 +228,8 @@ fields for deny, and rejection of mixed variants. `DecodeResult` also recognizes
 the complete evaluation-error variant and returns it as `*EvaluationError` with
 a zero `Result`; its strict JSON decoder rejects unknown fields. The example
 `NO_AUTHORIZING_GRANT` may be used only for the established no-route deny;
-`AUTH_SERVICE_TIMEOUT` may be used only for an actual timeout. They are examples,
+`AUTHORITY_TIMEOUT` may be used only for an actual timeout. The catalogue and its
+compatibility rule are Q-135; codes are examples here,
 not a complete catalogue. Other failures remain fail-closed Go errors until the
 catalogue supplies an honest external code/message; they must not be relabeled as
 either example. This is the remaining blocker to a general result renderer, not

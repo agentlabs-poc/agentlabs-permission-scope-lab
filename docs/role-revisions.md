@@ -190,3 +190,65 @@ now governs role revision selection; RESOLUTION-003's dependent-view meaning sur
 | RESOLUTION-003 | AGREED | Expand a role reference into its current permission set, producing the same permission-set grant form used to evaluate explicitly listed permissions. Preserve the original grant identity, scope, recipient, validity, conditions, and source provenance, including the role definition used. Expansion is a computed view of the same grant, not a new assignment, and does not merge unrelated grants. | User agreed after clarification that the earlier JSON represented the existing G-6 after role lookup. GRANT-EX-005 retains G-6 visibly. Expanded does not mean fully resolved: application relationships or resource facts may still be missing. Exact schema, role-revision encoding, membership expansion, and final resolved-grant representation remain open. |
 
 </details>
+
+## Q-145 / ROLE-004 — publish freely, restrict adoption
+
+Status: **AGREED.** The user settled both halves: *"any role we should be able to
+publish it freely. But the adoption should be restricted… it should evaluate all
+its child if they carry the subset or no. With the new revision. If the child or
+children are not subset of the new revision it should explicitly deny."*
+
+**Publication is unconstrained by existing grants.** A new role revision is
+validated against its own shape and the catalog, and against the authority of
+whoever publishes it. It does not consult the grants that adopted earlier
+revisions, and it cannot be refused because one of them would be affected.
+
+**Adoption is where the evaluation happens.** When a grant adopts a newer
+revision, every enabled dependent beneath it is re-evaluated against the revision
+being adopted. If a dependent that resolved before would not resolve after, the
+adoption is **refused** and the grant is left exactly as it was.
+
+Correcting the dependents is then the administrator's work, and the order is
+bottom-up: fix or remove the children, then adopt at the parent. Same order
+[Q-132](grant-lifecycle.md) requires for dismantling, for the same reason — the
+structure is repaired from the leaves.
+
+### Why publication is not the place
+
+A role may be one the application ships to every tenant. Refusing publication
+because one tenant's private grant structure would break would let that tenant
+block a shared catalog change, and the publisher cannot repair it — they have no
+authority over tenant grants. It would also make publication's cost grow with
+every tenant that ever adopted the role.
+
+This is the same reasoning that keeps [Q-125](permission-lifecycle.md) from
+requiring references to be edited before a permission is retired.
+
+### Two qualifications, and a gap
+
+**The evaluation is differential, not absolute.** A dependent that did not resolve
+*before* the adoption does not block it. Without this, a dependent whose own grant
+had expired or been disabled would refuse an adoption whose content it was never
+compatible with — and because revision content is immutable, it would have frozen
+its ancestor's adoption permanently.
+
+**A disabled dependent is skipped.** It supplies no authority, so nothing of its
+can stop working; it is revalidated when it is enabled, which is where that check
+belongs.
+
+**The gap, recorded rather than hidden:** if the dependent inventory cannot be
+built at all — an area with a record that does not read — the evaluation is
+skipped and the adoption proceeds. That is deliberate: one unreadable branch must
+not freeze every adoption in a tenant, and an area in that state is already
+failing its reads. It means "explicitly deny" holds except where the area is
+already broken.
+
+### Rationale / conscious tradeoff
+
+The cost is that a grant can be **stuck**: sitting on an old revision, unable to
+adopt the current one, with nothing telling anybody. That is the same condition as
+a grant referencing a retired permission, and it belongs to the same unmet
+requirement — see [grant health](permission-lifecycle.md). Until that exists, an
+administrator discovers a stuck grant by attempting the adoption and being
+refused.
+

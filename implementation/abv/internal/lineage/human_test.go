@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 )
@@ -434,17 +435,40 @@ func TestOneIneligibleRouteDoesNotRemoveTheRest(t *testing.T) {
 		t.Fatalf("the fixture does not hold two routes, so nothing below means anything: %#v, %v", both, err)
 	}
 
-	// Retire the permission only Team1's grant selects. Its route stops; the
-	// other one is untouched by the act and must survive it.
+	// Retiring a permission one grant selects among others narrows that grant —
+	// Q-143 — so both routes survive and Team1's carries only what is left.
 	f = second()
 	write := f.Snapshot.Catalog.Permissions[lab.PayslipWrite]
 	write.Active = false
 	f.Snapshot.Catalog.Permissions[lab.PayslipWrite] = write
-	got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
+	kept, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
 	if err != nil {
 		t.Fatalf("retiring one permission failed the whole answer: %v", err)
 	}
-	if len(got) != 1 || got[0].GrantID != "fk3x9r2mv7qq" {
+	if len(kept) != 2 {
+		t.Fatalf("a retirement closed a route that still supplies read: %#v", kept)
+	}
+	for _, route := range kept {
+		if slices.Contains(route.Permissions, lab.PayslipWrite) {
+			t.Fatalf("a retired permission survived in %s: %#v", route.GrantID, route.Permissions)
+		}
+	}
+
+	// A route whose *whole* selection is retired does stop, and the others still
+	// do not. This is the case the test is named for, and under Q-143 it is the
+	// only retirement that produces it.
+	f = second()
+	onlyWrite := f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mv7qq", Revision: 1}]
+	onlyWrite.Permissions = []string{lab.PayslipWrite}
+	f.Snapshot.Contents[domain.GrantKey{ID: "fk3x9r2mv7qq", Revision: 1}] = onlyWrite
+	write = f.Snapshot.Catalog.Permissions[lab.PayslipWrite]
+	write.Active = false
+	f.Snapshot.Catalog.Permissions[lab.PayslipWrite] = write
+	got, err := lineage.ResolveHuman(t.Context(), f.Snapshot, f.Issuer, lab.PayslipRead, time.Time{})
+	if err != nil {
+		t.Fatalf("one emptied route failed the whole answer: %v", err)
+	}
+	if len(got) != 1 || got[0].GrantID != "fk3x9r2m5iv8" {
 		t.Fatalf("the surviving route is not the unaffected one: %#v", got)
 	}
 

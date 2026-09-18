@@ -175,11 +175,11 @@ func TestEveryFailureIsAnEvaluationFailure(t *testing.T) {
 		body   string
 		want   string
 	}{
-		"a refusal":        {http.StatusForbidden, `{"error_code":"NOT_ENTITLED_TO_ASK"}`, "AUTH_REFUSED"},
-		"an outage":        {http.StatusServiceUnavailable, `{}`, "AUTH_REFUSED"},
-		"not the contract": {http.StatusOK, `{"version":"1","surprise":true}`, "AUTH_MALFORMED"},
-		"not JSON":         {http.StatusOK, `<html>`, "AUTH_MALFORMED"},
-		"oversized":        {http.StatusOK, `{"version":"1","tenant_id":"` + strings.Repeat("x", 1<<20) + `"}`, "AUTH_OVERSIZED"},
+		"a refusal":        {http.StatusForbidden, `{"error_code":"NOT_ENTITLED_TO_ASK"}`, "AUTHORITY_REFUSED"},
+		"an outage":        {http.StatusServiceUnavailable, `{}`, "AUTHORITY_REFUSED"},
+		"not the contract": {http.StatusOK, `{"version":"1","surprise":true}`, "AUTHORITY_UNREADABLE"},
+		"not JSON":         {http.StatusOK, `<html>`, "AUTHORITY_UNREADABLE"},
+		"oversized":        {http.StatusOK, `{"version":"1","tenant_id":"` + strings.Repeat("x", 1<<20) + `"}`, "AUTHORITY_OVERSIZED"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			source, _ := answering(t, tc.status, tc.body)

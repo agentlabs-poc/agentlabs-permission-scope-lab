@@ -250,7 +250,7 @@ func (r *routeResolver) resolve(assignment domain.Assignment, holderTeamID strin
 	if err != nil {
 		return fail(err)
 	}
-	result, err := validation.Narrow(r.s.Area, parent, content, r.s.Roles)
+	result, err := validation.NarrowSupplied(r.s.Area, r.s.Catalog, parent, content, r.s.Roles)
 	if err != nil {
 		// This child no longer sits within the parent it descends from. One
 		// route, not the answer — and again only when the answer is a rejection,
@@ -325,7 +325,7 @@ func validateSelectedContent(s storage.Snapshot, content domain.GrantContent, no
 	if control.Status == "disabled" {
 		return ErrInactive
 	}
-	if err := validation.CheckContent(s.Area, s.Catalog, content, s.Roles); err != nil {
+	if _, err := validation.SuppliedContent(s.Area, s.Catalog, content, s.Roles); err != nil {
 		// Only a rejection is this route's own problem — a retired permission,
 		// an adopted role revision that has gone. CheckContent also answers
 		// ErrMalformed and ErrUnsupported, for a stored row that is not a record

@@ -11,7 +11,7 @@ migration owes.
 
 ---
 
-## 1 · ~~The gate finds the route's tenant by the placeholder's spelling~~ — built
+## 1 · ~~The gate finds the route's tenant by the placeholder's spelling~~ — built and adopted
 
 **Closed in the lab, open for the contract.** The gate bound the route's tenant
 to the trusted area by reading `PathValue("tenant")`, so a policy whose path said
@@ -48,8 +48,11 @@ refuse any path segment it could not account for, which needs it to guess which
 segments are tenant-shaped — a heuristic that catches `tenant_id` and misses
 `org`. A declaration has nothing to guess: the endpoint already knows.
 
-**What the migration owes.** The published policy format is a handbook chapter,
-so the `trusted` field is **a proposal**, not an adopted contract. Note also what
+**What the migration owes.** The `trusted` field is **adopted** — Q-133 /
+CONTRACT-013 in [endpoint policy format](../../docs/endpoint-policy-format.md),
+which amends CONTRACT-012's field list and supplies the mechanism for the
+binding this chapter already mandated. It was carried here as a proposal until
+that decision; it is no longer one. Note also what
 was given up: the gate previously held *every* route tenant to the trusted one
 unconditionally, by spelling. The declaration is stronger where the spelling
 differed and weaker where it matched, and only the mount rule above closes the
@@ -86,9 +89,24 @@ dependent" is represented in published contracts, and bulk dismantle.
 Two assignment-side root special cases went with the grant-side ones: delete of
 an assignment, and its status change, each refused while the grant was a trusted
 root. Q-132 does not cover them — it is about grants — and their old
-justification, that deleting one takes the root's holder away and leaves a
-ceiling nobody holds, is not replaced by anything. **Open for the migration:**
-whether a root's last holder may be removed, and what it means if it is.
+justification was that deleting one takes the root's holder away and leaves a
+ceiling nobody holds.
+
+**Closed, and by behaviour that was already there.** The ordinary dependency
+rules refuse it: delete of an assignment is refused while another assignment
+holds a grant naming this one as parent, and disable is refused while an enabled
+dependent binding exists. See the note in
+[grant lifecycle](../../docs/grant-lifecycle.md). The removed clauses were
+redundant with those, not load-bearing.
+
+This was investigated wrongly first. A demonstration disabled the root's binding
+*in the snapshot* and resolved, which took every person in the area to zero and
+looked like a reachable failure. It is not reachable — that path never goes
+through a write gate, and manipulating the store directly is exactly what this
+corpus bans. Asking the service produces a conflict and a rejection. A
+root-specific rule was drafted on the strength of the bad demonstration and
+withdrawn; it would have deadlocked dismantling. The behaviour is now pinned by a
+test, whose absence is how the wrong belief survived.
 
 ---
 
@@ -138,23 +156,25 @@ unbuilt, and it is the consumer this evidence exists for.
 
 ---
 
-## 6 · What a retirement does to a mixed grant
+## 6 · ~~What a retirement does to a mixed grant~~ — answered by Q-143
 
-**What the lab does.** Retiring one permission withdraws every route through a
-grant that selects it — including routes *beneath* that grant which select only
-permissions still supplied. Demonstration 18 captures it: maya holds a grant for
-`::read` and `::write` at `dept=FIN`, and a deeper one for `::read` alone at
-`cert=C17`; retiring `::write` leaves her holding nothing at all, because the
-deeper route's chain runs through the mixed grant.
+**What the lab used to do.** Retiring one permission withdrew every route through
+a grant that selected it — including routes *beneath* that grant which selected
+only permissions still supplied. Retiring `::write` left maya holding nothing,
+because the deeper `cert=C17` route's chain ran through the mixed grant.
 
-**Why it is not a defect.** [Permission lifecycle](../../docs/permission-lifecycle.md)
-says so in terms under Q-125's remaining contract boundaries: *"This decision
-specifies loss of the retired permission; it does not settle every consequence
-for other still-supported permissions in a mixed grant."* The route-wise outcome
-is defensible under `authority-lineage.md:169`, and it is fail-closed.
+That was never chosen; it was what the chain walk already did, and Q-125's
+remaining boundaries had parked the question: *"it does not settle every
+consequence for other still-supported permissions in a mixed grant."*
 
-**What the migration owes.** The settlement. The available answers are that a
-mixed grant loses only the retired permission and keeps narrowing beneath it,
-or that it is withdrawn whole as it is here. Either is defensible; the lab
-implements the second because it is what the chain walk already did, not because
-it was chosen.
+**Settled by [Q-143](../../docs/permission-lifecycle.md), and the lab now
+implements it.** A grant supplies what it selects and the catalog still supplies;
+it stops only when nothing survives. So maya keeps `::read` at `dept=FIN` and
+keeps the deeper `cert=C17` route, which never selected the retired permission.
+The write path is unchanged — nothing new may reference a retired permission.
+
+**What the migration owes instead:** grant health. A grant still referencing a
+retired permission keeps working and is no longer what its author wrote. An
+administrator needs to see which grants in their area are unhealthy and correct
+them; Auth must not repair them silently, which Q-125 already forbids. That is an
+administrative surface, so it waits on the same work as HC-05-08.

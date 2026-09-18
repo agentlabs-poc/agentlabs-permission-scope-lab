@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-132
+## Current execution tree — through Q-154
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -23,13 +23,40 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 ├── Definition and delegation lifecycle
 │   ├── Retirement despite references; stable meaning [Q-125/126 APPROVED]
 │   ├── Direct human-to-proxy only; no proxy chains [Q-127 APPROVED]
+│   ├── Lifetime, growth and administration of a delegation [Q-154 APPROVED]
 │   └── OPEN: scope evolution, direct-delegation and ownership/sync contracts
 ├── Evaluation and operation coverage
 │   ├── All confirmed reductions govern new checks [Q-128 APPROVED]
 │   ├── Prior bounded synchronous allow may finish [Q-129 APPROVED]
 │   ├── Different complete grants across batch items [Q-130 APPROVED]
+│   ├── Composition is not a grant question [Q-150 APPROVED, withdraws Q-131]
 │   ├── No disable or delete beneath a dependent [Q-132 APPROVED]
+│   ├── A filter is a narrowing, not an assertion [Q-136 APPROVED]
+│   ├── Namespace ownership and identifier permanence [Q-151 APPROVED]
+│   ├── Retirement withdraws the permission, not the route [Q-143 APPROVED]
+│   ├── Publish roles freely, restrict adoption [Q-145 APPROVED]
+│   ├── Reference existence delegated, subtree scope excluded [Q-148 APPROVED]
+│   ├── OPEN: grant health — detection and administrative correction
 │   └── OPEN: move composition, timing/background/collection cases
+├── Endpoint policy and its declared bindings
+│   ├── Policy declares its trusted correlations [Q-133 APPROVED]
+│   ├── Allow evidence is the ordered contributing chain [Q-134 APPROVED]
+│   ├── Open code catalogue, fixed names [Q-135 APPROVED]
+│   ├── An unusable route does not establish a denial [Q-137 APPROVED]
+│   ├── Response disclosure is the endpoint's duty [Q-138 APPROVED]
+│   ├── Authority loading transport published [Q-139 APPROVED]
+│   ├── Handler integration contract [Q-146 APPROVED]
+│   ├── Structural policy validation at mount [Q-147 APPROVED]
+│   ├── Missing/invalid/unsupported evidence [Q-149 APPROVED]
+│   ├── An unreachable node closes its route [Q-140 APPROVED]
+│   ├── What an audit consumer is given [Q-141 APPROVED]
+│   ├── Background/non-HTTP deferred for v1 [Q-142 APPROVED]
+│   ├── OPEN: nested input syntax, further trusted fields, proxy attribution
+│   └── OPEN: policy-declared scope boundary [Q-144 RAISED, NOT APPROVED]
+├── Bootstrap and the two tenant namespaces
+│   ├── A tenant operates in two namespaces [Q-153 APPROVED]
+│   ├── Establishment is the platform-namespace authority's closing step [Q-153]
+│   └── OPEN: administrative API contracts for establishment
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]
 └── Final scenarios, reconciliation, package and acceptance [OPEN]
@@ -37,8 +64,9 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 
 Twelve design topics contain remaining choices, plus five contract reviews and
 final acceptance. D02's mechanism is resolved; no new topics offset the twelve
-answers. Q-132 is approved and supersedes B09–B11. Q-131 is not approved. Next discussion: move source/destination grant
-composition, distinct from Q-130's finite-batch case.
+answers. Q-132 is approved and supersedes B09–B11. Q-133 amends CONTRACT-012's field list. Q-131 is withdrawn by Q-150; Q-144 is not approved; Q-144 would make Q-071 a consequence of boundary coverage rather than a rule of its own. Next discussion: the remaining questions that need the user — identity and
+proxy attribution, permission naming governance, bootstrap authority, delegation
+ceilings, group nesting, and administrative bounds.
 
 <details>
 <summary>Historical status and discussion snapshot — current summary above supersedes stale pending labels</summary>
@@ -242,7 +270,9 @@ Post-0.0.1 canonical direction
 ├── Subteam / subgroup: explicit dependent authority [Q-091 AGREED]
 │   ├── One supporting parent assignment per derived route
 │   ├── Permissions subset; parent scope AND child constraints
-│   └── Human memberships remain direct, not inherited
+│   ├── Human memberships remain direct, not inherited
+│   ├── Synchronization is an ordinary authorized caller [Q-152 APPROVED]
+│   └── OPEN: ownership transfer and absence handling (Q-096 remainder)
 ├── Team administration: create/write/delete; write includes membership [Q-092 AGREED]
 │   └── Creating a subteam does not assign its authority; assignment is separate
 ├── Assignment: admin authority + assigner's valid supporting parent route [Q-093 AGREED]

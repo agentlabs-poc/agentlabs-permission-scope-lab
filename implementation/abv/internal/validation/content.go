@@ -11,30 +11,75 @@ import (
 
 // CheckContent requires an established area and its application-owned catalog.
 // Catalog loading and role lookup must already be partitioned by the provider.
+//
+// Every permission the content selects must be registered and active. This is
+// the write-path rule: a grant may not be authored, revised or assigned while it
+// names a permission the catalog does not supply.
 func CheckContent(area domain.Area, catalog domain.Catalog, g domain.GrantContent, roles map[domain.RoleKey]domain.RoleContent) error {
+	_, err := checkContent(area, catalog, g, roles, true)
+	return err
+}
+
+// SuppliedContent is the read-path counterpart, and it narrows where CheckContent
+// refuses. It returns the subset of the content's selection that the catalog
+// still supplies, and rejects only when that subset is empty.
+//
+// Q-125 retires a permission without rewriting the grants that reference it, and
+// Q-143 settles what that leaves behind: the retirement withdraws that permission
+// and nothing else. A grant selecting read and write, whose write was retired,
+// still supplies read — so a route through it narrows rather than closing, and a
+// route hanging beneath it that never selected write is untouched. It closes only
+// when nothing it selects survives.
+//
+// The returned slice is the content's effective permission set. It is what a
+// resolved route carries, and it can be narrower than the stored record. That
+// divergence is the cost of Q-143 and is deliberate: what a grant gives cannot be
+// read from the record alone, only from the record and the catalog together.
+func SuppliedContent(area domain.Area, catalog domain.Catalog, g domain.GrantContent, roles map[domain.RoleKey]domain.RoleContent) ([]string, error) {
+	return checkContent(area, catalog, g, roles, false)
+}
+
+// checkContent is one body for both rules. requireAll distinguishes them: the
+// write path needs every selected permission supplied, the read path needs one.
+func checkContent(area domain.Area, catalog domain.Catalog, g domain.GrantContent, roles map[domain.RoleKey]domain.RoleContent, requireAll bool) ([]string, error) {
 	if err := area.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 	if catalog.ApplicationID != area.ApplicationID() {
-		return domain.ErrRejected
+		return nil, domain.ErrRejected
 	}
 	if err := codec.ValidateContent(g); err != nil {
-		return err
+		return nil, err
 	}
-	permissions, err := selectedPermissions(g, roles)
+	selected, err := selectedPermissions(g, roles)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	for _, permission := range permissions {
+	supplied := make([]string, 0, len(selected))
+	for _, permission := range selected {
 		registered, ok := catalog.Permissions[permission]
 		if !ok || registered.ID != permission || !registered.Active {
-			return domain.ErrRejected
+			if requireAll {
+				return nil, domain.ErrRejected
+			}
+			continue
 		}
+		supplied = append(supplied, permission)
+	}
+	// A selection that is emptied by the catalog is a rejection: nothing the
+	// grant names survives, so there is nothing left to supply.
+	//
+	// A selection that was empty to begin with is not. A trusted root stores no
+	// permission list at all — Q-122 computes its coverage from the catalog at
+	// resolve time rather than materializing it — so an empty selection here is
+	// the root's ordinary shape, and rejecting it closed every route in the area.
+	if len(selected) > 0 && len(supplied) == 0 {
+		return nil, domain.ErrRejected
 	}
 	for key, value := range g.Scope {
 		registered, ok := catalog.Scopes[key]
 		if !ok || registered.Key != key {
-			return domain.ErrRejected
+			return nil, domain.ErrRejected
 		}
 		// Two boundaries are implicit and never registered keys:
 		//
@@ -45,10 +90,10 @@ func CheckContent(area domain.Area, catalog domain.Catalog, g domain.GrantConten
 		//
 		// A key does not declare either, and no other $-prefixed value exists.
 		if strings.HasPrefix(value, domain.ReservedTokenPrefix) && value != domain.SelfToken {
-			return domain.ErrRejected
+			return nil, domain.ErrRejected
 		}
 	}
-	return nil
+	return supplied, nil
 }
 
 // selectedPermissions resolves the content's complete, exact permission source.

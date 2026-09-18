@@ -92,3 +92,69 @@ implements the rule. Approval of this principle alone does not close HC-09-04.
 covering both current and proposed boundaries. Under the impact-first pass, move
 next to [revocation and freshness](authority-freshness.md), keeping the detailed
 move-composition and concurrency questions open.
+
+## Q-150 / ENFORCEMENT-013 — composition is not a grant question
+
+Status: **AGREED, and it answers Q-131 by dissolving it.** The user declined the
+framing: *"it doesn't really matter if it is one grant or two grant as long as the
+resolved grant has the permission… and the required scope. So the question is more
+about designing the API than the grant itself."*
+
+Q-068 requires authority over both the current and the proposed boundary of a
+move. Q-131 asked whether those two may be covered by two different grants. That
+question is withdrawn: **the model has no opinion about composition.** What is
+required is that the resolved authority covers the permission and the boundary
+being evaluated. Whether it arrived from one grant or several is not a property
+this model reasons about, and no rule should depend on it.
+
+### How one operation covers two boundaries
+
+A move is **one endpoint and one gate**, and the gate evaluates **once per
+boundary**. The same permission is asked about each, and the effect runs only if
+every evaluation allows:
+
+```json
+{ "permission": "hrms:payroll:payslip::write", "material": { "dept": "FIN" } }
+{ "permission": "hrms:payroll:payslip::write", "material": { "dept": "ENG" } }
+```
+
+Each evaluation is a complete route against one boundary, so no fragment is ever
+mixed — the concern Q-130 names is structurally absent rather than guarded
+against. And because both evaluations happen in one request at one gate, "both
+hold" means at one moment, which is what a boundary-changing operation needs.
+
+**Expressing the two boundaries is the endpoint's obligation.** A boundary is
+identified by a registered scope key, and a request carries one value per key, so
+a single evaluation cannot mean two departments at once. An endpoint that moves
+data declares both, and asks for each. Getting that wrong produces an endpoint
+that authorizes one end of a move and not the other, which is exactly what Q-068
+forbids — and it is endpoint design, not a gap in the authorization model.
+
+### Create and update follow from the same rule
+
+| Operation | Boundaries evaluated |
+|---|---|
+| Create | the **proposed** boundary only — there is no current one |
+| Update that does not change the boundary | the **current** boundary only |
+| Update that changes the boundary | **both** — it is a move, whatever the endpoint calls it |
+| Move | **both** |
+
+The last row is the one worth stating: an update is a move when it changes the
+boundary, and an endpoint cannot escape the both-boundary requirement by naming
+the operation differently.
+
+### Rationale / conscious tradeoff
+
+Refusing composition as a concept is what keeps this simple. The alternative —
+requiring a single grant to cover both ends — would push administrators toward
+broader grants: to let somebody move records between two departments they already
+administer, they would have to grant tenant-wide authority instead. A rule that
+makes legitimate use require more access than it needs is the wrong rule.
+
+The cost falls where the user placed it. The model cannot check that an endpoint
+asked about both boundaries; it can only answer what it is asked. An endpoint that
+asks about one end is wrong, and this handbook cannot detect it — the same duty
+split as [Q-138](endpoint-authorization.md), and the same reason
+[Q-144](policy-scope-boundary.md) is worth settling, since a declared boundary is
+what would make it checkable.
+

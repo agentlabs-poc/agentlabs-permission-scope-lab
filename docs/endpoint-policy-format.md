@@ -6,7 +6,7 @@ rationale. Endpoint policy is not redesigned: one permission, declared inputs,
 and endpoint-owned enforcement remain. [Subgroup dependencies](subgroups.md)
 are resolved as part of complete authority, not a new prepared handoff.
 
-## Current reading guide — reconciled through Q-050-F
+## Current reading guide — reconciled through Q-050-F and Q-133
 
 Later refinement: [Q-068 / ENFORCEMENT-004](operation-enforcement.md) now requires
 move authority over both current and proposed boundaries for the same-tenant
@@ -147,6 +147,12 @@ The adopted policy retains `version`, `method`, `path`, one `permission`, and
 selected `inputs` with their sources. No `relationships` block, named resolver,
 or argument-mapping contract is adopted.
 
+[Q-133](#q-133--contract-013--the-policy-declares-its-trusted-correlations)
+later adds one further field, `trusted`, which correlates a trusted context
+field with a declared input. It is not the block declined here — it needs no
+resolver and asserts no relationship between application records — but this
+field list is amended by it.
+
 > The endpoint predeclares one required permission and selected inputs with
 > their sources. The endpoint implementation must establish or enforce the
 > application relationships necessary to keep execution within the authorized
@@ -269,7 +275,8 @@ not by itself complete a contract.
     "tenant": { "source": "path", "name": "tenant" },
     "dept": { "source": "path", "name": "dept" },
     "cert": { "source": "path", "name": "cert" }
-  }
+  },
+  "trusted": { "tenant": "tenant" }
 }
 ```
 
@@ -280,6 +287,7 @@ not by itself complete a contract.
 | `permission` | Exactly one required permission, mapping the operation directly without a redundant separate action field. |
 | `inputs` | Locally name selected request inputs that authorization may use. These names are not automatically scope boundary keys. |
 | `source` and `name` | Explicitly identify the source location and parameter/field name independently of the local input name. |
+| `trusted` | Correlates a trusted context field with a declared input — Q-133. Required for `tenant`. |
 
 For a route parameter named `certificateId`, the local input could still be
 `cert`, with `source: path` and `name: certificateId`. Explicit source/name was
@@ -315,13 +323,14 @@ Its partial endpoint policy uses the approved structure:
     "tenant": { "source": "path", "name": "tenant" },
     "cert": { "source": "path", "name": "cert" },
     "proposed_dept": { "source": "body", "name": "department_id" }
-  }
+  },
+  "trusted": { "tenant": "tenant" }
 }
 ```
 
 | Local input | Source | Meaning in this example |
 |---|---|---|
-| `tenant` | Path `tenant`, yielding `acme` | Requested tenant identifier; must agree with trusted tenant context. |
+| `tenant` | Path `tenant`, yielding `acme` | Requested tenant identifier; `trusted` names it, so the gate holds it to the trusted tenant — Q-133. |
 | `cert` | Path `cert`, yielding `C-17` | Certificate identified by the request; execution must remain bound to it. |
 | `proposed_dept` | Body `department_id`, yielding `FIN` | Requested department value, not proof of the certificate's current department. |
 
@@ -346,12 +355,154 @@ The same principle applies to a body employee identifier: it describes a request
 value, not verified caller identity or proof of current ownership. Those remain
 distinct from authenticated context and application-established relationships.
 
+## Q-133 / CONTRACT-013 — the policy declares its trusted correlations
+
+Status: **AGREED, with a reservation the user asked to be recorded.** The user
+adopted this and said: *"somehow I feel this is not explicitly a part of
+handbook… however, I think for now, we can adopt it."* It is carried here as an
+adopted rule, and as a candidate for relocation if the handbook later separates
+enforcement mechanics from the authorization model. The reservation does not
+weaken the rule; it marks where the rule may eventually live.
+
+The adopted policy gains one field, `trusted`, correlating a field of the
+trusted request context with one of the policy's own declared inputs:
+
+```json
+{
+  "version": "1",
+  "method": "GET",
+  "path": "/api/v1/{tenant}/{dept}/{cert}",
+  "permission": "hrms:employee:certificate::read",
+  "inputs": {
+    "tenant": { "source": "path", "name": "tenant" },
+    "dept": { "source": "path", "name": "dept" },
+    "cert": { "source": "path", "name": "cert" }
+  },
+  "trusted": { "tenant": "tenant" }
+}
+```
+
+Read as: *the input this policy calls `tenant` must equal the trusted tenant.*
+
+This is the mechanism for an obligation this chapter already states and leaves
+unspecified — "route tenant claims must still be bound to trusted context; field
+names alone do not prove relationships". Without a mechanism each endpoint
+invents one or omits one silently.
+
+### The rules
+
+| Rule | Meaning |
+|---|---|
+| A tenant correlation is required | A policy that declares none cannot be mounted. Forgetting becomes impossible rather than silent. |
+| The correlation names a declared input | Not a path segment, not a spelling. The gate compares the input's resolved value. |
+| A trusted field's own name in the path must be correlated | A path carrying `{tenant}` or `{application}` that no correlation names is refused at mount. |
+| A correlation may name any declared source | A body field binds as readily as a path segment; the check is on the resolved value. |
+| More than one field may be correlated | `tenant` and `application` are recognised. |
+
+### Why this is not the block CONTRACT-012 declined
+
+CONTRACT-012 declined a relationship language between *application records* —
+one needing a named resolver or argument-mapping contract to answer whether a
+certificate belongs to a department. Its rationale is explicit that the endpoint
+keeps execution within the boundary "without needing a canonical relationship
+language or resolver interface".
+
+A correlation between trusted context and a declared input needs neither. Both
+values are already in the gate's hand; nothing is looked up, and no record
+relationship is asserted. CONTRACT-012's field list is amended by this decision,
+not reopened.
+
+### Rationale / conscious tradeoff
+
+The alternative was for the gate to refuse any route segment it could not
+account for. That requires guessing which segments are tenant-shaped — a
+heuristic that catches `tenant_id` and misses `org`. A declaration guesses
+nothing: the endpoint already knows which of its inputs carries the tenant.
+
+The cost is that the obligation moves from implicit to declared, so every
+existing policy document must gain the field or stop mounting. That is the
+intended consequence: the failure this closes was a policy that omitted the
+binding and was accepted anyway.
+
+The rule is stated for `tenant` and `application`. Whether further trusted
+fields are correlated, and how this interacts with proxy attribution, remain
+open with HC-03-05.
+
+## Q-147 / CONTRACT-016 — the structural validation a policy must pass
+
+Status: **AGREED.** Q-050 left "full policy validation, missing-input handling,
+nested-body selection" open. This closes the structural half — what a policy must
+satisfy to be mounted at all — and leaves value validation where Q-050-F put it,
+with the application.
+
+A policy is refused at **mount time**, not at request time, when any of this
+fails. A policy that cannot be mounted cannot guard an endpoint, so the endpoint
+does not serve rather than serving unguarded.
+
+| Rule | |
+|---|---|
+| Version | Exactly the supported contract version. No default is guessed. |
+| Method | A valid uppercase HTTP token, and the request's method must equal it. |
+| Path | Absolute, with no query or fragment, and every placeholder well formed and unique. |
+| Permission | Exactly one, canonical, no wildcard and no list. |
+| Inputs | Declared; each local name and source name well formed. |
+| Path inputs | Must name a placeholder the path actually declares. A path input naming nothing is refused. |
+| Body inputs | **Top level only.** A selector containing `.`, `[`, `]` or `/` is refused. |
+| Sources | Exactly two are supported: `path` and `body`. Any other is refused. |
+| Trusted | Required for the tenant, and subject to [Q-133](#q-133--contract-013--the-policy-declares-its-trusted-correlations). |
+| Unknown fields | A policy document carrying a field this version does not define is refused, not ignored. |
+
+### Nested body selection is refused, not deferred
+
+A body input names a top-level field. `employee.department_id` is not a selector.
+
+This is a decision, not an omission. A nested selector is a query language —
+once `a.b` is admitted, arrays, filters and absence semantics follow, and the
+policy becomes a place where application structure is described. CONTRACT-012
+declined exactly that for relationships, and the reason holds here: an
+application that needs a nested value reads it in the binder, validates it, and
+supplies it as material under its own local name.
+
+### Missing input handling
+
+A declared input that the request does not supply is a **refusal of the request**,
+not an absent value passed to the binder. There is no implicit default, no empty
+string, and no fallback to another source — a path input is not satisfied by a
+query parameter of the same name.
+
+### What stays with the application
+
+Value validation. Q-050-F settled that the application validates the *values* of
+its inputs; this chapter governs the *shape of the declaration*. A policy may be
+perfectly valid and still name an input whose value the application rejects.
+
+### Rationale / conscious tradeoff
+
+Mount-time refusal is the whole point: every rule here is checkable before a
+request arrives, and a policy that is wrong should fail where an operator is
+looking, not on a caller's request.
+
+The cost is that adding a field to the policy contract is a breaking change by
+construction — unknown fields are refused, so an older consumer cannot ignore a
+newer policy. That is accepted for the reason CONTRACT-010 gives: a consumer that
+silently ignores what it does not understand is a consumer that enforces something
+other than what was declared.
+
+## Open: the boundary an endpoint operates at
+
+A policy declares its inputs and, under Q-133, its trusted correlations. It does
+not declare the **scope boundary** its endpoint operates at, so the boundary
+reaching evaluation is whatever the binder supplies at request time. An endpoint
+may therefore claim a narrow boundary and read a wide one, and nothing can check
+it. [Q-144](policy-scope-boundary.md) frames that question and is not approved.
+
 ## What stays implicit and what remains open
 
 The declaration is server-owned and fixed. Verified identity/tenant context and
 shared Auth authority loading need not be copied into every policy. Route tenant
 claims must still be bound to trusted context; field names alone do not prove
-relationships. An applicable `{}` scope does not invent department restrictions
+relationships — [Q-133](#q-133--contract-013--the-policy-declares-its-trusted-correlations)
+supplies the mechanism, and makes omitting it a mount-time refusal. An applicable `{}` scope does not invent department restrictions
 merely because department input is declared; other mandatory checks remain.
 
 Q-050-C must define how relationship bindings establish required facts and connect

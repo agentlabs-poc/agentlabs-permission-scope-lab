@@ -1,4 +1,4 @@
-# Current handbook state — RECON-002, through Q-130
+# Current handbook state — RECON-002, through Q-154
 
 ## Publication checkpoint — RECON-002 and C01-D1/D2
 
@@ -45,7 +45,7 @@ the end of this page. Draft supported behavior first; do not start another
 question sequence merely because a review-area row remains open. Changes remain
 local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 
-## Twelve decisions recorded since the previous checkpoint
+## Thirty-three decisions recorded since the previous checkpoint
 
 | Decision | Current approved rule | Source with rationale and examples |
 |---|---|---|
@@ -60,10 +60,33 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-128 | New checks after any confirmed authority reduction cannot rely on withdrawn stale support. Other complete valid routes may allow; uncertain freshness is not proof of denial. | [Freshness](authority-freshness.md) |
 | Q-129 | The same already-allowed ordinary synchronous application operation may finish within evaluated boundaries after later withdrawal. Q-074 and Q-110 remain; queues, streams, long-running and not-yet-allowed cases are not included. | [Concurrent enforcement](concurrent-enforcement.md) |
 | Q-130 | Different complete valid grant routes may cover different batch items. All items need complete support before effects; no permission/scope fragment mixing or partial successful filtering. | [Bulk enforcement](bulk-enforcement.md) |
+| Q-154 | A delegation is permission for an actor to ask about a human, not a holding of authority, so it adds nothing to a lineage and needs no representation in an answer. It carries its own validity window and the effective lifetime is the narrower of it and the human's; it tracks the human's authority at request time rather than copying it; the human administers their own. Whether it may carry scope is left open with the reason. Closes HC-05-10. | [Delegation lifecycle](delegation-lifecycle.md) |
+| Q-153 | A tenant operates in two namespaces and these are different authorities: a platform-namespace authority that enables an application and establishes its root, and an application-namespace authority authorized against that root. Neither confers the other. Root establishment is the closing step of enabling, authorized by the first — not by a permission, which would be circular, and not by a separate operator, because the decision is the tenant's. Establishment names the holder team, which is the handover. | [Bootstrap authority](bootstrap-authority.md) |
+| Q-152 | Membership synchronization is an ordinary authorized caller: a service account with team-write authority in a definite scope, making authorized writes. Nothing writes the store directly. Bulk is an endpoint question — one team is one boundary under Q-150, several teams are governed by Q-130 — so there is no gap to fall through and no privileged mode. Auth's record is the authorization; a directory proposes. Ratifies the team-deletion guard. | [Groups and membership](groups-and-membership.md) |
+| Q-151 | An application registers only in its own namespace — the first noun segment is the application — and the platform namespace is written only by platform authority at a separate boundary. Without that slice an application root would carry platform permissions including the one that establishes application roots. An identifier is never renamed; a rename stops it resolving and every referencing grant narrows silently. Labels may be corrected. Closes HC-04-03. | [Permission lifecycle](permission-lifecycle.md) |
+| Q-150 | Composition is not a grant question. The resolved authority must cover the permission and the boundary being evaluated; one grant or several is not something the model reasons about. A move is one endpoint evaluating once per boundary, and every evaluation must allow — so no fragment is mixed and both hold at one moment. An update that changes the boundary is a move. Answers Q-131 by withdrawing it, and closes HC-09-04. | [Operation enforcement](operation-enforcement.md) |
+| Q-149 | Missing, invalid and unsupported evidence: material that never arrives is a failure to establish, a route whose evidence is invalid closes, and evidence of a kind the model does not define is refused rather than treated as absent. No condition engine — nothing here evaluates a business fact. Closes HC-08-03. | [Grant conditions](grant-conditions.md) |
+| Q-148 | Reference existence is the application's — scope values are opaque to authorization — and subtree or pattern scope is excluded rather than deferred. A hierarchy would give every stored boundary implied children the day it arrived. Closes HC-06-07. | [Application registration](application-registration.md) |
+| Q-147 | The structural validation a policy must pass to be mounted, refused at mount rather than at request time. Nested body selection is refused as a decision, not deferred; a missing declared input refuses the request rather than defaulting. Closes HC-07-07. | [Endpoint policy format](endpoint-policy-format.md) |
+| Q-146 | The handler integration contract: the four things an application supplies, the order the gate imposes — identity before the body, binding before deciding, the effect only after an allow — and the two failure kinds. No SDK required. Closes HC-07-10. | [Handler integration contract](handler-integration-contract.md) |
+| Q-145 | Publish a role revision freely; restrict adoption. Adopting a newer revision re-evaluates every enabled dependent and is refused if one that resolved stops resolving, leaving the grant as it was. Correcting the dependents is the administrator's work, bottom-up. | [Role revisions](role-revisions.md) |
+| Q-143 | Retirement withdraws the retired permission and not the route. A grant supplies what it selects and the catalog still supplies, and stops only when nothing survives — so a route beneath it that never selected the retired permission is untouched. The write path is unchanged: nothing new may reference a retired permission. Carries a stated requirement for grant health. | [Permission lifecycle](permission-lifecycle.md) |
+| Q-142 | Non-HTTP and background integration is deferred for v1, explicitly rather than by silence. Q-075 still stands — queued work is authorized when it executes — and an allow does not travel with the work. | [Background authorization](background-authorization.md) |
+| Q-141 | Audit stays excluded, and what an audit consumer is given is stated anyway: the ordered contributing chain, on every allow, handed to the effect before it runs, and nothing else. A consumer must not assume grant ids stay resolvable, nor that the evidence is a complete account of the decision. | [Authority change audit](authority-change-audit.md) |
+| Q-140 | A node that cannot be reached closes its route: the route supplies nothing, that is an ordinary answer rather than a failure, and no other route is affected. Names the single rule that missing support, a narrowed parent, a retired permission, a lapsed window and a lost membership were all instances of. A record that cannot be *read* is not a closed route — it still fails the answer. | [Authority lineage](authority-lineage.md) |
+| Q-139 | The authority-loading transport is published: the question names the asking application and the human and nothing else, and the answer echoes the three boundaries and carries every grant with its folded scope, validity and lineage. Consumers reject unsupported versions, unknown fields and redirects, and every failure is an evaluation error. The route is deliberately not adopted — the reference path carries a lab module name. | [Authority loading transport](authority-resolve-transport.md) |
+| Q-138 | What a response body discloses is the endpoint's duty, not the gate's. The gate authorizes a request; it cannot know what a body contains and is not given the job. Disclosure stays mandatory authorization work, assigned where the responsibility split already puts it. | [Endpoint authorization](endpoint-authorization.md) |
+| Q-137 | An unusable route does not establish a denial. A route that could not be read is a route that might have authorized, so an allow another route earns stands, and a denial reached with an unusable route present is reported as a failure to establish. Carries authority-lineage's route-scoped rule across to the consuming side. | [Decision results](decision-results.md) |
+| Q-136 | A filter is a narrowing, not an assertion. A permission the catalog does not supply — retired or never registered — yields an empty answer rather than a refusal, and the two are deliberately indistinguishable. A caller never asks whether a permission exists. | [Permission lifecycle](permission-lifecycle.md) |
+| Q-135 | The error-code catalogue is open and its names are fixed: a published code never changes meaning, new codes may appear, and a consumer must tolerate an unknown one by falling back to the class the result arrived in. A code explains; it never decides — that is the allow/deny/evaluation-error split. Thirteen codes published, and the drifted `AUTH_*` family renamed while renaming was still possible. | [Decision results](decision-results.md) |
+| Q-134 | An allow result's `grant_ids` is the contributing chain of the authorizing route, ordered root first, so the order carries the dependency. The richer lineage form — assignment, team and revision per step — was considered and not adopted, because it is audit structure and audit sits in another layer. Closes HC-08-04. | [Decision results](decision-results.md) |
+| Q-133 | The endpoint policy declares its trusted correlations: one `trusted` map from a trusted context field to a declared input. A tenant correlation is required, a path spelling a trusted field's own name must be correlated, and a correlation may name any declared source. Supplies the mechanism for an obligation the chapter already mandated. Adopted with a recorded reservation about where the rule belongs. | [Endpoint policy format](endpoint-policy-format.md) |
 | Q-132 | A grant another grant names as parent can be neither disabled nor deleted. One rule for both operations and every grant, with no trusted-root exception; dismantling is bottom-up. A dependent is a child grant, not an assignment — counting assignments would make every held grant undisablable. Supersedes the disable-propagation cases B09–B11. | [Grant lifecycle](grant-lifecycle.md) |
 
-These are twelve answered decisions, not twelve completed chapters or twelve
-of the original eighteen agenda packages. Q-117 is no longer parked. Q-131 has
+These are thirty-three answered decisions, not thirty-three completed chapters or thirty-three
+of the original eighteen agenda packages. Q-117 is no longer parked. Q-131 is
+withdrawn rather than approved — [Q-150](operation-enforcement.md) dissolves it,
+because composition is not a grant question. Q-131 has
 not been approved; move source/destination grant composition remains open.
 Q-132 was raised by implementation rather than by the question sequence: the lab
 refused to disable or delete a trusted root, which contradicted a stated rule for
@@ -86,7 +109,7 @@ every unfinished row was too broad and is not the current working classification
 | Contract-review packages | **5** | C01–C05; assistant drafts and validates, user approves genuinely new contract choices. |
 | Final acceptance | **1** | User acceptance after reconciliation, contracts, and scenarios are finished. |
 | Assistant execution packages | **8** | Same A01–A08 supporting the above agenda, not eight additional discussions. |
-| Full criteria | **38 DONE / 30 OPEN / 1 EXCLUDED** | 68 in scope: 55.9% closed, 44.1% open. Original criteria/statuses are preserved. |
+| Full criteria | **47 DONE / 21 OPEN / 1 EXCLUDED** | 68 in scope: 69.1% closed, 30.9% open. HC-08-04 closed by CLOSURE-002; earlier figures retained as history. |
 
 The original thirteen design topics reduce to twelve because D02's mechanism
 choice is settled. Its remaining root wire representation is C02/C04 work, not
@@ -122,6 +145,10 @@ ineffective route, rewrite immutable child content, or select new child permissi
 Root parent omission is agreed, but no stored wildcard or computed-source field
 is approved. Auth platform administration, application platform administration,
 tenant administration, and application business access must not be collapsed.
+[Q-153](bootstrap-authority.md) states that split from the tenant's side: one
+tenant holds two of these — a platform-namespace authority that enables an
+application and establishes its root, and an application-namespace authority that
+administers within it — and neither confers the other.
 
 ## Reconciliation and preservation rules
 
@@ -137,6 +164,13 @@ tenant administration, and application business access must not be collapsed.
   business-rule engine is reintroduced as an implementation requirement.
 - Canonical completion still requires full contracts and scenario review. Reader
   build/tests verify documentation delivery, not authorization correctness.
+
+**Raised and not approved — [Q-144](policy-scope-boundary.md):** a policy does not
+declare the scope boundary its endpoint operates at, so that boundary comes from
+the binder at request time and an endpoint may claim a narrow one while reading a
+wide one. Framed rather than answered, because it would amend the published policy
+contract a second time and would turn Q-071 into a consequence of coverage. Counts
+are deliberately left unanswered until it is settled.
 
 Next discussion when resumed: whether different complete grants may cover the
 current and proposed boundaries of one move (D09), distinct from Q-130's batch

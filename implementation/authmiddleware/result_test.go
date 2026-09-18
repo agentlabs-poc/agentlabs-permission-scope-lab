@@ -16,7 +16,7 @@ func TestDecodeResultCanonicalVariants(t *testing.T) {
 	}{
 		{"allow", `{"version":"1","decision":"allow","grant_ids":["G-17"]}`, Result{Version: "1", Decision: Allow, GrantIDs: []string{"G-17"}}, nil},
 		{"deny", `{"version":"1","decision":"deny","error_code":"NO_AUTHORIZING_GRANT","error_message":"You do not have access to this certificate.","error_message_reason":"No grant authorizes this certificate read within Finance."}`, Result{Version: "1", Decision: Deny, ErrorCode: "NO_AUTHORIZING_GRANT", ErrorMessage: "You do not have access to this certificate.", ErrorMessageReason: "No grant authorizes this certificate read within Finance."}, nil},
-		{"evaluation error", `{"version":"1","error_code":"AUTH_SERVICE_TIMEOUT","error_message":"We could not check your access.","error_message_reason":"The authorization service did not respond in time."}`, Result{}, &EvaluationError{Version: "1", Code: "AUTH_SERVICE_TIMEOUT", Message: "We could not check your access.", MessageReason: "The authorization service did not respond in time."}},
+		{"evaluation error", `{"version":"1","error_code":"AUTHORITY_TIMEOUT","error_message":"We could not check your access.","error_message_reason":"The authorization service did not respond in time."}`, Result{}, &EvaluationError{Version: "1", Code: "AUTHORITY_TIMEOUT", Message: "We could not check your access.", MessageReason: "The authorization service did not respond in time."}},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -50,7 +50,7 @@ func TestDecodeResultRejectsMixedMalformedAndUnsupportedVariants(t *testing.T) {
 		"duplicate field":     strings.Replace(allow, `"decision":"allow"`, `"decision":"allow","decision":"deny"`, 1),
 		"wrong decision type": strings.Replace(allow, `"decision":"allow"`, `"decision":true`, 1),
 		"wrong grant ID type": strings.Replace(allow, `["G-17"]`, `[17]`, 1),
-		"mixed allow error":   strings.Replace(allow, `}`, `,"error_code":"AUTH_SERVICE_TIMEOUT"}`, 1),
+		"mixed allow error":   strings.Replace(allow, `}`, `,"error_code":"AUTHORITY_TIMEOUT"}`, 1),
 		"mixed deny grants":   `{"version":"1","decision":"deny","grant_ids":[],"error_code":"X","error_message":"m","error_message_reason":"r"}`,
 		"error with decision": `{"version":"1","decision":"error","error_code":"X","error_message":"m","error_message_reason":"r"}`,
 		"empty allow grants":  `{"version":"1","decision":"allow","grant_ids":[]}`,

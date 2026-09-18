@@ -295,7 +295,7 @@ Evaluation error, with no `decision` field:
 ```json
 {
   "version": "1",
-  "error_code": "AUTH_SERVICE_TIMEOUT",
+  "error_code": "AUTHORITY_TIMEOUT",
   "error_message": "We could not check your access.",
   "error_message_reason": "The authorization service did not respond in time."
 }

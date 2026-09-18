@@ -159,3 +159,89 @@ automatic account deletion is proposed.
 **Q-070:** After a required supporting relationship breaks, should restoring the
 human's access require explicit authorized renewal of the affected delegation,
 rather than automatically reactivating it?
+
+## Q-154 / DELEGATION-004 — a delegation's lifetime, growth and administration
+
+Status: **AGREED.** The user's position was that these should already be clear, and
+that the recommendations stand if they are not. Two of the three were not stated
+anywhere; the middle one is the consequence of a rule already agreed and is written
+here as a consequence rather than a choice.
+
+### What a delegation is, first
+
+A delegation is **not a grant and not a step in a lineage.** It does not add
+authority and it does not appear in a contributing chain. It is permission for an
+**actor** to ask about a **human** — the two parties Q-086 already keeps apart —
+and the authority that comes back is the human's.
+
+```
+  vinay ──▶ agent A                agent A may ask about vinay
+                                   the answer is VINAY'S authority
+                                   A adds nothing to it
+```
+
+That is why a delegation needs no representation in a resolved answer. The
+transport already names the asking actor and the subject separately, and a
+delegated request differs from a direct one only in the actor.
+
+### Lifetime
+
+A delegation **carries its own validity window**, and the effective lifetime is
+the **narrower** of the delegation's and the human's authority.
+
+This is not a new rule so much as the existing one applied. A route's validity is
+already the narrowest window in its chain; a delegation is another constraint on
+the same request, so it folds the same way. Without a window of its own a
+delegation would be the only thing in the model that outlives nothing — revocable,
+but never expiring.
+
+### Growth
+
+A delegation **tracks the human's authority.** What a proxy may do is resolved
+from what its human holds **at the time of the request**, not at the time the
+delegation was created.
+
+This follows from proxies being *"human-dependent subsets, never independent
+authority"*. A subset is resolved, not copied. Freezing a snapshot would make a
+delegation diverge from the authority it depends on, with nothing reconciling
+them, and would require a delegation write for every grant the human later
+receives.
+
+**The cost, stated:** an agent silently gains reach when its human does. That is
+inherent in delegation being dependent rather than a copy — and it is the same
+property that makes revoking the human's authority remove the proxy's reach with
+no delegation write at all.
+
+### Administration
+
+**The human administers their own delegations.** Vinay creates and revokes them,
+and an administrator does not create one on his behalf, because the proxy acts as
+an extension of him and he is accountable for what it does.
+
+An administrator is not powerless: removing vinay's authority removes the
+delegation's reach immediately, through growth above, without touching the
+delegation record.
+
+### Records and evidence
+
+A delegation record names the **human**, the **proxy**, and its **validity
+window**. Nothing else is required, and no new field enters the resolved answer.
+
+**Left open deliberately:** whether a delegation may also carry its own *scope*,
+narrowing the human's authority further. Nothing in the model needs it — the
+human's own grants already bound the proxy, and a narrower delegation can be
+expressed by delegating from a human who holds less. If a case appears that this
+cannot express, that is the moment to add it.
+
+### Rationale / conscious tradeoff
+
+The whole of this rests on a delegation being a permission to *ask*, not a holding
+of authority. Every part follows from that: it needs no lineage representation, it
+tracks rather than copies, and it is the human's to give because it is the human's
+authority being used.
+
+The tradeoff is in growth, and it is deliberate. A model where delegations froze
+would be more predictable and would rot: proxies would hold authority their humans
+had lost, or lack authority their humans had gained, and reconciling the two would
+become an administrative task nobody owns.
+

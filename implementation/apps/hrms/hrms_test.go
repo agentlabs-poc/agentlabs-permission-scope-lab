@@ -101,7 +101,7 @@ func TestAnOutageIsNotADenial(t *testing.T) {
 	}{
 		"the canonical evaluation block": {
 			&authmiddleware.EvaluationError{
-				Version: "1", Code: "AUTH_UNREACHABLE",
+				Version: "1", Code: "AUTHORITY_UNREACHABLE",
 				Message: "We could not check your access.", MessageReason: "the authority service did not answer",
 			},
 			http.StatusServiceUnavailable,

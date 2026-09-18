@@ -68,3 +68,39 @@ part of the record. The subsequent Q-076 [audit detour](authority-change-audit.m
 was excluded by the user as another layer's responsibility. Return to Q-077 in
 [groups and membership](groups-and-membership.md). Running-job and retry details
 remain tracked rather than implicitly approved.
+
+## Q-142 / ENFORCEMENT-011 — non-HTTP and background integration is deferred for v1
+
+Status: **AGREED, as an explicit deferral.** The criterion covering this asked
+for integration requirements *or an explicit deferral*, and the user chose the
+deferral. Recorded as a decision so that silence is not later read as an
+oversight.
+
+Everything this handbook settles assumes a synchronous request arriving at one
+endpoint-owned gate, with the effect bounded by the evaluated material. Queues,
+scheduled jobs, streams and long-running work are **out of scope for v1**.
+
+This does not weaken what is already settled about them.
+[Q-075](#q-075--enforcement-009--queued-work-needs-execution-time-authorization)
+stands: queued work is authorized when it executes, not when it was enqueued.
+[Q-129](concurrent-enforcement.md) stands, and its own limits are already stated
+— it covers an ordinary synchronous operation already allowed, and explicitly not
+queues, streams or long-running cases.
+
+**What a deployment doing this anyway must not assume:** that an allow travels
+with the work. It does not. An evaluation is about a request, a boundary and a
+moment; carrying its result forward to a later execution is the thing Q-075
+refuses.
+
+### Rationale / conscious tradeoff
+
+Specifying it now would mean designing freshness, cancellation and
+re-authorization for execution paths nothing here has built or demonstrated —
+the same objection that keeps caching out until an epoch exists to invalidate
+against. A deferral that says so is more useful than a specification nobody has
+run.
+
+The cost is real and worth naming: a deployment with background work has no
+guidance beyond Q-075's single rule, and will invent the rest. That is preferable
+to inventing it here, where nothing could check it.
+
