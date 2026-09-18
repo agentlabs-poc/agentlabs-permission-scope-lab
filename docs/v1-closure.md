@@ -8,8 +8,16 @@ reviews, and final acceptance**, with the same eight assistant execution package
 is approved and D02 is resolved. The old checklist below is preserved history.
 
 The [detailed register](handbook-completion-audit.md) is the current criterion-level
-checklist: **38 DONE / 30 OPEN / one EXCLUDED**, 68 in scope. Its evidence names
+checklist: **48 DONE / 20 OPEN / one EXCLUDED**, 68 in scope. Its evidence names
 approved portions and incomplete deliverables. No criterion is added or removed.
+
+This line trailed the register by ten criteria until 19 September 2026. The register
+has always been the authority; this checklist restates it, and a restatement that
+drifts is worse than no restatement. The four criteria that remain open for one shared
+reason are worth naming here rather than counting: administrative operations have no
+wire contract, so no administrative operation can name its permission on a wire. That
+is not closable inside this repository — it closes against a real service's route
+contract.
 
 1. Settle remaining authority/operation decisions one at a time; do not reopen
    computed/shared catalogs, bootstrap visibility/retry, no proxy chains,
@@ -18,6 +26,14 @@ approved portions and incomplete deliverables. No criterion is added or removed.
 3. Finish A06 scenarios and A07 cross-chapter/diagram consistency against final
    contracts. This reconciliation is not final editorial acceptance.
 4. Package and verify with A08, then obtain explicit F01 user acceptance.
+
+**Manuscript status, 19 September 2026.** The manuscript at repository-root
+`handbook/` has been recompiled against every decision taken since its 8 September
+first draft. Chapter 1 is unchanged because none of its sources moved; Chapters 6 and
+7 are rewrites; the remaining chapters, the Foundations reference and both appendices
+were recompiled. The slide deck under `handbook/slides/` is **not** recompiled and
+says so. Publication itself — what the website serves — is still open: the site is
+titled for the handbook and renders three concept guides rather than the manuscript.
 
 Q-127's chain exclusion and Q-123's single application version are explicit.
 External audit and business-rule design remain outside scope. No production

@@ -28,6 +28,35 @@ delegation and resolved-view formats are not invented. Example controls and
 required upstream support must be valid in the stated scenario; examples do not
 create live authority. Error codes/messages are illustrative.
 
+## Status after the 19 September recompilation — STALE
+
+The manuscript was recompiled against roughly two dozen decisions taken after the
+first draft. **This deck was not**, and the generated artefacts here — the `.pptx`,
+`deck-manifest.json` and the `preview/` SVGs — are behind the chapters they teach
+from.
+
+`build-deck.cjs` has had one correction applied: the evaluation-error example now
+uses the published `AUTHORITY_TIMEOUT` rather than the retired illustrative
+`AUTH_SERVICE_TIMEOUT`. The generated files still contain the old spelling, because
+regenerating requires the isolated `pptxgenjs` install described below. **Source and
+artefacts therefore disagree until a rebuild is run.**
+
+Content that the deck does not yet carry, and would need before it is presented:
+
+- administration is an ordinary grant on the Auth root chain, and what bounds each side
+- a tenant's two namespaces, and why root establishment belongs to the first
+- ownership as a grant, with the earlier relation superseded
+- scope values opaque and matched exactly, with subtree excluded, and the one platform
+  key whose values are resolved
+- the authority-loading question and answer, which are no longer pending
+- the policy's trusted correlations and its mount-time structural validation
+- the ordered contributing chain, and the published code catalogue
+- an unusable route not establishing a denial
+
+Until then, treat the [Foundations reference](../theory/canonical-terms.md) and the
+[implementation chapters](../implementation/06-auth-service.md) as authoritative and
+this deck as a prior snapshot.
+
 ## Rebuild
 
 The generator uses `pptxgenjs` 3.12.0. Install it into an isolated temporary
