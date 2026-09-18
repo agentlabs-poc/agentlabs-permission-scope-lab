@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-152
+## Current execution tree — through Q-153
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -52,6 +52,10 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── Background/non-HTTP deferred for v1 [Q-142 APPROVED]
 │   ├── OPEN: nested input syntax, further trusted fields, proxy attribution
 │   └── OPEN: policy-declared scope boundary [Q-144 RAISED, NOT APPROVED]
+├── Bootstrap and the two tenant namespaces
+│   ├── A tenant operates in two namespaces [Q-153 APPROVED]
+│   ├── Establishment is the platform-namespace authority's closing step [Q-153]
+│   └── OPEN: administrative API contracts for establishment
 ├── Complete contracts [C01–C05 OPEN]
 ├── Applicability and rule governance [D12/D13 OPEN]
 └── Final scenarios, reconciliation, package and acceptance [OPEN]

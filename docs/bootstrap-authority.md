@@ -18,6 +18,99 @@ registration, maximum intended tenant authority, normal enablement, and bounded
 child selection remain. Earlier separate-manual-expansion framing is qualified;
 bootstrap replay and arbitrary cross-application expansion are not authorized.
 
+## Q-153 / BOOTSTRAP-001 — a tenant operates in two namespaces, and establishment belongs to the first
+
+Status: **AGREED.** The user supplied the distinction this chapter needed and did
+not have: *"a tenant operates in two namespaces. One is in the platform namespace,
+that is where he enables the application — that's a different authority
+altogether. And the same tenant can operate in the application namespace, that is
+where he creates teams, adds members."*
+
+### The distinction
+
+One tenant holds **two authorities**, and neither implies the other.
+
+```
+                     ACME  (one tenant, two authorities)
+  ┌────────────────────────────────────┬────────────────────────────────────┐
+  │  acme in the PLATFORM namespace    │  acme in the APPLICATION namespace │
+  │           auth: / system:          │               hrms:                │
+  ├────────────────────────────────────┼────────────────────────────────────┤
+  │  enable hrms for acme              │  create grants beneath the root    │
+  │  ▸ establish acme/hrms root        │  create teams, add members         │
+  │      names the holder team ────────┼──▶ authorized AGAINST the root     │
+  └────────────────────────────────────┴────────────────────────────────────┘
+       creates the authority ───────────────▶ which authorizes everything here
+```
+
+Holding the platform-namespace authority does not confer the
+application-namespace one, and holding the application-namespace authority never
+confers the platform-namespace one. This is the fourfold split
+[the status page](current-status.md) already requires not be collapsed, stated
+from the tenant's side: the same tenant appears in two of those four.
+
+### Root establishment is the tenant's platform-namespace authority
+
+Establishing an application's root in a tenant is **the closing step of enabling
+that application for that tenant**, and it is authorized by the same authority
+that enabled it. Not by a permission, and not by a different party reaching into
+the tenant.
+
+**Why not a permission.** Requiring one is circular, and the circle does not
+close:
+
+```
+  to establish acme/hrms's root
+      you need a grant carrying that permission
+          a grant must have a parent
+              …up to some root
+                  which had to be established
+                      which needs that permission …
+```
+
+Nothing terminates the chain inside the grant model. It has to be started from
+outside it, and the authority that is already outside it — and already decided
+this application should run in this tenant — is the tenant's platform-namespace
+authority. A permission could only ever be held by whoever is already there.
+
+**Why not a separate platform operator.** Because the decision is the tenant's.
+The party that turned the application on is the party that says what authority it
+starts with, and to whom.
+
+**The handover is explicit.** Establishment names the team that will hold the
+root, so the act that creates the authority also names who first receives it.
+After it, the platform-namespace authority is finished and every subsequent act is
+authorized against the root.
+
+### Trusted setup evidence
+
+The root grant carries its own trust marker, and the establishing actor is
+recorded as the actor of that write. **No separate ceremony record is introduced.**
+An establishment is an authorized write like any other; what makes it special is
+what it creates, not how it is recorded.
+
+### Deliberate recovery
+
+Replacing a lost or wrong root is **establishment again**, not a distinct
+operation. [Q-132](grant-lifecycle.md) already requires the subtree to be
+dismantled bottom-up first, so there is no state in which two roots of one
+application coexist in one tenant, and no separate recovery path is needed to
+reach a clean one.
+
+### Rationale / conscious tradeoff
+
+Stating the two namespaces is the substance here. Without it, root establishment
+reads as either circular — a grant model authorizing its own creation — or as an
+intrusion, a platform operator creating authority inside somebody's tenant.
+Neither is what happens, and both readings were available because the tenant's two
+authorities had never been named apart.
+
+The cost is that the platform-namespace authority is genuinely powerful and has no
+grant chain constraining it: whoever holds it for a tenant can decide that
+tenant's starting authority. That is inherent — something has to start the chain —
+and it is bounded elsewhere, by registration being a prerequisite (Q-114) and by
+coverage being computed from the application's catalog rather than chosen (Q-122).
+
 ## Q-114 — Maximum starting authority: agreed, with registration prerequisite
 
 **AGREED AS CORRECTED.** The user clarified that the initial administrator must
