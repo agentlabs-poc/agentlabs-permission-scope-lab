@@ -335,6 +335,30 @@ being disabled beneath live **child grants** — a state this rule prevents. B06
 where a grant held by two recipients is disabled, is untouched and remains
 reachable: its holders are assignments, not dependents.
 
+### A trusted root's holder needs no rule of its own
+
+Q-132 leaves disable and delete of a *grant* governed by one dependency rule with
+no root exception. The question this raised was whether removing the *assignment*
+that holds a trusted root needs a rule of its own — a root nobody holds supplies
+authority to nobody, and every route in the area walks through it.
+
+**It does not, because the ordinary dependency rules already refuse it.** Delete
+of an assignment is refused while another assignment holds a grant naming this
+one as parent; disable is refused while an enabled dependent binding exists. A
+root's holder is therefore protected exactly as any other grant's holder is,
+which is consistent with Q-132 having no root exception rather than a departure
+from it.
+
+A root-specific rule was drafted and withdrawn. It would have deadlocked
+dismantling: a grant cannot be deleted while an assignment names it, so refusing
+to remove the last holder would make an established root permanent. Dismantling
+stays bottom-up, and reaches the root last.
+
+What is *not* protected, deliberately: a root held by two groups may lose one of
+them, and a root nothing hangs beneath may lose its last holder. Both remove only
+the authority of the people who held that binding, which is visible and is the
+operation being asked for.
+
 Exact operation permission names, the representation of "has a dependent" in
 published contracts, and bulk or cascading dismantle operations remain open. No
 cascade is approved here: each dependent is removed by its own authorized

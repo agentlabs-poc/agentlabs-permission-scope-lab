@@ -497,3 +497,46 @@ func TestDeleteRefusesOnAuthorizationBeforeItRefusesOnADependent(t *testing.T) {
 		t.Fatalf("a dependent parent gave %v, want ErrConflict", err)
 	}
 }
+
+// A trusted root's holder cannot be removed or disabled while anything is held
+// beneath it — and it is the ordinary dependency rules that refuse it, not a
+// rule of the root's own.
+//
+// This was untested, and its absence let me report a danger that does not exist:
+// a demonstration that disabled the root's binding *in the snapshot* took every
+// person in the area to zero authority, and I read that as a reachable failure.
+// It is not reachable. The write paths refuse it, and this pins that they do.
+//
+// Which rule refuses is worth knowing: delete refuses while another assignment
+// holds a grant naming this one as parent, and disable refuses while an enabled
+// dependent binding exists. Both are about dependents, so a root is protected
+// exactly as any other grant is — consistent with Q-132 having no root
+// exception.
+func TestATrustedRootsHolderIsHeldByTheOrdinaryDependencyRules(t *testing.T) {
+	area, _ := domain.NewArea("acme", "hrms")
+	fixture := lab.TeamFINC17(area)
+	if !fixture.Snapshot.TrustedRoots["fk3x9r2m0dq3"] {
+		t.Fatal("the fixture's root is not marked trusted, so nothing below means anything")
+	}
+	statusAdmin, err := lab.NewAssignmentStatusAdministration(area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	provider, err := lab.CreateSQLite(t.Context(), t.TempDir()+"/root.db", []storage.Snapshot{fixture.Snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer provider.Close()
+	service, err := mutation.New(provider,
+		&lab.RoleAdministration{AssignmentStatusAdministration: statusAdmin},
+		&fixedClock{now: time.Now()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := service.DeleteAssignment(t.Context(), area, fixture.Issuer, "fm5b7t4p0dq3"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("deleting the root's holder gave %v, want ErrConflict", err)
+	}
+	if _, err := service.SetAssignmentStatus(t.Context(), area, fixture.Issuer, "fm5b7t4p0dq3", "disabled"); err == nil {
+		t.Fatal("disabling the root's holder succeeded")
+	}
+}

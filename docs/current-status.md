@@ -1,4 +1,4 @@
-# Current handbook state — RECON-002, through Q-139
+# Current handbook state — RECON-002, through Q-142
 
 ## Publication checkpoint — RECON-002 and C01-D1/D2
 
@@ -45,7 +45,7 @@ the end of this page. Draft supported behavior first; do not start another
 question sequence merely because a review-area row remains open. Changes remain
 local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 
-## Nineteen decisions recorded since the previous checkpoint
+## Twenty-two decisions recorded since the previous checkpoint
 
 | Decision | Current approved rule | Source with rationale and examples |
 |---|---|---|
@@ -60,6 +60,9 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-128 | New checks after any confirmed authority reduction cannot rely on withdrawn stale support. Other complete valid routes may allow; uncertain freshness is not proof of denial. | [Freshness](authority-freshness.md) |
 | Q-129 | The same already-allowed ordinary synchronous application operation may finish within evaluated boundaries after later withdrawal. Q-074 and Q-110 remain; queues, streams, long-running and not-yet-allowed cases are not included. | [Concurrent enforcement](concurrent-enforcement.md) |
 | Q-130 | Different complete valid grant routes may cover different batch items. All items need complete support before effects; no permission/scope fragment mixing or partial successful filtering. | [Bulk enforcement](bulk-enforcement.md) |
+| Q-142 | Non-HTTP and background integration is deferred for v1, explicitly rather than by silence. Q-075 still stands — queued work is authorized when it executes — and an allow does not travel with the work. | [Background authorization](background-authorization.md) |
+| Q-141 | Audit stays excluded, and what an audit consumer is given is stated anyway: the ordered contributing chain, on every allow, handed to the effect before it runs, and nothing else. A consumer must not assume grant ids stay resolvable, nor that the evidence is a complete account of the decision. | [Authority change audit](authority-change-audit.md) |
+| Q-140 | A node that cannot be reached closes its route: the route supplies nothing, that is an ordinary answer rather than a failure, and no other route is affected. Names the single rule that missing support, a narrowed parent, a retired permission, a lapsed window and a lost membership were all instances of. A record that cannot be *read* is not a closed route — it still fails the answer. | [Authority lineage](authority-lineage.md) |
 | Q-139 | The authority-loading transport is published: the question names the asking application and the human and nothing else, and the answer echoes the three boundaries and carries every grant with its folded scope, validity and lineage. Consumers reject unsupported versions, unknown fields and redirects, and every failure is an evaluation error. The route is deliberately not adopted — the reference path carries a lab module name. | [Authority loading transport](authority-resolve-transport.md) |
 | Q-138 | What a response body discloses is the endpoint's duty, not the gate's. The gate authorizes a request; it cannot know what a body contains and is not given the job. Disclosure stays mandatory authorization work, assigned where the responsibility split already puts it. | [Endpoint authorization](endpoint-authorization.md) |
 | Q-137 | An unusable route does not establish a denial. A route that could not be read is a route that might have authorized, so an allow another route earns stands, and a denial reached with an unusable route present is reported as a failure to establish. Carries authority-lineage's route-scoped rule across to the consuming side. | [Decision results](decision-results.md) |
@@ -69,7 +72,7 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-133 | The endpoint policy declares its trusted correlations: one `trusted` map from a trusted context field to a declared input. A tenant correlation is required, a path spelling a trusted field's own name must be correlated, and a correlation may name any declared source. Supplies the mechanism for an obligation the chapter already mandated. Adopted with a recorded reservation about where the rule belongs. | [Endpoint policy format](endpoint-policy-format.md) |
 | Q-132 | A grant another grant names as parent can be neither disabled nor deleted. One rule for both operations and every grant, with no trusted-root exception; dismantling is bottom-up. A dependent is a child grant, not an assignment — counting assignments would make every held grant undisablable. Supersedes the disable-propagation cases B09–B11. | [Grant lifecycle](grant-lifecycle.md) |
 
-These are nineteen answered decisions, not nineteen completed chapters or nineteen
+These are twenty-two answered decisions, not twenty-two completed chapters or twenty-two
 of the original eighteen agenda packages. Q-117 is no longer parked. Q-131 has
 not been approved; move source/destination grant composition remains open.
 Q-132 was raised by implementation rather than by the question sequence: the lab
@@ -93,7 +96,7 @@ every unfinished row was too broad and is not the current working classification
 | Contract-review packages | **5** | C01–C05; assistant drafts and validates, user approves genuinely new contract choices. |
 | Final acceptance | **1** | User acceptance after reconciliation, contracts, and scenarios are finished. |
 | Assistant execution packages | **8** | Same A01–A08 supporting the above agenda, not eight additional discussions. |
-| Full criteria | **39 DONE / 29 OPEN / 1 EXCLUDED** | 68 in scope: 57.4% closed, 42.6% open. HC-08-04 closed by CLOSURE-002; earlier figures retained as history. |
+| Full criteria | **40 DONE / 28 OPEN / 1 EXCLUDED** | 68 in scope: 58.8% closed, 41.2% open. HC-08-04 closed by CLOSURE-002; earlier figures retained as history. |
 
 The original thirteen design topics reduce to twelve because D02's mechanism
 choice is settled. Its remaining root wire representation is C02/C04 work, not

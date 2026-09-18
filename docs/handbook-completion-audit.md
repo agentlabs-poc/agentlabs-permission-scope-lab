@@ -4,7 +4,7 @@
 
 [Eleven recent decisions](current-status.md) are mapped into current evidence.
 All 69 criterion texts remain unchanged; statuses move only by a recorded
-closure. Current: **39 DONE / 29 OPEN / one
+closure. Current: **40 DONE / 28 OPEN / one
 EXCLUDED**, 68 in scope. Each open row still has an incomplete full deliverable.
 These are not all user-blocking questions: drafting and verification can proceed
 from approval; ask only for materially different behavior or new contract choices.
@@ -30,6 +30,7 @@ evidence, not the authority.
 
 | Checkpoint | Earlier status | Current status | Completion evidence |
 |---|---|---|---|
+| HC-09-09 | OPEN | DONE | [Q-142](background-authorization.md): the criterion asked for integration requirements **or an explicit deferral**, and the deferral is recorded as a decision with its cost named. Q-075 continues to govern queued work. |
 | HC-08-04 | OPEN | DONE | [Q-134](decision-results.md): `grant_ids` is the contributing chain ordered root first, so the order carries the dependency. Q-061's no-scope rule and Q-076's audit exclusion are both preserved — the lineage form was considered and not adopted for that reason. |
 
 **HC-07-09 advances but does not close.** [Q-139](authority-resolve-transport.md)
@@ -43,8 +44,8 @@ Full value validation and the remaining failure cases stay open and stay parked
 under PROCESS-007, so the row keeps its OPEN status rather than taking partial
 credit — this register does not award fractional closure.
 
-**Current after CLOSURE-002: 39 DONE / 29 OPEN / 1 EXCLUDED; 68 in scope;
-57.4% closed, 42.6% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
+**Current after CLOSURE-002: 40 DONE / 28 OPEN / 1 EXCLUDED; 68 in scope;
+58.8% closed, 41.2% remaining.** The pre-CLOSURE-002 figure was 38 DONE / 30
 OPEN, 55.9% closed. [CLOSURE-001](v1-closure.md) maps all 33 formerly open criteria.
 The detailed register below incorporates these three updates; older numerical
 summaries retain their historical values. No other row is newly closed or
@@ -308,7 +309,7 @@ until the full criterion is met; no runtime test completion is claimed.
 | HC-09-06 | OPEN | Define freshness, caching, revocation propagation, and stale membership/dependency behavior. | [Q-069/128](authority-freshness.md) require no stale withdrawn support for new checks after ALL confirmed reductions, not just deletion. Remaining: exact confirmation/ordering/evidence and cache/propagation contracts. No per-request remote call or runtime compliance claimed. |
 | HC-09-07 | OPEN | Define concurrent-change/check-to-use consistency guarantees. | [Q-074/129](concurrent-enforcement.md) preserve application boundaries and permit bounded prior-allowed synchronous completion. [Q-110](auth-write-consistency.md) retains stronger Auth-write consistency; Q-128 governs new checks. Remaining: still-evaluating ordering, exact conflict/retry/evidence and uncovered operation types. |
 | HC-09-08 | EXCLUDED | Complete audit event, correlation, retention/storage, versioning, and disclosure rules. | Q-076: user explicitly places audit in another layer, outside this handbook. Prior OPEN criterion and proposal retained in [scope decision and history](authority-change-audit.md). Not completed work, not parked; excluded from the denominator. Authorization-result evidence remains in scope under stage 8. |
-| HC-09-09 | OPEN | Define non-HTTP/background-operation integration requirements or explicitly defer them. | [Q-075](background-authorization.md) requires execution-time checking. Q-127 excludes proxy chains; Q-129 does not cover queues/streams/long-running jobs. Remaining: trusted job/material adapters, retries/recurrence/running-job/streaming rules or explicit approved limits. |
+| HC-09-09 | DONE | Define non-HTTP/background-operation integration requirements or explicitly defer them. | [Q-075](background-authorization.md) requires execution-time checking. Q-127 excludes proxy chains; Q-129 does not cover queues/streams/long-running jobs. Remaining: trusted job/material adapters, retries/recurrence/running-job/streaming rules or explicit approved limits. Closed by CLOSURE-002 / [Q-142](background-authorization.md) as an explicit v1 deferral. |
 
 ### 10. Challenge and verify
 

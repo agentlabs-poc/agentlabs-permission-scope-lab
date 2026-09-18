@@ -89,9 +89,24 @@ dependent" is represented in published contracts, and bulk dismantle.
 Two assignment-side root special cases went with the grant-side ones: delete of
 an assignment, and its status change, each refused while the grant was a trusted
 root. Q-132 does not cover them — it is about grants — and their old
-justification, that deleting one takes the root's holder away and leaves a
-ceiling nobody holds, is not replaced by anything. **Open for the migration:**
-whether a root's last holder may be removed, and what it means if it is.
+justification was that deleting one takes the root's holder away and leaves a
+ceiling nobody holds.
+
+**Closed, and by behaviour that was already there.** The ordinary dependency
+rules refuse it: delete of an assignment is refused while another assignment
+holds a grant naming this one as parent, and disable is refused while an enabled
+dependent binding exists. See the note in
+[grant lifecycle](../../docs/grant-lifecycle.md). The removed clauses were
+redundant with those, not load-bearing.
+
+This was investigated wrongly first. A demonstration disabled the root's binding
+*in the snapshot* and resolved, which took every person in the area to zero and
+looked like a reachable failure. It is not reachable — that path never goes
+through a write gate, and manipulating the store directly is exactly what this
+corpus bans. Asking the service produces a conflict and a rejection. A
+root-specific rule was drafted on the strength of the bad demonstration and
+withdrawn; it would have deadlocked dismantling. The behaviour is now pinned by a
+test, whose absence is how the wrong belief survived.
 
 ---
 

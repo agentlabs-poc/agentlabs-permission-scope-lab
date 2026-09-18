@@ -212,6 +212,60 @@ status of the two-owner recommendation remain pending.
 
 </details>
 
+## Q-140 / RESOLUTION-007 — a node that cannot be reached closes its route
+
+Status: **AGREED.** The user stated it as the general rule the scattered cases
+were already instances of: *"during the evaluation, if we are not able to reach
+the node, then consider it as closed."*
+
+Walking a route means reaching every node in its chain. **A node that cannot be
+reached closes the route**: the route supplies nothing, and that is an ordinary
+completed answer rather than a failure.
+
+This chapter already said as much for one case — *"missing support stops the
+affected authority route, not necessarily all authority of that user or group"* —
+and the same consequence had been settled separately, case by case, elsewhere.
+They are one rule:
+
+| Why the node cannot be reached | Settled by |
+|---|---|
+| Its supporting binding is absent or disabled | Q-094, above |
+| Its parent no longer carries what it selects | Q-101 / parent-grant bindings |
+| A permission it selects is retired or unregistered | [Q-125](permission-lifecycle.md), [Q-136](permission-lifecycle.md) |
+| Its validity window has not opened, or has closed | [Q-109](grant-validity.md) |
+| The group holding it no longer has the member | Q-093 |
+
+None of these is an error, and none of them reaches beyond its own route. Other
+routes the human holds are unaffected, which is what this chapter and
+[freshness](authority-freshness.md) both already required and what
+[Q-137](decision-results.md) carries across to the consuming side.
+
+### The boundary: unreachable is not unreadable
+
+**A record that cannot be read is not a closed route.** If a stored record does
+not parse, or is structurally invalid, the answer fails — a structure that cannot
+be read is not one this model may reason about, and treating it as "closed" would
+turn a corrupt store into a quiet denial that looks exactly like a correct one.
+
+That distinction is the whole safety of this rule. Closing a route can only ever
+remove authority, so an unreachable node is safe to skip. Silently closing a
+route because a row was damaged would mean answering authorization questions from
+a store we have admitted we cannot fully read.
+
+### Rationale / conscious tradeoff
+
+Stating it once replaces reasoning case by case, and each case had been reasoned
+separately with the same outcome — which is the evidence that it was always one
+rule.
+
+The cost is that a closed route is indistinguishable, in the answer, from a route
+that never existed. A person who has lost access through a retirement, a lapsed
+window and a removed membership receives the same empty answer in all three
+cases, and the operator's explanation lives on the authority side rather than in
+the reply. That is deliberate: the alternative is a reply that enumerates why
+each of a person's routes failed, which tells a caller more about somebody's
+authority than asking about one permission should.
+
 ## Next contract work
 
 Team-parent representation and authority-parent representation must be explicit
