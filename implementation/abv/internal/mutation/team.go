@@ -230,7 +230,7 @@ func (s *Service) CreateTeam(ctx context.Context, area domain.Area, identity dom
 		// `auth:group::create` covers "creating teams and subteams" with. A
 		// top-level team has no parent and so no bounding team, which only an
 		// unscoped route satisfies — the tenant administrator's.
-		if err := s.authorizeTeam(ctx, snapshot, identity, groupCreate, parentID, s.clock.Now()); err != nil {
+		if err := s.authorizeUnder(ctx, snapshot, identity, groupCreate, parentID, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckTeamCreation(snapshot.Teams, proposed); err != nil {
@@ -276,8 +276,13 @@ func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity 
 		if err := s.authorizeTeam(ctx, snapshot, identity, groupWrite, id, s.clock.Now()); err != nil {
 			return storage.WriteSet{}, err
 		}
-		if parentID != "" && parentID != snapshot.Teams[id].ParentID {
-			if err := s.authorizeTeam(ctx, snapshot, identity, groupWrite, parentID, s.clock.Now()); err != nil {
+		if parentID != snapshot.Teams[id].ParentID {
+			// The other end. A move *up* to top level has no new parent to name,
+			// and the end state is the one CreateTeam reserves for an unscoped
+			// route — so it takes the same unscoped route. Checking only the moved
+			// team here let a holder scoped to one team produce, by moving, the
+			// state it could not produce by creating.
+			if err := s.authorizeUnder(ctx, snapshot, identity, groupWrite, parentID, s.clock.Now()); err != nil {
 				return storage.WriteSet{}, err
 			}
 		}
@@ -300,7 +305,7 @@ func (s *Service) SetTeamParent(ctx context.Context, area domain.Area, identity 
 		// caller whose request timed out after succeeding got a conflict on the
 		// repeat. UpgradeAssignment carries the same shortcut for its own no-op.
 		if snapshot.Teams[id].ParentID != parentID {
-			if err := refuseAffectedBindings(snapshot, id); err != nil {
+			if err := refuseAffectedBindings(snapshot, administrativeChain(snapshot), id); err != nil {
 				return storage.WriteSet{}, err
 			}
 		}
@@ -337,6 +342,12 @@ func (s *Service) DeleteTeam(ctx context.Context, area domain.Area, identity dom
 			return storage.WriteSet{}, err
 		}
 		if err := validation.CheckTeamDeletion(snapshot.Teams, snapshot.Memberships, snapshot.Ownerships, snapshot.Assignments, id); err != nil {
+			return storage.WriteSet{}, err
+		}
+		// And the administrative chain, which is in another area and so not in the
+		// assignments above. An administrative assignment names a team exactly as a
+		// business one does.
+		if err := refuseAdministrativeDependants(administrativeChain(snapshot), id); err != nil {
 			return storage.WriteSet{}, err
 		}
 		if err := ctx.Err(); err != nil {
@@ -414,7 +425,7 @@ func (s *Service) membership(ctx context.Context, area domain.Area, identity dom
 //
 // Disabled bindings are left out. They hold nothing to re-anchor, and enabling
 // one revalidates against the structure as it then is.
-func refuseAffectedBindings(snapshot storage.Snapshot, teamID string) error {
+func refuseAffectedBindings(snapshot, chain storage.Snapshot, teamID string) error {
 	// A children index, built once, then walked downward. Growing the set by
 	// repeated passes over every team was correct and cost a pass per level —
 	// and team depth is whatever a tenant makes it, with no cap at creation.
@@ -444,12 +455,20 @@ func refuseAffectedBindings(snapshot storage.Snapshot, teamID string) error {
 			}
 		}
 	}
-	for _, assignment := range snapshot.Assignments {
-		if assignment.Status != "enabled" || assignment.Recipient.Type != "group" {
-			continue
-		}
-		if subtree[assignment.Recipient.ID] {
-			return domain.ErrConflict
+	// Both areas' assignments, over the one subtree. The teams are tenant-wide, so
+	// a move re-anchors an administrative binding exactly as it re-anchors a
+	// business one — and B13 is about what the move affects, not about which area
+	// happens to record it. When there is no separate administrative chain the two
+	// maps are the same map, and scanning it twice costs a pass and answers the
+	// same.
+	for _, assignments := range []map[string]domain.Assignment{snapshot.Assignments, chain.Assignments} {
+		for _, assignment := range assignments {
+			if assignment.Status != "enabled" || assignment.Recipient.Type != "group" {
+				continue
+			}
+			if subtree[assignment.Recipient.ID] {
+				return domain.ErrConflict
+			}
 		}
 	}
 	return nil

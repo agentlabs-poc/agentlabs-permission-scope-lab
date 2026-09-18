@@ -59,10 +59,17 @@ func CreateFixture(ctx context.Context, path string, snapshots []storage.Snapsho
 //
 // It is derived rather than configured for the same reason seededRegistry is: a
 // fixture is a closed world, and a catalog that declares a platform-boundary
-// record has already named the platform's namespace by declaring it. Two
+// permission has already named the platform's namespace by declaring it. Two
 // fixtures disagreeing about it is a fixture that cannot be true, and the honest
 // answer is none — which makes every administrative operation ErrUnsupported
 // rather than resolving against the wrong chain.
+//
+// Only a platform *permission* is read, and that is the fix for a real fail-open:
+// a scope definition carries no namespace, so a fixture declaring a platform scope
+// key and no platform permission used to name its own application as the platform
+// namespace — and a catalog read returns the platform `team` key inside every
+// application's catalog, so any snapshot round-trip produced exactly that shape.
+// The store then treated the application as its own administrative chain.
 func seededPlatformNamespace(snapshots []storage.Snapshot) string {
 	found := ""
 	for _, s := range snapshots {
@@ -70,11 +77,6 @@ func seededPlatformNamespace(snapshots []storage.Snapshot) string {
 		for _, d := range s.Catalog.Permissions {
 			if d.Boundary == domain.PlatformBoundary && d.Namespace != "" {
 				named[d.Namespace] = true
-			}
-		}
-		for _, d := range s.Catalog.Scopes {
-			if d.Boundary == domain.PlatformBoundary {
-				named[s.Catalog.ApplicationID] = true
 			}
 		}
 		for namespace := range named {

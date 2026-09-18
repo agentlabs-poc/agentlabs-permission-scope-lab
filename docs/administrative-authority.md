@@ -165,6 +165,50 @@ and produces a route carrying `team` pinned to both values — which no request 
 satisfy. A test asserts the two predicates rather than asserting a refusal,
 because "authorizes nothing" is the property and "cannot be written" is not.
 
+## What the adversarial review changed
+
+Five defects, four reproduced against a real store. They are recorded here rather
+than only in the commit, because three of them are rules this decision had to state
+and did not.
+
+**A team's dependants include the administrative ones.** "Deleting a team is
+refused while an assignment names it" ([Q-099](groups-and-membership.md)) and B13's
+refusal to move a team under an affected binding
+([parent-grant-bindings.md](parent-grant-bindings.md)) both read the operation's own
+area. The administrative chain is in another area and binds the *same tenant-wide
+team records*, so both rules now read both. Without it the team holding a tenant's
+Auth root was deletable whenever it happened to hold no business assignment, which
+takes away all administrative authority for that tenant with no record of why.
+
+**A namespace is verified to be the platform's, not assumed.** Treating "the area I
+am in is the platform namespace" as "this snapshot is the administrative chain" is
+right when the namespace is the platform's and catastrophic when it names an
+application: the caller then resolves `<app>:group::write` against the
+application's own root, and that application's root holder silently becomes the
+tenant's team administrator. A namespace owning no platform-boundary permission is
+refused, in both the same-area and cross-area branches. A misconfiguration must
+fail closed, not sideways.
+
+**Promoting a team to top level takes the same route as creating one there.** The
+move used to authorize only on the team being moved when the new parent was empty,
+so a holder scoped to one team could produce by moving the state an unscoped route
+is required to produce by creating. It is one-way rather than escalating — the
+mover severs their own chain — but it was a second door to a reserved state.
+
+**A scope key claimed at two boundaries is ambiguous, and ambiguity is refused.**
+A scope key is a bare word, so one catalog holds one entry per key, and an
+application's catalog is its own keys union every platform key. Which declaration
+survived a collision used to depend on how the application's id sorted against the
+platform's namespace: an application whose id sorted first had its own opaque
+values validated as Auth team ids. `CheckScopeRegistration` already refuses a new
+colliding registration, so the reachable case is a key an application registered
+before Auth owned it — a migration to notice loudly rather than guess at.
+
+**What survived the attack.** The mirroring of `authmiddleware`'s `routeMatches`;
+the same-transaction claim; that no other write path authors a grant's scope; and
+sideways escalation, attacked through re-parenting, a revision dropping the
+parent's predicate, `$self`, and a dormant root, without a gain being constructed.
+
 **What is still a fixture, and why it is not a lie.** Every other administrative
 gate — grants, assignments, roles, ownership, establishment, and all of platform
 administration — still compares an identifier to a constant. The rule above

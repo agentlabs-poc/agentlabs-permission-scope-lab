@@ -221,9 +221,9 @@ func TestAPlatformScopeValueIsResolvedRatherThanTrusted(t *testing.T) {
 func TestASidewaysAdministrativeGrantIsWrittenAndAuthorizesNothing(t *testing.T) {
 	facade, authArea := administrativeFacade(t)
 	maya := domain.Identity{Version: "1", Actor: domain.Actor{Type: "user", ID: "fi7io4lvjqio"}, HumanID: "fi7io4lvjqio"}
-	// A subteam of C17 to hold the sideways grant. Its parent holds the grant
-	// being narrowed, which is what a chain's first hop requires.
-	holder, err := facade.CreateTeam(t.Context(), authArea, maya, "Sideways", hersC17)
+	// A subteam of the administrators' team to hold the sideways grant. Its parent
+	// holds the grant being narrowed, which is what a chain's first hop requires.
+	holder, err := facade.CreateTeam(t.Context(), authArea, maya, "Sideways", lab.TeamAdminsTeam)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -297,4 +297,78 @@ func administrativeFacade(t *testing.T) (*abv.Facade, domain.Area) {
 	}
 	t.Cleanup(func() { _ = facade.Close() })
 	return facade, authArea
+}
+
+// The other half of failing closed, and the half a mutation check found nothing
+// guarding: a platform namespace that names an *application*.
+//
+// `attachAdministrative` treats "the area I am in is the platform namespace" as
+// "the snapshot in hand is the administrative chain" — which is right when the
+// namespace is the platform's and catastrophic when it is an application's, because
+// the caller then resolves `<app>:group::write` against the application's own root.
+// An application's root holder would silently become the tenant's team
+// administrator, which is the leak Q-151's namespace slice exists to prevent.
+//
+// So the branch checks rather than assumes: a namespace owning no platform-boundary
+// permission is not a platform namespace, and this store cannot answer an
+// administrative question at all.
+func TestANamespaceThatNamesAnApplicationIsNotAnAdministrativeChain(t *testing.T) {
+	area, err := domain.NewArea("acme", "hrms")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixture := lab.TeamFINC17(area)
+	snapshot := fixture.Snapshot
+	// The application registered a permission spelled like Auth's, which is its
+	// right — the namespace is the application's own. And the acting human is in the
+	// team holding the application's root, so an application-chain resolve would
+	// succeed if one were attempted.
+	snapshot.Catalog.Permissions["hrms:group::write"] = domain.PermissionDefinition{
+		ID: "hrms:group::write", Active: true, Boundary: domain.ApplicationBoundary, Namespace: "hrms",
+	}
+	snapshot.Memberships = append(snapshot.Memberships, domain.Membership{TeamID: "fibggi2jur5s", HumanID: "fi7io4lvjqio"})
+	path := filepath.Join(t.TempDir(), "misconfigured.db")
+	provider, err := lab.CreateSQLite(t.Context(), path, []storage.Snapshot{snapshot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := provider.Close(); err != nil {
+		t.Fatal(err)
+	}
+	registry, err := lab.NewFixedRegistry(area)
+	if err != nil {
+		t.Fatal(err)
+	}
+	admin, err := lab.NewAdministration(area, fixture.Administration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Reopened with the namespace pointed at the application, which is the
+	// misconfiguration. A deployment names this value; nothing stops it naming this.
+	facade, err := abv.OpenSQLiteWithOptions(t.Context(), path, admin,
+		clock{now: time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)},
+		abv.Options{Registry: registry, PlatformNamespace: "hrms"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer facade.Close()
+	if err := facade.AddMember(t.Context(), area, fixture.Issuer, hersC17, "fi7io4lvk35s"); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("an application treated as the platform namespace gave %v, want ErrUnsupported", err)
+	}
+
+	// And the same misconfiguration one area over: a namespace naming some *other*
+	// application rather than this one. The chain is then read from that area, and
+	// the answer must still be "this store cannot say" rather than a denial —
+	// ErrRejected here would tell an operator their administrator lacks authority,
+	// when what they actually have is a typo in a namespace.
+	elsewhere, err := abv.OpenSQLiteWithOptions(t.Context(), path, admin,
+		clock{now: time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)},
+		abv.Options{Registry: registry, PlatformNamespace: "crm"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer elsewhere.Close()
+	if err := elsewhere.AddMember(t.Context(), area, fixture.Issuer, hersC17, "fi7io4lvk35s"); !errors.Is(err, domain.ErrUnsupported) {
+		t.Fatalf("a namespace naming another application gave %v, want ErrUnsupported", err)
+	}
 }

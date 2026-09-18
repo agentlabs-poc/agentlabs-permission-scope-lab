@@ -97,7 +97,14 @@ func (p *provider) attachAdministrative(ctx context.Context, conn *sql.Conn, s *
 	if s.Area.ApplicationID() == p.platformNamespace {
 		// Already the administrative area. Nil is the answer, not an omission:
 		// the chain the gate must walk is the one the caller is holding.
-		return nil
+		//
+		// Checked, not assumed. A namespace that names an *application* would make
+		// this branch hand the application's own chain back as the administrative
+		// one, and the caller would then resolve `<app>:group::write` against the
+		// application's root — an application's root holder silently becoming the
+		// tenant's team administrator, which is precisely the leak Q-151 exists to
+		// prevent. A misconfigured namespace has to fail closed, not sideways.
+		return platformCatalog(s.Catalog, p.platformNamespace)
 	}
 	area, err := domain.NewArea(s.Area.TenantID(), p.platformNamespace)
 	if err != nil {
@@ -118,8 +125,27 @@ func (p *provider) attachAdministrative(ctx context.Context, conn *sql.Conn, s *
 			return err
 		}
 	}
+	if err := platformCatalog(administrative.Catalog, p.platformNamespace); err != nil {
+		return err
+	}
 	s.Administrative = &administrative
 	return nil
+}
+
+// platformCatalog refuses a namespace that owns no platform permission.
+//
+// It is the one observable difference between "the platform's namespace" and "some
+// application's name": Auth's own vocabulary is registered at the platform boundary
+// under it. A namespace with none is either misconfigured or not yet bootstrapped,
+// and both answers are the same — this store cannot resolve administrative
+// authority, so it says so rather than resolving something else.
+func platformCatalog(catalog domain.Catalog, namespace string) error {
+	for _, definition := range catalog.Permissions {
+		if definition.Boundary == domain.PlatformBoundary && definition.Namespace == namespace {
+			return nil
+		}
+	}
+	return domain.ErrUnsupported
 }
 
 func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) error {
@@ -194,7 +220,7 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 	// key4 the key. The union mirrors the permission read above and for the same
 	// reason — a platform key is vocabulary every application inherits.
 	rows, err = r.conn.QueryContext(r.ctx, `
-		SELECT boundary, key4, value FROM abv_l1_records
+		SELECT boundary, key3, key4, value FROM abv_l1_records
 		 WHERE tenant_id='' AND key1='abv' AND key2='scope'
 		   AND ((boundary='application' AND key3=?) OR boundary='platform')
 		 ORDER BY key3, key4`, applicationID)
@@ -202,9 +228,9 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 		return classify(err)
 	}
 	for rows.Next() {
-		var boundary, key string
+		var boundary, namespace, key string
 		var payload []byte
-		if err = rows.Scan(&boundary, &key, &payload); err != nil {
+		if err = rows.Scan(&boundary, &namespace, &key, &payload); err != nil {
 			rows.Close()
 			return classify(err)
 		}
@@ -221,6 +247,23 @@ func (r *snapshotReader) catalog(applicationID string, catalog *domain.Catalog) 
 		if !where.Valid() {
 			rows.Close()
 			return rowf(domain.ErrMalformed, "scope %q boundary %q", key, boundary)
+		}
+		// A scope key is a bare word, so unlike a permission id it carries no
+		// namespace to tell two declarations apart — one catalog, one entry per
+		// key. A key claimed by both an application and the platform is therefore
+		// genuinely ambiguous, and which declaration survived used to depend on how
+		// the application's id sorted against the platform's namespace: an
+		// application whose id sorts first had its own opaque values validated as
+		// Auth team ids, and one whose id sorts later did not.
+		//
+		// Refused rather than resolved, because there is no correct winner.
+		// CheckScopeRegistration already refuses a new registration that collides,
+		// so this state is only reachable for a key an application registered
+		// before Auth owned it — a migration to notice loudly, not to guess at.
+		if existing, seen := catalog.Scopes[key]; seen {
+			rows.Close()
+			return rowf(domain.ErrMalformed, "scope %q is claimed at both the %s and %s boundaries, in namespace %q",
+				key, existing.Boundary, where, clip(namespace))
 		}
 		catalog.Scopes[key] = domain.ScopeDefinition{Key: key, Boundary: where}
 	}

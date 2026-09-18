@@ -622,3 +622,24 @@ reader has to know which boundary a key belongs to before knowing whether its va
 means anything. That is accepted because the alternative — validating application
 values — is the resolver interface this handbook has declined three times.
 
+---
+
+## A key claimed at two boundaries is refused — Q-156 / SCOPE-011
+
+An application's catalog is its own scope keys union every platform key, and a
+scope key is a bare word: unlike a permission id it carries no namespace, so one
+catalog holds one entry per key. A key declared by both an application and the
+platform is therefore genuinely ambiguous, and the catalog read **refuses** rather
+than choosing.
+
+It chose before, by the SQL ordering — namespace then key — so an application whose
+id sorted before the platform's namespace had its own declaration overwritten and
+its own opaque values validated as Auth record ids, while an application whose id
+sorted later kept working. The same records, two answers, decided by a string
+comparison nobody wrote down.
+
+`CheckScopeRegistration` already refuses a registration that collides with a
+platform key, so the reachable state is a key an application registered *before*
+Auth owned that key. That is a migration, and the right behaviour for a migration
+is a refusal naming the key rather than a silent reinterpretation of every value
+under it.

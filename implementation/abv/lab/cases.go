@@ -119,7 +119,10 @@ const (
 // The administrative chain's ids. They are spelled out rather than issued because
 // a fixture is a record of a state, and a state's identifiers are facts about it.
 const (
-	AuthRootGrant = "fk3x9r2mau01"
+	// TeamAdminsTeam holds the narrow administrative grant. It is the only team the
+	// administrative fixture adds to the tenant's own.
+	TeamAdminsTeam = "fibggi2jv1n8"
+	AuthRootGrant  = "fk3x9r2mau01"
 	// TenantAdminGrant is the unscoped administrative authority: every group verb,
 	// no `team` predicate, so it satisfies any team. It is what "the tenant
 	// administrator" means, and Q-155 notes it is the only kind a root hands out
@@ -147,11 +150,17 @@ const (
 //	    └── fk3x9r2mau02  create/delete/write, scope {}
 //	                                           held by fibggi2juubk  (maya)
 //	        └── fk3x9r2mau03  write, {team: fibggi2juxhc}
-//	                                           held by fibggi2juxhc  (priya)
+//	                                           held by fibggi2jv1n8  (priya)
 //
-// It mirrors the business fixture's shape exactly, and that is the point: same
-// walk, same narrowing, same containment, one namespace over. Maya holds every
-// group verb over every team; priya holds membership writes over exactly one.
+// It mirrors the business fixture's shape, and that is the point: same walk, same
+// narrowing, same containment, one namespace over. Maya holds every group verb over
+// every team; priya holds membership writes over exactly one.
+//
+// The holder of the narrow grant is a team of its own — TeamAdmins, a subteam of
+// FIN — rather than the C17 team the grant is scoped to. Who administers a team and
+// who is in it are different facts, and hanging the grant on its own subject would
+// have made them look like one. It also keeps C17 a team nothing binds, which the
+// re-parent and delete guards need in order to be tested in both directions.
 //
 // Because a route travels the team hierarchy, bending that hierarchy severs the
 // administrative chain along with the business one. That is correct rather than
@@ -162,6 +171,16 @@ func AuthAdministration(area domain.Area) (storage.Snapshot, error) {
 		return storage.Snapshot{}, err
 	}
 	business := TeamFINC17(area).Snapshot
+	// The administrators' own team, and the one team this fixture adds to the
+	// tenant. It hangs under FIN because a chain's first hop requires the holder's
+	// direct parent to hold the grant being narrowed, and FIN holds the tenant
+	// administrator's.
+	teams := map[string]domain.Team{TeamAdminsTeam: {ID: TeamAdminsTeam, Name: "fp8h2w6yv1n8", ParentID: "fibggi2juubk"}}
+	for id, team := range business.Teams {
+		teams[id] = team
+	}
+	memberships := append(append([]domain.Membership{}, business.Memberships...),
+		domain.Membership{TeamID: TeamAdminsTeam, HumanID: "fi7io4lvjwu8"})
 	root := domain.GrantContent{Version: "1", GrantID: AuthRootGrant, Revision: 1, Scope: map[string]string{}}
 	tenantAdmin := domain.GrantContent{
 		Version: "1", GrantID: TenantAdminGrant, Revision: 1, ParentGrantID: AuthRootGrant,
@@ -200,11 +219,11 @@ func AuthAdministration(area domain.Area) (storage.Snapshot, error) {
 		Assignments: map[string]domain.Assignment{
 			"fm5b7t4pau01": {Version: "1", ID: "fm5b7t4pau01", GrantID: AuthRootGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2jur5s"}, Status: "enabled"},
 			"fm5b7t4pau02": {Version: "1", ID: "fm5b7t4pau02", GrantID: TenantAdminGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juubk"}, Status: "enabled"},
-			"fm5b7t4pau03": {Version: "1", ID: "fm5b7t4pau03", GrantID: TeamAdminGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: "fibggi2juxhc"}, Status: "enabled"},
+			"fm5b7t4pau03": {Version: "1", ID: "fm5b7t4pau03", GrantID: TeamAdminGrant, GrantRevision: 1, Recipient: domain.Recipient{Type: "group", ID: TeamAdminsTeam}, Status: "enabled"},
 		},
 		Roles:        map[domain.RoleKey]domain.RoleContent{},
-		Teams:        business.Teams,
-		Memberships:  business.Memberships,
+		Teams:        teams,
+		Memberships:  memberships,
 		Ownerships:   []domain.Ownership{},
 		TrustedRoots: map[string]bool{AuthRootGrant: true},
 	}, nil
