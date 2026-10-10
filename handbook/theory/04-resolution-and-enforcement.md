@@ -77,13 +77,45 @@ has no grant.
 Both situations must prevent unchecked protected execution. They can still have
 different diagnostic and operational meanings. A caller may be able to correct
 an entitlement problem; a service failure may require operational recovery.
-The exact result envelope, reason catalog and retry behavior are implementation
-contracts. The [Foundations reference](canonical-terms.md#decision-and-enforcement)
+The [Foundations reference](canonical-terms.md#decision-and-enforcement)
 explains the repository's minimal result JSON; Part II explains endpoint handling.
+
+A diagnostic code catalog is worth one design note, because it is usually decided by
+accident. A **closed** list lets a consumer be exhaustive, which is the reason to
+want one — and it makes every newly discovered failure mode a contract version, since
+failure modes are learned by the layer that meets them rather than by the document.
+An **open** list avoids that and costs exhaustiveness: no consumer can handle every
+code, so each must fall back to the *class* the result arrived in. Part II chooses
+open, with published names fixed forever, and accepts the consequence — a consumer
+that logs an unrecognized code without alerting on it will swallow a new failure mode
+silently. Either way, the code explains; the class decides.
 
 A failed candidate route also does not establish a final rejection if another
 complete valid route authorizes the operation. Conversely, a successful partial
 check cannot authorize an operation whose mandatory requirements remain unmet.
+
+A third case sits between the two and is the one most often collapsed into a
+rejection: **a route the evaluator cannot read.** Malformed, internally
+inconsistent, carrying identifiers it cannot parse — that is precisely a route that
+*might* have authorized. So it costs that route, and it costs the certainty of a
+rejection, but not the whole answer:
+
+| Situation | Result |
+|---|---|
+| A route is unusable, and another complete route authorizes | **Allow.** The unusable route says nothing about the one that did. |
+| A route is unusable, and no other route authorizes | **Failure to evaluate.** The rejection is not established. |
+| Every route is readable, and none authorizes | **Completed rejection.** |
+
+This matters more, not less, as an authority answer grows: if the answer describes
+everything a subject holds, then failing the whole evaluation on one unreadable entry
+takes away every other authority they have. Reporting a failure rather than a
+rejection does tell a person "we could not check" when the honest answer might have
+been "you have no access" — and that is the correct trade, because a rejection
+asserts something about their authority, and asserting it from evidence that was
+never read is the error being prevented.
+
+An answer describing a different subject or a different boundary is not one unusable
+route. It means the answer is about somebody else, and nothing in it may be used.
 
 ## Time belongs in the reasoning
 
@@ -103,6 +135,13 @@ work now is not automatically proof of authority to execute it later. Recurring
 jobs and long-running streams need an explicit rule about which subsequent
 effects remain covered; a single old allow is not self-explanatory evidence.
 
+Part II holds one rule here and **defers the rest explicitly**: queued work is
+authorized when it executes, not when it was enqueued, and everything else about
+queues, schedules and streams is out of scope for its first version. A deferral that
+says so is more useful than a specification nobody has run — and it is honest about
+the cost, which is that a deployment with background work has one rule and will
+invent the remainder.
+
 ## Evidence should explain the route, not replace it
 
 Useful decision evidence lets the recipient understand what was decided and,
@@ -113,6 +152,22 @@ capability accidentally detached from the evaluated request.
 Providing evidence is also different from designing a complete audit system.
 An audit consumer may record authorization outcomes, but retention, storage,
 delivery and disclosure policy are separate responsibilities in this handbook.
+Specifying the *producing* half without the consuming half does create one
+obligation, though: whoever builds the recorder must be told what it may rely on,
+or it will infer its requirements from an implementation — which is how a layering
+decision turns into an accident.
+
+There is one further duty that belongs to the endpoint and not to the gate, and it
+is easy to miss because no rule is broken when it fails. Consider a caller holding
+write and not the matching read who issues an update: the write is authorized and
+succeeds, and the response carries the whole record — fields the caller never
+supplied and now learns by writing. A gate cannot prevent that. It does not know what
+a body contains and should not be given the job of finding out. **What a response
+discloses is the endpoint's duty**, assigned by the same split that gives the
+endpoint execution: it keeps its output, as well as its effect, inside the authorized
+boundary. One layer cannot be made answerable for the correctness of every layer
+above it, and attempting it is how a gate accretes obligations that look like safety
+and are not.
 
 **Chapter takeaway:** resolution prepares justified meaning; evaluation decides
 applicability; enforcement constrains the actual effect. A sound integration

@@ -1,6 +1,8 @@
 # Handbook of Authorization
 
-**First manuscript draft · 8 September 2026**
+**Recompiled manuscript · 19 September 2026** — the first draft was 8 September;
+every chapter but the first has been recompiled against the decisions taken since.
+See [what this recompilation was](appendices/source-map.md#what-this-recompilation-was).
 
 Authorization connects a person or program's authority to a specific operation
 and its effects. A permission check is part of that connection, but it cannot

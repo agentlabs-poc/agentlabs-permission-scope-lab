@@ -30,7 +30,7 @@ const getPolicy = {version:'1',method:'GET',path:'/api/v1/{tenant}/{dept}/{cert}
 const putPolicy = {version:'1',method:'PUT',path:'/api/v1/{tenant}/certificates/{cert}',permission:WRITE,inputs:{tenant:{source:'path',name:'tenant'},cert:{source:'path',name:'cert'},proposed_dept:{source:'body',name:'department_id'}}};
 const allow = {version:'1',decision:'allow',grant_ids:['G2']};
 const deny = {version:'1',decision:'deny',error_code:'NO_AUTHORIZING_GRANT',error_message:'You do not have access.',error_message_reason:'No complete route permits this read.'};
-const error = {version:'1',error_code:'AUTH_SERVICE_TIMEOUT',error_message:'We could not check your access.',error_message_reason:'Required authority could not be loaded.'};
+const error = {version:'1',error_code:'AUTHORITY_TIMEOUT',error_message:'We could not check your access.',error_message_reason:'Required authority could not be loaded.'};
 
 // Small nested values stay compact; complete JSON remains parseable.
 function pretty(obj) {

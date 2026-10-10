@@ -41,6 +41,20 @@ The scope definition owns the meaning of its selectors. A department identifier
 has meaning because the application defines the department relationship, not
 because a generic grant engine recognizes a familiar word.
 
+Part II takes that ownership to its conclusion: a scope **value is opaque** to
+authorization. Nothing resolves it to a record, checks that the record exists, or
+asks what it refers to — `dept=FIN` authorizes within a boundary named `FIN`, and
+whether such a department exists is the application's to establish. Values match
+**exactly**, with no prefix, wildcard or hierarchy. That exclusion is deliberate
+rather than unfinished: a hierarchical scope would give every existing boundary
+implied children on the day it was introduced, silently changing the reach of every
+grant already stored, with no record of the change.
+
+The one exception is a key the authorization platform itself owns, whose values name
+the platform's own records. Those it can resolve, and does. A system adopting this
+pattern should be explicit about which of its keys are opaque and which are not,
+because the two behave differently at the write.
+
 | Authority statement | Operation | Boundary |
 |---|---|---|
 | Vinay may read his own payslips | Read payslip | Payslips belonging to Vinay |
@@ -128,6 +142,16 @@ within the allowed distribution boundary? A system must define that distribution
 boundary. Part II chooses parent-supported issuance, where both checks are
 required. Other designs should state their own rule explicitly rather than
 infer it from the word administrator.
+
+There is a second choice hiding behind the first: **what kind of thing
+administrative authority is.** A common answer is a separate list of capabilities,
+checked by a different mechanism from the one that governs business access. Part II
+chooses the other answer — administrative authority is an ordinary grant, in the
+platform's own namespace, on its own chain — so that the same narrowing and the same
+containment govern both. A design that keeps two mechanisms takes on the obligation
+to keep them in agreement forever; a design that keeps one takes on the recursion of
+administration being administered. Neither is free, and the choice should be made
+rather than inherited.
 
 **Chapter takeaway:** a useful authorization explanation preserves operation,
 reach, recipient and support together. Do not let convenient packaging erase
