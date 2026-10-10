@@ -76,7 +76,7 @@ Nothing in the question names an endpoint, a method, a resource, or a verdict.
 | `tenant_id`, `application_id`, `human_id` | The three boundaries, echoed. They exist so a consumer can tell "nothing here" from "answered about somebody else". |
 | `resolved_grants` | Every grant the human holds in this area, after the chain is walked. Empty is a completed answer, never a failure. |
 | `permissions` | What this grant selects, already expanded from any adopted role. |
-| `scope` | The boundary, already folded down the chain — a consumer never folds one itself. |
+| `scope` | The boundary, already folded down the chain — a consumer never folds one itself. Under [Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset) each value is a canonical list (`{"dept": ["FIN"]}`), the per-key intersection of the chain; a route whose intersection would be empty is never shipped. The example above predates Q-158 and shows the string form. |
 | `validity` | The narrowest window in the chain; absent means no automatic expiry. |
 | `source` | Why the human holds it: the binding, the group, and the lineage root-first. `adopted_role` appears when the grant selects through a role revision. |
 

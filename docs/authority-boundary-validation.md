@@ -109,6 +109,8 @@ If the parent requires FIN and the child adds ENG under the same exact-departmen
 meaning, both restrictions remain. The child cannot replace FIN with ENG. Whether
 every unsatisfiable definition must be rejected at publication is not settled;
 such a route cannot authorize either department by dropping a constraint.
+*Settled by [Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset):* a child whose list is not a subset of the parent's effective list
+is refused at write. The route semantics stay a conjunction of per-link membership.
 
 Auth validates registered syntax and canonical lineage construction. It does
 not query a customer HRMS database to prove that C17 belongs to FIN. The HRMS

@@ -87,6 +87,12 @@ There are still no scope arrays or OR operators: each descriptor remains a flat
 string-value object, and alternatives remain separate complete authority routes.
 AND composition is semantic, not a last-write-wins merge of JSON objects.
 
+**[Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset) settles the open rule and supersedes the "no scope arrays" sentence:** a scope
+value is a list, a child's list must be a subset of the parent's effective list for
+the same key, and a child that is not a subset — `dept = [ENG]` beneath `dept = [FIN]`
+— is refused at write. Alternatives within one key may now be a list; alternatives
+across keys or permissions remain separate complete routes.
+
 Selecting fewer permissions and adding restrictions constructs narrower
 authority. It does not settle arbitrary administrative scope containment,
 recipient eligibility, or permission to create the dependent assignment.

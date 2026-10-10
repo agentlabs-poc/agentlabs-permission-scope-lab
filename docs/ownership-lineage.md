@@ -170,7 +170,7 @@ tenant, the platform-namespace authority that exists before the grant model does
 | create a team | its administrative grant and assignment are created with it |
 | remove the last administrative assignment | **refused** — it would leave a team nobody can administer |
 | disable the last one | **refused**, for the same reason |
-| delete the team | permitted; the administrative grant goes with it |
+| delete the team | permitted; the administrative grant goes with it — unless a grant names the team in a `team` list beside other teams, which [Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset) makes possible: then **refused** until that grant is revised, because deleting it would silently strip the other teams' administration |
 
 This is the same shape as [Q-132](grant-lifecycle.md)'s dependency rule and the
 root-holder protection: a write that would leave something unreachable is refused,

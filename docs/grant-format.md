@@ -7,7 +7,7 @@ A grant has no `recipient`; the assignment carries `grant_id`, `recipient`, and
 its enabled/disabled status. [Subgroups](subgroups.md) add explicitly dependent,
 narrower authority; their combined assignment-aware wire format remains open.
 
-Scope descriptors remain flat, string-valued AND selectors. A derived route adds
+Scope descriptors remain flat AND selectors whose values are non-empty string lists ([Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset)). A derived route adds
 constraints to its parent boundary; `{}` cannot discard that parent boundary.
 No stored state is migrated, and no contract-version compatibility rule is implied.
 

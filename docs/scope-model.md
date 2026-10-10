@@ -1,5 +1,12 @@
 # Working handbook chapter: scope boundaries
 
+**Current refinement — Q-158 / SCOPE-012:** [a scope value is a non-empty list](#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset);
+a record satisfies a key when its value is a member of the list, keys combine with
+AND, and a child narrows by per-key subset — a child that is not a subset is
+refused at write. This supersedes the single-string-value format and the "no
+arrays / no OR" statements below, which are preserved as history. JSON examples
+written before Q-158 show `"dept": "FIN"`; read them as `"dept": ["FIN"]`.
+
 ## Post-0.0.1 update — Q-090 / Q-091
 
 A [grant definition](grant-assignments.md) now carries permissions and scope
@@ -643,3 +650,131 @@ platform key, so the reachable state is a key an application registered *before*
 Auth owned that key. That is a migration, and the right behaviour for a migration
 is a refusal naming the key rather than a silent reinterpretation of every value
 under it.
+
+---
+
+## Q-158 / SCOPE-012 — a scope value is a list; a child narrows by subset
+
+Status: **AGREED.** Raised while proving the sample applications, after a child
+grant scoped `dept=ENG` beneath a parent scoped `dept=FIN` was written and then
+never matched. The user asked whether scope narrowing could be enforced without
+understanding the scope — *"the parent may have three of them, finance,
+engineering, production, and if you make it for a child, it has to be one of
+them"* — then chose to allow lists now, inside v1, *"because nothing is there"*,
+and gave the go-ahead to change the handbook, the Auth service and the sample
+applications. The groundwork and safety analysis were reviewed before any change.
+
+### The rule
+
+**A scope value is a non-empty list of strings.** A record satisfies a key when
+its value is **a member** of that key's list. Keys still combine with AND. Values
+stay opaque and are compared exactly; Auth never interprets one.
+
+```json
+{ "dept": ["ENG", "FIN"], "user": ["$self"] }
+```
+
+reads: the record's department is ENG or FIN, **and** the record lies in the
+authorizing human's own boundary.
+
+**A child narrows by subset.** For every key the child states, its list must be a
+subset of the parent's effective list for that key. A key the parent's chain does
+not constrain may be added freely; a key the child omits is inherited unchanged.
+A child that is not a subset is **refused at write**. Nothing is trimmed, and lists
+are never combined by union.
+
+| Parent effective scope | Child scope | Result |
+|---|---|---|
+| `{dept: [FIN, PROD]}` | `{dept: [FIN]}` | **allowed** — a subset |
+| `{dept: [FIN, PROD]}` | `{}` | **allowed** — inherits `[FIN, PROD]` |
+| `{dept: [FIN]}` | `{dept: [FIN], loc: [BLR]}` | **allowed** — a new key narrows further |
+| `{dept: [FIN]}` | `{dept: [ENG]}` | **refused** — ENG is not within FIN |
+| `{dept: [FIN]}` | `{dept: [ENG, FIN]}` | **refused** — not trimmed to FIN |
+| any | `{dept: []}` | **refused** — malformed, never "unrestricted" |
+
+The effective scope of a route is the per-key **intersection** of every link's
+list. Because each child is a subset, the intersection is the child's list; it is
+still computed rather than assumed, so a stored state that violates the rule can
+only narrow, never widen, and an empty intersection authorizes nothing.
+
+### Canonical form and validation
+
+- A list is **non-empty, strictly ascending, and free of duplicates**. A
+  non-canonical list is **rejected**, not normalised — normalising on one write
+  path and comparing bytes on another would let the two disagree.
+- `[]`, `null`, a bare string, or any non-string element is **malformed**. An empty
+  list is never read as an absent key and never as `{}`. This extends Q-034: losing
+  entries can widen a scope, and an empty list is the new way to lose one.
+- One invalid element invalidates the whole scope; it is never dropped while the
+  rest is kept (SCOPE-007's existing rule, now per element).
+- Every rule that applied to a value applies to each element: the bare `*` is
+  rejected, `$self` is the only reserved token, and a `team` element must name an
+  existing team (Q-156, above).
+- `{}` keeps its meaning under Q-034: no additional restriction, including values
+  that do not yet exist. A list is a closed enumeration; it never means "all".
+
+### `$self` is compared as a token at write
+
+At write time `$self` is an opaque element like any other: `[$self]` beneath
+`[maya-id]` is refused even though it would match Maya. The check can refuse a
+grant that would have been satisfiable; it can never widen one. Identical text
+with a different human binding is not a containment proof (C01-T28). At request
+time `$self` is bound to the requesting human, element by element.
+
+### Requests stay single-valued
+
+Lists exist only in **grant** scope. Request material still carries one value per
+key ([Q-150](operation-enforcement.md)), so a list never turns one request into a
+question about several departments. A handler still queries with the value it was
+asked about and never with a grant's list — [Q-072](collection-enforcement.md)'s
+"does not inspect grants" is what keeps lists out of query translation.
+
+### What it settles and what it amends
+
+- **Settles** the creation-time rejection left open by [Q-091](subgroups.md) ("exact
+  creation-time rejection rules remain open") and by
+  [authority-boundary-validation](authority-boundary-validation.md) ("whether every
+  unsatisfiable definition must be rejected at publication is not settled"): a
+  child that is not a subset of its parent is refused at write.
+- **Retires** the wart recorded under [Q-155](administrative-authority.md): a
+  contradictory re-scope is no longer written and left inert; it is refused.
+  Sideways escalation stays impossible for the same reason as before — a request
+  value must be a member of every list on the chain — and is now also refused at
+  the write.
+- **Amends** SCOPE-007 (single string values → lists), SCOPE-008 and PC-04
+  (alternatives *within one key* may be a list; alternatives across keys or
+  permissions still use separate complete grants), PC-05 (narrowing is per-key
+  subset), and the "no arrays" statements in this chapter and its summaries. Earlier
+  wording is preserved below and in the summaries as history.
+- **Keeps** exact matching, the exclusion of subtree and wildcard scope
+  ([Q-148](application-registration.md)), `{}` semantics (Q-034), the contract
+  version `"1"` (no version had been published to a consumer; renaming before
+  publication follows [Q-135](decision-results.md)'s precedent), and the
+  single-valued request.
+
+### Consequences settled by existing rules
+
+| Situation | Outcome | Settled by |
+|---|---|---|
+| A parent revision narrows its list so an enabled child is no longer a subset | Adoption of that revision is **refused** | [Q-105](grant-revisions.md) adoption re-validates dependants; [B22](parent-grant-bindings.md) "validate the complete result" |
+| A stored chain that is not a subset (legacy data, a direct store write) | The route is **closed**, not widened | [Q-140](authority-lineage.md); the effective intersection is empty or narrower |
+| Delete team X while a grant names `{team: [X, Y]}` | **Refused** until the grant is revised | [Q-157](ownership-lineage.md): no write passes through an unreachable state; Q-156: no grant names a team that does not exist |
+| The refusal's code | `SCOPE_NOT_WITHIN_PARENT`, given only to a caller who holds the parent | [Q-135](decision-results.md): the catalogue is open, a code explains and does not decide |
+
+### Rationale / conscious tradeoff
+
+The format change costs one rule — set inclusion on strings — and needs no
+meaning: whether `ENG` lies within `[FIN, PROD]` is a string comparison, so the
+subset check works for every key an application will ever register. It expresses
+"one of these departments" in one grant instead of one grant per department, and it
+turns an inert, misleading grant into a refusal with a reason.
+
+The alternative was to keep single values and add a write-time contradiction check.
+It was rejected because the user's motivating case — a parent holding several
+departments and a child choosing among them — would still need one grant per
+department, and the check would exist anyway.
+
+The conscious costs: every consumer's matcher changes (membership instead of
+equality), every stored scope is migrated to one-element lists, and JSON examples
+written before this decision show the earlier string form. Those examples are
+preserved as written; read `"dept": "FIN"` there as `"dept": ["FIN"]`.

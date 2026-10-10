@@ -237,8 +237,8 @@ rationale, examples, and links. Navigation cleanup must not hide agreed decision
 
 - Permission identifies the operation; scope selects its boundary within the
   trusted implicit tenant. No additional canonical “target” entity is required.
-- Scope is a required flat string-value object: AND within one scope, alternatives
-  through complete grants, explicit `{}` for no narrower tenant-local restriction.
+- Scope is a required flat object of non-empty string lists ([Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset)): membership within
+  a key, AND across keys, other alternatives through complete grants, explicit `{}` for no narrower tenant-local restriction.
   A derived route retains its parent scope AND additional child constraints;
   additional `{}` does not discard the parent boundary. Missing/null scope is
   invalid. Applications register supported key meanings.
