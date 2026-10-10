@@ -134,7 +134,8 @@ within `dept = FIN AND cert = C17`, subject to all other checks. Additional
 scope `{}` retains FIN; it does not become tenant-wide. Adding an incompatible
 ENG constraint cannot escape FIN: FIN AND ENG is not ENG. Whether to reject all
 unsatisfiable definitions at registration is a separate validation-contract
-question; they cannot authorize an operation outside FIN.
+question; they cannot authorize an operation outside FIN. *Answered by [Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset):*
+the non-subset child is refused at write.
 
 ## Required material and continuing dependencies
 

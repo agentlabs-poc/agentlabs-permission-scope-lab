@@ -1,6 +1,6 @@
 # Authorization handbook — discussion tree
 
-## Current execution tree — through Q-157
+## Current execution tree — through Q-158
 
 [Current state](current-status.md) · [remaining agenda](discussion-assessment.md) ·
 [checkpoint evidence](handbook-completion-audit.md)
@@ -36,6 +36,7 @@ Handbook closure [38/68 full criteria; 30 OPEN]
 │   ├── Retirement withdraws the permission, not the route [Q-143 APPROVED]
 │   ├── Publish roles freely, restrict adoption [Q-145 APPROVED]
 │   ├── Reference existence delegated, subtree scope excluded [Q-148 APPROVED]
+│   ├── Scope values are lists; a child narrows by subset, refused otherwise [Q-158 APPROVED]
 │   ├── OPEN: grant health — detection and administrative correction
 │   └── OPEN: move composition, timing/background/collection cases
 ├── Endpoint policy and its declared bindings

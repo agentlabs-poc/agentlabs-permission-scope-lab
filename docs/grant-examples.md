@@ -333,5 +333,8 @@ validation and resource facts are required; this example is not a runtime test.
 
 An alternative Finance OR Engineering route uses two complete grants with
 their respective scope objects, not an array or OR operator inside one scope.
+*Superseded by [Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset):* one grant may now carry `{"dept": ["ENG", "FIN"]}`;
+separate grants remain the form for alternatives across keys or permissions.
+The validation list above now reads: arrays are required, and an empty array is invalid.
 Who may issue or widen any of these grants is governed by administrative
 authority; these examples do not grant that authority to their recipients.

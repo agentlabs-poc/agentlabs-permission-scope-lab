@@ -258,6 +258,19 @@ An `{}` boundary is not a wildcard by another name: it adds no restriction, whic
 is different from matching many values. And a key never declares either form —
 `{}` and `$self` are properties of a value.
 
+**Under [Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset)** the value is a list and each element matches exactly:
+
+| Written | Means |
+|---|---|
+| `{"dept": ["FIN"]}` | exactly the boundary named `FIN` |
+| `{"dept": ["ENG", "FIN"]}` | the boundary named `ENG` or the one named `FIN` — a closed list |
+| `{"dept": ["FIN*"]}` | **refused.** Not a boundary. |
+| `{"dept": []}` | **refused.** Malformed — never `{}`. |
+| `{"dept": ["$self"]}` | the authorizing human, the one reserved token |
+
+A list does match several values, but only the ones it names; `{}` still differs
+from it by covering values that do not exist yet. `$self` is a property of an element.
+
 ### Why exclusion rather than a hierarchy
 
 A hierarchical scope would give every existing boundary implied children the day

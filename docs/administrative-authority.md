@@ -91,7 +91,21 @@ value per key. That single fact supplies the whole containment property:
 So a team's owner can hand that team to someone else and cannot reach a sibling.
 Nothing enforces this; it is what the model already computes.
 
-**One wart, recorded rather than hidden.** Narrowing *accepts* the contradictory
+**Q-158 update.** Scope values are now lists and a child narrows by per-key subset
+([Q-158](scope-model.md#q-158--scope-012--a-scope-value-is-a-list-a-child-narrows-by-subset)).
+The containment property is unchanged — a request value must be a member of every
+list on the chain — and the sideways case is now also refused at the write:
+
+| Proposed grant | Result under Q-158 |
+|---|---|
+| `{team: [X]}` beneath `{team: [X]}` | **allowed** — equal lists |
+| `{team: [Y]}` beneath `{team: [X]}` | **refused** at write — `SCOPE_NOT_WITHIN_PARENT` |
+| `{team: [X]}` beneath `{team: [X, Y]}` | **allowed** — delegating one of the teams you administer |
+| `{team: [X, Y]}` beneath `{team: [X]}` | **refused** — Y is not within the parent |
+| `{team: [X]}` beneath `{}` | **allowed** — the tenant administrator |
+
+**One wart, recorded rather than hidden — retired by Q-158,** which refuses the
+contradictory re-scope at write. The original record follows. Narrowing *accepts* the contradictory
 re-scope and builds a route that never matches, rather than refusing the write. The
 safety is "authorizes nothing", not "cannot be written". A nonsense administrative
 grant can therefore be stored, and grant health is where it should surface.
@@ -159,7 +173,8 @@ store:
   priya  team create --name Rootish         rc=3   no bounding team to satisfy
 ```
 
-And the sideways grant behaves exactly as the wart above records it: a grant
+*Superseded by Q-158: the sideways grant below is now refused at write, and the test
+asserts the refusal.* As originally implemented, the sideways grant behaved exactly as the wart above records it: a grant
 scoped `{team: FIN}` beneath one scoped `{team: C17}` is **written**, resolves,
 and produces a route carrying `team` pinned to both values — which no request can
 satisfy. A test asserts the two predicates rather than asserting a refusal,

@@ -1,4 +1,4 @@
-# Current handbook state — RECON-002, through Q-157
+# Current handbook state — RECON-002, through Q-158
 
 ## Publication checkpoint — RECON-002 and C01-D1/D2
 
@@ -45,7 +45,7 @@ the end of this page. Draft supported behavior first; do not start another
 question sequence merely because a review-area row remains open. Changes remain
 local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 
-## Thirty-six decisions recorded since the previous checkpoint
+## Thirty-seven decisions recorded since the previous checkpoint
 
 | Decision | Current approved rule | Source with rationale and examples |
 |---|---|---|
@@ -60,6 +60,7 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-128 | New checks after any confirmed authority reduction cannot rely on withdrawn stale support. Other complete valid routes may allow; uncertain freshness is not proof of denial. | [Freshness](authority-freshness.md) |
 | Q-129 | The same already-allowed ordinary synchronous application operation may finish within evaluated boundaries after later withdrawal. Q-074 and Q-110 remain; queues, streams, long-running and not-yet-allowed cases are not included. | [Concurrent enforcement](concurrent-enforcement.md) |
 | Q-130 | Different complete valid grant routes may cover different batch items. All items need complete support before effects; no permission/scope fragment mixing or partial successful filtering. | [Bulk enforcement](bulk-enforcement.md) |
+| Q-158 | A scope value is a non-empty, canonical list of strings: a record satisfies a key by membership, keys still combine with AND, and values stay opaque and exact. A child narrows by per-key subset of its parent's effective scope and is refused at write otherwise — never trimmed, never unioned. `[]` is malformed and never means `{}`; `$self` is compared as a token at write; requests stay single-valued. Settles the creation-time rejection Q-091 left open and retires the Q-155 wart. Contract version stays `"1"`. | [Scope model](scope-model.md) |
 | Q-157 | Creating a team confers its ownership, and the ownership relation is superseded. Ownership is an administrative grant scoped to the team, held by a human or a team; the old table carried no authority and nothing read it. A team must always have at least one enabled administrative grant naming it — removing or disabling the last is refused, so no write passes through an ownerless state. Q-099's substance survives as a consequence. | [Ownership lineage](ownership-lineage.md) |
 | Q-156 | A `team` scope key at the platform boundary, and a scope value naming an Auth record is validated rather than opaque. Q-148's opacity was justified by application facts Auth cannot know; a team is Auth's own record, so a grant scoped to a team that does not exist is refused. Matching stays exact and subtree scope stays excluded — which is what makes sideways escalation unsatisfiable. | [Scope model](scope-model.md) |
 | Q-155 | Administrative authority is an ordinary grant: platform-namespace permissions on a chain from the tenant's Auth root, created, narrowed, assigned and resolved by the machinery that already exists. The 28 administrative gates collapse into one evaluation. Tenant administration is bounded by a team carried as scope; platform administration is bounded by the area itself. Sideways escalation is unsatisfiable rather than guarded, because two values of one scope key can never both be met. Closes HC-05-08. | [Administrative authority](administrative-authority.md) |
@@ -86,7 +87,7 @@ local/uncommitted, including the preceding reconciliation. No scratchpad edits.
 | Q-133 | The endpoint policy declares its trusted correlations: one `trusted` map from a trusted context field to a declared input. A tenant correlation is required, a path spelling a trusted field's own name must be correlated, and a correlation may name any declared source. Supplies the mechanism for an obligation the chapter already mandated. Adopted with a recorded reservation about where the rule belongs. | [Endpoint policy format](endpoint-policy-format.md) |
 | Q-132 | A grant another grant names as parent can be neither disabled nor deleted. One rule for both operations and every grant, with no trusted-root exception; dismantling is bottom-up. A dependent is a child grant, not an assignment — counting assignments would make every held grant undisablable. Supersedes the disable-propagation cases B09–B11. | [Grant lifecycle](grant-lifecycle.md) |
 
-These are thirty-six answered decisions, not thirty-six completed chapters or thirty-six
+These are thirty-seven answered decisions, not thirty-seven completed chapters or thirty-seven
 of the original eighteen agenda packages. Q-117 is no longer parked. Q-131 is
 withdrawn rather than approved — [Q-150](operation-enforcement.md) dissolves it,
 because composition is not a grant question. Q-131 has
